@@ -1,11 +1,13 @@
 package com.westlake.air.swathplatform.xml;
 
 import com.thoughtworks.xstream.XStream;
+import org.springframework.stereotype.Component;
 
 import java.io.OutputStream;
 import java.io.Writer;
 
-public class TraMLXStream extends XStream {
+@Component
+public class AirXStream extends XStream {
 
     /**
      * xml版本号，默认1.0
@@ -15,7 +17,8 @@ public class TraMLXStream extends XStream {
      * xml编码，默认UTF-8
      */
     private String encoding;
-    public TraMLXStream() {
+
+    public AirXStream() {
         this("1.0","UTF-8");
     }
     //XML的声明
@@ -23,7 +26,7 @@ public class TraMLXStream extends XStream {
         return "< ?xml version=\"" + this.version + "\" encoding=\"" + this.encoding + "\"? >\n";
     }
 
-    public TraMLXStream(String version, String encoding) {
+    public AirXStream(String version, String encoding) {
         this.version = version;
         this.encoding = encoding;
     }

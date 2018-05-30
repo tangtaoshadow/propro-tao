@@ -13,7 +13,7 @@ public class HomeController extends BaseController{
 
     private Logger logger = LoggerFactory.getLogger(HomeController.class);
 
-    @RequestMapping(value = "/",method = RequestMethod.GET)
+    @RequestMapping(value = {"/","/home"},method = RequestMethod.GET)
     String home(Model model) {
         model.addAttribute("name","陆妙善");
         return "home";

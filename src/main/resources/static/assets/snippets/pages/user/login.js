@@ -90,11 +90,12 @@ var SnippetLogin = function() {
             form.ajaxSubmit({
                 url: '/login',
                 success: function(response, status, xhr, $form) {
-                	// similate 2s delay
-                	setTimeout(function() {
-	                    btn.removeClass('m-loader m-loader--right m-loader--light').attr('disabled', false);
-	                    showErrorMsg(form, 'danger', 'Incorrect username or password. Please try again.');
-                    }, 2000);
+                    btn.removeClass('m-loader m-loader--right m-loader--light').attr('disabled', false);
+                    if(response.status === "error"){
+                        showErrorMsg(form, 'danger', response.msg);
+                    }else{
+                        window.location.href="/";
+                    }
                 }
             });
         });
