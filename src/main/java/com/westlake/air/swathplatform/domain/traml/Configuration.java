@@ -8,6 +8,9 @@ import java.util.List;
 
 /**
  * Instrument configuration used in the testing, validation or optimization of the transitions
+ *
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
  */
 @Data
 @XStreamAlias("Configuration")

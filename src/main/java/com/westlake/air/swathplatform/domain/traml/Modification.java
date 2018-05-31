@@ -12,6 +12,9 @@ import java.util.List;
  * there should be n instances of the modification element. If multiple modifications are provided as cvParams,
  * it is assumed the modification is ambiguous, i.e. one modification or the other.
  * If no cvParams are provided it is assumed that the delta has not been matched to a known modification.
+ *
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
  */
 @Data
 @XStreamAlias("Modification")

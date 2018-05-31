@@ -9,6 +9,9 @@ import java.util.List;
 
 /**
  * Contact person referenced in the generation or validation of transitions
+ *
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
  */
 @Data
 @XStreamAlias("Contact")

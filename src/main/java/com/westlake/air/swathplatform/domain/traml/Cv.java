@@ -6,6 +6,9 @@ import lombok.Data;
 
 /**
  * Controlled vocabulary used in a TraML document
+ *
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
  */
 @Data
 @XStreamAlias("cv")

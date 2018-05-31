@@ -7,6 +7,9 @@ import lombok.Data;
  * Uncontrolled user parameters (essentially allowing free text).
  * Before using these, one should verify whether there is an
  * appropriate CV term available,and if so, use the CV term instead
+ *
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
  */
 @Data
 public class UserParam {

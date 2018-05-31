@@ -8,6 +8,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 
+/**
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
+ */
 @RestController
 @RequestMapping("api")
 public class ApiController {
@@ -17,7 +21,7 @@ public class ApiController {
 
     @RequestMapping("traml")
     String transTraML(){
-        File file = new File(ApiController.class.getClassLoader().getResource("data/Example1.traML").getPath());
+        File file = new File(ApiController.class.getClassLoader().getResource("data/MRMDecoyGenerator_input.TraML").getPath());
         TraML traML = traMLService.parse(file);
         return traML.getVersion();
     }

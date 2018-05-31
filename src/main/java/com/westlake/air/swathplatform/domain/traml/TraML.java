@@ -6,6 +6,10 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
+ */
 @Data
 @XStreamAlias("TraML")
 public class TraML {

@@ -9,6 +9,9 @@ import java.util.List;
 
 /**
  * List and descriptions of the source files this TraML document was generated or derived from
+ *
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
  */
 @Data
 @XStreamAlias("SourceFile")

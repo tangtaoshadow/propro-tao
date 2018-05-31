@@ -8,6 +8,9 @@ import java.util.List;
 
 /**
  * Information about the state of validation of a transition on a given instrument model
+ *
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
  */
 @Data
 @XStreamAlias("ValidationStatus")

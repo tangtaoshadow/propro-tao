@@ -9,6 +9,9 @@ import java.util.List;
 
 /**
  * Information about a single transition for a peptide or other compound
+ *
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
  */
 @Data
 @XStreamAlias("Transition")

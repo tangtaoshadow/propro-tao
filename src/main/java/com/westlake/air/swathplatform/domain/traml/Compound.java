@@ -9,6 +9,9 @@ import java.util.List;
 
 /**
  * Chemical compound other than a peptide for which one or more transitions
+ *
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
  */
 @Data
 public class Compound {

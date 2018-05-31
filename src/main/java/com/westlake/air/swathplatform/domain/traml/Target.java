@@ -9,6 +9,9 @@ import java.util.List;
 
 /**
  * A peptide or compound that is to be included or excluded from a target list of precursor m/z values.
+ *
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
  */
 @Data
 @XStreamAlias("Target")

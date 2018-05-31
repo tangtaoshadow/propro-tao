@@ -8,6 +8,9 @@ import java.util.List;
 
 /**
  * Intermediate product ion information of the transition when using MS3 or above
+ *
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
  */
 @Data
 @XStreamAlias("IntermediateProduct")

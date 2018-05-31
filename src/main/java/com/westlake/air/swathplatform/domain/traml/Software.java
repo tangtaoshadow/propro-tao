@@ -10,6 +10,9 @@ import java.util.List;
 /**
  * Description of a software package used in the
  * generation of one or more transitions described in the document
+ *
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
  */
 @Data
 @XStreamAlias("Software")

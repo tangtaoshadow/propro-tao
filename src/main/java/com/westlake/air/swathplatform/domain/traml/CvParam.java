@@ -5,6 +5,9 @@ import lombok.Data;
 
 /**
  * Controlled vocabulary term adding information to the parent term
+ *
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
  */
 @Data
 public class CvParam {

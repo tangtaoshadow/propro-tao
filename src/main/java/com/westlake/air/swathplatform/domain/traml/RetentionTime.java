@@ -9,6 +9,9 @@ import java.util.List;
 
 /**
  * Information about predicted or calibrated retention time
+ *
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
  */
 @Data
 @XStreamAlias("RetentionTime")

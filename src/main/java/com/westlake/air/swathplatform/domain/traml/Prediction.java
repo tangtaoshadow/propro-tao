@@ -9,6 +9,9 @@ import java.util.List;
 
 /**
  * Information about a prediction for a suitable transition using some software
+ *
+ * Created by James Lu MiaoShan
+ * Time: 2018-05-31 09:53
  */
 @Data
 @XStreamAlias("Prediction")
