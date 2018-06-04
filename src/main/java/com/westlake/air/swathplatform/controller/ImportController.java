@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller;
  * Time: 2018-05-31 09:53
  */
 @Controller
-public class FileController {
+public class ImportController {
 
 
 }

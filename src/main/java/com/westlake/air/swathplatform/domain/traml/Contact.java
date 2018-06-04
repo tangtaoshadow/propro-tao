@@ -30,5 +30,4 @@ public class Contact {
     @XStreamAsAttribute
     String id;
 
-
 }
