@@ -3,32 +3,39 @@ package com.westlake.air.swathplatform.controller;
 import com.westlake.air.swathplatform.domain.traml.*;
 import com.westlake.air.swathplatform.service.TraMLService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-05-31 09:53
  */
-@RestController
-@RequestMapping("api")
-public class ApiController {
+@Controller
+@RequestMapping("traml")
+public class TramlController {
 
     @Autowired
     TraMLService traMLService;
 
     TraML traML;
 
-    @RequestMapping("traml")
-    String transTraML() {
-        File file = new File(ApiController.class.getClassLoader().getResource("data/BreastCancer_s69_osw.TraML").getPath());
+    @RequestMapping(value = {"/","/list"},method = RequestMethod.GET)
+    String list(Model model){
+        return "traml/list";
+    }
+
+    @RequestMapping("/load2memory")
+    String transTraML(Model model) {
+        File file = new File(TramlController.class.getClassLoader().getResource("data/BreastCancer_s69_osw.TraML").getPath());
         traML = traMLService.parse(file);
-        return traML.getVersion();
+        model.addAttribute("version",traML.getVersion());
+        return "traml/list";
     }
 
     @RequestMapping("test")
