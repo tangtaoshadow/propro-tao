@@ -1,16 +1,18 @@
-package com.westlake.air.swathplatform.service;
+package com.westlake.air.swathplatform.service.impl;
 
 import com.thoughtworks.xstream.security.AnyTypePermission;
 import com.westlake.air.swathplatform.domain.traml.*;
+import com.westlake.air.swathplatform.service.XMLParseService;
 import com.westlake.air.swathplatform.xml.AirXStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 
-@Component
-public class TraMLService {
+@Service("tramlService")
+public class TraMLServiceImpl implements XMLParseService {
 
     @Autowired
     AirXStream airXStream;
@@ -31,6 +33,7 @@ public class TraMLService {
         airXStream.allowTypes(classes);
     }
 
+    @Override
     public TraML parse(File file) {
         //XML反序列化
         TraML traML = new TraML();
