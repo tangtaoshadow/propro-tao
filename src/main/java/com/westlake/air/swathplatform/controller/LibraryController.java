@@ -7,13 +7,14 @@ import com.westlake.air.swathplatform.domain.traml.*;
 import com.westlake.air.swathplatform.service.LibraryService;
 import com.westlake.air.swathplatform.service.impl.TraMLServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.xml.transform.Result;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,15 +35,22 @@ public class LibraryController extends BaseController {
 
     TraML traML;
 
-    @RequestMapping(value = {"/", "/list"}, method = RequestMethod.GET)
-    String list(Model model) {
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    String list(Model model,@RequestParam(value = "searchName",required = false) String searchName) {
+        model.addAttribute("searchName",searchName);
         return "library/list";
     }
 
     @RequestMapping(value = {"/listJson"})
     @ResponseBody
-    List<LibraryDO> listJson() {
-        List<LibraryDO> libraries = libraryService.findAll();
+    List<LibraryDO> listJson(@RequestParam(value = "name",required = false) String name) {
+        List<LibraryDO> libraries = new ArrayList<>();
+        if(name == null || name.isEmpty()){
+            libraries = libraryService.findAll();
+        }else{
+            Page<LibraryDO> page = libraryService.findAllByName(name, PageRequest.of(0,10));
+            libraries = page.getContent();
+        }
         return libraries;
     }
 
@@ -53,34 +61,34 @@ public class LibraryController extends BaseController {
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     String add(Model model,
-                      @RequestParam(value = "name", required = true) String name,
-                      @RequestParam(value = "instrument", required = false) String instrument,
-                      @RequestParam(value = "description", required = false) String description,
-                      @RequestParam(value = "file") MultipartFile file,
-                      RedirectAttributes redirectAttributes) {
+               @RequestParam(value = "name", required = true) String name,
+               @RequestParam(value = "instrument", required = false) String instrument,
+               @RequestParam(value = "description", required = false) String description,
+               @RequestParam(value = "file") MultipartFile file,
+               RedirectAttributes redirectAttributes) {
         LibraryDO library = new LibraryDO();
         library.setName(name);
         library.setInstrument(instrument);
         library.setDescription(description);
         ResultDO resultDO = libraryService.save(library);
-        if(resultDO.isSuccess()){
-            redirectAttributes.addFlashAttribute(SUCCESS_MSG,SuccessMsg.CREATE_LIBRARY_SUCCESS);
+        if (resultDO.isSuccess()) {
+            redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS);
             return "redirect:/library/list";
-        }else{
+        } else {
             logger.warn(resultDO.getMsgInfo());
-            redirectAttributes.addFlashAttribute(ERROR_MSG,resultDO.getMsgInfo());
-            redirectAttributes.addFlashAttribute("library",library);
+            redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
+            redirectAttributes.addFlashAttribute("library", library);
             return "redirect:/library/create";
         }
     }
 
     @RequestMapping(value = "/edit/{id}")
-    String edit(Model model,@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+    String edit(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
-        if (resultDO.isFailured()){
+        if (resultDO.isFailured()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/library/list";
-        }else{
+        } else {
             model.addAttribute("library", resultDO.getModel());
             return "/library/edit";
         }
@@ -89,16 +97,16 @@ public class LibraryController extends BaseController {
     @RequestMapping(value = "/detail/{id}")
     String detail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
-        if (resultDO.isSuccess()){
+        if (resultDO.isSuccess()) {
             model.addAttribute("library", resultDO.getModel());
             return "/library/detail";
-        }else{
+        } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/library/list";
         }
     }
 
-    @RequestMapping(value = "/update",method = RequestMethod.POST)
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
     String update(Model model,
                   @RequestParam(value = "id", required = true) String id,
                   @RequestParam(value = "name") String name,
@@ -107,19 +115,31 @@ public class LibraryController extends BaseController {
                   @RequestParam(value = "file") MultipartFile file,
                   RedirectAttributes redirectAttributes) {
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
-        if(resultDO.isSuccess()){
+        if (resultDO.isSuccess()) {
             LibraryDO libraryDO = resultDO.getModel();
             libraryDO.setDescription(description);
             libraryDO.setInstrument(instrument);
-            ResultDO saveResult = libraryService.save(libraryDO);
-            if(saveResult.isSuccess()){
-                redirectAttributes.addFlashAttribute(SUCCESS_MSG,SuccessMsg.CREATE_LIBRARY_SUCCESS);
-                return "redirect:/library/detail/"+libraryDO.getId();
-            }else{
+            ResultDO saveResult = libraryService.update(libraryDO);
+            if (saveResult.isSuccess()) {
+                redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS);
+                return "redirect:/library/detail/" + libraryDO.getId();
+            } else {
                 redirectAttributes.addFlashAttribute(ERROR_MSG, saveResult.getMsgInfo());
                 return "redirect:/library/list";
             }
-        }else{
+        } else {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
+            return "redirect:/library/list";
+        }
+    }
+
+    @RequestMapping(value = "/delete/{id}")
+    String delete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+        ResultDO resultDO = libraryService.delete(id);
+        if (resultDO.isSuccess()) {
+            redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_LIBRARY_SUCCESS);
+            return "redirect:/library/list";
+        } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/library/list";
         }

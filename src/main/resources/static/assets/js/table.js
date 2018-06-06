@@ -107,16 +107,15 @@ var DatatableResponsiveColumnsDemo = function () {
     };
 }();
 
-var LibraryTable = function () {
-    // table initializer
-    var table = function () {
+var LibraryTable = function (remoteUrl) {
+    var table = function (remoteUrl) {
 
         var datatable = $('.m-datatable').mDatatable({
             data: {
                 type: 'remote',
                 source: {
                     read: {
-                        url: '/library/listJson'
+                        url: remoteUrl
                     }
                 },
                 pageSize: 10,
@@ -134,66 +133,60 @@ var LibraryTable = function () {
                 },
                 {
                     field: 'name',
-                    title: 'Name'
+                    title: '库名'
                 },
                 {
                     field: 'instrument',
-                    title: 'Instrument'
+                    title: '设备名称'
                 },
                 {
                     field: 'proteinCount',
-                    title: 'ProteinCount'
+                    title: '蛋白质数目'
                 },
                 {
                     field: 'peptideCount',
-                    title: 'PeptideCount'
+                    title: '肽段数目'
                 },
                 {
                     field: 'transitionCount',
-                    title: 'TransitionCount'
+                    title: 'Transition数目'
                 },
                 {
                     field: 'description',
-                    title: 'Description'
+                    title: '详细描述'
+                },
+                {
+                    field: 'createDate',
+                    title: '创建时间'
+                },
+                {
+                    field: 'lastModifiedDate',
+                    title: '最后修改时间'
                 },
                 {
                     field: "Actions",
                     width: 110,
-                    title: "Actions",
+                    title: "操作",
                     sortable: false,
                     overflow: 'visible',
                     template: function (row, index, datatable) {
-                        var dropup = (datatable.getPageSize() - index) <= 4 ? 'dropup' : '';
                         return '\
-						<a href="/library/edit/' + row.id + '" class="m-portlet__nav-link btn m-btn m-btn--hover-accent m-btn--icon m-btn--icon-only m-btn--pill" title="Edit details">\
+						<a href="/library/edit/' + row.id + '" class="m-portlet__nav-link btn m-btn m-btn--hover-accent m-btn--icon m-btn--icon-only m-btn--pill" title="编辑">\
 							<i class="la la-edit"></i>\
 						</a>\
+						<a href="/library/detail/' + row.id + '" class="m-portlet__nav-link btn m-btn m-btn--hover-accent m-btn--icon m-btn--icon-only m-btn--pill" title="查看详情">\
+                            <i class="la la-navicon"></i>\
+                        </a>\
 					';
                     }
                 }
             ]
         });
-
-        $('#m_form_status').on('change', function () {
-            datatable.search($(this).val().toLowerCase(), 'Status');
-        });
-
-        $('#m_form_type').on('change', function () {
-            datatable.search($(this).val().toLowerCase(), 'Type');
-        });
-
-        $('#m_form_status, #m_form_type').selectpicker();
-
     };
 
     return {
-        init: function () {
-            // init table
-            table();
+        init: function (remoteUrl) {
+            table(remoteUrl);
         }
     };
 }();
-
-// jQuery(document).ready(function () {
-//     DatatableResponsiveColumnsDemo.init();
-// });

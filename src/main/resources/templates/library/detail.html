@@ -10,6 +10,17 @@
 <!-- end::Head -->
 <!-- end::Body -->
 <body>
+
+<div class="m-subheader ">
+    <div class="d-flex align-items-center">
+        <div class="mr-auto">
+            <h3 class="m-subheader__title m-subheader__title--separator">
+                标准库详情页面
+            </h3>
+        </div>
+    </div>
+</div>
+
 <div class="m-content" layout:fragment="content">
 
     <div class="row">
@@ -22,18 +33,13 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text" th:value="${library?.name}"></h3>
+                            <h3 class="m-portlet__head-text">标准库详情页</h3>
                         </div>
                     </div>
                 </div>
                 <!--begin::Form-->
                 <form class="m-form m-form--fit m-form--label-align-right">
                     <div class="m-portlet__body">
-                        <div class="form-group m-form__group m--margin-top-10">
-                            <div class="alert m-alert m-alert--default" role="alert">
-                                请导入标准TraML格式的库文件,并为库文件创建相关的信息
-                            </div>
-                        </div>
                         <div class="form-group m-form__group">
                             <label for="libraryName">
                                 库文件ID
@@ -54,7 +60,24 @@
                             </label>
                             <input type="text" class="form-control m-input" id="instrument" name="instrument" readonly th:value="${library?.instrument}">
                         </div>
-
+                        <div class="form-group m-form__group">
+                            <label for="proteinCount">
+                                蛋白质数目
+                            </label>
+                            <input type="text" class="form-control m-input" id="proteinCount" name="proteinCount" readonly th:value="${library?.proteinCount}">
+                        </div>
+                        <div class="form-group m-form__group">
+                            <label for="peptideCount">
+                                肽段数目
+                            </label>
+                            <input type="text" class="form-control m-input" id="peptideCount" name="peptideCount" readonly th:value="${library?.peptideCount}">
+                        </div>
+                        <div class="form-group m-form__group">
+                            <label for="transitionCount">
+                                Transition数目
+                            </label>
+                            <input type="text" class="form-control m-input" id="transitionCount" name="transitionCount" readonly th:value="${library?.transitionCount}">
+                        </div>
                         <div class="form-group m-form__group">
                             <label for="description">
                                 详细描述
@@ -62,22 +85,22 @@
                             <textarea class="form-control m-input" id="description" name="description" rows="3" readonly th:text="${library?.description}"></textarea>
                         </div>
                         <div class="form-group m-form__group">
-                            <label>
-                                上传TraML文件
+                            <label for="createDate">
+                                创建时间
                             </label>
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" name="file" id="file">
-                                <label class="custom-file-label" for="file">
-                                    选择文件
-                                </label>
-                            </div>
+                            <input type="text" class="form-control m-input" id="createDate" name="createDate" readonly th:value="${#dates.format(library?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
+                        </div>
+                        <div class="form-group m-form__group">
+                            <label for="lastModifiedDate">
+                                最后修改时间
+                            </label>
+                            <input type="text" class="form-control m-input" id="lastModifiedDate" name="lastModifiedDate" readonly th:value="${#dates.format(library?.lastModifiedDate, 'yyyy-MM-dd HH:mm:ss')}">
                         </div>
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <button type="reset" class="btn btn-primary">
-                                提交
-                            </button>
+                            <a th:href="|/library/edit/${library?.id}|" class="btn btn-primary">修改</a>
+                            <a th:href="|/library/delete/${library?.id}|" class="btn btn-danger">删除</a>
                         </div>
                     </div>
                 </form>

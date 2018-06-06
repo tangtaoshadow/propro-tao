@@ -18,7 +18,11 @@ public interface LibraryService {
 
     Page<LibraryDO> findAll(PageRequest pageRequest);
 
+    Page<LibraryDO> findAllByName(String name, PageRequest pageRequest);
+
     ResultDO save(LibraryDO libraryDO);
+
+    ResultDO update(LibraryDO libraryDO);
 
     ResultDO delete(String id);
 

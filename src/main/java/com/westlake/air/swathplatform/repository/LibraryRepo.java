@@ -1,6 +1,8 @@
 package com.westlake.air.swathplatform.repository;
 
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
@@ -9,7 +11,9 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  */
 public interface LibraryRepo extends MongoRepository<LibraryDO, String> {
 
-    public LibraryDO getById(String id);
+    LibraryDO getById(String id);
 
-    public LibraryDO getByName(String name);
+    LibraryDO getByName(String name);
+
+    Page<LibraryDO> findByName(String name, Pageable page);
 }
