@@ -3,9 +3,9 @@ package com.westlake.air.swathplatform.controller;
 import com.westlake.air.swathplatform.constants.SuccessMsg;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
-import com.westlake.air.swathplatform.domain.traml.*;
+import com.westlake.air.swathplatform.parser.model.traml.*;
 import com.westlake.air.swathplatform.service.LibraryService;
-import com.westlake.air.swathplatform.service.impl.TraMLServiceImpl;
+import com.westlake.air.swathplatform.parser.TraMLParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +28,7 @@ import java.util.List;
 public class LibraryController extends BaseController {
 
     @Autowired
-    TraMLServiceImpl traMLServiceImpl;
+    TraMLParser traMLParser;
 
     @Autowired
     LibraryService libraryService;
@@ -148,7 +148,7 @@ public class LibraryController extends BaseController {
     @RequestMapping("/load2memory")
     String transTraML(Model model) {
         File file = new File(LibraryController.class.getClassLoader().getResource("data/BreastCancer_s69_osw.TraML").getPath());
-        traML = traMLServiceImpl.parse(file);
+        traML = traMLParser.parse(file);
         model.addAttribute("version", traML.getVersion());
         return "library/list";
     }
