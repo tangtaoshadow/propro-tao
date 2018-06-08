@@ -53,18 +53,15 @@
                                 详细描述
                             </label>
                             <textarea class="form-control m-input" id="description" name="description"
-                                      rows="3" th:value="${library?.description}"></textarea>
+                                      rows="3" th:text="${library?.description}"></textarea>
                         </div>
                         <div class="form-group m-form__group">
                             <label>
-                                上传TraML文件
+                                上传TSV格式文件(不上传代表不作修改,上传后会覆盖原有的数据)
                             </label>
                             <div class="custom-file">
-                                <input type="file" class="custom-file-input" name="file" id="file">
-                                <span class="m-form__help">不上传文件代表不作修改</span>
-                                <label class="custom-file-label" for="file">
-                                    选择文件
-                                </label>
+                                <input type="file" class="custom-file-input" name="file" id="customFile">
+                                <label class="custom-file-label" for="customFile">选择文件</label>
                             </div>
                         </div>
                     </div>

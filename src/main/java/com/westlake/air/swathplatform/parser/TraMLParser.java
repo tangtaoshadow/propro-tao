@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.File;
 
-@Component("traMLParser")
-public class TraMLParser implements FileParser {
+@Component
+public class TraMLParser {
 
     @Autowired
     AirXStream airXStream;
@@ -31,7 +31,6 @@ public class TraMLParser implements FileParser {
         airXStream.allowTypes(classes);
     }
 
-    @Override
     public TraML parse(File file) {
         //XML反序列化
         TraML traML = new TraML();

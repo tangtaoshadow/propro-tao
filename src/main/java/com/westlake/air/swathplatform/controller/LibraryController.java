@@ -1,11 +1,13 @@
 package com.westlake.air.swathplatform.controller;
 
+import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.constants.SuccessMsg;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
-import com.westlake.air.swathplatform.parser.model.traml.*;
+import com.westlake.air.swathplatform.domain.db.TransitionDO;
+import com.westlake.air.swathplatform.parser.TsvParser;
 import com.westlake.air.swathplatform.service.LibraryService;
-import com.westlake.air.swathplatform.parser.TraMLParser;
+import com.westlake.air.swathplatform.service.TransitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,27 +30,28 @@ import java.util.List;
 public class LibraryController extends BaseController {
 
     @Autowired
-    TraMLParser traMLParser;
+    TsvParser tsvParser;
 
     @Autowired
     LibraryService libraryService;
 
-    TraML traML;
+    @Autowired
+    TransitionService transitionService;
 
     @RequestMapping(value = "/list", method = RequestMethod.GET)
-    String list(Model model,@RequestParam(value = "searchName",required = false) String searchName) {
-        model.addAttribute("searchName",searchName);
+    String list(Model model, @RequestParam(value = "searchName", required = false) String searchName) {
+        model.addAttribute("searchName", searchName);
         return "library/list";
     }
 
     @RequestMapping(value = {"/listJson"})
     @ResponseBody
-    List<LibraryDO> listJson(@RequestParam(value = "name",required = false) String name) {
+    List<LibraryDO> listJson(@RequestParam(value = "name", required = false) String name) {
         List<LibraryDO> libraries = new ArrayList<>();
-        if(name == null || name.isEmpty()){
+        if (name == null || name.isEmpty()) {
             libraries = libraryService.findAll();
-        }else{
-            Page<LibraryDO> page = libraryService.findAllByName(name, PageRequest.of(0,10));
+        } else {
+            Page<LibraryDO> page = libraryService.findAllByName(name, PageRequest.of(0, 10));
             libraries = page.getContent();
         }
         return libraries;
@@ -71,15 +74,43 @@ public class LibraryController extends BaseController {
         library.setInstrument(instrument);
         library.setDescription(description);
         ResultDO resultDO = libraryService.save(library);
-        if (resultDO.isSuccess()) {
-            redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS);
-            return "redirect:/library/list";
-        } else {
+        if(resultDO.isFailured()){
             logger.warn(resultDO.getMsgInfo());
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             redirectAttributes.addFlashAttribute("library", library);
             return "redirect:/library/create";
         }
+
+        if (file != null) {
+            //先Parse文件,再作数据库的操作
+            List<TransitionDO> transitions = parseTsv(file, library.getId());
+
+            /**
+             * 这边的代码由于时间问题写的比较简陋,先删除原有的关联数据,再插入新的关联数据,未做事务处理
+             */
+            ResultDO deleteResult = transitionService.deleteAllByLibraryId(library.getId());
+            if (deleteResult.isFailured()) {
+                redirectAttributes.addFlashAttribute(ResultCode.DELETE_ERROR.getMessage(), deleteResult.getMsgInfo());
+                return "redirect:/library/list";
+            }
+
+            /**
+             * 存储所有新的数据
+             */
+            ResultDO saveAllResult = transitionService.insertAll(transitions);
+            if(saveAllResult.isFailured()){
+                redirectAttributes.addFlashAttribute(ResultCode.INSERT_ERROR.getMessage(), saveAllResult.getMsgInfo());
+                return "redirect:/library/list";
+            }
+
+            /**
+             * 如果全部存储成功,开始统计蛋白质数目,肽段数目和Transition数目
+             */
+            library.setProteinCount(transitionService.countByProteinName(library.getId()));
+        }
+
+        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS);
+        return "redirect:/library/detail/"+library.getId();
     }
 
     @RequestMapping(value = "/edit/{id}")
@@ -116,17 +147,51 @@ public class LibraryController extends BaseController {
                   RedirectAttributes redirectAttributes) {
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
         if (resultDO.isSuccess()) {
-            LibraryDO libraryDO = resultDO.getModel();
-            libraryDO.setDescription(description);
-            libraryDO.setInstrument(instrument);
-            ResultDO saveResult = libraryService.update(libraryDO);
-            if (saveResult.isSuccess()) {
-                redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS);
-                return "redirect:/library/detail/" + libraryDO.getId();
-            } else {
-                redirectAttributes.addFlashAttribute(ERROR_MSG, saveResult.getMsgInfo());
+            LibraryDO library = resultDO.getModel();
+            library.setDescription(description);
+            library.setInstrument(instrument);
+            ResultDO updateResult = libraryService.update(library);
+            if (updateResult.isFailured()) {
+                redirectAttributes.addFlashAttribute(ResultCode.UPDATE_ERROR.getMessage(), updateResult.getMsgInfo());
                 return "redirect:/library/list";
             }
+
+            if (file != null) {
+                //先Parse文件,再作数据库的操作
+                List<TransitionDO> transitions = parseTsv(file, library.getId());
+
+                /**
+                 * 这边的代码由于时间问题写的比较简陋,先删除原有的关联数据,再插入新的关联数据,未做事务处理
+                 */
+                ResultDO deleteResult = transitionService.deleteAllByLibraryId(library.getId());
+                if (deleteResult.isFailured()) {
+                    redirectAttributes.addFlashAttribute(ResultCode.DELETE_ERROR.getMessage(), deleteResult.getMsgInfo());
+                    return "redirect:/library/list";
+                }
+
+                /**
+                 * 存储所有新的数据
+                 */
+                ResultDO insertAllResult = transitionService.insertAll(transitions);
+                if(insertAllResult.isFailured()){
+                    redirectAttributes.addFlashAttribute(ResultCode.INSERT_ERROR.getMessage(), insertAllResult.getMsgInfo());
+                    return "redirect:/library/list";
+                }
+
+                /**
+                 * 如果全部存储成功,开始统计蛋白质数目,肽段数目和Transition数目
+                 */
+                library.setProteinCount(transitionService.countByProteinName(library.getId()));
+                library.setPeptideCount(transitionService.countByPeptideSequence(library.getId()));
+                library.setTransitionCount(transitionService.countByTransitionName(library.getId()));
+
+                libraryService.update(library);
+            }
+
+            redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS);
+            return "redirect:/library/detail/" + library.getId();
+
+
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/library/list";
@@ -145,106 +210,16 @@ public class LibraryController extends BaseController {
         }
     }
 
-    @RequestMapping("/load2memory")
-    String transTraML(Model model) {
-        File file = new File(LibraryController.class.getClassLoader().getResource("data/BreastCancer_s69_osw.TraML").getPath());
-        traML = traMLParser.parse(file);
-        model.addAttribute("version", traML.getVersion());
-        return "library/list";
-    }
+    private List<TransitionDO> parseTsv(MultipartFile file, String libraryId) {
 
-    @RequestMapping("test")
-    String testTraML() {
-        StringBuilder result = new StringBuilder();
-        //最长的蛋白质id长度
-        String longestProteinId = "";
-        //最长的肽段id长度
-        String longestPeptideId = "";
-        boolean isAllTheIdEqualToCvParam = true;
-        boolean isAllTheSequenceEmpty = true;
-        //扫描所有的蛋白质
-        List<Protein> proteins = traML.getProteinList();
-        for (Protein p : proteins) {
-            List<CvParam> cvParams = p.getCvParams();
-            //测试文件中所有的蛋白质的id和cvParams中对应的id是否完全一致
-            for (CvParam cvParam : cvParams) {
-                if (cvParam.getName().equals("protein accession")) {
-                    if (!p.getId().equals(cvParam.getValue())) {
-                        result.append("Protein的Id和CvParam中的Value居然有不相等的!\r\n\r\n");
-                        isAllTheIdEqualToCvParam = false;
-                    }
-                }
-            }
-            //测试所有蛋白质的Sequence是不是都是空的
-            if (!p.getSequence().isEmpty()) {
-                isAllTheSequenceEmpty = false;
-                result.append("Protein 的Sequence居然有不是空的").append(p.getId()).append(":").append(p.getSequence()).append("\r\n\r\n");
-            }
-            //拿到Id最长的蛋白质id
-            if (p.getId().length() > longestProteinId.length()) {
-                longestProteinId = p.getId();
-            }
+        List<TransitionDO> transitions = null;
+        try {
+            transitions = tsvParser.parse(file.getInputStream(), libraryId);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        result.append("最长的蛋白质ID长度为").append(longestProteinId.length()).append("--").append(longestProteinId);
-        if (isAllTheIdEqualToCvParam) {
-            result.append("所有蛋白质的Id和CvParams中Value的值均相等\r\n\r\n");
-        }
-        if (isAllTheSequenceEmpty) {
-            result.append("所有蛋白质的Sequence均为空\r\n\r\n");
-        }
-        //扫描所有肽段
-        List<Peptide> peptides = traML.getCompoundList().getPeptideList();
-        List<String> peptideGroupLabel = new ArrayList<>();
-        List<String> peptideChargeState = new ArrayList<>();
 
-        boolean isAllTheIdEqualToUserParam = true;
-        for (Peptide peptide : peptides) {
-            if (peptide.getId().length() > longestPeptideId.length()) {
-                longestPeptideId = peptide.getId();
-            }
-            List<UserParam> userParams = peptide.getUserParams();
-            for (UserParam userParam : userParams) {
-                if (!userParam.getName().equals("full_peptide_name")) {
-                    isAllTheIdEqualToUserParam = false;
-                    result.append("肽段的Sequence和对应的UserParams中的full peptide name的值不相同\r\n\r\n");
-                }
-            }
-            List<CvParam> cvParams = peptide.getCvParams();
-            for (CvParam cvParam : cvParams) {
-                if (cvParam.getName().equals("peptide group label")) {
-                    if (!peptideGroupLabel.contains(cvParam.getValue())) {
-                        peptideGroupLabel.add(cvParam.getValue());
-                    }
-                }
-                if (cvParam.getName().equals("charge state")) {
-                    if (!peptideChargeState.contains(cvParam.getValue())) {
-                        peptideChargeState.add(cvParam.getValue());
-                    }
-                }
-            }
-        }
-        result.append("最长的肽段ID长度为").append(longestPeptideId.length()).append("--").append(longestPeptideId).append("\r\n\r\n");
-        if (isAllTheIdEqualToUserParam) {
-            result.append("所有肽段的Sequence和UserParams中Full Peptide Name的值均相等").append("\r\n\r\n");
-        }
-        result.append("GroupLabel:");
-        for (String s : peptideGroupLabel) {
-            result.append(s).append(";");
-        }
-        result.append("\r\n");
+        return transitions;
 
-        result.append("ChargeState:");
-        for (String s : peptideChargeState) {
-            result.append(s).append(";");
-        }
-        result.append("\r\n");
-
-        List<Transition> transitions = traML.getTransitionList();
-
-        result.append("总计有蛋白质").append(proteins.size()).append("个\r\n");
-        result.append("总计有肽段").append(peptides.size()).append("个\r\n");
-        result.append("总计有Transition").append(transitions.size()).append("个\r\n");
-
-        return result.toString();
     }
 }

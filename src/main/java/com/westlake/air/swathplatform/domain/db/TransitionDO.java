@@ -43,20 +43,10 @@ public class TransitionDO {
     String transitionName;
 
     /**
-     * 未知参数
-     */
-    Integer ce;
-
-    /**
      * 离子强度
      * library intensity
      */
     String productIonIntensity;
-
-    /**
-     * 过渡态组ID
-     */
-    String transitionGroupId;
 
     /**
      * 是否是伪肽段
@@ -94,11 +84,6 @@ public class TransitionDO {
     String peptideGroupLabel;
 
     /**
-     * 对应蛋白质的唯一ID
-     */
-    String uniProteinId;
-
-    /**
      * 片段类型
      */
     String fragmentType;
@@ -112,9 +97,4 @@ public class TransitionDO {
      * 片段序列号
      */
     Integer fragmentSeriesNumber;
-
-    /**
-     * 片段类型
-     */
-    String labelType;
 }

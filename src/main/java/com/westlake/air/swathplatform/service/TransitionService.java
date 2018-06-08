@@ -4,8 +4,8 @@ import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
+import javax.xml.transform.Result;
 import java.util.List;
 
 /**
@@ -16,19 +16,26 @@ public interface TransitionService {
 
     Page<TransitionDO> findAll(PageRequest pageRequest);
 
-    ResultDO save(TransitionDO transitionDO);
+    ResultDO insert(TransitionDO transitionDO);
 
-    ResultDO saveAll(List<TransitionDO> transitions);
+    ResultDO insertAll(List<TransitionDO> transitions);
 
     ResultDO deleteAllByLibraryId(String libraryId);
 
     ResultDO<TransitionDO> getById(String id);
 
-    ResultDO<List<TransitionDO>> findAllByLibraryIdAndTransitionGroupId(String libraryId, String transitionGroupLabel);
+    Integer countByProteinName(String libraryId);
+
+    Integer countByPeptideSequence(String libraryId);
+
+    Integer countByTransitionName(String libraryId);
+
+    ResultDO<List<TransitionDO>> findAllByLibraryIdAndPeptideGroupLabel(String libraryId, String peptideGroupLabel);
 
     ResultDO<List<TransitionDO>> findAllByLibraryIdAndPeptideSequence(String libraryId, String peptideSequence);
 
     ResultDO<List<TransitionDO>> findAllByLibraryIdAndProteinName(String libraryId, String proteinName);
 
     Page<TransitionDO> findAllByLibraryIdAndIsDecoy(String libraryId, Boolean isDecoy, PageRequest pageRequest);
+
 }

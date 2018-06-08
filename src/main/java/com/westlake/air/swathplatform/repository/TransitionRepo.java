@@ -17,12 +17,11 @@ public interface TransitionRepo extends MongoRepository<TransitionDO, String> {
 
     void deleteAllByLibraryId(String libraryId);
 
-    List<TransitionDO> getAllByLibraryIdAndTransitionGroupId(String libraryId, String transitionGroupId);
+    List<TransitionDO> getAllByLibraryIdAndPeptideGroupLabel(String libraryId, String peptideGroupLabel);
 
     List<TransitionDO> getAllByLibraryIdAndPeptideSequence(String libraryId, String peptideSequence);
 
     List<TransitionDO> getAllByLibraryIdAndProteinName(String libraryId, String proteinName);
 
     Page<TransitionDO> getAllByLibraryIdAndIsDecoy(String libraryId, Boolean isDecoy, Pageable page);
-
 }

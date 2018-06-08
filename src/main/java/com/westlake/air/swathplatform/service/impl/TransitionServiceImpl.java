@@ -3,6 +3,7 @@ package com.westlake.air.swathplatform.service.impl;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
+import com.westlake.air.swathplatform.repository.TransitionDAO;
 import com.westlake.air.swathplatform.repository.TransitionRepo;
 import com.westlake.air.swathplatform.service.TransitionService;
 import org.slf4j.Logger;
@@ -10,10 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.xml.transform.Result;
 import java.util.List;
 
 /**
@@ -28,13 +27,16 @@ public class TransitionServiceImpl implements TransitionService {
     @Autowired
     TransitionRepo transitionRepo;
 
+    @Autowired
+    TransitionDAO transitionDAO;
+
     @Override
     public Page<TransitionDO> findAll(PageRequest pageRequest) {
         return transitionRepo.findAll(pageRequest);
     }
 
     @Override
-    public ResultDO save(TransitionDO transitionDO) {
+    public ResultDO insert(TransitionDO transitionDO) {
         try {
             transitionRepo.save(transitionDO);
             return new ResultDO(true);
@@ -45,7 +47,7 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
-    public ResultDO saveAll(List<TransitionDO> transitions) {
+    public ResultDO insertAll(List<TransitionDO> transitions) {
         try {
             transitionRepo.saveAll(transitions);
             return new ResultDO(true);
@@ -58,7 +60,7 @@ public class TransitionServiceImpl implements TransitionService {
     @Override
     public ResultDO deleteAllByLibraryId(String libraryId) {
         try {
-            transitionRepo.deleteAllByLibraryId(libraryId);
+            transitionDAO.deleteAllByLibraryId(libraryId);
             return new ResultDO(true);
         } catch (Exception e) {
             return ResultDO.buildError(ResultCode.DELETE_ERROR);
@@ -68,7 +70,7 @@ public class TransitionServiceImpl implements TransitionService {
     @Override
     public ResultDO<TransitionDO> getById(String id) {
         try {
-            TransitionDO transitionDO = transitionRepo.getById(id);
+            TransitionDO transitionDO = transitionDAO.getById(id);
             if (transitionDO == null) {
                 return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
             } else {
@@ -82,9 +84,24 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
-    public ResultDO<List<TransitionDO>> findAllByLibraryIdAndTransitionGroupId(String libraryId, String transitionGroupLabel) {
+    public Integer countByProteinName(String libraryId) {
+        return transitionDAO.countByProteinName(libraryId);
+    }
+
+    @Override
+    public Integer countByPeptideSequence(String libraryId) {
+        return transitionDAO.countByPeptideSequence(libraryId);
+    }
+
+    @Override
+    public Integer countByTransitionName(String libraryId) {
+        return transitionDAO.countByTransitionName(libraryId);
+    }
+
+    @Override
+    public ResultDO<List<TransitionDO>> findAllByLibraryIdAndPeptideGroupLabel(String libraryId, String peptideGroupLabel) {
         try {
-            List<TransitionDO> transitions = transitionRepo.getAllByLibraryIdAndTransitionGroupId(libraryId, transitionGroupLabel);
+            List<TransitionDO> transitions = transitionRepo.getAllByLibraryIdAndPeptideGroupLabel(libraryId, peptideGroupLabel);
             ResultDO resultDO = new ResultDO(true);
             resultDO.setModel(transitions);
             return resultDO;
