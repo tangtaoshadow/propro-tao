@@ -245,6 +245,7 @@
         </NODE>
       </NODE>
     </NODE>
+    <!--????99.98%-->
     <NODE name="Silicon">
       <ITEM name="Name" value="Silicon" type="string" />
       <ITEM name="Symbol" value="Si" type="string" />
@@ -401,6 +402,7 @@
         </NODE>
       </NODE>
     </NODE>
+    <!--????99.11%-->
     <NODE name="Tellurium">
       <ITEM name="Name" value="Tellurium" type="string" />
       <ITEM name="Symbol" value="Te" type="string" />
@@ -436,6 +438,7 @@
         </NODE>
       </NODE>
     </NODE>
+    <!--????99.894%-->
     <NODE name="Barium">
       <ITEM name="Name" value="Barium" type="string"/>
       <ITEM name="Symbol" value="Ba" type="string"/>
@@ -512,6 +515,7 @@
         </NODE>
       </NODE>
     </NODE>
+    <!--????99.94%-->
     <NODE name="Nickel">
       <ITEM name="Name" value="Nickel" type="string" />
       <ITEM name="Symbol" value="Ni" type="string" />
@@ -595,7 +599,8 @@
           <ITEM name="AtomicMass" value="70.9247013" type="float"/>
         </NODE>
       </NODE>
-    </NODE>    
+    </NODE>
+    <!--????92.17%-->
     <NODE name="Germanium">
       <ITEM name="Name" value="Germanium" type="string" />
       <ITEM name="Symbol" value="Ge" type="string" />
@@ -630,6 +635,7 @@
         </NODE>
       </NODE>
     </NODE>
+    <!--????72.17%-->
     <NODE name="Rubidium">
       <ITEM name="Name" value="Rubidium" type="string" />
       <ITEM name="Symbol" value="Rb" type="string" />
@@ -1030,6 +1036,7 @@
         </NODE>
       </NODE>
     </NODE>
+    <!--????99.84%-->
     <NODE name="Hafnium">
       <ITEM name="Name" value="Hafnium" type="string" />
       <ITEM name="Symbol" value="Hf" type="string" />
@@ -1068,6 +1075,7 @@
         </NODE>
       </NODE>
     </NODE>
+    <!--????99.986%-->
     <NODE name="Platinum">
       <ITEM name="Name" value="Platinum" type="string" />
       <ITEM name="Symbol" value="Pt" type="string" />
@@ -1200,6 +1208,7 @@
           <ITEM name="RelativeAbundance" value="22.1" type="float" />
           <ITEM name="AtomicMass" value="206.9758969" type="float" />
         </NODE>
+        <!--??????-->
         <NODE name="208">
           <ITEM name="RelativeAbundance" value="52.4" type="float" />
           <ITEM name="AtomicMass" value="206.9758969" type="float" />

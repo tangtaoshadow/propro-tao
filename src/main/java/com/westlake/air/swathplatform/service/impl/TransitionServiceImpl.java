@@ -3,7 +3,7 @@ package com.westlake.air.swathplatform.service.impl;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
-import com.westlake.air.swathplatform.repository.TransitionDAO;
+import com.westlake.air.swathplatform.dao.TransitionDAO;
 import com.westlake.air.swathplatform.repository.TransitionRepo;
 import com.westlake.air.swathplatform.service.TransitionService;
 import org.slf4j.Logger;
