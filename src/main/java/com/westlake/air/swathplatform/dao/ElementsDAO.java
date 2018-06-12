@@ -2,6 +2,7 @@ package com.westlake.air.swathplatform.dao;
 
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.swathplatform.parser.model.chemistry.Element;
+import com.westlake.air.swathplatform.utils.ElementUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,13 @@ public class ElementsDAO {
     String elementsStr = "";
     List<Element> elementList = new ArrayList<>();
     HashMap<String, Element> symbolElementsMap = new HashMap<>();
+
+    public static String H2O = "H:2,O:1";
+    public static String H = "H:1";
+    public static String OH = "H:1,O:1";
+    public static String CHO = "C:1,H:1,O:1";
+    public static String NH2 = "N:1,H:2";
+    public static String CO = "C:1,O:1";
 
     @PostConstruct
     public void init() {
@@ -64,6 +72,32 @@ public class ElementsDAO {
         return elementsStr;
     }
 
+    //必须符合k:v,k:v的格式
+    public double getMonoWeight(String formula) {
+        HashMap<String, Integer> elementMap = ElementUtil.getElementMap(formula);
+        if (elementMap == null) {
+            return 0;
+        }
+        double monoWeight = 0;
+        for (String key : elementMap.keySet()) {
+            monoWeight += getElementBySymbol(key).getMonoWeight() * elementMap.get(key);
+        }
+        return monoWeight;
+    }
+
+    //必须符合k:v,k:v的格式
+    public double getAverageWeight(String formula) {
+        HashMap<String, Integer> elementMap = ElementUtil.getElementMap(formula);
+        if (elementMap == null) {
+            return 0;
+        }
+        double averageWeight = 0;
+        for (String key : elementMap.keySet()) {
+            averageWeight += getElementBySymbol(key).getAverageWeight() * elementMap.get(key);
+        }
+        return averageWeight;
+    }
+
     /**
      * 计算平均质量和Mono质量,根据OpenMS源代码中的逻辑,平均质量为"求和(分布率*相对原子质量)",Mono质量为取相对原子质量最小的一个
      *
@@ -85,10 +119,10 @@ public class ElementsDAO {
                 smallestWeight = weight;
             }
 
-            if (biggestAbundance == null){
+            if (biggestAbundance == null) {
                 biggestAbundance = abundance;
                 biggestAbundanceWeight = weight;
-            }else if(abundance > biggestAbundance){
+            } else if (abundance > biggestAbundance) {
                 biggestAbundance = abundance;
                 biggestAbundanceWeight = weight;
             }

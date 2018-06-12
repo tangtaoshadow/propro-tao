@@ -1,9 +1,12 @@
 package com.westlake.air.swathplatform.domain.db;
 
+import com.westlake.air.swathplatform.domain.bean.Annotation;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -84,17 +87,9 @@ public class TransitionDO {
     String peptideGroupLabel;
 
     /**
-     * 片段类型
+     * fragment详情列表
      */
-    String fragmentType;
+    List<Annotation> annotations;
 
-    /**
-     * 片段带电量
-     */
-    Integer fragmentCharge;
 
-    /**
-     * 片段序列号
-     */
-    Integer fragmentSeriesNumber;
 }
