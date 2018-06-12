@@ -24,7 +24,6 @@ public class ElementUtil {
             for (String kvPair : kvPairs) {
                 String[] kv = kvPair.split(":");
                 elementMap.put(kv[0], Integer.parseInt(kv[1]));
-
             }
         } catch (Exception e) {
             logger.error("Formula Parse Error:", e);

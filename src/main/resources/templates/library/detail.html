@@ -23,6 +23,12 @@
 
 <div class="m-content" layout:fragment="content">
 
+    <div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>
+    <div th:if="${errorList}" th:each="arrayS:${errorList}">
+        <div class="alert alert-danger" role="alert" th:text="${arrayS}"></div>
+    </div>
+
+    <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
     <div class="row">
         <div class="col-md-6">
             <!--begin::Portlet-->

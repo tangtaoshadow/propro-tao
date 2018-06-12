@@ -3,6 +3,7 @@ package com.westlake.air.swathplatform.domain;
 import com.westlake.air.swathplatform.constants.ResultCode;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -180,6 +181,13 @@ public class ResultDO<T> implements Serializable {
     public ResultDO setErrorList(List<String> errorList) {
         this.errorList = errorList;
         return this;
+    }
+
+    public void addErrorMsg(String errorMsg) {
+        if (errorList == null) {
+            errorList = new ArrayList<>();
+        }
+        errorList.add(errorMsg);
     }
 
 }

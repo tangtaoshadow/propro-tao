@@ -38,6 +38,8 @@ public class LibraryController extends BaseController {
     @Autowired
     TransitionService transitionService;
 
+    int errorListNumberLimit = 10;
+
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     String list(Model model, @RequestParam(value = "searchName", required = false) String searchName) {
         model.addAttribute("searchName", searchName);
@@ -69,12 +71,15 @@ public class LibraryController extends BaseController {
                @RequestParam(value = "description", required = false) String description,
                @RequestParam(value = "file") MultipartFile file,
                RedirectAttributes redirectAttributes) {
+
+        long deltaTimeForParse = 0;
+        long deltaTimeForSaveToDB = 0;
         LibraryDO library = new LibraryDO();
         library.setName(name);
         library.setInstrument(instrument);
         library.setDescription(description);
         ResultDO resultDO = libraryService.save(library);
-        if(resultDO.isFailured()){
+        if (resultDO.isFailured()) {
             logger.warn(resultDO.getMsgInfo());
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             redirectAttributes.addFlashAttribute("library", library);
@@ -82,9 +87,21 @@ public class LibraryController extends BaseController {
         }
 
         if (file != null) {
+            long startTimeForParse = System.currentTimeMillis();
             //先Parse文件,再作数据库的操作
-            List<TransitionDO> transitions = parseTsv(file, library.getId());
+            ResultDO<List<TransitionDO>> parseResult = parseTsv(file, library.getId());
+            if (parseResult.getErrorList() != null) {
+                if (parseResult.getErrorList().size() > errorListNumberLimit) {
+                    redirectAttributes.addFlashAttribute(ERROR_MSG, "解析错误,错误的条数过多,这边只显示" + errorListNumberLimit + "条错误信息");
+                    redirectAttributes.addFlashAttribute("errorList", parseResult.getErrorList().subList(0, errorListNumberLimit));
+                } else {
+                    redirectAttributes.addFlashAttribute("errorList", parseResult.getErrorList());
+                }
+            }
+            List<TransitionDO> transitions = parseResult.getModel();
+            deltaTimeForParse = System.currentTimeMillis() - startTimeForParse;
 
+            long startTimeForSaveToDB = System.currentTimeMillis();
             /**
              * 这边的代码由于时间问题写的比较简陋,先删除原有的关联数据,再插入新的关联数据,未做事务处理
              */
@@ -98,7 +115,7 @@ public class LibraryController extends BaseController {
              * 存储所有新的数据
              */
             ResultDO saveAllResult = transitionService.insertAll(transitions);
-            if(saveAllResult.isFailured()){
+            if (saveAllResult.isFailured()) {
                 redirectAttributes.addFlashAttribute(ResultCode.INSERT_ERROR.getMessage(), saveAllResult.getMsgInfo());
                 return "redirect:/library/list";
             }
@@ -107,10 +124,15 @@ public class LibraryController extends BaseController {
              * 如果全部存储成功,开始统计蛋白质数目,肽段数目和Transition数目
              */
             library.setProteinCount(transitionService.countByProteinName(library.getId()));
+            library.setPeptideCount(transitionService.countByPeptideSequence(library.getId()));
+            library.setTransitionCount(transitionService.countByTransitionName(library.getId()));
+
+            libraryService.update(library);
+            deltaTimeForSaveToDB = System.currentTimeMillis() - startTimeForSaveToDB;
         }
 
-        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS);
-        return "redirect:/library/detail/"+library.getId();
+        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS + "解析源文件耗时:" + deltaTimeForParse + "毫秒;数据库操作时间:" + deltaTimeForSaveToDB + "毫秒");
+        return "redirect:/library/detail/" + library.getId();
     }
 
     @RequestMapping(value = "/edit/{id}")
@@ -145,6 +167,8 @@ public class LibraryController extends BaseController {
                   @RequestParam(value = "description") String description,
                   @RequestParam(value = "file") MultipartFile file,
                   RedirectAttributes redirectAttributes) {
+        long deltaTimeForParse = 0;
+        long deltaTimeForSaveToDB = 0;
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
         if (resultDO.isSuccess()) {
             LibraryDO library = resultDO.getModel();
@@ -157,9 +181,22 @@ public class LibraryController extends BaseController {
             }
 
             if (file != null) {
+                long startTimeForParse = System.currentTimeMillis();
                 //先Parse文件,再作数据库的操作
-                List<TransitionDO> transitions = parseTsv(file, library.getId());
+                ResultDO<List<TransitionDO>> parseResult = parseTsv(file, library.getId());
+                if (parseResult.getErrorList() != null) {
+                    if (parseResult.getErrorList().size() > errorListNumberLimit) {
+                        redirectAttributes.addFlashAttribute(ERROR_MSG, "解析错误,错误的条数过多,这边只显示" + errorListNumberLimit + "条错误信息");
+                        redirectAttributes.addFlashAttribute("errorList", parseResult.getErrorList().subList(0, errorListNumberLimit));
+                    } else {
+                        redirectAttributes.addFlashAttribute("errorList", parseResult.getErrorList());
+                    }
+                }
+                List<TransitionDO> transitions = parseResult.getModel();
 
+                deltaTimeForParse = System.currentTimeMillis() - startTimeForParse;
+
+                long startTimeForSaveToDB = System.currentTimeMillis();
                 /**
                  * 这边的代码由于时间问题写的比较简陋,先删除原有的关联数据,再插入新的关联数据,未做事务处理
                  */
@@ -173,7 +210,7 @@ public class LibraryController extends BaseController {
                  * 存储所有新的数据
                  */
                 ResultDO insertAllResult = transitionService.insertAll(transitions);
-                if(insertAllResult.isFailured()){
+                if (insertAllResult.isFailured()) {
                     redirectAttributes.addFlashAttribute(ResultCode.INSERT_ERROR.getMessage(), insertAllResult.getMsgInfo());
                     return "redirect:/library/list";
                 }
@@ -186,9 +223,10 @@ public class LibraryController extends BaseController {
                 library.setTransitionCount(transitionService.countByTransitionName(library.getId()));
 
                 libraryService.update(library);
+                deltaTimeForSaveToDB = System.currentTimeMillis() - startTimeForSaveToDB;
             }
 
-            redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS);
+            redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS + "解析源文件耗时:" + deltaTimeForParse/1000.0 + "秒;数据库操作时间:" + deltaTimeForSaveToDB/1000.0 + "秒");
             return "redirect:/library/detail/" + library.getId();
 
 
@@ -210,16 +248,16 @@ public class LibraryController extends BaseController {
         }
     }
 
-    private List<TransitionDO> parseTsv(MultipartFile file, String libraryId) {
+    private ResultDO<List<TransitionDO>> parseTsv(MultipartFile file, String libraryId) {
 
-        List<TransitionDO> transitions = null;
+        ResultDO<List<TransitionDO>> resultDO = new ResultDO<>(true);
         try {
-            transitions = tsvParser.parse(file.getInputStream(), libraryId);
+            resultDO = tsvParser.parse(file.getInputStream(), libraryId);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return transitions;
+        return resultDO;
 
     }
 }

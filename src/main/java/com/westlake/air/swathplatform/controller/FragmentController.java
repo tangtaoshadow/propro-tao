@@ -2,6 +2,7 @@ package com.westlake.air.swathplatform.controller;
 
 import com.westlake.air.swathplatform.algorithm.FragmentCalculator;
 import com.westlake.air.swathplatform.dao.TransitionDAO;
+import com.westlake.air.swathplatform.domain.bean.FragmentResult;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,8 +27,8 @@ public class FragmentController {
 
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     @ResponseBody
-    TransitionDO list(Model model) {
+    FragmentResult list(Model model) {
         TransitionDO transitionDO = transitionDAO.getById("5b1f466547d23c17a07e5b98");
-        return fragmentCalculator.cal(transitionDO);
+        return fragmentCalculator.getResult(transitionDO);
     }
 }

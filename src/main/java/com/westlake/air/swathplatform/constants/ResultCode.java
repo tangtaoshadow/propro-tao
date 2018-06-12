@@ -28,7 +28,7 @@ public enum ResultCode implements Serializable {
     INSERT_ERROR("INSERT_ERROR", "插入数据失败"),
     UPDATE_ERROR("UPDATE_ERROR", "更新数据失败"),
     DELETE_ERROR("UPDATE_ERROR", "删除数据失败"),
-
+    PARSE_ERROR("PARSE_ERROR", "解析错误"),
     USER_NOT_EXISTED("USER_NOT_EXISTED", "该用户不存在"),
     ID_CANNOT_BE_NULL_OR_ZERO("ID_CANNOT_BE_NULL_OR_ZERO", "ID不能为空或者0"),
 
