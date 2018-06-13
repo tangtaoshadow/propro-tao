@@ -2,6 +2,7 @@ package com.westlake.air.swathplatform.service;
 
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
+import com.westlake.air.swathplatform.domain.query.LibraryQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -14,11 +15,9 @@ import java.util.List;
  */
 public interface LibraryService {
 
-    List<LibraryDO> findAll();
+    public ResultDO<List<LibraryDO>> getList(LibraryQuery query);
 
-    Page<LibraryDO> findAll(PageRequest pageRequest);
-
-    Page<LibraryDO> findAllByName(String name, PageRequest pageRequest);
+    public ResultDO<LibraryDO> findByName(String name);
 
     ResultDO save(LibraryDO libraryDO);
 

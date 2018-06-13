@@ -6,6 +6,7 @@ import com.westlake.air.swathplatform.constants.SuccessMsg;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
+import com.westlake.air.swathplatform.domain.query.LibraryQuery;
 import com.westlake.air.swathplatform.parser.TsvParser;
 import com.westlake.air.swathplatform.service.LibraryService;
 import com.westlake.air.swathplatform.service.TransitionService;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.management.Query;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,36 +44,25 @@ public class LibraryController extends BaseController {
 
     int errorListNumberLimit = 10;
 
-    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    @RequestMapping(value = "/list")
     String list(Model model,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
                 @RequestParam(value = "searchName", required = false) String searchName) {
         model.addAttribute("searchName", searchName);
         model.addAttribute("pageSize",pageSize);
-        List<LibraryDO> libraryList = libraryService.findAll();
-//        libraries = page.getContent();
-        libraryList.addAll(libraryList);
-        libraryList.addAll(libraryList);
-        libraryList.addAll(libraryList);
-        model.addAttribute("libraryList",libraryList);
-        model.addAttribute("totalPage", 10);
+        LibraryQuery query = new LibraryQuery();
+        if(searchName != null && !searchName.isEmpty()){
+            query.setName(searchName);
+        }
+        query.setPageSize(pageSize);
+        query.setPageNo(currentPage);
+        ResultDO<List<LibraryDO>> resultDO = libraryService.getList(query);
+
+        model.addAttribute("libraryList",resultDO.getModel());
+        model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
         return "library/list";
-    }
-
-    @RequestMapping(value = {"/listJson"})
-    @ResponseBody
-    List<LibraryDO> listJson(@RequestBody MultiValueMap<String,String> body, @RequestParam(value = "name", required = false) String name) {
-        System.out.println(body);
-        List<LibraryDO> libraries = new ArrayList<>();
-        if (name == null || name.isEmpty()) {
-            libraries = libraryService.findAll();
-        } else {
-            Page<LibraryDO> page = libraryService.findAllByName(name, PageRequest.of(0, 10));
-            libraries = page.getContent();
-        }
-        return libraries;
     }
 
     @RequestMapping(value = "/create")

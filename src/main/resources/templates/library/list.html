@@ -17,7 +17,7 @@
     <div class="m-portlet__body">
         <!--begin: Search Form -->
         <div class="clearfix">
-            <form id="searchForm" role="form" class="form-inline" action="/library/list">
+            <form id="searchForm" method="post" role="form" class="form-inline" action="/library/list">
                 <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                 <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
 
@@ -32,10 +32,10 @@
 
                 <div class="form-group m-form__group">
                     <div class="input-group">
-                        <input type="text" class="form-control" id="searchName" name="name" placeholder="标准库名称"
+                        <input type="text" class="form-control" id="searchName" name="searchName" placeholder="标准库名称"
                                th:value="${searchName}">
                         <div class="input-group-append">
-                            <button class="btn btn-primary" typjquery.bootpag.min.jse="submit">
+                            <button class="btn btn-primary" type="submit">
                                 查找
                             </button>
                         </div>
@@ -45,35 +45,32 @@
         </div>
         <!--end: Search Form -->
         <!--begin: Datatable -->
-        <div class="table-scrollable">
-            <table class="table table-bordered table-hover" style="table-layout:fixed;" id="html_table" width="100%">
+        <div>
+            <table class="table table-bordered" style="table-layout:fixed;">
                 <thead>
                 <tr>
                     <th width="20%">
                         库名
                     </th>
-                    <th width="5%">
+                    <th width="10%">
                         设备名称
                     </th>
-                    <th width="8%">
+                    <th width="10%">
                         蛋白质数目
                     </th>
-                    <th width="8%">
+                    <th width="10%">
                         肽段数目
                     </th>
-                    <th width="8%">
+                    <th width="10%">
                         Transition数目
                     </th>
-                    <th width="16%">
-                        详细描述
-                    </th>
-                    <th width="10%">
+                    <th width="15%">
                         创建时间
                     </th>
-                    <th width="10%">
+                    <th width="15%">
                         最后修改时间
                     </th>
-                    <th width="15%">
+                    <th width="10%">
                         操作
                     </th>
                 </tr>
@@ -85,19 +82,16 @@
                     <td th:text="${library.proteinCount}"></td>
                     <td th:text="${library.peptideCount}"></td>
                     <td th:text="${library.transitionCount}"></td>
-                    <td th:text="${library.description}"></td>
                     <td th:text="${#dates.format(library.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(library.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
                         <a th:href="|/library/edit/${library.id}|"
-                           class="m-portlet__nav-link btn m-btn m-btn--hover-accent m-btn--icon m-btn--icon-only m-btn--pill"
-                           title="编辑">
-                            <i class="la la-edit"></i>
+                           class="btn btn-primary btn-sm">编辑
+                            <!--<i class="la la-edit"></i>-->
                         </a>
                         <a th:href="|/library/detail/${library.id}|"
-                           class="m-portlet__nav-link btn m-btn m-btn--hover-accent m-btn--icon m-btn--icon-only m-btn--pill"
-                           title="查看详情">
-                            <i class="la la-navicon"></i>
+                           class="btn btn-success btn-sm">详情
+                            <!--<i class="la la-navicon"></i>-->
                         </a>
                     </td>
                 </tr>
@@ -123,7 +117,7 @@
                 paginationClass: 'pagination',
                 next: '<i class="fa fa-angle-right"></i>',
                 prev: '<i class="fa fa-angle-left"></i>',
-                total: 10,
+                total: totalPage,
                 page: currentPage,
                 maxVisible: 10
             }).on("page", function (event, num) {

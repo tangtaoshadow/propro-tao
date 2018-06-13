@@ -46,7 +46,7 @@ public class ResultDO<T> implements Serializable {
     /**
      * 每页显示个数
      */
-    private int pageSize;
+    private int pageSize = 10;
 
     /**
      * 最大页面数

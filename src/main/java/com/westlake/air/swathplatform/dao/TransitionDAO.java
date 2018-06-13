@@ -1,11 +1,17 @@
 package com.westlake.air.swathplatform.dao;
 
 import com.mongodb.BasicDBObject;
+import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
+import com.westlake.air.swathplatform.domain.query.LibraryQuery;
+import com.westlake.air.swathplatform.parser.model.traml.Transition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
@@ -51,17 +57,17 @@ public class TransitionDAO {
         mongoTemplate.remove(query, TransitionDO.class);
     }
 
-    public Integer countByProteinName(String libraryId){
+    public Integer countByProteinName(String libraryId) {
         AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(
                         TransitionDO.class,
                         Aggregation.match(where("libraryId").is(libraryId)),
                         Aggregation.group("proteinName").count().as("count1")),
-                        BasicDBObject.class);
+                BasicDBObject.class);
         return a.getMappedResults().size();
     }
 
-    public Integer countByPeptideSequence(String libraryId){
+    public Integer countByPeptideSequence(String libraryId) {
         AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(
                         TransitionDO.class,
@@ -71,7 +77,7 @@ public class TransitionDAO {
         return a.getMappedResults().size();
     }
 
-    public Integer countByTransitionName(String libraryId){
+    public Integer countByTransitionName(String libraryId) {
         AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(
                         TransitionDO.class,
