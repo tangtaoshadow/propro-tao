@@ -61,8 +61,8 @@
                 </div>
                 <!-- END: Brand -->
                 <div class="m-stack__item m-stack__item--fluid m-header-head" id="m_header_nav">
-                    <div th:replace="fragments/h-menu">&nbsp;</div>
-                    <div th:replace="fragments/topbar">&nbsp;</div>
+                    <div th:replace="screens/h-menu">&nbsp;</div>
+                    <div th:replace="screens/topbar">&nbsp;</div>
                 </div>
             </div>
         </div>
@@ -70,7 +70,7 @@
     <!-- END: Header -->
     <!-- begin::Body -->
     <div class="m-grid__item m-grid__item--fluid m-grid m-grid--ver-desktop m-grid--desktop m-body">
-        <div th:replace="fragments/v-left-menu">&nbsp;</div>
+        <div th:replace="screens/v-left-menu">&nbsp;</div>
         <div class="m-grid__item m-grid__item--fluid m-wrapper">
             <div class="m-content" layout:fragment="content">
                 <!--Begin::Section-->
@@ -409,7 +409,7 @@
         </div>
     </div>
     <!-- end:: Body -->
-
+    <div th:replace="screens/footer">&nbsp;</div>
 </div>
 <!-- end:: Page -->
 

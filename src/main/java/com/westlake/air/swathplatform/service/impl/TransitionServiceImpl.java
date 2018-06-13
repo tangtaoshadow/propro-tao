@@ -38,7 +38,7 @@ public class TransitionServiceImpl implements TransitionService {
     @Override
     public ResultDO insert(TransitionDO transitionDO) {
         try {
-            transitionRepo.insert(transitionDO);
+            transitionDAO.insert(transitionDO);
             return new ResultDO(true);
         } catch (Exception e) {
             ResultDO resultDO = new ResultDO();
@@ -49,7 +49,7 @@ public class TransitionServiceImpl implements TransitionService {
     @Override
     public ResultDO insertAll(List<TransitionDO> transitions) {
         try {
-            transitionRepo.insert(transitions);
+            transitionDAO.insertAll(transitions);
             return new ResultDO(true);
         } catch (Exception e) {
             ResultDO resultDO = new ResultDO();

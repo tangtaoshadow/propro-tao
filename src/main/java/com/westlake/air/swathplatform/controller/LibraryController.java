@@ -1,5 +1,6 @@
 package com.westlake.air.swathplatform.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.constants.SuccessMsg;
 import com.westlake.air.swathplatform.domain.ResultDO;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -41,14 +43,27 @@ public class LibraryController extends BaseController {
     int errorListNumberLimit = 10;
 
     @RequestMapping(value = "/list", method = RequestMethod.GET)
-    String list(Model model, @RequestParam(value = "searchName", required = false) String searchName) {
+    String list(Model model,
+                @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+                @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
+                @RequestParam(value = "searchName", required = false) String searchName) {
         model.addAttribute("searchName", searchName);
+        model.addAttribute("pageSize",pageSize);
+        List<LibraryDO> libraryList = libraryService.findAll();
+//        libraries = page.getContent();
+        libraryList.addAll(libraryList);
+        libraryList.addAll(libraryList);
+        libraryList.addAll(libraryList);
+        model.addAttribute("libraryList",libraryList);
+        model.addAttribute("totalPage", 10);
+        model.addAttribute("currentPage", currentPage);
         return "library/list";
     }
 
     @RequestMapping(value = {"/listJson"})
     @ResponseBody
-    List<LibraryDO> listJson(@RequestParam(value = "name", required = false) String name) {
+    List<LibraryDO> listJson(@RequestBody MultiValueMap<String,String> body, @RequestParam(value = "name", required = false) String name) {
+        System.out.println(body);
         List<LibraryDO> libraries = new ArrayList<>();
         if (name == null || name.isEmpty()) {
             libraries = libraryService.findAll();
