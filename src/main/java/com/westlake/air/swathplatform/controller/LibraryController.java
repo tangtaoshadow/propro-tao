@@ -1,6 +1,5 @@
 package com.westlake.air.swathplatform.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.constants.SuccessMsg;
 import com.westlake.air.swathplatform.domain.ResultDO;
@@ -11,18 +10,16 @@ import com.westlake.air.swathplatform.parser.TsvParser;
 import com.westlake.air.swathplatform.service.LibraryService;
 import com.westlake.air.swathplatform.service.TransitionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.management.Query;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -95,7 +92,7 @@ public class LibraryController extends BaseController {
         if (file != null) {
             long startTimeForParse = System.currentTimeMillis();
             //先Parse文件,再作数据库的操作
-            ResultDO<List<TransitionDO>> parseResult = parseTsv(file, library.getId());
+            ResultDO<List<TransitionDO>> parseResult = parseTsv(file, library);
             if (parseResult.getErrorList() != null) {
                 if (parseResult.getErrorList().size() > errorListNumberLimit) {
                     redirectAttributes.addFlashAttribute(ERROR_MSG, "解析错误,错误的条数过多,这边只显示" + errorListNumberLimit + "条错误信息");
@@ -189,7 +186,7 @@ public class LibraryController extends BaseController {
             if (file != null) {
                 long startTimeForParse = System.currentTimeMillis();
                 //先Parse文件,再作数据库的操作
-                ResultDO<List<TransitionDO>> parseResult = parseTsv(file, library.getId());
+                ResultDO<List<TransitionDO>> parseResult = parseTsv(file, library);
                 if (parseResult.getErrorList() != null) {
                     if (parseResult.getErrorList().size() > errorListNumberLimit) {
                         redirectAttributes.addFlashAttribute(ERROR_MSG, "解析错误,错误的条数过多,这边只显示" + errorListNumberLimit + "条错误信息");
@@ -254,11 +251,11 @@ public class LibraryController extends BaseController {
         }
     }
 
-    private ResultDO<List<TransitionDO>> parseTsv(MultipartFile file, String libraryId) {
+    private ResultDO<List<TransitionDO>> parseTsv(MultipartFile file, LibraryDO library) {
 
         ResultDO<List<TransitionDO>> resultDO = new ResultDO<>(true);
         try {
-            resultDO = tsvParser.parse(file.getInputStream(), libraryId);
+            resultDO = tsvParser.parse(file.getInputStream(), library);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -17,8 +17,6 @@ public interface LibraryService {
 
     public ResultDO<List<LibraryDO>> getList(LibraryQuery query);
 
-    public ResultDO<LibraryDO> findByName(String name);
-
     ResultDO save(LibraryDO libraryDO);
 
     ResultDO update(LibraryDO libraryDO);

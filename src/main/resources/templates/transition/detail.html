@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="/layouts/layout">
+    <!-- begin::Head -->
+    <head>
+        <title>
+            欢迎登陆西湖大学Swath蛋白质组学分析平台
+        </title>
+    </head>
+    <!-- end::Head -->
+    <!-- end::Body -->
+    <body>
+
+        <div class="m-subheader ">
+            <div class="d-flex align-items-center">
+                <div class="mr-auto">
+                    <h3 class="m-subheader__title m-subheader__title--separator">
+                        标准库详情页面
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="m-content" layout:fragment="content">
+
+            <div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>
+            <div th:if="${errorList}" th:each="arrayS:${errorList}">
+                <div class="alert alert-danger" role="alert" th:text="${arrayS}"></div>
+            </div>
+
+            <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
+            <div class="row">
+                <div class="col-md-6">
+                    <!--begin::Portlet-->
+                    <div class="m-portlet m-portlet--tab">
+                        <div class="m-portlet__head">
+                            <div class="m-portlet__head-caption">
+                                <div class="m-portlet__head-title">
+                                    <span class="m-portlet__head-icon m--hide">
+                                        <i class="la la-gear"></i>
+                                    </span>
+                                    <h3 class="m-portlet__head-text">Transition详情页</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <!--begin::Form-->
+                        <form class="m-form m-form--fit m-form--label-align-right">
+                            <div class="m-portlet__body">
+                                <div class="form-group m-form__group row">
+                                    <label for="id" class="col-2 col-form-label">
+                                        ID
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="id" name="id" readonly
+                                               th:value="${transition?.id}">
+                                        <span class="m-form__help">全局唯一</span>
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label class="col-2 col-form-label">
+                                        对应库文件ID
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="libraryId" name="libraryId"
+                                               readonly th:value="${transition?.libraryId}"/>
+                                        <span class="m-form__help">
+                                            <a th:href="|/library/detail/${transition?.libraryId}|">点击查看</a>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="precursorMz" class="col-2 col-form-label">
+                                        前体的荷质比MZ
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="precursorMz"
+                                               name="precursorMz"
+                                               readonly th:value="${transition?.precursorMz}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="productMz" class="col-2 col-form-label">
+                                        本体的荷质比MZ
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="productMz" name="productMz"
+                                               readonly th:value="${transition?.productMz}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="normalizedRetentionTime" class="col-2 col-form-label">
+                                        归一化RT
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="normalizedRetentionTime"
+                                               name="normalizedRetentionTime" readonly
+                                               th:value="${transition?.normalizedRetentionTime}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="transitionName" class="col-2 col-form-label">
+                                        Transition名称
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="transitionName"
+                                               name="transitionName" readonly th:value="${transition?.transitionName}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="productIonIntensity" class="col-2 col-form-label">
+                                        离子强度
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="productIonIntensity"
+                                               name="productIonIntensity" readonly
+                                               th:value="${transition?.productIonIntensity}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="isDecoy" class="col-2 col-form-label">
+                                        是否是伪肽段
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="isDecoy" name="isDecoy"
+                                               readonly
+                                               th:value="${transition?.isDecoy}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="peptideSequence" class="col-2 col-form-label">
+                                        对应肽段序列
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="peptideSequence"
+                                               name="peptideSequence" readonly
+                                               th:value="${transition?.peptideSequence}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="proteinName" class="col-2 col-form-label">
+                                        对应蛋白质名称
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="proteinName"
+                                               name="proteinName"
+                                               readonly th:value="${transition?.proteinName}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="annotation" class="col-2 col-form-label">
+                                        注释
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="annotation"
+                                               name="annotation"
+                                               readonly th:value="${transition?.annotation}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="fullUniModPeptideName" class="col-2 col-form-label">
+                                        完整版肽段名称(含修饰基团)
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="fullUniModPeptideName"
+                                               name="fullUniModPeptideName" readonly
+                                               th:value="${transition?.fullUniModPeptideName}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="precursorCharge" class="col-2 col-form-label">
+                                        前体带电量
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="precursorCharge"
+                                               name="precursorCharge" readonly
+                                               th:value="${transition?.precursorCharge}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="peptideGroupLabel" class="col-2 col-form-label">
+                                        肽段组标签
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="peptideGroupLabel"
+                                               name="peptideGroupLabel" readonly
+                                               th:value="${transition?.peptideGroupLabel}">
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!--<div class="m-portlet__foot m-portlet__foot&#45;&#45;fit">-->
+                            <!--<div class="m-form__actions">-->
+                            <!--<a th:href="|/library/edit/${library?.id}|" class="btn btn-primary">修改</a>-->
+                            <!--<a th:href="|/library/delete/${library?.id}|" class="btn btn-danger">删除</a>-->
+                            <!--</div>-->
+                            <!--</div>-->
+                        </form>
+                        <!--end::Form-->
+                    </div>
+                    <!--end::Portlet-->
+                </div>
+            </div>
+
+        </div>
+
+
+    </body>
+
+    <!-- end::Body -->
+</html>

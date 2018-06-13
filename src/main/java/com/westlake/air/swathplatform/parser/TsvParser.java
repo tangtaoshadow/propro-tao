@@ -3,6 +3,7 @@ package com.westlake.air.swathplatform.parser;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.bean.Annotation;
+import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.parser.model.chemistry.Residue;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ public class TsvParser {
 //    private static String FragmentCharge = "fragmentcharge";
 //    private static String FragmentSeriesNumber = "fragmentseriesnumber";
 
-    public ResultDO<List<TransitionDO>> parse(InputStream in, String libraryId) {
+    public ResultDO<List<TransitionDO>> parse(InputStream in, LibraryDO library) {
         List<TransitionDO> transitions = new ArrayList<>();
         ResultDO<List<TransitionDO>> tranResult = new ResultDO<>(true);
         try {
@@ -52,7 +53,7 @@ public class TsvParser {
             HashMap<String, Integer> columnMap = parseColumns(line);
 
             while ((line = reader.readLine()) != null) {
-                ResultDO<TransitionDO> resultDO = parseTransition(line, columnMap, libraryId);
+                ResultDO<TransitionDO> resultDO = parseTransition(line, columnMap, library);
                 if(resultDO.isFailured()){
                     tranResult.addErrorMsg(resultDO.getMsgInfo());
                 }else{
@@ -80,20 +81,21 @@ public class TsvParser {
      *
      * @param line
      * @param columnMap
-     * @param libraryId
+     * @param library
      * @return
      */
-    private ResultDO<TransitionDO> parseTransition(String line, HashMap<String, Integer> columnMap, String libraryId) {
+    private ResultDO<TransitionDO> parseTransition(String line, HashMap<String, Integer> columnMap, LibraryDO library) {
         ResultDO<TransitionDO> resultDO = new ResultDO<>(true);
         String[] row = line.split("\t");
         TransitionDO transitionDO = new TransitionDO();
-        transitionDO.setLibraryId(libraryId);
-        transitionDO.setPrecursorMz(row[columnMap.get(PrecursorMz)]);
-        transitionDO.setProductMz(row[columnMap.get(ProductMz)]);
-        transitionDO.setNormalizedRetentionTime(row[columnMap.get(NormalizedRetentionTime)]);
+        transitionDO.setLibraryId(library.getId());
+        transitionDO.setLibraryName(library.getName());
+        transitionDO.setPrecursorMz(Double.parseDouble(row[columnMap.get(PrecursorMz)]));
+        transitionDO.setProductMz(Double.parseDouble(row[columnMap.get(ProductMz)]));
+        transitionDO.setNormalizedRetentionTime(Double.parseDouble(row[columnMap.get(NormalizedRetentionTime)]));
         transitionDO.setTransitionName(row[columnMap.get(TransitionName)]);
         transitionDO.setIsDecoy(!row[columnMap.get(IsDecoy)].equals("0"));
-        transitionDO.setProductIonIntensity(row[columnMap.get(ProductIonIntensity)]);
+        transitionDO.setProductIonIntensity(Double.parseDouble(row[columnMap.get(ProductIonIntensity)]));
         transitionDO.setPeptideSequence(row[columnMap.get(PeptideSequence)]);
         transitionDO.setProteinName(row[columnMap.get(ProteinName)]);
         transitionDO.setAnnotation(row[columnMap.get(Annotation)].replaceAll("\"", ""));

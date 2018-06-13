@@ -2,10 +2,8 @@ package com.westlake.air.swathplatform.service;
 
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import com.westlake.air.swathplatform.domain.query.TransitionQuery;
 
-import javax.xml.transform.Result;
 import java.util.List;
 
 /**
@@ -14,7 +12,7 @@ import java.util.List;
  */
 public interface TransitionService {
 
-    Page<TransitionDO> findAll(PageRequest pageRequest);
+    ResultDO<List<TransitionDO>> getList(TransitionQuery transitionQuery);
 
     ResultDO insert(TransitionDO transitionDO);
 
@@ -29,13 +27,5 @@ public interface TransitionService {
     Integer countByPeptideSequence(String libraryId);
 
     Integer countByTransitionName(String libraryId);
-
-    ResultDO<List<TransitionDO>> findAllByLibraryIdAndPeptideGroupLabel(String libraryId, String peptideGroupLabel);
-
-    ResultDO<List<TransitionDO>> findAllByLibraryIdAndPeptideSequence(String libraryId, String peptideSequence);
-
-    ResultDO<List<TransitionDO>> findAllByLibraryIdAndProteinName(String libraryId, String proteinName);
-
-    Page<TransitionDO> findAllByLibraryIdAndIsDecoy(String libraryId, Boolean isDecoy, PageRequest pageRequest);
 
 }

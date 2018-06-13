@@ -40,17 +40,6 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public ResultDO<LibraryDO> findByName(String name) {
-        LibraryDO libraryDO = libraryDAO.getByName(name);
-        if (libraryDO == null) {
-            return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
-        }
-        ResultDO<LibraryDO> resultDO = new ResultDO<>(true);
-        resultDO.setModel(libraryDO);
-        return resultDO;
-    }
-
-    @Override
     public ResultDO save(LibraryDO libraryDO) {
         if (libraryDO.getName() == null || libraryDO.getName().isEmpty()) {
             return ResultDO.buildError(ResultCode.LIBRARY_NAME_CANNOT_BE_EMPTY);

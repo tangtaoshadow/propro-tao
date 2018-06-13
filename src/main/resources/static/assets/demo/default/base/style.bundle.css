@@ -1089,6 +1089,7 @@ pre {
   .table tbody + tbody {
     border-top: 2px solid #f4f5f8; }
   .table .table {
+
     background-color: #fff; }
 
 .table-sm th,
@@ -7515,7 +7516,7 @@ body {
   height: 100%;
   margin: 0px;
   padding: 0px;
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 300;
   font-family: Poppins;
   -ms-text-size-adjust: 100%;
@@ -23200,8 +23201,8 @@ body.m-portlet--fullscreen {
 .m-form.m-form--fit .m-form__content,
 .m-form.m-form--fit .m-form__heading,
 .m-form.m-form--fit .m-form__group {
-  padding-left: 30px;
-  padding-right: 30px; }
+  padding-left: 5px;
+  padding-right: 5px; }
 
 @media (min-width: 993px) {
   .m-form .m-form__section.m-form__section--label-align-right .m-form__group > label, .m-form.m-form--label-align-right .m-form__group > label {
@@ -23216,8 +23217,8 @@ body.m-portlet--fullscreen {
   padding-bottom: 0; }
 
 .m-form.m-form--group-seperator-dashed .m-form__group, .m-form.m-form--group-seperator .m-form__group {
-  padding-top: 25px;
-  padding-bottom: 25px; }
+  padding-top: 5px;
+  padding-bottom: 5px; }
 
 .m-form .form-control-feedback {
   margin-top: 0.2rem;
@@ -30448,7 +30449,7 @@ body.m-page--boxed {
     margin-right: auto; } }
 
 .m-body .m-content {
-  padding: 30px 30px; }
+  padding: 10px 10px; }
 
 .m-content--skin-light .m-body {
   background-color: #ffffff; }

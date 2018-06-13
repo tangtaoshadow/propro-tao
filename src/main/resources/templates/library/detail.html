@@ -46,61 +46,89 @@
                 <!--begin::Form-->
                 <form class="m-form m-form--fit m-form--label-align-right">
                     <div class="m-portlet__body">
-                        <div class="form-group m-form__group">
-                            <label for="libraryName">
+                        <div class="form-group m-form__group row">
+                            <label for="libraryName" class="col-2 col-form-label">
                                 库文件ID
                             </label>
-                            <input type="text" class="form-control m-input" name="id" readonly th:value="${library?.id}">
-                            <span class="m-form__help">库ID全局唯一</span>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" name="id" readonly
+                                       th:value="${library?.id}">
+                                <span class="m-form__help">库ID全局唯一</span>
+                            </div>
                         </div>
-                        <div class="form-group m-form__group">
-                            <label for="libraryName">
+                        <div class="form-group m-form__group row">
+                            <label for="libraryName" class="col-2 col-form-label">
                                 库文件名称
                             </label>
-                            <input type="text" class="form-control m-input" id="libraryName" name="name" readonly th:value="${library?.name}">
-                            <span class="m-form__help">库名称全局唯一</span>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="libraryName" name="name" readonly
+                                       th:value="${library?.name}">
+                                <span class="m-form__help">库名称全局唯一</span>
+                            </div>
                         </div>
-                        <div class="form-group m-form__group">
-                            <label for="instrument">
+                        <div class="form-group m-form__group row">
+                            <label for="instrument" class="col-2 col-form-label">
                                 设备名称
                             </label>
-                            <input type="text" class="form-control m-input" id="instrument" name="instrument" readonly th:value="${library?.instrument}">
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="instrument" name="instrument"
+                                       readonly th:value="${library?.instrument}">
+                            </div>
                         </div>
-                        <div class="form-group m-form__group">
-                            <label for="proteinCount">
+                        <div class="form-group m-form__group row">
+                            <label for="proteinCount" class="col-2 col-form-label">
                                 蛋白质数目
                             </label>
-                            <input type="text" class="form-control m-input" id="proteinCount" name="proteinCount" readonly th:value="${library?.proteinCount}">
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="proteinCount" name="proteinCount"
+                                       readonly th:value="${library?.proteinCount}">
+                            </div>
                         </div>
-                        <div class="form-group m-form__group">
-                            <label for="peptideCount">
+                        <div class="form-group m-form__group row">
+                            <label for="peptideCount" class="col-2 col-form-label">
                                 肽段数目
                             </label>
-                            <input type="text" class="form-control m-input" id="peptideCount" name="peptideCount" readonly th:value="${library?.peptideCount}">
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="peptideCount" name="peptideCount"
+                                       readonly th:value="${library?.peptideCount}">
+                            </div>
                         </div>
-                        <div class="form-group m-form__group">
-                            <label for="transitionCount">
+                        <div class="form-group m-form__group row">
+                            <label for="transitionCount" class="col-2 col-form-label">
                                 Transition数目
                             </label>
-                            <input type="text" class="form-control m-input" id="transitionCount" name="transitionCount" readonly th:value="${library?.transitionCount}">
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="transitionCount"
+                                       name="transitionCount" readonly th:value="${library?.transitionCount}">
+                            </div>
                         </div>
-                        <div class="form-group m-form__group">
-                            <label for="description">
+                        <div class="form-group m-form__group row">
+                            <label for="description" class="col-2 col-form-label">
                                 详细描述
                             </label>
-                            <textarea class="form-control m-input" id="description" name="description" rows="3" readonly th:text="${library?.description}"></textarea>
+                            <div class="col-10">
+                                <textarea class="form-control m-input" id="description" name="description" rows="3"
+                                          readonly th:text="${library?.description}"></textarea>
+                            </div>
                         </div>
-                        <div class="form-group m-form__group">
-                            <label for="createDate">
+                        <div class="form-group m-form__group row">
+                            <label for="createDate" class="col-2 col-form-label">
                                 创建时间
                             </label>
-                            <input type="text" class="form-control m-input" id="createDate" name="createDate" readonly th:value="${#dates.format(library?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="createDate" name="createDate"
+                                       readonly th:value="${#dates.format(library?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
+                            </div>
                         </div>
-                        <div class="form-group m-form__group">
-                            <label for="lastModifiedDate">
+                        <div class="form-group m-form__group row">
+                            <label for="lastModifiedDate" class="col-2 col-form-label">
                                 最后修改时间
                             </label>
-                            <input type="text" class="form-control m-input" id="lastModifiedDate" name="lastModifiedDate" readonly th:value="${#dates.format(library?.lastModifiedDate, 'yyyy-MM-dd HH:mm:ss')}">
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="lastModifiedDate"
+                                       name="lastModifiedDate" readonly
+                                       th:value="${#dates.format(library?.lastModifiedDate, 'yyyy-MM-dd HH:mm:ss')}">
+                            </div>
                         </div>
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">

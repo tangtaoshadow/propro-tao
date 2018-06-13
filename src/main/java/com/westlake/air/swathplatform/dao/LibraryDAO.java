@@ -68,15 +68,8 @@ public class LibraryDAO {
     }
 
     private Query buildQuery(LibraryQuery libraryQuery) {
-        Query query = new Query();
-        if (libraryQuery.getId() != null) {
-            query.addCriteria(where("id").is(libraryQuery.getId()));
-        }
-        if (libraryQuery.getName() != null) {
-            //加个i支持不区分大小写的模糊查询
-            query.addCriteria(where("name").regex(libraryQuery.getName(),"i"));
-        }
-        query.skip((libraryQuery.getPageNo()-1) * libraryQuery.getPageSize());
+        Query query = buildQueryWithoutPage(libraryQuery);
+        query.skip((libraryQuery.getPageNo() - 1) * libraryQuery.getPageSize());
         query.limit(libraryQuery.getPageSize());
         query.with(new Sort(libraryQuery.getOrderBy(), libraryQuery.getSortColumn()));
         return query;
