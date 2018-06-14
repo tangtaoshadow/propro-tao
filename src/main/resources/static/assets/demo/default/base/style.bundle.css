@@ -175,6 +175,7 @@ a {
   color: #5867dd;
   text-decoration: none;
   background-color: transparent;
+    word-wrap: break-word;
   -webkit-text-decoration-skip: objects; }
   a:hover {
     color: #2739c1;
@@ -1080,6 +1081,7 @@ pre {
   background-color: transparent; }
   .table th,
   .table td {
+      word-wrap: break-word;
     padding: 0.75rem;
     vertical-align: middle;
     border-top: 1px solid #f4f5f8; }

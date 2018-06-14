@@ -77,25 +77,25 @@
                     <table class="table table-bordered" style="table-layout:fixed;">
                         <thead>
                             <tr>
-                                <th width="2%">
+                                <th width="3%">
                                     No.
                                 </th>
                                 <th width="10%">
                                     对应标准库名称
                                 </th>
-                                <th width="13%">
+                                <th width="10%">
                                     对应蛋白质名称
                                 </th>
-                                <th width="10%">
+                                <th width="12%">
                                     对应肽段序列
                                 </th>
                                 <th width="15%">
                                     肽段全名(伪肽段则为原肽段全名)
                                 </th>
-                                <th width="5%">
+                                <th width="7%">
                                     肽段荷质比
                                 </th>
-                                <th width="5%">
+                                <th width="7%">
                                     本体荷质比
                                 </th>
                                 <th width="15%">
@@ -104,10 +104,10 @@
                                 <th width="5%">
                                     是否是伪肽段
                                 </th>
-                                <th width="10%">
+                                <th width="8%">
                                     离子强度
                                 </th>
-                                <th width="10%">
+                                <th width="8%">
                                     归一化RT
                                 </th>
                                 <th width="10%">
@@ -136,12 +136,12 @@
                                 <td th:text="${transition.annotation}"></td>
                                 <td th:if="${transition.isDecoy}">
                                     <span class="m-badge m-badge--danger m-badge--wide">
-                                        伪肽段
+                                        伪
                                     </span>
                                 </td>
                                 <td th:if="${!transition.isDecoy}">
                                     <span class="m-badge m-badge--success m-badge--wide">
-                                        真肽段
+                                        真
                                     </span>
                                 </td>
                                 <td th:text="${transition.productIonIntensity}"></td>
@@ -175,7 +175,7 @@
                         prev: '<i class="fa fa-angle-left"></i>',
                         total: totalPage,
                         page: currentPage,
-                        maxVisible: 10
+                        maxVisible: 20
                     }).on("page", function (event, num) {
                         document.getElementById("currentPage").value = num;
                         document.getElementById("searchForm").submit();
