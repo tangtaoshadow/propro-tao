@@ -1,7 +1,8 @@
 package com.westlake.air.swathplatform.domain.bean;
 
-import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -10,12 +11,19 @@ import lombok.Data;
 @Data
 public class FragmentResult {
 
-    TransitionDO transitionDO;
+    List<Fragment> decoyList;
 
-    double monoWeight;
-    double averageWeight;
+    int decoyTotalCount;
 
-    public FragmentResult(TransitionDO transitionDO){
-        this.transitionDO = transitionDO;
-    }
+    int decoyUniCount;
+
+    List<Fragment> targetList;
+
+    int targetTotalCount;
+
+    int targetUniCount;
+
+    List<Fragment> overlapList;
+
+    String msgInfo;
 }

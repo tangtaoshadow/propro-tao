@@ -1,8 +1,10 @@
 package com.westlake.air.swathplatform.controller;
 
+import com.westlake.air.swathplatform.algorithm.FragmentCalculator;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.constants.SuccessMsg;
 import com.westlake.air.swathplatform.domain.ResultDO;
+import com.westlake.air.swathplatform.domain.bean.FragmentResult;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.LibraryQuery;
@@ -39,6 +41,9 @@ public class LibraryController extends BaseController {
     @Autowired
     TransitionService transitionService;
 
+    @Autowired
+    FragmentCalculator fragmentCalculator;
+
     int errorListNumberLimit = 10;
 
     @RequestMapping(value = "/list")
@@ -47,16 +52,16 @@ public class LibraryController extends BaseController {
                 @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
                 @RequestParam(value = "searchName", required = false) String searchName) {
         model.addAttribute("searchName", searchName);
-        model.addAttribute("pageSize",pageSize);
+        model.addAttribute("pageSize", pageSize);
         LibraryQuery query = new LibraryQuery();
-        if(searchName != null && !searchName.isEmpty()){
+        if (searchName != null && !searchName.isEmpty()) {
             query.setName(searchName);
         }
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
         ResultDO<List<LibraryDO>> resultDO = libraryService.getList(query);
 
-        model.addAttribute("libraryList",resultDO.getModel());
+        model.addAttribute("libraryList", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
         return "library/list";
@@ -229,7 +234,7 @@ public class LibraryController extends BaseController {
                 deltaTimeForSaveToDB = System.currentTimeMillis() - startTimeForSaveToDB;
             }
 
-            redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS + "解析源文件耗时:" + deltaTimeForParse/1000.0 + "秒;数据库操作时间:" + deltaTimeForSaveToDB/1000.0 + "秒");
+            redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS + "解析源文件耗时:" + deltaTimeForParse / 1000.0 + "秒;数据库操作时间:" + deltaTimeForSaveToDB / 1000.0 + "秒");
             return "redirect:/library/detail/" + library.getId();
 
 
@@ -251,6 +256,17 @@ public class LibraryController extends BaseController {
         }
     }
 
+    @RequestMapping(value = "/decoy/{id}")
+    String decoy(Model model, @PathVariable("id") String id) {
+        FragmentResult result = fragmentCalculator.decoyOverview(id);
+
+        model.addAttribute(SUCCESS_MSG, result.getMsgInfo());
+        model.addAttribute("overlapList", result.getOverlapList());
+        model.addAttribute("decoyList", result.getDecoyList());
+        model.addAttribute("targetList", result.getTargetList());
+        return "/library/decoy";
+    }
+
     private ResultDO<List<TransitionDO>> parseTsv(MultipartFile file, LibraryDO library) {
 
         ResultDO<List<TransitionDO>> resultDO = new ResultDO<>(true);
@@ -261,6 +277,5 @@ public class LibraryController extends BaseController {
         }
 
         return resultDO;
-
     }
 }

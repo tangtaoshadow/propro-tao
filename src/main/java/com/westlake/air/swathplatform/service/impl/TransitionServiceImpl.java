@@ -26,6 +26,11 @@ public class TransitionServiceImpl implements TransitionService {
     TransitionDAO transitionDAO;
 
     @Override
+    public List<TransitionDO> getAllByLibraryId(String libraryId) {
+        return transitionDAO.getAllByLibraryId(libraryId);
+    }
+
+    @Override
     public ResultDO<List<TransitionDO>> getList(TransitionQuery query) {
 
         List<TransitionDO> transitionDOList = transitionDAO.getList(query);

@@ -12,6 +12,8 @@ import java.util.List;
  */
 public interface TransitionService {
 
+    List<TransitionDO> getAllByLibraryId(String libraryId);
+
     ResultDO<List<TransitionDO>> getList(TransitionQuery transitionQuery);
 
     ResultDO insert(TransitionDO transitionDO);

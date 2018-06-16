@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="/layouts/layout">
+<!-- begin::Head -->
+<head>
+    <title>
+        欢迎登陆西湖大学Swath蛋白质组学分析平台
+    </title>
+</head>
+<!-- end::Head -->
+<!-- end::Body -->
+<body>
+
+<div class="m-subheader ">
+    <div class="d-flex align-items-center">
+        <div class="mr-auto">
+            <h3 class="m-subheader__title m-subheader__title--separator">
+                真伪肽段分析图
+            </h3>
+        </div>
+    </div>
+</div>
+
+<div class="m-content" layout:fragment="content">
+
+    <div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>
+    <div th:if="${errorList}" th:each="arrayS:${errorList}">
+        <div class="alert alert-danger" role="alert" th:text="${arrayS}"></div>
+    </div>
+
+    <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="m-portlet m-portlet--tab">
+                <div class="m-portlet__head">
+                    <div class="m-portlet__head-caption">
+                        <div class="m-portlet__head-title">
+                            <span class="m-portlet__head-icon m--hide">
+                                <i class="la la-gear"></i>
+                            </span>
+                            <h3 class="m-portlet__head-text">原始肽段碎片分布</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="m-portlet__body">
+                    <table class="table table-bordered" style="table-layout:fixed;">
+                        <thead>
+                        <tr>
+                            <th width="70%">
+                                片段
+                            </th>
+                            <th width="10%">
+                                类型
+                            </th>
+                            <th width="20%">
+                                重复次数
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="target:${targetList}">
+                            <td th:text="${target.sequence}"></td>
+                            <td th:text="${target.type}"></td>
+                            <td th:text="${target.count}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="m-portlet m-portlet--tab">
+                <div class="m-portlet__head">
+                    <div class="m-portlet__head-caption">
+                        <div class="m-portlet__head-title">
+                            <span class="m-portlet__head-icon m--hide">
+                                <i class="la la-gear"></i>
+                            </span>
+                            <h3 class="m-portlet__head-text">重复碎片分布</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="m-portlet__body">
+                    <table class="table table-bordered" style="table-layout:fixed;">
+                        <thead>
+                        <tr>
+                            <th width="70%">
+                                片段
+                            </th>
+                            <th width="10%">
+                                类型
+                            </th>
+                            <th width="20%">
+                                重复次数
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="overlap:${overlapList}">
+                            <td th:text="${overlap.sequence}"></td>
+                            <td th:text="${overlap.type}"></td>
+                            <td th:text="${overlap.count}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="m-portlet m-portlet--tab">
+                <div class="m-portlet__head">
+                    <div class="m-portlet__head-caption">
+                        <div class="m-portlet__head-title">
+                            <span class="m-portlet__head-icon m--hide">
+                                <i class="la la-gear"></i>
+                            </span>
+                            <h3 class="m-portlet__head-text">伪肽段碎片分布</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="m-portlet__body">
+                    <table class="table table-bordered" style="table-layout:fixed;">
+                        <thead>
+                        <tr>
+                            <th width="70%">
+                                片段
+                            </th>
+                            <th width="10%">
+                                类型
+                            </th>
+                            <th width="20%">
+                                重复次数
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="decoy:${decoyList}">
+                            <td th:text="${decoy.sequence}"></td>
+                            <td th:text="${decoy.type}"></td>
+                            <td th:text="${decoy.count}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+</body>
+
+<!-- end::Body -->
+</html>

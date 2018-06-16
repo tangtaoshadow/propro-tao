@@ -1,13 +1,8 @@
 package com.westlake.air.swathplatform.controller;
 
-import com.fasterxml.jackson.databind.ser.Serializers;
 import com.westlake.air.swathplatform.algorithm.FragmentCalculator;
-import com.westlake.air.swathplatform.dao.TransitionDAO;
 import com.westlake.air.swathplatform.domain.ResultDO;
-import com.westlake.air.swathplatform.domain.bean.FragmentResult;
-import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
-import com.westlake.air.swathplatform.domain.query.LibraryQuery;
 import com.westlake.air.swathplatform.domain.query.TransitionQuery;
 import com.westlake.air.swathplatform.service.TransitionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,10 +82,4 @@ public class TransitionController extends BaseController {
         }
     }
 
-    @RequestMapping(value = "/test", method = RequestMethod.GET)
-    @ResponseBody
-    FragmentResult test(Model model) {
-        ResultDO<TransitionDO> resultDO = transitionService.getById("5b1f466547d23c17a07e5b98");
-        return fragmentCalculator.getResult(resultDO.getModel());
-    }
 }

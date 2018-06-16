@@ -142,6 +142,23 @@
             </div>
             <!--end::Portlet-->
         </div>
+        <div class="col-md-6">
+            <div class="m-portlet m-portlet--tab">
+                <div class="m-portlet__head">
+                    <div class="m-portlet__head-caption">
+                        <div class="m-portlet__head-title">
+                            <span class="m-portlet__head-icon m--hide">
+                                <i class="la la-gear"></i>
+                            </span>
+                            <h3 class="m-portlet__head-text">肽段分析</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="m-portlet__body">
+                    <a th:href="|/library/decoy/${library?.id}|" class="btn btn-primary">进行伪肽段覆盖率诊断</a>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>
