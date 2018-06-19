@@ -15,6 +15,8 @@ public class Fragment implements Comparable<Fragment>{
 
     String type;
 
+    int charge;
+
     double monoWeight;
 
     double averageWeight;

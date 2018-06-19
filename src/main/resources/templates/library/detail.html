@@ -155,7 +155,8 @@
                     </div>
                 </div>
                 <div class="m-portlet__body">
-                    <a th:href="|/library/decoy/${library?.id}|" class="btn btn-primary">进行伪肽段覆盖率诊断</a>
+                    <a th:href="|/decoy/overview/${library?.id}|" class="btn btn-primary">进行伪肽段覆盖率诊断</a>
+                    <a th:href="|/decoy/check/${library?.id}|" class="btn btn-primary">检测肽段MZ计算误差</a>
                 </div>
             </div>
         </div>

@@ -24,9 +24,7 @@ public class PageQuery implements Serializable {
 
     protected int totalPage = 0 ;
 
-    protected PageQuery() {
-
-    }
+    protected PageQuery() {}
 
     public PageQuery(int pageNo, int pageSize) {
         this.pageNo = pageNo;

@@ -43,7 +43,7 @@ public class TransitionDO {
     Double normalizedRetentionTime;
 
     /**
-     * 过渡态名称
+     * 过渡态名称,如果是伪肽段,则为包含了原始肽段的属性
      */
     String transitionName;
 
@@ -59,7 +59,7 @@ public class TransitionDO {
     Boolean isDecoy;
 
     /**
-     * 对应肽段序列
+     * 对应肽段序列,如果是伪肽段,则为对应的伪肽段的序列
      */
     String peptideSequence;
 
@@ -74,7 +74,7 @@ public class TransitionDO {
     String annotation;
 
     /**
-     * 完整版肽段名称(含修饰基团)
+     * 完整版肽段名称(含修饰基团),如果是伪肽段则为原始的肽段的完整序列而不是伪肽段的完整序列
      */
     String fullUniModPeptideName;
 

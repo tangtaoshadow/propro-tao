@@ -1,5 +1,6 @@
 package com.westlake.air.swathplatform.controller;
 
+import com.westlake.air.swathplatform.algorithm.FormulaCalculator;
 import com.westlake.air.swathplatform.algorithm.FragmentCalculator;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
@@ -23,6 +24,9 @@ public class TransitionController extends BaseController {
 
     @Autowired
     FragmentCalculator fragmentCalculator;
+
+    @Autowired
+    FormulaCalculator formulaCalculator;
 
     @Autowired
     TransitionService transitionService;
@@ -80,6 +84,34 @@ public class TransitionController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/transition/list";
         }
+    }
+
+    @RequestMapping(value = "/calculator")
+    String calculator(Model model,
+                      @RequestParam(value = "sequence", required = false) String sequence,
+                      @RequestParam(value = "type", required = false) String type,
+                      @RequestParam(value = "charge", required = false,defaultValue = "1") int charge
+                      ) {
+        model.addAttribute("charge",charge);
+
+        if(sequence == null || sequence.isEmpty()){
+            return "/transition/calculator";
+        }
+
+        if(type == null || type.isEmpty()){
+            return "/transition/calculator";
+        }
+
+        model.addAttribute("sequence",sequence);
+        model.addAttribute("type",type);
+
+
+        double monoMz = formulaCalculator.getMonoMz(sequence, type, charge);
+        double averageMz = formulaCalculator.getAverageMz(sequence,type,charge);
+        model.addAttribute("monoMz",monoMz);
+        model.addAttribute("averageMz",averageMz);
+
+        return "/transition/calculator";
     }
 
 }

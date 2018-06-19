@@ -41,9 +41,6 @@ public class LibraryController extends BaseController {
     @Autowired
     TransitionService transitionService;
 
-    @Autowired
-    FragmentCalculator fragmentCalculator;
-
     int errorListNumberLimit = 10;
 
     @RequestMapping(value = "/list")
@@ -254,17 +251,6 @@ public class LibraryController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/library/list";
         }
-    }
-
-    @RequestMapping(value = "/decoy/{id}")
-    String decoy(Model model, @PathVariable("id") String id) {
-        FragmentResult result = fragmentCalculator.decoyOverview(id);
-
-        model.addAttribute(SUCCESS_MSG, result.getMsgInfo());
-        model.addAttribute("overlapList", result.getOverlapList());
-        model.addAttribute("decoyList", result.getDecoyList());
-        model.addAttribute("targetList", result.getTargetList());
-        return "/library/decoy";
     }
 
     private ResultDO<List<TransitionDO>> parseTsv(MultipartFile file, LibraryDO library) {

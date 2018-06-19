@@ -32,6 +32,12 @@ public class TransitionDAO {
         return mongoTemplate.find(query, TransitionDO.class, CollectionName);
     }
 
+    public List<TransitionDO> getAllByLibraryIdAndIsDecoy(String libraryId, boolean isDecoy){
+        Query query = new Query(where("libraryId").is(libraryId));
+        query.addCriteria(where("isDecoy").is(isDecoy));
+        return mongoTemplate.find(query, TransitionDO.class, CollectionName);
+    }
+
     public List<TransitionDO> getList(TransitionQuery query) {
         return mongoTemplate.find(buildQuery(query), TransitionDO.class, CollectionName);
     }

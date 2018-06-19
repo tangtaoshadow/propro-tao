@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="/layouts/layout">
+<!-- begin::Head -->
+<head>
+    <title>
+        欢迎登陆西湖大学Swath蛋白质组学分析平台
+    </title>
+</head>
+<!-- end::Head -->
+<!-- end::Body -->
+<body>
+
+<div class="m-subheader ">
+    <div class="d-flex align-items-center">
+        <div class="mr-auto">
+            <h3 class="m-subheader__title m-subheader__title--separator">
+                伪肽段生成MZ检测结果
+            </h3>
+        </div>
+    </div>
+</div>
+
+<div class="m-content" layout:fragment="content">
+
+    <div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>
+    <div th:if="${errorList}" th:each="arrayS:${errorList}">
+        <div class="alert alert-danger" role="alert" th:text="${arrayS}"></div>
+    </div>
+
+    <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="m-portlet m-portlet--tab">
+                <div class="m-portlet__head">
+                    <div class="m-portlet__head-caption">
+                        <div class="m-portlet__head-title">
+                            <span class="m-portlet__head-icon m--hide">
+                                <i class="la la-gear"></i>
+                            </span>
+                            <h3 class="m-portlet__head-text">超出阈值的数据列表</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="m-portlet__body">
+                    <table class="table table-bordered" style="table-layout:fixed;">
+                        <thead>
+                        <tr>
+                            <th width="10%">
+                                原数据
+                            </th>
+                            <th width="10%">
+                                新计算数据
+                            </th>
+                            <th width="10%">
+                                Delta值
+                            </th>
+                            <th width="20%">
+                                碎片序列
+                            </th>
+                            <th width="5%">
+                                前体带电量
+                            </th>
+                            <th width="5%">
+                                碎片带电量
+                            </th>
+                            <th width="10%">
+                                碎片类型
+                            </th>
+                            <th width="20%">
+                                伪肽段序列
+                            </th>
+                            <th width="20%">
+                                原始肽段序列(含Mod)
+                            </th>
+                            <th width="10%">
+                                Annotations
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="result:${resultList}">
+                            <td th:text="${result.originMz}"></td>
+                            <td th:text="${result.newMz}"></td>
+                            <td th:text="${result.delta}"></td>
+                            <td th:text="${result.fragmentSequence}"></td>
+                            <td th:text="${result.precursorCharge}"></td>
+                            <td th:text="${result.charge}"></td>
+                            <td th:text="${result.type}"></td>
+                            <td th:text="${result.sequence}"></td>
+                            <td th:text="${result.originSequence}"></td>
+                            <td th:text="${result.annotations}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+</body>
+
+<!-- end::Body -->
+</html>

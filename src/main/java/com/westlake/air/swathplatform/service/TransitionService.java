@@ -14,6 +14,8 @@ public interface TransitionService {
 
     List<TransitionDO> getAllByLibraryId(String libraryId);
 
+    List<TransitionDO> getAllByLibraryIdAndIsDecoy(String libraryId,boolean isDecoy);
+
     ResultDO<List<TransitionDO>> getList(TransitionQuery transitionQuery);
 
     ResultDO insert(TransitionDO transitionDO);
