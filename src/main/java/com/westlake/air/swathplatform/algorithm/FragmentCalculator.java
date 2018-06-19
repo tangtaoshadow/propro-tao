@@ -150,12 +150,16 @@ public class FragmentCalculator {
         HashSet<Fragment> overlapFragments = new HashSet<>();
 
         int count = 0;
+        int countForTarget = 0;
         for (Fragment decoy : decoyFragments) {
             if (targetFragments.contains(decoy)) {
                 overlapFragments.add(decoy);
                 count += decoy.getCount();
+//                countForTarget +=
             }
         }
+
+
 
         Ordering<Fragment> ordering = Ordering.natural();
 
