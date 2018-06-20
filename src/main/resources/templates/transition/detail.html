@@ -186,6 +186,16 @@
                                                th:value="${transition?.peptideGroupLabel}">
                                     </div>
                                 </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="peptideGroupLabel" class="col-2 col-form-label">
+                                        修饰基团
+                                    </label>
+                                    <div class="col-10">
+                                        <div th:each="unimod:${transition?.unimodMap}">
+                                            <div th:text="${unimod}"></div>
+                                        </div>
+                                    </div>
+                                </div>
 
                             </div>
                             <!--<div class="m-portlet__foot m-portlet__foot&#45;&#45;fit">-->

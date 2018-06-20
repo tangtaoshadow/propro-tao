@@ -46,13 +46,13 @@
                     <table class="table table-bordered" style="table-layout:fixed;">
                         <thead>
                         <tr>
-                            <th width="10%">
+                            <th width="5%">
                                 原数据
                             </th>
                             <th width="10%">
                                 新计算数据
                             </th>
-                            <th width="10%">
+                            <th width="5%">
                                 Delta值
                             </th>
                             <th width="15%">
@@ -62,19 +62,28 @@
                                 肽段Mz
                             </th>
                             <th width="5%">
+                                新计算肽段Mz
+                            </th>
+                            <th width="5%">
+                                Delta值
+                            </th>
+                            <th width="5%">
                                 肽段带电量
                             </th>
                             <th width="5%">
                                 碎片带电量
                             </th>
-                            <th width="10%">
+                            <th width="5%">
                                 碎片类型
                             </th>
-                            <th width="20%">
-                                伪肽段序列
+                            <th width="5%">
+                                断裂位置
                             </th>
                             <th width="20%">
-                                原始肽段序列(含Mod)
+                                肽段序列
+                            </th>
+                            <th width="20%">
+                                肽段序列(含Mod)
                             </th>
                             <th width="10%">
                                 Annotations
@@ -88,9 +97,12 @@
                             <td th:text="${result.delta}"></td>
                             <td th:text="${result.fragmentSequence}"></td>
                             <td th:text="${result.precursorMz}"></td>
+                            <td th:text="${result.newPrecursorMz}"></td>
+                            <td th:text="${result.delatPrecursorMz}"></td>
                             <td th:text="${result.precursorCharge}"></td>
                             <td th:text="${result.charge}"></td>
                             <td th:text="${result.type}"></td>
+                            <td th:text="${result.location}"></td>
                             <td th:text="${result.sequence}"></td>
                             <td th:text="${result.originSequence}"></td>
                             <td th:text="${result.annotations}"></td>

@@ -26,6 +26,10 @@ public class MzResult {
 
     double precursorMz;
 
+    double newPrecursorMz;
+
+    double delatPrecursorMz;
+
     double originMz;
 
     double newMz;
@@ -33,4 +37,6 @@ public class MzResult {
     double delta;
 
     String type;
+
+    int location;
 }

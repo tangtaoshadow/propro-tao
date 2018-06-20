@@ -2,6 +2,8 @@ package com.westlake.air.swathplatform.domain.bean;
 
 import lombok.Data;
 
+import java.util.HashMap;
+
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-06-12 20:27
@@ -15,15 +17,29 @@ public class Fragment implements Comparable<Fragment>{
 
     String type;
 
+    int location;
+
     int charge;
 
     int adjust;
 
-    double monoWeight;
+    double deviation = 0.00;
 
-    double averageWeight;
+    double monoMz;
 
+    double averageMz;
+
+    boolean isIsotope = false;
+
+    //用于统计碎片出现的次数,仅在统计时有效
     int count = 1;
+
+    //离子片段在原肽段中的起始位置,位置从0开始算,闭区间
+    int start = 0;
+    //离子片段在元肽段中的结束位置,位置从0开始算,闭区间
+    int end = 0;
+
+    HashMap<Integer,String> unimodMap;
 
     public Fragment(){}
 

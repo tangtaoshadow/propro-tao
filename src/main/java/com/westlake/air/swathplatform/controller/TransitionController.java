@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -93,11 +96,14 @@ public class TransitionController extends BaseController {
                       @RequestParam(value = "sequence", required = false) String sequence,
                       @RequestParam(value = "type", required = false) String type,
                       @RequestParam(value = "adjust", required = false, defaultValue = "0") int adjust,
+                      @RequestParam(value = "deviation", required = false, defaultValue = "0") double deviation,
+                      @RequestParam(value = "unimodIds", required = false) String unimodIds,
                       @RequestParam(value = "charge", required = false, defaultValue = "1") int charge
     ) {
         model.addAttribute("charge", charge);
         model.addAttribute("adjust", adjust);
-
+        model.addAttribute("deviation", deviation);
+        model.addAttribute("unimodIds", unimodIds);
         if (sequence == null || sequence.isEmpty()) {
             return "/transition/calculator";
         }
@@ -109,9 +115,15 @@ public class TransitionController extends BaseController {
         model.addAttribute("sequence", sequence);
         model.addAttribute("type", type);
 
+        List<String> unimodList = null;
+        if(unimodIds != null && !unimodIds.isEmpty()){
+            String[] unimodIdArray = unimodIds.split(",");
+            unimodList = Arrays.asList(unimodIdArray);
+        }
 
-        double monoMz = formulaCalculator.getMonoMz(sequence, type, charge, adjust);
-        double averageMz = formulaCalculator.getAverageMz(sequence, type, charge, adjust);
+        //默认偏差为0
+        double monoMz = formulaCalculator.getMonoMz(sequence, type, charge, adjust, deviation, false, unimodList);
+        double averageMz = formulaCalculator.getAverageMz(sequence, type, charge, adjust, deviation, false, unimodList);
         model.addAttribute("monoMz", monoMz);
         model.addAttribute("averageMz", averageMz);
 

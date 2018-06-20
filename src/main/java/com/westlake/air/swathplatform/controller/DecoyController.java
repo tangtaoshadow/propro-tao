@@ -38,7 +38,7 @@ public class DecoyController extends BaseController {
     String check(Model model,
                  @RequestParam(value = "id", required = true) String id,
                  @RequestParam(value = "isDecoy", required = false) boolean isDecoy) {
-        List<MzResult> result = fragmentCalculator.check(id, 0.05, isDecoy);
+        List<MzResult> result = fragmentCalculator.check(id, 0.1, isDecoy);
         model.addAttribute("resultList", result.size() > 100 ? result.subList(0, 100) : result);
         return "/decoy/check";
     }

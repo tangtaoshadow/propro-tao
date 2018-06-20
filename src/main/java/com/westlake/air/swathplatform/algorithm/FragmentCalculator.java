@@ -13,7 +13,6 @@ import com.westlake.air.swathplatform.service.TransitionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.aggregation.ArrayOperators;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -40,18 +39,31 @@ public class FragmentCalculator {
         Fragment fragment = new Fragment(transitionDO.getId());
         String sequence = transitionDO.getPeptideSequence();
         List<Annotation> annotationList = transitionDO.getAnnotations();
+        fragment.setUnimodMap(transitionDO.getUnimodMap());
         for (Annotation annotation : annotationList) {
             String fs = getFragmentSequence(sequence, annotation.getType(), annotation.getLocation());
             if (fs == null) {
                 continue;
             }
 
+            String type = annotation.getType();
+            if (type.equals(ResidueType.AIon) || type.equals(ResidueType.BIon) || type.equals(ResidueType.CIon)) {
+                fragment.setStart(0);
+                //因为location是从1开始计数的,而这边的end是从0开始计数的
+                fragment.setEnd(annotation.getLocation() - 1);
+            } else if (type.equals(ResidueType.XIon) || type.equals(ResidueType.YIon) || type.equals(ResidueType.ZIon)) {
+                fragment.setStart(sequence.length() - annotation.getLocation());
+                fragment.setEnd(sequence.length() - 1);
+            }
             fragment.setSequence(fs);
+            fragment.setIsotope(annotation.isIsotope());
+            fragment.setLocation(annotation.getLocation());
+            fragment.setDeviation(annotation.getDeviation());
             fragment.setAdjust(annotation.getAdjust());
             fragment.setType(annotation.getType());
             fragment.setCharge(annotation.getCharge());
-            fragment.setMonoWeight(formulaCalculator.getMonoMz(fragment));
-            fragment.setAverageWeight(formulaCalculator.getAverageMz(fragment));
+            fragment.setMonoMz(formulaCalculator.getMonoMz(fragment));
+            fragment.setAverageMz(formulaCalculator.getAverageMz(fragment));
             fragments.add(fragment);
         }
 
@@ -59,7 +71,7 @@ public class FragmentCalculator {
     }
 
     /**
-     * 获取不包含计算分子质量数据的fragment
+     * 获取不包含计算分子质量数据的fragment,也不包含修饰基团
      *
      * @param transitionDO
      * @return
@@ -69,11 +81,15 @@ public class FragmentCalculator {
         Fragment fragment = new Fragment();
         String sequence = transitionDO.getPeptideSequence();
         List<Annotation> annotationList = transitionDO.getAnnotations();
+        fragment.setUnimodMap(transitionDO.getUnimodMap());
         for (Annotation annotation : annotationList) {
             String fs = getFragmentSequence(sequence, annotation.getType(), annotation.getLocation());
             if (fs == null) {
                 continue;
             }
+            fragment.setIsotope(annotation.isIsotope());
+            fragment.setDeviation(annotation.getDeviation());
+            fragment.setLocation(annotation.getLocation());
             fragment.setAdjust(annotation.getAdjust());
             fragment.setSequence(fs);
             fragment.setType(annotation.getType());
@@ -85,13 +101,9 @@ public class FragmentCalculator {
     }
 
     public String getFragmentSequence(String originSequence, String type, int location) {
-        if (type.equals(ResidueType.AIon) ||
-                type.equals(ResidueType.BIon) ||
-                type.equals(ResidueType.CIon)) {
+        if (type.equals(ResidueType.AIon) || type.equals(ResidueType.BIon) || type.equals(ResidueType.CIon)) {
             return originSequence.substring(0, location);
-        } else if (type.equals(ResidueType.XIon) ||
-                type.equals(ResidueType.YIon) ||
-                type.equals(ResidueType.ZIon)) {
+        } else if (type.equals(ResidueType.XIon) || type.equals(ResidueType.YIon) || type.equals(ResidueType.ZIon)) {
             return originSequence.substring(originSequence.length() - location, originSequence.length());
         } else {
             logger.error("解析出未识别离子类型:" + type);
@@ -133,9 +145,7 @@ public class FragmentCalculator {
             }
         }
 
-
         logger.info("初始化肽段片段完成");
-
         logger.info("总计有原始肽段片段:" + targetFragments.size() + "/" + countTarget + "条,占比:" + (double) targetFragments.size() / countTarget);
         logger.info("总计有伪肽段片段:" + decoyFragments.size() + "/" + countDecoy + "条,占比:" + (double) decoyFragments.size() / countDecoy);
         logger.info("开始比对");
@@ -206,18 +216,18 @@ public class FragmentCalculator {
         int count = 0;
         int countForError = 0;
         for (TransitionDO transition : transitionList) {
-            List<Fragment> tmp = getBaseFragments(transition);
+            List<Fragment> tmp = getFragments(transition);
             if (tmp != null && tmp.size() > 0) {
                 for (Fragment fragment : tmp) {
+                    count++;
                     if (!fragments.contains(fragment)) {
                         count++;
                         fragments.add(fragment);
-                        double monoMz = formulaCalculator.getMonoMz(fragment);
-                        double result = Math.abs(transition.getProductMz() - monoMz);
+                        double result = Math.abs(transition.getProductMz() - fragment.getMonoMz());
                         if (result > threshold) {
                             MzResult mzResult = new MzResult();
                             mzResult.setOriginMz(transition.getProductMz());
-                            mzResult.setNewMz(monoMz);
+                            mzResult.setNewMz(fragment.getMonoMz());
                             mzResult.setDelta(result);
                             mzResult.setCharge(fragment.getCharge());
                             mzResult.setSequence(transition.getPeptideSequence());
@@ -227,6 +237,11 @@ public class FragmentCalculator {
                             mzResult.setAnnotations(transition.getAnnotation());
                             mzResult.setPrecursorCharge(transition.getPrecursorCharge());
                             mzResult.setPrecursorMz(transition.getPrecursorMz());
+                            mzResult.setNewPrecursorMz(formulaCalculator.getMonoMz(transition));
+                            mzResult.setLocation(fragment.getLocation());
+                            if (Math.abs(transition.getPrecursorMz() - mzResult.getNewPrecursorMz()) > threshold) {
+                                mzResult.setDelatPrecursorMz(Math.abs(transition.getPrecursorMz() - mzResult.getNewPrecursorMz()));
+                            }
                             mzResultList.add(mzResult);
 
                             countForError++;
@@ -236,7 +251,7 @@ public class FragmentCalculator {
                 }
             }
         }
-        logger.info("总计Fragment条数:" + count + ";其中超过阈值的有" + countForError + "条");
+        logger.info("总计Fragment条数:" + count + ";阈值为:" + threshold + ";其中超过阈值的有" + countForError + "条");
         return mzResultList;
     }
 }

@@ -1,11 +1,13 @@
 package com.westlake.air.swathplatform.domain.db;
 
 import com.westlake.air.swathplatform.domain.bean.Annotation;
+import com.westlake.air.swathplatform.domain.bean.Fragment;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -28,12 +30,12 @@ public class TransitionDO {
     String libraryName;
 
     /**
-     * 前体的荷质比MZ
+     * 肽段的荷质比MZ
      */
     Double precursorMz;
 
     /**
-     * 本体的荷质比MZ
+     * 栗子片段的荷质比MZ
      */
     Double productMz;
 
@@ -74,12 +76,17 @@ public class TransitionDO {
     String annotation;
 
     /**
+     * 注释是否带有中括号,默认不带
+     */
+    boolean withBrackets = false;
+
+    /**
      * 完整版肽段名称(含修饰基团),如果是伪肽段则为原始的肽段的完整序列而不是伪肽段的完整序列
      */
     String fullUniModPeptideName;
 
     /**
-     * 前体带电量
+     * 肽段带电量
      */
     Integer precursorCharge;
 
@@ -93,5 +100,9 @@ public class TransitionDO {
      */
     List<Annotation> annotations;
 
-
+    /**
+     * 如果是伪肽段,则本字段代表的是伪肽段中unimod的位置
+     * key为unimod在肽段中的位置,位置从0开始计数,value为unimod的Id(参见unimod.obo文件)
+     */
+    HashMap<Integer, String> unimodMap;
 }

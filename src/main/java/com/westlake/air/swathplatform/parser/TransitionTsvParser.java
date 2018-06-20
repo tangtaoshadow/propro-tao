@@ -5,6 +5,7 @@ import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.bean.Annotation;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by James Lu MiaoShan
@@ -42,6 +45,8 @@ public class TransitionTsvParser {
 //    private static String FragmentCharge = "fragmentcharge";
 //    private static String FragmentSeriesNumber = "fragmentseriesnumber";
 
+    public static final Pattern unimodPattern = Pattern.compile("([a-z])[\\(]unimod[\\:](\\d*)[\\)]");
+
     public ResultDO<List<TransitionDO>> parse(InputStream in, LibraryDO library) {
         List<TransitionDO> transitions = new ArrayList<>();
         ResultDO<List<TransitionDO>> tranResult = new ResultDO<>(true);
@@ -53,9 +58,9 @@ public class TransitionTsvParser {
 
             while ((line = reader.readLine()) != null) {
                 ResultDO<TransitionDO> resultDO = parseTransition(line, columnMap, library);
-                if(resultDO.isFailured()){
+                if (resultDO.isFailured()) {
                     tranResult.addErrorMsg(resultDO.getMsgInfo());
-                }else{
+                } else {
                     transitions.add(resultDO.getModel());
                 }
             }
@@ -97,7 +102,12 @@ public class TransitionTsvParser {
         transitionDO.setProductIonIntensity(Double.parseDouble(row[columnMap.get(ProductIonIntensity)]));
         transitionDO.setPeptideSequence(row[columnMap.get(PeptideSequence)]);
         transitionDO.setProteinName(row[columnMap.get(ProteinName)]);
-        transitionDO.setAnnotation(row[columnMap.get(Annotation)].replaceAll("\"", ""));
+        String annotations = row[columnMap.get(Annotation)].replaceAll("\"", "");
+        if (annotations.contains("[")) {
+            transitionDO.setWithBrackets(true);
+            annotations = annotations.replace("[", "").replace("]", "");
+        }
+        transitionDO.setAnnotation(annotations);
         transitionDO.setFullUniModPeptideName(row[columnMap.get(FullUniModPeptideName)]);
         transitionDO.setPrecursorCharge(Integer.parseInt(row[columnMap.get(PrecursorCharge)]));
         //兼容在某些TSV格式中decoy的PeptideGroupLabel被描述为TransitionGroupId
@@ -109,22 +119,26 @@ public class TransitionTsvParser {
         try {
             ResultDO<List<Annotation>> annotationResult = parseAnnotation(transitionDO.getAnnotation());
             transitionDO.setAnnotations(annotationResult.getModel());
-            if(annotationResult.isFailured()){
-                if(annotationResult.getModel() != null && annotationResult.getModel().size() > 0){
-                    logger.error("Line解析异常,忽略了部分异常数据:"+transitionDO.getPeptideSequence()+";"+annotationResult.getMsgInfo());
+            if (annotationResult.isFailured()) {
+                if (annotationResult.getModel() != null && annotationResult.getModel().size() > 0) {
+                    logger.error("Line解析异常,忽略了部分异常数据:" + transitionDO.getPeptideSequence() + ";" + annotationResult.getMsgInfo());
                     resultDO.setModel(transitionDO);
                     return resultDO;
+                } else {
+                    resultDO.setSuccess(false);
+                    resultDO.setMsgInfo("Line插入错误:" + transitionDO.getPeptideSequence() + ";" + annotationResult.getMsgInfo());
+                    return resultDO;
                 }
-                resultDO.setSuccess(false);
-                resultDO.setMsgInfo("Line插入错误:"+transitionDO.getPeptideSequence()+";"+annotationResult.getMsgInfo());
-                return resultDO;
             }
             resultDO.setModel(transitionDO);
         } catch (Exception e) {
             resultDO.setSuccess(false);
-            resultDO.setMsgInfo("Line插入错误(Sequence未知):"+line+";");
+            resultDO.setMsgInfo("Line插入错误(Sequence未知):" + line + ";");
             logger.error(transitionDO.getLibraryId() + ":" + transitionDO.getAnnotation(), e);
+            return resultDO;
         }
+
+        parseModification(transitionDO);
 
         return resultDO;
     }
@@ -177,10 +191,32 @@ public class TransitionTsvParser {
             }
         } catch (Exception e) {
             resultDO.setSuccess(false);
-            resultDO.setErrorResult(ResultCode.PARSE_ERROR.getCode(), "解析Annotation错误,Annotation:"+annotations);
+            resultDO.setErrorResult(ResultCode.PARSE_ERROR.getCode(), "解析Annotation错误,Annotation:" + annotations);
         } finally {
             resultDO.setModel(annotationList);
         }
         return resultDO;
+    }
+
+    /**
+     * 解析出Modification的位置
+     * @param transitionDO
+     */
+    public void parseModification(TransitionDO transitionDO) {
+        //不论是真肽段还是伪肽段,fullUniModPeptideName字段都是真肽段的完整版
+        String peptide = transitionDO.getFullUniModPeptideName();
+        peptide = peptide.toLowerCase();
+        HashMap<Integer,String> unimodMap = new HashMap<>();
+
+        while (peptide.contains("(unimod:")) {
+            Matcher matcher = unimodPattern.matcher(peptide);
+            if (matcher.find()) {
+                unimodMap.put(matcher.start(), matcher.group(2));
+                peptide = StringUtils.replaceOnce(peptide,matcher.group(0),matcher.group(1));
+            }
+        }
+        if(unimodMap.size() > 0){
+            transitionDO.setUnimodMap(unimodMap);
+        }
     }
 }

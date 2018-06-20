@@ -4,10 +4,17 @@ import com.westlake.air.swathplatform.constants.ResidueType;
 import com.westlake.air.swathplatform.dao.AminoAcidDAO;
 import com.westlake.air.swathplatform.dao.ElementsDAO;
 import com.westlake.air.swathplatform.domain.bean.Fragment;
+import com.westlake.air.swathplatform.domain.db.TransitionDO;
+import com.westlake.air.swathplatform.parser.UnimodParser;
+import com.westlake.air.swathplatform.parser.model.chemistry.Unimod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -24,51 +31,97 @@ public class FormulaCalculator {
     @Autowired
     ElementsDAO elementsDAO;
 
-    public double getMonoMz(Fragment fragment){
-        return getMonoMz(fragment.getSequence(),fragment.getType(),fragment.getCharge(), fragment.getAdjust());
+    @Autowired
+    UnimodParser unimodParser;
+
+    public double getMonoMz(TransitionDO transitionDO) {
+        return getMonoMz(transitionDO.getPeptideSequence(), ResidueType.Full, transitionDO.getPrecursorCharge(), 0, 0, false, parseUnimodIds(transitionDO));
     }
 
-    public double getAverageMz(Fragment fragment){
-        return getAverageMz(fragment.getSequence(),fragment.getType(),fragment.getCharge(), fragment.getAdjust());
+    public double getAverageMz(TransitionDO transitionDO) {
+        return getAverageMz(transitionDO.getPeptideSequence(), ResidueType.Full, transitionDO.getPrecursorCharge(), 0, 0, false, parseUnimodIds(transitionDO));
     }
 
-    public double getMonoMz(String sequence, String type, int charge, int adjust) {
+    /**
+     * 本函数会考虑Modification的情况
+     *
+     * @param fragment
+     * @return
+     */
+    public double getMonoMz(Fragment fragment) {
+
+        return getMonoMz(fragment.getSequence(), fragment.getType(), fragment.getCharge(), fragment.getAdjust(), fragment.getDeviation(), fragment.isIsotope(), parseUnimodIds(fragment));
+    }
+
+    /**
+     * 本函数会考虑Modification的情况
+     *
+     * @param fragment
+     * @return
+     */
+    public double getAverageMz(Fragment fragment) {
+
+        return getAverageMz(fragment.getSequence(), fragment.getType(), fragment.getCharge(), fragment.getAdjust(), fragment.getDeviation(), fragment.isIsotope(), parseUnimodIds(fragment));
+    }
+
+    public double getMonoMz(String sequence, String type, int charge, int adjust, double deviation, boolean isIsotope, List<String> unimodIds) {
+        double unimodMonoMass = 0;
+        if (unimodIds != null) {
+            for (String unimodId : unimodIds) {
+                Unimod unimod = unimodParser.getUnimod(unimodId);
+                if (unimod != null) {
+                    unimodMonoMass += unimod.getMonoMass();
+                }
+            }
+        }
+
         switch (type) {
             case ResidueType.Full:
-                return (getMonoWeightAsFull(sequence) + getMonoHWeight(charge) + adjust) / charge;
+                return (getMonoWeightAsFull(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope?1:0)) / charge + deviation;
             case ResidueType.AIon:
-                return (getMonoWeightAsAIon(sequence) + getMonoHWeight(charge) + adjust) / charge;
+                return (getMonoWeightAsAIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope?1:0)) / charge + deviation;
             case ResidueType.BIon:
-                return (getMonoWeightAsBIon(sequence) + getMonoHWeight(charge) + adjust) / charge;
+                return (getMonoWeightAsBIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope?1:0)) / charge + deviation;
             case ResidueType.CIon:
-                return (getMonoWeightAsCIon(sequence) + getMonoHWeight(charge) + adjust) / charge;
+                return (getMonoWeightAsCIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope?1:0)) / charge + deviation;
             case ResidueType.XIon:
-                return (getMonoWeightAsXIon(sequence) + getMonoHWeight(charge) + adjust) / charge;
+                return (getMonoWeightAsXIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope?1:0)) / charge + deviation;
             case ResidueType.YIon:
-                return (getMonoWeightAsYIon(sequence) + getMonoHWeight(charge) + adjust) / charge;
+                return (getMonoWeightAsYIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope?1:0)) / charge + deviation;
             case ResidueType.ZIon:
-                return (getMonoWeightAsZIon(sequence) + getMonoHWeight(charge) + adjust) / charge;
+                return (getMonoWeightAsZIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope?1:0)) / charge + deviation;
             default:
                 return 0;
         }
     }
 
-    public double getAverageMz(String sequence, String type, int charge, int adjust) {
+    public double getAverageMz(String sequence, String type, int charge, int adjust, double deviation, boolean isIsotope,  List<String> unimodIds) {
+
+        double unimodAverageMass = 0;
+        if (unimodIds != null) {
+            for (String unimodId : unimodIds) {
+                Unimod unimod = unimodParser.getUnimod(unimodId);
+                if (unimod != null) {
+                    unimodAverageMass += unimod.getAverageMass();
+                }
+            }
+        }
+
         switch (type) {
             case ResidueType.Full:
-                return (getAverageWeightAsFull(sequence) + getAverageHWeight(charge) + adjust) / charge;
+                return (getAverageWeightAsFull(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope?1:0)) / charge + deviation;
             case ResidueType.AIon:
-                return (getAverageWeightAsAIon(sequence) + getAverageHWeight(charge) + adjust) / charge;
+                return (getAverageWeightAsAIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope?1:0)) / charge + deviation;
             case ResidueType.BIon:
-                return (getAverageWeightAsBIon(sequence) + getAverageHWeight(charge) + adjust) / charge;
+                return (getAverageWeightAsBIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope?1:0)) / charge + deviation;
             case ResidueType.CIon:
-                return (getAverageWeightAsCIon(sequence) + getAverageHWeight(charge) + adjust) / charge;
+                return (getAverageWeightAsCIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope?1:0)) / charge + deviation;
             case ResidueType.XIon:
-                return (getAverageWeightAsXIon(sequence) + getAverageHWeight(charge) + adjust) / charge;
+                return (getAverageWeightAsXIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope?1:0)) / charge + deviation;
             case ResidueType.YIon:
-                return (getAverageWeightAsYIon(sequence) + getAverageHWeight(charge) + adjust) / charge;
+                return (getAverageWeightAsYIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope?1:0)) / charge + deviation;
             case ResidueType.ZIon:
-                return (getAverageWeightAsZIon(sequence) + getAverageHWeight(charge) + adjust) / charge;
+                return (getAverageWeightAsZIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope?1:0)) / charge + deviation;
             default:
                 return 0;
         }
@@ -173,6 +226,32 @@ public class FormulaCalculator {
 
     private double getAverageWeightAsZIon(String sequence) {
         return getAverageWeightAsCTerm(sequence) + elementsDAO.getAverageWeight("N:1,H:2");
+    }
+
+    private List<String> parseUnimodIds(Fragment fragment) {
+        List<String> unimodIds = null;
+        HashMap<Integer, String> map = fragment.getUnimodMap();
+        if (map != null) {
+            unimodIds = new ArrayList<>();
+            for (Integer key : map.keySet()) {
+                if (key >= fragment.getStart() && key <= fragment.getEnd()) {
+                    unimodIds.add(map.get(key));
+                }
+            }
+        }
+        return unimodIds;
+    }
+
+    private List<String> parseUnimodIds(TransitionDO transitionDO) {
+        List<String> unimodIds = null;
+        HashMap<Integer, String> map = transitionDO.getUnimodMap();
+        if (map != null) {
+            unimodIds = new ArrayList<>();
+            for (Integer key : map.keySet()) {
+                unimodIds.add(map.get(key));
+            }
+        }
+        return unimodIds;
     }
 
 }
