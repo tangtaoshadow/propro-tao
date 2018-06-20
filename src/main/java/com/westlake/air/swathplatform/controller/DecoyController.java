@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -33,11 +34,12 @@ public class DecoyController extends BaseController {
         return "/decoy/overview";
     }
 
-    @RequestMapping(value = "/check/{id}")
-    String check(Model model, @PathVariable("id") String id) {
-        List<MzResult> result = fragmentCalculator.checkDecoy(id);
-
-        model.addAttribute("resultList", result.subList(0,100));
+    @RequestMapping(value = "/check")
+    String check(Model model,
+                 @RequestParam(value = "id", required = true) String id,
+                 @RequestParam(value = "isDecoy", required = false) boolean isDecoy) {
+        List<MzResult> result = fragmentCalculator.check(id, 0.05, isDecoy);
+        model.addAttribute("resultList", result.size() > 100 ? result.subList(0, 100) : result);
         return "/decoy/check";
     }
 }

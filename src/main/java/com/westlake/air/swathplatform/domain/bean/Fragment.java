@@ -17,15 +17,15 @@ public class Fragment implements Comparable<Fragment>{
 
     int charge;
 
+    int adjust;
+
     double monoWeight;
 
     double averageWeight;
 
     int count = 1;
 
-    public Fragment(){
-
-    }
+    public Fragment(){}
 
     public Fragment(String transitionId){
         this.transitionId = transitionId;

@@ -24,6 +24,8 @@ public class MzResult {
 
     int charge = 1;
 
+    double precursorMz;
+
     double originMz;
 
     double newMz;

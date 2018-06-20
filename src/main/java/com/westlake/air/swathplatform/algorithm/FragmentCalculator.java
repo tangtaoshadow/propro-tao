@@ -13,6 +13,7 @@ import com.westlake.air.swathplatform.service.TransitionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.aggregation.ArrayOperators;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ public class FragmentCalculator {
             }
 
             fragment.setSequence(fs);
+            fragment.setAdjust(annotation.getAdjust());
             fragment.setType(annotation.getType());
             fragment.setCharge(annotation.getCharge());
             fragment.setMonoWeight(formulaCalculator.getMonoMz(fragment));
@@ -72,6 +74,7 @@ public class FragmentCalculator {
             if (fs == null) {
                 continue;
             }
+            fragment.setAdjust(annotation.getAdjust());
             fragment.setSequence(fs);
             fragment.setType(annotation.getType());
             fragment.setCharge(annotation.getCharge());
@@ -189,11 +192,15 @@ public class FragmentCalculator {
 
     }
 
-    public List<MzResult> checkDecoy(String libraryId) {
-        logger.info("数据库读取数据");
-        List<TransitionDO> transitionList = transitionService.getAllByLibraryIdAndIsDecoy(libraryId, true);
+    public List<MzResult> check(String libraryId, Double threshold, boolean isDecoy) {
+        if (threshold == null) {
+            threshold = 0.05;
+        }
 
-        HashSet<Fragment> decoyFragments = new HashSet<>();
+        logger.info("数据库读取数据");
+        List<TransitionDO> transitionList = transitionService.getAllByLibraryIdAndIsDecoy(libraryId, isDecoy);
+
+        HashSet<Fragment> fragments = new HashSet<>();
         logger.info("数据读取完毕,开始初始化肽段片段");
         List<MzResult> mzResultList = new ArrayList<>();
         int count = 0;
@@ -202,34 +209,34 @@ public class FragmentCalculator {
             List<Fragment> tmp = getBaseFragments(transition);
             if (tmp != null && tmp.size() > 0) {
                 for (Fragment fragment : tmp) {
-                    if (transition.getIsDecoy()) {
-                        if (!decoyFragments.contains(fragment)) {
-                            count++;
-                            decoyFragments.add(fragment);
-                            double monoMz = formulaCalculator.getMonoMz(fragment);
-                            double result = Math.abs(transition.getProductMz() - monoMz);
-                            if (result > 0.1) {
-                                MzResult mzResult = new MzResult();
-                                mzResult.setOriginMz(transition.getProductMz());
-                                mzResult.setNewMz(monoMz);
-                                mzResult.setDelta(result);
-                                mzResult.setCharge(fragment.getCharge());
-                                mzResult.setSequence(transition.getPeptideSequence());
-                                mzResult.setType(fragment.getType());
-                                mzResult.setOriginSequence(transition.getFullUniModPeptideName());
-                                mzResult.setFragmentSequence(fragment.getSequence());
-                                mzResult.setAnnotations(transition.getAnnotation());
-                                mzResult.setPrecursorCharge(transition.getPrecursorCharge());
-                                mzResultList.add(mzResult);
+                    if (!fragments.contains(fragment)) {
+                        count++;
+                        fragments.add(fragment);
+                        double monoMz = formulaCalculator.getMonoMz(fragment);
+                        double result = Math.abs(transition.getProductMz() - monoMz);
+                        if (result > threshold) {
+                            MzResult mzResult = new MzResult();
+                            mzResult.setOriginMz(transition.getProductMz());
+                            mzResult.setNewMz(monoMz);
+                            mzResult.setDelta(result);
+                            mzResult.setCharge(fragment.getCharge());
+                            mzResult.setSequence(transition.getPeptideSequence());
+                            mzResult.setType(fragment.getType());
+                            mzResult.setOriginSequence(transition.getFullUniModPeptideName());
+                            mzResult.setFragmentSequence(fragment.getSequence());
+                            mzResult.setAnnotations(transition.getAnnotation());
+                            mzResult.setPrecursorCharge(transition.getPrecursorCharge());
+                            mzResult.setPrecursorMz(transition.getPrecursorMz());
+                            mzResultList.add(mzResult);
 
-                                countForError++;
-                            }
+                            countForError++;
                         }
                     }
+
                 }
             }
         }
-        logger.info("总计Fragment条数:"+count+";其中超过阈值的有"+countForError+"条");
+        logger.info("总计Fragment条数:" + count + ";其中超过阈值的有" + countForError + "条");
         return mzResultList;
     }
 }

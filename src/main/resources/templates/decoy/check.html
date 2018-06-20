@@ -55,11 +55,14 @@
                             <th width="10%">
                                 Delta值
                             </th>
-                            <th width="20%">
+                            <th width="15%">
                                 碎片序列
                             </th>
                             <th width="5%">
-                                前体带电量
+                                肽段Mz
+                            </th>
+                            <th width="5%">
+                                肽段带电量
                             </th>
                             <th width="5%">
                                 碎片带电量
@@ -84,6 +87,7 @@
                             <td th:text="${result.newMz}"></td>
                             <td th:text="${result.delta}"></td>
                             <td th:text="${result.fragmentSequence}"></td>
+                            <td th:text="${result.precursorMz}"></td>
                             <td th:text="${result.precursorCharge}"></td>
                             <td th:text="${result.charge}"></td>
                             <td th:text="${result.type}"></td>

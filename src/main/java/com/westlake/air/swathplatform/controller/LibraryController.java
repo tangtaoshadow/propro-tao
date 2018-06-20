@@ -1,14 +1,12 @@
 package com.westlake.air.swathplatform.controller;
 
-import com.westlake.air.swathplatform.algorithm.FragmentCalculator;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.constants.SuccessMsg;
 import com.westlake.air.swathplatform.domain.ResultDO;
-import com.westlake.air.swathplatform.domain.bean.FragmentResult;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.LibraryQuery;
-import com.westlake.air.swathplatform.parser.TsvParser;
+import com.westlake.air.swathplatform.parser.TransitionTsvParser;
 import com.westlake.air.swathplatform.service.LibraryService;
 import com.westlake.air.swathplatform.service.TransitionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +31,7 @@ import java.util.List;
 public class LibraryController extends BaseController {
 
     @Autowired
-    TsvParser tsvParser;
+    TransitionTsvParser tsvParser;
 
     @Autowired
     LibraryService libraryService;

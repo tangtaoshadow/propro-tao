@@ -25,50 +25,50 @@ public class FormulaCalculator {
     ElementsDAO elementsDAO;
 
     public double getMonoMz(Fragment fragment){
-        return getMonoMz(fragment.getSequence(),fragment.getType(),fragment.getCharge());
+        return getMonoMz(fragment.getSequence(),fragment.getType(),fragment.getCharge(), fragment.getAdjust());
     }
 
     public double getAverageMz(Fragment fragment){
-        return getAverageMz(fragment.getSequence(),fragment.getType(),fragment.getCharge());
+        return getAverageMz(fragment.getSequence(),fragment.getType(),fragment.getCharge(), fragment.getAdjust());
     }
 
-    public double getMonoMz(String sequence, String type, int charge) {
+    public double getMonoMz(String sequence, String type, int charge, int adjust) {
         switch (type) {
             case ResidueType.Full:
-                return (getMonoWeightAsFull(sequence) + getMonoHWeight(charge)) / charge;
+                return (getMonoWeightAsFull(sequence) + getMonoHWeight(charge) + adjust) / charge;
             case ResidueType.AIon:
-                return (getMonoWeightAsAIon(sequence) + getMonoHWeight(charge)) / charge;
+                return (getMonoWeightAsAIon(sequence) + getMonoHWeight(charge) + adjust) / charge;
             case ResidueType.BIon:
-                return (getMonoWeightAsBIon(sequence) + getMonoHWeight(charge)) / charge;
+                return (getMonoWeightAsBIon(sequence) + getMonoHWeight(charge) + adjust) / charge;
             case ResidueType.CIon:
-                return (getMonoWeightAsCIon(sequence) + getMonoHWeight(charge)) / charge;
+                return (getMonoWeightAsCIon(sequence) + getMonoHWeight(charge) + adjust) / charge;
             case ResidueType.XIon:
-                return (getMonoWeightAsXIon(sequence) + getMonoHWeight(charge)) / charge;
+                return (getMonoWeightAsXIon(sequence) + getMonoHWeight(charge) + adjust) / charge;
             case ResidueType.YIon:
-                return (getMonoWeightAsYIon(sequence) + getMonoHWeight(charge)) / charge;
+                return (getMonoWeightAsYIon(sequence) + getMonoHWeight(charge) + adjust) / charge;
             case ResidueType.ZIon:
-                return (getMonoWeightAsZIon(sequence) + getMonoHWeight(charge)) / charge;
+                return (getMonoWeightAsZIon(sequence) + getMonoHWeight(charge) + adjust) / charge;
             default:
                 return 0;
         }
     }
 
-    public double getAverageMz(String sequence, String type, int charge) {
+    public double getAverageMz(String sequence, String type, int charge, int adjust) {
         switch (type) {
             case ResidueType.Full:
-                return (getAverageWeightAsFull(sequence) + getAverageHWeight(charge)) / charge;
+                return (getAverageWeightAsFull(sequence) + getAverageHWeight(charge) + adjust) / charge;
             case ResidueType.AIon:
-                return (getAverageWeightAsAIon(sequence) + getAverageHWeight(charge)) / charge;
+                return (getAverageWeightAsAIon(sequence) + getAverageHWeight(charge) + adjust) / charge;
             case ResidueType.BIon:
-                return (getAverageWeightAsBIon(sequence) + getAverageHWeight(charge)) / charge;
+                return (getAverageWeightAsBIon(sequence) + getAverageHWeight(charge) + adjust) / charge;
             case ResidueType.CIon:
-                return (getAverageWeightAsCIon(sequence) + getAverageHWeight(charge)) / charge;
+                return (getAverageWeightAsCIon(sequence) + getAverageHWeight(charge) + adjust) / charge;
             case ResidueType.XIon:
-                return (getAverageWeightAsXIon(sequence) + getAverageHWeight(charge)) / charge;
+                return (getAverageWeightAsXIon(sequence) + getAverageHWeight(charge) + adjust) / charge;
             case ResidueType.YIon:
-                return (getAverageWeightAsYIon(sequence) + getAverageHWeight(charge)) / charge;
+                return (getAverageWeightAsYIon(sequence) + getAverageHWeight(charge) + adjust) / charge;
             case ResidueType.ZIon:
-                return (getAverageWeightAsZIon(sequence) + getAverageHWeight(charge)) / charge;
+                return (getAverageWeightAsZIon(sequence) + getAverageHWeight(charge) + adjust) / charge;
             default:
                 return 0;
         }

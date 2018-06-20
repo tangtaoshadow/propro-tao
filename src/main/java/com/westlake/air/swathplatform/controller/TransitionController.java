@@ -9,7 +9,9 @@ import com.westlake.air.swathplatform.service.TransitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -68,9 +70,9 @@ public class TransitionController extends BaseController {
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
         StringBuilder builder = new StringBuilder();
-        builder.append("本次搜索耗时:").append(System.currentTimeMillis()-startTime).append("毫秒;包含搜索结果总计:")
+        builder.append("本次搜索耗时:").append(System.currentTimeMillis() - startTime).append("毫秒;包含搜索结果总计:")
                 .append(resultDO.getTotalNum()).append("条");
-        model.addAttribute("searchResult",builder.toString());
+        model.addAttribute("searchResult", builder.toString());
         return "transition/list";
     }
 
@@ -90,26 +92,28 @@ public class TransitionController extends BaseController {
     String calculator(Model model,
                       @RequestParam(value = "sequence", required = false) String sequence,
                       @RequestParam(value = "type", required = false) String type,
-                      @RequestParam(value = "charge", required = false,defaultValue = "1") int charge
-                      ) {
-        model.addAttribute("charge",charge);
+                      @RequestParam(value = "adjust", required = false, defaultValue = "0") int adjust,
+                      @RequestParam(value = "charge", required = false, defaultValue = "1") int charge
+    ) {
+        model.addAttribute("charge", charge);
+        model.addAttribute("adjust", adjust);
 
-        if(sequence == null || sequence.isEmpty()){
+        if (sequence == null || sequence.isEmpty()) {
             return "/transition/calculator";
         }
 
-        if(type == null || type.isEmpty()){
+        if (type == null || type.isEmpty()) {
             return "/transition/calculator";
         }
 
-        model.addAttribute("sequence",sequence);
-        model.addAttribute("type",type);
+        model.addAttribute("sequence", sequence);
+        model.addAttribute("type", type);
 
 
-        double monoMz = formulaCalculator.getMonoMz(sequence, type, charge);
-        double averageMz = formulaCalculator.getAverageMz(sequence,type,charge);
-        model.addAttribute("monoMz",monoMz);
-        model.addAttribute("averageMz",averageMz);
+        double monoMz = formulaCalculator.getMonoMz(sequence, type, charge, adjust);
+        double averageMz = formulaCalculator.getAverageMz(sequence, type, charge, adjust);
+        model.addAttribute("monoMz", monoMz);
+        model.addAttribute("averageMz", averageMz);
 
         return "/transition/calculator";
     }

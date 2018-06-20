@@ -5,7 +5,6 @@ import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.bean.Annotation;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
-import com.westlake.air.swathplatform.parser.model.chemistry.Residue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,9 +21,9 @@ import java.util.List;
  * Time: 2018-06-07 11:07
  */
 @Component
-public class TsvParser {
+public class TransitionTsvParser {
 
-    public final Logger logger = LoggerFactory.getLogger(TsvParser.class);
+    public final Logger logger = LoggerFactory.getLogger(TransitionTsvParser.class);
 
     private static String PrecursorMz = "precursormz";
     private static String ProductMz = "productmz";
@@ -111,6 +110,11 @@ public class TsvParser {
             ResultDO<List<Annotation>> annotationResult = parseAnnotation(transitionDO.getAnnotation());
             transitionDO.setAnnotations(annotationResult.getModel());
             if(annotationResult.isFailured()){
+                if(annotationResult.getModel() != null && annotationResult.getModel().size() > 0){
+                    logger.error("Line解析异常,忽略了部分异常数据:"+transitionDO.getPeptideSequence()+";"+annotationResult.getMsgInfo());
+                    resultDO.setModel(transitionDO);
+                    return resultDO;
+                }
                 resultDO.setSuccess(false);
                 resultDO.setMsgInfo("Line插入错误:"+transitionDO.getPeptideSequence()+";"+annotationResult.getMsgInfo());
                 return resultDO;
@@ -121,7 +125,6 @@ public class TsvParser {
             resultDO.setMsgInfo("Line插入错误(Sequence未知):"+line+";");
             logger.error(transitionDO.getLibraryId() + ":" + transitionDO.getAnnotation(), e);
         }
-
 
         return resultDO;
     }

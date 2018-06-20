@@ -24,7 +24,7 @@
                           action="/transition/calculator">
 
                         <div class="form-group m-form__group row">
-                            <div class="input-group col-lg-4">
+                            <div class="input-group col-lg-3">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-success" type="button">
                                         分子化学式序列:
@@ -33,7 +33,7 @@
                                 <input type="text" class="form-control m-input" name="sequence" placeholder="sequence"
                                        th:value="${sequence}">
                             </div>
-                            <div class="input-group col-lg-4">
+                            <div class="input-group col-lg-3">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-success" type="button">
                                         碎片类型:
@@ -48,7 +48,7 @@
                                     <option th:unless="${type}=='y'" value="y">y离子</option>
                                 </select>
                             </div>
-                            <div class="input-group col-lg-4">
+                            <div class="input-group col-lg-3">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-success" type="button">
                                         带电量:
@@ -56,6 +56,15 @@
                                 </div>
                                 <input type="number" class="form-control m-input" name="charge" placeholder="charge"
                                        th:value="${charge}">
+                            </div>
+                            <div class="input-group col-lg-3">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        校准:
+                                    </button>
+                                </div>
+                                <input type="number" class="form-control m-input" name="adjust" placeholder="adjust"
+                                       th:value="${adjust}">
                                 <div class="input-group-append">
                                     <button class="btn btn-warning" type="submit">计算</button>
                                 </div>
