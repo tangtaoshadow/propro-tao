@@ -30,11 +30,11 @@ public class LibraryDO extends BaseDO {
 
     String instrument;
 
-    Integer proteinCount;
+    Long proteinCount;
 
-    Integer peptideCount;
+    Long peptideCount;
 
-    Integer transitionCount;
+    Long transitionCount;
 
     Date createDate;
 

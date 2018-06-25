@@ -16,20 +16,20 @@ public interface TransitionService {
 
     List<TransitionDO> getAllByLibraryIdAndIsDecoy(String libraryId,boolean isDecoy);
 
+    Long count(TransitionQuery query);
+
     ResultDO<List<TransitionDO>> getList(TransitionQuery transitionQuery);
 
     ResultDO insert(TransitionDO transitionDO);
 
-    ResultDO insertAll(List<TransitionDO> transitions);
+    ResultDO insertAll(List<TransitionDO> transitions, boolean isDeleteOld);
 
     ResultDO deleteAllByLibraryId(String libraryId);
 
     ResultDO<TransitionDO> getById(String id);
 
-    Integer countByProteinName(String libraryId);
+    Long countByProteinName(String libraryId);
 
-    Integer countByPeptideSequence(String libraryId);
-
-    Integer countByTransitionName(String libraryId);
+    Long countByPeptideSequence(String libraryId);
 
 }

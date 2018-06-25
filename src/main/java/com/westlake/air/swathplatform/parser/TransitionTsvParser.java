@@ -1,13 +1,16 @@
 package com.westlake.air.swathplatform.parser;
 
 import com.westlake.air.swathplatform.constants.ResultCode;
+import com.westlake.air.swathplatform.dao.TransitionDAO;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.bean.Annotation;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
+import com.westlake.air.swathplatform.service.TransitionService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -47,7 +50,11 @@ public class TransitionTsvParser {
 
     public static final Pattern unimodPattern = Pattern.compile("([a-z])[\\(]unimod[\\:](\\d*)[\\)]");
 
-    public ResultDO<List<TransitionDO>> parse(InputStream in, LibraryDO library) {
+    public static final int MAX_INSERT_RECORD = 100000;
+    @Autowired
+    TransitionService transitionService;
+
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library) {
         List<TransitionDO> transitions = new ArrayList<>();
         ResultDO<List<TransitionDO>> tranResult = new ResultDO<>(true);
         try {
@@ -56,6 +63,16 @@ public class TransitionTsvParser {
             String line = reader.readLine();
             HashMap<String, Integer> columnMap = parseColumns(line);
 
+            //开始插入前先清空原有的数据库数据
+            ResultDO resultDOTmp = transitionService.deleteAllByLibraryId(library.getId());
+            logger.info("删除旧数据完毕");
+
+            if(resultDOTmp.isFailured()){
+                logger.error(resultDOTmp.getMsgInfo());
+                return ResultDO.buildError(ResultCode.DELETE_ERROR);
+            }
+
+            int count = 0;
             while ((line = reader.readLine()) != null) {
                 ResultDO<TransitionDO> resultDO = parseTransition(line, columnMap, library);
                 if (resultDO.isFailured()) {
@@ -63,7 +80,17 @@ public class TransitionTsvParser {
                 } else {
                     transitions.add(resultDO.getModel());
                 }
+                //每存储满50000条存储一次,由于之前已经删除过原有的数据,因此不再删除原有数据
+                if(transitions.size() > MAX_INSERT_RECORD){
+                    count += MAX_INSERT_RECORD;
+                    transitionService.insertAll(transitions,false);
+                    logger.info(count+"条数据插入成功");
+                    transitions = new ArrayList<>();
+                }
             }
+            transitionService.insertAll(transitions,false);
+            count+=transitions.size();
+            logger.info(count+"条数据插入成功");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -121,7 +148,7 @@ public class TransitionTsvParser {
             transitionDO.setAnnotations(annotationResult.getModel());
             if (annotationResult.isFailured()) {
                 if (annotationResult.getModel() != null && annotationResult.getModel().size() > 0) {
-                    logger.error("Line解析异常,忽略了部分异常数据:" + transitionDO.getPeptideSequence() + ";" + annotationResult.getMsgInfo());
+//                    logger.error("Line解析异常,忽略了部分异常数据:" + transitionDO.getPeptideSequence() + ";" + annotationResult.getMsgInfo());
                     resultDO.setModel(transitionDO);
                 } else {
                     resultDO.setSuccess(false);

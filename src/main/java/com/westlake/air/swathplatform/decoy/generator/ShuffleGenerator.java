@@ -5,7 +5,14 @@ import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.parser.model.traml.Modification;
 import com.westlake.air.swathplatform.parser.model.traml.Peptide;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -13,6 +20,8 @@ import org.springframework.stereotype.Component;
  */
 @Component("shuffleGenerator")
 public class ShuffleGenerator extends BaseGenerator {
+
+    public final Logger logger = LoggerFactory.getLogger(ReverseGenerator.class);
 
     /**
      * Reverse a peptide sequence (with its modifications)
@@ -29,6 +38,17 @@ public class ShuffleGenerator extends BaseGenerator {
 
     @Override
     protected TransitionDO generate(TransitionDO transitionDO) {
+        if(transitionDO.getIsDecoy()){
+            logger.warn("this is already a decoy!!!");
+            return transitionDO;
+        }
+
+        String sequence = transitionDO.getPeptideSequence();
+        char[] array = sequence.toCharArray();
+        List<char[]> list = Arrays.asList(array);
+
+        Collections.shuffle(Arrays.asList(array));
+
         return null;
     }
 }

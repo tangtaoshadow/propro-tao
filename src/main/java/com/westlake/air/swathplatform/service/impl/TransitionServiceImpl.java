@@ -36,6 +36,11 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
+    public Long count(TransitionQuery query) {
+        return transitionDAO.count(query);
+    }
+
+    @Override
     public ResultDO<List<TransitionDO>> getList(TransitionQuery query) {
 
         List<TransitionDO> transitionDOList = transitionDAO.getList(query);
@@ -58,9 +63,21 @@ public class TransitionServiceImpl implements TransitionService {
         }
     }
 
+    /**
+     * 这边的代码由于时间问题写的比较简陋,先删除原有的关联数据,再插入新的关联数据,未做事务处理
+     * @param transitions
+     * @param isDeleteOld
+     * @return
+     */
     @Override
-    public ResultDO insertAll(List<TransitionDO> transitions) {
+    public ResultDO insertAll(List<TransitionDO> transitions, boolean isDeleteOld) {
+        if(transitions == null || transitions.size() == 0){
+            return ResultDO.buildError(ResultCode.OBJECT_CANNOT_BE_NULL);
+        }
         try {
+            if(isDeleteOld){
+                transitionDAO.deleteAllByLibraryId(transitions.get(0).getLibraryId());
+            }
             transitionDAO.insert(transitions);
             return new ResultDO(true);
         } catch (Exception e) {
@@ -98,17 +115,12 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
-    public Integer countByProteinName(String libraryId) {
+    public Long countByProteinName(String libraryId) {
         return transitionDAO.countByProteinName(libraryId);
     }
 
     @Override
-    public Integer countByPeptideSequence(String libraryId) {
+    public Long countByPeptideSequence(String libraryId) {
         return transitionDAO.countByPeptideSequence(libraryId);
-    }
-
-    @Override
-    public Integer countByTransitionName(String libraryId) {
-        return transitionDAO.countByTransitionName(libraryId);
     }
 }

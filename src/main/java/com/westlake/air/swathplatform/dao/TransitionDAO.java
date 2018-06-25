@@ -74,34 +74,35 @@ public class TransitionDAO {
         mongoTemplate.remove(query, TransitionDO.class, CollectionName);
     }
 
-    public Integer countByProteinName(String libraryId) {
+    public long countByProteinName(String libraryId) {
         AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(
                         TransitionDO.class,
                         Aggregation.match(where("libraryId").is(libraryId)),
-                        Aggregation.group("proteinName").count().as("count1")), CollectionName,
+                        Aggregation.group("proteinName").count().as("count")).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
                 BasicDBObject.class);
-        return a.getMappedResults().size();
+        return (long)a.getMappedResults().size();
     }
 
-    public Integer countByPeptideSequence(String libraryId) {
+    public long countByPeptideSequence(String libraryId) {
         AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(
                         TransitionDO.class,
                         Aggregation.match(where("libraryId").is(libraryId)),
-                        Aggregation.group("peptideSequence").count().as("count")), CollectionName,
+                        Aggregation.group("peptideSequence").count().as("count")).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
                 BasicDBObject.class);
-        return a.getMappedResults().size();
+
+        return (long)a.getMappedResults().size();
     }
 
-    public Integer countByTransitionName(String libraryId) {
+    public long countByTransitionName(String libraryId) {
         AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(
                         TransitionDO.class,
                         Aggregation.match(where("libraryId").is(libraryId)),
-                        Aggregation.group("transitionName").count().as("count")), CollectionName,
+                        Aggregation.group("transitionName").count().as("count")).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
                 BasicDBObject.class);
-        return a.getMappedResults().size();
+        return (long)a.getMappedResults().size();
     }
 
     private Query buildQuery(TransitionQuery transitionQuery) {
@@ -109,7 +110,8 @@ public class TransitionDAO {
 
         query.skip((transitionQuery.getPageNo() - 1) * transitionQuery.getPageSize());
         query.limit(transitionQuery.getPageSize());
-        query.with(new Sort(transitionQuery.getOrderBy(), transitionQuery.getSortColumn()));
+        //默认没有排序功能(排序会带来极大的性能开销)
+//        query.with(new Sort(transitionQuery.getOrderBy(), transitionQuery.getSortColumn()));
         return query;
     }
 
