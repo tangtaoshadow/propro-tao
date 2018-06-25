@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,7 +41,7 @@ public class TransitionController extends BaseController {
                 @RequestParam(value = "peptideSequence", required = false) String peptideSequence,
                 @RequestParam(value = "transitionName", required = false) String transitionName,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                @RequestParam(value = "pageSize", required = false, defaultValue = "100") Integer pageSize) {
+                @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
         long startTime = System.currentTimeMillis();
         model.addAttribute("libraryId", libraryId);
         model.addAttribute("proteinName", proteinName);

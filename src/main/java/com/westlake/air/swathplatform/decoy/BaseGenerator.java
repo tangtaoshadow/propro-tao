@@ -1,5 +1,6 @@
 package com.westlake.air.swathplatform.decoy;
 
+import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.parser.model.traml.Modification;
 import com.westlake.air.swathplatform.parser.model.traml.Peptide;
 
@@ -13,6 +14,8 @@ import java.util.List;
 public abstract class BaseGenerator {
 
     protected abstract Peptide generate(Peptide peptide);
+
+    protected abstract TransitionDO generate(TransitionDO transitionDO);
 
     /**
      * Compute relative identity (relative number of matches of amino acids at the same position) between two sequences

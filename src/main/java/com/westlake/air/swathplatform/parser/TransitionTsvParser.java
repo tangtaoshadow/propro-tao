@@ -75,7 +75,7 @@ public class TransitionTsvParser {
         String[] columns = line.split("\t");
         HashMap<String, Integer> columnMap = new HashMap<>();
         for (int i = 0; i < columns.length; i++) {
-            columnMap.put(columns[i].toLowerCase(), i);
+            columnMap.put(StringUtils.deleteWhitespace(columns[i].toLowerCase()), i);
         }
         return columnMap;
     }
@@ -123,7 +123,6 @@ public class TransitionTsvParser {
                 if (annotationResult.getModel() != null && annotationResult.getModel().size() > 0) {
                     logger.error("Line解析异常,忽略了部分异常数据:" + transitionDO.getPeptideSequence() + ";" + annotationResult.getMsgInfo());
                     resultDO.setModel(transitionDO);
-                    return resultDO;
                 } else {
                     resultDO.setSuccess(false);
                     resultDO.setMsgInfo("Line插入错误:" + transitionDO.getPeptideSequence() + ";" + annotationResult.getMsgInfo());
@@ -151,7 +150,9 @@ public class TransitionTsvParser {
             for (String annotationStr : annotationStrs) {
                 Annotation annotation = new Annotation();
                 String[] forDeviation = annotationStr.split("/");
-                annotation.setDeviation(Double.parseDouble(forDeviation[1]));
+                if(forDeviation.length > 1){
+                    annotation.setDeviation(Double.parseDouble(forDeviation[1]));
+                }
 
                 if (forDeviation[0].endsWith("i")) {
                     annotation.setIsotope(true);
@@ -208,7 +209,7 @@ public class TransitionTsvParser {
         peptide = peptide.toLowerCase();
         HashMap<Integer,String> unimodMap = new HashMap<>();
 
-        while (peptide.contains("(unimod:")) {
+        while (peptide.contains("(unimod:") && peptide.indexOf("(unimod:") != 0) {
             Matcher matcher = unimodPattern.matcher(peptide);
             if (matcher.find()) {
                 unimodMap.put(matcher.start(), matcher.group(2));

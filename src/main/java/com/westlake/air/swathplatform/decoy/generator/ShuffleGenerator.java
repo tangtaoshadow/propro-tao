@@ -1,6 +1,7 @@
 package com.westlake.air.swathplatform.decoy.generator;
 
 import com.westlake.air.swathplatform.decoy.BaseGenerator;
+import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.parser.model.traml.Modification;
 import com.westlake.air.swathplatform.parser.model.traml.Peptide;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +24,11 @@ public class ShuffleGenerator extends BaseGenerator {
      */
     @Override
     protected Peptide generate(Peptide peptide) {
+        return null;
+    }
+
+    @Override
+    protected TransitionDO generate(TransitionDO transitionDO) {
         return null;
     }
 }

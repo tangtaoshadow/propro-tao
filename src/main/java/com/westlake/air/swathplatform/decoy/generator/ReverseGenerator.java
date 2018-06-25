@@ -1,9 +1,12 @@
 package com.westlake.air.swathplatform.decoy.generator;
 
 import com.westlake.air.swathplatform.decoy.BaseGenerator;
+import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.parser.model.traml.Modification;
 import com.westlake.air.swathplatform.parser.model.traml.Peptide;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -12,6 +15,8 @@ import org.springframework.stereotype.Component;
  */
 @Component("reverseGenerator")
 public class ReverseGenerator extends BaseGenerator {
+
+    public final Logger logger = LoggerFactory.getLogger(ReverseGenerator.class);
 
     /**
      * Reverse a peptide sequence (with its modifications)
@@ -31,5 +36,18 @@ public class ReverseGenerator extends BaseGenerator {
             modification.setLocation(sequence.length() + 1 - modification.getLocation());
         }
         return peptide;
+    }
+
+    @Override
+    protected TransitionDO generate(TransitionDO transitionDO) {
+        if(transitionDO.getIsDecoy()){
+            logger.warn("this is already a decoy!!!");
+            return transitionDO;
+        }
+        String sequence = transitionDO.getPeptideSequence();
+        sequence = StringUtils.reverse(sequence);
+        transitionDO.setPeptideSequence(sequence);
+        transitionDO.getUnimodMap();
+        return null;
     }
 }
