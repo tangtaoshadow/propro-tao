@@ -4,11 +4,14 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Ordering;
 import com.westlake.air.swathplatform.constants.ResidueType;
+import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.bean.Annotation;
 import com.westlake.air.swathplatform.domain.bean.Fragment;
 import com.westlake.air.swathplatform.domain.bean.FragmentResult;
 import com.westlake.air.swathplatform.domain.bean.MzResult;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
+import com.westlake.air.swathplatform.domain.query.TransitionQuery;
+import com.westlake.air.swathplatform.parser.model.chemistry.Residue;
 import com.westlake.air.swathplatform.service.TransitionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +37,8 @@ public class FragmentCalculator {
     @Autowired
     FormulaCalculator formulaCalculator;
 
+    public static final int MAX_PAGE_SIZE = 100000;
+
     public List<Fragment> getFragments(TransitionDO transitionDO) {
         List<Fragment> fragments = new ArrayList<>();
         Fragment fragment = new Fragment(transitionDO.getId());
@@ -53,6 +58,9 @@ public class FragmentCalculator {
                 fragment.setEnd(annotation.getLocation() - 1);
             } else if (type.equals(ResidueType.XIon) || type.equals(ResidueType.YIon) || type.equals(ResidueType.ZIon)) {
                 fragment.setStart(sequence.length() - annotation.getLocation());
+                fragment.setEnd(sequence.length() - 1);
+            } else if (type.equals(ResidueType.Full)) {
+                fragment.setStart(0);
                 fragment.setEnd(sequence.length() - 1);
             }
             fragment.setSequence(fs);
@@ -105,6 +113,8 @@ public class FragmentCalculator {
             return originSequence.substring(0, location);
         } else if (type.equals(ResidueType.XIon) || type.equals(ResidueType.YIon) || type.equals(ResidueType.ZIon)) {
             return originSequence.substring(originSequence.length() - location, originSequence.length());
+        } else if (type.equals(ResidueType.Full)) {
+            return originSequence;
         } else {
             logger.error("解析出未识别离子类型:" + type);
             return null;
@@ -114,38 +124,51 @@ public class FragmentCalculator {
     public FragmentResult decoyOverview(String libraryId) {
         FragmentResult result = new FragmentResult();
         logger.info("数据库读取数据");
-        List<TransitionDO> transitionList = transitionService.getAllByLibraryId(libraryId);
+
+        TransitionQuery query = new TransitionQuery();
+        query.setLibraryId(libraryId);
+        query.setPageSize(MAX_PAGE_SIZE);
+        long totalCount = transitionService.count(query);
+        int totalPage = 1;
+        if (totalCount > MAX_PAGE_SIZE) {
+            totalPage = (int) (totalCount / MAX_PAGE_SIZE) + 1;
+        }
+
         HashSet<Fragment> targetFragments = new HashSet<>();
         HashSet<Fragment> decoyFragments = new HashSet<>();
-
         int countDecoy = 0;
         int countTarget = 0;
 
-        logger.info("数据读取完毕,开始初始化肽段片段");
-        for (TransitionDO transition : transitionList) {
-            List<Fragment> tmp = getBaseFragments(transition);
-            if (tmp != null && tmp.size() > 0) {
-                for (Fragment fragment : tmp) {
-                    if (transition.getIsDecoy()) {
-                        countDecoy++;
-                        if (decoyFragments.contains(fragment)) {
-                            fragment.count();
+        for (int i = 1; i <= totalPage; i++) {
+            query.setPageNo(i);
+            ResultDO<List<TransitionDO>> resultTmp = transitionService.getList(query);
+            logger.info("读取第" + i + "批数据,总计" + totalPage + "批");
+            List<TransitionDO> list = resultTmp.getModel();
+
+            for (TransitionDO transition : list) {
+                List<Fragment> tmp = getBaseFragments(transition);
+                if (tmp != null && tmp.size() > 0) {
+                    for (Fragment fragment : tmp) {
+                        if (transition.getIsDecoy()) {
+                            countDecoy++;
+                            if (decoyFragments.contains(fragment)) {
+                                fragment.count();
+                            } else {
+                                decoyFragments.add(fragment);
+                            }
                         } else {
-                            decoyFragments.add(fragment);
-                        }
-                    } else {
-                        countTarget++;
-                        if (targetFragments.contains(fragment)) {
-                            fragment.count();
-                        } else {
-                            targetFragments.add(fragment);
+                            countTarget++;
+                            if (targetFragments.contains(fragment)) {
+                                fragment.count();
+                            } else {
+                                targetFragments.add(fragment);
+                            }
                         }
                     }
                 }
             }
         }
 
-        logger.info("初始化肽段片段完成");
         logger.info("总计有原始肽段片段:" + targetFragments.size() + "/" + countTarget + "条,占比:" + (double) targetFragments.size() / countTarget);
         logger.info("总计有伪肽段片段:" + decoyFragments.size() + "/" + countDecoy + "条,占比:" + (double) decoyFragments.size() / countDecoy);
         logger.info("开始比对");
@@ -208,46 +231,60 @@ public class FragmentCalculator {
         }
 
         logger.info("数据库读取数据");
-        List<TransitionDO> transitionList = transitionService.getAllByLibraryIdAndIsDecoy(libraryId, isDecoy);
+        TransitionQuery query = new TransitionQuery();
+        query.setLibraryId(libraryId);
+        query.setIsDecoy(isDecoy);
+        query.setPageSize(MAX_PAGE_SIZE);
+        long totalCount = transitionService.count(query);
+        int totalPage = 1;
+        if (totalCount > MAX_PAGE_SIZE) {
+            totalPage = (int) (totalCount / MAX_PAGE_SIZE) + 1;
+        }
 
         HashSet<Fragment> fragments = new HashSet<>();
-        logger.info("数据读取完毕,开始初始化肽段片段");
         List<MzResult> mzResultList = new ArrayList<>();
         int count = 0;
         int countForError = 0;
-        for (TransitionDO transition : transitionList) {
-            List<Fragment> tmp = getFragments(transition);
-            if (tmp != null && tmp.size() > 0) {
-                for (Fragment fragment : tmp) {
-                    count++;
-                    if (!fragments.contains(fragment)) {
+        for (int i = 1; i <= totalPage; i++) {
+            query.setPageNo(i);
+            ResultDO<List<TransitionDO>> resultDO = transitionService.getList(query);
+            logger.info("读取第" + i + "批数据,总计" + totalPage + "批");
+            List<TransitionDO> list = resultDO.getModel();
+
+            for (TransitionDO transition : list) {
+                List<Fragment> tmp = getFragments(transition);
+                if (tmp != null && tmp.size() > 0) {
+                    for (Fragment fragment : tmp) {
                         count++;
-                        fragments.add(fragment);
-                        double result = Math.abs(transition.getProductMz() - fragment.getMonoMz());
-                        if (result > threshold) {
-                            MzResult mzResult = new MzResult();
-                            mzResult.setOriginMz(transition.getProductMz());
-                            mzResult.setNewMz(fragment.getMonoMz());
-                            mzResult.setDelta(result);
-                            mzResult.setCharge(fragment.getCharge());
-                            mzResult.setSequence(transition.getPeptideSequence());
-                            mzResult.setType(fragment.getType());
-                            mzResult.setOriginSequence(transition.getFullUniModPeptideName());
-                            mzResult.setFragmentSequence(fragment.getSequence());
-                            mzResult.setAnnotations(transition.getAnnotation());
-                            mzResult.setPrecursorCharge(transition.getPrecursorCharge());
-                            mzResult.setPrecursorMz(transition.getPrecursorMz());
-                            mzResult.setNewPrecursorMz(formulaCalculator.getMonoMz(transition));
-                            mzResult.setLocation(fragment.getLocation());
-                            if (Math.abs(transition.getPrecursorMz() - mzResult.getNewPrecursorMz()) > threshold) {
-                                mzResult.setDelatPrecursorMz(Math.abs(transition.getPrecursorMz() - mzResult.getNewPrecursorMz()));
+                        if (!fragments.contains(fragment)) {
+                            count++;
+                            fragments.add(fragment);
+                            double result = Math.abs(transition.getProductMz() - fragment.getMonoMz());
+                            if (result > threshold) {
+                                MzResult mzResult = new MzResult();
+                                mzResult.setOriginMz(transition.getProductMz());
+                                mzResult.setNewMz(fragment.getMonoMz());
+                                mzResult.setDelta(result);
+                                mzResult.setCharge(fragment.getCharge());
+                                mzResult.setSequence(transition.getPeptideSequence());
+                                mzResult.setType(fragment.getType());
+                                mzResult.setOriginSequence(transition.getFullUniModPeptideName());
+                                mzResult.setFragmentSequence(fragment.getSequence());
+                                mzResult.setAnnotations(transition.getAnnotation());
+                                mzResult.setPrecursorCharge(transition.getPrecursorCharge());
+                                mzResult.setPrecursorMz(transition.getPrecursorMz());
+                                mzResult.setNewPrecursorMz(formulaCalculator.getMonoMz(transition));
+                                mzResult.setLocation(fragment.getLocation());
+                                if (Math.abs(transition.getPrecursorMz() - mzResult.getNewPrecursorMz()) > threshold) {
+                                    mzResult.setDelatPrecursorMz(Math.abs(transition.getPrecursorMz() - mzResult.getNewPrecursorMz()));
+                                }
+                                mzResultList.add(mzResult);
+
+                                countForError++;
                             }
-                            mzResultList.add(mzResult);
-
-                            countForError++;
                         }
-                    }
 
+                    }
                 }
             }
         }

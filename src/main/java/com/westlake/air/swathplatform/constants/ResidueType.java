@@ -6,7 +6,7 @@ package com.westlake.air.swathplatform.constants;
  */
 public class ResidueType {
 
-    public static final String Full  = "Full";
+    public static final String Full  = "p";
     public static final String NTerm = "NTerm";
     public static final String CTerm = "CTerm";
     public static final String AIon  = "a";
