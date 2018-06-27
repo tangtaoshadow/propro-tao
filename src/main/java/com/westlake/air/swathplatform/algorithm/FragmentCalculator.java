@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import static com.westlake.air.swathplatform.constants.Constants.MAX_PAGE_SIZE_FOR_FRAGMENT;
+
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-06-12 10:32
@@ -135,11 +137,11 @@ public class FragmentCalculator {
 
         TransitionQuery query = new TransitionQuery();
         query.setLibraryId(libraryId);
-        query.setPageSize(Constants.MAX_PAGE_SIZE_FOR_FRAGMENT);
+        query.setPageSize(MAX_PAGE_SIZE_FOR_FRAGMENT);
         long totalCount = transitionService.count(query);
         int totalPage = 1;
-        if (totalCount > Constants.MAX_PAGE_SIZE_FOR_FRAGMENT) {
-            totalPage = (int) (totalCount / Constants.MAX_PAGE_SIZE_FOR_FRAGMENT) + 1;
+        if (totalCount > MAX_PAGE_SIZE_FOR_FRAGMENT) {
+            totalPage = (int) (totalCount / MAX_PAGE_SIZE_FOR_FRAGMENT) + 1;
         }
 
         HashSet<Fragment> targetFragments = new HashSet<>();
@@ -242,11 +244,11 @@ public class FragmentCalculator {
         TransitionQuery query = new TransitionQuery();
         query.setLibraryId(libraryId);
         query.setIsDecoy(isDecoy);
-        query.setPageSize(Constants.MAX_PAGE_SIZE_FOR_FRAGMENT);
+        query.setPageSize(MAX_PAGE_SIZE_FOR_FRAGMENT);
         long totalCount = transitionService.count(query);
         int totalPage = 1;
-        if (totalCount > Constants.MAX_PAGE_SIZE_FOR_FRAGMENT) {
-            totalPage = (int) (totalCount / Constants.MAX_PAGE_SIZE_FOR_FRAGMENT) + 1;
+        if (totalCount > MAX_PAGE_SIZE_FOR_FRAGMENT) {
+            totalPage = (int) (totalCount / MAX_PAGE_SIZE_FOR_FRAGMENT) + 1;
         }
 
         HashSet<Fragment> fragments = new HashSet<>();

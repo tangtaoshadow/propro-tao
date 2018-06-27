@@ -2,12 +2,10 @@ package com.westlake.air.swathplatform.parser;
 
 import com.westlake.air.swathplatform.constants.Constants;
 import com.westlake.air.swathplatform.constants.ResultCode;
-import com.westlake.air.swathplatform.dao.TransitionDAO;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.bean.Annotation;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
-import com.westlake.air.swathplatform.parser.model.chemistry.Residue;
 import com.westlake.air.swathplatform.service.TransitionService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

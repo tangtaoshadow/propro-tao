@@ -25,7 +25,7 @@ import java.util.*;
 @Component("shuffleGenerator")
 public class ShuffleGenerator extends BaseGenerator {
 
-    public final Logger logger = LoggerFactory.getLogger(ReverseGenerator.class);
+    public final Logger logger = LoggerFactory.getLogger(ShuffleGenerator.class);
 
     @Autowired
     FormulaCalculator formulaCalculator;

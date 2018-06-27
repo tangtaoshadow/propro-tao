@@ -45,6 +45,7 @@ public class TransitionController extends BaseController {
                 @RequestParam(value = "sequence", required = false) String sequence,
                 @RequestParam(value = "name", required = false) String name,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+                @RequestParam(value = "isDecoy", required = false) Boolean isDecoy,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
         long startTime = System.currentTimeMillis();
         model.addAttribute("libraryId", libraryId);
@@ -52,6 +53,7 @@ public class TransitionController extends BaseController {
         model.addAttribute("sequence", sequence);
         model.addAttribute("name", name);
         model.addAttribute("pageSize", pageSize);
+        model.addAttribute("isDecoy", isDecoy);
         TransitionQuery query = new TransitionQuery();
 
         if (libraryId != null && !libraryId.isEmpty()) {
@@ -65,6 +67,9 @@ public class TransitionController extends BaseController {
         }
         if (name != null && !name.isEmpty()) {
             query.setName(name);
+        }
+        if (isDecoy != null) {
+            query.setIsDecoy(isDecoy);
         }
 
         query.setPageSize(pageSize);
@@ -132,7 +137,7 @@ public class TransitionController extends BaseController {
         model.addAttribute("type", type);
 
         List<String> unimodList = null;
-        if(unimodIds != null && !unimodIds.isEmpty()){
+        if (unimodIds != null && !unimodIds.isEmpty()) {
             String[] unimodIdArray = unimodIds.split(",");
             unimodList = Arrays.asList(unimodIdArray);
         }
