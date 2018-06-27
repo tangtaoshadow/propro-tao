@@ -24,8 +24,20 @@ public abstract class BaseGenerator {
      * @param decoy
      * @return
      */
-    private float aaSequenceIdentify(String sequence, String decoy) {
-        return 0;
+    protected double aaSequenceIdentify(String sequence, String decoy) {
+        //sequence和decoy的长度必须一致
+        if (sequence.length() != decoy.length()) {
+            return 0;
+        }
+
+        double count = 0;
+        for (int i = 0; i < sequence.length(); i++) {
+            if(sequence.charAt(i) == decoy.charAt(i)){
+                count++;
+            }
+        }
+
+        return count/sequence.length();
     }
 
     /**

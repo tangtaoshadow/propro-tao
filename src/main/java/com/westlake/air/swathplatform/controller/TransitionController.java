@@ -2,6 +2,7 @@ package com.westlake.air.swathplatform.controller;
 
 import com.westlake.air.swathplatform.algorithm.FormulaCalculator;
 import com.westlake.air.swathplatform.algorithm.FragmentCalculator;
+import com.westlake.air.swathplatform.decoy.generator.ShuffleGenerator;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.TransitionQuery;
@@ -33,6 +34,9 @@ public class TransitionController extends BaseController {
 
     @Autowired
     TransitionService transitionService;
+
+    @Autowired
+    ShuffleGenerator shuffleGenerator;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -87,6 +91,20 @@ public class TransitionController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/transition/list";
         }
+    }
+
+    @RequestMapping(value = "/createdecoy/{id}")
+    String generateDecoy(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+        ResultDO<TransitionDO> resultDO = transitionService.getById(id);
+
+        if (resultDO.isFailured()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
+            return "redirect:/transition/list";
+        }
+
+        shuffleGenerator.generate(resultDO.getModel());
+        model.addAttribute("transition", resultDO.getModel());
+        return "/transition/detail";
     }
 
     @RequestMapping(value = "/calculator")

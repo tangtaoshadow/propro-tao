@@ -5,10 +5,7 @@ import com.google.common.collect.Multiset;
 import com.google.common.collect.Ordering;
 import com.westlake.air.swathplatform.constants.ResidueType;
 import com.westlake.air.swathplatform.domain.ResultDO;
-import com.westlake.air.swathplatform.domain.bean.Annotation;
-import com.westlake.air.swathplatform.domain.bean.Fragment;
-import com.westlake.air.swathplatform.domain.bean.FragmentResult;
-import com.westlake.air.swathplatform.domain.bean.MzResult;
+import com.westlake.air.swathplatform.domain.bean.*;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.TransitionQuery;
 import com.westlake.air.swathplatform.parser.model.chemistry.Residue;
@@ -115,6 +112,19 @@ public class FragmentCalculator {
             return originSequence.substring(originSequence.length() - location, originSequence.length());
         } else if (type.equals(ResidueType.Full)) {
             return originSequence;
+        } else {
+            logger.error("解析出未识别离子类型:" + type);
+            return null;
+        }
+    }
+
+    public List<AminoAcid> getFragmentSequence(List<AminoAcid> originList, String type, int location) {
+        if (type.equals(ResidueType.AIon) || type.equals(ResidueType.BIon) || type.equals(ResidueType.CIon)) {
+            return originList.subList(0, location);
+        } else if (type.equals(ResidueType.XIon) || type.equals(ResidueType.YIon) || type.equals(ResidueType.ZIon)) {
+            return originList.subList(originList.size() - location, originList.size());
+        } else if (type.equals(ResidueType.Full)) {
+            return originList;
         } else {
             logger.error("解析出未识别离子类型:" + type);
             return null;
