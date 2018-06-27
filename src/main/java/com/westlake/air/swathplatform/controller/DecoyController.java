@@ -1,8 +1,11 @@
 package com.westlake.air.swathplatform.controller;
 
 import com.westlake.air.swathplatform.algorithm.FragmentCalculator;
+import com.westlake.air.swathplatform.decoy.generator.ShuffleGenerator;
 import com.westlake.air.swathplatform.domain.bean.FragmentResult;
 import com.westlake.air.swathplatform.domain.bean.MzResult;
+import com.westlake.air.swathplatform.domain.query.TransitionQuery;
+import com.westlake.air.swathplatform.service.TransitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,6 +26,12 @@ public class DecoyController extends BaseController {
     @Autowired
     FragmentCalculator fragmentCalculator;
 
+    @Autowired
+    ShuffleGenerator shuffleGenerator;
+
+    @Autowired
+    TransitionService transitionService;
+
     @RequestMapping(value = "/overview/{id}")
     String overview(Model model, @PathVariable("id") String id) {
         FragmentResult result = fragmentCalculator.decoyOverview(id);
@@ -40,6 +49,22 @@ public class DecoyController extends BaseController {
                  @RequestParam(value = "isDecoy", required = false) boolean isDecoy) {
         List<MzResult> result = fragmentCalculator.check(id, 0.1, isDecoy);
         model.addAttribute("resultList", result.size() > 100 ? result.subList(0, 100) : result);
+        return "/decoy/check";
+    }
+
+    @RequestMapping(value = "/generate")
+    String generate(Model model,
+                 @RequestParam(value = "id", required = true) String id) {
+
+        TransitionQuery query = new TransitionQuery();
+        query.setIsDecoy(true);
+        long totalCount = transitionService.count(query);
+
+        transitionService.deleteAllDecoyByLibraryId(id);
+
+
+
+//        model.addAttribute("resultList", result.size() > 100 ? result.subList(0, 100) : result);
         return "/decoy/check";
     }
 }

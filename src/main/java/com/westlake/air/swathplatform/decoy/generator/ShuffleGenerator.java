@@ -2,6 +2,7 @@ package com.westlake.air.swathplatform.decoy.generator;
 
 import com.westlake.air.swathplatform.algorithm.FormulaCalculator;
 import com.westlake.air.swathplatform.algorithm.FragmentCalculator;
+import com.westlake.air.swathplatform.constants.Constants;
 import com.westlake.air.swathplatform.decoy.BaseGenerator;
 import com.westlake.air.swathplatform.domain.bean.AminoAcid;
 import com.westlake.air.swathplatform.domain.bean.Annotation;
@@ -26,29 +27,21 @@ public class ShuffleGenerator extends BaseGenerator {
 
     public final Logger logger = LoggerFactory.getLogger(ReverseGenerator.class);
 
-    public static final int TRY_TIME = 10;
-
     @Autowired
     FormulaCalculator formulaCalculator;
 
     @Autowired
     FragmentCalculator fragmentCalculator;
 
-    /**
-     * Reverse a peptide sequence (with its modifications)
-     * 转置一个Sequence以及它的modification.如果存在C-,N-Terminal,由于是完全转置,所以C-Terminal和N-Terminal还是在两端不变,只是位置互换了一下
-     * 例如肽段 C-A-P-M-K-N 这样一个肽段,修饰结构在两端,分别为C和N.因此Modification的位置为 C-0,N-5.其余的基团位置分别为A-1,P-2,M-3,K-4
-     * 转换以后变为N-K-M-P-A-C. N依然修饰K,C依然修饰A
-     *
-     * @param peptide
-     * @return
-     */
-    @Override
-    public Peptide generate(Peptide peptide) {
-        return null;
+    public List<TransitionDO> generate(List<TransitionDO> list) {
+        List<TransitionDO> decoys = new ArrayList<>();
+        for (TransitionDO trans : list) {
+            TransitionDO decoy = generate(trans);
+            decoys.add(decoy);
+        }
+        return decoys;
     }
 
-    @Override
     public TransitionDO generate(TransitionDO transitionDO) {
 
         if (transitionDO.getIsDecoy()) {
@@ -93,7 +86,7 @@ public class ShuffleGenerator extends BaseGenerator {
         HashMap<Integer, String> newUnimodMap = new HashMap<>();
 
         //生成十个随机打乱的数组,比对重复度
-        for (int i = 0; i < TRY_TIME; i++) {
+        for (int i = 0; i < Constants.DECOY_GENERATOR_TRY_TIMES; i++) {
             Collections.shuffle(aminoAcids);
 
             String newSequence = TransitionUtil.toSequence(aminoAcids, false);
@@ -124,15 +117,15 @@ public class ShuffleGenerator extends BaseGenerator {
         Annotation oneAnno = decoy.getAnnotations().get(0);
 
         List<String> unimodIds = new ArrayList<>();
-        List<AminoAcid> acids = fragmentCalculator.getFragmentSequence(aminoAcids,oneAnno.getType(),oneAnno.getLocation());
-        for(AminoAcid aminoAcid : acids){
-            if(aminoAcid.getModId() != null){
+        List<AminoAcid> acids = fragmentCalculator.getFragmentSequence(aminoAcids, oneAnno.getType(), oneAnno.getLocation());
+        for (AminoAcid aminoAcid : acids) {
+            if (aminoAcid.getModId() != null) {
                 unimodIds.add(aminoAcid.getModId());
             }
         }
 
         double productMz = formulaCalculator.getMonoMz(
-                TransitionUtil.toSequence(acids,false),
+                TransitionUtil.toSequence(acids, false),
                 oneAnno.getType(),
                 oneAnno.getCharge(),
                 oneAnno.getAdjust(),

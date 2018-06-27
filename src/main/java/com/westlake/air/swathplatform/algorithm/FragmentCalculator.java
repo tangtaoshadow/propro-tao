@@ -3,12 +3,12 @@ package com.westlake.air.swathplatform.algorithm;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Ordering;
+import com.westlake.air.swathplatform.constants.Constants;
 import com.westlake.air.swathplatform.constants.ResidueType;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.bean.*;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.TransitionQuery;
-import com.westlake.air.swathplatform.parser.model.chemistry.Residue;
 import com.westlake.air.swathplatform.service.TransitionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +33,6 @@ public class FragmentCalculator {
 
     @Autowired
     FormulaCalculator formulaCalculator;
-
-    public static final int MAX_PAGE_SIZE = 100000;
 
     public List<Fragment> getFragments(TransitionDO transitionDO) {
         List<Fragment> fragments = new ArrayList<>();
@@ -137,11 +135,11 @@ public class FragmentCalculator {
 
         TransitionQuery query = new TransitionQuery();
         query.setLibraryId(libraryId);
-        query.setPageSize(MAX_PAGE_SIZE);
+        query.setPageSize(Constants.MAX_PAGE_SIZE_FOR_FRAGMENT);
         long totalCount = transitionService.count(query);
         int totalPage = 1;
-        if (totalCount > MAX_PAGE_SIZE) {
-            totalPage = (int) (totalCount / MAX_PAGE_SIZE) + 1;
+        if (totalCount > Constants.MAX_PAGE_SIZE_FOR_FRAGMENT) {
+            totalPage = (int) (totalCount / Constants.MAX_PAGE_SIZE_FOR_FRAGMENT) + 1;
         }
 
         HashSet<Fragment> targetFragments = new HashSet<>();
@@ -244,11 +242,11 @@ public class FragmentCalculator {
         TransitionQuery query = new TransitionQuery();
         query.setLibraryId(libraryId);
         query.setIsDecoy(isDecoy);
-        query.setPageSize(MAX_PAGE_SIZE);
+        query.setPageSize(Constants.MAX_PAGE_SIZE_FOR_FRAGMENT);
         long totalCount = transitionService.count(query);
         int totalPage = 1;
-        if (totalCount > MAX_PAGE_SIZE) {
-            totalPage = (int) (totalCount / MAX_PAGE_SIZE) + 1;
+        if (totalCount > Constants.MAX_PAGE_SIZE_FOR_FRAGMENT) {
+            totalPage = (int) (totalCount / Constants.MAX_PAGE_SIZE_FOR_FRAGMENT) + 1;
         }
 
         HashSet<Fragment> fragments = new HashSet<>();

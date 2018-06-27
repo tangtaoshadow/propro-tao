@@ -34,7 +34,7 @@ public class TransitionUtil {
 
     /**
      * 克隆一个Transition
-     * 设置PeptideSequence为空
+     * 设置Sequence为空
      * 设置UnimodMap为空
      * 设置id为空
      * 设置ProductMz为空
@@ -44,7 +44,7 @@ public class TransitionUtil {
      */
     public static TransitionDO cloneForDecoy(TransitionDO transitionDO){
         TransitionDO decoy = new TransitionDO();
-        decoy.setSequence(transitionDO.getSequence());
+        decoy.setTargetSequence(transitionDO.getTargetSequence());
         decoy.setLibraryName(transitionDO.getLibraryName());
         decoy.setWithBrackets(transitionDO.isWithBrackets());
         decoy.setAnnotations(transitionDO.getAnnotations());
@@ -55,7 +55,6 @@ public class TransitionUtil {
         decoy.setProteinName(transitionDO.getProteinName());
         decoy.setIsDecoy(true);
         decoy.setName(transitionDO.getName());
-//        decoy.setPeptideGroupLabel(transitionDO.getPeptideGroupLabel());
         decoy.setRt(transitionDO.getRt());
         decoy.setIntensity(transitionDO.getIntensity());
         decoy.setPrecursorMz(transitionDO.getPrecursorMz());

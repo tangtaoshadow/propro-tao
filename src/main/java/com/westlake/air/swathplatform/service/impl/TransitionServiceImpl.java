@@ -97,6 +97,16 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
+    public ResultDO deleteAllDecoyByLibraryId(String libraryId){
+        try {
+            transitionDAO.deleteAllDecoyByLibraryId(libraryId);
+            return new ResultDO(true);
+        } catch (Exception e) {
+            return ResultDO.buildError(ResultCode.DELETE_ERROR);
+        }
+    }
+
+    @Override
     public ResultDO<TransitionDO> getById(String id) {
         try {
             TransitionDO transitionDO = transitionDAO.getById(id);

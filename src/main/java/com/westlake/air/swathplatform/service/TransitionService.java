@@ -26,6 +26,8 @@ public interface TransitionService {
 
     ResultDO deleteAllByLibraryId(String libraryId);
 
+    ResultDO deleteAllDecoyByLibraryId(String libraryId);
+
     ResultDO<TransitionDO> getById(String id);
 
     Long countByProteinName(String libraryId);

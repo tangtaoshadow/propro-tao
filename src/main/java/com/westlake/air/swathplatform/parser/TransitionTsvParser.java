@@ -1,5 +1,6 @@
 package com.westlake.air.swathplatform.parser;
 
+import com.westlake.air.swathplatform.constants.Constants;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.dao.TransitionDAO;
 import com.westlake.air.swathplatform.domain.ResultDO;
@@ -48,7 +49,7 @@ public class TransitionTsvParser {
 
     public static final Pattern unimodPattern = Pattern.compile("([a-z])[\\(]unimod[\\:](\\d*)[\\)]");
 
-    public static final int MAX_INSERT_RECORD = 100000;
+
     @Autowired
     TransitionService transitionService;
 
@@ -82,8 +83,8 @@ public class TransitionTsvParser {
                     transitions.add(resultDO.getModel());
                 }
                 //每存储满50000条存储一次,由于之前已经删除过原有的数据,因此不再删除原有数据
-                if(transitions.size() > MAX_INSERT_RECORD){
-                    count += MAX_INSERT_RECORD;
+                if(transitions.size() > Constants.MAX_INSERT_RECORD_FOR_TRANSITION){
+                    count += Constants.MAX_INSERT_RECORD_FOR_TRANSITION;
                     transitionService.insertAll(transitions,false);
                     logger.info(count+"条数据插入成功");
                     transitions = new ArrayList<>();

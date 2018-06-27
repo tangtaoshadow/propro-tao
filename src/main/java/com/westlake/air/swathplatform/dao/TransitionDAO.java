@@ -74,6 +74,12 @@ public class TransitionDAO {
         mongoTemplate.remove(query, TransitionDO.class, CollectionName);
     }
 
+    public void deleteAllDecoyByLibraryId(String libraryId) {
+        Query query = new Query(where("libraryId").is(libraryId));
+        query.addCriteria(where("isDecoy").is(true));
+        mongoTemplate.remove(query, TransitionDO.class, CollectionName);
+    }
+
     public long countByProteinName(String libraryId) {
         AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(

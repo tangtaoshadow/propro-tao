@@ -11,11 +11,7 @@ import java.util.List;
  * Created by James Lu MiaoShan
  * Time: 2018-06-07 10:20
  */
-public abstract class BaseGenerator {
-
-    protected abstract Peptide generate(Peptide peptide);
-
-    protected abstract TransitionDO generate(TransitionDO transitionDO);
+public class BaseGenerator {
 
     /**
      * Compute relative identity (relative number of matches of amino acids at the same position) between two sequences
