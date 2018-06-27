@@ -1,5 +1,6 @@
 package com.westlake.air.swathplatform.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.westlake.air.swathplatform.algorithm.FormulaCalculator;
 import com.westlake.air.swathplatform.algorithm.FragmentCalculator;
 import com.westlake.air.swathplatform.decoy.generator.ShuffleGenerator;
@@ -107,7 +108,12 @@ public class TransitionController extends BaseController {
             return "redirect:/transition/list";
         }
 
-        shuffleGenerator.generate(resultDO.getModel());
+        TransitionDO transitionDO = shuffleGenerator.generate(resultDO.getModel());
+        if(transitionDO != null){
+            logger.info(JSON.toJSONString(transitionDO));
+        }else{
+            logger.info("未能够生成伪肽段");
+        }
         model.addAttribute("transition", resultDO.getModel());
         return "/transition/detail";
     }

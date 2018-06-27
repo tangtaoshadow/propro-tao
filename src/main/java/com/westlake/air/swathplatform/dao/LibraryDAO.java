@@ -59,13 +59,14 @@ public class LibraryDAO {
     }
 
     public void delete(String id) {
-        mongoTemplate.remove(id, CollectionName);
+        Query query = new Query(where("id").is(id));
+        mongoTemplate.remove(query, LibraryDO.class, CollectionName);
     }
-
-    public void deleteAllByLibraryId(String libraryId) {
-        Query query = new Query(where("libraryId").is(libraryId));
-        mongoTemplate.remove(query, TransitionDO.class, CollectionName);
-    }
+//
+//    public void deleteAllByLibraryId(String libraryId) {
+//        Query query = new Query(where("libraryId").is(libraryId));
+//        mongoTemplate.remove(query, TransitionDO.class, CollectionName);
+//    }
 
     private Query buildQuery(LibraryQuery libraryQuery) {
         Query query = buildQueryWithoutPage(libraryQuery);

@@ -66,7 +66,8 @@ public class TransitionDAO {
     }
 
     public void delete(String id) {
-        mongoTemplate.remove(id, CollectionName);
+        Query query = new Query(where("id").is(id));
+        mongoTemplate.remove(query,TransitionDO.class, CollectionName);
     }
 
     public void deleteAllByLibraryId(String libraryId) {

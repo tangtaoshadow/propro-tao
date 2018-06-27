@@ -51,20 +51,23 @@ public class TransitionTsvParser {
     @Autowired
     TransitionService transitionService;
 
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library,boolean justReal) {
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, boolean justReal) {
         List<TransitionDO> transitions = new ArrayList<>();
         ResultDO<List<TransitionDO>> tranResult = new ResultDO<>(true);
         try {
             InputStreamReader isr = new InputStreamReader(in, "UTF-8");
             BufferedReader reader = new BufferedReader(isr);
             String line = reader.readLine();
+            if (line == null) {
+                return ResultDO.buildError(ResultCode.LINE_IS_EMPTY);
+            }
             HashMap<String, Integer> columnMap = parseColumns(line);
 
             //开始插入前先清空原有的数据库数据
             ResultDO resultDOTmp = transitionService.deleteAllByLibraryId(library.getId());
             logger.info("删除旧数据完毕");
 
-            if(resultDOTmp.isFailured()){
+            if (resultDOTmp.isFailured()) {
                 logger.error(resultDOTmp.getMsgInfo());
                 return ResultDO.buildError(ResultCode.DELETE_ERROR);
             }
@@ -72,7 +75,7 @@ public class TransitionTsvParser {
             int count = 0;
             while ((line = reader.readLine()) != null) {
                 ResultDO<TransitionDO> resultDO = parseTransition(line, columnMap, library, justReal);
-                if(resultDO == null){
+                if (resultDO == null) {
                     continue;
                 }
                 if (resultDO.isFailured()) {
@@ -81,16 +84,16 @@ public class TransitionTsvParser {
                     transitions.add(resultDO.getModel());
                 }
                 //每存储满50000条存储一次,由于之前已经删除过原有的数据,因此不再删除原有数据
-                if(transitions.size() > Constants.MAX_INSERT_RECORD_FOR_TRANSITION){
+                if (transitions.size() > Constants.MAX_INSERT_RECORD_FOR_TRANSITION) {
                     count += Constants.MAX_INSERT_RECORD_FOR_TRANSITION;
-                    transitionService.insertAll(transitions,false);
-                    logger.info(count+"条数据插入成功");
+                    transitionService.insertAll(transitions, false);
+                    logger.info(count + "条数据插入成功");
                     transitions = new ArrayList<>();
                 }
             }
-            transitionService.insertAll(transitions,false);
-            count+=transitions.size();
-            logger.info(count+"条数据插入成功");
+            transitionService.insertAll(transitions, false);
+            count += transitions.size();
+            logger.info(count + "条数据插入成功");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -115,12 +118,12 @@ public class TransitionTsvParser {
      * @param library
      * @return
      */
-    private ResultDO<TransitionDO> parseTransition(String line, HashMap<String, Integer> columnMap, LibraryDO library,boolean justReal) {
+    private ResultDO<TransitionDO> parseTransition(String line, HashMap<String, Integer> columnMap, LibraryDO library, boolean justReal) {
         ResultDO<TransitionDO> resultDO = new ResultDO<>(true);
         String[] row = line.split("\t");
         TransitionDO transitionDO = new TransitionDO();
         boolean isDecoy = !row[columnMap.get(IsDecoy)].equals("0");
-        if(justReal && isDecoy){
+        if (justReal && isDecoy) {
             return null;
         }
         transitionDO.setIsDecoy(isDecoy);
@@ -138,28 +141,12 @@ public class TransitionTsvParser {
             transitionDO.setWithBrackets(true);
             annotations = annotations.replace("[", "").replace("]", "");
         }
-        transitionDO.setAnnotation(annotations);
+        transitionDO.setAnnotations(annotations);
         transitionDO.setFullName(row[columnMap.get(FullUniModPeptideName)]);
         transitionDO.setPrecursorCharge(Integer.parseInt(row[columnMap.get(PrecursorCharge)]));
-        //兼容在某些TSV格式中decoy的PeptideGroupLabel被描述为TransitionGroupId
-//        if (columnMap.get(PeptideGroupLabel) != null) {
-//            transitionDO.setPeptideGroupLabel(row[columnMap.get(PeptideGroupLabel)]);
-//        } else if (columnMap.get(TransitionGroupId) != null) {
-//            transitionDO.setPeptideGroupLabel(row[columnMap.get(TransitionGroupId)]);
-//        }
         try {
-            ResultDO<List<Annotation>> annotationResult = parseAnnotation(transitionDO.getAnnotation());
-            transitionDO.setAnnotations(annotationResult.getModel());
-            if (annotationResult.isFailured()) {
-                if (annotationResult.getModel() != null && annotationResult.getModel().size() > 0) {
-//                    logger.error("Line解析异常,忽略了部分异常数据:" + transitionDO.getPeptideSequence() + ";" + annotationResult.getMsgInfo());
-                    resultDO.setModel(transitionDO);
-                } else {
-                    resultDO.setSuccess(false);
-                    resultDO.setMsgInfo("Line插入错误:" + transitionDO.getSequence() + ";" + annotationResult.getMsgInfo());
-                    return resultDO;
-                }
-            }
+            ResultDO<Annotation> annotationResult = parseAnnotation(transitionDO.getAnnotations());
+            transitionDO.setAnnotation(annotationResult.getModel());
             resultDO.setModel(transitionDO);
         } catch (Exception e) {
             resultDO.setSuccess(false);
@@ -173,81 +160,82 @@ public class TransitionTsvParser {
         return resultDO;
     }
 
-    private ResultDO<List<Annotation>> parseAnnotation(String annotations) {
-        ResultDO<List<Annotation>> resultDO = new ResultDO<>(true);
-        List<Annotation> annotationList = new ArrayList<>();
+    private ResultDO<Annotation> parseAnnotation(String annotations) {
+        ResultDO<Annotation> resultDO = new ResultDO<>(true);
         String[] annotationStrs = annotations.split(",");
+        Annotation annotation = new Annotation();
+
         try {
-            for (String annotationStr : annotationStrs) {
-                Annotation annotation = new Annotation();
-                String[] forDeviation = annotationStr.split("/");
-                if(forDeviation.length > 1){
-                    annotation.setDeviation(Double.parseDouble(forDeviation[1]));
-                }
-
-                if (forDeviation[0].endsWith("i")) {
-                    annotation.setIsotope(true);
-                    forDeviation[0] = forDeviation[0].replace("i", "");
-                }
-
-                String[] forCharge = forDeviation[0].split("\\^");
-                if (forCharge.length == 2) {
-                    annotation.setCharge(Integer.parseInt(forCharge[1]));
-                }
-                //默认为负,少数情况下校准值为正
-                String nOrP = "-";
-                String[] forAdjust;
-                if (forCharge[0].contains("+")) {
-                    nOrP = "+";
-                    forAdjust = forCharge[0].split("\\+");
-                    if (forAdjust.length == 2) {
-                        annotation.setAdjust(Integer.parseInt(nOrP + forAdjust[1]));
-                    }
-                } else if (forCharge[0].contains("-")) {
-                    forAdjust = forCharge[0].split("-");
-                    if (forAdjust.length == 2) {
-                        annotation.setAdjust(Integer.parseInt(nOrP + forAdjust[1]));
-                    }
-                } else {
-                    forAdjust = forCharge;
-                }
-
-                String finalStr = forAdjust[0];
-                //第一位必定是字母,代表fragment类型
-                annotation.setType(finalStr.substring(0, 1));
-                String location = finalStr.substring(1, finalStr.length());
-                if (!location.isEmpty()) {
-                    annotation.setLocation(Integer.parseInt(location));
-                }
-                annotationList.add(annotation);
+            String annotationStr = annotationStrs[0];
+            String[] forDeviation = annotationStr.split("/");
+            if (forDeviation.length > 1) {
+                annotation.setDeviation(Double.parseDouble(forDeviation[1]));
             }
+
+            if (forDeviation[0].endsWith("i")) {
+                annotation.setIsotope(true);
+                forDeviation[0] = forDeviation[0].replace("i", "");
+            }
+
+            String[] forCharge = forDeviation[0].split("\\^");
+            if (forCharge.length == 2) {
+                annotation.setCharge(Integer.parseInt(forCharge[1]));
+            }
+            //默认为负,少数情况下校准值为正
+            String nOrP = "-";
+            String[] forAdjust;
+            if (forCharge[0].contains("+")) {
+                nOrP = "+";
+                forAdjust = forCharge[0].split("\\+");
+                if (forAdjust.length == 2) {
+                    annotation.setAdjust(Integer.parseInt(nOrP + forAdjust[1]));
+                }
+            } else if (forCharge[0].contains("-")) {
+                forAdjust = forCharge[0].split("-");
+                if (forAdjust.length == 2) {
+                    annotation.setAdjust(Integer.parseInt(nOrP + forAdjust[1]));
+                }
+            } else {
+                forAdjust = forCharge;
+            }
+
+            String finalStr = forAdjust[0];
+            //第一位必定是字母,代表fragment类型
+            annotation.setType(finalStr.substring(0, 1));
+            String location = finalStr.substring(1, finalStr.length());
+            if (!location.isEmpty()) {
+                annotation.setLocation(Integer.parseInt(location));
+            }
+
+
         } catch (Exception e) {
             resultDO.setSuccess(false);
             resultDO.setErrorResult(ResultCode.PARSE_ERROR.getCode(), "解析Annotation错误,Annotation:" + annotations);
         } finally {
-            resultDO.setModel(annotationList);
+            resultDO.setModel(annotation);
         }
         return resultDO;
     }
 
     /**
      * 解析出Modification的位置
+     *
      * @param transitionDO
      */
     public void parseModification(TransitionDO transitionDO) {
         //不论是真肽段还是伪肽段,fullUniModPeptideName字段都是真肽段的完整版
         String peptide = transitionDO.getFullName();
         peptide = peptide.toLowerCase();
-        HashMap<Integer,String> unimodMap = new HashMap<>();
+        HashMap<Integer, String> unimodMap = new HashMap<>();
 
         while (peptide.contains("(unimod:") && peptide.indexOf("(unimod:") != 0) {
             Matcher matcher = unimodPattern.matcher(peptide);
             if (matcher.find()) {
                 unimodMap.put(matcher.start(), matcher.group(2));
-                peptide = StringUtils.replaceOnce(peptide,matcher.group(0),matcher.group(1));
+                peptide = StringUtils.replaceOnce(peptide, matcher.group(0), matcher.group(1));
             }
         }
-        if(unimodMap.size() > 0){
+        if (unimodMap.size() > 0) {
             transitionDO.setUnimodMap(unimodMap);
         }
     }

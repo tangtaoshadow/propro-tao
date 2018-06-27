@@ -7,16 +7,16 @@ import com.westlake.air.swathplatform.decoy.BaseGenerator;
 import com.westlake.air.swathplatform.domain.bean.AminoAcid;
 import com.westlake.air.swathplatform.domain.bean.Annotation;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
-import com.westlake.air.swathplatform.parser.model.traml.Modification;
-import com.westlake.air.swathplatform.parser.model.traml.Peptide;
 import com.westlake.air.swathplatform.utils.TransitionUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -44,10 +44,10 @@ public class ShuffleGenerator extends BaseGenerator {
 
     public TransitionDO generate(TransitionDO transitionDO) {
 
-        if (transitionDO.getIsDecoy()) {
-            logger.warn("this is already a decoy!!!");
-            return transitionDO;
-        }
+//        if (transitionDO.getIsDecoy()) {
+//            logger.warn("this is already a decoy!!!");
+//            return null;
+//        }
 
         String sequence = transitionDO.getSequence();
         HashMap<Integer, String> unimodMap = transitionDO.getUnimodMap();
@@ -70,54 +70,47 @@ public class ShuffleGenerator extends BaseGenerator {
             }
         }
 
-        char[] sequenceArray = sequence.toCharArray();
+        aminoAcids = fragmentCalculator.parseAminoAcid(sequence,unimodMap);
 
-        for (int i = 0; i < sequenceArray.length; i++) {
-            AminoAcid aa = new AminoAcid();
-            aa.setName(String.valueOf(sequenceArray[i]));
-            if (unimodMap != null) {
-                aa.setModId(unimodMap.get(i));
-            }
-            aminoAcids.add(aa);
-        }
-
-        String bestDecoy = null;
+        List<AminoAcid> bestDecoy = null;
         Double asi = null;
         HashMap<Integer, String> newUnimodMap = new HashMap<>();
 
         //生成十个随机打乱的数组,比对重复度
         for (int i = 0; i < Constants.DECOY_GENERATOR_TRY_TIMES; i++) {
+
             Collections.shuffle(aminoAcids);
 
             String newSequence = TransitionUtil.toSequence(aminoAcids, false);
             double tempAsi = aaSequenceIdentify(sequence, newSequence);
             if (asi == null || asi > tempAsi) {
                 asi = tempAsi;
-                bestDecoy = newSequence;
+                bestDecoy = aminoAcids;
                 //如果已经生成一个重复度为0的肽段则可以直接跳出循环
                 if (asi == 0) {
                     break;
                 }
             }
+            aminoAcids = fragmentCalculator.parseAminoAcid(sequence,unimodMap);
         }
 
         if (removeLastAcid) {
-            aminoAcids.add(lastAcid);
+            bestDecoy.add(lastAcid);
         }
 
-        for (int i = 0; i < aminoAcids.size(); i++) {
-            if (aminoAcids.get(i).getModId() != null) {
-                newUnimodMap.put(i, aminoAcids.get(i).getModId());
+        for (int i = 0; i < bestDecoy.size(); i++) {
+            if (bestDecoy.get(i).getModId() != null) {
+                newUnimodMap.put(i, bestDecoy.get(i).getModId());
             }
         }
 
         TransitionDO decoy = TransitionUtil.cloneForDecoy(transitionDO);
-        decoy.setSequence(bestDecoy + lastAcidChar);
+        decoy.setSequence(TransitionUtil.toSequence(bestDecoy, false));
         decoy.setUnimodMap(newUnimodMap);
-        Annotation oneAnno = decoy.getAnnotations().get(0);
+        Annotation oneAnno = decoy.getAnnotation();
 
         List<String> unimodIds = new ArrayList<>();
-        List<AminoAcid> acids = fragmentCalculator.getFragmentSequence(aminoAcids, oneAnno.getType(), oneAnno.getLocation());
+        List<AminoAcid> acids = fragmentCalculator.getFragmentSequence(bestDecoy, oneAnno.getType(), oneAnno.getLocation());
         for (AminoAcid aminoAcid : acids) {
             if (aminoAcid.getModId() != null) {
                 unimodIds.add(aminoAcid.getModId());
@@ -134,7 +127,8 @@ public class ShuffleGenerator extends BaseGenerator {
                 unimodIds
         );
 
-        transitionDO.setProductMz(productMz);
-        return transitionDO;
+        decoy.setFeatures("计算的肽段:"+TransitionUtil.toSequence(acids, false));
+        decoy.setProductMz(productMz);
+        return decoy;
     }
 }

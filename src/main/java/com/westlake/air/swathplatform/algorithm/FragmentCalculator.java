@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -40,37 +41,33 @@ public class FragmentCalculator {
         List<Fragment> fragments = new ArrayList<>();
         Fragment fragment = new Fragment(transitionDO.getId());
         String sequence = transitionDO.getSequence();
-        List<Annotation> annotationList = transitionDO.getAnnotations();
+        Annotation annotation = transitionDO.getAnnotation();
         fragment.setUnimodMap(transitionDO.getUnimodMap());
-        for (Annotation annotation : annotationList) {
-            String fs = getFragmentSequence(sequence, annotation.getType(), annotation.getLocation());
-            if (fs == null) {
-                continue;
-            }
 
-            String type = annotation.getType();
-            if (type.equals(ResidueType.AIon) || type.equals(ResidueType.BIon) || type.equals(ResidueType.CIon)) {
-                fragment.setStart(0);
-                //因为location是从1开始计数的,而这边的end是从0开始计数的
-                fragment.setEnd(annotation.getLocation() - 1);
-            } else if (type.equals(ResidueType.XIon) || type.equals(ResidueType.YIon) || type.equals(ResidueType.ZIon)) {
-                fragment.setStart(sequence.length() - annotation.getLocation());
-                fragment.setEnd(sequence.length() - 1);
-            } else if (type.equals(ResidueType.Full)) {
-                fragment.setStart(0);
-                fragment.setEnd(sequence.length() - 1);
-            }
-            fragment.setSequence(fs);
-            fragment.setIsotope(annotation.isIsotope());
-            fragment.setLocation(annotation.getLocation());
-            fragment.setDeviation(annotation.getDeviation());
-            fragment.setAdjust(annotation.getAdjust());
-            fragment.setType(annotation.getType());
-            fragment.setCharge(annotation.getCharge());
-            fragment.setMonoMz(formulaCalculator.getMonoMz(fragment));
-            fragment.setAverageMz(formulaCalculator.getAverageMz(fragment));
-            fragments.add(fragment);
+        String fs = getFragmentSequence(sequence, annotation.getType(), annotation.getLocation());
+
+        String type = annotation.getType();
+        if (type.equals(ResidueType.AIon) || type.equals(ResidueType.BIon) || type.equals(ResidueType.CIon)) {
+            fragment.setStart(0);
+            //因为location是从1开始计数的,而这边的end是从0开始计数的
+            fragment.setEnd(annotation.getLocation() - 1);
+        } else if (type.equals(ResidueType.XIon) || type.equals(ResidueType.YIon) || type.equals(ResidueType.ZIon)) {
+            fragment.setStart(sequence.length() - annotation.getLocation());
+            fragment.setEnd(sequence.length() - 1);
+        } else if (type.equals(ResidueType.Full)) {
+            fragment.setStart(0);
+            fragment.setEnd(sequence.length() - 1);
         }
+        fragment.setSequence(fs);
+        fragment.setIsotope(annotation.isIsotope());
+        fragment.setLocation(annotation.getLocation());
+        fragment.setDeviation(annotation.getDeviation());
+        fragment.setAdjust(annotation.getAdjust());
+        fragment.setType(annotation.getType());
+        fragment.setCharge(annotation.getCharge());
+        fragment.setMonoMz(formulaCalculator.getMonoMz(fragment));
+        fragment.setAverageMz(formulaCalculator.getAverageMz(fragment));
+        fragments.add(fragment);
 
         return fragments;
     }
@@ -85,22 +82,19 @@ public class FragmentCalculator {
         List<Fragment> fragments = new ArrayList<>();
         Fragment fragment = new Fragment();
         String sequence = transitionDO.getSequence();
-        List<Annotation> annotationList = transitionDO.getAnnotations();
+        Annotation annotation = transitionDO.getAnnotation();
         fragment.setUnimodMap(transitionDO.getUnimodMap());
-        for (Annotation annotation : annotationList) {
-            String fs = getFragmentSequence(sequence, annotation.getType(), annotation.getLocation());
-            if (fs == null) {
-                continue;
-            }
-            fragment.setIsotope(annotation.isIsotope());
-            fragment.setDeviation(annotation.getDeviation());
-            fragment.setLocation(annotation.getLocation());
-            fragment.setAdjust(annotation.getAdjust());
-            fragment.setSequence(fs);
-            fragment.setType(annotation.getType());
-            fragment.setCharge(annotation.getCharge());
-            fragments.add(fragment);
-        }
+
+        String fs = getFragmentSequence(sequence, annotation.getType(), annotation.getLocation());
+
+        fragment.setIsotope(annotation.isIsotope());
+        fragment.setDeviation(annotation.getDeviation());
+        fragment.setLocation(annotation.getLocation());
+        fragment.setAdjust(annotation.getAdjust());
+        fragment.setSequence(fs);
+        fragment.setType(annotation.getType());
+        fragment.setCharge(annotation.getCharge());
+        fragments.add(fragment);
 
         return fragments;
     }
@@ -235,6 +229,21 @@ public class FragmentCalculator {
 
     }
 
+    public List<AminoAcid> parseAminoAcid(String sequence, HashMap<Integer,String> unimodMap){
+
+        List<AminoAcid> aminoAcids = new ArrayList<>();
+        char[] sequenceArray = sequence.toCharArray();
+        for (int i = 0; i < sequenceArray.length; i++) {
+            AminoAcid aa = new AminoAcid();
+            aa.setName(String.valueOf(sequenceArray[i]));
+            if (unimodMap != null) {
+                aa.setModId(unimodMap.get(i));
+            }
+            aminoAcids.add(aa);
+        }
+        return aminoAcids;
+    }
+
     public List<MzResult> check(String libraryId, Double threshold, boolean isDecoy) {
         if (threshold == null) {
             threshold = 0.05;
@@ -280,7 +289,7 @@ public class FragmentCalculator {
                                 mzResult.setType(fragment.getType());
                                 mzResult.setOriginSequence(transition.getFullName());
                                 mzResult.setFragmentSequence(fragment.getSequence());
-                                mzResult.setAnnotations(transition.getAnnotation());
+                                mzResult.setAnnotations(transition.getAnnotations());
                                 mzResult.setPrecursorCharge(transition.getPrecursorCharge());
                                 mzResult.setPrecursorMz(transition.getPrecursorMz());
                                 mzResult.setNewPrecursorMz(formulaCalculator.getMonoMz(transition));

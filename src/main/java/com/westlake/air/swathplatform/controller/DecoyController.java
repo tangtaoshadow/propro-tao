@@ -70,7 +70,7 @@ public class DecoyController extends BaseController {
         query.setLibraryId(id);
         long totalCount = transitionService.count(query);
         int totalPage = (int) (totalCount / MAX_INSERT_RECORD_FOR_TRANSITION) + 1;
-
+        query.setPageSize(MAX_INSERT_RECORD_FOR_TRANSITION);
         int countForInsert = 0;
         for (int i = 1; i <= totalPage; i++) {
             query.setPageNo(i);

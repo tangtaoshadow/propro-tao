@@ -157,6 +157,16 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
+                                    <label for="annotation" class="col-2 col-form-label">
+                                        完整版注释
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="annotations"
+                                               name="annotations"
+                                               readonly th:value="${transition?.annotations}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
                                     <label for="fullUniModPeptideName" class="col-2 col-form-label">
                                         完整版肽段名称(含修饰基团)
                                     </label>
@@ -176,16 +186,16 @@
                                                th:value="${transition?.precursorCharge}">
                                     </div>
                                 </div>
-                                <!--<div class="form-group m-form__group row">-->
-                                    <!--<label for="peptideGroupLabel" class="col-2 col-form-label">-->
-                                        <!--肽段组标签-->
-                                    <!--</label>-->
-                                    <!--<div class="col-10">-->
-                                        <!--<input type="text" class="form-control m-input" id="peptideGroupLabel"-->
-                                               <!--name="peptideGroupLabel" readonly-->
-                                               <!--th:value="${transition?.peptideGroupLabel}">-->
-                                    <!--</div>-->
-                                <!--</div>-->
+                                <div class="form-group m-form__group row">
+                                    <label for="features" class="col-2 col-form-label">
+                                        Features
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="features"
+                                               name="features" readonly
+                                               th:value="${transition?.features}">
+                                    </div>
+                                </div>
                                 <div class="form-group m-form__group row">
                                     <label for="" class="col-2 col-form-label">
                                         修饰基团

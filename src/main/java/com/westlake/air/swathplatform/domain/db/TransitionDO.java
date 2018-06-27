@@ -82,7 +82,7 @@ public class TransitionDO {
     /**
      * 注释
      */
-    String annotation;
+    String annotations;
 
     /**
      * 注释是否带有中括号,默认不带
@@ -100,9 +100,9 @@ public class TransitionDO {
     Integer precursorCharge;
 
     /**
-     * 新字段,fragment详情列表
+     * 新字段,仅记录第一个
      */
-    List<Annotation> annotations;
+    Annotation annotation;
 
     /**
      * 如果是伪肽段,则本字段代表的是伪肽段中unimod的位置
@@ -114,4 +114,7 @@ public class TransitionDO {
      * 新字段,原始肽段的序列列表,包含修饰符
      */
     List<AminoAcid> acidList = new ArrayList<>();
+
+    String features;
+
 }

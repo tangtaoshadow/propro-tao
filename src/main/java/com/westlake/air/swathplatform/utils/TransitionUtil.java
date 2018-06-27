@@ -44,7 +44,7 @@ public class TransitionUtil {
      */
     public static TransitionDO cloneForDecoy(TransitionDO transitionDO){
         TransitionDO decoy = new TransitionDO();
-        decoy.setTargetSequence(transitionDO.getTargetSequence());
+        decoy.setTargetSequence(transitionDO.getSequence());
         decoy.setLibraryName(transitionDO.getLibraryName());
         decoy.setWithBrackets(transitionDO.isWithBrackets());
         decoy.setAnnotations(transitionDO.getAnnotations());
@@ -58,7 +58,6 @@ public class TransitionUtil {
         decoy.setRt(transitionDO.getRt());
         decoy.setIntensity(transitionDO.getIntensity());
         decoy.setPrecursorMz(transitionDO.getPrecursorMz());
-        decoy.setProductMz(transitionDO.getProductMz());
 
         return decoy;
     }

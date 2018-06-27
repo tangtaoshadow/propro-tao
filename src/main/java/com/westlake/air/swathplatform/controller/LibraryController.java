@@ -90,7 +90,7 @@ public class LibraryController extends BaseController {
             return "redirect:/library/create";
         }
 
-        if (file != null) {
+        if (file != null && file.getOriginalFilename() != null && !file.getOriginalFilename().isEmpty()) {
 
             //先Parse文件,再作数据库的操作
             ResultDO result = parseAndInsertTsv(file, library, justReal);
@@ -180,7 +180,7 @@ public class LibraryController extends BaseController {
                 return "redirect:/library/list";
             }
 
-            if (file != null) {
+            if (file != null && file.getOriginalFilename() != null && !file.getOriginalFilename().isEmpty()) {
                 //先Parse文件,再作数据库的操作
                 ResultDO parseResult = parseAndInsertTsv(file, library, justReal);
                 if (parseResult.getErrorList() != null) {
@@ -210,6 +210,7 @@ public class LibraryController extends BaseController {
     @RequestMapping(value = "/delete/{id}")
     String delete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO resultDO = libraryService.delete(id);
+        transitionService.deleteAllByLibraryId(id);
         if (resultDO.isSuccess()) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_LIBRARY_SUCCESS);
             return "redirect:/library/list";
