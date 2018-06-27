@@ -39,7 +39,7 @@ public class FragmentCalculator {
     public List<Fragment> getFragments(TransitionDO transitionDO) {
         List<Fragment> fragments = new ArrayList<>();
         Fragment fragment = new Fragment(transitionDO.getId());
-        String sequence = transitionDO.getPeptideSequence();
+        String sequence = transitionDO.getSequence();
         List<Annotation> annotationList = transitionDO.getAnnotations();
         fragment.setUnimodMap(transitionDO.getUnimodMap());
         for (Annotation annotation : annotationList) {
@@ -84,7 +84,7 @@ public class FragmentCalculator {
     public List<Fragment> getBaseFragments(TransitionDO transitionDO) {
         List<Fragment> fragments = new ArrayList<>();
         Fragment fragment = new Fragment();
-        String sequence = transitionDO.getPeptideSequence();
+        String sequence = transitionDO.getSequence();
         List<Annotation> annotationList = transitionDO.getAnnotations();
         fragment.setUnimodMap(transitionDO.getUnimodMap());
         for (Annotation annotation : annotationList) {
@@ -276,9 +276,9 @@ public class FragmentCalculator {
                                 mzResult.setNewMz(fragment.getMonoMz());
                                 mzResult.setDelta(result);
                                 mzResult.setCharge(fragment.getCharge());
-                                mzResult.setSequence(transition.getPeptideSequence());
+                                mzResult.setSequence(transition.getSequence());
                                 mzResult.setType(fragment.getType());
-                                mzResult.setOriginSequence(transition.getFullUniModPeptideName());
+                                mzResult.setOriginSequence(transition.getFullName());
                                 mzResult.setFragmentSequence(fragment.getSequence());
                                 mzResult.setAnnotations(transition.getAnnotation());
                                 mzResult.setPrecursorCharge(transition.getPrecursorCharge());

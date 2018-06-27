@@ -94,12 +94,30 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="transitionCount" class="col-2 col-form-label">
-                                Transition数目
+                            <label for="totalCount" class="col-2 col-form-label">
+                                总数目
                             </label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="transitionCount"
-                                       name="transitionCount" readonly th:value="${library?.transitionCount}">
+                                <input type="text" class="form-control m-input" id="totalCount"
+                                       name="totalCount" readonly th:value="${library?.totalCount}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="totalTargetCount" class="col-2 col-form-label">
+                                真实肽段总数目
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="totalTargetCount"
+                                       name="totalTargetCount" readonly th:value="${library?.totalTargetCount}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="totalDecoyCount" class="col-2 col-form-label">
+                                伪肽段总数目
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="totalDecoyCount"
+                                       name="totalDecoyCount" readonly th:value="${library?.totalDecoyCount}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">

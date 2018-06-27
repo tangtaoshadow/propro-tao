@@ -44,9 +44,9 @@ public class ReverseGenerator extends BaseGenerator {
             logger.warn("this is already a decoy!!!");
             return transitionDO;
         }
-        String sequence = transitionDO.getPeptideSequence();
+        String sequence = transitionDO.getSequence();
         sequence = StringUtils.reverse(sequence);
-        transitionDO.setPeptideSequence(sequence);
+        transitionDO.setSequence(sequence);
         transitionDO.getUnimodMap();
         return null;
     }

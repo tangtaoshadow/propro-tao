@@ -88,32 +88,32 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="normalizedRetentionTime" class="col-2 col-form-label">
+                                    <label for="rt" class="col-2 col-form-label">
                                         归一化RT
                                     </label>
                                     <div class="col-10">
-                                        <input type="text" class="form-control m-input" id="normalizedRetentionTime"
-                                               name="normalizedRetentionTime" readonly
-                                               th:value="${transition?.normalizedRetentionTime}">
+                                        <input type="text" class="form-control m-input" id="rt"
+                                               name="rt" readonly
+                                               th:value="${transition?.rt}">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="transitionName" class="col-2 col-form-label">
+                                    <label for="name" class="col-2 col-form-label">
                                         Transition名称
                                     </label>
                                     <div class="col-10">
-                                        <input type="text" class="form-control m-input" id="transitionName"
-                                               name="transitionName" readonly th:value="${transition?.transitionName}">
+                                        <input type="text" class="form-control m-input" id="name"
+                                               name="name" readonly th:value="${transition?.name}">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="productIonIntensity" class="col-2 col-form-label">
+                                    <label for="intensity" class="col-2 col-form-label">
                                         离子强度
                                     </label>
                                     <div class="col-10">
-                                        <input type="text" class="form-control m-input" id="productIonIntensity"
-                                               name="productIonIntensity" readonly
-                                               th:value="${transition?.productIonIntensity}">
+                                        <input type="text" class="form-control m-input" id="intensity"
+                                               name="intensity" readonly
+                                               th:value="${transition?.intensity}">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
@@ -131,9 +131,9 @@
                                         对应肽段序列
                                     </label>
                                     <div class="col-10">
-                                        <input type="text" class="form-control m-input" id="peptideSequence"
-                                               name="peptideSequence" readonly
-                                               th:value="${transition?.peptideSequence}">
+                                        <input type="text" class="form-control m-input" id="sequence"
+                                               name="sequence" readonly
+                                               th:value="${transition?.sequence}">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
@@ -163,7 +163,7 @@
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="fullUniModPeptideName"
                                                name="fullUniModPeptideName" readonly
-                                               th:value="${transition?.fullUniModPeptideName}">
+                                               th:value="${transition?.fullName}">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
@@ -176,18 +176,18 @@
                                                th:value="${transition?.precursorCharge}">
                                     </div>
                                 </div>
+                                <!--<div class="form-group m-form__group row">-->
+                                    <!--<label for="peptideGroupLabel" class="col-2 col-form-label">-->
+                                        <!--肽段组标签-->
+                                    <!--</label>-->
+                                    <!--<div class="col-10">-->
+                                        <!--<input type="text" class="form-control m-input" id="peptideGroupLabel"-->
+                                               <!--name="peptideGroupLabel" readonly-->
+                                               <!--th:value="${transition?.peptideGroupLabel}">-->
+                                    <!--</div>-->
+                                <!--</div>-->
                                 <div class="form-group m-form__group row">
-                                    <label for="peptideGroupLabel" class="col-2 col-form-label">
-                                        肽段组标签
-                                    </label>
-                                    <div class="col-10">
-                                        <input type="text" class="form-control m-input" id="peptideGroupLabel"
-                                               name="peptideGroupLabel" readonly
-                                               th:value="${transition?.peptideGroupLabel}">
-                                    </div>
-                                </div>
-                                <div class="form-group m-form__group row">
-                                    <label for="peptideGroupLabel" class="col-2 col-form-label">
+                                    <label for="" class="col-2 col-form-label">
                                         修饰基团
                                     </label>
                                     <div class="col-10">

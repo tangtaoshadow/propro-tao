@@ -26,18 +26,18 @@ public class TransitionQuery extends PageQuery {
     /**
      * 归一化RT
      */
-    Double normalizedRetentionTime;
+    Double rt;
 
     /**
      * 过渡态名称
      */
-    String transitionName;
+    String name;
 
     /**
      * 离子强度
      * library intensity
      */
-    Double productIonIntensity;
+    Double intensity;
 
     /**
      * 是否是伪肽段
@@ -47,7 +47,7 @@ public class TransitionQuery extends PageQuery {
     /**
      * 对应肽段序列
      */
-    String peptideSequence;
+    String sequence;
 
     /**
      * 对应蛋白质名称
@@ -57,12 +57,7 @@ public class TransitionQuery extends PageQuery {
     /**
      * 完整版肽段名称(含修饰基团)
      */
-    String fullUniModPeptideName;
-
-    /**
-     * 肽段组标签
-     */
-    String peptideGroupLabel;
+    String fullName;
 
 
 }

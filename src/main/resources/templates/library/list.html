@@ -55,14 +55,20 @@
                     <th width="10%">
                         设备名称
                     </th>
-                    <th width="10%">
+                    <th width="5%">
                         蛋白质数目
                     </th>
-                    <th width="10%">
+                    <th width="5%">
                         肽段数目
                     </th>
-                    <th width="10%">
-                        Transition数目
+                    <th width="5%">
+                        总数目
+                    </th>
+                    <th width="5%">
+                        真肽段数目
+                    </th>
+                    <th width="5%">
+                        伪肽段数目
                     </th>
                     <th width="15%">
                         创建时间
@@ -70,7 +76,7 @@
                     <th width="15%">
                         最后修改时间
                     </th>
-                    <th width="10%">
+                    <th width="15%">
                         操作
                     </th>
                 </tr>
@@ -81,7 +87,9 @@
                     <td th:text="${library.instrument}"></td>
                     <td th:text="${library.proteinCount}"></td>
                     <td th:text="${library.peptideCount}"></td>
-                    <td th:text="${library.transitionCount}"></td>
+                    <td th:text="${library.totalCount}"></td>
+                    <td th:text="${library.totalTargetCount}"></td>
+                    <td th:text="${library.totalDecoyCount}"></td>
                     <td th:text="${#dates.format(library.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(library.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>

@@ -35,11 +35,11 @@ public class FormulaCalculator {
     UnimodParser unimodParser;
 
     public double getMonoMz(TransitionDO transitionDO) {
-        return getMonoMz(transitionDO.getPeptideSequence(), ResidueType.Full, transitionDO.getPrecursorCharge(), 0, 0, false, parseUnimodIds(transitionDO));
+        return getMonoMz(transitionDO.getSequence(), ResidueType.Full, transitionDO.getPrecursorCharge(), 0, 0, false, parseUnimodIds(transitionDO));
     }
 
     public double getAverageMz(TransitionDO transitionDO) {
-        return getAverageMz(transitionDO.getPeptideSequence(), ResidueType.Full, transitionDO.getPrecursorCharge(), 0, 0, false, parseUnimodIds(transitionDO));
+        return getAverageMz(transitionDO.getSequence(), ResidueType.Full, transitionDO.getPrecursorCharge(), 0, 0, false, parseUnimodIds(transitionDO));
     }
 
     /**

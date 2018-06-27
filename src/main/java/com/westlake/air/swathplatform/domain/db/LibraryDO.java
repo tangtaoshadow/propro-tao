@@ -34,7 +34,11 @@ public class LibraryDO extends BaseDO {
 
     Long peptideCount;
 
-    Long transitionCount;
+    Long totalCount;
+
+    Long totalTargetCount;
+
+    Long totalDecoyCount;
 
     Date createDate;
 

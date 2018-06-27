@@ -50,8 +50,8 @@
                                         肽段:
                                     </button>
                                 </div>
-                                <input type="text" class="form-control m-input" name="peptideSequence"
-                                       placeholder="peptideSequence" th:value="${peptideSequence}">
+                                <input type="text" class="form-control m-input" name="sequence"
+                                       placeholder="sequence" th:value="${sequence}">
                             </div>
                             <div class="input-group col-lg-3">
                                 <div class="input-group-prepend">
@@ -59,8 +59,8 @@
                                         Transition名称:
                                     </button>
                                 </div>
-                                <input type="text" class="form-control m-input" name="transitionName"
-                                       placeholder="transitionName" th:value="${transitionName}">
+                                <input type="text" class="form-control m-input" name="name"
+                                       placeholder="name" th:value="${name}">
                                 <div class="input-group-append">
                                     <button class="btn btn-warning" type="submit">
                                         搜索
@@ -127,10 +127,10 @@
                                        th:text="${transition.proteinName}"></a>
                                 </td>
                                 <td>
-                                    <a th:href="|/transition/list?peptideSequence=${transition.peptideSequence}|"
-                                       th:text="${transition.peptideSequence}"></a>
+                                    <a th:href="|/transition/list?sequence=${transition.sequence}|"
+                                       th:text="${transition.sequence}"></a>
                                 </td>
-                                <td th:text="${transition.fullUniModPeptideName}"></td>
+                                <td th:text="${transition.fullName}"></td>
                                 <td th:text="${transition.precursorMz}"></td>
                                 <td th:text="${transition.productMz}"></td>
                                 <td th:text="${transition.annotation}"></td>
@@ -144,8 +144,8 @@
                                         真
                                     </span>
                                 </td>
-                                <td th:text="${transition.productIonIntensity}"></td>
-                                <td th:text="${transition.normalizedRetentionTime}"></td>
+                                <td th:text="${transition.intensity}"></td>
+                                <td th:text="${transition.rt}"></td>
                                 <td>
                                     <a th:href="|/transition/detail/${transition.id}|"
                                        class="btn btn-success btn-sm">详情

@@ -44,20 +44,20 @@ public class TransitionUtil {
      */
     public static TransitionDO cloneForDecoy(TransitionDO transitionDO){
         TransitionDO decoy = new TransitionDO();
-        decoy.setPeptideSequence(transitionDO.getPeptideSequence());
+        decoy.setSequence(transitionDO.getSequence());
         decoy.setLibraryName(transitionDO.getLibraryName());
         decoy.setWithBrackets(transitionDO.isWithBrackets());
         decoy.setAnnotations(transitionDO.getAnnotations());
         decoy.setAnnotation(transitionDO.getAnnotation());
         decoy.setLibraryId(transitionDO.getLibraryId());
         decoy.setPrecursorCharge(transitionDO.getPrecursorCharge());
-        decoy.setFullUniModPeptideName(transitionDO.getFullUniModPeptideName());
+        decoy.setFullName(transitionDO.getFullName());
         decoy.setProteinName(transitionDO.getProteinName());
         decoy.setIsDecoy(true);
-        decoy.setTransitionName(transitionDO.getTransitionName());
-        decoy.setPeptideGroupLabel(transitionDO.getPeptideGroupLabel());
-        decoy.setNormalizedRetentionTime(transitionDO.getNormalizedRetentionTime());
-        decoy.setProductIonIntensity(transitionDO.getProductIonIntensity());
+        decoy.setName(transitionDO.getName());
+//        decoy.setPeptideGroupLabel(transitionDO.getPeptideGroupLabel());
+        decoy.setRt(transitionDO.getRt());
+        decoy.setIntensity(transitionDO.getIntensity());
         decoy.setPrecursorMz(transitionDO.getPrecursorMz());
         decoy.setProductMz(transitionDO.getProductMz());
 

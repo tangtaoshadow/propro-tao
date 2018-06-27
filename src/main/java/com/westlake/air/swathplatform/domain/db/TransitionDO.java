@@ -1,5 +1,6 @@
 package com.westlake.air.swathplatform.domain.db;
 
+import com.westlake.air.swathplatform.domain.bean.AminoAcid;
 import com.westlake.air.swathplatform.domain.bean.Annotation;
 import com.westlake.air.swathplatform.domain.bean.Fragment;
 import lombok.Data;
@@ -9,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -37,25 +39,25 @@ public class TransitionDO {
     Double precursorMz;
 
     /**
-     * 栗子片段的荷质比MZ
+     * 离子片段的荷质比MZ(Mono荷质比)
      */
     Double productMz;
 
     /**
      * 归一化RT
      */
-    Double normalizedRetentionTime;
+    Double rt;
 
     /**
      * 过渡态名称,如果是伪肽段,则为包含了原始肽段的属性
      */
-    String transitionName;
+    String name;
 
     /**
      * 离子强度
      * library intensity
      */
-    Double productIonIntensity;
+    Double intensity;
 
     /**
      * 是否是伪肽段
@@ -63,9 +65,14 @@ public class TransitionDO {
     Boolean isDecoy;
 
     /**
+     * 新字段,如果是伪肽段,则本字段为伪肽段对应的原始肽段的Sequence
+     */
+    String targetSequence;
+
+    /**
      * 对应肽段序列,如果是伪肽段,则为对应的伪肽段的序列
      */
-    String peptideSequence;
+    String sequence;
 
     /**
      * 对应蛋白质名称
@@ -85,7 +92,7 @@ public class TransitionDO {
     /**
      * 完整版肽段名称(含修饰基团),如果是伪肽段则为原始的肽段的完整序列而不是伪肽段的完整序列
      */
-    String fullUniModPeptideName;
+    String fullName;
 
     /**
      * 肽段带电量
@@ -93,12 +100,7 @@ public class TransitionDO {
     Integer precursorCharge;
 
     /**
-     * 肽段组标签
-     */
-    String peptideGroupLabel;
-
-    /**
-     * fragment详情列表
+     * 新字段,fragment详情列表
      */
     List<Annotation> annotations;
 
@@ -107,4 +109,9 @@ public class TransitionDO {
      * key为unimod在肽段中的位置,位置从0开始计数,value为unimod的Id(参见unimod.obo文件)
      */
     HashMap<Integer, String> unimodMap;
+
+    /**
+     * 新字段,原始肽段的序列列表,包含修饰符
+     */
+    List<AminoAcid> acidList = new ArrayList<>();
 }

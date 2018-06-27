@@ -6,6 +6,7 @@ import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.bean.Annotation;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
+import com.westlake.air.swathplatform.parser.model.chemistry.Residue;
 import com.westlake.air.swathplatform.service.TransitionService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -44,9 +45,6 @@ public class TransitionTsvParser {
     private static String PrecursorCharge = "precursorcharge";
     private static String PeptideGroupLabel = "peptidegrouplabel";
     private static String TransitionGroupId = "transition_group_id";
-//    private static String FragmentType = "fragmenttype";
-//    private static String FragmentCharge = "fragmentcharge";
-//    private static String FragmentSeriesNumber = "fragmentseriesnumber";
 
     public static final Pattern unimodPattern = Pattern.compile("([a-z])[\\(]unimod[\\:](\\d*)[\\)]");
 
@@ -54,7 +52,7 @@ public class TransitionTsvParser {
     @Autowired
     TransitionService transitionService;
 
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library) {
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library,boolean justReal) {
         List<TransitionDO> transitions = new ArrayList<>();
         ResultDO<List<TransitionDO>> tranResult = new ResultDO<>(true);
         try {
@@ -74,7 +72,10 @@ public class TransitionTsvParser {
 
             int count = 0;
             while ((line = reader.readLine()) != null) {
-                ResultDO<TransitionDO> resultDO = parseTransition(line, columnMap, library);
+                ResultDO<TransitionDO> resultDO = parseTransition(line, columnMap, library, justReal);
+                if(resultDO == null){
+                    continue;
+                }
                 if (resultDO.isFailured()) {
                     tranResult.addErrorMsg(resultDO.getMsgInfo());
                 } else {
@@ -115,19 +116,23 @@ public class TransitionTsvParser {
      * @param library
      * @return
      */
-    private ResultDO<TransitionDO> parseTransition(String line, HashMap<String, Integer> columnMap, LibraryDO library) {
+    private ResultDO<TransitionDO> parseTransition(String line, HashMap<String, Integer> columnMap, LibraryDO library,boolean justReal) {
         ResultDO<TransitionDO> resultDO = new ResultDO<>(true);
         String[] row = line.split("\t");
         TransitionDO transitionDO = new TransitionDO();
+        boolean isDecoy = !row[columnMap.get(IsDecoy)].equals("0");
+        if(justReal && isDecoy){
+            return null;
+        }
+        transitionDO.setIsDecoy(isDecoy);
         transitionDO.setLibraryId(library.getId());
         transitionDO.setLibraryName(library.getName());
         transitionDO.setPrecursorMz(Double.parseDouble(row[columnMap.get(PrecursorMz)]));
         transitionDO.setProductMz(Double.parseDouble(row[columnMap.get(ProductMz)]));
-        transitionDO.setNormalizedRetentionTime(Double.parseDouble(row[columnMap.get(NormalizedRetentionTime)]));
-        transitionDO.setTransitionName(row[columnMap.get(TransitionName)]);
-        transitionDO.setIsDecoy(!row[columnMap.get(IsDecoy)].equals("0"));
-        transitionDO.setProductIonIntensity(Double.parseDouble(row[columnMap.get(ProductIonIntensity)]));
-        transitionDO.setPeptideSequence(row[columnMap.get(PeptideSequence)]);
+        transitionDO.setRt(Double.parseDouble(row[columnMap.get(NormalizedRetentionTime)]));
+        transitionDO.setName(row[columnMap.get(TransitionName)]);
+        transitionDO.setIntensity(Double.parseDouble(row[columnMap.get(ProductIonIntensity)]));
+        transitionDO.setSequence(row[columnMap.get(PeptideSequence)]);
         transitionDO.setProteinName(row[columnMap.get(ProteinName)]);
         String annotations = row[columnMap.get(Annotation)].replaceAll("\"", "");
         if (annotations.contains("[")) {
@@ -135,14 +140,14 @@ public class TransitionTsvParser {
             annotations = annotations.replace("[", "").replace("]", "");
         }
         transitionDO.setAnnotation(annotations);
-        transitionDO.setFullUniModPeptideName(row[columnMap.get(FullUniModPeptideName)]);
+        transitionDO.setFullName(row[columnMap.get(FullUniModPeptideName)]);
         transitionDO.setPrecursorCharge(Integer.parseInt(row[columnMap.get(PrecursorCharge)]));
         //兼容在某些TSV格式中decoy的PeptideGroupLabel被描述为TransitionGroupId
-        if (columnMap.get(PeptideGroupLabel) != null) {
-            transitionDO.setPeptideGroupLabel(row[columnMap.get(PeptideGroupLabel)]);
-        } else if (columnMap.get(TransitionGroupId) != null) {
-            transitionDO.setPeptideGroupLabel(row[columnMap.get(TransitionGroupId)]);
-        }
+//        if (columnMap.get(PeptideGroupLabel) != null) {
+//            transitionDO.setPeptideGroupLabel(row[columnMap.get(PeptideGroupLabel)]);
+//        } else if (columnMap.get(TransitionGroupId) != null) {
+//            transitionDO.setPeptideGroupLabel(row[columnMap.get(TransitionGroupId)]);
+//        }
         try {
             ResultDO<List<Annotation>> annotationResult = parseAnnotation(transitionDO.getAnnotation());
             transitionDO.setAnnotations(annotationResult.getModel());
@@ -152,7 +157,7 @@ public class TransitionTsvParser {
                     resultDO.setModel(transitionDO);
                 } else {
                     resultDO.setSuccess(false);
-                    resultDO.setMsgInfo("Line插入错误:" + transitionDO.getPeptideSequence() + ";" + annotationResult.getMsgInfo());
+                    resultDO.setMsgInfo("Line插入错误:" + transitionDO.getSequence() + ";" + annotationResult.getMsgInfo());
                     return resultDO;
                 }
             }
@@ -232,7 +237,7 @@ public class TransitionTsvParser {
      */
     public void parseModification(TransitionDO transitionDO) {
         //不论是真肽段还是伪肽段,fullUniModPeptideName字段都是真肽段的完整版
-        String peptide = transitionDO.getFullUniModPeptideName();
+        String peptide = transitionDO.getFullName();
         peptide = peptide.toLowerCase();
         HashMap<Integer,String> unimodMap = new HashMap<>();
 

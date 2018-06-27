@@ -72,6 +72,7 @@ public class LibraryController extends BaseController {
                @RequestParam(value = "name", required = true) String name,
                @RequestParam(value = "instrument", required = false) String instrument,
                @RequestParam(value = "description", required = false) String description,
+               @RequestParam(value = "justReal", required = false) boolean justReal,
                @RequestParam(value = "file") MultipartFile file,
                RedirectAttributes redirectAttributes) {
 
@@ -92,7 +93,7 @@ public class LibraryController extends BaseController {
         if (file != null) {
 
             //先Parse文件,再作数据库的操作
-            ResultDO result = parseAndInsertTsv(file, library);
+            ResultDO result = parseAndInsertTsv(file, library, justReal);
             if (result.getErrorList() != null) {
                 if (result.getErrorList().size() > errorListNumberLimit) {
                     redirectAttributes.addFlashAttribute(ERROR_MSG, "解析错误,错误的条数过多,这边只显示" + errorListNumberLimit + "条错误信息");
@@ -110,17 +111,7 @@ public class LibraryController extends BaseController {
             /**
              * 如果全部存储成功,开始统计蛋白质数目,肽段数目和Transition数目
              */
-            try {
-                library.setProteinCount(transitionService.countByProteinName(library.getId()));
-                library.setPeptideCount(transitionService.countByPeptideSequence(library.getId()));
-                TransitionQuery query = new TransitionQuery();
-                query.setId(library.getId());
-                library.setTransitionCount(transitionService.count(query));
-
-                libraryService.update(library);
-            } catch (Exception e) {
-                logger.error(e.getMessage());
-            }
+            countAndUpdateForLibrary(library);
         }
         long deltaTime = System.currentTimeMillis() - startTime;
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS + "总共耗时:" + deltaTime + "毫秒;");
@@ -137,17 +128,7 @@ public class LibraryController extends BaseController {
         }
 
         LibraryDO library = resultDO.getModel();
-        try {
-            library.setProteinCount(transitionService.countByProteinName(library.getId()));
-            library.setPeptideCount(transitionService.countByPeptideSequence(library.getId()));
-            TransitionQuery query = new TransitionQuery();
-            query.setLibraryId(library.getId());
-            library.setTransitionCount(transitionService.count(query));
-
-            libraryService.update(library);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        }
+        countAndUpdateForLibrary(library);
 
         return "redirect:/library/detail/" + library.getId();
     }
@@ -182,6 +163,7 @@ public class LibraryController extends BaseController {
                   @RequestParam(value = "name") String name,
                   @RequestParam(value = "instrument") String instrument,
                   @RequestParam(value = "description") String description,
+                  @RequestParam(value = "justReal", required = false) boolean justReal,
                   @RequestParam(value = "file") MultipartFile file,
                   RedirectAttributes redirectAttributes) {
 
@@ -200,7 +182,7 @@ public class LibraryController extends BaseController {
 
             if (file != null) {
                 //先Parse文件,再作数据库的操作
-                ResultDO parseResult = parseAndInsertTsv(file, library);
+                ResultDO parseResult = parseAndInsertTsv(file, library, justReal);
                 if (parseResult.getErrorList() != null) {
                     if (parseResult.getErrorList().size() > errorListNumberLimit) {
                         redirectAttributes.addFlashAttribute(ERROR_MSG, "解析错误,错误的条数过多,这边只显示" + errorListNumberLimit + "条错误信息");
@@ -210,20 +192,7 @@ public class LibraryController extends BaseController {
                     }
                 }
 
-                /**
-                 * 如果全部存储成功,开始统计蛋白质数目,肽段数目和Transition数目
-                 */
-                try {
-                    library.setProteinCount(transitionService.countByProteinName(library.getId()));
-                    library.setPeptideCount(transitionService.countByPeptideSequence(library.getId()));
-                    TransitionQuery query = new TransitionQuery();
-                    query.setId(library.getId());
-                    library.setTransitionCount(transitionService.count(query));
-
-                    libraryService.update(library);
-                } catch (Exception e) {
-                    logger.error(e.getMessage());
-                }
+                countAndUpdateForLibrary(library);
 
             }
 
@@ -250,15 +219,33 @@ public class LibraryController extends BaseController {
         }
     }
 
-    private ResultDO parseAndInsertTsv(MultipartFile file, LibraryDO library) {
+    private ResultDO parseAndInsertTsv(MultipartFile file, LibraryDO library, boolean justReal) {
 
         ResultDO resultDO = new ResultDO<>(true);
         try {
-            resultDO = tsvParser.parseAndInsert(file.getInputStream(), library);
+            resultDO = tsvParser.parseAndInsert(file.getInputStream(), library, justReal);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         return resultDO;
+    }
+
+    private void countAndUpdateForLibrary(LibraryDO library){
+        try {
+            library.setProteinCount(transitionService.countByProteinName(library.getId()));
+            library.setPeptideCount(transitionService.countByPeptideSequence(library.getId()));
+            TransitionQuery query = new TransitionQuery();
+            query.setLibraryId(library.getId());
+            library.setTotalCount(transitionService.count(query));
+            query.setIsDecoy(false);
+            library.setTotalTargetCount(transitionService.count(query));
+            query.setIsDecoy(true);
+            library.setTotalDecoyCount(transitionService.count(query));
+
+            libraryService.update(library);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
     }
 }

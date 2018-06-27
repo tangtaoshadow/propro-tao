@@ -42,29 +42,29 @@ public class TransitionController extends BaseController {
     String list(Model model,
                 @RequestParam(value = "libraryId", required = false) String libraryId,
                 @RequestParam(value = "proteinName", required = false) String proteinName,
-                @RequestParam(value = "peptideSequence", required = false) String peptideSequence,
-                @RequestParam(value = "transitionName", required = false) String transitionName,
+                @RequestParam(value = "sequence", required = false) String sequence,
+                @RequestParam(value = "name", required = false) String name,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
         long startTime = System.currentTimeMillis();
         model.addAttribute("libraryId", libraryId);
         model.addAttribute("proteinName", proteinName);
-        model.addAttribute("peptideSequence", peptideSequence);
-        model.addAttribute("transitionName", transitionName);
+        model.addAttribute("sequence", sequence);
+        model.addAttribute("name", name);
         model.addAttribute("pageSize", pageSize);
         TransitionQuery query = new TransitionQuery();
 
         if (libraryId != null && !libraryId.isEmpty()) {
             query.setLibraryId(libraryId);
         }
-        if (peptideSequence != null && !peptideSequence.isEmpty()) {
-            query.setPeptideSequence(peptideSequence);
+        if (sequence != null && !sequence.isEmpty()) {
+            query.setSequence(sequence);
         }
         if (proteinName != null && !proteinName.isEmpty()) {
             query.setProteinName(proteinName);
         }
-        if (transitionName != null && !transitionName.isEmpty()) {
-            query.setTransitionName(transitionName);
+        if (name != null && !name.isEmpty()) {
+            query.setName(name);
         }
 
         query.setPageSize(pageSize);

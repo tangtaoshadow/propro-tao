@@ -84,23 +84,23 @@ public class TransitionDAO {
         return (long)a.getMappedResults().size();
     }
 
-    public long countByPeptideSequence(String libraryId) {
+    public long countBySequence(String libraryId) {
         AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(
                         TransitionDO.class,
                         Aggregation.match(where("libraryId").is(libraryId)),
-                        Aggregation.group("peptideSequence").count().as("count")).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
+                        Aggregation.group("sequence").count().as("count")).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
                 BasicDBObject.class);
 
         return (long)a.getMappedResults().size();
     }
 
-    public long countByTransitionName(String libraryId) {
+    public long countByName(String libraryId) {
         AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(
                         TransitionDO.class,
                         Aggregation.match(where("libraryId").is(libraryId)),
-                        Aggregation.group("transitionName").count().as("count")).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
+                        Aggregation.group("name").count().as("count")).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
                 BasicDBObject.class);
         return (long)a.getMappedResults().size();
     }
@@ -123,20 +123,20 @@ public class TransitionDAO {
         if (transitionQuery.getIsDecoy() != null) {
             query.addCriteria(where("isDecoy").is(transitionQuery.getIsDecoy()));
         }
-        if (transitionQuery.getFullUniModPeptideName() != null) {
-            query.addCriteria(where("fullUniModPeptideName").regex(transitionQuery.getFullUniModPeptideName(), "i"));
+        if (transitionQuery.getFullName() != null) {
+            query.addCriteria(where("fullName").regex(transitionQuery.getFullName(), "i"));
         }
         if (transitionQuery.getLibraryId() != null) {
             query.addCriteria(where("libraryId").is(transitionQuery.getLibraryId()));
         }
-        if (transitionQuery.getPeptideSequence() != null) {
-            query.addCriteria(where("peptideSequence").regex(transitionQuery.getPeptideSequence(), "i"));
+        if (transitionQuery.getSequence() != null) {
+            query.addCriteria(where("sequence").regex(transitionQuery.getSequence(), "i"));
         }
         if (transitionQuery.getProteinName() != null) {
             query.addCriteria(where("proteinName").is(transitionQuery.getProteinName()));
         }
-        if (transitionQuery.getTransitionName() != null) {
-            query.addCriteria(where("transitionName").regex(transitionQuery.getTransitionName(),"i"));
+        if (transitionQuery.getName() != null) {
+            query.addCriteria(where("name").regex(transitionQuery.getName(),"i"));
         }
 
         return query;

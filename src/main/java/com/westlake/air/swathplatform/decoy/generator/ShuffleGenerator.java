@@ -56,7 +56,7 @@ public class ShuffleGenerator extends BaseGenerator {
             return transitionDO;
         }
 
-        String sequence = transitionDO.getPeptideSequence();
+        String sequence = transitionDO.getSequence();
         HashMap<Integer, String> unimodMap = transitionDO.getUnimodMap();
 
         List<AminoAcid> aminoAcids = new ArrayList<>();
@@ -119,7 +119,7 @@ public class ShuffleGenerator extends BaseGenerator {
         }
 
         TransitionDO decoy = TransitionUtil.cloneForDecoy(transitionDO);
-        decoy.setPeptideSequence(bestDecoy + lastAcidChar);
+        decoy.setSequence(bestDecoy + lastAcidChar);
         decoy.setUnimodMap(newUnimodMap);
         Annotation oneAnno = decoy.getAnnotations().get(0);
 

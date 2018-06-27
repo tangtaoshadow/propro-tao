@@ -121,6 +121,6 @@ public class TransitionServiceImpl implements TransitionService {
 
     @Override
     public Long countByPeptideSequence(String libraryId) {
-        return transitionDAO.countByPeptideSequence(libraryId);
+        return transitionDAO.countBySequence(libraryId);
     }
 }
