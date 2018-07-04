@@ -174,7 +174,7 @@ var amChartsStockChartsDemo = function() {
                 "enabled": true
             }
         });
-    }
+    };
 
     var demo2 = function() {
         var chartData = [];
@@ -346,7 +346,7 @@ var amChartsStockChartsDemo = function() {
                 "enabled": true
             }
         });
-    }
+    };
 
     var demo3 = function() {
         var chartData = generateChartData();
@@ -440,7 +440,7 @@ var amChartsStockChartsDemo = function() {
                 }]
             }
         });
-    }
+    };
 
     var demo4 = function() {
         var chartData = generateChartData();
@@ -568,7 +568,7 @@ var amChartsStockChartsDemo = function() {
                 "position": "bottom-right"
             }
         });
-    }
+    };
 
     var demo5 = function() {
         var chartData = [];
@@ -763,7 +763,7 @@ var amChartsStockChartsDemo = function() {
                 "enabled": true
             }
         });
-    }
+    };
     return {
         // public functions
         init: function() {

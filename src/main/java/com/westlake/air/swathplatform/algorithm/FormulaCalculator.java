@@ -77,25 +77,25 @@ public class FormulaCalculator {
 
         switch (type) {
             case ResidueType.Full:
-                return (getMonoWeightAsFull(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope?1:0)) / charge + deviation;
+                return (getMonoWeightAsFull(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope ? 1 : 0)) / charge + deviation;
             case ResidueType.AIon:
-                return (getMonoWeightAsAIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope?1:0)) / charge + deviation;
+                return (getMonoWeightAsAIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope ? 1 : 0)) / charge + deviation;
             case ResidueType.BIon:
-                return (getMonoWeightAsBIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope?1:0)) / charge + deviation;
+                return (getMonoWeightAsBIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope ? 1 : 0)) / charge + deviation;
             case ResidueType.CIon:
-                return (getMonoWeightAsCIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope?1:0)) / charge + deviation;
+                return (getMonoWeightAsCIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope ? 1 : 0)) / charge + deviation;
             case ResidueType.XIon:
-                return (getMonoWeightAsXIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope?1:0)) / charge + deviation;
+                return (getMonoWeightAsXIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope ? 1 : 0)) / charge + deviation;
             case ResidueType.YIon:
-                return (getMonoWeightAsYIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope?1:0)) / charge + deviation;
+                return (getMonoWeightAsYIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope ? 1 : 0)) / charge + deviation;
             case ResidueType.ZIon:
-                return (getMonoWeightAsZIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope?1:0)) / charge + deviation;
+                return (getMonoWeightAsZIon(sequence) + getMonoHWeight(charge) + adjust + unimodMonoMass + (isIsotope ? 1 : 0)) / charge + deviation;
             default:
                 return 0;
         }
     }
 
-    public double getAverageMz(String sequence, String type, int charge, int adjust, double deviation, boolean isIsotope,  List<String> unimodIds) {
+    public double getAverageMz(String sequence, String type, int charge, int adjust, double deviation, boolean isIsotope, List<String> unimodIds) {
 
         double unimodAverageMass = 0;
         if (unimodIds != null) {
@@ -109,19 +109,19 @@ public class FormulaCalculator {
 
         switch (type) {
             case ResidueType.Full:
-                return (getAverageWeightAsFull(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope?1:0)) / charge + deviation;
+                return (getAverageWeightAsFull(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope ? 1 : 0)) / charge + deviation;
             case ResidueType.AIon:
-                return (getAverageWeightAsAIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope?1:0)) / charge + deviation;
+                return (getAverageWeightAsAIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope ? 1 : 0)) / charge + deviation;
             case ResidueType.BIon:
-                return (getAverageWeightAsBIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope?1:0)) / charge + deviation;
+                return (getAverageWeightAsBIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope ? 1 : 0)) / charge + deviation;
             case ResidueType.CIon:
-                return (getAverageWeightAsCIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope?1:0)) / charge + deviation;
+                return (getAverageWeightAsCIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope ? 1 : 0)) / charge + deviation;
             case ResidueType.XIon:
-                return (getAverageWeightAsXIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope?1:0)) / charge + deviation;
+                return (getAverageWeightAsXIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope ? 1 : 0)) / charge + deviation;
             case ResidueType.YIon:
-                return (getAverageWeightAsYIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope?1:0)) / charge + deviation;
+                return (getAverageWeightAsYIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope ? 1 : 0)) / charge + deviation;
             case ResidueType.ZIon:
-                return (getAverageWeightAsZIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope?1:0)) / charge + deviation;
+                return (getAverageWeightAsZIon(sequence) + getAverageHWeight(charge) + adjust + unimodAverageMass + (isIsotope ? 1 : 0)) / charge + deviation;
             default:
                 return 0;
         }

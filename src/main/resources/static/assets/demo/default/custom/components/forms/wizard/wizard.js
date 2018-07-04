@@ -18,13 +18,13 @@ var WizardDemo = function () {
             if (validator.form() !== true) {
                 return false;  // don't go to the next step
             }
-        })
+        });
 
         //== Change event
         wizard.on('change', function(wizard) {
             mApp.scrollTop();
         });
-    }
+    };
 
     var initValidation = function() {
         validator = formEl.validate({
@@ -162,7 +162,7 @@ var WizardDemo = function () {
                 
             }
         });   
-    }
+    };
 
     var initSubmit = function() {
         var btn = formEl.find('[data-wizard-action="submit"]');
@@ -191,7 +191,7 @@ var WizardDemo = function () {
                 });
             }
         });
-    }
+    };
 
     return {
         // public functions

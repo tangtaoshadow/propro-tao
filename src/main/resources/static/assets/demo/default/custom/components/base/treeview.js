@@ -17,7 +17,7 @@ var Treeview = function () {
             },
             "plugins": ["types"]
         });
-    }
+    };
 
     var demo2 = function () {
         $('#m_tree_2').jstree({
@@ -48,7 +48,7 @@ var Treeview = function () {
                 return false;
             }
         });
-    }
+    };
 
     var demo3 = function () {
         $('#m_tree_3').jstree({
@@ -97,7 +97,7 @@ var Treeview = function () {
                 }
             },
         });
-    }
+    };
 
     var demo4 = function() {
         $("#m_tree_4").jstree({
@@ -161,7 +161,7 @@ var Treeview = function () {
             "state" : { "key" : "demo2" },
             "plugins" : [ "contextmenu", "state", "types" ]
         });    
-    }
+    };
 
     var demo5 = function() {
         $("#m_tree_5").jstree({
@@ -225,7 +225,7 @@ var Treeview = function () {
             "state" : { "key" : "demo2" },
             "plugins" : [ "dnd", "state", "types" ]
         });    
-    }
+    };
 
     var demo6 = function() {
         $("#m_tree_6").jstree({
@@ -255,7 +255,7 @@ var Treeview = function () {
             "state" : { "key" : "demo3" },
             "plugins" : [ "dnd", "state", "types" ]
         });
-    }
+    };
 
     return {
         //main function to initiate the module

@@ -44,7 +44,7 @@ var Typeahead = function() {
             name: 'states',
             source: substringMatcher(states)
         });
-    }
+    };
 
     var demo2 = function() {
         // constructs the suggestion engine
@@ -64,7 +64,7 @@ var Typeahead = function() {
             name: 'states',
             source: bloodhound
         }); 
-    }
+    };
 
     var demo3 = function() {
         var countries = new Bloodhound({
@@ -81,7 +81,7 @@ var Typeahead = function() {
             name: 'countries',
             source: countries
         });
-    }
+    };
 
     var demo4 = function() {
         var bestPictures = new Bloodhound({
@@ -103,7 +103,7 @@ var Typeahead = function() {
                 suggestion: Handlebars.compile('<div><strong>{{value}}</strong> – {{year}}</div>')
             }
         });
-    }
+    };
 
     var demo5 = function() {
         var nbaTeams = new Bloodhound({
@@ -136,7 +136,7 @@ var Typeahead = function() {
                 }
             }
         );
-    }
+    };
 
     return {
         // public functions

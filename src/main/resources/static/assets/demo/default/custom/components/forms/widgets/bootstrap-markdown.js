@@ -4,7 +4,7 @@ var BootstrapMarkdown = function () {
     //== Private functions
     var demos = function () {
         
-    }
+    };
 
     return {
         // public functions

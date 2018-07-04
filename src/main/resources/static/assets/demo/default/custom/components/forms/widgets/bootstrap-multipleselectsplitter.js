@@ -6,7 +6,7 @@ var BootstrapMultipleSelectsplitter = function () {
     var demos = function () {
         // minimum setup
         $('#m_multipleselectsplitter_1, #m_multipleselectsplitter_2').multiselectsplitter();
-    }
+    };
 
     return {
         // public functions

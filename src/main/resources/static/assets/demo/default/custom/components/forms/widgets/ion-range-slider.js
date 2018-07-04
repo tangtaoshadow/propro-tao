@@ -68,7 +68,7 @@ var IONRangeSlider = function () {
             decorate_both: true
         });
 
-    }
+    };
 
     return {
         // public functions

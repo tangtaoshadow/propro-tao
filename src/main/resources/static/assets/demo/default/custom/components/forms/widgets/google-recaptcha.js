@@ -6,7 +6,7 @@ var BootstrapTouchspin = function () {
     var demos = function () {
         // minimum setup
         //$('#m_timepicker_1, #m_timepicker_1_modal').timepicker();
-    }
+    };
 
     return {
         // public functions

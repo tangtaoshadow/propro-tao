@@ -57,7 +57,7 @@ var BootstrapTouchspin = function() {
             verticalupclass: 'la la-angle-up',
             verticaldownclass: 'la la-angle-down'
         });
-    }
+    };
 
     var validationStateDemos = function() {
         // validation state demos
@@ -92,7 +92,7 @@ var BootstrapTouchspin = function() {
             verticalupclass: 'la la-plus',
             verticaldownclass: 'la la-minus'
         });
-    }
+    };
 
     return {
         // public functions

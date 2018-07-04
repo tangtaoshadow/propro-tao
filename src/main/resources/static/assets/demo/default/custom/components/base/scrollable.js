@@ -6,7 +6,7 @@ var Scrollable = function () {
 
     // basic demo
     var demo1 = function () {
-    }
+    };
 
     return {
         // public functions

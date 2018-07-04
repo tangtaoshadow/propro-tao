@@ -75,7 +75,7 @@ var BootstrapNotifyDemo = function () {
                 }, 4000);
             }
         });
-    }
+    };
 
     return {
         // public functions

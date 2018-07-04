@@ -13,7 +13,7 @@ var SnippetLogin = function() {
         alert.prependTo(form);
         alert.animateClass('fadeIn animated');
         alert.find('span').html(msg);
-    }
+    };
 
     //== Private Functions
 
@@ -23,7 +23,7 @@ var SnippetLogin = function() {
 
         login.addClass('m-login--signup');
         login.find('.m-login__signup').animateClass('flipInX animated');
-    }
+    };
 
     var displaySignInForm = function() {
         login.removeClass('m-login--forget-password');
@@ -31,7 +31,7 @@ var SnippetLogin = function() {
 
         login.addClass('m-login--signin');
         login.find('.m-login__signin').animateClass('flipInX animated');
-    }
+    };
 
     var displayForgetPasswordForm = function() {
         login.removeClass('m-login--signin');
@@ -39,7 +39,7 @@ var SnippetLogin = function() {
 
         login.addClass('m-login--forget-password');
         login.find('.m-login__forget-password').animateClass('flipInX animated');
-    }
+    };
 
     var handleFormSwitch = function() {
         $('#m_login_forget_password').click(function(e) {
@@ -61,7 +61,7 @@ var SnippetLogin = function() {
             e.preventDefault();
             displaySignInForm();
         });
-    }
+    };
 
     var handleSignInFormSubmit = function() {
         $('#m_login_signin_submit').click(function(e) {
@@ -99,7 +99,7 @@ var SnippetLogin = function() {
                 }
             });
         });
-    }
+    };
 
     var handleSignUpFormSubmit = function() {
         $('#m_login_signup_submit').click(function(e) {
@@ -155,7 +155,7 @@ var SnippetLogin = function() {
                 }
             });
         });
-    }
+    };
 
     var handleForgetPasswordFormSubmit = function() {
         $('#m_login_forget_password_submit').click(function(e) {
@@ -199,7 +199,7 @@ var SnippetLogin = function() {
                 }
             });
         });
-    }
+    };
 
     //== Public Functions
     return {

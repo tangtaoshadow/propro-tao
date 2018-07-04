@@ -107,7 +107,7 @@ var amChartsMapsDemo = function() {
             }
 
         });
-    }
+    };
 
     var demo2 = function() {
         // svg path for target icon
@@ -305,7 +305,7 @@ var amChartsMapsDemo = function() {
                 "enabled": true
             }
         });
-    }
+    };
 
     var demo3 = function() {
         var map = AmCharts.makeChart("m_amcharts_3", {
@@ -328,7 +328,7 @@ var amChartsMapsDemo = function() {
                 "position": "bottom-right"
             }
         });
-    }
+    };
 
     var demo4 = function() {
         /**
@@ -602,7 +602,7 @@ var amChartsMapsDemo = function() {
                 "enabled": true
             }
         });
-    }
+    };
 
     var demo5 = function() {
         var map = AmCharts.makeChart("m_amcharts_5", {
@@ -824,7 +824,7 @@ var amChartsMapsDemo = function() {
             }
 
         });
-    }
+    };
 
     var demo6 = function() {
         var map = AmCharts.makeChart("m_amcharts_6", {
@@ -1002,7 +1002,7 @@ var amChartsMapsDemo = function() {
             }
 
         });
-    }
+    };
 
     return {
         // public functions

@@ -145,7 +145,7 @@ var Select2 = function() {
         $('.m-select2-general').select2({
             placeholder: "Select an option"
         });
-    }
+    };
 
     var modalDemos = function() {
         $('#m_select2_modal').on('shown.bs.modal', function () {
@@ -170,7 +170,7 @@ var Select2 = function() {
                 allowClear: true
             }); 
         });
-    }
+    };
 
     //== Public functions
     return {

@@ -6,7 +6,7 @@ var BootstrapSwitch = function () {
     var demos = function () {
         // minimum setup
         $('[data-switch=true]').bootstrapSwitch();
-    }
+    };
 
     return {
         // public functions

@@ -9,7 +9,7 @@ var ClipboardDemo = function () {
             e.clearSelection();
             alert('Copied!');
         });
-    }
+    };
 
     return {
         // public functions

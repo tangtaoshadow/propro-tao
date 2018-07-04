@@ -6,7 +6,7 @@ var BootstrapSelect = function () {
     var demos = function () {
         // minimum setup
         $('.m_selectpicker').selectpicker();
-    }
+    };
 
     return {
         // public functions

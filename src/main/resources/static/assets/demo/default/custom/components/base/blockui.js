@@ -64,7 +64,7 @@ var BlockUIDemo = function () {
                 mApp.unblock('#m_blockui_1_content');
             }, 2000);
         });
-    }
+    };
 
     // portlet blocking
     var demo2 = function () {
@@ -126,7 +126,7 @@ var BlockUIDemo = function () {
                 mApp.unblock('#m_blockui_2_portlet');
             }, 2000);
         });
-    }
+    };
 
     // page blocking
     var demo3 = function () {
@@ -188,7 +188,7 @@ var BlockUIDemo = function () {
                 mApp.unblockPage();
             }, 2000);
         });
-    }
+    };
 
     // modal blocking
     var demo4 = function () {
@@ -250,7 +250,7 @@ var BlockUIDemo = function () {
                 mApp.unblock('#m_blockui_4_5_modal .modal-content');
             }, 2000);
         });
-    }
+    };
 
     return {
         // public functions

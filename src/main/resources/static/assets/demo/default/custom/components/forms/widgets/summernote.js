@@ -6,7 +6,7 @@ var SummernoteDemo = function () {
         $('.summernote').summernote({
             height: 150
         });
-    }
+    };
 
     return {
         // public functions

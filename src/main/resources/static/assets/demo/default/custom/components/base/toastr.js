@@ -148,7 +148,7 @@ var ToastrDemo = function() {
         $('#cleartoasts').click(function () {
             toastr.clear();
         });
-    }
+    };
 
     return {
         // public functions

@@ -90,7 +90,7 @@ var Dashboard = function() {
         };
 
         return new Chart(src, config);
-    }
+    };
 
     //== Daily Sales chart.
     //** Based on Chartjs plugin - http://www.chartjs.org/
@@ -160,7 +160,7 @@ var Dashboard = function() {
                 }
             }
         });
-    }
+    };
 
     //== Profit Share Chart.
     //** Based on Chartist plugin - https://gionkunz.github.io/chartist-js/index.html
@@ -249,7 +249,7 @@ var Dashboard = function() {
             }
             window.__anim21278907124 = setTimeout(chart.update.bind(chart), 15000);
         });
-    }
+    };
 
     //== Sales Stats.
     //** Based on Chartjs plugin - http://www.chartjs.org/
@@ -338,7 +338,7 @@ var Dashboard = function() {
         };
 
         var chart = new Chart($('#m_chart_sales_stats'), config);
-    }
+    };
 
     //== Sales By mUtillication Stats.
     //** Based on Chartjs plugin - http://www.chartjs.org/
@@ -353,7 +353,7 @@ var Dashboard = function() {
         _initSparklineChart($('#m_chart_sales_by_apps_2_2'), [2, 16, 0, 12, 22, 5, -10, 5, 15, 2], mUtil.getColor('metal'), 2);
         _initSparklineChart($('#m_chart_sales_by_apps_2_3'), [15, 5, -10, 5, 16, 22, 6, -6, -12, 5], mUtil.getColor('brand'), 2);
         _initSparklineChart($('#m_chart_sales_by_apps_2_4'), [8, 18, -12, 12, 22, -2, -14, 16, 18, 2], mUtil.getColor('info'), 2);
-    }
+    };
 
     //== Latest Updates.
     //** Based on Chartjs plugin - http://www.chartjs.org/
@@ -436,7 +436,7 @@ var Dashboard = function() {
         };
 
         var chart = new Chart(ctx, config);
-    }
+    };
 
     //== Trends Stats.
     //** Based on Chartjs plugin - http://www.chartjs.org/
@@ -540,7 +540,7 @@ var Dashboard = function() {
         };
 
         var chart = new Chart(ctx, config);
-    }
+    };
 
     //== Trends Stats 2.
     //** Based on Chartjs plugin - http://www.chartjs.org/
@@ -640,7 +640,7 @@ var Dashboard = function() {
         };
 
         var chart = new Chart(ctx, config);
-    }
+    };
 
     //== Trends Stats.
     //** Based on Chartjs plugin - http://www.chartjs.org/
@@ -658,7 +658,7 @@ var Dashboard = function() {
         } catch (e) {
             console.log(e);
         }
-    }
+    };
 
     //== Revenue Change.
     //** Based on Morris plugin - http://morrisjs.github.io/morris.js/
@@ -688,7 +688,7 @@ var Dashboard = function() {
                 mUtil.getColor('brand')
             ],
         });
-    }
+    };
 
     //== Support Tickets Chart.
     //** Based on Morris plugin - http://morrisjs.github.io/morris.js/
@@ -720,7 +720,7 @@ var Dashboard = function() {
             ]
             //formatter: function (x) { return x + "%"}
         });
-    }
+    };
 
     //== Support Tickets Chart.
     //** Based on Morris plugin - http://morrisjs.github.io/morris.js/
@@ -800,7 +800,7 @@ var Dashboard = function() {
                 data.element.animate(animationDefinition, false);
             }
         });
-    }
+    };
 
     //== Activities Charts.
     //** Based on Chartjs plugin - http://www.chartjs.org/
@@ -894,7 +894,7 @@ var Dashboard = function() {
         };
 
         var chart = new Chart(ctx, config);
-    }
+    };
 
     //== Bandwidth Charts 1.
     //** Based on Chartjs plugin - http://www.chartjs.org/
@@ -988,7 +988,7 @@ var Dashboard = function() {
         };
 
         var chart = new Chart(ctx, config);
-    }
+    };
 
     //== Bandwidth Charts 2.
     //** Based on Chartjs plugin - http://www.chartjs.org/
@@ -1082,7 +1082,7 @@ var Dashboard = function() {
         };
 
         var chart = new Chart(ctx, config);
-    }
+    };
 
     //== Bandwidth Charts 2.
     //** Based on Chartjs plugin - http://www.chartjs.org/
@@ -1188,7 +1188,7 @@ var Dashboard = function() {
         };
 
         var chart = new Chart(ctx, config);
-    }
+    };
 
     //== Bandwidth Charts 2.
     //** Based on Chartjs plugin - http://www.chartjs.org/
@@ -1277,7 +1277,7 @@ var Dashboard = function() {
         };
 
         var chart = new Chart(ctx, config);
-    }
+    };
 
     //== Quick Stat Charts
     var quickStats = function() {
@@ -1285,7 +1285,7 @@ var Dashboard = function() {
         _initSparklineChart($('#m_chart_quick_stats_2'), [11, 12, 18, 13, 11, 12, 15, 13, 19, 15], mUtil.getColor('danger'), 3);
         _initSparklineChart($('#m_chart_quick_stats_3'), [12, 12, 18, 11, 15, 12, 13, 16, 11, 18], mUtil.getColor('success'), 3);
         _initSparklineChart($('#m_chart_quick_stats_4'), [11, 9, 13, 18, 13, 15, 14, 13, 18, 15], mUtil.getColor('accent'), 3);
-    }
+    };
 
     var daterangepickerInit = function() {
         if ($('#m_dashboard_daterangepicker').length == 0) {
@@ -1329,7 +1329,7 @@ var Dashboard = function() {
         }, cb);
 
         cb(start, end, '');
-    }
+    };
 
     var datatableLatestOrders = function() {
         if ($('#m_datatable_latest_orders').length === 0) {
@@ -1484,7 +1484,7 @@ var Dashboard = function() {
                 }
             }]
         });
-    }
+    };
 
     var calendarInit = function() {
         if ($('#m_calendar').length === 0) {
@@ -1640,7 +1640,7 @@ var Dashboard = function() {
                 }
             }
         });
-    }
+    };
 
     return {
         //== Init demos

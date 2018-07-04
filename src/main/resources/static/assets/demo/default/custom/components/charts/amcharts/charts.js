@@ -77,7 +77,7 @@ var amChartsChartsDemo = function() {
             }
 
         });
-    }
+    };
 
     var demo2 = function() {
         var chart = AmCharts.makeChart("m_amcharts_2", {
@@ -164,7 +164,7 @@ var amChartsChartsDemo = function() {
                 "enabled": true
             }
         });
-    }
+    };
 
     var demo3 = function() {
         var chart = AmCharts.makeChart("m_amcharts_3", {
@@ -228,7 +228,7 @@ var amChartsChartsDemo = function() {
             }
 
         });
-    }
+    };
 
     var demo4 = function() {
         var chart = AmCharts.makeChart("m_amcharts_4", {
@@ -304,7 +304,7 @@ var amChartsChartsDemo = function() {
                 "enabled": true
             }
         });
-    }
+    };
 
     var demo5 = function() {
         var chart = AmCharts.makeChart("m_amcharts_5", {
@@ -376,7 +376,7 @@ var amChartsChartsDemo = function() {
             }
 
         });
-    }
+    };
 
     var demo6 = function() {
         var chart = AmCharts.makeChart("m_amcharts_6", {
@@ -1028,7 +1028,7 @@ var amChartsChartsDemo = function() {
         function zoomChart() {
             chart.zoomToIndexes(chart.dataProvider.length - 40, chart.dataProvider.length - 1);
         }
-    }
+    };
 
     var demo7 = function() {
         var chartData = generateChartData();
@@ -1111,7 +1111,7 @@ var amChartsChartsDemo = function() {
             }
             return chartData;
         }
-    }
+    };
 
     var demo8 = function() {
         var chart = AmCharts.makeChart("m_amcharts_8", {
@@ -1335,7 +1335,7 @@ var amChartsChartsDemo = function() {
                 "enabled": true
             }
         });
-    }
+    };
 
     var demo9 = function() {
         var chart = AmCharts.makeChart("m_amcharts_9", {
@@ -1377,7 +1377,7 @@ var amChartsChartsDemo = function() {
                 "enabled": true
             }
         });
-    }
+    };
 
     var demo10 = function() {
         var chart = AmCharts.makeChart("m_amcharts_10", {
@@ -1450,7 +1450,7 @@ var amChartsChartsDemo = function() {
                 "enabled": true
             }
         });
-    }
+    };
 
     var demo11 = function() {
         var chart = AmCharts.makeChart("m_amcharts_11", {
@@ -1586,7 +1586,7 @@ var amChartsChartsDemo = function() {
                 "enabled": true
             }
         });
-    }
+    };
 
     var demo12 = function() {
         var chart = AmCharts.makeChart("m_amcharts_12", {
@@ -1629,7 +1629,7 @@ var amChartsChartsDemo = function() {
                 "enabled": true
             }
         });
-    }
+    };
 
     var demo13 = function() {
         /**
@@ -2360,7 +2360,7 @@ var amChartsChartsDemo = function() {
                 "enabled": true
             }
         });
-    }
+    };
 
 
     return {

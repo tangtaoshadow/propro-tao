@@ -139,9 +139,8 @@ var getElementById = function(id, context) {
     element = $('#' + id, context)[0];
   } else {
     element = document.getElementById(id);
-  };
-
-  return element;
+  }
+    return element;
 };
 
 var findAbsolutePosition = function(obj)  {
@@ -1861,8 +1860,8 @@ GMaps.prototype.toImage = function(options) {
     
     static_map_options['polyline'] = {};
     static_map_options['polyline']['path'] = google.maps.geometry.encoding.encodePath(polyline.getPath());
-    static_map_options['polyline']['strokeColor'] = polyline.strokeColor
-    static_map_options['polyline']['strokeOpacity'] = polyline.strokeOpacity
+    static_map_options['polyline']['strokeColor'] = polyline.strokeColor;
+    static_map_options['polyline']['strokeOpacity'] = polyline.strokeOpacity;
     static_map_options['polyline']['strokeWeight'] = polyline.strokeWeight
   }
 

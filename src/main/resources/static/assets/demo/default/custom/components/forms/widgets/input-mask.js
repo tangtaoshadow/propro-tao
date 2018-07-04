@@ -63,7 +63,7 @@ var Inputmask = function () {
                 }
             }
         });        
-    }
+    };
 
     return {
         // public functions

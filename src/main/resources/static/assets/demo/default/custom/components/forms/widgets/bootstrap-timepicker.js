@@ -40,7 +40,7 @@ var BootstrapTimepicker = function () {
             showMeridian: false,
             snapToStep: true
         });
-    }
+    };
 
     return {
         // public functions

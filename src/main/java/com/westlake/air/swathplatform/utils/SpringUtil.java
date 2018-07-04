@@ -16,10 +16,14 @@ public class SpringUtil implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+        SpringUtil.applicationContext = applicationContext;
     }
 
     public static Object getObject(String id) {
+        Double[] a = new Double[2];
+        if(a!=null){
+
+        }
         Object object = null;
         object = applicationContext.getBean(id);
         return object;

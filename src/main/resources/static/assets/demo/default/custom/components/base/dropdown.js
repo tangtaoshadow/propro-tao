@@ -35,7 +35,7 @@ var DropdownDemo = function () {
         dropdown2.mDropdown().on('beforeHide', function(dropdown) {
             output.append('<p>Dropdown 2: beforeHide event fired</p>');
         });    
-    }
+    };
 
     return {
         // public functions

@@ -18,7 +18,7 @@ var FormRepeater = function() {
                 $(this).slideUp(deleteElement);                 
             }   
         });
-    }
+    };
 
     var demo2 = function() {
         $('#m_repeater_2').repeater({            
@@ -38,7 +38,7 @@ var FormRepeater = function() {
                 }                                
             }      
         });
-    }
+    };
 
 
     var demo3 = function() {
@@ -59,7 +59,7 @@ var FormRepeater = function() {
                 }                                  
             }      
         });
-    }
+    };
 
     var demo4 = function() {
         $('#m_repeater_4').repeater({            
@@ -77,7 +77,7 @@ var FormRepeater = function() {
                 $(this).slideUp(deleteElement);                                               
             }      
         });
-    }
+    };
 
     var demo5 = function() {
         $('#m_repeater_5').repeater({            
@@ -95,7 +95,7 @@ var FormRepeater = function() {
                 $(this).slideUp(deleteElement);                                               
             }      
         });
-    }
+    };
 
     var demo6 = function() {
         $('#m_repeater_6').repeater({            
@@ -113,7 +113,7 @@ var FormRepeater = function() {
                 $(this).slideUp(deleteElement);                                                
             }      
         });
-    }
+    };
     return {
         // public functions
         init: function() {

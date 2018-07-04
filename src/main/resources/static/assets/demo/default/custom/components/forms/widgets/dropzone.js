@@ -48,7 +48,7 @@ var DropzoneDemo = function () {
                 }
             }   
         };
-    }
+    };
 
     return {
         // public functions

@@ -9,7 +9,7 @@ var GoogleMapsDemo = function() {
             lat: -12.043333,
             lng: -77.028333
         });
-    }
+    };
 
     var demo2 = function() {
         var map = new GMaps({
@@ -24,7 +24,7 @@ var GoogleMapsDemo = function() {
                 alert('dragend');
             }
         });
-    }
+    };
 
     var demo3 = function() {
         var map = new GMaps({
@@ -54,7 +54,7 @@ var GoogleMapsDemo = function() {
             }
         });
         map.setZoom(5);
-    }
+    };
 
     var demo4 = function() {
         var map = new GMaps({
@@ -77,7 +77,7 @@ var GoogleMapsDemo = function() {
                 //alert("Geolocation Done!");
             }
         });
-    }
+    };
 
     var demo5 = function() {
         var map = new GMaps({
@@ -106,7 +106,7 @@ var GoogleMapsDemo = function() {
             strokeOpacity: 0.6,
             strokeWeight: 6
         });
-    }
+    };
 
     var demo6 = function() {
         var map = new GMaps({
@@ -130,7 +130,7 @@ var GoogleMapsDemo = function() {
             fillColor: '#BBD8E9',
             fillOpacity: 0.6
         });
-    }
+    };
 
     var demo7 = function() {
         var map = new GMaps({
@@ -159,7 +159,7 @@ var GoogleMapsDemo = function() {
                 }
             });
         });
-    }
+    };
 
     var demo8 = function() {
         var map = new GMaps({
@@ -184,7 +184,7 @@ var GoogleMapsDemo = function() {
                     }
                 }
             });
-        }
+        };
 
         $('#m_gmap_8_btn').click(function(e) {
             e.preventDefault();
@@ -198,7 +198,7 @@ var GoogleMapsDemo = function() {
                 handleAction();
             }
         });
-    }
+    };
 
     return {
         // public functions

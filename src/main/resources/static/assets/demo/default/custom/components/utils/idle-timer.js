@@ -126,7 +126,7 @@ var IdleTimerDemo = function() {
         //For demo purposes, display the actual timeout on the page
         $('#docTimeout').text(docTimeout / 1000);
 
-    }
+    };
 
     var demo2 = function() {
         //Define textarea settings
@@ -239,7 +239,7 @@ var IdleTimerDemo = function() {
         // Display the actual timeout on the page
         $('#elTimeout').text(taTimeout / 1000);
 
-    }
+    };
 
     return {
         //main function to initiate the module

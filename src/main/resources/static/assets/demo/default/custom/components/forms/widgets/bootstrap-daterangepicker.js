@@ -98,7 +98,7 @@ var BootstrapDaterangepicker = function () {
         }, function(start, end, label) {
             $('#m_daterangepicker_6 .form-control').val( start.format('MM/DD/YYYY') + ' / ' + end.format('MM/DD/YYYY'));
         });
-    }
+    };
 
     var validationDemos = function() {
         // input group and left alignment setup
@@ -127,7 +127,7 @@ var BootstrapDaterangepicker = function () {
         }, function(start, end, label) {
             $('#m_daterangepicker_3_validate .form-control').val( start.format('YYYY-MM-DD') + ' / ' + end.format('YYYY-MM-DD'));
         });        
-    }
+    };
 
     return {
         // public functions

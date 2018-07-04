@@ -105,7 +105,7 @@ var BootstrapDatetimepicker = function () {
             forceParse: 0,
             pickerPosition: 'bottom-left'
         });
-    }
+    };
 
     return {
         // public functions

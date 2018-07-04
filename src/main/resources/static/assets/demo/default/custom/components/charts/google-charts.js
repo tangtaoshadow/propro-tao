@@ -12,7 +12,7 @@ var GoogleChartsDemo = function() {
         google.setOnLoadCallback(function() {
             GoogleChartsDemo.runDemos();
         });
-    }
+    };
 
     var demoColumnCharts = function() {
         // COLUMN CHART
@@ -85,7 +85,7 @@ var GoogleChartsDemo = function() {
 
         var chart = new google.visualization.ColumnChart(document.getElementById('m_gchart_2'));
         chart.draw(data, options);
-    }
+    };
 
     var demoPieCharts = function() {
         var data = google.visualization.arrayToDataTable([
@@ -110,7 +110,7 @@ var GoogleChartsDemo = function() {
 
         var chart = new google.visualization.PieChart(document.getElementById('m_gchart_4'));
         chart.draw(data, options);
-    }    
+    };
 
     var demoLineCharts = function() {
         // LINE CHART
@@ -146,7 +146,7 @@ var GoogleChartsDemo = function() {
 
         var chart = new google.charts.Line(document.getElementById('m_gchart_5'));
         chart.draw(data, options);
-    }
+    };
 
     return {
         // public functions

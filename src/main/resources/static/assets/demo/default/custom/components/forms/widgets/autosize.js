@@ -12,7 +12,7 @@ var Autosize = function () {
 
         autosize(demo2);
         autosize.update(demo2);
-    }
+    };
 
     return {
         // public functions

@@ -15,7 +15,7 @@ import java.util.List;
  */
 public interface LibraryService {
 
-    public ResultDO<List<LibraryDO>> getList(LibraryQuery query);
+    ResultDO<List<LibraryDO>> getList(LibraryQuery query);
 
     ResultDO save(LibraryDO libraryDO);
 

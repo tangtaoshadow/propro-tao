@@ -220,7 +220,7 @@ var jQVMapDemo = function() {
 
         map.width(map.parent().width());
         map.vectorMap(data);
-    }
+    };
 
     var setupMaps = function() {
         setupMap("world");
@@ -228,7 +228,7 @@ var jQVMapDemo = function() {
         setupMap("europe");
         setupMap("russia");
         setupMap("germany");
-    }
+    };
 
     return {
         // public functions

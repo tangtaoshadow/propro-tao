@@ -54,7 +54,7 @@ var MorrisChartsDemo = function() {
             // chart.
             labels: ['Values A', 'Values B']
         });
-    }
+    };
 
     var demo2 = function() {
         // AREA CHART
@@ -100,7 +100,7 @@ var MorrisChartsDemo = function() {
             ykeys: ['a', 'b'],
             labels: ['Series A', 'Series B']
         });
-    }
+    };
 
     var demo3 = function() {
         // BAR CHART
@@ -146,7 +146,7 @@ var MorrisChartsDemo = function() {
             ykeys: ['a', 'b'],
             labels: ['Series A', 'Series B']
         });
-    }
+    };
 
     var demo4 = function() {
         // PIE CHART
@@ -166,7 +166,7 @@ var MorrisChartsDemo = function() {
                 }
             ]
         });
-    }
+    };
 
     return {
         // public functions

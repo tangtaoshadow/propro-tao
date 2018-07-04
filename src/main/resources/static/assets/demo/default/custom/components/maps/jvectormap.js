@@ -4,7 +4,7 @@ var jVectorMap = function() {
     //== Private functions
 
     var demo1 = function() {
-    }
+    };
 
     return {
         // public functions

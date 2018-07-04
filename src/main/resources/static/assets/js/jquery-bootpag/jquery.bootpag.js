@@ -68,8 +68,7 @@
                 .last()
                 .toggleClass('disabled', page === settings.total)
                 .attr('data-lp', lp)
-                .find('a').attr('href', href(lp));;
-
+                .find('a').attr('href', href(lp));
             var $currPage = $page.filter('[data-lp='+page+']');
             if(!$currPage.not('.next,.prev').length){
                 var d = page <= vis ? -settings.maxVisible : 0;

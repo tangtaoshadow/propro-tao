@@ -79,7 +79,7 @@ var FormWidgets = function () {
         $('#m_typeahead').bind('typeahead:select', function(ev, suggestion) {
             validator.element($('#m_typeahead')); // validate element
         });
-    }
+    };
     
     var initValidation = function () {
         validator = $( "#m_form_1" ).validate({
@@ -131,7 +131,7 @@ var FormWidgets = function () {
                 //form[0].submit(); // submit the form
             }
         });       
-    }
+    };
 
     return {
         // public functions

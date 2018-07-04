@@ -92,7 +92,7 @@ var FlotchartsDemo = function() {
                 borderWidth: 1
             }
         });
-    }
+    };
 
     var demo2 = function() {
         function randValue() {
@@ -254,7 +254,7 @@ var FlotchartsDemo = function() {
                 previousPoint = null;
             }
         });
-    }
+    };
 
     var demo3 = function() {
         var sin = [],
@@ -341,7 +341,7 @@ var FlotchartsDemo = function() {
             latestPosition = pos;
             if (!updateLegendTimeout) updateLegendTimeout = setTimeout(updateLegend, 50);
         });
-    }
+    };
 
     var demo4 = function() {
 
@@ -414,7 +414,7 @@ var FlotchartsDemo = function() {
         }
 
         update();
-    }
+    };
 
     var demo5 = function() {
         var d1 = [];
@@ -501,7 +501,7 @@ var FlotchartsDemo = function() {
         });
 
         plotWithOptions();
-    }
+    };
 
     var demo6 = function() {
         // bar chart:
@@ -549,7 +549,7 @@ var FlotchartsDemo = function() {
             },
             shadowSize: 0
         }], options);
-    }
+    };
 
     var demo7 = function() {
         // horizontal bar chart:
@@ -583,7 +583,7 @@ var FlotchartsDemo = function() {
         };
 
         $.plot($("#m_flotcharts_7"), [data1], options);
-    }
+    };
 
 
     var demo8 = function() {
@@ -605,7 +605,7 @@ var FlotchartsDemo = function() {
                         }
                     }
                 });
-    }
+    };
 
     var demo9 = function() {
          var data = [];
@@ -629,7 +629,7 @@ var FlotchartsDemo = function() {
                         show: false
                     }
                 });
-    }
+    };
 
     var demo10 = function() {
          var data = [];
@@ -664,7 +664,7 @@ var FlotchartsDemo = function() {
                         show: false
                     }
                 });
-    }
+    };
 
     var demo11 = function() {
          var data = [];
@@ -699,7 +699,7 @@ var FlotchartsDemo = function() {
                         show: false
                     }
                 });
-    }
+    };
 
 
     return {

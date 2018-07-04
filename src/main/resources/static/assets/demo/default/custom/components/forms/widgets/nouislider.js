@@ -30,7 +30,7 @@ var noUiSliderDemos = function() {
         sliderInput.addEventListener('change', function(){
             slider.noUiSlider.set(this.value);
         });
-    }
+    };
 
     var demo2 = function() {
         // init slider
@@ -61,7 +61,7 @@ var noUiSliderDemos = function() {
         sliderInput.addEventListener('change', function(){
             slider.noUiSlider.set(this.value);
         });
-    }
+    };
 
     var demo3 = function() {
         // init slider
@@ -90,7 +90,7 @@ var noUiSliderDemos = function() {
         slider.noUiSlider.on('update', function( values, handle ) {
             sliderInputs[handle].value = values[handle];
         });
-    }
+    };
 
     var demo4 = function() {
 
@@ -139,7 +139,7 @@ var noUiSliderDemos = function() {
         inputNumber.addEventListener('change', function(){
             html5Slider.noUiSlider.set([null, this.value]);
         });
-    }
+    };
  
     var demo5 = function() {
         // init slider
@@ -175,7 +175,7 @@ var noUiSliderDemos = function() {
                 slider.noUiSlider.set(80);
             }
         });
-    }
+    };
 
     var demo6 = function() {
         // init slider             
@@ -201,7 +201,7 @@ var noUiSliderDemos = function() {
         sliderInput.addEventListener('change', function(){
             verticalSlider.noUiSlider.set(this.value);
         });      
-    }    
+    };
 
     // Modal demo
 
@@ -230,7 +230,7 @@ var noUiSliderDemos = function() {
         sliderInput.addEventListener('change', function(){
             slider.noUiSlider.set(this.value);
         });
-    }
+    };
 
     var modaldemo2 = function() {
         var slider = document.getElementById('m_nouislider_modal2');
@@ -260,7 +260,7 @@ var noUiSliderDemos = function() {
         sliderInput.addEventListener('change', function(){
             slider.noUiSlider.set(this.value);
         });
-    }
+    };
 
     var modaldemo3 = function() {
         var slider = document.getElementById('m_nouislider_modal3');        
@@ -288,7 +288,7 @@ var noUiSliderDemos = function() {
         slider.noUiSlider.on('update', function( values, handle ) {
             sliderInputs[handle].value = values[handle];
         });
-    }
+    };
     return {
         // public functions
         init: function() {

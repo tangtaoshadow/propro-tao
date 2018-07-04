@@ -2452,7 +2452,6 @@ function locale(localeCode, newFcOptions) {
     options_1.globalDefaults.locale = localeCode;
 }
 exports.locale = locale;
-;
 // NOTE: can't guarantee any of these computations will run because not every locale has datepicker
 // configs, so make sure there are English fallbacks for these in the defaults file.
 var dpComputableOptions = {
@@ -2580,7 +2579,6 @@ var Class = /** @class */ (function () {
             }
             return SubClass;
         }(this));
-        ;
         util_1.copyOwnProps(members, SubClass.prototype);
         return SubClass;
     };
@@ -3721,7 +3719,7 @@ var View = /** @class */ (function (_super) {
         return {}; // subclasses must implement
     };
     View.prototype.applyDateScroll = function (scroll) {
-        ; // subclasses must implement
+         // subclasses must implement
     };
     /* Event Drag-n-Drop
     ------------------------------------------------------------------------------------------------------------------*/
@@ -7138,7 +7136,6 @@ var BasicView = /** @class */ (function (_super) {
                 _this.dayGrid.cellWeekNumbersVisible = false;
                 _this.dayGrid.colWeekNumbersVisible = true;
             }
-            ;
         }
         _this.addChild(_this.dayGrid);
         _this.scroller = new Scroller_1.default({
@@ -11244,7 +11241,6 @@ function makeTimeGridSubclass(SuperClass) {
         return SubClass;
     }(SuperClass));
 }
-;
 // Will customize the rendering behavior of the AgendaView's dayGrid
 function makeDayGridSubclass(SuperClass) {
     return /** @class */ (function (_super) {
@@ -11271,8 +11267,7 @@ function makeDayGridSubclass(SuperClass) {
         return SubClass;
     }(SuperClass));
 }
-;
-function groupEventFootprintsByAllDay(eventFootprints) {
+        function groupEventFootprintsByAllDay(eventFootprints) {
     var allDay = [];
     var timed = [];
     var i;
@@ -14725,9 +14720,7 @@ var JsonFeedEventSource = FC.JsonFeedEventSource;
 var EventSourceParser = FC.EventSourceParser;
 var applyAll = FC.applyAll;
 
-;;
-
-var GcalEventSource = EventSource.extend({
+    var GcalEventSource = EventSource.extend({
 
 	// TODO: eventually remove "googleCalendar" prefix (API-breaking)
 	googleCalendarApiKey: null,
@@ -14984,7 +14977,5 @@ function injectQsComponent(url, component) {
 EventSourceParser.registerClass(GcalEventSource);
 
 FC.GcalEventSource = GcalEventSource;
-
-;;
 
 });

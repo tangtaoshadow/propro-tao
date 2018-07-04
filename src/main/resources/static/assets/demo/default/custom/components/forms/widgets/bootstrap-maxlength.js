@@ -113,7 +113,7 @@ var BootstrapMaxlength = function () {
             postText: ' chars remaining.',
             validate: true
         });
-    }
+    };
 
     return {
         // public functions

@@ -18,7 +18,7 @@ var CalendarExternalEvents = function() {
                 revertDuration: 0 //  original position after the drag
             });
         });
-    }
+    };
 
     var initCalendar = function() {
         var todayDate = moment().startOf('day');
@@ -169,7 +169,7 @@ var CalendarExternalEvents = function() {
                 }
             }
         });
-    }
+    };
 
     return {
         //main function to initiate the module
