@@ -33,6 +33,10 @@ public class LibraryDAO {
         return mongoTemplate.find(buildQuery(query), LibraryDO.class, CollectionName);
     }
 
+    public List<LibraryDO> getAll() {
+        return mongoTemplate.findAll(LibraryDO.class, CollectionName);
+    }
+
     public LibraryDO getById(String id) {
         return mongoTemplate.findById(id, LibraryDO.class, CollectionName);
     }

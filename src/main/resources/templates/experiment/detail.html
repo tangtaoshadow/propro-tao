@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="/layouts/layout">
+<!-- begin::Head -->
+<head>
+    <title>
+        欢迎登陆西湖大学Swath蛋白质组学分析平台
+    </title>
+</head>
+<!-- end::Head -->
+<!-- end::Body -->
+<body>
+
+<div class="m-subheader ">
+    <div class="d-flex align-items-center">
+        <div class="mr-auto">
+            <h3 class="m-subheader__title m-subheader__title--separator">
+                实验数据详情页面
+            </h3>
+        </div>
+    </div>
+</div>
+
+<div class="m-content" layout:fragment="content">
+
+    <div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>
+    <div th:if="${errorList}" th:each="arrayS:${errorList}">
+        <div class="alert alert-danger" role="alert" th:text="${arrayS}"></div>
+    </div>
+
+    <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
+    <div class="row">
+        <div class="col-md-6">
+            <!--begin::Portlet-->
+            <div class="m-portlet m-portlet--tab">
+                <div class="m-portlet__head">
+                    <div class="m-portlet__head-caption">
+                        <div class="m-portlet__head-title">
+                            <span class="m-portlet__head-icon m--hide">
+                                <i class="la la-gear"></i>
+                            </span>
+                            <h3 class="m-portlet__head-text">实验数据详情页</h3>
+                        </div>
+                    </div>
+                </div>
+                <!--begin::Form-->
+                <form class="m-form m-form--fit m-form--label-align-right">
+                    <div class="m-portlet__body">
+                        <div class="form-group m-form__group row">
+                            <label for="id" class="col-2 col-form-label">
+                                实验ID
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="id" name="id" readonly
+                                       th:value="${experiment?.id}">
+                                <span class="m-form__help">实验ID全局唯一</span>
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="name" class="col-2 col-form-label">
+                                实验名称
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="name" name="name" readonly
+                                       th:value="${experiment?.name}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="library" class="col-2 col-form-label">
+                                关联标准库名称及ID
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="library" readonly th:value="|${experiment?.libraryName}(${experiment?.libraryId})|">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="description" class="col-2 col-form-label">
+                                详细描述
+                            </label>
+                            <div class="col-10">
+                                <textarea class="form-control m-input" id="description" name="description" rows="3"
+                                          readonly th:text="${experiment?.description}"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="createDate" class="col-2 col-form-label">
+                                创建时间
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="createDate" name="createDate"
+                                       readonly th:value="${#dates.format(experiment?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="lastModifiedDate" class="col-2 col-form-label">
+                                最后修改时间
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="lastModifiedDate"
+                                       name="lastModifiedDate" readonly
+                                       th:value="${#dates.format(experiment?.lastModifiedDate, 'yyyy-MM-dd HH:mm:ss')}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m-portlet__foot m-portlet__foot--fit">
+                        <div class="m-form__actions">
+                            <a th:href="|/experiment/edit/${experiment?.id}|" class="btn btn-primary">修改</a>
+                            <a th:href="|/experiment/delete/${experiment?.id}|" class="btn btn-danger">删除</a>
+                        </div>
+                    </div>
+                </form>
+                <!--end::Form-->
+            </div>
+            <!--end::Portlet-->
+        </div>
+    </div>
+
+</div>
+
+
+</body>
+
+<!-- end::Body -->
+</html>

@@ -17,6 +17,8 @@ public interface LibraryService {
 
     ResultDO<List<LibraryDO>> getList(LibraryQuery query);
 
+    List<LibraryDO> getAll();
+
     ResultDO save(LibraryDO libraryDO);
 
     ResultDO update(LibraryDO libraryDO);
