@@ -8,6 +8,7 @@ import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.query.ExperimentQuery;
 import com.westlake.air.swathplatform.domain.query.LibraryQuery;
 import com.westlake.air.swathplatform.parser.MzXmlParser;
+import com.westlake.air.swathplatform.parser.indexer.LmsIndexer;
 import com.westlake.air.swathplatform.service.ExperimentService;
 import com.westlake.air.swathplatform.service.LibraryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,11 +85,17 @@ public class ExperimentController extends BaseController {
 //        File file = new File("D:\\testdata\\testfile.mzXML");
 
         try {
-            MzXMLFile mzXMLFile = new MzXMLFile(file);
-            logger.info("Cost:" + (System.currentTimeMillis() - startTime) + "");
-        } catch (MzXMLParsingException e) {
+            MzXmlParser parser = new MzXmlParser();
+            parser.parse(file, new LmsIndexer());
+        } catch (Exception e) {
             e.printStackTrace();
         }
+//        try {
+//            MzXMLFile mzXMLFile = new MzXMLFile(file);
+//            logger.info("Cost:" + (System.currentTimeMillis() - startTime) + "");
+//        } catch (MzXMLParsingException e) {
+//            e.printStackTrace();
+//        }
 
         return "experiment/list";
     }

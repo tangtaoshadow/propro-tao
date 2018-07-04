@@ -1,5 +1,6 @@
 package com.westlake.air.swathplatform.parser;
 
+import com.westlake.air.swathplatform.parser.indexer.Indexer;
 import com.westlake.air.swathplatform.parser.model.mzxml.*;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
@@ -17,7 +18,6 @@ import javax.xml.transform.sax.SAXSource;
 import java.io.*;
 import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
@@ -35,6 +35,14 @@ public class MzXmlParser {
 
     public MzXmlParser() throws Exception {}
 
+    public void parse(File file, Indexer iIndexer) throws Exception {
+
+        long startTime = System.currentTimeMillis();
+        HashMap<Integer,ScanIndex> indexMap = iIndexer.index(file);
+        System.out.println(System.currentTimeMillis() - startTime + "");
+        System.out.println("");
+    }
+
     public void parse(File file) throws Exception {
 
         JAXBContext jc = null;
@@ -51,22 +59,14 @@ public class MzXmlParser {
         Long indexOffset;
         HashMap<Integer, Long> indexMap = null;
         RandomAccessFile raf = new RandomAccessFile(file, "r");
-        try {
-            parseFileEncode(raf);
-            logger.info("parse file encode finished,file encode:" + FILE_ENCODING);
-            indexOffset = parseIndexOffset(raf);
-            logger.info("parse scan index offset finished,indexOffset:" + indexOffset);
-            long startTime = System.currentTimeMillis();
-            indexMap = parseScanIndex(indexOffset, raf);
-            logger.info("Parse花费时间:" + (System.currentTimeMillis() - startTime) + "");
-            logger.info(indexMap.size() + "");
-//            logger.info("parse scan index finished,indeMap size:" + indexMap.size());
-            buildScanContent(indexOffset, indexMap, raf, unmarshaller);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            closeRandomAccessFile(raf);
-        }
+//        try {
+//
+//            buildScanContent(indexOffset, indexMap, raf, unmarshaller);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            closeRandomAccessFile(raf);
+//        }
     }
 
     public synchronized <T extends MzXMLObject> T parseXml(byte[] content, MzXmlElement element, Unmarshaller unmarshaller) throws Exception {
@@ -136,44 +136,9 @@ public class MzXmlParser {
         }
     }
 
-    public HashMap<Integer, Long> parseScanIndex(Long indexOffset, RandomAccessFile rf) throws IOException {
-        HashMap<Integer, Long> indexMap = new HashMap<>();
-        rf.seek(indexOffset);
-        int indexSize = (int) (rf.length() - 1 - indexOffset);
-        byte[] indexArray = new byte[indexSize];
-        rf.read(indexArray);
-        String totalLine = new String(indexArray);
-        String[] indexLines = totalLine.split("\n");
-        for (String line : indexLines) {
-            if (line.contains("<offset")) {
-                line = line.trim();
-                String id = line.substring(line.indexOf("\"") + 1, line.lastIndexOf("\""));
-                String offset = line.substring(line.indexOf(">") + 1, line.lastIndexOf("<"));
-                indexMap.put(Integer.valueOf(id.trim()), Long.valueOf(offset.trim()));
-            }
-        }
-        return indexMap;
-    }
 
-    public Long parseIndexOffset(RandomAccessFile rf) throws IOException {
-        long position = rf.length() - 1;
-        rf.seek(position);
-        byte words[] = new byte[1];
-        for (int i = 0; i < 1000; i++) {
-            rf.read(words);
-            if (words[0] == '\n') {
-                //detect the line break symbol
-                String line = rf.readLine();
-                if (line != null && line.contains("<indexOffset>")) {
-                    line = line.trim().replace("<indexOffset>", "").replace("</indexOffset>", "");
-                    return Long.valueOf(line);
-                }
-            }
 
-            rf.seek(--position);
-        }
-        return 0L;
-    }
+
 
     private void closeRandomAccessFile(RandomAccessFile raf) {
         if (raf != null) {
@@ -186,21 +151,21 @@ public class MzXmlParser {
         }
     }
 
-    private void parseFileEncode(RandomAccessFile rf) throws IOException {
-        rf.seek(0);
-        String firstLine = rf.readLine();
-        if (firstLine == null || !firstLine.contains("<?xml")) {
-            FILE_ENCODING = "ISO-8859-1";
-            return;
-        }
-
-        Matcher matcher = attrPattern.matcher(firstLine);
-        while (matcher.find()) {
-            if (matcher.group(1).equals("encoding")) {
-                FILE_ENCODING = matcher.group(2);
-            }
-        }
-    }
+//    private void parseFileEncode(RandomAccessFile rf) throws IOException {
+//        rf.seek(0);
+//        String firstLine = rf.readLine();
+//        if (firstLine == null || !firstLine.contains("<?xml")) {
+//            FILE_ENCODING = "ISO-8859-1";
+//            return;
+//        }
+//
+//        Matcher matcher = attrPattern.matcher(firstLine);
+//        while (matcher.find()) {
+//            if (matcher.group(1).equals("encoding")) {
+//                FILE_ENCODING = matcher.group(2);
+//            }
+//        }
+//    }
 
     private String getLastLine(RandomAccessFile raf, Long position) throws IOException {
         long len = raf.length();   //文件长度

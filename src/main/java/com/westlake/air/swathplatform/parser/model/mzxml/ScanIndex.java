@@ -8,10 +8,15 @@ import lombok.Data;
  */
 
 @Data
-public class ScanPosition {
+public class ScanIndex {
 
+    public ScanIndex(int id, Long start, Long end) {
+        this.id = id;
+        this.start = start;
+        this.end = end;
+    }
+
+    int id;
     Long start;
     Long end;
-    Long lineNumber;
-
 }
