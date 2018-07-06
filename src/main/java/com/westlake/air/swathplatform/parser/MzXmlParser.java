@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Pattern;
 
 @Component
@@ -36,7 +37,7 @@ public class MzXmlParser {
             Separation.class, SeparationTechnique.class, Software.class, Spot.class, Spotting.class,
     };
 
-    public MzXmlParser() throws Exception {}
+    public MzXmlParser(){}
 
     private void prepare(){
         airXStream.processAnnotations(classes);
@@ -47,8 +48,7 @@ public class MzXmlParser {
 
     public void parse(File file, Indexer iIndexer) throws Exception {
         prepare();
-
-        HashMap<Integer,ScanIndex> indexMap = iIndexer.index(file);
+        List<ScanIndex> indexList = iIndexer.index(file);
 
     }
 }

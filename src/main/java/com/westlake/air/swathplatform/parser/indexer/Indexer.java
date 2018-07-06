@@ -4,7 +4,7 @@ import com.westlake.air.swathplatform.parser.model.mzxml.ScanIndex;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -12,5 +12,5 @@ import java.util.HashMap;
  */
 public interface Indexer {
 
-    HashMap<Integer, ScanIndex> index(File file) throws IOException;
+    List<ScanIndex> index(File file) throws IOException;
 }

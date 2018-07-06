@@ -7,6 +7,7 @@ import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.query.ExperimentQuery;
 import com.westlake.air.swathplatform.parser.MzXmlParser;
 import com.westlake.air.swathplatform.parser.indexer.LmsIndexer;
+import com.westlake.air.swathplatform.parser.indexer.PrideIndexer;
 import com.westlake.air.swathplatform.service.ExperimentService;
 import com.westlake.air.swathplatform.service.LibraryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,13 +74,16 @@ public class ExperimentController extends BaseController {
                @RequestParam(value = "libraryId", required = true) String libraryId,
                RedirectAttributes redirectAttributes) {
 
-//        File file = new File("H:\\data\\weissto_i170508_005-SWLYPB125.mzXML");
-        File file = new File(getClass().getClassLoader().getResource("data/MzXMLFile_1_compressed.mzXML").getPath());
+        File file = new File("H:\\data\\weissto_i170508_005-SWLYPB125.mzXML");
+//        File file = new File(getClass().getClassLoader().getResource("data/MzXMLFile_1_compressed.mzXML").getPath());
 //        File file = new File("D:\\data\\wlym5.mzXML");
 //        File file = new File("D:\\testdata\\testfile.mzXML");
 
         try {
+            long startTime = System.currentTimeMillis();
             mzXmlParser.parse(file, new LmsIndexer());
+            System.out.println("LmsCost:"+(System.currentTimeMillis()-startTime));
+
         } catch (Exception e) {
             e.printStackTrace();
         }
