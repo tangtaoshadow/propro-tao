@@ -1,5 +1,6 @@
 package com.westlake.air.swathplatform.parser.model.mzxml;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 import lombok.Data;
@@ -12,6 +13,7 @@ import java.util.List;
  * Time: 2018-07-05 16:50
  */
 @Data
+@XStreamAlias("msRun")
 public class MsRun {
 
     @XStreamImplicit(itemFieldName = "parentFile")

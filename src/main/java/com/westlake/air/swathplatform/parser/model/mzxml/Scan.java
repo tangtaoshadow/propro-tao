@@ -13,9 +13,11 @@ import java.util.List;
 @Data
 public class Scan {
 
-    List<ScanOrigin> scanOrigin;
+    @XStreamImplicit(itemFieldName = "scanOrigin")
+    List<ScanOrigin> scanOriginList;
 
-    List<PrecursorMz> precursorMz;
+    @XStreamImplicit(itemFieldName = "precursorMz")
+    List<PrecursorMz> precursorMzList;
 
     Maldi maldi;
 
@@ -30,6 +32,9 @@ public class Scan {
 
     @XStreamImplicit(itemFieldName = "scan")
     List<Scan> scanList;
+
+    @XStreamImplicit(itemFieldName = "comment")
+    List<String> commentList;
 
     @XStreamAsAttribute
     Long num;

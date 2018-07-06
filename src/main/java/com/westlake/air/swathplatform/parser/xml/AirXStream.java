@@ -1,8 +1,10 @@
 package com.westlake.air.swathplatform.parser.xml;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.security.AnyTypePermission;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.OutputStream;
 import java.io.Writer;
 
@@ -21,6 +23,13 @@ public class AirXStream extends XStream {
     public AirXStream() {
         this("1.0","UTF-8");
     }
+
+    @PostConstruct
+    public void init(){
+        addPermission(new AnyTypePermission());
+        AirXStream.setupDefaultSecurity(this);
+    }
+
     //XML的声明
     public String getDeclaration() {
         return "< ?xml version=\"" + this.version + "\" encoding=\"" + this.encoding + "\"? >\n";

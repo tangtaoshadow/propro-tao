@@ -1,12 +1,10 @@
 package com.westlake.air.swathplatform.controller;
 
-import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.constants.SuccessMsg;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.db.ExperimentDO;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.query.ExperimentQuery;
-import com.westlake.air.swathplatform.domain.query.LibraryQuery;
 import com.westlake.air.swathplatform.parser.MzXmlParser;
 import com.westlake.air.swathplatform.parser.indexer.LmsIndexer;
 import com.westlake.air.swathplatform.service.ExperimentService;
@@ -18,10 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import uk.ac.ebi.pride.tools.mzxml_parser.MzXMLFile;
-import uk.ac.ebi.pride.tools.mzxml_parser.MzXMLParsingException;
 
 import java.io.File;
 import java.util.List;
@@ -78,24 +73,16 @@ public class ExperimentController extends BaseController {
                @RequestParam(value = "libraryId", required = true) String libraryId,
                RedirectAttributes redirectAttributes) {
 
-        long startTime = System.currentTimeMillis();
-        File file = new File("H:\\data\\weissto_i170508_005-SWLYPB125.mzXML");
-
+//        File file = new File("H:\\data\\weissto_i170508_005-SWLYPB125.mzXML");
+        File file = new File(getClass().getClassLoader().getResource("data/MzXMLFile_1_compressed.mzXML").getPath());
 //        File file = new File("D:\\data\\wlym5.mzXML");
 //        File file = new File("D:\\testdata\\testfile.mzXML");
 
         try {
-            MzXmlParser parser = new MzXmlParser();
-            parser.parse(file, new LmsIndexer());
+            mzXmlParser.parse(file, new LmsIndexer());
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        try {
-//            MzXMLFile mzXMLFile = new MzXMLFile(file);
-//            logger.info("Cost:" + (System.currentTimeMillis() - startTime) + "");
-//        } catch (MzXMLParsingException e) {
-//            e.printStackTrace();
-//        }
 
         return "experiment/list";
     }

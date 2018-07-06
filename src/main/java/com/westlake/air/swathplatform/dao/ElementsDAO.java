@@ -49,9 +49,9 @@ public class ElementsDAO {
                 countWeight(element);
                 symbolElementsMap.put(element.getSymbol(), element);
             }
-            System.out.println("Init Element Database file success!!!");
+            logger.info("Init Element Database file success!!!");
         } catch (IOException e) {
-            System.out.println("Init Element Database file failed!!!");
+            logger.error("Init Element Database file failed!!!");
             e.printStackTrace();
         }
     }
