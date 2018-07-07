@@ -14,6 +14,8 @@ public interface TransitionService {
 
     List<TransitionDO> getAllByLibraryId(String libraryId);
 
+    List<TransitionDO> getSimpleAllByLibraryId(String libraryId);
+
     List<TransitionDO> getAllByLibraryIdAndIsDecoy(String libraryId,boolean isDecoy);
 
     Long count(TransitionQuery query);

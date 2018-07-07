@@ -31,6 +31,12 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
+    public List<TransitionDO> getSimpleAllByLibraryId(String libraryId) {
+        List<TransitionDO> simpleList = transitionDAO.getSimpleAllByLibraryId(libraryId);
+        return simpleList;
+    }
+
+    @Override
     public List<TransitionDO> getAllByLibraryIdAndIsDecoy(String libraryId, boolean isDecoy) {
         return transitionDAO.getAllByLibraryIdAndIsDecoy(libraryId, isDecoy);
     }

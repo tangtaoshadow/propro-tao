@@ -49,6 +49,8 @@ public class MzXmlParser {
     public void parse(File file, Indexer iIndexer) throws Exception {
         prepare();
         List<ScanIndex> indexList = iIndexer.index(file);
+        for(ScanIndex scanIndex : indexList){
 
+        }
     }
 }

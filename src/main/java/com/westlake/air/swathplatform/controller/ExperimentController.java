@@ -4,12 +4,15 @@ import com.westlake.air.swathplatform.constants.SuccessMsg;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.db.ExperimentDO;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
+import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.ExperimentQuery;
 import com.westlake.air.swathplatform.parser.MzXmlParser;
+import com.westlake.air.swathplatform.parser.indexer.Indexer;
 import com.westlake.air.swathplatform.parser.indexer.LmsIndexer;
-import com.westlake.air.swathplatform.parser.indexer.PrideIndexer;
+import com.westlake.air.swathplatform.parser.model.mzxml.ScanIndex;
 import com.westlake.air.swathplatform.service.ExperimentService;
 import com.westlake.air.swathplatform.service.LibraryService;
+import com.westlake.air.swathplatform.service.TransitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,10 +37,16 @@ public class ExperimentController extends BaseController {
     LibraryService libraryService;
 
     @Autowired
+    TransitionService transitionService;
+
+    @Autowired
     ExperimentService experimentService;
 
     @Autowired
     MzXmlParser mzXmlParser;
+
+    @Autowired
+    Indexer lmsIndexer;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -80,9 +89,10 @@ public class ExperimentController extends BaseController {
 //        File file = new File("D:\\testdata\\testfile.mzXML");
 
         try {
-            long startTime = System.currentTimeMillis();
-            mzXmlParser.parse(file, new LmsIndexer());
-            System.out.println("LmsCost:"+(System.currentTimeMillis()-startTime));
+            List<TransitionDO> simpleList = transitionService.getSimpleAllByLibraryId(libraryId);
+            System.out.println(simpleList.size());
+            //建立索引
+            List<ScanIndex> indexList = lmsIndexer.index(file);
 
         } catch (Exception e) {
             e.printStackTrace();

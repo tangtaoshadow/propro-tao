@@ -3,11 +3,12 @@ package com.westlake.air.swathplatform.dao;
 import com.mongodb.BasicDBObject;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.TransitionQuery;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,22 @@ public class TransitionDAO {
 
     public List<TransitionDO> getAllByLibraryId(String libraryId){
         Query query = new Query(where("libraryId").is(libraryId));
+        return mongoTemplate.find(query, TransitionDO.class, CollectionName);
+    }
+
+    public List<TransitionDO> getSimpleAllByLibraryId(String libraryId){
+        Document queryDoc = new Document();
+        queryDoc.put("libraryId",libraryId);
+
+        Document fieldsDoc = new Document();
+        fieldsDoc.put("precursorMz",true);
+        fieldsDoc.put("productMz",true);
+        fieldsDoc.put("rt",true);
+        fieldsDoc.put("intensity",true);
+        fieldsDoc.put("precursorCharge",true);
+        fieldsDoc.put("Annotation",true);
+
+        Query query = new BasicQuery(queryDoc, fieldsDoc);
         return mongoTemplate.find(query, TransitionDO.class, CollectionName);
     }
 

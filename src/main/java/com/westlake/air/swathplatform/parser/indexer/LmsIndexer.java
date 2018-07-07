@@ -2,6 +2,7 @@ package com.westlake.air.swathplatform.parser.indexer;
 
 import com.westlake.air.swathplatform.parser.model.mzxml.ScanIndex;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.util.Stack;
  * Created by James Lu MiaoShan
  * Time: 2018-07-04 20:29
  */
+@Component("lmsIndexer")
 public class LmsIndexer implements Indexer {
 
     public static int TAIL_TRY = 30;

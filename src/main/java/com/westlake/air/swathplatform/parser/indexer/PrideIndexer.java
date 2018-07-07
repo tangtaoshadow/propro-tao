@@ -3,6 +3,7 @@ package com.westlake.air.swathplatform.parser.indexer;
 import com.westlake.air.swathplatform.parser.model.mzxml.Scan;
 import com.westlake.air.swathplatform.parser.model.mzxml.ScanIndex;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 import psidev.psi.tools.xxindex.StandardXpathAccess;
 import psidev.psi.tools.xxindex.index.IndexElement;
 import psidev.psi.tools.xxindex.index.XpathIndex;
@@ -24,6 +25,7 @@ import java.util.Stack;
  * Created by James Lu MiaoShan
  * Time: 2018-07-04 20:29
  */
+@Component("prideIndexer")
 public class PrideIndexer implements Indexer {
 
     @Override
