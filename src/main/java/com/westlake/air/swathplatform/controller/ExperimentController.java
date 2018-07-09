@@ -8,7 +8,6 @@ import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.ExperimentQuery;
 import com.westlake.air.swathplatform.parser.MzXmlParser;
 import com.westlake.air.swathplatform.parser.indexer.Indexer;
-import com.westlake.air.swathplatform.parser.indexer.LmsIndexer;
 import com.westlake.air.swathplatform.parser.model.mzxml.ScanIndex;
 import com.westlake.air.swathplatform.service.ExperimentService;
 import com.westlake.air.swathplatform.service.LibraryService;
