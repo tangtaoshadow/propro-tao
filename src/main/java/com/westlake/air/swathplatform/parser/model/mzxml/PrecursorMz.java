@@ -1,6 +1,9 @@
 package com.westlake.air.swathplatform.parser.model.mzxml;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamConverter;
+import com.westlake.air.swathplatform.parser.xml.PeaksConverter;
+import com.westlake.air.swathplatform.parser.xml.PrecursorMzConverter;
 import lombok.Data;
 
 /**
@@ -8,6 +11,7 @@ import lombok.Data;
  * Time: 2018-07-06 09:18
  */
 @Data
+@XStreamConverter(PrecursorMzConverter.class)
 public class PrecursorMz {
 
     Float value;

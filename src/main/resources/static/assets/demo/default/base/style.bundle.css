@@ -75,7 +75,7 @@ $table-inverse-color:           $body-bg !default;
   box-sizing: border-box; }
 
 html {
-  font-family: sans-serif;
+    font-family: "微软雅黑", sans-serif;
   line-height: 1.15;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
@@ -90,7 +90,7 @@ article, aside, dialog, figcaption, figure, footer, header, hgroup, main, nav, s
 
 body {
   margin: 0;
-  font-family: "Poppins";
+  font-family: "微软雅黑";
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
@@ -7507,7 +7507,7 @@ xl: 1200px
 */
 /*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
 html {
-  font-family: sans-serif;
+    font-family: "微软雅黑", sans-serif;
   text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
@@ -7520,7 +7520,7 @@ body {
   padding: 0px;
   font-size: 10px;
   font-weight: 300;
-  font-family: Poppins;
+  font-family: "微软雅黑",Poppins;
   -ms-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale; }

@@ -5,6 +5,7 @@ import com.westlake.air.swathplatform.parser.model.mzxml.*;
 import com.westlake.air.swathplatform.parser.xml.AirXStream;
 import com.westlake.air.swathplatform.parser.xml.PeaksConverter;
 import com.westlake.air.swathplatform.parser.xml.PrecursorMzConverter;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
@@ -50,7 +52,7 @@ public class MzXmlParser {
     private void prepare() {
         airXStream.processAnnotations(classes);
         airXStream.allowTypes(classes);
-        airXStream.registerConverter(new PeaksConverter());
+//        airXStream.registerConverter(new PeaksConverter());
         airXStream.registerConverter(new PrecursorMzConverter());
     }
 
@@ -66,7 +68,7 @@ public class MzXmlParser {
 
         double[] values = getValues(value, precision, isCompression);
 
-        HashMap<Double, Double> peakMap = new HashMap<>(values.length / 2);
+        TreeMap<Double, Double> peakMap = new TreeMap<>();
 
         for (int peakIndex = 0; peakIndex < values.length - 1; peakIndex += 2) {
             // get the two value
@@ -99,8 +101,7 @@ public class MzXmlParser {
     private double[] getValues(String value, int precision, boolean isCompression) {
         double[] values;
 
-
-        ByteBuffer byteBuffer = ByteBuffer.wrap(value.getBytes());
+        ByteBuffer byteBuffer = ByteBuffer.wrap(new Base64().decode(value));
 
         if (isCompression) {
             Inflater decompresser = new Inflater();

@@ -29,6 +29,7 @@ public class SpectrumController {
         model.addAttribute("precision", precision);
         model.addAttribute("isCompression", isCompression);
 
+
         if (values != null && !values.isEmpty()) {
             Map<Double, Double> peakMap = mzXmlParser.getPeakMap(values.trim(), precision, isCompression);
             model.addAttribute("peakMap", peakMap);

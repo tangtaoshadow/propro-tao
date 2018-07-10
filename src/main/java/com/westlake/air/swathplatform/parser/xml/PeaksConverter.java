@@ -6,6 +6,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.westlake.air.swathplatform.parser.model.mzxml.Peaks;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * Created by James Lu MiaoShan
@@ -22,7 +23,7 @@ public class PeaksConverter implements Converter {
             writer.addAttribute("contentType", peaks.getContentType());
             writer.addAttribute("compressionType", peaks.getCompressionType());
             writer.addAttribute("compressedLen", String.valueOf(peaks.getCompressedLen()));
-            writer.setValue(peaks.getValue());
+            writer.setValue(new Base64().encodeToString(peaks.getValue()));
         }
     }
 
@@ -44,7 +45,7 @@ public class PeaksConverter implements Converter {
             peaks.setCompressedLen(Integer.valueOf(compressedLen));
         }
 
-        String value = reader.getValue();
+        byte[] value = new Base64().decode(reader.getValue());
         peaks.setValue(value);
 
         return peaks;
