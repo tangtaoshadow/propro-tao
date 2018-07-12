@@ -1,171 +1,196 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
       layout:decorator="/layouts/layout">
-    <!-- begin::Head -->
-    <head>
-        <title>欢迎登陆西湖大学Swath蛋白质组学分析平台</title>
-        <link th:href="@{/assets/css/main.css}" rel="stylesheet" type="text/css"/>
+<!-- begin::Head -->
+<head>
+    <title>欢迎登陆西湖大学Swath蛋白质组学分析平台</title>
+    <link th:href="@{/assets/css/pagination.css}" rel="stylesheet" type="text/css"/>
 
-    </head>
-    <!-- end::Head -->
-    <!-- end::Body -->
-    <body>
-        <div class="m-content" layout:fragment="content">
+</head>
+<!-- end::Head -->
+<!-- end::Body -->
+<body>
+<div class="m-content" layout:fragment="content">
 
-            <div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>
-            <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
-            <div class="alert alert-success" role="alert" th:if="${searchResult}" th:text="${searchResult}"></div>
+    <div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>
+    <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
+    <div class="alert alert-success" role="alert" th:if="${searchResult}" th:text="${searchResult}"></div>
 
-            <div class="m-portlet__body">
-                <!--begin: Search Form -->
-                <div class="clearfix">
-                    <form id="searchForm" method="post" role="form"
-                          class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
-                          action="/scanindex/list">
-                        <input id="currentPage" type="hidden" class="form-control" name="currentPage">
-                        <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
+    <div class="m-portlet__body">
+        <!--begin: Search Form -->
+        <div class="clearfix">
+            <form id="searchForm" method="post" role="form"
+                  class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
+                  action="/scanindex/list">
+                <input id="currentPage" type="hidden" class="form-control" name="currentPage">
+                <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
 
-                        <div class="form-group m-form__group row">
-                            <div class="input-group col-lg-3">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-success" type="button">
-                                        实验ID:
-                                    </button>
-                                </div>
-                                <input type="text" class="form-control m-input" name="experimentId"
-                                       th:value="${experimentId}">
-                            </div>
-                            <div class="input-group col-lg-3">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-success" type="button">
-                                        MS等级:
-                                    </button>
-                                </div>
-                                <input type="text" class="form-control m-input" name="msLevel"
-                                       placeholder="msLevel" th:value="${msLevel}">
-                            </div>
-                            <div class="input-group col-lg-3">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-success" type="button">
-                                        内部序列Num:
-                                    </button>
-                                </div>
-                                <input type="text" class="form-control m-input" name="num"
-                                       placeholder="sequence" th:value="${num}">
-                            </div>
-                            <div class="input-group col-lg-3">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-success" type="button">
-                                        RT:
-                                    </button>
-                                </div>
-                                <input type="text" class="form-control m-input" name="rt"
-                                       placeholder="rt" th:value="${rt}">
-                                <div class="input-group-append">
-                                    <button class="btn btn-warning" type="submit">
-                                        搜索
-                                    </button>
-                                </div>
-                            </div>
+                <div class="form-group m-form__group row">
+                    <div class="input-group col-lg-3">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-success" type="button">
+                                实验ID:
+                            </button>
                         </div>
-                    </form>
+                        <input type="text" class="form-control m-input" name="experimentId"
+                               th:value="${experimentId}">
+                    </div>
+                    <div class="input-group col-lg-3">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-success" type="button">
+                                MS等级:
+                            </button>
+                        </div>
+                        <input type="text" class="form-control m-input" name="msLevel"
+                               placeholder="msLevel" th:value="${msLevel}">
+                    </div>
+                    <div class="input-group col-lg-3">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-success" type="button">
+                                内部序列Num:
+                            </button>
+                        </div>
+                        <input type="text" class="form-control m-input" name="num"
+                               placeholder="sequence" th:value="${num}">
+                    </div>
+                    <div class="input-group col-lg-3">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-success" type="button">
+                                RT:
+                            </button>
+                        </div>
+                        <input type="text" class="form-control m-input" name="rt"
+                               placeholder="rt" th:value="${rt}">
+                        <div class="input-group-append">
+                            <button class="btn btn-warning" type="submit">
+                                搜索
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <!--end: Search Form -->
-                <!--begin: Datatable -->
-                <div>
-                    <table class="table table-bordered" style="table-layout:fixed;">
-                        <thead>
-                            <tr>
-                                <th width="5%">
-                                    No.
-                                </th>
-                                <th width="15%">
-                                    实验ID
-                                </th>
-                                <th width="10%">
-                                    实验名称
-                                </th>
-                                <th width="5%">
-                                    父节点
-                                </th>
-                                <th width="5%">
-                                    内部序列号
-                                </th>
-                                <th width="10%">
-                                    MSLevel
-                                </th>
-                                <th width="20%">
-                                    RT
-                                </th>
-                                <th width="10%">
-                                    起始位置
-                                </th>
-                                <th width="10%">
-                                    结束位置
-                                </th>
-                                <th width="10%">
-                                    操作
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="scanIndex,status:${scanIndexList}">
-                                <td th:text="${status.index+1}"></td>
-                                <td>
-                                    <a th:href="|/experiment/detail/${scanIndex.experimentId}|"
-                                       th:text="${scanIndex.experimentId}"></a>
-                                </td>
-                                <td th:text="${experiment.name}"></td>
-                                <td th:text="${scanIndex.parentNum}"></td>
+            </form>
+        </div>
+        <!--end: Search Form -->
+        <!--begin: Datatable -->
+        <div>
+            <table class="table table-bordered" style="table-layout:fixed;">
+                <thead>
+                <tr>
+                    <th width="5%">
+                        No.
+                    </th>
+                    <th width="15%">
+                        实验ID
+                    </th>
+                    <th width="10%">
+                        实验名称
+                    </th>
+                    <th width="5%">
+                        父节点
+                    </th>
+                    <th width="5%">
+                        内部序列号
+                    </th>
+                    <th width="10%">
+                        MSLevel
+                    </th>
+                    <th width="20%">
+                        RT
+                    </th>
+                    <th width="10%">
+                        起始位置
+                    </th>
+                    <th width="10%">
+                        结束位置
+                    </th>
+                    <th width="10%">
+                        操作
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="scanIndex,status:${scanIndexList}">
+                    <td th:text="${status.index+1}"></td>
+                    <td>
+                        <a th:href="|/experiment/detail/${scanIndex.experimentId}|"
+                           th:text="${scanIndex.experimentId}"></a>
+                    </td>
+                    <td th:text="${experiment.name}"></td>
+                    <td th:text="${scanIndex.parentNum}"></td>
 
-                                <td th:text="${scanIndex.num}"></td>
-                                <td th:text="${scanIndex.msLevel}"></td>
+                    <td th:text="${scanIndex.num}"></td>
+                    <td th:text="${scanIndex.msLevel}"></td>
 
-                                <td th:text="${scanIndex.rtStr}"></td>
-                                <td th:text="${scanIndex.start}"></td>
-                                <td th:text="${scanIndex.end}"></td>
-                                <td>
-                                    <a th:href="|/scanIndex/detail/${scanIndex.id}|"
-                                       class="btn btn-success btn-sm">详情
-                                    </a>
-                                    <a th:href="|/spectrum/view?indexId=${scanIndex.id}&expId=${experiment.id}|"
-                                       class="btn btn-info btn-sm">查看谱图
-                                    </a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <td th:text="${scanIndex.rtStr}"></td>
+                    <td th:text="${scanIndex.start}"></td>
+                    <td th:text="${scanIndex.end}"></td>
+                    <td>
+                        <a th:href="|/scanindex/detail/${scanIndex.id}|"
+                           class="btn btn-success btn-sm">详情
+                        </a>
+                        <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
+                                data-target="#m_modal_spectrum" th:onclick="|query('${scanIndex.id}','${experiment.id}')|">
+                            查看谱图
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <p id="pagination"></p>
+        <!--end: Datatable -->
+
+        <div class="modal fade" id="m_modal_spectrum" tabindex="-1" role="dialog" aria-labelledby="SpectrumInfo"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Spectrum Info</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            关闭
+                        </button>
+                    </div>
                 </div>
-                <p id="pagination"></p>
-                <!--end: Datatable -->
             </div>
         </div>
-        <th:block layout:fragment="script">
-            <script th:src="@{/assets/js/jquery-bootpag/jquery.bootpag.js}" type="text/javascript"></script>
+    </div>
+</div>
+<th:block layout:fragment="script">
+    <script th:src="@{/assets/js/jquery-bootpag/jquery.bootpag.js}" type="text/javascript"></script>
 
-            <script th:inline="javascript">
-                /*<![CDATA[*/
-                var totalPage = [[${totalPage}]];
-                var currentPage = [[${currentPage}]];
-                /*]]>*/
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var totalPage = [[${totalPage}]];
+        var currentPage = [[${currentPage}]];
+        /*]]>*/
 
-                $(document).ready(function () {
-                    $('#pagination').bootpag({
-                        paginationClass: 'pagination',
-                        next: '<i class="fa fa-angle-right"></i>',
-                        prev: '<i class="fa fa-angle-left"></i>',
-                        total: totalPage,
-                        page: currentPage,
-                        maxVisible: 20
-                    }).on("page", function (event, num) {
-                        document.getElementById("currentPage").value = num;
-                        document.getElementById("searchForm").submit();
-                    });
-                })
-            </script>
-        </th:block>
+        $(document).ready(function () {
+            $('#pagination').bootpag({
+                paginationClass: 'pagination',
+                next: '<i class="fa fa-angle-right"></i>',
+                prev: '<i class="fa fa-angle-left"></i>',
+                total: totalPage,
+                page: currentPage,
+                maxVisible: 20
+            }).on("page", function (event, num) {
+                document.getElementById("currentPage").value = num;
+                document.getElementById("searchForm").submit();
+            });
+        })
 
-    </body>
+        function query(indexId, expId) {
+            htmlobj = $.ajax({url: "/spectrum/view?indexId=" + indexId + "&expId=" + expId, async: false});
+        }
+    </script>
+</th:block>
 
-    <!-- end::Body -->
+</body>
+
+<!-- end::Body -->
 </html>

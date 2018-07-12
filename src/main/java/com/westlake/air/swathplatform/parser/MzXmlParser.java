@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -51,12 +54,52 @@ public class MzXmlParser {
         airXStream.registerConverter(new PrecursorMzConverter());
     }
 
-    public void parse(File file, LmsIndexer indexer) throws Exception {
+    public void parseAll(File file, LmsIndexer indexer) throws Exception {
         prepare();
         List<ScanIndexDO> indexList = indexer.index(file);
         for (ScanIndexDO scanIndexDO : indexList) {
 
         }
+    }
+
+    public Map<Double, Double> parseOne(File file, ScanIndexDO index) {
+        prepare();
+        Map<Double, Double> hashMap = new HashMap<>();
+        try {
+            RandomAccessFile raf = new RandomAccessFile(file, "r");
+            raf.seek(index.getStart());
+            byte[] reader = new byte[(int) (index.getEnd() - index.getStart())];
+            raf.read(reader);
+            Scan scan = new Scan();
+            airXStream.fromXML(new String(reader), scan);
+            if (scan.getPeaksList() != null && scan.getPeaksList().size() >= 1) {
+                Peaks peaks = scan.getPeaksList().get(0);
+                hashMap = getPeakMap(peaks.getValue(),peaks.getPrecision(),true);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return hashMap;
+    }
+
+    public Map<Double, Double> getPeakMap(byte[] value, int precision, boolean isCompression) {
+
+        double[] values = getValues(value, precision, isCompression);
+
+        TreeMap<Double, Double> peakMap = new TreeMap<>();
+
+        for (int peakIndex = 0; peakIndex < values.length - 1; peakIndex += 2) {
+            // get the two value
+            Double mz = values[peakIndex];
+            Double intensity = values[peakIndex + 1];
+
+            peakMap.put(mz, intensity);
+        }
+
+        return peakMap;
     }
 
     public Map<Double, Double> getPeakMap(String value, int precision, boolean isCompression) {
@@ -93,10 +136,10 @@ public class MzXmlParser {
 
     }
 
-    private double[] getValues(String value, int precision, boolean isCompression) {
+    private double[] getValues(byte[] value, int precision, boolean isCompression) {
         double[] values;
 
-        ByteBuffer byteBuffer = ByteBuffer.wrap(new Base64().decode(value));
+        ByteBuffer byteBuffer = ByteBuffer.wrap(value);
 
         if (isCompression) {
             Inflater decompresser = new Inflater();
@@ -127,5 +170,9 @@ public class MzXmlParser {
         }
 
         return values;
+    }
+
+    private double[] getValues(String value, int precision, boolean isCompression) {
+        return getValues(new Base64().decode(value), precision, isCompression);
     }
 }

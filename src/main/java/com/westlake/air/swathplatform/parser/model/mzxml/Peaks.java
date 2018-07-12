@@ -12,7 +12,7 @@ public class Peaks {
     byte[] value;
 
     @XStreamAsAttribute
-    protected Long precision;
+    protected Integer precision;
 
     @XStreamAsAttribute
     String byteOrder;
@@ -24,5 +24,5 @@ public class Peaks {
     String compressionType;
 
     @XStreamAsAttribute
-    int compressedLen;
+    Integer compressedLen;
 }

@@ -36,7 +36,7 @@ public class PeaksConverter implements Converter {
         String compressionType = reader.getAttribute("compressionType");
         String compressedLen = reader.getAttribute("compressedLen");
         if(precision != null){
-            peaks.setPrecision(Long.valueOf(precision));
+            peaks.setPrecision(Integer.valueOf(precision));
         }
         peaks.setByteOrder(byteOrder);
         peaks.setContentType(contentType);

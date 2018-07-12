@@ -1,12 +1,21 @@
 package com.westlake.air.swathplatform.controller;
 
+import com.westlake.air.swathplatform.constants.ResultCode;
+import com.westlake.air.swathplatform.domain.ResultDO;
+import com.westlake.air.swathplatform.domain.db.ExperimentDO;
+import com.westlake.air.swathplatform.domain.db.ScanIndexDO;
 import com.westlake.air.swathplatform.parser.MzXmlParser;
+import com.westlake.air.swathplatform.service.ExperimentService;
+import com.westlake.air.swathplatform.service.ScanIndexService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -19,6 +28,12 @@ public class SpectrumController {
 
     @Autowired
     MzXmlParser mzXmlParser;
+
+    @Autowired
+    ExperimentService experimentService;
+
+    @Autowired
+    ScanIndexService scanIndexService;
 
     @RequestMapping(value = "/mzxmlextractor")
     String mzxmlextractor(Model model,
@@ -58,10 +73,33 @@ public class SpectrumController {
     }
 
     @RequestMapping(value = "/view")
-    String view(Model model,
-                         @RequestParam(value = "scanId", required = false) String scanId) {
+    @ResponseBody
+    ResultDO<Map<Double,Double>> view(Model model,
+                         @RequestParam(value = "indexId", required = false) String indexId,
+                @RequestParam(value = "expId", required = false) String expId) {
 
-        return "spectrum/view";
+        ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
+        ResultDO<ScanIndexDO> indexResult = scanIndexService.getById(indexId);
+
+        ResultDO<Map<Double,Double>> resultDO = new ResultDO<>();
+        Map<Double,Double> map = new HashMap<>();
+        if(expResult.isFailured()){
+            resultDO.setErrorResult(ResultCode.EXPERIMENT_NOT_EXISTED);
+            return resultDO;
+        }
+
+        if(indexResult.isFailured()){
+            resultDO.setErrorResult(ResultCode.SCAN_INDEX_NOT_EXISTED);
+            return resultDO;
+        }
+
+        ExperimentDO experimentDO = expResult.getModel();
+        ScanIndexDO scanIndexDO = indexResult.getModel();
+
+        File file = new File(experimentDO.getFileLocation());
+        map = mzXmlParser.parseOne(file, scanIndexDO);
+        resultDO.setModel(map);
+        return resultDO;
     }
 
 

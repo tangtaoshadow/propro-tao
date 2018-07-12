@@ -1,5 +1,6 @@
 package com.westlake.air.swathplatform.parser.model.mzxml;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 import lombok.Data;
@@ -11,6 +12,7 @@ import java.util.List;
  * The actual MS data is here
  */
 @Data
+@XStreamAlias("scan")
 public class Scan {
 
     @XStreamImplicit(itemFieldName = "scanOrigin")

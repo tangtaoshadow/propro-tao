@@ -57,6 +57,7 @@ public enum ResultCode implements Serializable {
      */
     SCAN_INDEX_LIST_MUST_BE_QUERY_WITH_EXPERIMENT_ID("SCAN_INDEX_LIST_MUST_BE_QUERY_WITH_EXPERIMENT_ID","ScanIndex的列表页面必须至少按照ExperimentId维度进行查询"),
     EXPERIMENT_NOT_EXISTED("EXPERIMENT_NOT_EXISTED","实验数据不存在"),
+    SCAN_INDEX_NOT_EXISTED("SCAN_INDEX_NOT_EXISTED","对应的索引数据不存在"),
     ;
 
     private String code = "";
