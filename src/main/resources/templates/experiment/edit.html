@@ -42,22 +42,20 @@
                             <input type="text" class="form-control m-input" id="libraryName" name="name" readonly th:value="${library?.name}">
                             <span class="m-form__help">库名称全局唯一</span>
                         </div>
-                        <div class="form-group m-form__group row">
-                            <label for="library" class="col-2 col-form-label">
+                        <div class="form-group m-form__group">
+                            <label for="library">
                                 关联标准库名称及ID
                             </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="library" readonly th:value="|${experiment?.libraryName}(${experiment?.libraryId})|">
-                            </div>
+                            <input type="text" class="form-control m-input" id="library" readonly th:value="|${experiment?.libraryName}(${experiment?.libraryId})|">
+
                         </div>
 
-                        <div class="form-group m-form__group row">
-                            <label for="description" class="col-2 col-form-label">
+                        <div class="form-group m-form__group">
+                            <label for="description">
                                 详细描述
                             </label>
-                            <div class="col-10">
-                                <textarea class="form-control m-input" id="description" name="description" rows="3" th:text="${experiment?.description}"></textarea>
-                            </div>
+                            <textarea class="form-control m-input" id="description" name="description" rows="3" th:text="${experiment?.description}"></textarea>
+
                         </div>
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">

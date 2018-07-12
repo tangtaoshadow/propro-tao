@@ -1,9 +1,9 @@
 package com.westlake.air.swathplatform.parser;
 
-import com.westlake.air.swathplatform.parser.indexer.Indexer;
+import com.westlake.air.swathplatform.domain.db.ScanIndexDO;
+import com.westlake.air.swathplatform.parser.indexer.LmsIndexer;
 import com.westlake.air.swathplatform.parser.model.mzxml.*;
 import com.westlake.air.swathplatform.parser.xml.AirXStream;
-import com.westlake.air.swathplatform.parser.xml.PeaksConverter;
 import com.westlake.air.swathplatform.parser.xml.PrecursorMzConverter;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -15,10 +15,7 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
@@ -31,8 +28,6 @@ public class MzXmlParser {
 
     @Autowired
     AirXStream airXStream;
-
-    private static final Pattern attrPattern = Pattern.compile("(\\w+)=\"([^\"]*)\"");
 
     private static byte[] prefix = "<scanList>".getBytes();
     private static byte[] suffix = "</scanList>".getBytes();
@@ -56,10 +51,10 @@ public class MzXmlParser {
         airXStream.registerConverter(new PrecursorMzConverter());
     }
 
-    public void parse(File file, Indexer iIndexer) throws Exception {
+    public void parse(File file, LmsIndexer indexer) throws Exception {
         prepare();
-        List<ScanIndex> indexList = iIndexer.index(file);
-        for (ScanIndex scanIndex : indexList) {
+        List<ScanIndexDO> indexList = indexer.index(file);
+        for (ScanIndexDO scanIndexDO : indexList) {
 
         }
     }

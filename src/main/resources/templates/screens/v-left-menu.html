@@ -11,32 +11,27 @@
          data-menu-vertical="true" data-menu-scrollable="false" data-menu-dropdown-timeout="500">
         <ul class="m-menu__nav m-menu__nav--dropdown-submenu-arrow ">
             <!--m-menu__item&#45;&#45;active-->
-            <li class="m-menu__item " aria-haspopup="true">
-                <a href="/home" class="m-menu__link ">
-                    <i class="m-menu__link-icon flaticon-line-graph"></i>
-                    <span class="m-menu__link-title">
-						<span class="m-menu__link-wrap">
-							<span class="m-menu__link-text">
-								总控制台
-							</span>
-						</span>
-					</span>
-                </a>
-            </li>
-            <!--<li class="m-menu__section">-->
-                <!--<h4 class="m-menu__section-text">-->
-                    <!--标准库管理控制台-->
-                <!--</h4>-->
-                <!--<i class="m-menu__section-icon flaticon-more-v3"></i>-->
+            <!--<li class="m-menu__item " aria-haspopup="true">-->
+                <!--<a href="/home" class="m-menu__link ">-->
+                    <!--<i class="m-menu__link-icon flaticon-line-graph"></i>-->
+                    <!--<span class="m-menu__link-title">-->
+						<!--<span class="m-menu__link-wrap">-->
+							<!--<span class="m-menu__link-text">-->
+								<!--总控制台-->
+							<!--</span>-->
+						<!--</span>-->
+					<!--</span>-->
+                <!--</a>-->
             <!--</li>-->
 
-            <li class="m-menu__item m-menu__item--submenu m-menu__item--open" aria-haspopup="true" data-menu-submenu-toggle="hover">
+            <li class="m-menu__item m-menu__item--submenu m-menu__item--expanded m-menu__item--open" aria-haspopup="true"
+                data-menu-submenu-toggle="hover">
                 <a href="#" class="m-menu__link m-menu__toggle">
                     <i class="m-menu__link-icon flaticon-list-1"></i>
                     <span class="m-menu__link-text">数据导入</span>
                     <i class="m-menu__ver-arrow la la-angle-right"></i>
                 </a>
-                <div class="m-menu__submenu " style="display: block;">
+                <div class="m-menu__submenu ">
                     <span class="m-menu__arrow"></span>
                     <ul class="m-menu__subnav">
                         <li class="m-menu__item  m-menu__item--parent" aria-haspopup="true">
@@ -44,7 +39,7 @@
 								<span class="m-menu__link-text">数据导入</span>
 							</span>
                         </li>
-                        <li class="m-menu__item " aria-haspopup="true">
+                        <li class="m-menu__item" aria-haspopup="true">
                             <a href="/library/create" class="m-menu__link ">
                                 <i class="m-menu__link-bullet m-menu__link-bullet--dot"><span></span></i>
                                 <span class="m-menu__link-text">导入TSV格式标准库</span>
@@ -59,10 +54,11 @@
                     </ul>
                 </div>
             </li>
-            <li class="m-menu__item m-menu__item--submenu m-menu__item--open" aria-haspopup="true" data-menu-submenu-toggle="hover">
+            <li class="m-menu__item m-menu__item--submenu m-menu__item--expanded m-menu__item--open" aria-haspopup="true"
+                data-menu-submenu-toggle="hover">
                 <a href="#" class="m-menu__link m-menu__toggle">
                     <i class="m-menu__link-icon flaticon-signs-2"></i>
-                    <span class="m-menu__link-text">实验数据</span>
+                    <span class="m-menu__link-text">实验</span>
                     <i class="m-menu__ver-arrow la la-angle-right"></i>
                 </a>
                 <div class="m-menu__submenu " style="display: block;">
@@ -70,20 +66,33 @@
                     <ul class="m-menu__subnav">
                         <li class="m-menu__item  m-menu__item--parent" aria-haspopup="true">
 							<span class="m-menu__link">
-								<span class="m-menu__link-text">实验数据快速查看</span>
+								<span class="m-menu__link-text">实验</span>
 							</span>
+                        </li>
+                        <li class="m-menu__item " aria-haspopup="true">
+                            <a href="/experiment/quickscan" class="m-menu__link ">
+                                <i class="m-menu__link-bullet m-menu__link-bullet--dot"><span></span></i>
+                                <span class="m-menu__link-text">速查</span>
+                            </a>
                         </li>
                         <li class="m-menu__item " aria-haspopup="true">
                             <a href="/experiment/list" class="m-menu__link ">
                                 <i class="m-menu__link-bullet m-menu__link-bullet--dot"><span></span></i>
-                                <span class="m-menu__link-text">实验数据列表</span>
+                                <span class="m-menu__link-text">实验列表</span>
+                            </a>
+                        </li>
+                        <li class="m-menu__item " aria-haspopup="true">
+                            <a href="/scanindex/list" class="m-menu__link ">
+                                <i class="m-menu__link-bullet m-menu__link-bullet--dot"><span></span></i>
+                                <span class="m-menu__link-text">实验索引列表</span>
                             </a>
                         </li>
                     </ul>
                 </div>
             </li>
 
-            <li class="m-menu__item m-menu__item--submenu m-menu__item--open" aria-haspopup="true" data-menu-submenu-toggle="hover">
+            <li class="m-menu__item m-menu__item--submenu m-menu__item--expanded m-menu__item--open" aria-haspopup="true"
+                data-menu-submenu-toggle="hover">
                 <a href="#" class="m-menu__link m-menu__toggle">
                     <i class="m-menu__link-icon flaticon-interface-2"></i>
                     <span class="m-menu__link-text">标准库</span>
@@ -100,7 +109,7 @@
                         <li class="m-menu__item " aria-haspopup="true">
                             <a href="/library/list" class="m-menu__link ">
                                 <i class="m-menu__link-bullet m-menu__link-bullet--dot"><span></span></i>
-                                <span class="m-menu__link-text">实验数据列表</span>
+                                <span class="m-menu__link-text">标准库列表</span>
                             </a>
                         </li>
                         <li class="m-menu__item " aria-haspopup="true">
@@ -113,7 +122,8 @@
                 </div>
             </li>
 
-            <li class="m-menu__item m-menu__item--submenu m-menu__item--open" aria-haspopup="true" data-menu-submenu-toggle="hover">
+            <li class="m-menu__item m-menu__item--submenu m-menu__item--expanded m-menu__item--open" aria-haspopup="true"
+                data-menu-submenu-toggle="hover">
                 <a href="#" class="m-menu__link m-menu__toggle">
                     <i class="m-menu__link-icon flaticon-attachment"></i>
                     <span class="m-menu__link-text">小工具集</span>

@@ -1,16 +1,17 @@
 package com.westlake.air.swathplatform.controller;
 
+import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.constants.SuccessMsg;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.db.ExperimentDO;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
-import com.westlake.air.swathplatform.domain.db.TransitionDO;
+import com.westlake.air.swathplatform.domain.db.ScanIndexDO;
 import com.westlake.air.swathplatform.domain.query.ExperimentQuery;
 import com.westlake.air.swathplatform.parser.MzXmlParser;
-import com.westlake.air.swathplatform.parser.indexer.Indexer;
-import com.westlake.air.swathplatform.parser.model.mzxml.ScanIndex;
+import com.westlake.air.swathplatform.parser.indexer.LmsIndexer;
 import com.westlake.air.swathplatform.service.ExperimentService;
 import com.westlake.air.swathplatform.service.LibraryService;
+import com.westlake.air.swathplatform.service.ScanIndexService;
 import com.westlake.air.swathplatform.service.TransitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -45,7 +46,10 @@ public class ExperimentController extends BaseController {
     MzXmlParser mzXmlParser;
 
     @Autowired
-    Indexer lmsIndexer;
+    LmsIndexer lmsIndexer;
+
+    @Autowired
+    ScanIndexService scanIndexService;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -79,19 +83,73 @@ public class ExperimentController extends BaseController {
     String add(Model model,
                @RequestParam(value = "name", required = true) String name,
                @RequestParam(value = "description", required = false) String description,
+               @RequestParam(value = "fileLocation", required = true) String fileLocation,
                @RequestParam(value = "libraryId", required = true) String libraryId,
                RedirectAttributes redirectAttributes) {
 
-        File file = new File("H:\\data\\weissto_i170508_005-SWLYPB125.mzXML");
-//        File file = new File(getClass().getClassLoader().getResource("data/MzXMLFile_1_compressed.mzXML").getPath());
-//        File file = new File("D:\\data\\wlym5.mzXML");
-//        File file = new File("D:\\testdata\\testfile.mzXML");
+        List<LibraryDO> list = libraryService.getAll();
+        model.addAttribute("libraries", list);
+
+        if (name != null && !name.isEmpty()) {
+            model.addAttribute("name", name);
+        }
+        if (description != null && !description.isEmpty()) {
+            model.addAttribute("description", description);
+        }
+        if (libraryId != null && !libraryId.isEmpty()) {
+            model.addAttribute("libraryId", libraryId);
+        }
+
+        if (fileLocation == null || fileLocation.isEmpty()) {
+            model.addAttribute(ERROR_MSG, ResultCode.FILE_LOCATION_CANNOT_BE_EMPTY);
+            return "experiment/create";
+        }
+
+        File file = new File(fileLocation);
+
+        if (!file.exists()) {
+            model.addAttribute(ERROR_MSG, ResultCode.FILE_NOT_EXISTED);
+            return "experiment/create";
+        }
+
+        ResultDO<LibraryDO> resultLib = libraryService.getById(libraryId);
+        if (resultLib.isFailured()) {
+            model.addAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED);
+            return "experiment/create";
+        }
+//      File file = new File("H:\\data\\weissto_i170508_005-SWLYPB125.mzXML");
+
+//      File file = new File(getClass().getClassLoader().getResource("data/MzXMLFile_1_compressed.mzXML").getPath());
+//      File file = new File("D:\\data\\wlym5.mzXML");
+//      File file = new File("D:\\testdata\\testfile.mzXML");
+
+        ExperimentDO experimentDO = new ExperimentDO();
+        experimentDO.setName(name);
+        experimentDO.setDescription(description);
+        experimentDO.setFileLocation(fileLocation);
+        experimentDO.setLibraryId(libraryId);
+        experimentDO.setLibraryName(resultLib.getModel().getName());
+
+        ResultDO result = experimentService.save(experimentDO);
+        if (result.isFailured()) {
+            model.addAttribute(ERROR_MSG, result.getMsgInfo());
+            return "experiment/create";
+        }
 
         try {
-            List<TransitionDO> simpleList = transitionService.getSimpleAllByLibraryId(libraryId);
-            System.out.println(simpleList.size());
             //建立索引
-            List<ScanIndex> indexList = lmsIndexer.index(file);
+            Long time = System.currentTimeMillis();
+            List<ScanIndexDO> indexList = lmsIndexer.index(file, experimentDO.getId());
+            ResultDO resultDO = scanIndexService.insertAll(indexList, true);
+            System.out.println("Cost:" + (System.currentTimeMillis() - time));
+            if(resultDO.isFailured()){
+                experimentService.delete(experimentDO.getId());
+                model.addAttribute(ERROR_MSG, result.getMsgInfo());
+                return "experiment/create";
+            }else{
+                redirectAttributes.addAttribute(SUCCESS_MSG, SuccessMsg.CREATE_EXPERIMENT_AND_INDEX_SUCCESS);
+                return "redirect:/experiment/list";
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -143,5 +201,25 @@ public class ExperimentController extends BaseController {
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_LIBRARY_SUCCESS);
         return "redirect:/experiment/list";
 
+    }
+
+    @RequestMapping(value = "/quickscan")
+    String quickScan(Model model, RedirectAttributes redirectAttributes) {
+
+        File file = new File("H:\\data\\weissto_i170508_005-SWLYPB125.mzXML");
+//    File file = new File("D:\\data\\wlym5.mzXML");
+//    File file = new File("D:\\testdata\\testfile.mzXML");
+
+        try {
+            Long time = System.currentTimeMillis();
+            List<ScanIndexDO> indexList = lmsIndexer.index(file);
+
+            System.out.println("Cost:" + (System.currentTimeMillis() - time));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return "experiment/list";
     }
 }

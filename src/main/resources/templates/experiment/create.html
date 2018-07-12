@@ -48,6 +48,17 @@
                         </div>
 
                         <div class="form-group m-form__group row">
+                            <label for="fileLocation" class="col-2 col-form-label">
+                                文件绝对路径
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="fileLocation"
+                                       placeholder="Enter File Location,such as D:/data/xxx.mzXML" name="fileLocation" th:value="${experiment?.fileLocation}">
+                                <span class="m-form__help">文件在服务器上的绝对路径</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
                             <label for="libraryId" class="col-2 col-form-label">
                                 选择实验相关的标准库
                             </label>

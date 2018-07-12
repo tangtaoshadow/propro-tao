@@ -36,11 +36,27 @@ public enum ResultCode implements Serializable {
 
     /**
      * ******
-     * library表
+     * library
      * *******
      */
     LIBRARY_NAME_CANNOT_BE_EMPTY("LIBRARY_NAME_CANNOT_BE_EMPTY","标准库名称不能为空"),
 
+    /**
+     * ******
+     * experiment
+     * *******
+     */
+    FILE_LOCATION_CANNOT_BE_EMPTY("FILE_LOCATION_CANNOT_BE_EMPTY","文件路径不能为空"),
+    FILE_NOT_EXISTED("FILE_NOT_EXISTED","文件不存在"),
+    LIBRARY_NOT_EXISTED("LIBRARY_NOT_EXISTED","指定的库不存在"),
+
+    /**
+     * ******
+     * ScanIndex
+     * *******
+     */
+    SCAN_INDEX_LIST_MUST_BE_QUERY_WITH_EXPERIMENT_ID("SCAN_INDEX_LIST_MUST_BE_QUERY_WITH_EXPERIMENT_ID","ScanIndex的列表页面必须至少按照ExperimentId维度进行查询"),
+    EXPERIMENT_NOT_EXISTED("EXPERIMENT_NOT_EXISTED","实验数据不存在"),
     ;
 
     private String code = "";

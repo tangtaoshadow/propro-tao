@@ -29,7 +29,6 @@ public class SpectrumController {
         model.addAttribute("precision", precision);
         model.addAttribute("isCompression", isCompression);
 
-
         if (values != null && !values.isEmpty()) {
             Map<Double, Double> peakMap = mzXmlParser.getPeakMap(values.trim(), precision, isCompression);
             model.addAttribute("peakMap", peakMap);
@@ -56,6 +55,13 @@ public class SpectrumController {
         }
 
         return "spectrum/mzmlextractor";
+    }
+
+    @RequestMapping(value = "/view")
+    String view(Model model,
+                         @RequestParam(value = "scanId", required = false) String scanId) {
+
+        return "spectrum/view";
     }
 
 
