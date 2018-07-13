@@ -20,16 +20,6 @@
             <form id="searchForm" method="post" role="form" class="form-inline" action="/library/list">
                 <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                 <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
-
-                <!--<div class="input-group">-->
-                <!--<input type="text" class="form-control" id="searchName" name="name" placeholder="标准库名称" th:value="${searchName}">-->
-                <!--<div class="input-group-append">-->
-                <!--<button class="btn btn-primary" type="submit">-->
-                <!--查找-->
-                <!--</button>-->
-                <!--</div>-->
-                <!--</div>-->
-
                 <div class="form-group m-form__group">
                     <div class="input-group">
                         <input type="text" class="form-control" id="searchName" name="searchName" placeholder="标准库名称"
