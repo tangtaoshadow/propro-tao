@@ -62,9 +62,9 @@ public class MzXmlParser {
         }
     }
 
-    public Map<Double, Double> parseOne(File file, ScanIndexDO index) {
+    public TreeMap<Double, Double> parseOne(File file, ScanIndexDO index) {
         prepare();
-        Map<Double, Double> hashMap = new HashMap<>();
+        TreeMap<Double, Double> hashMap = new TreeMap<>();
         try {
             RandomAccessFile raf = new RandomAccessFile(file, "r");
             raf.seek(index.getStart());
@@ -85,7 +85,7 @@ public class MzXmlParser {
         return hashMap;
     }
 
-    public Map<Double, Double> getPeakMap(byte[] value, int precision, boolean isCompression) {
+    public TreeMap<Double, Double> getPeakMap(byte[] value, int precision, boolean isCompression) {
 
         double[] values = getValues(value, precision, isCompression);
 
@@ -102,7 +102,7 @@ public class MzXmlParser {
         return peakMap;
     }
 
-    public Map<Double, Double> getPeakMap(String value, int precision, boolean isCompression) {
+    public TreeMap<Double, Double> getPeakMap(String value, int precision, boolean isCompression) {
 
         double[] values = getValues(value, precision, isCompression);
 
@@ -119,7 +119,7 @@ public class MzXmlParser {
         return peakMap;
     }
 
-    public Map<Double, Double> getPeakMap(String mz, String intensity, int mzPrecision, int intensityPrecision, boolean isCompression) {
+    public TreeMap<Double, Double> getPeakMap(String mz, String intensity, int mzPrecision, int intensityPrecision, boolean isCompression) {
 
         double[] mzValues = getValues(mz, mzPrecision, isCompression);
         double[] intensityValues = getValues(intensity, intensityPrecision, false);
@@ -127,7 +127,7 @@ public class MzXmlParser {
         if (mzValues == null || intensityValues == null || mzValues.length != intensityValues.length) {
             return null;
         }
-        HashMap<Double, Double> peakMap = new HashMap<>();
+        TreeMap<Double, Double> peakMap = new TreeMap<>();
         for (int peakIndex = 0; peakIndex < mzValues.length; peakIndex++) {
             peakMap.put(mzValues[peakIndex], intensityValues[peakIndex]);
         }

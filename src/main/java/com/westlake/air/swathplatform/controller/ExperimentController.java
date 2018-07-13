@@ -213,7 +213,6 @@ public class ExperimentController extends BaseController {
         try {
             Long time = System.currentTimeMillis();
             List<ScanIndexDO> indexList = lmsIndexer.index(file);
-
             System.out.println("Cost:" + (System.currentTimeMillis() - time));
 
         } catch (Exception e) {

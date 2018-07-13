@@ -1,5 +1,7 @@
 package com.westlake.air.swathplatform.controller;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.db.ExperimentDO;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Created by James Lu MiaoShan
@@ -74,15 +77,15 @@ public class SpectrumController {
 
     @RequestMapping(value = "/view")
     @ResponseBody
-    ResultDO<Map<Double,Double>> view(Model model,
-                         @RequestParam(value = "indexId", required = false) String indexId,
-                @RequestParam(value = "expId", required = false) String expId) {
+    ResultDO<JSONObject> view(Model model,
+                              @RequestParam(value = "indexId", required = false) String indexId,
+                              @RequestParam(value = "expId", required = false) String expId) {
 
         ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
         ResultDO<ScanIndexDO> indexResult = scanIndexService.getById(indexId);
 
-        ResultDO<Map<Double,Double>> resultDO = new ResultDO<>();
-        Map<Double,Double> map = new HashMap<>();
+        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
+        TreeMap<Double,Double> map = new TreeMap<>();
         if(expResult.isFailured()){
             resultDO.setErrorResult(ResultCode.EXPERIMENT_NOT_EXISTED);
             return resultDO;
@@ -98,7 +101,18 @@ public class SpectrumController {
 
         File file = new File(experimentDO.getFileLocation());
         map = mzXmlParser.parseOne(file, scanIndexDO);
-        resultDO.setModel(map);
+
+        JSONObject res = new JSONObject();
+        JSONArray mzArray = new JSONArray();
+        JSONArray intensityArray = new JSONArray();
+        for(Double key : map.keySet()){
+            mzArray.add(key);
+            intensityArray.add(map.get(key));
+        }
+
+        res.put("mz",mzArray);
+        res.put("intensity",intensityArray);
+        resultDO.setModel(res);
         return resultDO;
     }
 

@@ -52,13 +52,13 @@ public class ScanIndexController extends BaseController {
 
         if (experimentId == null || experimentId.isEmpty()) {
             model.addAttribute(ERROR_MSG, ResultCode.SCAN_INDEX_LIST_MUST_BE_QUERY_WITH_EXPERIMENT_ID.getMessage());
-            return "/scanIndex/list";
+            return "/scanindex/list";
         }
 
         ResultDO<ExperimentDO> expResult = experimentService.getById(experimentId);
         if (expResult.isFailured()) {
             model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
-            return "/scanIndex/list";
+            return "/scanindex/list";
         }
         model.addAttribute("experiment", expResult.getModel());
         ScanIndexQuery query = new ScanIndexQuery();
@@ -90,7 +90,7 @@ public class ScanIndexController extends BaseController {
         builder.append("本次搜索耗时:").append(System.currentTimeMillis() - startTime).append("毫秒;包含搜索结果总计:")
                 .append(resultDO.getTotalNum()).append("条");
         model.addAttribute("searchResult", builder.toString());
-        return "scanIndex/list";
+        return "scanindex/list";
     }
 
     @RequestMapping(value = "/detail/{id}")
@@ -98,10 +98,10 @@ public class ScanIndexController extends BaseController {
         ResultDO<ScanIndexDO> resultDO = scanIndexService.getById(id);
         if (resultDO.isSuccess()) {
             model.addAttribute("scanIndex", resultDO.getModel());
-            return "/scanIndex/detail";
+            return "/scanindex/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/scanIndex/list";
+            return "redirect:/scanindex/list";
         }
     }
 }
