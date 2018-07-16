@@ -84,7 +84,7 @@ public class ExperimentController extends BaseController {
                @RequestParam(value = "name", required = true) String name,
                @RequestParam(value = "description", required = false) String description,
                @RequestParam(value = "fileLocation", required = true) String fileLocation,
-               @RequestParam(value = "libraryId", required = true) String libraryId,
+               @RequestParam(value = "libraryId", required = false) String libraryId,
                RedirectAttributes redirectAttributes) {
 
         List<LibraryDO> list = libraryService.getAll();
@@ -112,11 +112,7 @@ public class ExperimentController extends BaseController {
             return "experiment/create";
         }
 
-        ResultDO<LibraryDO> resultLib = libraryService.getById(libraryId);
-        if (resultLib.isFailured()) {
-            model.addAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED);
-            return "experiment/create";
-        }
+
 //      File file = new File("H:\\data\\weissto_i170508_005-SWLYPB125.mzXML");
 
 //      File file = new File(getClass().getClassLoader().getResource("data/MzXMLFile_1_compressed.mzXML").getPath());
@@ -127,8 +123,12 @@ public class ExperimentController extends BaseController {
         experimentDO.setName(name);
         experimentDO.setDescription(description);
         experimentDO.setFileLocation(fileLocation);
-        experimentDO.setLibraryId(libraryId);
-        experimentDO.setLibraryName(resultLib.getModel().getName());
+
+        ResultDO<LibraryDO> resultLib = libraryService.getById(libraryId);
+        if (resultLib.isSuccess()) {
+            experimentDO.setLibraryId(libraryId);
+            experimentDO.setLibraryName(resultLib.getModel().getName());
+        }
 
         ResultDO result = experimentService.save(experimentDO);
         if (result.isFailured()) {

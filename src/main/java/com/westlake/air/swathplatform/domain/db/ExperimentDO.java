@@ -29,9 +29,13 @@ public class ExperimentDO extends BaseDO {
 
     String libraryName;
 
+    //预设定的RT卷积窗口宽度
+    Double preRTWindow;
+
     String description;
 
     Date createDate;
 
     Date lastModifiedDate;
+
 }

@@ -60,7 +60,7 @@
 
                         <div class="form-group m-form__group row">
                             <label for="libraryId" class="col-2 col-form-label">
-                                选择实验相关的标准库
+                                相关的标准库
                             </label>
                             <div class="col-10">
                                 <select class="form-control m-input" id="libraryId" name="libraryId">
@@ -68,6 +68,17 @@
                                             th:text="${library.name}"></option>
                                 </select>
                                 <span class="m-form__help">关联标准库一旦设定无法修改</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="libraryId" class="col-2 col-form-label">
+                                预设RT卷积窗口
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="preRTWindow"
+                                       placeholder="" name="preRTWindow" th:value="${experiment?.preRTWindow}">
+                                <span class="m-form__help">预设RT卷积窗口</span>
                             </div>
                         </div>
 
