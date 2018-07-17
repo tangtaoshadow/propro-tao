@@ -219,10 +219,20 @@ public class LibraryController extends BaseController {
         }
     }
 
-    @RequestMapping(value = "/build/ms1/{id}")
-    String buildMS1(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
-        List<TargetTransition> result = transitionService.buildMS1(id);
-        return "redirect:/library/list";
+    @RequestMapping(value = "/buildCoordinate")
+    String buildCoordinate(Model model,
+                    @RequestParam(value = "id", required = true) String id,
+                    @RequestParam(value = "extractionWindow", required = true,defaultValue = "1.0") double extractionWindow,
+                    RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("extractionWindow",extractionWindow);
+        long start = System.currentTimeMillis();
+        List<TargetTransition> resultMS1 = transitionService.buildMS1(id, extractionWindow);
+        logger.info("BuildMS1图消耗时间为:"+resultMS1.size()+"|"+(System.currentTimeMillis()-start));
+
+        start = System.currentTimeMillis();
+        List<TargetTransition> resultMS2 = transitionService.buildMS2(id, extractionWindow);
+        logger.info("BuildMS2图消耗时间为:"+resultMS2.size()+"|"+(System.currentTimeMillis()-start));
+        return "redirect:/library/detail/"+id;
     }
 
     private ResultDO parseAndInsertTsv(MultipartFile file, LibraryDO library, boolean justReal) {
@@ -237,7 +247,7 @@ public class LibraryController extends BaseController {
         return resultDO;
     }
 
-    private void countAndUpdateForLibrary(LibraryDO library){
+    private void countAndUpdateForLibrary(LibraryDO library) {
         try {
             library.setProteinCount(transitionService.countByProteinName(library.getId()));
             library.setPeptideCount(transitionService.countByPeptideSequence(library.getId()));

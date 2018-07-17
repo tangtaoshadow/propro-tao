@@ -15,7 +15,7 @@ public interface TransitionService {
 
     List<TransitionDO> getAllByLibraryId(String libraryId);
 
-    List<TransitionDO> getSimpleAllByLibraryId(String libraryId);
+//    List<TransitionDO> getSimpleAllByLibraryId(String libraryId);
 
     List<TransitionDO> getAllByLibraryIdAndIsDecoy(String libraryId,boolean isDecoy);
 
@@ -37,8 +37,8 @@ public interface TransitionService {
 
     Long countByPeptideSequence(String libraryId);
 
-    List<TargetTransition> buildMS1(String libraryId);
+    List<TargetTransition> buildMS1(String libraryId, double extraction_windows);
 
-    List<TargetTransition> buildMS2(String libraryId);
+    List<TargetTransition> buildMS2(String libraryId, double extraction_windows);
 
 }

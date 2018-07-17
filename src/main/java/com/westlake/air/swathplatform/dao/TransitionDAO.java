@@ -1,6 +1,7 @@
 package com.westlake.air.swathplatform.dao;
 
 import com.mongodb.BasicDBObject;
+import com.westlake.air.swathplatform.domain.bean.TargetTransition;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.TransitionQuery;
 import org.bson.Document;
@@ -33,20 +34,18 @@ public class TransitionDAO {
         return mongoTemplate.find(query, TransitionDO.class, CollectionName);
     }
 
-    public List<TransitionDO> getSimpleAllByLibraryId(String libraryId){
+    public List<TargetTransition> getTargetTransitionsByLibraryId(String libraryId){
         Document queryDoc = new Document();
         queryDoc.put("libraryId",libraryId);
 
         Document fieldsDoc = new Document();
-        fieldsDoc.put("precursorMz",true);
+        fieldsDoc.put("id",true);
+        fieldsDoc.put("fullName",true);
         fieldsDoc.put("productMz",true);
         fieldsDoc.put("rt",true);
-        fieldsDoc.put("intensity",true);
-        fieldsDoc.put("precursorCharge",true);
-        fieldsDoc.put("Annotation",true);
 
         Query query = new BasicQuery(queryDoc, fieldsDoc);
-        return mongoTemplate.find(query, TransitionDO.class, CollectionName);
+        return mongoTemplate.find(query, TargetTransition.class, CollectionName);
     }
 
     public List<TransitionDO> getAllByLibraryIdAndIsDecoy(String libraryId, boolean isDecoy){
@@ -119,13 +118,16 @@ public class TransitionDAO {
         return (long)a.getMappedResults().size();
     }
 
-    public Object groupByFullSequence(String libraryId) {
-        AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
+    public List<TargetTransition> groupByFullName(String libraryId) {
+
+        AggregationResults<TargetTransition> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(
                         TransitionDO.class,
                         Aggregation.match(where("libraryId").is(libraryId)),
-                        Aggregation.group("sequence")).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
-                BasicDBObject.class);
+                        Aggregation.group("fullName","sequence","precursorMz","rt","id")
+
+                ).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
+                TargetTransition.class);
 
         return a.getMappedResults();
     }

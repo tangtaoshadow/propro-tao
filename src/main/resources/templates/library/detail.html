@@ -178,7 +178,32 @@
                     <a th:href="|/decoy/check?id=${library?.id}&isDecoy=true|" class="btn btn-success">检测伪肽段MZ计算误差</a>
                     <a th:href="|/decoy/check?id=${library?.id}&isDecoy=false|" class="btn btn-info">检测真实肽段MZ计算误差</a>
                     <a th:href="|/decoy/generate?id=${library?.id}|" class="btn btn-success">生成伪肽段</a>
-                    <a th:href="|/library/build/ms1/${library?.id}|" class="btn btn-info">生成MS1坐标</a>
+
+                    <form id="searchForm" method="post" role="form"
+                          class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
+                          action="/library/buildCoordinate">
+                        <div class="form-group m-form__group row">
+                            <div class="input-group col-lg-12">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        Extraction Window:
+                                    </button>
+                                </div>
+                                <input hidden="hidden" name="id" th:value="${library?.id}">
+                                <input type="text" class="form-control m-input" name="extractionWindow"
+                                       placeholder="extractionWindow,通常为1.0" th:value="${extractionWindow}">
+                                <div class="input-group-append">
+                                    <button class="btn btn-warning" type="submit">
+                                        生成MS坐标
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </form>
+
+
                 </div>
             </div>
         </div>

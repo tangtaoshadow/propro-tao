@@ -32,12 +32,6 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
-    public List<TransitionDO> getSimpleAllByLibraryId(String libraryId) {
-        List<TransitionDO> simpleList = transitionDAO.getSimpleAllByLibraryId(libraryId);
-        return simpleList;
-    }
-
-    @Override
     public List<TransitionDO> getAllByLibraryIdAndIsDecoy(String libraryId, boolean isDecoy) {
         return transitionDAO.getAllByLibraryIdAndIsDecoy(libraryId, isDecoy);
     }
@@ -72,17 +66,18 @@ public class TransitionServiceImpl implements TransitionService {
 
     /**
      * 这边的代码由于时间问题写的比较简陋,先删除原有的关联数据,再插入新的关联数据,未做事务处理
+     *
      * @param transitions
      * @param isDeleteOld
      * @return
      */
     @Override
     public ResultDO insertAll(List<TransitionDO> transitions, boolean isDeleteOld) {
-        if(transitions == null || transitions.size() == 0){
+        if (transitions == null || transitions.size() == 0) {
             return ResultDO.buildError(ResultCode.OBJECT_CANNOT_BE_NULL);
         }
         try {
-            if(isDeleteOld){
+            if (isDeleteOld) {
                 transitionDAO.deleteAllByLibraryId(transitions.get(0).getLibraryId());
             }
             transitionDAO.insert(transitions);
@@ -104,7 +99,7 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
-    public ResultDO deleteAllDecoyByLibraryId(String libraryId){
+    public ResultDO deleteAllDecoyByLibraryId(String libraryId) {
         try {
             transitionDAO.deleteAllDecoyByLibraryId(libraryId);
             return new ResultDO(true);
@@ -142,14 +137,29 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
-    public List<TargetTransition> buildMS1(String libraryId) {
-        Object result = transitionDAO.groupByFullSequence(libraryId);
-        System.out.println(result.getClass());
-        return null;
+    public List<TargetTransition> buildMS1(String libraryId, double extraction_windows) {
+        long start = System.currentTimeMillis();
+        List<TargetTransition> targetList = transitionDAO.groupByFullName(libraryId);
+        logger.info("读取数据库MS1花费时间:" + (System.currentTimeMillis() - start));
+        for (TargetTransition targetTransition : targetList) {
+            targetTransition.setIsMS1(true);
+            targetTransition.setRtStart(targetTransition.getRt() - extraction_windows / 2.0);
+            targetTransition.setRtStart(targetTransition.getRt() + extraction_windows / 2.0);
+        }
+        return targetList;
     }
 
     @Override
-    public List<TargetTransition> buildMS2(String libraryId) {
-        return null;
+    public List<TargetTransition> buildMS2(String libraryId, double extraction_windows) {
+        long start = System.currentTimeMillis();
+        List<TargetTransition> targetList = transitionDAO.getTargetTransitionsByLibraryId(libraryId);
+        logger.info("读取数据库MS2花费时间:" + (System.currentTimeMillis() - start));
+
+        for (TargetTransition targetTransition : targetList) {
+            targetTransition.setIsMS1(false);
+            targetTransition.setRtStart(targetTransition.getRt() - extraction_windows / 2.0);
+            targetTransition.setRtStart(targetTransition.getRt() + extraction_windows / 2.0);
+        }
+        return targetList;
     }
 }
