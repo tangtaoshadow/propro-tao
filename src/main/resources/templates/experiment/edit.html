@@ -46,7 +46,10 @@
                             <label for="library">
                                 关联标准库名称及ID
                             </label>
-                            <input type="text" class="form-control m-input" id="library" readonly th:value="|${experiment?.libraryName}(${experiment?.libraryId})|">
+                            <select class="form-control m-input" id="library" name="libraryId">
+                                <option th:each="library:${libraries}" th:value="${library.id}" th:text="${library.name}" th:selected="${experiment.libraryId}==${library.id}?true:false"></option>
+                            </select>
+                            <!--<input type="text" class="form-control m-input" id="library" readonly th:value="|${experiment?.libraryName}(${experiment?.libraryId})|">-->
 
                         </div>
 

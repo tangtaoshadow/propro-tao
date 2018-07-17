@@ -19,6 +19,8 @@ public interface LibraryService {
 
     List<LibraryDO> getAll();
 
+    List<LibraryDO> getSimpleAll();
+
     ResultDO save(LibraryDO libraryDO);
 
     ResultDO update(LibraryDO libraryDO);

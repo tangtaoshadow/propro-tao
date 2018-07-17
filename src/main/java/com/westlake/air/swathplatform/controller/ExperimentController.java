@@ -87,8 +87,7 @@ public class ExperimentController extends BaseController {
                @RequestParam(value = "libraryId", required = false) String libraryId,
                RedirectAttributes redirectAttributes) {
 
-        List<LibraryDO> list = libraryService.getAll();
-        model.addAttribute("libraries", list);
+        model.addAttribute("libraries", getLibraryList());
 
         if (name != null && !name.isEmpty()) {
             model.addAttribute("name", name);
@@ -112,9 +111,7 @@ public class ExperimentController extends BaseController {
             return "experiment/create";
         }
 
-
 //      File file = new File("H:\\data\\weissto_i170508_005-SWLYPB125.mzXML");
-
 //      File file = new File(getClass().getClassLoader().getResource("data/MzXMLFile_1_compressed.mzXML").getPath());
 //      File file = new File("D:\\data\\wlym5.mzXML");
 //      File file = new File("D:\\testdata\\testfile.mzXML");
@@ -160,6 +157,8 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/edit/{id}")
     String edit(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+
+        model.addAttribute("libraries", getLibraryList());
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailured()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
@@ -187,9 +186,27 @@ public class ExperimentController extends BaseController {
                   @RequestParam(value = "id", required = true) String id,
                   @RequestParam(value = "name") String name,
                   @RequestParam(value = "description") String description,
+                  @RequestParam(value = "libraryId") String libraryId,
                   RedirectAttributes redirectAttributes) {
 
+        ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
+        if(resultDO.isFailured()){
+            redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
+            return "redirect:/experiment/list";
+        }
+        ResultDO<LibraryDO> resultLib = libraryService.getById(libraryId);
+        ExperimentDO experimentDO = resultDO.getModel();
+        if (resultLib.isSuccess()) {
+            experimentDO.setLibraryId(libraryId);
+            experimentDO.setLibraryName(resultLib.getModel().getName());
+        }
+        experimentDO.setDescription(description);
 
+        ResultDO result = experimentService.update(experimentDO);
+        if (result.isFailured()) {
+            model.addAttribute(ERROR_MSG, result.getMsgInfo());
+            return "experiment/create";
+        }
         return "redirect:/experiment/list";
 
     }

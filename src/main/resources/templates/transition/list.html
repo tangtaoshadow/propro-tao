@@ -29,11 +29,12 @@
                             <div class="input-group col-lg-3">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-success" type="button">
-                                        库ID:
+                                        标准库:
                                     </button>
                                 </div>
-                                <input type="text" class="form-control m-input" name="libraryId" placeholder="libraryId"
-                                       th:value="${libraryId}">
+                                <select class="form-control m-input" id="libraryId" name="libraryId">
+                                    <option th:each="library:${libraries}" th:value="${library.id}" th:text="${library.name}" th:selected="${libraryId}==${library.id}?true:false"></option>
+                                </select>
                             </div>
                             <div class="input-group col-lg-3">
                                 <div class="input-group-prepend">

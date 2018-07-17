@@ -34,6 +34,11 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
+    public List<LibraryDO> getSimpleAll() {
+        return libraryDAO.getSimpleAll();
+    }
+
+    @Override
     public ResultDO<List<LibraryDO>> getList(LibraryQuery query) {
         List<LibraryDO> libraryDOS = libraryDAO.getList(query);
         long totalCount = libraryDAO.count(query);

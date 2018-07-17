@@ -119,6 +119,17 @@ public class TransitionDAO {
         return (long)a.getMappedResults().size();
     }
 
+    public Object groupByFullSequence(String libraryId) {
+        AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
+                Aggregation.newAggregation(
+                        TransitionDO.class,
+                        Aggregation.match(where("libraryId").is(libraryId)),
+                        Aggregation.group("sequence")).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
+                BasicDBObject.class);
+
+        return a.getMappedResults();
+    }
+
     public long countByName(String libraryId) {
         AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(

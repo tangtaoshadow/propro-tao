@@ -1,6 +1,7 @@
 package com.westlake.air.swathplatform.service;
 
 import com.westlake.air.swathplatform.domain.ResultDO;
+import com.westlake.air.swathplatform.domain.bean.TargetTransition;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.TransitionQuery;
 
@@ -36,5 +37,8 @@ public interface TransitionService {
 
     Long countByPeptideSequence(String libraryId);
 
+    List<TargetTransition> buildMS1(String libraryId);
+
+    List<TargetTransition> buildMS2(String libraryId);
 
 }

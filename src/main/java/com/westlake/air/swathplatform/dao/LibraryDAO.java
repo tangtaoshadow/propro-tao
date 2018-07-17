@@ -3,9 +3,11 @@ package com.westlake.air.swathplatform.dao;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.LibraryQuery;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,17 @@ public class LibraryDAO {
 
     public List<LibraryDO> getAll() {
         return mongoTemplate.findAll(LibraryDO.class, CollectionName);
+    }
+
+    public List<LibraryDO> getSimpleAll() {
+        Document queryDoc = new Document();
+
+        Document fieldsDoc = new Document();
+        fieldsDoc.put("id",true);
+        fieldsDoc.put("name",true);
+
+        Query query = new BasicQuery(queryDoc, fieldsDoc);
+        return mongoTemplate.find(query, LibraryDO.class, CollectionName);
     }
 
     public LibraryDO getById(String id) {

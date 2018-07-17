@@ -3,6 +3,7 @@ package com.westlake.air.swathplatform.controller;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.constants.SuccessMsg;
 import com.westlake.air.swathplatform.domain.ResultDO;
+import com.westlake.air.swathplatform.domain.bean.TargetTransition;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.query.LibraryQuery;
 import com.westlake.air.swathplatform.domain.query.TransitionQuery;
@@ -32,10 +33,8 @@ public class LibraryController extends BaseController {
 
     @Autowired
     TransitionTsvParser tsvParser;
-
     @Autowired
     LibraryService libraryService;
-
     @Autowired
     TransitionService transitionService;
 
@@ -218,6 +217,12 @@ public class LibraryController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/library/list";
         }
+    }
+
+    @RequestMapping(value = "/build/ms1/{id}")
+    String buildMS1(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+        List<TargetTransition> result = transitionService.buildMS1(id);
+        return "redirect:/library/list";
     }
 
     private ResultDO parseAndInsertTsv(MultipartFile file, LibraryDO library, boolean justReal) {

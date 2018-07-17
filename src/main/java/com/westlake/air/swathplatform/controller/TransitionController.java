@@ -29,13 +29,10 @@ public class TransitionController extends BaseController {
 
     @Autowired
     FragmentCalculator fragmentCalculator;
-
     @Autowired
     FormulaCalculator formulaCalculator;
-
     @Autowired
     TransitionService transitionService;
-
     @Autowired
     ShuffleGenerator shuffleGenerator;
 
@@ -55,6 +52,8 @@ public class TransitionController extends BaseController {
         model.addAttribute("name", name);
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("isDecoy", isDecoy);
+        model.addAttribute("libraries",getLibraryList());
+
         TransitionQuery query = new TransitionQuery();
 
         if (libraryId != null && !libraryId.isEmpty()) {

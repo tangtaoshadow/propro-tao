@@ -3,6 +3,7 @@ package com.westlake.air.swathplatform.service.impl;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.dao.TransitionDAO;
 import com.westlake.air.swathplatform.domain.ResultDO;
+import com.westlake.air.swathplatform.domain.bean.TargetTransition;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.TransitionQuery;
 import com.westlake.air.swathplatform.service.TransitionService;
@@ -138,5 +139,17 @@ public class TransitionServiceImpl implements TransitionService {
     @Override
     public Long countByPeptideSequence(String libraryId) {
         return transitionDAO.countBySequence(libraryId);
+    }
+
+    @Override
+    public List<TargetTransition> buildMS1(String libraryId) {
+        Object result = transitionDAO.groupByFullSequence(libraryId);
+        System.out.println(result.getClass());
+        return null;
+    }
+
+    @Override
+    public List<TargetTransition> buildMS2(String libraryId) {
+        return null;
     }
 }
