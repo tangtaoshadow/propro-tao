@@ -1,5 +1,6 @@
 package com.westlake.air.swathplatform.controller;
 
+import com.mongodb.BasicDBObject;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.constants.SuccessMsg;
 import com.westlake.air.swathplatform.domain.ResultDO;
@@ -230,6 +231,7 @@ public class LibraryController extends BaseController {
         logger.info("BuildMS1图消耗时间为:"+resultMS1.size()+"|"+(System.currentTimeMillis()-start));
 
         start = System.currentTimeMillis();
+        logger.info("开始读取数据");
         List<TargetTransition> resultMS2 = transitionService.buildMS2(id, extractionWindow);
         logger.info("BuildMS2图消耗时间为:"+resultMS2.size()+"|"+(System.currentTimeMillis()-start));
         return "redirect:/library/detail/"+id;
