@@ -41,6 +41,7 @@ public class TransitionDAO {
         Document fieldsDoc = new Document();
         fieldsDoc.put("id",true);
         fieldsDoc.put("fullName",true);
+        fieldsDoc.put("precursorMz",true);
         fieldsDoc.put("productMz",true);
         fieldsDoc.put("rt",true);
 
@@ -107,29 +108,15 @@ public class TransitionDAO {
         return (long)a.getMappedResults().size();
     }
 
-    public long countBySequence(String libraryId) {
+    public long countByFullName(String libraryId) {
         AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(
                         TransitionDO.class,
                         Aggregation.match(where("libraryId").is(libraryId)),
-                        Aggregation.group("sequence").count().as("count")).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
+                        Aggregation.group("fullName").count().as("count")).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
                 BasicDBObject.class);
 
         return (long)a.getMappedResults().size();
-    }
-
-    public List<TargetTransition> groupByFullName(String libraryId) {
-
-        AggregationResults<TargetTransition> a = mongoTemplate.aggregate(
-                Aggregation.newAggregation(
-                        TransitionDO.class,
-                        Aggregation.match(where("libraryId").is(libraryId)),
-                        Aggregation.group("fullName","sequence","precursorMz","rt","id")
-
-                ).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
-                TargetTransition.class);
-
-        return a.getMappedResults();
     }
 
     public long countByName(String libraryId) {

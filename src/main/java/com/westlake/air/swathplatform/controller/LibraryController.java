@@ -1,5 +1,6 @@
 package com.westlake.air.swathplatform.controller;
 
+import com.google.common.collect.Ordering;
 import com.mongodb.BasicDBObject;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.constants.SuccessMsg;
@@ -22,6 +23,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -193,13 +197,11 @@ public class LibraryController extends BaseController {
                 }
 
                 countAndUpdateForLibrary(library);
-
             }
 
             long deltaTime = System.currentTimeMillis() - startTime;
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS + "解析源文件耗时:" + deltaTime + "秒;");
             return "redirect:/library/detail/" + library.getId();
-
 
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
@@ -227,13 +229,11 @@ public class LibraryController extends BaseController {
                     RedirectAttributes redirectAttributes) {
         redirectAttributes.addFlashAttribute("extractionWindow",extractionWindow);
         long start = System.currentTimeMillis();
-        List<TargetTransition> resultMS1 = transitionService.buildMS1(id, extractionWindow);
-        logger.info("BuildMS1图消耗时间为:"+resultMS1.size()+"|"+(System.currentTimeMillis()-start));
-
-        start = System.currentTimeMillis();
         logger.info("开始读取数据");
-        List<TargetTransition> resultMS2 = transitionService.buildMS2(id, extractionWindow);
-        logger.info("BuildMS2图消耗时间为:"+resultMS2.size()+"|"+(System.currentTimeMillis()-start));
+        HashMap<Integer, List<TargetTransition>> resultMap = transitionService.buildMS(id, extractionWindow);
+        logger.info("BuildMS图消耗时间为:"+resultMap.get(1).size()+"|"+(System.currentTimeMillis()-start));
+        logger.info("BuildMS图消耗时间为:"+resultMap.get(2).size()+"|"+(System.currentTimeMillis()-start));
+
         return "redirect:/library/detail/"+id;
     }
 

@@ -1,9 +1,10 @@
 package com.westlake.air.swathplatform.service.impl;
 
-import com.mongodb.BasicDBObject;
+import com.google.common.collect.Ordering;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.dao.TransitionDAO;
 import com.westlake.air.swathplatform.domain.ResultDO;
+import com.westlake.air.swathplatform.domain.bean.Fragment;
 import com.westlake.air.swathplatform.domain.bean.TargetTransition;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.TransitionQuery;
@@ -13,7 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * Created by James Lu MiaoShan
@@ -134,33 +136,56 @@ public class TransitionServiceImpl implements TransitionService {
 
     @Override
     public Long countByPeptideSequence(String libraryId) {
-        return transitionDAO.countBySequence(libraryId);
+        return transitionDAO.countByFullName(libraryId);
     }
 
     @Override
-    public List<TargetTransition> buildMS1(String libraryId, double extraction_windows) {
-        long start = System.currentTimeMillis();
-        List<TargetTransition> targetList = transitionDAO.groupByFullName(libraryId);
-        logger.info("读取数据库MS1花费时间:" + (System.currentTimeMillis() - start));
-        for (TargetTransition targetTransition : targetList) {
-            targetTransition.setIsMS1(true);
-            targetTransition.setRtStart(targetTransition.getRt() - extraction_windows / 2.0);
-            targetTransition.setRtStart(targetTransition.getRt() + extraction_windows / 2.0);
-        }
-        return targetList;
-    }
-
-    @Override
-    public List<TargetTransition> buildMS2(String libraryId, double extraction_windows) {
+    public HashMap<Integer,List<TargetTransition>> buildMS(String libraryId, double extraction_windows) {
+        HashMap<Integer,List<TargetTransition>> hashMap = new HashMap<>();
         long start = System.currentTimeMillis();
         List<TargetTransition> targetList = transitionDAO.getTargetTransitionsByLibraryId(libraryId);
-        logger.info("读取数据库MS2花费时间:" + (System.currentTimeMillis() - start));
-
+        logger.info("读取数据库MS花费时间:" + (System.currentTimeMillis() - start));
+        Ordering<TargetTransition> ordering = Ordering.from(new Comparator<TargetTransition>() {
+            @Override
+            public int compare(TargetTransition o1, TargetTransition o2) {
+                if(o1.getProductMz() > o2.getProductMz()){
+                    return 1;
+                } else if(o1.getProductMz().equals(o2.getProductMz())){
+                    return 0;
+                } else{
+                    return -1;
+                }
+            }
+        });
         for (TargetTransition targetTransition : targetList) {
             targetTransition.setIsMS1(false);
             targetTransition.setRtStart(targetTransition.getRt() - extraction_windows / 2.0);
             targetTransition.setRtStart(targetTransition.getRt() + extraction_windows / 2.0);
         }
-        return targetList;
+        List<TargetTransition> ms2List = ordering.sortedCopy(targetList);
+
+        //将MS2信息存入
+        hashMap.put(2, ms2List);
+
+        HashSet<TargetTransition> targetSet = new HashSet<>();
+        targetSet.addAll(targetList);
+        Ordering<TargetTransition> ordering2 = Ordering.from(new Comparator<TargetTransition>() {
+            @Override
+            public int compare(TargetTransition o1, TargetTransition o2) {
+                if(o1.getPrecursorMz() > o2.getPrecursorMz()){
+                    return 1;
+                } else if(o1.getPrecursorMz().equals(o2.getPrecursorMz())){
+                    return 0;
+                } else{
+                    return -1;
+                }
+            }
+        });
+
+        List<TargetTransition> ms1List = ordering2.sortedCopy(targetSet);
+        hashMap.put(1, ms1List);
+        return hashMap;
     }
+
+
 }

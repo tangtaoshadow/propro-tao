@@ -6,6 +6,7 @@ import com.westlake.air.swathplatform.domain.bean.TargetTransition;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.TransitionQuery;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -38,8 +39,6 @@ public interface TransitionService {
 
     Long countByPeptideSequence(String libraryId);
 
-    List<TargetTransition> buildMS1(String libraryId, double extraction_windows);
-
-    List<TargetTransition> buildMS2(String libraryId, double extraction_windows);
+    HashMap<Integer,List<TargetTransition>> buildMS(String libraryId, double extraction_windows);
 
 }
