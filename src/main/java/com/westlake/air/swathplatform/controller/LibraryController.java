@@ -5,6 +5,7 @@ import com.mongodb.BasicDBObject;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.constants.SuccessMsg;
 import com.westlake.air.swathplatform.domain.ResultDO;
+import com.westlake.air.swathplatform.domain.bean.LibraryCoordinate;
 import com.westlake.air.swathplatform.domain.bean.TargetTransition;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.query.LibraryQuery;
@@ -225,14 +226,10 @@ public class LibraryController extends BaseController {
     @RequestMapping(value = "/buildCoordinate")
     String buildCoordinate(Model model,
                     @RequestParam(value = "id", required = true) String id,
-                    @RequestParam(value = "extractionWindow", required = true,defaultValue = "1.0") double extractionWindow,
+                    @RequestParam(value = "rtExtractionWindow", required = true,defaultValue = "1.0") double rtExtractionWindow,
                     RedirectAttributes redirectAttributes) {
-        redirectAttributes.addFlashAttribute("extractionWindow",extractionWindow);
-        long start = System.currentTimeMillis();
-        logger.info("开始读取数据");
-        HashMap<Integer, List<TargetTransition>> resultMap = transitionService.buildMS(id, extractionWindow);
-        logger.info("BuildMS图消耗时间为:"+resultMap.get(1).size()+"|"+(System.currentTimeMillis()-start));
-        logger.info("BuildMS图消耗时间为:"+resultMap.get(2).size()+"|"+(System.currentTimeMillis()-start));
+        redirectAttributes.addFlashAttribute("rtExtractionWindow",rtExtractionWindow);
+        LibraryCoordinate lc = transitionService.buildMS(id, rtExtractionWindow);
 
         return "redirect:/library/detail/"+id;
     }

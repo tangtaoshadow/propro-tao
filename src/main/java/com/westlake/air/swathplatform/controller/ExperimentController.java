@@ -135,24 +135,23 @@ public class ExperimentController extends BaseController {
 
         try {
             //建立索引
-            Long time = System.currentTimeMillis();
             List<ScanIndexDO> indexList = lmsIndexer.index(file, experimentDO.getId());
             ResultDO resultDO = scanIndexService.insertAll(indexList, true);
-            System.out.println("Cost:" + (System.currentTimeMillis() - time));
-            if(resultDO.isFailured()){
+
+            if (resultDO.isFailured()) {
                 experimentService.delete(experimentDO.getId());
                 model.addAttribute(ERROR_MSG, result.getMsgInfo());
                 return "experiment/create";
-            }else{
+            } else {
                 redirectAttributes.addAttribute(SUCCESS_MSG, SuccessMsg.CREATE_EXPERIMENT_AND_INDEX_SUCCESS);
                 return "redirect:/experiment/list";
             }
 
         } catch (Exception e) {
             e.printStackTrace();
+            redirectAttributes.addFlashAttribute(ERROR_MSG, e.getMessage());
+            return "redirect:/experiment/list";
         }
-
-        return "experiment/list";
     }
 
     @RequestMapping(value = "/edit/{id}")
@@ -190,7 +189,7 @@ public class ExperimentController extends BaseController {
                   RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
-        if(resultDO.isFailured()){
+        if (resultDO.isFailured()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/experiment/list";
         }

@@ -1,6 +1,7 @@
 package com.westlake.air.swathplatform.service;
 
 import com.westlake.air.swathplatform.domain.ResultDO;
+import com.westlake.air.swathplatform.domain.bean.LibraryCoordinate;
 import com.westlake.air.swathplatform.domain.db.ExperimentDO;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.query.ExperimentQuery;
@@ -28,4 +29,6 @@ public interface ExperimentService {
     ResultDO<ExperimentDO> getById(String id);
 
     ResultDO<ExperimentDO> getByName(String name);
+
+    void extract(String expId, String libraryId, double rt_extract_window);
 }

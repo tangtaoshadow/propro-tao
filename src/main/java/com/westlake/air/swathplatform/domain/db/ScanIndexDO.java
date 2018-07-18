@@ -2,6 +2,7 @@ package com.westlake.air.swathplatform.domain.db;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -23,8 +24,12 @@ public class ScanIndexDO {
     Long start;
     Long end;
     int num;
-    int msLevel;
     String rtStr;
+
+    @Indexed
+    int msLevel;
+
+    @Indexed
     Double rt;
 
     Integer parentNum;

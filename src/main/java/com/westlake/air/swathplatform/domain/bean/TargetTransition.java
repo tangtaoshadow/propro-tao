@@ -7,9 +7,7 @@ import lombok.Data;
  * Time: 2018-07-17 10:16
  */
 @Data
-public class TargetTransition implements Comparable<TargetTransition>{
-
-    Boolean isMS1;
+public class TargetTransition {
 
     //对应的transition的Id,如果是MS1的则为对应的第一条transition的Id(一个MS1会对应多条transition记录)
     String id;
@@ -49,35 +47,6 @@ public class TargetTransition implements Comparable<TargetTransition>{
 
     @Override
     public int hashCode() {
-        return (isMS1+fullName).hashCode();
-    }
-
-    @Override
-    public int compareTo(TargetTransition o) {
-        if (o == null) {
-            return 1;
-        }
-        if(this.isMS1.equals(o.getIsMS1()) && this.isMS1){
-            if(this.precursorMz > o.getPrecursorMz()){
-                return -1;
-            } else if(this.precursorMz.equals(o.getPrecursorMz())){
-                return 0;
-            } else{
-                return 1;
-            }
-
-        } else if(this.isMS1.equals(o.getIsMS1()) && !this.isMS1){
-            if(this.productMz > o.getProductMz()){
-                return -1;
-            } else if(this.productMz.equals(o.getProductMz())){
-                return 0;
-            } else{
-                return 1;
-            }
-        } else if(this.isMS1){
-            return 1;
-        } else{
-            return -1;
-        }
+        return (fullName).hashCode();
     }
 }

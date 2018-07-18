@@ -1,12 +1,10 @@
 package com.westlake.air.swathplatform.service;
 
-import com.mongodb.BasicDBObject;
 import com.westlake.air.swathplatform.domain.ResultDO;
-import com.westlake.air.swathplatform.domain.bean.TargetTransition;
+import com.westlake.air.swathplatform.domain.bean.LibraryCoordinate;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.TransitionQuery;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -16,8 +14,6 @@ import java.util.List;
 public interface TransitionService {
 
     List<TransitionDO> getAllByLibraryId(String libraryId);
-
-//    List<TransitionDO> getSimpleAllByLibraryId(String libraryId);
 
     List<TransitionDO> getAllByLibraryIdAndIsDecoy(String libraryId,boolean isDecoy);
 
@@ -39,6 +35,5 @@ public interface TransitionService {
 
     Long countByPeptideSequence(String libraryId);
 
-    HashMap<Integer,List<TargetTransition>> buildMS(String libraryId, double extraction_windows);
-
+    LibraryCoordinate buildMS(String libraryId, double rt_extraction_windows);
 }

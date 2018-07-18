@@ -1,6 +1,7 @@
 package com.westlake.air.swathplatform.dao;
 
 import com.mongodb.BasicDBObject;
+import com.westlake.air.swathplatform.domain.bean.LibraryCoordinate;
 import com.westlake.air.swathplatform.domain.bean.TargetTransition;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
 import com.westlake.air.swathplatform.domain.query.TransitionQuery;
@@ -25,6 +26,7 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 public class TransitionDAO {
 
     public static String CollectionName = "transition";
+    public static String CollectionNameLC = "libraryCoordinate";
 
     @Autowired
     MongoTemplate mongoTemplate;

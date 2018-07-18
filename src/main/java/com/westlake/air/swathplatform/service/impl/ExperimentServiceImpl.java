@@ -4,12 +4,17 @@ import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.dao.ExperimentDAO;
 import com.westlake.air.swathplatform.dao.LibraryDAO;
 import com.westlake.air.swathplatform.domain.ResultDO;
+import com.westlake.air.swathplatform.domain.bean.LibraryCoordinate;
+import com.westlake.air.swathplatform.domain.bean.TargetTransition;
 import com.westlake.air.swathplatform.domain.db.ExperimentDO;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.query.ExperimentQuery;
 import com.westlake.air.swathplatform.domain.query.LibraryQuery;
+import com.westlake.air.swathplatform.domain.query.ScanIndexQuery;
 import com.westlake.air.swathplatform.service.ExperimentService;
 import com.westlake.air.swathplatform.service.LibraryService;
+import com.westlake.air.swathplatform.service.ScanIndexService;
+import com.westlake.air.swathplatform.service.TransitionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +34,12 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     @Autowired
     ExperimentDAO experimentDAO;
+
+    @Autowired
+    TransitionService transitionService;
+
+    @Autowired
+    ScanIndexService scanIndexService;
 
     @Override
     public List<ExperimentDO> getAll() {
@@ -140,6 +151,30 @@ public class ExperimentServiceImpl implements ExperimentService {
             ResultDO resultDO = new ResultDO(false);
             resultDO.setErrorResult(ResultCode.QUERY_ERROR.getCode(), e.getMessage());
             return resultDO;
+        }
+    }
+
+    @Override
+    public void extract(String expId, String libraryId, double rt_extract_window) {
+        //构建卷积坐标
+        LibraryCoordinate lc = transitionService.buildMS(libraryId, rt_extract_window);
+
+        ScanIndexQuery query = new ScanIndexQuery();
+        query.setExperimentId(expId);
+        query.setMsLevel(1);
+        Long ms1Count = scanIndexService.count(query);
+        //如果MS1存在,则进行MS1的光谱扫描
+        if(ms1Count > 0){
+            for(TargetTransition ms1 : lc.getMs1List()){
+
+            }
+        }
+
+        query.setMsLevel(2);
+        Long ms2Count = scanIndexService.count(query);
+        //如果MS2存在,则进行MS2的光谱扫描
+        for(TargetTransition ms2 : lc.getMs2List()){
+
         }
     }
 }

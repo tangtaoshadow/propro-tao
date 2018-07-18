@@ -167,7 +167,7 @@ public class LmsIndexer {
             e.printStackTrace();
         } finally {
             try {
-                if(raf != null){
+                if (raf != null) {
                     raf.close();
                 }
             } catch (IOException e) {
@@ -176,13 +176,6 @@ public class LmsIndexer {
         }
 
         return list;
-    }
-
-    public void parseAttribute(RandomAccessFile raf, List<ScanIndexDO> indexList, String experimentId) throws IOException {
-        for (ScanIndexDO scanIndex : indexList) {
-            parseAttribute(raf, scanIndex);
-            scanIndex.setExperimentId(experimentId);
-        }
     }
 
     public Long parseIndexOffset(RandomAccessFile rf) throws IOException {
@@ -213,12 +206,14 @@ public class LmsIndexer {
         rf.read(indexArray);
         String totalLine = new String(indexArray);
         String[] indexLines = totalLine.split("\n");
+        int count = 1;
         for (String line : indexLines) {
             if (line.contains("<offset")) {
                 line = line.trim();
                 String id = line.substring(line.indexOf("\"") + 1, line.lastIndexOf("\""));
                 String offset = line.substring(line.indexOf(">") + 1, line.lastIndexOf("<"));
-                indexMap.put(Integer.valueOf(id.trim()), new ScanIndexDO(Integer.valueOf(id.trim()), Long.valueOf(offset.trim()), null));
+                indexMap.put(count, new ScanIndexDO(Integer.valueOf(id.trim()), Long.valueOf(offset.trim()), null));
+                count++;
             }
         }
         return indexMap;
@@ -254,7 +249,14 @@ public class LmsIndexer {
 
         String read = new String(readBytes);
         read = read.substring(0, read.indexOf(">"));
-        String[] tmp = read.split("\n");
+        String[] tmp = null;
+        if (read.contains("\n")) {
+            tmp = read.split("\n");
+        } else {//说明属性在一行里面
+            tmp = read.split(" ");
+        }
+
+
         for (String tmpStr : tmp) {
             tmpStr = tmpStr.trim();
             if (tmpStr.startsWith("msLevel")) {
