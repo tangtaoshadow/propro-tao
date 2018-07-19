@@ -151,7 +151,7 @@ public class ExperimentController extends BaseController {
                 model.addAttribute(ERROR_MSG, result.getMsgInfo());
                 return "experiment/create";
             } else {
-                redirectAttributes.addAttribute(SUCCESS_MSG, SuccessMsg.CREATE_EXPERIMENT_AND_INDEX_SUCCESS+",耗时:"+(System.currentTimeMillis() - start)+"毫秒");
+                redirectAttributes.addAttribute(SUCCESS_MSG, SuccessMsg.CREATE_EXPERIMENT_AND_INDEX_SUCCESS + ",耗时:" + (System.currentTimeMillis() - start) + "毫秒");
                 return "redirect:/experiment/list";
             }
 
@@ -256,7 +256,7 @@ public class ExperimentController extends BaseController {
         try {
             ResultDO resultDO = experimentService.extract(id, rtExtractWindow, mzExtractWindow, buildType);
         } catch (IOException e) {
-            logger.error("卷积报错了:",e);
+            logger.error("卷积报错了:", e);
             e.printStackTrace();
         }
 
