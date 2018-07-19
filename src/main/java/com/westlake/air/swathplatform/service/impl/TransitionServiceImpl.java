@@ -150,7 +150,7 @@ public class TransitionServiceImpl implements TransitionService {
             public int compare(TargetTransition o1, TargetTransition o2) {
                 if (o1.getProductMz() > o2.getProductMz()) {
                     return 1;
-                } else if (o1.getProductMz().equals(o2.getProductMz())) {
+                } else if (o1.getProductMz() == o2.getProductMz()) {
                     return 0;
                 } else {
                     return -1;
@@ -170,7 +170,7 @@ public class TransitionServiceImpl implements TransitionService {
             public int compare(TargetTransition o1, TargetTransition o2) {
                 if (o1.getPrecursorMz() > o2.getPrecursorMz()) {
                     return 1;
-                } else if (o1.getPrecursorMz().equals(o2.getPrecursorMz())) {
+                } else if (o1.getPrecursorMz() == o2.getPrecursorMz()) {
                     return 0;
                 } else {
                     return -1;

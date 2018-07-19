@@ -129,7 +129,7 @@ public class ExperimentController extends BaseController {
             experimentDO.setLibraryName(resultLib.getModel().getName());
         }
 
-        ResultDO result = experimentService.save(experimentDO);
+        ResultDO result = experimentService.insert(experimentDO);
         if (result.isFailured()) {
             model.addAttribute(ERROR_MSG, result.getMsgInfo());
             return "experiment/create";

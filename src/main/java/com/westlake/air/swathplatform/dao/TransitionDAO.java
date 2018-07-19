@@ -26,7 +26,6 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 public class TransitionDAO {
 
     public static String CollectionName = "transition";
-    public static String CollectionNameLC = "libraryCoordinate";
 
     @Autowired
     MongoTemplate mongoTemplate;
@@ -43,7 +42,7 @@ public class TransitionDAO {
         queryDoc.put("isDecoy",false);
 
         Document fieldsDoc = new Document();
-//        fieldsDoc.put("id",true);//这个字段的加入会占用较大内存
+        fieldsDoc.put("id",true);//这个字段的加入会占用较大内存
         fieldsDoc.put("fullName",true);
         fieldsDoc.put("precursorMz",true);
         fieldsDoc.put("productMz",true);

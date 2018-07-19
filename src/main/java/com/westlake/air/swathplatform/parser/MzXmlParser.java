@@ -91,7 +91,7 @@ public class MzXmlParser {
             airXStream.fromXML(new String(reader), scan);
             if (scan.getPeaksList() != null && scan.getPeaksList().size() >= 1) {
                 Peaks peaks = scan.getPeaksList().get(0);
-                hashMap = getPeakMap(peaks.getValue(), peaks.getPrecision(), false);
+                hashMap = getPeakMap(peaks.getValue(), peaks.getPrecision(), true);
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -27,7 +27,7 @@ public interface ExperimentService {
 
     List<ExperimentDO> getAll();
 
-    ResultDO save(ExperimentDO experimentDO);
+    ResultDO insert(ExperimentDO experimentDO);
 
     ResultDO update(ExperimentDO experimentDO);
 

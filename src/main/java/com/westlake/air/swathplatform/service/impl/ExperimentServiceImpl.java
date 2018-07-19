@@ -71,7 +71,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     @Override
-    public ResultDO save(ExperimentDO experimentDO) {
+    public ResultDO insert(ExperimentDO experimentDO) {
         if (experimentDO.getName() == null || experimentDO.getName().isEmpty()) {
             return ResultDO.buildError(ResultCode.LIBRARY_NAME_CANNOT_BE_EMPTY);
         }
@@ -199,7 +199,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         experimentResult.setExperimentId(expId);
         experimentResult.setRtExtractWindow(rtExtractWindow);
 
-        try{
+        try {
             raf = new RandomAccessFile(file, "r");
 
             //构建卷积坐标(耗时操作)
@@ -219,8 +219,8 @@ public class ExperimentServiceImpl implements ExperimentService {
 
             experimentResult.setMs1Map(ms1Map);
             experimentResult.setMs2Map(ms2Map);
-        }catch (Exception e){
-            if(raf != null){
+        } catch (Exception e) {
+            if (raf != null) {
                 try {
                     raf.close();
                 } catch (IOException e1) {
@@ -250,58 +250,58 @@ public class ExperimentServiceImpl implements ExperimentService {
         //用于存储最终的卷积结果
         HashMap<Double, TreeMap<Double, Double>> ms1Map = new HashMap<>();
         //用于存储从XML中解压缩出来的数据
-        HashMap<Double, TreeMap<Double, Double>> rtMap = new HashMap<>();
+        TreeMap<Double, TreeMap<Double, Double>> rtMap = new TreeMap<>();
 
         ScanIndexQuery query = new ScanIndexQuery();
         query.setExperimentId(expId);
         query.setMsLevel(1);
 
         List<ScanIndexDO> indexes = scanIndexService.getAll(query);
-
         logger.info("MS1 坐标总计" + coordinates.size() + "条");
         logger.info("MS1 实验光谱数" + indexes.size() + "条");
+
+        //如果MS1的实验数据不存在,则跳过
+        if (indexes.size() == 0) {
+            return ms1Map;
+        }
 
         //如果MS1存在,则进行MS1的光谱扫描
         double mzStart = 0;
         double mzEnd = -1;
 
-        if (indexes.size() > 0) {
+        long start = System.currentTimeMillis();
+        logger.info("开始创建MS1图谱");
+        for (ScanIndexDO index : indexes) {
+            rtMap.put(index.getRt(), mzXmlParser.parseOne(raf, index));
+        }
 
-            long start = System.currentTimeMillis();
-            logger.info("开始创建MS1图谱");
-            for (ScanIndexDO index : indexes) {
-                rtMap.put(index.getRt(), mzXmlParser.parseOne(raf, index));
-                logger.info("解析MS1的XML数据平均耗时:"+(System.currentTimeMillis() - start)/rtMap.size());
-                logger.info("总计解析了:"+rtMap.size());
-            }
+        logger.info("解析XML文件总计耗时:" + (System.currentTimeMillis() - start));
+        int logCountForMS1Target = 0;
+        for (TargetTransition ms1 : coordinates) {
 
-            logger.info("解析XML文件总计耗时:" + (System.currentTimeMillis() - start));
+            //设置mz卷积窗口
+            mzStart = ms1.getPrecursorMz() - mzExtractWindow / 2.0;
+            mzEnd = ms1.getPrecursorMz() + mzExtractWindow / 2.0;
 
-            int logCountForMS1Target = 0;
-            for (TargetTransition ms1 : coordinates) {
-                logCountForMS1Target++;
-                if (logCountForMS1Target % 100 == 0) {
-                    logger.info("已扫描MS1目标:" + logCountForMS1Target + "条,累计耗时:" + (System.currentTimeMillis() - start));
-                }
-
-                //设置mz卷积窗口
-                mzStart = ms1.getPrecursorMz() - mzExtractWindow / 2.0;
-                mzEnd = ms1.getPrecursorMz() + mzExtractWindow / 2.0;
-
-                TreeMap<Double, Double> mzResultMap = new TreeMap<>();
-                for (Double rt : rtMap.keySet()) {
-                    double intensity = 0;
-                    TreeMap<Double, Double> kvMap = rtMap.get(rt);
-                    for (Double key : kvMap.keySet()) {
-                        if (key >= mzStart && key <= mzEnd) {
-                            intensity += kvMap.get(key);
-                        }
+            TreeMap<Double, Double> mzResultMap = new TreeMap<>();
+            for (Double rt : rtMap.keySet()) {
+                Double intensity = 0d;
+                TreeMap<Double, Double> kvMap = rtMap.get(rt);
+                for (Double key : kvMap.keySet()) {
+                    if (key >= mzStart && key <= mzEnd) {
+                        intensity += kvMap.get(key);
                     }
-                    mzResultMap.put(rt, intensity);
                 }
-
-                ms1Map.put(ms1.getPrecursorMz(), mzResultMap);
+                mzResultMap.put(rt, intensity);
             }
+
+            //每隔1000条数据落库一次,以减少对内存的依赖
+            logCountForMS1Target++;
+            if (logCountForMS1Target % 10000 == 0) {
+                logger.info("已扫描MS1目标:" + logCountForMS1Target + "条,累计耗时:" + (System.currentTimeMillis() - start));
+            }
+
+            ms1Map.put(ms1.getPrecursorMz(), mzResultMap);
         }
 
         return ms1Map;
