@@ -12,14 +12,14 @@ import java.util.TreeMap;
  * Time: 2018-07-19 15:48
  */
 @Data
-@Document(collection = "convolutionData")
-public class ConvolutionDataDO {
+@Document(collection = "analyseData")
+public class AnalyseDataDO {
 
     @Id
     String id;
 
     @Indexed
-    String expId;
+    String recordId;
 
     String transitionId;
 

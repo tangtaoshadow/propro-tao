@@ -1,14 +1,15 @@
 package com.westlake.air.swathplatform.service.impl;
 
 import com.westlake.air.swathplatform.constants.ResultCode;
-import com.westlake.air.swathplatform.dao.ConvolutionDataDAO;
+import com.westlake.air.swathplatform.dao.AnalyseDataDAO;
 import com.westlake.air.swathplatform.domain.ResultDO;
-import com.westlake.air.swathplatform.domain.db.ConvolutionDataDO;
-import com.westlake.air.swathplatform.domain.query.ConvolutionDataQuery;
-import com.westlake.air.swathplatform.service.ConvolutionDataService;
+import com.westlake.air.swathplatform.domain.db.AnalyseDataDO;
+import com.westlake.air.swathplatform.domain.query.AnalyseDataQuery;
+import com.westlake.air.swathplatform.service.AnalyseDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -16,40 +17,41 @@ import java.util.List;
  * Created by James Lu MiaoShan
  * Time: 2018-07-19 16:10
  */
-public class ConvolutionDataServiceImpl implements ConvolutionDataService {
+@Service("convolutionDataService")
+public class AnalyseDataServiceImpl implements AnalyseDataService {
 
-    public final Logger logger = LoggerFactory.getLogger(ConvolutionDataServiceImpl.class);
+    public final Logger logger = LoggerFactory.getLogger(AnalyseDataServiceImpl.class);
 
     @Autowired
-    ConvolutionDataDAO convolutionDataDAO;
+    AnalyseDataDAO analyseDataDAO;
 
     @Override
-    public List<ConvolutionDataDO> getAllByExpId(String expId) {
-        return convolutionDataDAO.getAllByExperimentId(expId);
+    public List<AnalyseDataDO> getAllByRecordId(String recordId) {
+        return analyseDataDAO.getAllByExperimentId(recordId);
     }
 
     @Override
-    public Long count(ConvolutionDataQuery query) {
-        return convolutionDataDAO.count(query);
+    public Long count(AnalyseDataQuery query) {
+        return analyseDataDAO.count(query);
     }
 
     @Override
-    public ResultDO<List<ConvolutionDataDO>> getList(ConvolutionDataQuery convQuery) {
-        List<ConvolutionDataDO> dataList = convolutionDataDAO.getList(convQuery);
-        long totalCount = convolutionDataDAO.count(convQuery);
-        ResultDO<List<ConvolutionDataDO>> resultDO = new ResultDO<>(true);
+    public ResultDO<List<AnalyseDataDO>> getList(AnalyseDataQuery targetQuery) {
+        List<AnalyseDataDO> dataList = analyseDataDAO.getList(targetQuery);
+        long totalCount = analyseDataDAO.count(targetQuery);
+        ResultDO<List<AnalyseDataDO>> resultDO = new ResultDO<>(true);
         resultDO.setModel(dataList);
         resultDO.setTotalNum(totalCount);
-        resultDO.setPageSize(convQuery.getPageSize());
+        resultDO.setPageSize(targetQuery.getPageSize());
         return resultDO;
     }
 
     @Override
-    public ResultDO insert(ConvolutionDataDO convData) {
+    public ResultDO insert(AnalyseDataDO dataDO) {
 
         try {
-            convolutionDataDAO.insert(convData);
-            return ResultDO.build(convData);
+            analyseDataDAO.insert(dataDO);
+            return ResultDO.build(dataDO);
         } catch (Exception e) {
             logger.warn(e.getMessage());
             ResultDO resultDO = new ResultDO(false);
@@ -59,15 +61,15 @@ public class ConvolutionDataServiceImpl implements ConvolutionDataService {
     }
 
     @Override
-    public ResultDO insertAll(List<ConvolutionDataDO> convList, boolean isDeleteOld) {
-        if (convList == null || convList.size() == 0) {
+    public ResultDO insertAll(List<AnalyseDataDO> dataList, boolean isDeleteOld) {
+        if (dataList == null || dataList.size() == 0) {
             return ResultDO.buildError(ResultCode.OBJECT_CANNOT_BE_NULL);
         }
         try {
             if (isDeleteOld) {
-                convolutionDataDAO.deleteAllByExpId(convList.get(0).getExpId());
+                analyseDataDAO.deleteAllByRecordId(dataList.get(0).getRecordId());
             }
-            convolutionDataDAO.insert(convList);
+            analyseDataDAO.insert(dataList);
             return new ResultDO(true);
         } catch (Exception e) {
             ResultDO resultDO = new ResultDO();
@@ -81,7 +83,7 @@ public class ConvolutionDataServiceImpl implements ConvolutionDataService {
             return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
         }
         try {
-            convolutionDataDAO.delete(id);
+            analyseDataDAO.delete(id);
             return new ResultDO(true);
         } catch (Exception e) {
             logger.warn(e.getMessage());
@@ -92,12 +94,12 @@ public class ConvolutionDataServiceImpl implements ConvolutionDataService {
     }
 
     @Override
-    public ResultDO deleteAllByExpId(String expId) {
-        if (expId == null || expId.isEmpty()) {
+    public ResultDO deleteAllByExpId(String recordId) {
+        if (recordId == null || recordId.isEmpty()) {
             return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
         }
         try {
-            convolutionDataDAO.deleteAllByExpId(expId);
+            analyseDataDAO.deleteAllByRecordId(recordId);
             return new ResultDO(true);
         } catch (Exception e) {
             logger.warn(e.getMessage());
@@ -108,14 +110,14 @@ public class ConvolutionDataServiceImpl implements ConvolutionDataService {
     }
 
     @Override
-    public ResultDO<ConvolutionDataDO> getById(String id) {
+    public ResultDO<AnalyseDataDO> getById(String id) {
         try {
-            ConvolutionDataDO convolutionDataDO = convolutionDataDAO.getById(id);
-            if (convolutionDataDO == null) {
+            AnalyseDataDO analyseDataDO = analyseDataDAO.getById(id);
+            if (analyseDataDO == null) {
                 return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
             } else {
-                ResultDO<ConvolutionDataDO> resultDO = new ResultDO<>(true);
-                resultDO.setModel(convolutionDataDO);
+                ResultDO<AnalyseDataDO> resultDO = new ResultDO<>(true);
+                resultDO.setModel(analyseDataDO);
                 return resultDO;
             }
         } catch (Exception e) {

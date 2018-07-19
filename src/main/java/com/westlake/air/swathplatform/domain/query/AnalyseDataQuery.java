@@ -7,13 +7,13 @@ import lombok.Data;
  * Time: 2018-07-19 15:55
  */
 @Data
-public class ConvolutionDataQuery extends PageQuery{
+public class AnalyseDataQuery extends PageQuery{
 
     private static final long serialVersionUID = -3258829839166834225L;
 
     String id;
 
-    String expId;
+    String recordId;
 
     String transitionId;
 

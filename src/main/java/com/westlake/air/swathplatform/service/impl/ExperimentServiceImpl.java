@@ -2,30 +2,23 @@ package com.westlake.air.swathplatform.service.impl;
 
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.dao.ExperimentDAO;
-import com.westlake.air.swathplatform.dao.LibraryDAO;
 import com.westlake.air.swathplatform.domain.ResultDO;
-import com.westlake.air.swathplatform.domain.bean.ExperimentResult;
 import com.westlake.air.swathplatform.domain.bean.LibraryCoordinate;
 import com.westlake.air.swathplatform.domain.bean.TargetTransition;
 import com.westlake.air.swathplatform.domain.db.ExperimentDO;
-import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.db.ScanIndexDO;
 import com.westlake.air.swathplatform.domain.query.ExperimentQuery;
-import com.westlake.air.swathplatform.domain.query.LibraryQuery;
 import com.westlake.air.swathplatform.domain.query.ScanIndexQuery;
 import com.westlake.air.swathplatform.parser.MzXmlParser;
 import com.westlake.air.swathplatform.service.ExperimentService;
-import com.westlake.air.swathplatform.service.LibraryService;
 import com.westlake.air.swathplatform.service.ScanIndexService;
 import com.westlake.air.swathplatform.service.TransitionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.ac.ebi.pride.tools.mzxml_parser.MzXMLParsingException;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Date;
@@ -176,9 +169,9 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @throws IOException
      */
     @Override
-    public ResultDO<ExperimentResult> extract(String expId, double rtExtractWindow, double mzExtractWindow, int buildType) {
+    public ResultDO extract(String expId, double rtExtractWindow, double mzExtractWindow, int buildType) {
 
-        ResultDO<ExperimentResult> resultDO = new ResultDO<ExperimentResult>();
+        ResultDO resultDO = new ResultDO(true);
         //基本条件检查
         logger.info("基本条件检查开始");
         ExperimentDO experimentDO = experimentDAO.getById(expId);
@@ -192,12 +185,8 @@ public class ExperimentServiceImpl implements ExperimentService {
 
         //创建结果对象
         logger.info("创建结果对象");
-        ExperimentResult experimentResult = new ExperimentResult();
         HashMap<Double, TreeMap<Double, Double>> ms1Map = null;
         HashMap<Double, TreeMap<Double, Double>> ms2Map = null;
-        experimentResult.setLibraryId(experimentDO.getLibraryId());
-        experimentResult.setExperimentId(expId);
-        experimentResult.setRtExtractWindow(rtExtractWindow);
 
         try {
             raf = new RandomAccessFile(file, "r");
@@ -217,8 +206,6 @@ public class ExperimentServiceImpl implements ExperimentService {
                 ms2Map = extractMS2(raf, expId, lc.getMs2List(), rtExtractWindow, mzExtractWindow);
             }
 
-            experimentResult.setMs1Map(ms1Map);
-            experimentResult.setMs2Map(ms2Map);
         } catch (Exception e) {
             if (raf != null) {
                 try {
@@ -229,7 +216,6 @@ public class ExperimentServiceImpl implements ExperimentService {
             }
         }
 
-        resultDO.setModel(experimentResult);
         return resultDO;
     }
 
