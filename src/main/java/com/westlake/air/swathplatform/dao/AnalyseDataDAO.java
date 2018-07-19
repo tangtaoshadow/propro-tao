@@ -60,8 +60,8 @@ public class AnalyseDataDAO {
         mongoTemplate.remove(query,AnalyseDataDO.class, CollectionName);
     }
 
-    public void deleteAllByRecordId(String recordId) {
-        Query query = new Query(where("recordId").is(recordId));
+    public void deleteAllByOverviewId(String overviewId) {
+        Query query = new Query(where("overviewId").is(overviewId));
         mongoTemplate.remove(query, AnalyseDataDO.class, CollectionName);
     }
 
@@ -80,8 +80,8 @@ public class AnalyseDataDAO {
         if (analyseDataQuery.getId() != null) {
             query.addCriteria(where("id").is(analyseDataQuery.getId()));
         }
-        if (analyseDataQuery.getRecordId() != null) {
-            query.addCriteria(where("recordId").is(analyseDataQuery.getRecordId()));
+        if (analyseDataQuery.getOverviewId() != null) {
+            query.addCriteria(where("overviewId").is(analyseDataQuery.getOverviewId()));
         }
         if (analyseDataQuery.getTransitionId() != null) {
             query.addCriteria(where("transitionId").is(analyseDataQuery.getTransitionId()));

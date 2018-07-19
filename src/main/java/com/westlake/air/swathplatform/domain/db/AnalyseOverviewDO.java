@@ -11,8 +11,8 @@ import java.util.Date;
  * Time: 2018-07-19 16:20
  */
 @Data
-@Document(collection = "analyseRecord")
-public class AnalyseRecordDO {
+@Document(collection = "analyseOverview")
+public class AnalyseOverviewDO {
 
     @Id
     String id;

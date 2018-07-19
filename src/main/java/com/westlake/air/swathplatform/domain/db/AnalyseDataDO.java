@@ -19,7 +19,7 @@ public class AnalyseDataDO {
     String id;
 
     @Indexed
-    String recordId;
+    String overviewId;
 
     String transitionId;
 

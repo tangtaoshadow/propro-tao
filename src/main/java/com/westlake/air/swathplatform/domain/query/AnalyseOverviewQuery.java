@@ -7,7 +7,7 @@ import lombok.Data;
  * Time: 2018-07-19 16:34
  */
 @Data
-public class AnalyseRecordQuery extends PageQuery {
+public class AnalyseOverviewQuery extends PageQuery {
 
     String id;
 

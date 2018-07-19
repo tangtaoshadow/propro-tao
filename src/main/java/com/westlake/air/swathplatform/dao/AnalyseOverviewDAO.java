@@ -1,7 +1,7 @@
 package com.westlake.air.swathplatform.dao;
 
-import com.westlake.air.swathplatform.domain.db.AnalyseRecordDO;
-import com.westlake.air.swathplatform.domain.query.AnalyseRecordQuery;
+import com.westlake.air.swathplatform.domain.db.AnalyseOverviewDO;
+import com.westlake.air.swathplatform.domain.query.AnalyseOverviewQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
@@ -16,56 +16,56 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
  * Time: 2018-06-07 20:50
  */
 @Service
-public class AnalyseRecordDAO {
+public class AnalyseOverviewDAO {
 
-    public static String CollectionName = "analyseRecord";
+    public static String CollectionName = "analyseOverview";
 
     @Autowired
     MongoTemplate mongoTemplate;
 
-    public List<AnalyseRecordDO> getAllByExperimentId(String expId){
+    public List<AnalyseOverviewDO> getAllByExperimentId(String expId){
         Query query = new Query(where("expId").is(expId));
-        return mongoTemplate.find(query, AnalyseRecordDO.class, CollectionName);
+        return mongoTemplate.find(query, AnalyseOverviewDO.class, CollectionName);
     }
 
-    public List<AnalyseRecordDO> getList(AnalyseRecordQuery query) {
-        return mongoTemplate.find(buildQuery(query), AnalyseRecordDO.class, CollectionName);
+    public List<AnalyseOverviewDO> getList(AnalyseOverviewQuery query) {
+        return mongoTemplate.find(buildQuery(query), AnalyseOverviewDO.class, CollectionName);
     }
 
-    public long count(AnalyseRecordQuery query){
-        return mongoTemplate.count(buildQueryWithoutPage(query), AnalyseRecordDO.class, CollectionName);
+    public long count(AnalyseOverviewQuery query){
+        return mongoTemplate.count(buildQueryWithoutPage(query), AnalyseOverviewDO.class, CollectionName);
     }
 
-    public AnalyseRecordDO getById(String id) {
-        return mongoTemplate.findById(id, AnalyseRecordDO.class, CollectionName);
+    public AnalyseOverviewDO getById(String id) {
+        return mongoTemplate.findById(id, AnalyseOverviewDO.class, CollectionName);
     }
 
-    public AnalyseRecordDO insert(AnalyseRecordDO recordDO) {
-        mongoTemplate.insert(recordDO, CollectionName);
-        return recordDO;
+    public AnalyseOverviewDO insert(AnalyseOverviewDO overviewDO) {
+        mongoTemplate.insert(overviewDO, CollectionName);
+        return overviewDO;
     }
 
-    public List<AnalyseRecordDO> insert(List<AnalyseRecordDO> recordList) {
-        mongoTemplate.insert(recordList, CollectionName);
-        return recordList;
+    public List<AnalyseOverviewDO> insert(List<AnalyseOverviewDO> overviewList) {
+        mongoTemplate.insert(overviewList, CollectionName);
+        return overviewList;
     }
 
-    public AnalyseRecordDO update(AnalyseRecordDO recordDO) {
-        mongoTemplate.save(recordDO, CollectionName);
-        return recordDO;
+    public AnalyseOverviewDO update(AnalyseOverviewDO overviewDO) {
+        mongoTemplate.save(overviewDO, CollectionName);
+        return overviewDO;
     }
 
     public void delete(String id) {
         Query query = new Query(where("id").is(id));
-        mongoTemplate.remove(query,AnalyseRecordDO.class, CollectionName);
+        mongoTemplate.remove(query,AnalyseOverviewDO.class, CollectionName);
     }
 
     public void deleteAllByExperimentId(String expId) {
         Query query = new Query(where("expId").is(expId));
-        mongoTemplate.remove(query, AnalyseRecordDO.class, CollectionName);
+        mongoTemplate.remove(query, AnalyseOverviewDO.class, CollectionName);
     }
 
-    private Query buildQuery(AnalyseRecordQuery targetQuery) {
+    private Query buildQuery(AnalyseOverviewQuery targetQuery) {
         Query query = buildQueryWithoutPage(targetQuery);
 
         query.skip((targetQuery.getPageNo() - 1) * targetQuery.getPageSize());
@@ -75,7 +75,7 @@ public class AnalyseRecordDAO {
         return query;
     }
 
-    private Query buildQueryWithoutPage(AnalyseRecordQuery targetQuery) {
+    private Query buildQueryWithoutPage(AnalyseOverviewQuery targetQuery) {
         Query query = new Query();
         if (targetQuery.getId() != null) {
             query.addCriteria(where("id").is(targetQuery.getId()));

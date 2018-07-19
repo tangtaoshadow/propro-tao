@@ -67,7 +67,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
         }
         try {
             if (isDeleteOld) {
-                analyseDataDAO.deleteAllByRecordId(dataList.get(0).getRecordId());
+                analyseDataDAO.deleteAllByOverviewId(dataList.get(0).getOverviewId());
             }
             analyseDataDAO.insert(dataList);
             return new ResultDO(true);
@@ -99,7 +99,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
         }
         try {
-            analyseDataDAO.deleteAllByRecordId(recordId);
+            analyseDataDAO.deleteAllByOverviewId(recordId);
             return new ResultDO(true);
         } catch (Exception e) {
             logger.warn(e.getMessage());

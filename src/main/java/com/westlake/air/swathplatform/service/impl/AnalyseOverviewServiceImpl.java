@@ -1,11 +1,11 @@
 package com.westlake.air.swathplatform.service.impl;
 
 import com.westlake.air.swathplatform.constants.ResultCode;
-import com.westlake.air.swathplatform.dao.AnalyseRecordDAO;
+import com.westlake.air.swathplatform.dao.AnalyseOverviewDAO;
 import com.westlake.air.swathplatform.domain.ResultDO;
-import com.westlake.air.swathplatform.domain.db.AnalyseRecordDO;
-import com.westlake.air.swathplatform.domain.query.AnalyseRecordQuery;
-import com.westlake.air.swathplatform.service.AnalyseRecordService;
+import com.westlake.air.swathplatform.domain.db.AnalyseOverviewDO;
+import com.westlake.air.swathplatform.domain.query.AnalyseOverviewQuery;
+import com.westlake.air.swathplatform.service.AnalyseOverviewService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,29 +17,29 @@ import java.util.List;
  * Created by James Lu MiaoShan
  * Time: 2018-07-19 16:40
  */
-@Service("analyseRecordService")
-public class AnalyseRecordServiceImpl implements AnalyseRecordService {
+@Service("analyseOverviewService")
+public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
 
-    public final Logger logger = LoggerFactory.getLogger(AnalyseRecordServiceImpl.class);
+    public final Logger logger = LoggerFactory.getLogger(AnalyseOverviewServiceImpl.class);
 
     @Autowired
-    AnalyseRecordDAO analyseRecordDAO;
+    AnalyseOverviewDAO analyseOverviewDAO;
 
     @Override
-    public List<AnalyseRecordDO> getAllByExpId(String expId) {
-        return analyseRecordDAO.getAllByExperimentId(expId);
+    public List<AnalyseOverviewDO> getAllByExpId(String expId) {
+        return analyseOverviewDAO.getAllByExperimentId(expId);
     }
 
     @Override
-    public Long count(AnalyseRecordQuery query) {
-        return analyseRecordDAO.count(query);
+    public Long count(AnalyseOverviewQuery query) {
+        return analyseOverviewDAO.count(query);
     }
 
     @Override
-    public ResultDO<List<AnalyseRecordDO>> getList(AnalyseRecordQuery targetQuery) {
-        List<AnalyseRecordDO> dataList = analyseRecordDAO.getList(targetQuery);
-        long totalCount = analyseRecordDAO.count(targetQuery);
-        ResultDO<List<AnalyseRecordDO>> resultDO = new ResultDO<>(true);
+    public ResultDO<List<AnalyseOverviewDO>> getList(AnalyseOverviewQuery targetQuery) {
+        List<AnalyseOverviewDO> dataList = analyseOverviewDAO.getList(targetQuery);
+        long totalCount = analyseOverviewDAO.count(targetQuery);
+        ResultDO<List<AnalyseOverviewDO>> resultDO = new ResultDO<>(true);
         resultDO.setModel(dataList);
         resultDO.setTotalNum(totalCount);
         resultDO.setPageSize(targetQuery.getPageSize());
@@ -47,9 +47,9 @@ public class AnalyseRecordServiceImpl implements AnalyseRecordService {
     }
 
     @Override
-    public ResultDO insert(AnalyseRecordDO recordDO) {
+    public ResultDO insert(AnalyseOverviewDO recordDO) {
         try {
-            analyseRecordDAO.insert(recordDO);
+            analyseOverviewDAO.insert(recordDO);
             return ResultDO.build(recordDO);
         } catch (Exception e) {
             logger.warn(e.getMessage());
@@ -65,7 +65,7 @@ public class AnalyseRecordServiceImpl implements AnalyseRecordService {
             return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
         }
         try {
-            analyseRecordDAO.delete(id);
+            analyseOverviewDAO.delete(id);
             return new ResultDO(true);
         } catch (Exception e) {
             logger.warn(e.getMessage());
@@ -81,7 +81,7 @@ public class AnalyseRecordServiceImpl implements AnalyseRecordService {
             return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
         }
         try {
-            analyseRecordDAO.deleteAllByExperimentId(expId);
+            analyseOverviewDAO.deleteAllByExperimentId(expId);
             return new ResultDO(true);
         } catch (Exception e) {
             logger.warn(e.getMessage());
@@ -92,14 +92,14 @@ public class AnalyseRecordServiceImpl implements AnalyseRecordService {
     }
 
     @Override
-    public ResultDO<AnalyseRecordDO> getById(String id) {
+    public ResultDO<AnalyseOverviewDO> getById(String id) {
         try {
-            AnalyseRecordDO analyseRecordDO = analyseRecordDAO.getById(id);
-            if (analyseRecordDO == null) {
+            AnalyseOverviewDO analyseOverviewDO = analyseOverviewDAO.getById(id);
+            if (analyseOverviewDO == null) {
                 return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
             } else {
-                ResultDO<AnalyseRecordDO> resultDO = new ResultDO<>(true);
-                resultDO.setModel(analyseRecordDO);
+                ResultDO<AnalyseOverviewDO> resultDO = new ResultDO<>(true);
+                resultDO.setModel(analyseOverviewDO);
                 return resultDO;
             }
         } catch (Exception e) {

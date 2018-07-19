@@ -13,7 +13,7 @@ public class AnalyseDataQuery extends PageQuery{
 
     String id;
 
-    String recordId;
+    String overviewId;
 
     String transitionId;
 
