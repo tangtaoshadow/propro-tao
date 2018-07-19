@@ -48,25 +48,42 @@ public class MzXmlParser {
     }
 
     private void prepare() {
+
         airXStream.processAnnotations(classes);
         airXStream.allowTypes(classes);
 //        airXStream.registerConverter(new PeaksConverter());
         airXStream.registerConverter(new PrecursorMzConverter());
     }
 
-    public void parseAll(File file, LmsIndexer indexer) throws Exception {
+    //    public void parseAll(File file, LmsIndexer indexer) throws Exception {
+//        prepare();
+//        List<ScanIndexDO> indexList = indexer.index(file);
+//        for (ScanIndexDO scanIndexDO : indexList) {
+//
+//        }
+//    }
+    public TreeMap<Double, Double> parseOne(RandomAccessFile raf, ScanIndexDO index) throws IOException {
         prepare();
-        List<ScanIndexDO> indexList = indexer.index(file);
-        for (ScanIndexDO scanIndexDO : indexList) {
-
+        TreeMap<Double, Double> hashMap = new TreeMap<>();
+        raf.seek(index.getStart());
+        byte[] reader = new byte[(int) (index.getEnd() - index.getStart())];
+        raf.read(reader);
+        Scan scan = new Scan();
+        airXStream.fromXML(new String(reader), scan);
+        if (scan.getPeaksList() != null && scan.getPeaksList().size() >= 1) {
+            Peaks peaks = scan.getPeaksList().get(0);
+//            hashMap = getPeakMap(peaks.getValue(), peaks.getPrecision(), false);
         }
+
+        return hashMap;
     }
 
     public TreeMap<Double, Double> parseOne(File file, ScanIndexDO index) {
         prepare();
         TreeMap<Double, Double> hashMap = new TreeMap<>();
+        RandomAccessFile raf = null;
         try {
-            RandomAccessFile raf = new RandomAccessFile(file, "r");
+            raf = new RandomAccessFile(file, "r");
             raf.seek(index.getStart());
             byte[] reader = new byte[(int) (index.getEnd() - index.getStart())];
             raf.read(reader);
@@ -74,12 +91,18 @@ public class MzXmlParser {
             airXStream.fromXML(new String(reader), scan);
             if (scan.getPeaksList() != null && scan.getPeaksList().size() >= 1) {
                 Peaks peaks = scan.getPeaksList().get(0);
-                hashMap = getPeakMap(peaks.getValue(),peaks.getPrecision(),true);
+                hashMap = getPeakMap(peaks.getValue(), peaks.getPrecision(), false);
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (raf != null) {
+                try {
+                    raf.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         return hashMap;
@@ -151,7 +174,7 @@ public class MzXmlParser {
                 int usedLength = decompresser.inflate(decompressedData);
                 byteBuffer = ByteBuffer.wrap(decompressedData, 0, usedLength);
             } catch (DataFormatException e) {
-                logger.error("Decompress failed!");
+                logger.error("Decompress failed!", e);
             }
         }
 
@@ -169,6 +192,7 @@ public class MzXmlParser {
             }
         }
 
+        byteBuffer.clear();
         return values;
     }
 

@@ -7,6 +7,7 @@ import com.westlake.air.swathplatform.domain.db.ExperimentDO;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.db.ScanIndexDO;
 import com.westlake.air.swathplatform.domain.query.ExperimentQuery;
+import com.westlake.air.swathplatform.domain.query.ScanIndexQuery;
 import com.westlake.air.swathplatform.parser.MzXmlParser;
 import com.westlake.air.swathplatform.parser.indexer.LmsIndexer;
 import com.westlake.air.swathplatform.service.ExperimentService;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -134,20 +136,27 @@ public class ExperimentController extends BaseController {
         }
 
         try {
+            long start = System.currentTimeMillis();
             //建立索引
+            logger.info("开始构建索引");
             List<ScanIndexDO> indexList = lmsIndexer.index(file, experimentDO.getId());
+            logger.info("索引构建完毕,开始存储索引");
             ResultDO resultDO = scanIndexService.insertAll(indexList, true);
+            logger.info("索引存储完毕");
+
 
             if (resultDO.isFailured()) {
+                logger.info("索引存储失败" + result.getMsgInfo());
                 experimentService.delete(experimentDO.getId());
                 model.addAttribute(ERROR_MSG, result.getMsgInfo());
                 return "experiment/create";
             } else {
-                redirectAttributes.addAttribute(SUCCESS_MSG, SuccessMsg.CREATE_EXPERIMENT_AND_INDEX_SUCCESS);
+                redirectAttributes.addAttribute(SUCCESS_MSG, SuccessMsg.CREATE_EXPERIMENT_AND_INDEX_SUCCESS+",耗时:"+(System.currentTimeMillis() - start)+"毫秒");
                 return "redirect:/experiment/list";
             }
 
         } catch (Exception e) {
+            logger.info("索引存储失败", e.getMessage());
             e.printStackTrace();
             redirectAttributes.addFlashAttribute(ERROR_MSG, e.getMessage());
             return "redirect:/experiment/list";
@@ -171,8 +180,17 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/detail/{id}")
     String detail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
+
+        ScanIndexQuery query = new ScanIndexQuery();
+        query.setExperimentId(id);
+        query.setMsLevel(1);
+        Long ms1Count = scanIndexService.count(query);
+        query.setMsLevel(2);
+        Long ms2Count = scanIndexService.count(query);
         if (resultDO.isSuccess()) {
             model.addAttribute("experiment", resultDO.getModel());
+            model.addAttribute("ms1Count", ms1Count);
+            model.addAttribute("ms2Count", ms2Count);
             return "/experiment/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
@@ -216,6 +234,34 @@ public class ExperimentController extends BaseController {
 
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_LIBRARY_SUCCESS);
         return "redirect:/experiment/list";
+
+    }
+
+    @RequestMapping(value = "/extract")
+    String extract(Model model,
+                   @RequestParam(value = "id", required = true) String id,
+                   @RequestParam(value = "buildType", required = true) int buildType,
+                   @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "1.0") Double rtExtractWindow,
+                   @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Double mzExtractWindow,
+                   RedirectAttributes redirectAttributes) {
+        if (rtExtractWindow == null) {
+            rtExtractWindow = 1.0;
+        }
+        if (mzExtractWindow == null) {
+            mzExtractWindow = 0.05;
+        }
+        redirectAttributes.addFlashAttribute("rtExtractWindow", rtExtractWindow);
+        redirectAttributes.addFlashAttribute("mzExtractWindow", mzExtractWindow);
+        redirectAttributes.addFlashAttribute("buildType", buildType);
+        try {
+            ResultDO resultDO = experimentService.extract(id, rtExtractWindow, mzExtractWindow, buildType);
+        } catch (IOException e) {
+            logger.error("卷积报错了:",e);
+            e.printStackTrace();
+        }
+
+        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.EXTRACT_DATA_SUCCESS);
+        return "redirect:/experiment/detail/" + id;
 
     }
 

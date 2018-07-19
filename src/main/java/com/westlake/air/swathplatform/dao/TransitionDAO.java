@@ -36,12 +36,14 @@ public class TransitionDAO {
         return mongoTemplate.find(query, TransitionDO.class, CollectionName);
     }
 
+    //这个函数目前只获取真肽段
     public List<TargetTransition> getTargetTransitionsByLibraryId(String libraryId){
         Document queryDoc = new Document();
         queryDoc.put("libraryId",libraryId);
+        queryDoc.put("isDecoy",false);
 
         Document fieldsDoc = new Document();
-        fieldsDoc.put("id",true);
+//        fieldsDoc.put("id",true);//这个字段的加入会占用较大内存
         fieldsDoc.put("fullName",true);
         fieldsDoc.put("precursorMz",true);
         fieldsDoc.put("productMz",true);

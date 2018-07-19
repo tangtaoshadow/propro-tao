@@ -256,7 +256,6 @@ public class LmsIndexer {
             tmp = read.split(" ");
         }
 
-
         for (String tmpStr : tmp) {
             tmpStr = tmpStr.trim();
             if (tmpStr.startsWith("msLevel")) {

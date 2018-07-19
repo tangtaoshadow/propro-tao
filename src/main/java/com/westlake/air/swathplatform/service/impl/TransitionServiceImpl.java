@@ -159,7 +159,7 @@ public class TransitionServiceImpl implements TransitionService {
         });
         for (TargetTransition targetTransition : targetList) {
             targetTransition.setRtStart(targetTransition.getRt() - rtExtractionWindows / 2.0);
-            targetTransition.setRtStart(targetTransition.getRt() + rtExtractionWindows / 2.0);
+            targetTransition.setRtEnd(targetTransition.getRt() + rtExtractionWindows / 2.0);
         }
         List<TargetTransition> ms2List = ordering.sortedCopy(targetList);
 

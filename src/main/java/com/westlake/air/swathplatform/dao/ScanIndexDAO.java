@@ -41,6 +41,10 @@ public class ScanIndexDAO {
         return mongoTemplate.find(buildQuery(query), ScanIndexDO.class, CollectionName);
     }
 
+    public List<ScanIndexDO> getAll(ScanIndexQuery query) {
+        return mongoTemplate.find(buildQueryWithoutPage(query), ScanIndexDO.class, CollectionName);
+    }
+
     public ScanIndexDO getById(String id) {
         return mongoTemplate.findById(id, ScanIndexDO.class, CollectionName);
     }
@@ -87,19 +91,13 @@ public class ScanIndexDAO {
             query.addCriteria(where("id").is(scanIndexQuery.getId()));
         }
         if (scanIndexQuery.getNumStart() != null) {
-            query.addCriteria(where("num").gte(scanIndexQuery.getNumStart()));
-        }
-        if (scanIndexQuery.getNumEnd() != null) {
-            query.addCriteria(where("num").lte(scanIndexQuery.getNumEnd()));
+            query.addCriteria(where("num").gte(scanIndexQuery.getNumStart()).lte(scanIndexQuery.getNumEnd()));
         }
         if (scanIndexQuery.getMsLevel() != null) {
             query.addCriteria(where("msLevel").is(scanIndexQuery.getMsLevel()));
         }
-        if (scanIndexQuery.getRtStart() != null) {
-            query.addCriteria(where("rt").gte(scanIndexQuery.getRtStart()));
-        }
-        if (scanIndexQuery.getRtEnd() != null) {
-            query.addCriteria(where("rt").lte(scanIndexQuery.getRtEnd()));
+        if (scanIndexQuery.getRtStart() != null && scanIndexQuery.getRtEnd() != null) {
+            query.addCriteria(where("rt").gte(scanIndexQuery.getRtStart()).lte(scanIndexQuery.getRtEnd()));
         }
         return query;
     }

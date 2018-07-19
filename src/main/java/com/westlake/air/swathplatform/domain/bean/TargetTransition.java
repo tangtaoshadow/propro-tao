@@ -10,7 +10,7 @@ import lombok.Data;
 public class TargetTransition {
 
     //对应的transition的Id,如果是MS1的则为对应的第一条transition的Id(一个MS1会对应多条transition记录)
-    String id;
+//    String id;
 
     //对应的MS1荷质比
     Double precursorMz;

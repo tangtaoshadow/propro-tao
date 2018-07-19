@@ -40,6 +40,7 @@ public enum ResultCode implements Serializable {
      * *******
      */
     LIBRARY_NAME_CANNOT_BE_EMPTY("LIBRARY_NAME_CANNOT_BE_EMPTY","标准库名称不能为空"),
+    LIBRARY_CANNOT_BE_EMPTY("LIBRARY_CANNOT_BE_EMPTY","标准库不能为空"),
 
     /**
      * ******
@@ -48,6 +49,7 @@ public enum ResultCode implements Serializable {
      */
     FILE_LOCATION_CANNOT_BE_EMPTY("FILE_LOCATION_CANNOT_BE_EMPTY","文件路径不能为空"),
     FILE_NOT_EXISTED("FILE_NOT_EXISTED","文件不存在"),
+    FILE_NOT_SET("FILE_NOT_SET","文件未设定"),
     LIBRARY_NOT_EXISTED("LIBRARY_NOT_EXISTED","指定的库不存在"),
 
     /**
