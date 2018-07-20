@@ -34,8 +34,8 @@ public interface ExperimentService {
 
     ResultDO extract(String expId, double rtExtractWindow, double mzExtractWindow, int buildType) throws IOException;
 
-    HashMap<Double, TreeMap<Double, Double>> extractMS1(RandomAccessFile raf, String expId, List<TargetTransition> coordinates, double rtExtractWindow, double mzExtractWindow) throws IOException;
+    void extractMS1(RandomAccessFile raf, String expId, String overviewId, List<TargetTransition> coordinates, double rtExtractWindow, double mzExtractWindow) throws IOException;
 
-    HashMap<Double, TreeMap<Double, Double>> extractMS2(RandomAccessFile raf, String expId, List<TargetTransition> coordinates, double rtExtractWindow, double mzExtractWindow) throws IOException;
+    void extractMS2(RandomAccessFile raf, String expId, String overviewId, List<TargetTransition> coordinates, double rtExtractWindow, double mzExtractWindow) throws IOException;
 
 }

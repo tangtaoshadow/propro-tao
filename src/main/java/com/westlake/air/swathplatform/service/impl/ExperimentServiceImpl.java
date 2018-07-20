@@ -1,18 +1,21 @@
 package com.westlake.air.swathplatform.service.impl;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.dao.ExperimentDAO;
 import com.westlake.air.swathplatform.domain.ResultDO;
 import com.westlake.air.swathplatform.domain.bean.LibraryCoordinate;
+import com.westlake.air.swathplatform.domain.bean.SimpleScanIndex;
 import com.westlake.air.swathplatform.domain.bean.TargetTransition;
+import com.westlake.air.swathplatform.domain.db.AnalyseDataDO;
+import com.westlake.air.swathplatform.domain.db.AnalyseOverviewDO;
 import com.westlake.air.swathplatform.domain.db.ExperimentDO;
 import com.westlake.air.swathplatform.domain.db.ScanIndexDO;
 import com.westlake.air.swathplatform.domain.query.ExperimentQuery;
 import com.westlake.air.swathplatform.domain.query.ScanIndexQuery;
 import com.westlake.air.swathplatform.parser.MzXmlParser;
-import com.westlake.air.swathplatform.service.ExperimentService;
-import com.westlake.air.swathplatform.service.ScanIndexService;
-import com.westlake.air.swathplatform.service.TransitionService;
+import com.westlake.air.swathplatform.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +24,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Created by James Lu MiaoShan
@@ -46,6 +46,12 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     @Autowired
     MzXmlParser mzXmlParser;
+
+    @Autowired
+    AnalyseDataService analyseDataService;
+
+    @Autowired
+    AnalyseOverviewService analyseOverviewService;
 
     @Override
     public List<ExperimentDO> getAll() {
@@ -183,10 +189,11 @@ public class ExperimentServiceImpl implements ExperimentService {
         File file = (File) checkResult.getModel();
         RandomAccessFile raf = null;
 
-        //创建结果对象
-        logger.info("创建结果对象");
-        HashMap<Double, TreeMap<Double, Double>> ms1Map = null;
-        HashMap<Double, TreeMap<Double, Double>> ms2Map = null;
+        //创建实验初始化概览数据
+        AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
+        overviewDO.setExpId(expId);
+        overviewDO.setLibraryId(experimentDO.getLibraryId());
+        analyseOverviewService.insert(overviewDO);
 
         try {
             raf = new RandomAccessFile(file, "r");
@@ -198,15 +205,16 @@ public class ExperimentServiceImpl implements ExperimentService {
             logger.info("构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
 
             if (buildType == 0) {
-                ms1Map = extractMS1(raf, expId, lc.getMs1List(), rtExtractWindow, mzExtractWindow);
-                ms2Map = extractMS2(raf, expId, lc.getMs2List(), rtExtractWindow, mzExtractWindow);
+                extractMS1(raf, expId, overviewDO.getId(), lc.getMs1List(), rtExtractWindow, mzExtractWindow);
+                extractMS2(raf, expId, overviewDO.getId(), lc.getMs2List(), rtExtractWindow, mzExtractWindow);
             } else if (buildType == 1) {
-                ms1Map = extractMS1(raf, expId, lc.getMs1List(), rtExtractWindow, mzExtractWindow);
+                extractMS1(raf, expId, overviewDO.getId(), lc.getMs1List(), rtExtractWindow, mzExtractWindow);
             } else if (buildType == 2) {
-                ms2Map = extractMS2(raf, expId, lc.getMs2List(), rtExtractWindow, mzExtractWindow);
+                extractMS2(raf, expId, overviewDO.getId(), lc.getMs2List(), rtExtractWindow, mzExtractWindow);
             }
 
         } catch (Exception e) {
+            logger.error(e.getMessage());
             if (raf != null) {
                 try {
                     raf.close();
@@ -221,7 +229,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     /**
      * 解压缩MS1数据的话会把所有的索引全部读入到内存中进行卷积
-     *
+     * 全光谱读取
      * @param raf
      * @param expId
      * @param coordinates
@@ -231,10 +239,13 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @throws IOException
      */
     @Override
-    public HashMap<Double, TreeMap<Double, Double>> extractMS1(RandomAccessFile raf, String expId, List<TargetTransition> coordinates, double rtExtractWindow, double mzExtractWindow) throws IOException {
+    public void extractMS1(RandomAccessFile raf, String expId, String overviewId, List<TargetTransition> coordinates, double rtExtractWindow, double mzExtractWindow) throws IOException {
 
         //用于存储最终的卷积结果
-        HashMap<Double, TreeMap<Double, Double>> ms1Map = new HashMap<>();
+//        Table<Double, Double[], Double[]> ms1Table = HashBasedTable.create();
+//        HashMap<Double, Double[]> ms1Map = new HashMap<>();
+        List<AnalyseDataDO> dataList = new ArrayList<>();
+//        HashMap<Double, TreeMap<Double, Double>> ms1Map = new HashMap<>();
         //用于存储从XML中解压缩出来的数据
         TreeMap<Double, TreeMap<Double, Double>> rtMap = new TreeMap<>();
 
@@ -242,13 +253,17 @@ public class ExperimentServiceImpl implements ExperimentService {
         query.setExperimentId(expId);
         query.setMsLevel(1);
 
-        List<ScanIndexDO> indexes = scanIndexService.getAll(query);
+        List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
         logger.info("MS1 坐标总计" + coordinates.size() + "条");
         logger.info("MS1 实验光谱数" + indexes.size() + "条");
 
         //如果MS1的实验数据不存在,则跳过
         if (indexes.size() == 0) {
-            return ms1Map;
+            return;
+        }
+        if(coordinates.size() == 0){
+            logger.info("坐标系为空");
+            return;
         }
 
         //如果MS1存在,则进行MS1的光谱扫描
@@ -257,7 +272,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
         long start = System.currentTimeMillis();
         logger.info("开始创建MS1图谱");
-        for (ScanIndexDO index : indexes) {
+        for (SimpleScanIndex index : indexes) {
             rtMap.put(index.getRt(), mzXmlParser.parseOne(raf, index));
         }
 
@@ -269,7 +284,13 @@ public class ExperimentServiceImpl implements ExperimentService {
             mzStart = ms1.getPrecursorMz() - mzExtractWindow / 2.0;
             mzEnd = ms1.getPrecursorMz() + mzExtractWindow / 2.0;
 
-            TreeMap<Double, Double> mzResultMap = new TreeMap<>();
+//            TreeMap<Double, Double> mzResultMap = new TreeMap<>();
+
+            Double[] rtArray = new Double[rtMap.size()];
+            rtMap.keySet().toArray(rtArray);
+            Double[] intensityArray = new Double[rtMap.size()];
+
+            int i = 0;
             for (Double rt : rtMap.keySet()) {
                 Double intensity = 0d;
                 TreeMap<Double, Double> kvMap = rtMap.get(rt);
@@ -278,23 +299,35 @@ public class ExperimentServiceImpl implements ExperimentService {
                         intensity += kvMap.get(key);
                     }
                 }
-                mzResultMap.put(rt, intensity);
+//              rtArray[i] = rt;
+                intensityArray[i] = intensity;
+                i++;
+//              mzResultMap.put(rt, intensity);
             }
+
+            AnalyseDataDO dataDO = new AnalyseDataDO();
+            dataDO.setMz(ms1.getPrecursorMz());
+            dataDO.setRtArray(rtArray);
+            dataDO.setIntensityArray(intensityArray);
+            dataDO.setMsLevel(1);
+            dataDO.setOverviewId(overviewId);
+            dataList.add(dataDO);
 
             //每隔1000条数据落库一次,以减少对内存的依赖
             logCountForMS1Target++;
             if (logCountForMS1Target % 10000 == 0) {
                 logger.info("已扫描MS1目标:" + logCountForMS1Target + "条,累计耗时:" + (System.currentTimeMillis() - start));
+                analyseDataService.insertAll(dataList, false);
+                logger.info("数据存入数据库成功");
+                dataList.clear();
             }
-
-            ms1Map.put(ms1.getPrecursorMz(), mzResultMap);
         }
-
-        return ms1Map;
+        analyseDataService.insertAll(dataList, false);
+        logger.info("全部数据处理完毕");
     }
 
     @Override
-    public HashMap<Double, TreeMap<Double, Double>> extractMS2(RandomAccessFile raf, String expId, List<TargetTransition> coordinates, double rtExtractWindow, double mzExtractWindow) {
+    public void extractMS2(RandomAccessFile raf, String expId,String overviewId, List<TargetTransition> coordinates, double rtExtractWindow, double mzExtractWindow) {
 
 //        query.setMsLevel(2);
 //        Long ms2Count = scanIndexService.count(query);
@@ -341,8 +374,6 @@ public class ExperimentServiceImpl implements ExperimentService {
 //
 //            ms2Map.put(ms2.getProductMz(), mzResultMap);
 //        }
-
-        return null;
     }
 
     private ResultDO<File> checkExperiment(ExperimentDO experimentDO) {

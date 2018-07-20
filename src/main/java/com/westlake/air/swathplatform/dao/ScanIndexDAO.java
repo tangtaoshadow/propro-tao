@@ -1,5 +1,6 @@
 package com.westlake.air.swathplatform.dao;
 
+import com.westlake.air.swathplatform.domain.bean.SimpleScanIndex;
 import com.westlake.air.swathplatform.domain.db.ExperimentDO;
 import com.westlake.air.swathplatform.domain.db.ScanIndexDO;
 import com.westlake.air.swathplatform.domain.db.TransitionDO;
@@ -43,6 +44,10 @@ public class ScanIndexDAO {
 
     public List<ScanIndexDO> getAll(ScanIndexQuery query) {
         return mongoTemplate.find(buildQueryWithoutPage(query), ScanIndexDO.class, CollectionName);
+    }
+
+    public List<SimpleScanIndex> getSimpleAll(ScanIndexQuery query) {
+        return mongoTemplate.find(buildQueryWithoutPage(query), SimpleScanIndex.class, CollectionName);
     }
 
     public ScanIndexDO getById(String id) {

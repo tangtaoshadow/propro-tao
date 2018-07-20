@@ -20,17 +20,21 @@ public class ScanIndexDO {
     @Id
     String id;
 
-    String experimentId;
-    Long start;
-    Long end;
-    int num;
-    String rtStr;
-
     @Indexed
-    int msLevel;
+    Integer msLevel;
 
     @Indexed
     Double rt;
+
+    String experimentId;
+
+    Long start;
+
+    Long end;
+
+    Integer num;
+
+    String rtStr;
 
     Integer parentNum;
 
@@ -48,10 +52,10 @@ public class ScanIndexDO {
         this.end = end;
     }
 
-    public void setRtStr(String rtStr){
+    public void setRtStr(String rtStr) {
         this.rtStr = rtStr;
-        if(rtStr.startsWith("PT") && rtStr.endsWith("S")){
-            this.rt = Double.parseDouble(rtStr.substring(2,rtStr.length()-1));
+        if (rtStr.startsWith("PT") && rtStr.endsWith("S")) {
+            this.rt = Double.parseDouble(rtStr.substring(2, rtStr.length() - 1));
         }
     }
 }

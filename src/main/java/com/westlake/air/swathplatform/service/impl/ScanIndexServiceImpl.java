@@ -3,6 +3,7 @@ package com.westlake.air.swathplatform.service.impl;
 import com.westlake.air.swathplatform.constants.ResultCode;
 import com.westlake.air.swathplatform.dao.ScanIndexDAO;
 import com.westlake.air.swathplatform.domain.ResultDO;
+import com.westlake.air.swathplatform.domain.bean.SimpleScanIndex;
 import com.westlake.air.swathplatform.domain.db.ScanIndexDO;
 import com.westlake.air.swathplatform.domain.query.ScanIndexQuery;
 import com.westlake.air.swathplatform.service.ScanIndexService;
@@ -48,8 +49,12 @@ public class ScanIndexServiceImpl implements ScanIndexService {
 
     @Override
     public List<ScanIndexDO> getAll(ScanIndexQuery query) {
-        List<ScanIndexDO> indexList = scanIndexDAO.getAll(query);
-        return indexList;
+        return scanIndexDAO.getAll(query);
+    }
+
+    @Override
+    public List<SimpleScanIndex> getSimpleAll(ScanIndexQuery query) {
+        return scanIndexDAO.getSimpleAll(query);
     }
 
     @Override

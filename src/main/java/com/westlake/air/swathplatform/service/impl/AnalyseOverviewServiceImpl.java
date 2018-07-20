@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -47,10 +48,11 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
     }
 
     @Override
-    public ResultDO insert(AnalyseOverviewDO recordDO) {
+    public ResultDO insert(AnalyseOverviewDO overviewDO) {
         try {
-            analyseOverviewDAO.insert(recordDO);
-            return ResultDO.build(recordDO);
+            overviewDO.setCreateDate(new Date());
+            analyseOverviewDAO.insert(overviewDO);
+            return ResultDO.build(overviewDO);
         } catch (Exception e) {
             logger.warn(e.getMessage());
             ResultDO resultDO = new ResultDO(false);

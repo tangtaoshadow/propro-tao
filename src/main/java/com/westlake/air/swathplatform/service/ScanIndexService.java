@@ -1,6 +1,7 @@
 package com.westlake.air.swathplatform.service;
 
 import com.westlake.air.swathplatform.domain.ResultDO;
+import com.westlake.air.swathplatform.domain.bean.SimpleScanIndex;
 import com.westlake.air.swathplatform.domain.db.LibraryDO;
 import com.westlake.air.swathplatform.domain.db.ScanIndexDO;
 import com.westlake.air.swathplatform.domain.query.LibraryQuery;
@@ -23,6 +24,8 @@ public interface ScanIndexService {
     ResultDO<List<ScanIndexDO>> getList(ScanIndexQuery query);
 
     List<ScanIndexDO> getAll(ScanIndexQuery query);
+
+    List<SimpleScanIndex> getSimpleAll(ScanIndexQuery query);
 
     ResultDO insert(ScanIndexDO scanIndexDO);
 

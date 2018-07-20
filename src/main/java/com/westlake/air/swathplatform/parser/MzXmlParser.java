@@ -1,5 +1,6 @@
 package com.westlake.air.swathplatform.parser;
 
+import com.westlake.air.swathplatform.domain.bean.SimpleScanIndex;
 import com.westlake.air.swathplatform.domain.db.ScanIndexDO;
 import com.westlake.air.swathplatform.parser.indexer.LmsIndexer;
 import com.westlake.air.swathplatform.parser.model.mzxml.*;
@@ -62,7 +63,8 @@ public class MzXmlParser {
 //
 //        }
 //    }
-    public TreeMap<Double, Double> parseOne(RandomAccessFile raf, ScanIndexDO index) throws IOException {
+
+    public TreeMap<Double, Double> parseOne(RandomAccessFile raf, SimpleScanIndex index) throws IOException {
         prepare();
         TreeMap<Double, Double> hashMap = new TreeMap<>();
         raf.seek(index.getStart());

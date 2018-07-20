@@ -5,8 +5,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.TreeMap;
-
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-07-19 15:48
@@ -27,5 +25,9 @@ public class AnalyseDataDO {
 
     Double mz;
 
-    TreeMap<Double, Double> rtIntensityMap;
+    //排序后的rt
+    Double[] rtArray;
+
+    //一一映射rt的intensity数据
+    Double[] intensityArray;
 }
