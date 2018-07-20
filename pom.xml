@@ -4,12 +4,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.westlake.air</groupId>
-    <artifactId>swath-platform</artifactId>
+    <artifactId>pecs</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>swath-platform</name>
-    <description>SwathPlatform</description>
+    <name>pecs</name>
+    <description>Proteomics Elastic Compute Service</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
