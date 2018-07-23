@@ -306,14 +306,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                 MzIntensityPairs pairs = rtMap.get(rt);
                 Double[] pairMzArray = pairs.getMzArray();
                 Double[] pairIntensityArray = pairs.getIntensityArray();
-                Double intensity = 0d;
-                for (int n = 0; n < pairMzArray.length; n++) {
-                    if (pairMzArray[n] >= mzStart && pairMzArray[n] <= mzEnd) {
-                        intensity += pairIntensityArray[n];
-                    }
-                }
-                intensityArray[i] = intensity;
-//                intensityArray[i] = sumWindowIntensity(pairMzArray, pairIntensityArray, mzStart, mzEnd);
+                intensityArray[i] = evolution(pairMzArray, pairIntensityArray, mzStart, mzEnd);
                 i++;
             }
 
@@ -417,7 +410,7 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @param mzEnd
      * @return
      */
-    public static Double sumWindowIntensity(Double[] mzArray, Double[] intensityArray, Double mzStart, Double mzEnd) {
+    public static Double evolution(Double[] mzArray, Double[] intensityArray, Double mzStart, Double mzEnd) {
         Double result = 0d;
         int start = findIndex(mzArray, mzStart);
         int end = findIndex(mzArray, mzEnd) - 1;
@@ -441,104 +434,5 @@ public class ExperimentServiceImpl implements ExperimentService {
             }
         }
         return pStart;
-    }
-
-    public static double calculate(Double[] mzArray,Double[] intensity,Double mzStart,Double mzEnd){
-
-        int x1=findlocation(mzArray,0, mzStart);
-        int x2=findlocation(mzArray,x1, mzEnd)-1;
-        Double result = 0d;
-        for(int i=x1;i<=x2;i++){
-            result+=intensity[i];
-        }
-        return result;
-
-    }
-
-
-    public static int findlocation(Double[] mzArray,int start, Double key) {
-        int low = start;
-        int high = mzArray.length - 1;
-        while (low <= high) {
-            int mid = (low + high) / 2;
-            if (key < mzArray[mid]) {
-                high = mid - 1;
-            } else if (key > mzArray[mid]) {
-                low = mid + 1;
-            } else {
-                return mid;
-            }
-        }
-        return low;
-    }
-
-    /**
-     * 傻逼原始算法,后面可以删除
-     * @param mzArray
-     * @param intensityArray
-     * @param mzStart
-     * @param mzEnd
-     * @return
-     */
-    @Deprecated
-    private static Double original(Double[] mzArray, Double[] intensityArray, Double mzStart, Double mzEnd) {
-        double intensity = 0;
-        for (int n = 0; n < mzArray.length; n++) {
-            if (mzArray[n] >= mzStart && mzArray[n] <= mzEnd) {
-                intensity += intensityArray[n];
-            }
-        }
-        return intensity;
-    }
-
-    public static void main(String[] args) {
-        Double[] testMzArray = new Double[1000000];
-        Double[] testIntensityArray = new Double[1000000];
-        for (int i = 1000000 - 1; i >= 0; i--) {
-            testMzArray[i] = i * 0.003;
-            testIntensityArray[i] = i * 0.2;
-        }
-
-        double mzStart = 1.0;
-        double mzEnd = 2.0;
-
-        double a = original(testMzArray, testIntensityArray, mzStart, mzEnd);
-        double b = sumWindowIntensity(testMzArray, testIntensityArray, mzStart, mzEnd);
-        double c = calculate(testMzArray, testIntensityArray, mzStart, mzEnd);
-        System.out.println("a:"+a);
-        System.out.println("b:"+b);
-        System.out.println("c:"+c);
-
-
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000; i++) {
-            mzStart = 1700.0 + i;
-            mzEnd = 1701.0 + i;
-            original(testMzArray, testIntensityArray, mzStart, mzEnd);
-        }
-        System.out.println("Lu Cost:" + (System.currentTimeMillis() - start));
-
-
-
-//        mzStart = 1.0;
-//        mzEnd = 2.0;
-//        start = System.currentTimeMillis();
-//        for (int i = 0; i < 1000; i++) {
-//            mzStart = 1700.0 + i;
-//            mzEnd = 1701.0 + i;
-//            calculate(testMzArray, testIntensityArray, mzStart, mzEnd);
-//        }
-//        System.out.println("An Cost:" + (System.currentTimeMillis() - start));
-
-        mzStart = 1.0;
-        mzEnd = 2.0;
-        start = System.currentTimeMillis();
-        for (int i = 0; i < 1000; i++) {
-            mzStart = 1700.0 + i;
-            mzEnd = 1701.0 + i;
-            sumWindowIntensity(testMzArray, testIntensityArray, mzStart, mzEnd);
-        }
-        System.out.println("Song Cost:" + (System.currentTimeMillis() - start));
-
     }
 }
