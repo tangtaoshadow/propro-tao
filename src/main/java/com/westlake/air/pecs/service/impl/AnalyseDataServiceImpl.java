@@ -94,12 +94,12 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     @Override
-    public ResultDO deleteAllByExpId(String recordId) {
-        if (recordId == null || recordId.isEmpty()) {
+    public ResultDO deleteAllByOverviewId(String overviewId) {
+        if (overviewId == null || overviewId.isEmpty()) {
             return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
         }
         try {
-            analyseDataDAO.deleteAllByOverviewId(recordId);
+            analyseDataDAO.deleteAllByOverviewId(overviewId);
             return new ResultDO(true);
         } catch (Exception e) {
             logger.warn(e.getMessage());

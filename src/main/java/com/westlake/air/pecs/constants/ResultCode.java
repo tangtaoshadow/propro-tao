@@ -41,6 +41,7 @@ public enum ResultCode implements Serializable {
      */
     LIBRARY_NAME_CANNOT_BE_EMPTY("LIBRARY_NAME_CANNOT_BE_EMPTY","标准库名称不能为空"),
     LIBRARY_CANNOT_BE_EMPTY("LIBRARY_CANNOT_BE_EMPTY","标准库不能为空"),
+    DATA_IS_EMPTY("DATA_IS_EMPTY","数据为空"),
 
     /**
      * ******

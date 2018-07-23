@@ -1,5 +1,7 @@
 package com.westlake.air.pecs.parser;
 
+import com.google.common.collect.Ordering;
+import com.westlake.air.pecs.domain.bean.MzIntensityPairs;
 import com.westlake.air.pecs.domain.bean.SimpleScanIndex;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.parser.model.mzxml.*;
@@ -22,6 +24,10 @@ import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
+/**
+ * Created by James Lu MiaoShan
+ * Time: 2018-07-19 16:50
+ */
 @Component
 public class MzXmlParser {
 
@@ -54,17 +60,9 @@ public class MzXmlParser {
         airXStream.registerConverter(new PrecursorMzConverter());
     }
 
-    //    public void parseAll(File file, LmsIndexer indexer) throws Exception {
-//        prepare();
-//        List<ScanIndexDO> indexList = indexer.index(file);
-//        for (ScanIndexDO scanIndexDO : indexList) {
-//
-//        }
-//    }
 
-    public TreeMap<Double, Double> parseOne(RandomAccessFile raf, SimpleScanIndex index) throws IOException {
+    public MzIntensityPairs parseOne(RandomAccessFile raf, SimpleScanIndex index) throws IOException {
         prepare();
-        TreeMap<Double, Double> hashMap = new TreeMap<>();
         raf.seek(index.getStart());
         byte[] reader = new byte[(int) (index.getEnd() - index.getStart())];
         raf.read(reader);
@@ -72,15 +70,14 @@ public class MzXmlParser {
         airXStream.fromXML(new String(reader), scan);
         if (scan.getPeaksList() != null && scan.getPeaksList().size() >= 1) {
             Peaks peaks = scan.getPeaksList().get(0);
-//            hashMap = getPeakMap(peaks.getValue(), peaks.getPrecision(), false);
+            return getPeakMap(peaks.getValue(), peaks.getPrecision(), false);
         }
 
-        return hashMap;
+        return null;
     }
 
-    public TreeMap<Double, Double> parseOne(File file, ScanIndexDO index) {
+    public MzIntensityPairs parseOne(File file, ScanIndexDO index) {
         prepare();
-        TreeMap<Double, Double> hashMap = new TreeMap<>();
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(file, "r");
@@ -91,7 +88,7 @@ public class MzXmlParser {
             airXStream.fromXML(new String(reader), scan);
             if (scan.getPeaksList() != null && scan.getPeaksList().size() >= 1) {
                 Peaks peaks = scan.getPeaksList().get(0);
-                hashMap = getPeakMap(peaks.getValue(), peaks.getPrecision(), true);
+                return getPeakMap(peaks.getValue(), peaks.getPrecision(), true);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -105,24 +102,36 @@ public class MzXmlParser {
             }
         }
 
-        return hashMap;
+        return null;
     }
 
-    public TreeMap<Double, Double> getPeakMap(byte[] value, int precision, boolean isCompression) {
+    public MzIntensityPairs getPeakMap(byte[] value, int precision, boolean isCompression) {
 
         double[] values = getValues(value, precision, isCompression);
 
-        TreeMap<Double, Double> peakMap = new TreeMap<>();
-
+        TreeMap<Double,Double> map = new TreeMap<>();
         for (int peakIndex = 0; peakIndex < values.length - 1; peakIndex += 2) {
             // get the two value
             Double mz = values[peakIndex];
             Double intensity = values[peakIndex + 1];
-
-            peakMap.put(mz, intensity);
+            map.put(mz,intensity);
         }
 
-        return peakMap;
+        Double[] mzArray = new Double[map.size()];
+        Double[] intensityArray = new Double[map.size()];
+//        TreeMap<Double,Double> treeMap = new TreeMap<>(hashMap);
+        int i = 0;
+        for(Double key : map.keySet()){
+            mzArray[i] = key;
+            intensityArray[i] = map.get(key);
+            i++;
+        }
+
+        MzIntensityPairs pairs = new MzIntensityPairs();
+        pairs.setMzArray(mzArray);
+        pairs.setIntensityArray(intensityArray);
+
+        return pairs;
     }
 
     public TreeMap<Double, Double> getPeakMap(String value, int precision, boolean isCompression) {

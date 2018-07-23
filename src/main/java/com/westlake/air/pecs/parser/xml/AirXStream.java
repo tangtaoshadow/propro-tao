@@ -8,6 +8,16 @@ import javax.annotation.PostConstruct;
 import java.io.OutputStream;
 import java.io.Writer;
 
+/**
+ * Created by James Lu MiaoShan
+ * Time: 2018-07-19 16:50
+ *
+ * 这个类的这种写法是有问题的,因为AirXStream在被不同的类调用的时候,所使用的初始化函数不同,在SpringBean的环境下会有线程安全问题
+ * 例如在MzXmlParser类中的初始化函数,这个在后面需要被重构修改
+ *  airXStream.processAnnotations(classes);
+ *  airXStream.allowTypes(classes);
+ *  airXStream.registerConverter(new PrecursorMzConverter());
+ */
 @Component
 public class AirXStream extends XStream {
 

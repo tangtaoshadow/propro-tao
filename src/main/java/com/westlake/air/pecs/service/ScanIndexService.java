@@ -24,6 +24,8 @@ public interface ScanIndexService {
 
     List<SimpleScanIndex> getSimpleAll(ScanIndexQuery query);
 
+    List<SimpleScanIndex> getSimpleList(ScanIndexQuery query);
+
     ResultDO insert(ScanIndexDO scanIndexDO);
 
     ResultDO insertAll(List<ScanIndexDO> scanIndexDOList, boolean isDeleteOld);

@@ -46,6 +46,10 @@ public class ScanIndexDAO {
         return mongoTemplate.find(buildQueryWithoutPage(query), SimpleScanIndex.class, CollectionName);
     }
 
+    public List<SimpleScanIndex> getSimpleList(ScanIndexQuery query) {
+        return mongoTemplate.find(buildQuery(query), SimpleScanIndex.class, CollectionName);
+    }
+
     public ScanIndexDO getById(String id) {
         return mongoTemplate.findById(id, ScanIndexDO.class, CollectionName);
     }

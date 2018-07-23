@@ -4,6 +4,7 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.ExperimentDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.LibraryCoordinate;
+import com.westlake.air.pecs.domain.bean.MzIntensityPairs;
 import com.westlake.air.pecs.domain.bean.SimpleScanIndex;
 import com.westlake.air.pecs.domain.bean.TargetTransition;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
@@ -31,6 +32,8 @@ import java.util.*;
 public class ExperimentServiceImpl implements ExperimentService {
 
     public final Logger logger = LoggerFactory.getLogger(ExperimentServiceImpl.class);
+
+    public static int SPECTRUM_READ_PER_TIME = 100;
 
     @Autowired
     ExperimentDAO experimentDAO;
@@ -227,6 +230,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     /**
      * 解压缩MS1数据的话会把所有的索引全部读入到内存中进行卷积
      * 全光谱读取
+     *
      * @param raf
      * @param expId
      * @param coordinates
@@ -244,35 +248,44 @@ public class ExperimentServiceImpl implements ExperimentService {
         List<AnalyseDataDO> dataList = new ArrayList<>();
 //        HashMap<Double, TreeMap<Double, Double>> ms1Map = new HashMap<>();
         //用于存储从XML中解压缩出来的数据
-        TreeMap<Double, TreeMap<Double, Double>> rtMap = new TreeMap<>();
+        TreeMap<Double, MzIntensityPairs> rtMap = new TreeMap<>();
 
         ScanIndexQuery query = new ScanIndexQuery();
         query.setExperimentId(expId);
         query.setMsLevel(1);
 
-        List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
+        long totalCount = scanIndexService.count(query);
+
         logger.info("MS1 坐标总计" + coordinates.size() + "条");
-        logger.info("MS1 实验光谱数" + indexes.size() + "条");
+        logger.info("MS1 实验光谱数" + totalCount + "条");
 
         //如果MS1的实验数据不存在,则跳过
-        if (indexes.size() == 0) {
+        if (totalCount == 0) {
             return;
         }
-        if(coordinates.size() == 0){
+        if (coordinates.size() == 0) {
             logger.info("坐标系为空");
             return;
         }
+
+        List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
 
         //如果MS1存在,则进行MS1的光谱扫描
         double mzStart = 0;
         double mzEnd = -1;
 
         long start = System.currentTimeMillis();
+        long start2 = System.currentTimeMillis();
         logger.info("开始创建MS1图谱");
+        int k = 0;
         for (SimpleScanIndex index : indexes) {
             rtMap.put(index.getRt(), mzXmlParser.parseOne(raf, index));
+            k++;
+            if (k % 100 == 0) {
+                logger.info("解析一百个光谱耗时:" + (System.currentTimeMillis() - start2));
+                start2 = System.currentTimeMillis();
+            }
         }
-
         logger.info("解析XML文件总计耗时:" + (System.currentTimeMillis() - start));
         int logCountForMS1Target = 0;
         for (TargetTransition ms1 : coordinates) {
@@ -290,14 +303,17 @@ public class ExperimentServiceImpl implements ExperimentService {
             int i = 0;
             for (Double rt : rtMap.keySet()) {
                 Double intensity = 0d;
-                TreeMap<Double, Double> kvMap = rtMap.get(rt);
-                for (Double key : kvMap.keySet()) {
-                    if (key >= mzStart && key <= mzEnd) {
-                        intensity += kvMap.get(key);
-                    }
-                }
+                MzIntensityPairs pairs = rtMap.get(rt);
+                Double[] pairMzArray = pairs.getMzArray();
+                Double[] pairIntensityArray = pairs.getIntensityArray();
+
+//                for (int n = 0; n < pairMzArray.length; n++) {
+//                    if (pairMzArray[n] >= mzStart && pairMzArray[n] <= mzEnd) {
+//                        intensity += pairIntensityArray[n];
+//                    }
+//                }
 //              rtArray[i] = rt;
-                intensityArray[i] = intensity;
+                intensityArray[i] = sumWindowIntensity(pairMzArray, pairIntensityArray, mzStart, mzEnd);
                 i++;
 //              mzResultMap.put(rt, intensity);
             }
@@ -314,17 +330,17 @@ public class ExperimentServiceImpl implements ExperimentService {
             logCountForMS1Target++;
             if (logCountForMS1Target % 10000 == 0) {
                 logger.info("已扫描MS1目标:" + logCountForMS1Target + "条,累计耗时:" + (System.currentTimeMillis() - start));
-                analyseDataService.insertAll(dataList, false);
+//                analyseDataService.insertAll(dataList, false);
                 logger.info("数据存入数据库成功");
                 dataList.clear();
             }
         }
-        analyseDataService.insertAll(dataList, false);
+//        analyseDataService.insertAll(dataList, false);
         logger.info("全部数据处理完毕");
     }
 
     @Override
-    public void extractMS2(RandomAccessFile raf, String expId,String overviewId, List<TargetTransition> coordinates, double rtExtractWindow, double mzExtractWindow) {
+    public void extractMS2(RandomAccessFile raf, String expId, String overviewId, List<TargetTransition> coordinates, double rtExtractWindow, double mzExtractWindow) {
 
 //        query.setMsLevel(2);
 //        Long ms2Count = scanIndexService.count(query);
@@ -391,5 +407,82 @@ public class ExperimentServiceImpl implements ExperimentService {
         ResultDO<File> resultDO = new ResultDO(true);
         resultDO.setModel(file);
         return resultDO;
+    }
+
+    /**
+     * 计算 mz在[mzStart, mzEnd]范围对应的intensity和
+     *
+     * @param mzArray        从小到到已经排好序
+     * @param intensityArray
+     * @param mzStart
+     * @param mzEnd
+     * @return
+     */
+    public static Double sumWindowIntensity(Double[] mzArray, Double[] intensityArray, Double mzStart, Double mzEnd) {
+        Double result = new Double(0);
+        int start = findIndex(mzArray, mzStart);
+        int end = findIndex(mzArray, mzEnd) - 1;
+        for (int index = start; index <= end; index++) {
+            result += intensityArray[index];
+        }
+        return result;
+    }
+
+    // 找到从小到大排序的第一个大于目标值的索引
+    public static int findIndex(Double[] array, Double target) {
+        int pStart = 0, pEnd = array.length - 1;
+        while (pStart <= pEnd) {
+            int tmp = (pStart + pEnd) / 2;
+            if (target > array[tmp]) {
+                pStart = tmp + 1;
+            } else if (target < array[tmp]) {
+                pEnd = tmp - 1;
+            } else {
+                return tmp;
+            }
+        }
+        return pStart;
+    }
+
+    private static Double original(Double[] mzArray, Double[] intensityArray, Double mzStart, Double mzEnd) {
+        double intensity = 0;
+        for (int n = 0; n < mzArray.length; n++) {
+            if (mzArray[n] >= mzStart && mzArray[n] <= mzEnd) {
+                intensity += intensityArray[n];
+            }
+        }
+        return intensity;
+    }
+
+    public static void main(String[] args) {
+        Double[] testMzArray = new Double[1000000];
+        Double[] testIntensityArray = new Double[1000000];
+        for (int i = 1000000 - 1; i >= 0; i--) {
+            testMzArray[i] = i * 0.003;
+            testIntensityArray[i] = i * 0.2;
+        }
+
+        double mzStart = 1.0;
+        double mzEnd = 2.0;
+
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            mzStart = 1.0 + i;
+            mzEnd = 2.0 + i;
+            original(testMzArray, testIntensityArray, mzStart, mzEnd);
+        }
+        System.out.println("Cost:" + (System.currentTimeMillis() - start));
+
+        mzStart = 1.0;
+        mzEnd = 2.0;
+        start = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            mzStart = 1.0 + i;
+            mzEnd = 2.0 + i;
+            sumWindowIntensity(testMzArray, testIntensityArray, mzStart, mzEnd);
+        }
+        System.out.println("Cost:" + (System.currentTimeMillis() - start));
+
+
     }
 }

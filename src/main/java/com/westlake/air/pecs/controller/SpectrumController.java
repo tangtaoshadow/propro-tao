@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.parser.MzXmlParser;
@@ -17,8 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Created by James Lu MiaoShan
@@ -84,13 +85,13 @@ public class SpectrumController {
         ResultDO<ScanIndexDO> indexResult = scanIndexService.getById(indexId);
 
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
-        TreeMap<Double,Double> map = new TreeMap<>();
-        if(expResult.isFailured()){
+        MzIntensityPairs pairs = null;
+        if (expResult.isFailured()) {
             resultDO.setErrorResult(ResultCode.EXPERIMENT_NOT_EXISTED);
             return resultDO;
         }
 
-        if(indexResult.isFailured()){
+        if (indexResult.isFailured()) {
             resultDO.setErrorResult(ResultCode.SCAN_INDEX_NOT_EXISTED);
             return resultDO;
         }
@@ -99,18 +100,24 @@ public class SpectrumController {
         ScanIndexDO scanIndexDO = indexResult.getModel();
 
         File file = new File(experimentDO.getFileLocation());
-        map = mzXmlParser.parseOne(file, scanIndexDO);
+        pairs = mzXmlParser.parseOne(file, scanIndexDO);
 
         JSONObject res = new JSONObject();
         JSONArray mzArray = new JSONArray();
         JSONArray intensityArray = new JSONArray();
-        for(Double key : map.keySet()){
-            mzArray.add(key);
-            intensityArray.add(map.get(key));
+        if (pairs == null) {
+            return ResultDO.buildError(ResultCode.DATA_IS_EMPTY);
         }
 
-        res.put("mz",mzArray);
-        res.put("intensity",intensityArray);
+        Double[] pairMzArray = pairs.getMzArray();
+        Double[] pairIntensityArray = pairs.getIntensityArray();
+        for (int n = 0; n < pairMzArray.length; n++) {
+            mzArray.add(pairMzArray[n]);
+            intensityArray.add(pairIntensityArray[n]);
+        }
+
+        res.put("mz", mzArray);
+        res.put("intensity", intensityArray);
         resultDO.setModel(res);
         return resultDO;
     }
