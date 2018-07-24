@@ -53,11 +53,10 @@ public class MzXmlParser {
     }
 
     private void prepare() {
-
         airXStream.processAnnotations(classes);
         airXStream.allowTypes(classes);
 //        airXStream.registerConverter(new PeaksConverter());
-        airXStream.registerConverter(new PrecursorMzConverter());
+//        airXStream.registerConverter(new PrecursorMzConverter());
     }
 
 
@@ -119,7 +118,6 @@ public class MzXmlParser {
 
         Double[] mzArray = new Double[map.size()];
         Double[] intensityArray = new Double[map.size()];
-//        TreeMap<Double,Double> treeMap = new TreeMap<>(hashMap);
         int i = 0;
         for(Double key : map.keySet()){
             mzArray[i] = key;

@@ -34,8 +34,7 @@ public class ScanIndexDO {
 
     Integer parentNum;
 
-    public ScanIndexDO() {
-    }
+    public ScanIndexDO() {}
 
     public ScanIndexDO(Long start, Long end) {
         this.start = start;

@@ -33,6 +33,8 @@ public class LmsIndexer {
     /**
      * 本算法得到的ScanIndex的End包含了换行符
      * ">"的byte编码是62
+     * <p>
+     * 小区域关键帧检测算法
      *
      * @param file
      * @return
@@ -153,15 +155,75 @@ public class LmsIndexer {
         return indexList;
     }
 
+    /**
+     * 本算法专门为Swath格式的mzXML优化,由于Swath的MzXML中是以Circle进行扫描到,即扫描的结果应该是MS1,MS2,MS2.....,MS1,MS2,MS2....这样的循环
+     * 并且MS2不会嵌套到MS1里面,因此对于父子关系的判断和index()函数中的不同
+     * 由于不存在嵌套关系,因此index()函数中的小区域关键帧检测算法也不需要了
+     *
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public List<ScanIndexDO> indexForSwath(File file) {
+
+        List<ScanIndexDO> indexList = new ArrayList<>();
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(file, "r");
+            //获取索引的起始位置
+            Long indexOffset = parseIndexOffset(raf);
+
+            //根据索引的内容获取id以及对应的startPosition
+            HashMap<Integer, ScanIndexDO> indexMap = parseScanStartPosition(indexOffset, raf);
+
+            //记录总共的scan条数
+            int totalCount = indexMap.size();
+            byte[] lastRead;
+            //对所有的记录开始做for循环,先解析第一个MS1
+            for (int i = 1; i <= totalCount; i++) {
+                //如果已经是最后一个元素了
+                if (i == totalCount) {
+                    //读取尾部的50个字符
+                    lastRead = read(raf, indexOffset - 50, 50);
+                    Long length = searchForLength(lastRead, 2, 62);
+                    indexMap.get(i).setEnd(indexOffset - length);
+                    indexList.add(indexMap.get(i));
+                    break;
+                }
+                ScanIndexDO index = indexMap.get(i);
+                ScanIndexDO nextIndex = indexMap.get(i + 1);
+                index.setEnd(nextIndex.getStart() - 1);
+                indexList.add(index);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (raf != null) {
+                try {
+                    raf.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return indexList;
+    }
+
     public List<ScanIndexDO> index(File file, String experimentId) {
         RandomAccessFile raf = null;
         List<ScanIndexDO> list = null;
         try {
             raf = new RandomAccessFile(file, "r");
-            list = index(file);
+            list = indexForSwath(file);
+            int count = 0;
             for (ScanIndexDO scanIndex : list) {
                 parseAttribute(raf, scanIndex);
                 scanIndex.setExperimentId(experimentId);
+                count++;
+                if (count % 1000 == 0) {
+                    logger.info("已扫描索引:" + count + "/" + list.size() + "条");
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -270,5 +332,7 @@ public class LmsIndexer {
                 break;
             }
         }
+
+
     }
 }

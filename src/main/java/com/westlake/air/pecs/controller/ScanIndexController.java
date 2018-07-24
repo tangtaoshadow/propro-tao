@@ -43,6 +43,7 @@ public class ScanIndexController extends BaseController {
                 @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
         long startTime = System.currentTimeMillis();
 
+        pageSize = 150;
         model.addAttribute("experimentId", experimentId);
         model.addAttribute("numStart", numStart);
         model.addAttribute("numEnd", numEnd);
