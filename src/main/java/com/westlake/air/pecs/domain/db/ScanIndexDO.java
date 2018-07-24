@@ -5,6 +5,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.awt.datatransfer.FlavorListener;
+
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-07-05 16:36
@@ -20,12 +22,14 @@ public class ScanIndexDO {
     Integer msLevel;
 
     @Indexed
-    Double rt;
+    Float rt;
 
     String experimentId;
 
+    //在源文件中的起始位置
     Long start;
 
+    //在源文件中的结束位置
     Long end;
 
     Integer num;
@@ -33,6 +37,18 @@ public class ScanIndexDO {
     String rtStr;
 
     Integer parentNum;
+
+    //前体的荷质比
+    Float precursorMz;
+
+    //前体的荷质比窗口开始位置
+    Float precursorMzStart;
+
+    //前体的荷质比窗口结束位置
+    Float precursorMzEnd;
+
+    //前体的荷质比窗口
+    Float windowWideness;
 
     public ScanIndexDO() {}
 
@@ -50,7 +66,7 @@ public class ScanIndexDO {
     public void setRtStr(String rtStr) {
         this.rtStr = rtStr;
         if (rtStr.startsWith("PT") && rtStr.endsWith("S")) {
-            this.rt = Double.parseDouble(rtStr.substring(2, rtStr.length() - 1));
+            this.rt = Float.parseFloat(rtStr.substring(2, rtStr.length() - 1));
         }
     }
 }

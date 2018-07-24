@@ -144,7 +144,7 @@ public class ExperimentController extends BaseController {
             ResultDO resultDO = scanIndexService.insertAll(indexList, true);
             logger.info("索引存储完毕");
 
-
+//            ResultDO resultDO = new ResultDO();
             if (resultDO.isFailured()) {
                 logger.info("索引存储失败" + result.getMsgInfo());
                 experimentService.delete(experimentDO.getId());

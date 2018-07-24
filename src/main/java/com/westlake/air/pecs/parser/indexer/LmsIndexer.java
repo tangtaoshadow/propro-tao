@@ -1,9 +1,13 @@
 package com.westlake.air.pecs.parser.indexer;
 
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
+import com.westlake.air.pecs.parser.model.mzxml.*;
+import com.westlake.air.pecs.parser.xml.AirXStream;
+import com.westlake.air.pecs.parser.xml.PrecursorMzConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -179,6 +183,7 @@ public class LmsIndexer {
             //记录总共的scan条数
             int totalCount = indexMap.size();
             byte[] lastRead;
+            ScanIndexDO currentMS1 = null;
             //对所有的记录开始做for循环,先解析第一个MS1
             for (int i = 1; i <= totalCount; i++) {
                 //如果已经是最后一个元素了
@@ -217,11 +222,24 @@ public class LmsIndexer {
             raf = new RandomAccessFile(file, "r");
             list = indexForSwath(file);
             int count = 0;
+
+            ScanIndexDO currentMS1 = null;
             for (ScanIndexDO scanIndex : list) {
                 parseAttribute(raf, scanIndex);
                 scanIndex.setExperimentId(experimentId);
+
+                if(scanIndex.getMsLevel() == 1){
+                    currentMS1 = scanIndex;
+                }else{
+                    if(currentMS1 == null){
+                        continue;
+                    }else{
+                        scanIndex.setParentNum(currentMS1.getNum());
+                    }
+                }
+
                 count++;
-                if (count % 1000 == 0) {
+                if (count % 10000 == 0) {
                     logger.info("已扫描索引:" + count + "/" + list.size() + "条");
                 }
             }
@@ -240,7 +258,7 @@ public class LmsIndexer {
         return list;
     }
 
-    public Long parseIndexOffset(RandomAccessFile rf) throws IOException {
+    private Long parseIndexOffset(RandomAccessFile rf) throws IOException {
         long position = rf.length() - 1;
         rf.seek(position);
         byte words[] = new byte[1];
@@ -260,7 +278,7 @@ public class LmsIndexer {
         return 0L;
     }
 
-    public HashMap<Integer, ScanIndexDO> parseScanStartPosition(Long indexOffset, RandomAccessFile rf) throws IOException {
+    private HashMap<Integer, ScanIndexDO> parseScanStartPosition(Long indexOffset, RandomAccessFile rf) throws IOException {
         HashMap<Integer, ScanIndexDO> indexMap = new HashMap<>();
         rf.seek(indexOffset);
         int indexSize = (int) (rf.length() - 1 - indexOffset);
@@ -281,7 +299,7 @@ public class LmsIndexer {
         return indexMap;
     }
 
-    Long searchForLength(byte[] strToFind, int findTime, int findStr) {
+    private Long searchForLength(byte[] strToFind, int findTime, int findStr) {
         int count = 0;
         //因为">"的byte编码时62,所以要搜索倒数第二个62所处的位置
         for (int j = strToFind.length - 1; j >= 0; j--) {
@@ -306,16 +324,39 @@ public class LmsIndexer {
     //解析Scan标签的Attributes
     private void parseAttribute(RandomAccessFile raf, ScanIndexDO scanIndexDO) throws IOException {
 
+        //仅关注两个attribute msLevel和retentionTime.因此如果扫描到这两个属性以后就可以跳出循环以节省时间开销
         int focusAttributeCount = 2;
         byte[] readBytes = read(raf, scanIndexDO.getStart() + 1, 500);
 
         String read = new String(readBytes);
-        read = read.substring(0, read.indexOf(">"));
+        String precursorMz;
+        if(read.contains("precursorMz")){
+            precursorMz = read.substring(read.indexOf("<precursorMz"),read.indexOf("</precursorMz>")+14);
+            scanIndexDO.setPrecursorMz(Float.parseFloat(precursorMz.substring(precursorMz.indexOf(">")+1,precursorMz.indexOf("</"))));
+            String attributeForPrecursorMz = precursorMz.substring(0, precursorMz.indexOf(">"));
+            String[] tmp = null;
+            if(attributeForPrecursorMz.contains("\n")){
+                tmp = attributeForPrecursorMz.split("\n");
+            }else{
+                tmp = attributeForPrecursorMz.split(" ");
+            }
+            for (String tmpStr : tmp) {
+                tmpStr = tmpStr.trim();
+                if (tmpStr.startsWith("windowWideness")) {
+                    scanIndexDO.setWindowWideness(Float.parseFloat(tmpStr.split("=")[1].replace("\"", "")));
+                    break;
+                }
+            }
+            scanIndexDO.setPrecursorMzStart(scanIndexDO.getPrecursorMz() - scanIndexDO.getWindowWideness()/2);
+            scanIndexDO.setPrecursorMzEnd(scanIndexDO.getPrecursorMz() + scanIndexDO.getWindowWideness()/2);
+        }
+
+        String scan = read.substring(0, read.indexOf(">"));
         String[] tmp = null;
-        if (read.contains("\n")) {
-            tmp = read.split("\n");
+        if (scan.contains("\n")) {
+            tmp = scan.split("\n");
         } else {//说明属性在一行里面
-            tmp = read.split(" ");
+            tmp = scan.split(" ");
         }
 
         for (String tmpStr : tmp) {
@@ -332,7 +373,6 @@ public class LmsIndexer {
                 break;
             }
         }
-
 
     }
 }

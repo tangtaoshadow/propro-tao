@@ -6,6 +6,7 @@ import com.westlake.air.pecs.domain.bean.SimpleScanIndex;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.parser.model.mzxml.*;
 import com.westlake.air.pecs.parser.xml.AirXStream;
+import com.westlake.air.pecs.parser.xml.PeaksConverter;
 import com.westlake.air.pecs.parser.xml.PrecursorMzConverter;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;

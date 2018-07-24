@@ -14,4 +14,13 @@ public class SimpleScanIndex {
     Long start;
 
     Long end;
+
+    public SimpleScanIndex(){
+
+    }
+
+    public SimpleScanIndex(Long start,Long end){
+        this.start = start;
+        this.end = end;
+    }
 }

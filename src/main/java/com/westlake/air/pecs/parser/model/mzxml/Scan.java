@@ -41,8 +41,9 @@ public class Scan {
     @XStreamAsAttribute
     Long num;
 
+    //标准格式为long类型,没必要,这里使用Integer
     @XStreamAsAttribute
-    Long msLevel;
+    Integer msLevel;
 
     @XStreamAsAttribute
     Long peaksCount;
