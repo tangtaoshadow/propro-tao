@@ -69,7 +69,6 @@ public class AnalyseController extends BaseController {
 
         analyseOverviewService.delete(id);
         analyseDataService.deleteAllByOverviewId(id);
-
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_LIBRARY_SUCCESS);
         return "redirect:/analyse/overview/list";
     }
