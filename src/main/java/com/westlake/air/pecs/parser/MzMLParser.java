@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * Time: 2018-07-25 20-14
  */
 
-@Component("MzMLParser")
+@Component
 public class MzMLParser {
 
     public final Logger logger = LoggerFactory.getLogger(MzMLParser.class);
