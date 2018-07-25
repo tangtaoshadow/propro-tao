@@ -9,8 +9,8 @@ import lombok.Data;
 @Data
 public class MzIntensityPairs{
 
-    Double[] mzArray;
+    Float[] mzArray;
 
-    Double[] intensityArray;
+    Float[] intensityArray;
 
 }

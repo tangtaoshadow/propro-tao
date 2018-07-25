@@ -2,6 +2,7 @@ package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.LibraryCoordinate;
+import com.westlake.air.pecs.domain.bean.TargetTransition;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
 
@@ -35,5 +36,9 @@ public interface TransitionService {
 
     Long countByPeptideSequence(String libraryId);
 
-    LibraryCoordinate buildMS(String libraryId, double rt_extraction_windows);
+    LibraryCoordinate buildMS(String libraryId, float rtExtractionWindows);
+
+    List<TargetTransition> buildMS1(String libraryId, float rtExtractionWindows);
+
+    List<TargetTransition> buildMS2(String libraryId, float rtExtractionWindows);
 }

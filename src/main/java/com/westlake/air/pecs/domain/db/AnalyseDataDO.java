@@ -23,11 +23,11 @@ public class AnalyseDataDO {
 
     Integer msLevel;
 
-    Double mz;
+    Float mz;
 
     //排序后的rt
-    Double[] rtArray;
+    Float[] rtArray;
 
     //一一映射rt的intensity数据
-    Double[] intensityArray;
+    Float[] intensityArray;
 }

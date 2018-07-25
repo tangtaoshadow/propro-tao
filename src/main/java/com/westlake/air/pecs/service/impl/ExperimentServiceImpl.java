@@ -175,7 +175,7 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @throws IOException
      */
     @Override
-    public ResultDO extract(String expId, double rtExtractWindow, double mzExtractWindow, int buildType) {
+    public ResultDO extract(String expId, float rtExtractWindow, float mzExtractWindow, int buildType) {
 
         ResultDO resultDO = new ResultDO(true);
         //基本条件检查
@@ -199,18 +199,16 @@ public class ExperimentServiceImpl implements ExperimentService {
             raf = new RandomAccessFile(file, "r");
 
             //构建卷积坐标(耗时操作)
-            logger.info("构建卷积坐标(耗时操作)");
-            long start = System.currentTimeMillis();
-            LibraryCoordinate lc = transitionService.buildMS(experimentDO.getLibraryId(), rtExtractWindow);
-            logger.info("构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
-
             if (buildType == 0) {
+                LibraryCoordinate lc = transitionService.buildMS(experimentDO.getLibraryId(), rtExtractWindow);
                 extractMS1(raf, expId, overviewDO.getId(), lc.getMs1List(), rtExtractWindow, mzExtractWindow);
                 extractMS2(raf, expId, overviewDO.getId(), lc.getMs2List(), rtExtractWindow, mzExtractWindow);
             } else if (buildType == 1) {
-                extractMS1(raf, expId, overviewDO.getId(), lc.getMs1List(), rtExtractWindow, mzExtractWindow);
+                List<TargetTransition> targetTransitions = transitionService.buildMS1(experimentDO.getLibraryId(), rtExtractWindow);
+                extractMS1(raf, expId, overviewDO.getId(), targetTransitions, rtExtractWindow, mzExtractWindow);
             } else if (buildType == 2) {
-                extractMS2(raf, expId, overviewDO.getId(), lc.getMs2List(), rtExtractWindow, mzExtractWindow);
+                List<TargetTransition> targetTransitions = transitionService.buildMS2(experimentDO.getLibraryId(), rtExtractWindow);
+                extractMS2(raf, expId, overviewDO.getId(), targetTransitions, rtExtractWindow, mzExtractWindow);
             }
 
         } catch (Exception e) {
@@ -229,8 +227,10 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     /**
      * 解压缩MS1数据的话会把所有的索引全部读入到内存中进行卷积
-     * 全光谱读取
-     *
+     * PECS在进行MS1谱图解析时的几个特点:
+     * 1.全光谱读取
+     * 2.由于是全光谱解析,因此解析过后的RTArray都是一样的,因此只存储一份从而减少内存的开销
+     * 3.
      * @param raf
      * @param expId
      * @param coordinates
@@ -240,15 +240,12 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @throws IOException
      */
     @Override
-    public void extractMS1(RandomAccessFile raf, String expId, String overviewId, List<TargetTransition> coordinates, double rtExtractWindow, double mzExtractWindow) throws IOException {
+    public void extractMS1(RandomAccessFile raf, String expId, String overviewId, List<TargetTransition> coordinates, float rtExtractWindow, float mzExtractWindow) throws IOException {
 
         //用于存储最终的卷积结果
-//        Table<Double, Double[], Double[]> ms1Table = HashBasedTable.create();
-//        HashMap<Double, Double[]> ms1Map = new HashMap<>();
         List<AnalyseDataDO> dataList = new ArrayList<>();
-//        HashMap<Double, TreeMap<Double, Double>> ms1Map = new HashMap<>();
         //用于存储从XML中解压缩出来的数据
-        TreeMap<Double, MzIntensityPairs> rtMap = new TreeMap<>();
+        TreeMap<Float, MzIntensityPairs> rtMap = new TreeMap<>();
 
         ScanIndexQuery query = new ScanIndexQuery();
         query.setExperimentId(expId);
@@ -271,8 +268,8 @@ public class ExperimentServiceImpl implements ExperimentService {
         List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
 
         //如果MS1存在,则进行MS1的光谱扫描
-        double mzStart = 0;
-        double mzEnd = -1;
+        float mzStart = 0;
+        float mzEnd = -1;
 
         long start = System.currentTimeMillis();
         long start2 = System.currentTimeMillis();
@@ -282,7 +279,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             rtMap.put(index.getRt(), mzXmlParser.parseOne(raf, index));
             k++;
             if (k % 100 == 0) {
-                logger.info("解析一百个光谱耗时:" + (System.currentTimeMillis() - start2));
+                logger.info("解析100个光谱耗时:" + (System.currentTimeMillis() - start2));
                 start2 = System.currentTimeMillis();
             }
         }
@@ -292,20 +289,18 @@ public class ExperimentServiceImpl implements ExperimentService {
         for (TargetTransition ms1 : coordinates) {
 
             //设置mz卷积窗口
-            mzStart = ms1.getPrecursorMz() - mzExtractWindow / 2.0;
-            mzEnd = ms1.getPrecursorMz() + mzExtractWindow / 2.0;
+            mzStart = ms1.getPrecursorMz() - mzExtractWindow / 2;
+            mzEnd = ms1.getPrecursorMz() + mzExtractWindow / 2;
 
-//            TreeMap<Double, Double> mzResultMap = new TreeMap<>();
-
-            Double[] rtArray = new Double[rtMap.size()];
+            Float[] rtArray = new Float[rtMap.size()];
             rtMap.keySet().toArray(rtArray);
-            Double[] intensityArray = new Double[rtMap.size()];
+            Float[] intensityArray = new Float[rtMap.size()];
 
             int i = 0;
-            for (Double rt : rtMap.keySet()) {
+            for (Float rt : rtMap.keySet()) {
                 MzIntensityPairs pairs = rtMap.get(rt);
-                Double[] pairMzArray = pairs.getMzArray();
-                Double[] pairIntensityArray = pairs.getIntensityArray();
+                Float[] pairMzArray = pairs.getMzArray();
+                Float[] pairIntensityArray = pairs.getIntensityArray();
                 intensityArray[i] = evolution(pairMzArray, pairIntensityArray, mzStart, mzEnd);
                 i++;
             }
@@ -332,7 +327,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     @Override
-    public void extractMS2(RandomAccessFile raf, String expId, String overviewId, List<TargetTransition> coordinates, double rtExtractWindow, double mzExtractWindow) {
+    public void extractMS2(RandomAccessFile raf, String expId, String overviewId, List<TargetTransition> coordinates, float rtExtractWindow, float mzExtractWindow) {
 
 //        query.setMsLevel(2);
 //        Long ms2Count = scanIndexService.count(query);
@@ -410,8 +405,8 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @param mzEnd
      * @return
      */
-    public static Double evolution(Double[] mzArray, Double[] intensityArray, Double mzStart, Double mzEnd) {
-        Double result = 0d;
+    public static Float evolution(Float[] mzArray, Float[] intensityArray, Float mzStart, Float mzEnd) {
+        Float result = 0f;
         int start = findIndex(mzArray, mzStart);
         int end = findIndex(mzArray, mzEnd) - 1;
         for (int index = start; index <= end; index++) {
@@ -421,7 +416,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     // 找到从小到大排序的第一个大于目标值的索引
-    public static int findIndex(Double[] array, Double target) {
+    public static int findIndex(Float[] array, Float target) {
         int pStart = 0, pEnd = array.length - 1;
         while (pStart <= pEnd) {
             int tmp = (pStart + pEnd) / 2;

@@ -48,7 +48,7 @@ public class SpectrumController {
         model.addAttribute("isCompression", isCompression);
 
         if (values != null && !values.isEmpty()) {
-            Map<Double, Double> peakMap = mzXmlParser.getPeakMap(values.trim(), precision, isCompression);
+            Map<Float, Float> peakMap = mzXmlParser.getPeakMap(values.trim(), precision, isCompression);
             model.addAttribute("peakMap", peakMap);
         }
 
@@ -68,7 +68,7 @@ public class SpectrumController {
         model.addAttribute("intensityPrecision", intensityPrecision);
 
         if (mz != null && !mz.isEmpty() && intensity != null && !intensity.isEmpty()) {
-            Map<Double, Double> peakMap = mzXmlParser.getPeakMap(mz.trim(), intensity.trim(), mzPrecision, intensityPrecision, isCompression);
+            Map<Float, Float> peakMap = mzXmlParser.getPeakMap(mz.trim(), intensity.trim(), mzPrecision, intensityPrecision, isCompression);
             model.addAttribute("peakMap", peakMap);
         }
 
@@ -109,8 +109,8 @@ public class SpectrumController {
             return ResultDO.buildError(ResultCode.DATA_IS_EMPTY);
         }
 
-        Double[] pairMzArray = pairs.getMzArray();
-        Double[] pairIntensityArray = pairs.getIntensityArray();
+        Float[] pairMzArray = pairs.getMzArray();
+        Float[] pairIntensityArray = pairs.getIntensityArray();
         for (int n = 0; n < pairMzArray.length; n++) {
             mzArray.add(pairMzArray[n]);
             intensityArray.add(pairIntensityArray[n]);

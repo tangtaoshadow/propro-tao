@@ -13,19 +13,19 @@ public class TargetTransition {
     String id;
 
     //对应的MS1荷质比
-    double precursorMz;
+    float precursorMz;
 
     //对应的MS2荷质比
-    double productMz;
+    float productMz;
 
     //对应的肽段全名(包含unimod)
     String fullName;
 
-    double rt;
+    float rt;
 
-    double rtStart;
+    float rtStart;
 
-    double rtEnd;
+    float rtEnd;
 
     @Override
     public boolean equals(Object obj) {

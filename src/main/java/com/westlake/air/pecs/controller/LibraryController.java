@@ -220,7 +220,7 @@ public class LibraryController extends BaseController {
     @RequestMapping(value = "/buildCoordinate")
     String buildCoordinate(Model model,
                     @RequestParam(value = "id", required = true) String id,
-                    @RequestParam(value = "rtExtractionWindow", required = true,defaultValue = "1.0") double rtExtractionWindow,
+                    @RequestParam(value = "rtExtractionWindow", required = true,defaultValue = "1.0") float rtExtractionWindow,
                     RedirectAttributes redirectAttributes) {
         redirectAttributes.addFlashAttribute("rtExtractionWindow",rtExtractionWindow);
         LibraryCoordinate lc = transitionService.buildMS(id, rtExtractionWindow);

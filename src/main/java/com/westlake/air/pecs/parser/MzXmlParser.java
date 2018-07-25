@@ -107,20 +107,19 @@ public class MzXmlParser {
 
     public MzIntensityPairs getPeakMap(byte[] value, int precision, boolean isCompression) {
 
-        double[] values = getValues(value, precision, isCompression);
+        float[] values = getValues(value, precision, isCompression);
 
-        TreeMap<Double,Double> map = new TreeMap<>();
+        TreeMap<Float, Float> map = new TreeMap<>();
         for (int peakIndex = 0; peakIndex < values.length - 1; peakIndex += 2) {
-            // get the two value
-            Double mz = values[peakIndex];
-            Double intensity = values[peakIndex + 1];
-            map.put(mz,intensity);
+            Float mz = values[peakIndex];
+            Float intensity = values[peakIndex + 1];
+            map.put(mz, intensity);
         }
 
-        Double[] mzArray = new Double[map.size()];
-        Double[] intensityArray = new Double[map.size()];
+        Float[] mzArray = new Float[map.size()];
+        Float[] intensityArray = new Float[map.size()];
         int i = 0;
-        for(Double key : map.keySet()){
+        for (Float key : map.keySet()) {
             mzArray[i] = key;
             intensityArray[i] = map.get(key);
             i++;
@@ -133,16 +132,15 @@ public class MzXmlParser {
         return pairs;
     }
 
-    public TreeMap<Double, Double> getPeakMap(String value, int precision, boolean isCompression) {
+    public TreeMap<Float, Float> getPeakMap(String value, int precision, boolean isCompression) {
 
-        double[] values = getValues(value, precision, isCompression);
+        float[] values = getValues(value, precision, isCompression);
 
-        TreeMap<Double, Double> peakMap = new TreeMap<>();
+        TreeMap<Float, Float> peakMap = new TreeMap<>();
 
         for (int peakIndex = 0; peakIndex < values.length - 1; peakIndex += 2) {
-            // get the two value
-            Double mz = values[peakIndex];
-            Double intensity = values[peakIndex + 1];
+            Float mz = values[peakIndex];
+            Float intensity = values[peakIndex + 1];
 
             peakMap.put(mz, intensity);
         }
@@ -150,15 +148,15 @@ public class MzXmlParser {
         return peakMap;
     }
 
-    public TreeMap<Double, Double> getPeakMap(String mz, String intensity, int mzPrecision, int intensityPrecision, boolean isCompression) {
+    public TreeMap<Float, Float> getPeakMap(String mz, String intensity, int mzPrecision, int intensityPrecision, boolean isCompression) {
 
-        double[] mzValues = getValues(mz, mzPrecision, isCompression);
-        double[] intensityValues = getValues(intensity, intensityPrecision, false);
+        float[] mzValues = getValues(mz, mzPrecision, isCompression);
+        float[] intensityValues = getValues(intensity, intensityPrecision, false);
 
         if (mzValues == null || intensityValues == null || mzValues.length != intensityValues.length) {
             return null;
         }
-        TreeMap<Double, Double> peakMap = new TreeMap<>();
+        TreeMap<Float, Float> peakMap = new TreeMap<>();
         for (int peakIndex = 0; peakIndex < mzValues.length; peakIndex++) {
             peakMap.put(mzValues[peakIndex], intensityValues[peakIndex]);
         }
@@ -167,9 +165,9 @@ public class MzXmlParser {
 
     }
 
-    private double[] getValues(byte[] value, int precision, boolean isCompression) {
-        double[] values;
-
+    private float[] getValues(byte[] value, int precision, boolean isCompression) {
+        double[] doubleValues;
+        float[] floatValues;
         ByteBuffer byteBuffer = ByteBuffer.wrap(value);
 
         if (isCompression) {
@@ -189,22 +187,26 @@ public class MzXmlParser {
         byteBuffer.order(ByteOrder.BIG_ENDIAN);
 
         if (precision == PRECISION_64) {
-            values = new double[byteBuffer.asDoubleBuffer().capacity()];
-            byteBuffer.asDoubleBuffer().get(values);
+            doubleValues = new double[byteBuffer.asDoubleBuffer().capacity()];
+            byteBuffer.asDoubleBuffer().get(doubleValues);
+            floatValues = new float[doubleValues.length];
+            for (int index = 0; index < doubleValues.length; index++) {
+                floatValues[index] = (float) doubleValues[index];
+            }
         } else {
             FloatBuffer floats = byteBuffer.asFloatBuffer();
-            values = new double[floats.capacity()];
+            floatValues = new float[floats.capacity()];
 
             for (int index = 0; index < floats.capacity(); index++) {
-                values[index] = (double) floats.get(index);
+                floatValues[index] = floats.get(index);
             }
         }
 
         byteBuffer.clear();
-        return values;
+        return floatValues;
     }
 
-    private double[] getValues(String value, int precision, boolean isCompression) {
+    private float[] getValues(String value, int precision, boolean isCompression) {
         return getValues(new Base64().decode(value), precision, isCompression);
     }
 }

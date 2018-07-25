@@ -13,7 +13,7 @@ public class LibraryCoordinate {
 
     String libraryId;
 
-    Double rtExtractionWindow;
+    Float rtExtractionWindow;
 
     List<TargetTransition> ms1List;
 

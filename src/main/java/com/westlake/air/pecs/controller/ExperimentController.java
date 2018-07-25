@@ -144,7 +144,6 @@ public class ExperimentController extends BaseController {
             ResultDO resultDO = scanIndexService.insertAll(indexList, true);
             logger.info("索引存储完毕");
 
-//            ResultDO resultDO = new ResultDO();
             if (resultDO.isFailured()) {
                 logger.info("索引存储失败" + result.getMsgInfo());
                 experimentService.delete(experimentDO.getId());
@@ -241,14 +240,14 @@ public class ExperimentController extends BaseController {
     String extract(Model model,
                    @RequestParam(value = "id", required = true) String id,
                    @RequestParam(value = "buildType", required = true) int buildType,
-                   @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "1.0") Double rtExtractWindow,
-                   @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Double mzExtractWindow,
+                   @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "1.0") Float rtExtractWindow,
+                   @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
                    RedirectAttributes redirectAttributes) {
         if (rtExtractWindow == null) {
-            rtExtractWindow = 1.0;
+            rtExtractWindow = 1.0f;
         }
         if (mzExtractWindow == null) {
-            mzExtractWindow = 0.05;
+            mzExtractWindow = 0.05f;
         }
         redirectAttributes.addFlashAttribute("rtExtractWindow", rtExtractWindow);
         redirectAttributes.addFlashAttribute("mzExtractWindow", mzExtractWindow);

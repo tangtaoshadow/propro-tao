@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class SimpleScanIndex {
 
-    Double rt;
+    Float rt;
 
     Long start;
 

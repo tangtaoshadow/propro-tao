@@ -142,29 +142,60 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
-    public LibraryCoordinate buildMS(String libraryId, double rtExtractionWindows) {
-        HashMap<Integer, List<TargetTransition>> hashMap = new HashMap<>();
+    public LibraryCoordinate buildMS(String libraryId, float rtExtractionWindows) {
+        logger.info("构建卷积MS1&MS2坐标(耗时操作)");
+        long start = System.currentTimeMillis();
         List<TargetTransition> targetList = transitionDAO.getTargetTransitionsByLibraryId(libraryId);
-        Ordering<TargetTransition> ordering = Ordering.from(new Comparator<TargetTransition>() {
-            @Override
-            public int compare(TargetTransition o1, TargetTransition o2) {
-                if (o1.getProductMz() > o2.getProductMz()) {
-                    return 1;
-                } else if (o1.getProductMz() == o2.getProductMz()) {
-                    return 0;
-                } else {
-                    return -1;
-                }
-            }
-        });
-        for (TargetTransition targetTransition : targetList) {
-            targetTransition.setRtStart(targetTransition.getRt() - rtExtractionWindows / 2.0);
-            targetTransition.setRtEnd(targetTransition.getRt() + rtExtractionWindows / 2.0);
-        }
-        List<TargetTransition> ms2List = ordering.sortedCopy(targetList);
 
-        HashSet<TargetTransition> targetSet = new HashSet<>();
-        targetSet.addAll(targetList);
+        for (TargetTransition targetTransition : targetList) {
+            targetTransition.setRtStart(targetTransition.getRt() - rtExtractionWindows / 2.0f);
+            targetTransition.setRtEnd(targetTransition.getRt() + rtExtractionWindows / 2.0f);
+        }
+        LibraryCoordinate lc = new LibraryCoordinate();
+        lc.setLibraryId(libraryId);
+        lc.setRtExtractionWindow(rtExtractionWindows);
+        lc.setMs2List(buildMS2(targetList));
+        lc.setMs1List(buildMS1(targetList));
+        logger.info("构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
+        return lc;
+    }
+
+    @Override
+    public List<TargetTransition> buildMS1(String libraryId, float rtExtractionWindows) {
+        logger.info("构建卷积MS1坐标(耗时操作)");
+        long start = System.currentTimeMillis();
+        List<TargetTransition> targetList = transitionDAO.getTargetTransitionsByLibraryId(libraryId);
+        logger.info("读取数据库耗时:" + (System.currentTimeMillis() - start));
+
+        for (TargetTransition targetTransition : targetList) {
+            targetTransition.setRtStart(targetTransition.getRt() - rtExtractionWindows / 2.0f);
+            targetTransition.setRtEnd(targetTransition.getRt() + rtExtractionWindows / 2.0f);
+        }
+        List<TargetTransition> list = buildMS1(targetList);
+        logger.info("构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
+        return list;
+    }
+
+    @Override
+    public List<TargetTransition> buildMS2(String libraryId, float rtExtractionWindows) {
+        logger.info("构建卷积MS1坐标(耗时操作)");
+        long start = System.currentTimeMillis();
+        List<TargetTransition> targetList = transitionDAO.getTargetTransitionsByLibraryId(libraryId);
+        logger.info("读取数据库耗时:" + (System.currentTimeMillis() - start));
+
+        for (TargetTransition targetTransition : targetList) {
+            targetTransition.setRtStart(targetTransition.getRt() - rtExtractionWindows / 2.0f);
+            targetTransition.setRtEnd(targetTransition.getRt() + rtExtractionWindows / 2.0f);
+        }
+        List<TargetTransition> list = buildMS2(targetList);
+        logger.info("构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
+        return list;
+    }
+
+
+    private List<TargetTransition> buildMS1(List<TargetTransition> targetList) {
+        //存储set中从而过滤出MS1
+        HashSet<TargetTransition> targetSet = new HashSet<>(targetList);
         Ordering<TargetTransition> ordering2 = Ordering.from(new Comparator<TargetTransition>() {
             @Override
             public int compare(TargetTransition o1, TargetTransition o2) {
@@ -178,14 +209,24 @@ public class TransitionServiceImpl implements TransitionService {
             }
         });
 
-        List<TargetTransition> ms1List = ordering2.sortedCopy(targetSet);
+        return ordering2.sortedCopy(targetSet);
+    }
 
-        LibraryCoordinate lc = new LibraryCoordinate();
-        lc.setLibraryId(libraryId);
-        lc.setRtExtractionWindow(rtExtractionWindows);
-        lc.setMs1List(ms1List);
-        lc.setMs2List(ms2List);
-        return lc;
+    private List<TargetTransition> buildMS2(List<TargetTransition> targetList) {
+        Ordering<TargetTransition> ordering = Ordering.from(new Comparator<TargetTransition>() {
+            @Override
+            public int compare(TargetTransition o1, TargetTransition o2) {
+                if (o1.getProductMz() > o2.getProductMz()) {
+                    return 1;
+                } else if (o1.getProductMz() == o2.getProductMz()) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+            }
+        });
+
+        return ordering.sortedCopy(targetList);
     }
 
 
