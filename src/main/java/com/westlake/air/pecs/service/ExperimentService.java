@@ -30,7 +30,7 @@ public interface ExperimentService {
 
     ResultDO<ExperimentDO> getByName(String name);
 
-    ResultDO extract(String expId, float rtExtractWindow, float mzExtractWindow, int buildType) throws IOException;
+    ResultDO extract(String expId, String creator, float rtExtractWindow, float mzExtractWindow, int buildType) throws IOException;
 
     void extractMS1(RandomAccessFile raf, String expId, String overviewId, List<TargetTransition> coordinates, float rtExtractWindow, float mzExtractWindow) throws IOException;
 

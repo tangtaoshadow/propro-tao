@@ -175,7 +175,7 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @throws IOException
      */
     @Override
-    public ResultDO extract(String expId, float rtExtractWindow, float mzExtractWindow, int buildType) {
+    public ResultDO extract(String expId, String creator, float rtExtractWindow, float mzExtractWindow, int buildType) {
 
         ResultDO resultDO = new ResultDO(true);
         //基本条件检查
@@ -193,6 +193,8 @@ public class ExperimentServiceImpl implements ExperimentService {
         AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
         overviewDO.setExpId(expId);
         overviewDO.setLibraryId(experimentDO.getLibraryId());
+        overviewDO.setLibraryId(experimentDO.getLibraryName());
+        overviewDO.setCreator(creator);
         analyseOverviewService.insert(overviewDO);
 
         try {

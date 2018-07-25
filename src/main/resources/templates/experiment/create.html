@@ -40,7 +40,7 @@
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="name"
-                                       placeholder="Enter Experiment Name" name="name" th:value="${experiment?.name}">
+                                       placeholder="Enter Experiment Name" name="name" th:value="${name}">
                                 <span class="m-form__help">实验数据名称全局唯一</span>
                             </div>
                         </div>
@@ -51,7 +51,7 @@
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="fileLocation"
-                                       placeholder="Enter File Location,such as D:/data/xxx.mzXML" name="fileLocation" th:value="${experiment?.fileLocation}">
+                                       placeholder="Enter File Location,such as D:/data/xxx.mzXML" name="fileLocation" th:value="${fileLocation}">
                                 <span class="m-form__help">文件在服务器上的绝对路径</span>
                             </div>
                         </div>
@@ -62,8 +62,7 @@
                             </label>
                             <div class="col-10">
                                 <select class="form-control m-input" id="libraryId" name="libraryId">
-                                    <option th:each="library:${libraries}" th:value="${library.id}"
-                                            th:text="${library.name}"></option>
+                                    <option th:each="library:${libraries}" th:value="${library.id}" th:text="${library.name}"></option>
                                 </select>
                                 <span class="m-form__help">关联标准库一旦设定无法修改</span>
                             </div>
@@ -75,7 +74,7 @@
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="preRTWindow"
-                                       placeholder="" name="preRTWindow" th:value="${experiment?.preRTWindow}">
+                                       placeholder="" name="preRTWindow" th:value="${preRTWindow}">
                                 <span class="m-form__help">预设RT卷积窗口</span>
                             </div>
                         </div>
@@ -86,7 +85,7 @@
                             </label>
                             <div class="col-10">
                             <textarea class="form-control m-input" id="description" name="description"
-                                      rows="3" th:value="${experiment?.experiment}"></textarea>
+                                      rows="3" th:value="${description}"></textarea>
                             </div>
                         </div>
                     </div>

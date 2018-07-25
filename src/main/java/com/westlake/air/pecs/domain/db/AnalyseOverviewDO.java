@@ -21,6 +21,8 @@ public class AnalyseOverviewDO {
 
     String libraryId;
 
+    String libraryName;
+
     Double rtExtractWindowForMS1;
 
     Double rtExtractWindowForMS2;
@@ -28,6 +30,8 @@ public class AnalyseOverviewDO {
     Double mzExtractWindowForMS1;
 
     Double mzExtractWindowForMS2;
+
+    String creator;
 
     Date createDate;
 }

@@ -69,7 +69,26 @@
                                 关联标准库ID
                             </label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="libraryId" readonly th:value="|${overview?.libraryId}|">
+                                <input type="text" class="form-control m-input" id="libraryId" readonly
+                                       th:value="|${overview?.libraryId}|">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="libraryName" class="col-2 col-form-label">
+                                关联标准库名称
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="libraryName" readonly
+                                       th:value="|${overview?.libraryName}|">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="creator" class="col-2 col-form-label">
+                                创建人
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="creator" readonly
+                                       th:value="|${overview?.creator}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -77,7 +96,8 @@
                                 MS1-RT卷积窗口
                             </label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="rtExtractWindowForMS1" readonly th:value="${overview?.rtExtractWindowForMS1}">
+                                <input type="text" class="form-control m-input" id="rtExtractWindowForMS1" readonly
+                                       th:value="${overview?.rtExtractWindowForMS1}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -85,7 +105,8 @@
                                 MS1-MZ卷积窗口
                             </label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="mzExtractWindowForMS1" readonly th:value="${overview?.mzExtractWindowForMS1}">
+                                <input type="text" class="form-control m-input" id="mzExtractWindowForMS1" readonly
+                                       th:value="${overview?.mzExtractWindowForMS1}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -93,7 +114,8 @@
                                 MS1-RT卷积窗口
                             </label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="rtExtractWindowForMS2" readonly th:value="${overview?.rtExtractWindowForMS2}">
+                                <input type="text" class="form-control m-input" id="rtExtractWindowForMS2" readonly
+                                       th:value="${overview?.rtExtractWindowForMS2}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -101,7 +123,8 @@
                                 MS2-MZ卷积窗口
                             </label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="mzExtractWindowForMS2" readonly th:value="${overview?.mzExtractWindowForMS2}">
+                                <input type="text" class="form-control m-input" id="mzExtractWindowForMS2" readonly
+                                       th:value="${overview?.mzExtractWindowForMS2}">
                             </div>
                         </div>
 
@@ -111,7 +134,8 @@
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="createDate" name="createDate"
-                                       readonly th:value="${#dates.format(overview?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
+                                       readonly
+                                       th:value="${#dates.format(overview?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
                             </div>
                         </div>
                     </div>

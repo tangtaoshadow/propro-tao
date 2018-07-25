@@ -91,25 +91,19 @@ public class ExperimentController extends BaseController {
 
         model.addAttribute("libraries", getLibraryList());
 
-        if (name != null && !name.isEmpty()) {
-            model.addAttribute("name", name);
-        }
-        if (description != null && !description.isEmpty()) {
-            model.addAttribute("description", description);
-        }
-        if (libraryId != null && !libraryId.isEmpty()) {
-            model.addAttribute("libraryId", libraryId);
-        }
+        model.addAttribute("name", name);
+        model.addAttribute("description", description);
+        model.addAttribute("libraryId", libraryId);
 
         if (fileLocation == null || fileLocation.isEmpty()) {
-            model.addAttribute(ERROR_MSG, ResultCode.FILE_LOCATION_CANNOT_BE_EMPTY);
+            model.addAttribute(ERROR_MSG, ResultCode.FILE_LOCATION_CANNOT_BE_EMPTY.getMessage());
             return "experiment/create";
         }
-
+        model.addAttribute("fileLocation", fileLocation);
         File file = new File(fileLocation);
 
         if (!file.exists()) {
-            model.addAttribute(ERROR_MSG, ResultCode.FILE_NOT_EXISTED);
+            model.addAttribute(ERROR_MSG, ResultCode.FILE_NOT_EXISTED.getMessage());
             return "experiment/create";
         }
 
@@ -240,6 +234,7 @@ public class ExperimentController extends BaseController {
     String extract(Model model,
                    @RequestParam(value = "id", required = true) String id,
                    @RequestParam(value = "buildType", required = true) int buildType,
+                   @RequestParam(value = "creator", required = false) String creator,
                    @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "1.0") Float rtExtractWindow,
                    @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
                    RedirectAttributes redirectAttributes) {
@@ -252,8 +247,11 @@ public class ExperimentController extends BaseController {
         redirectAttributes.addFlashAttribute("rtExtractWindow", rtExtractWindow);
         redirectAttributes.addFlashAttribute("mzExtractWindow", mzExtractWindow);
         redirectAttributes.addFlashAttribute("buildType", buildType);
+        redirectAttributes.addFlashAttribute("creator", creator);
         try {
-            ResultDO resultDO = experimentService.extract(id, rtExtractWindow, mzExtractWindow, buildType);
+            long start = System.currentTimeMillis();
+            ResultDO resultDO = experimentService.extract(id, creator, rtExtractWindow, mzExtractWindow, buildType);
+            logger.info("全部卷积完成,总共耗时:" + (System.currentTimeMillis() - start));
         } catch (IOException e) {
             logger.error("卷积报错了:", e);
             e.printStackTrace();
