@@ -54,9 +54,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             return ResultDO.build(dataDO);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.INSERT_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
         }
     }
 
@@ -72,8 +70,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             analyseDataDAO.insert(dataList);
             return new ResultDO(true);
         } catch (Exception e) {
-            ResultDO resultDO = new ResultDO();
-            return resultDO.setErrorResult(ResultCode.INSERT_ERROR.getMessage(), e.getMessage());
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
         }
     }
 
@@ -87,9 +84,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             return new ResultDO(true);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.DELETE_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.DELETE_ERROR);
         }
     }
 
@@ -103,9 +98,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             return new ResultDO(true);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.DELETE_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.DELETE_ERROR);
         }
     }
 
@@ -121,9 +114,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
                 return resultDO;
             }
         } catch (Exception e) {
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.QUERY_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
     }
 }

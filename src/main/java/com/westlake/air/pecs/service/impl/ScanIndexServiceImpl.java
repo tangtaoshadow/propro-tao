@@ -86,8 +86,7 @@ public class ScanIndexServiceImpl implements ScanIndexService {
             scanIndexDAO.insert(scanIndexes);
             return new ResultDO(true);
         } catch (Exception e) {
-            ResultDO resultDO = new ResultDO();
-            return resultDO.setErrorResult(ResultCode.INSERT_ERROR.getMessage(), e.getMessage());
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
         }
     }
 
@@ -113,9 +112,7 @@ public class ScanIndexServiceImpl implements ScanIndexService {
                 return resultDO;
             }
         } catch (Exception e) {
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.QUERY_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
     }
 }

@@ -40,13 +40,10 @@
             <table class="table table-bordered" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="15%">
+                    <th width="10%">
                         实验名称
                     </th>
-                    <th width="20%">
-                        关联的标准库ID
-                    </th>
-                    <th width="20%">
+                    <th width="10%">
                         关联的标准库名称
                     </th>
                     <th width="15%">
@@ -55,7 +52,7 @@
                     <th width="15%">
                         最后修改时间
                     </th>
-                    <th width="15%">
+                    <th width="50%">
                         操作
                     </th>
                 </tr>
@@ -63,7 +60,6 @@
                 <tbody>
                 <tr th:each="experiment:${experiments}">
                     <td th:text="${experiment.name}"></td>
-                    <td th:text="${experiment.libraryId}"></td>
                     <td th:text="${experiment.libraryName}"></td>
                     <td th:text="${#dates.format(experiment.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(experiment.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
@@ -75,7 +71,10 @@
                            class="btn btn-success btn-sm">详情
                         </a>
                         <a th:href="|/scanindex/list?experimentId=${experiment.id}|"
-                           class="btn btn-info btn-sm">查看索引
+                           class="btn btn-info btn-sm">原始索引
+                        </a>
+                        <a th:href="|/analyse/list?expId=${experiment.id}|"
+                           class="btn btn-warning btn-sm">查看卷积数据
                         </a>
                     </td>
                 </tr>

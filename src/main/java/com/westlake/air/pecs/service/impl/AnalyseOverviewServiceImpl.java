@@ -55,9 +55,7 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
             return ResultDO.build(overviewDO);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.INSERT_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
         }
     }
 
@@ -71,9 +69,7 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
             return new ResultDO(true);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.DELETE_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.DELETE_ERROR);
         }
     }
 
@@ -87,9 +83,7 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
             return new ResultDO(true);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.DELETE_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.DELETE_ERROR);
         }
     }
 
@@ -105,9 +99,23 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
                 return resultDO;
             }
         } catch (Exception e) {
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.QUERY_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO<AnalyseOverviewDO> getOneByExpId(String expId) {
+        try {
+            AnalyseOverviewDO overviewDO = analyseOverviewDAO.getOneByExperimentId(expId);
+            if (overviewDO == null) {
+                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
+            } else {
+                ResultDO<AnalyseOverviewDO> resultDO = new ResultDO<>(true);
+                resultDO.setModel(overviewDO);
+                return resultDO;
+            }
+        } catch (Exception e) {
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
     }
 }

@@ -1,6 +1,8 @@
 package com.westlake.air.pecs.service.impl;
 
 import com.westlake.air.pecs.constants.ResultCode;
+import com.westlake.air.pecs.dao.AnalyseDataDAO;
+import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
 import com.westlake.air.pecs.dao.ExperimentDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.LibraryCoordinate;
@@ -37,21 +39,16 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     @Autowired
     ExperimentDAO experimentDAO;
-
     @Autowired
     TransitionService transitionService;
-
     @Autowired
     ScanIndexService scanIndexService;
-
     @Autowired
     MzXmlParser mzXmlParser;
-
     @Autowired
-    AnalyseDataService analyseDataService;
-
+    AnalyseDataDAO analyseDataDAO;
     @Autowired
-    AnalyseOverviewService analyseOverviewService;
+    AnalyseOverviewDAO analyseOverviewDAO;
 
     @Override
     public List<ExperimentDO> getAll() {
@@ -81,9 +78,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             return ResultDO.build(experimentDO);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.INSERT_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
         }
     }
 
@@ -102,9 +97,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             return ResultDO.build(experimentDO);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.INSERT_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
         }
     }
 
@@ -118,9 +111,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             return new ResultDO(true);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.DELETE_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.DELETE_ERROR);
         }
     }
 
@@ -139,9 +130,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             }
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.QUERY_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
     }
 
@@ -160,9 +149,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             }
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.QUERY_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
     }
 
@@ -189,13 +176,17 @@ public class ExperimentServiceImpl implements ExperimentService {
         File file = (File) checkResult.getModel();
         RandomAccessFile raf = null;
 
+        //卷积前查看之前是否已经做过卷积处理,如果做过的话先删除原有的卷积数据
+        analyseOverviewDAO.getOneByExperimentId(expId);
+
         //创建实验初始化概览数据
         AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
         overviewDO.setExpId(expId);
+        overviewDO.setExpName(experimentDO.getName());
         overviewDO.setLibraryId(experimentDO.getLibraryId());
         overviewDO.setLibraryId(experimentDO.getLibraryName());
         overviewDO.setCreator(creator);
-        analyseOverviewService.insert(overviewDO);
+        analyseOverviewDAO.insert(overviewDO);
 
         try {
             raf = new RandomAccessFile(file, "r");

@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.controller;
 
+import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
@@ -90,5 +91,31 @@ public class AnalyseController extends BaseController {
         model.addAttribute("currentPage", currentPage);
 
         return "/analyse/data/list";
+    }
+
+    @RequestMapping(value = "/list")
+    String list(Model model,
+                    @RequestParam(value = "expId", required = true) String expId,
+                    @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+                    @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize) {
+
+        model.addAttribute("pageSize", pageSize);
+
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getOneByExpId(expId);
+        if(overviewResult.isSuccess()){
+            model.addAttribute("overview",overviewResult.getModel());
+        }else{
+            model.addAttribute(ERROR_MSG, ResultCode.EVOLUTION_DATA_NOT_EXISTED.getMessage());
+        }
+        AnalyseDataQuery query = new AnalyseDataQuery();
+        query.setPageSize(pageSize);
+        query.setPageNo(currentPage);
+        ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
+
+        model.addAttribute("datas", resultDO.getModel());
+        model.addAttribute("totalPage", resultDO.getTotalPage());
+        model.addAttribute("currentPage", currentPage);
+
+        return "/analyse/list";
     }
 }

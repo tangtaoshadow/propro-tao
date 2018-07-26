@@ -1,7 +1,6 @@
 package com.westlake.air.pecs.parser;
 
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -12,14 +11,11 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Stack;
-import java.util.regex.Pattern;
 
 /**
  * Created by Song Jian
  * Time: 2018-07-25 20-14
  */
-
 @Component
 public class MzMLParser {
 

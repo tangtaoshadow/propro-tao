@@ -28,6 +28,17 @@ public class AnalyseOverviewDAO {
         return mongoTemplate.find(query, AnalyseOverviewDO.class, CollectionName);
     }
 
+    public AnalyseOverviewDO getOneByExperimentId(String expId){
+        Query query = new Query(where("expId").is(expId));
+        query.limit(1);
+        List<AnalyseOverviewDO> list = mongoTemplate.find(query, AnalyseOverviewDO.class, CollectionName);
+        if(list == null || list.size() == 0){
+            return null;
+        }else{
+            return list.get(0);
+        }
+    }
+
     public List<AnalyseOverviewDO> getList(AnalyseOverviewQuery query) {
         return mongoTemplate.find(buildQuery(query), AnalyseOverviewDO.class, CollectionName);
     }

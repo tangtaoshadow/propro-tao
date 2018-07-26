@@ -64,8 +64,7 @@ public class TransitionServiceImpl implements TransitionService {
             transitionDAO.insert(transitionDO);
             return new ResultDO(true);
         } catch (Exception e) {
-            ResultDO resultDO = new ResultDO();
-            return resultDO.setErrorResult(ResultCode.INSERT_ERROR.getMessage(), e.getMessage());
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
         }
     }
 
@@ -88,8 +87,7 @@ public class TransitionServiceImpl implements TransitionService {
             transitionDAO.insert(transitions);
             return new ResultDO(true);
         } catch (Exception e) {
-            ResultDO resultDO = new ResultDO();
-            return resultDO.setErrorResult(ResultCode.INSERT_ERROR.getMessage(), e.getMessage());
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
         }
     }
 
@@ -125,9 +123,7 @@ public class TransitionServiceImpl implements TransitionService {
                 return resultDO;
             }
         } catch (Exception e) {
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.QUERY_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
     }
 

@@ -248,6 +248,7 @@ public class ExperimentController extends BaseController {
         redirectAttributes.addFlashAttribute("mzExtractWindow", mzExtractWindow);
         redirectAttributes.addFlashAttribute("buildType", buildType);
         redirectAttributes.addFlashAttribute("creator", creator);
+
         try {
             long start = System.currentTimeMillis();
             ResultDO resultDO = experimentService.extract(id, creator, rtExtractWindow, mzExtractWindow, buildType);

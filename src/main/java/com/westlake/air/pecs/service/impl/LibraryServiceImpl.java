@@ -59,9 +59,7 @@ public class LibraryServiceImpl implements LibraryService {
             return ResultDO.build(libraryDO);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.INSERT_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
         }
     }
 
@@ -80,9 +78,7 @@ public class LibraryServiceImpl implements LibraryService {
             return ResultDO.build(libraryDO);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.INSERT_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
         }
     }
 
@@ -96,9 +92,7 @@ public class LibraryServiceImpl implements LibraryService {
             return new ResultDO(true);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.DELETE_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.DELETE_ERROR);
         }
     }
 
@@ -117,9 +111,7 @@ public class LibraryServiceImpl implements LibraryService {
             }
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.QUERY_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
     }
 
@@ -138,9 +130,7 @@ public class LibraryServiceImpl implements LibraryService {
             }
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(ResultCode.QUERY_ERROR.getCode(), e.getMessage());
-            return resultDO;
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
     }
 }
