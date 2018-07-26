@@ -194,8 +194,6 @@ public class MzMLParser extends BaseExpParser{
             if (line.contains("ms level")) {
                 int level = Integer.parseInt(line.split("\"")[7]);
                 scanIndexDO.setMsLevel(level);
-
-
                 isMsLevelFinish = true;
             } else if (line.contains("scan start time") && line.contains("minute")) {
                 Float rt = Float.valueOf(line.split("\"")[7]) * 60.0F;

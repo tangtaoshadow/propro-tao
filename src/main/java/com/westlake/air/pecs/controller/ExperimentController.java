@@ -1,9 +1,13 @@
 package com.westlake.air.pecs.controller;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.MzIntensityPairs;
+import com.westlake.air.pecs.domain.bean.WindowRang;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
@@ -18,14 +22,13 @@ import com.westlake.air.pecs.service.TransitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.List;
 
 /**
@@ -264,5 +267,32 @@ public class ExperimentController extends BaseController {
 
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.EXTRACT_DATA_SUCCESS);
         return "redirect:/analyse/list?expId=" + id;
+    }
+
+    @RequestMapping(value = "/getWindows")
+    @ResponseBody
+    ResultDO<JSONObject> getWindows(Model model,
+                              @RequestParam(value = "expId", required = false) String expId) {
+
+
+        List<WindowRang> rangs = experimentService.getWindows(expId);
+        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
+
+        JSONObject res = new JSONObject();
+        JSONArray indexArray = new JSONArray();
+        JSONArray mzStartArray = new JSONArray();
+        JSONArray mzRangArray = new JSONArray();
+        for(int i = 0 ;i<rangs.size();i++){
+            indexArray.add((int)(rangs.get(i).getMs2Interval()*1000)+"ms");
+            mzStartArray.add(rangs.get(i).getMzStart());
+            mzRangArray.add((rangs.get(i).getMzEnd()-rangs.get(i).getMzStart()));
+        }
+        res.put("indexes", indexArray);
+        res.put("starts", mzStartArray);
+        res.put("rangs", mzRangArray);
+        res.put("min", rangs.get(0).getMzStart());
+        res.put("max", rangs.get(rangs.size()-1).getMzEnd());
+        resultDO.setModel(res);
+        return resultDO;
     }
 }

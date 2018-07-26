@@ -7,10 +7,7 @@ import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
 import com.westlake.air.pecs.dao.ExperimentDAO;
 import com.westlake.air.pecs.dao.ScanIndexDAO;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.LibraryCoordinate;
-import com.westlake.air.pecs.domain.bean.MzIntensityPairs;
-import com.westlake.air.pecs.domain.bean.SimpleScanIndex;
-import com.westlake.air.pecs.domain.bean.TargetTransition;
+import com.westlake.air.pecs.domain.bean.*;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
@@ -342,6 +339,8 @@ public class ExperimentServiceImpl implements ExperimentService {
             return;
         }
 
+        //开始按窗口区间获取所有的光谱图
+
         List<SimpleScanIndex> indexes = scanIndexDAO.getSimpleAll(query);
 
         //如果MS1存在,则进行MS1的光谱扫描
@@ -405,7 +404,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     @Override
-    public List<ScanIndexDO> getWindows(String expId) {
+    public List<WindowRang> getWindows(String expId) {
         ScanIndexQuery query = new ScanIndexQuery();
         query.setPageSize(1);
         query.setMsLevel(1);
@@ -420,12 +419,20 @@ public class ExperimentServiceImpl implements ExperimentService {
         query.setMsLevel(2);
         query.setParentNum(ms1Index.getNum());
         List<ScanIndexDO> ms2Indexes = scanIndexDAO.getAll(query);
-        if (ms2Indexes == null || ms2Indexes.size() == 0) {
+        if (ms2Indexes == null || ms2Indexes.size() <= 1) {
             return null;
         }
 
-
-        return null;
+        List<WindowRang> windowRangs = new ArrayList<>();
+        float ms2Interval = ms2Indexes.get(1).getRt() - ms2Indexes.get(0).getRt();
+        for (int i = 0; i < ms2Indexes.size(); i++) {
+            WindowRang rang = new WindowRang();
+            rang.setMzStart(ms2Indexes.get(i).getPrecursorMzStart());
+            rang.setMzEnd(ms2Indexes.get(i).getPrecursorMzEnd());
+            rang.setMs2Interval(ms2Interval);
+            windowRangs.add(rang);
+        }
+        return windowRangs;
     }
 
     private ResultDO<File> checkExperiment(ExperimentDO experimentDO) {
@@ -483,14 +490,14 @@ public class ExperimentServiceImpl implements ExperimentService {
         return pStart;
     }
 
-    private BaseExpParser getParser(String fileType){
+    private BaseExpParser getParser(String fileType) {
         //默认返回MzXMLParser
-        if(fileType == null){
+        if (fileType == null) {
             return mzXMLParser;
         }
-        if(fileType.equals(Constants.EXP_SUFFIX_MZXML)){
+        if (fileType.equals(Constants.EXP_SUFFIX_MZXML)) {
             return mzXMLParser;
-        }else{
+        } else {
             return mzMLParser;
         }
     }
