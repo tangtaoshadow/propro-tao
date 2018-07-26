@@ -107,11 +107,6 @@ public class ExperimentController extends BaseController {
             return "experiment/create";
         }
 
-//      File file = new File("H:\\data\\weissto_i170508_005-SWLYPB125.mzXML");
-//      File file = new File(getClass().getClassLoader().getResource("data/MzXMLFile_1_compressed.mzXML").getPath());
-//      File file = new File("D:\\data\\wlym5.mzXML");
-//      File file = new File("D:\\testdata\\testfile.mzXML");
-
         ExperimentDO experimentDO = new ExperimentDO();
         experimentDO.setName(name);
         experimentDO.setDescription(description);
@@ -259,26 +254,7 @@ public class ExperimentController extends BaseController {
         }
 
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.EXTRACT_DATA_SUCCESS);
-        return "redirect:/experiment/detail/" + id;
+        return "redirect:/analyse/list?expId=" + id;
 
-    }
-
-    @RequestMapping(value = "/quickscan")
-    String quickScan(Model model, RedirectAttributes redirectAttributes) {
-
-        File file = new File("H:\\data\\weissto_i170508_005-SWLYPB125.mzXML");
-//    File file = new File("D:\\data\\wlym5.mzXML");
-//    File file = new File("D:\\testdata\\testfile.mzXML");
-
-        try {
-            Long time = System.currentTimeMillis();
-            List<ScanIndexDO> indexList = lmsIndexer.index(file);
-            System.out.println("Cost:" + (System.currentTimeMillis() - time));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return "experiment/list";
     }
 }

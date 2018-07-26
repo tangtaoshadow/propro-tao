@@ -1,22 +1,29 @@
 package com.westlake.air.pecs.controller;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
+import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
+import com.westlake.air.pecs.domain.vo.AnalyseDataVO;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
+import com.westlake.air.pecs.service.TransitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,9 +36,10 @@ public class AnalyseController extends BaseController {
 
     @Autowired
     AnalyseOverviewService analyseOverviewService;
-
     @Autowired
     AnalyseDataService analyseDataService;
+    @Autowired
+    TransitionService transitionService;
 
     @RequestMapping(value = "/overview/list")
     String overviewList(Model model,
@@ -70,52 +78,90 @@ public class AnalyseController extends BaseController {
 
         analyseOverviewService.delete(id);
         analyseDataService.deleteAllByOverviewId(id);
-        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_LIBRARY_SUCCESS);
+        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
         return "redirect:/analyse/overview/list";
-    }
-
-    @RequestMapping(value = "/data/list")
-    String dataList(Model model,
-                    @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                    @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize) {
-
-        model.addAttribute("pageSize", pageSize);
-
-        AnalyseDataQuery query = new AnalyseDataQuery();
-        query.setPageSize(pageSize);
-        query.setPageNo(currentPage);
-        ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
-
-        model.addAttribute("datas", resultDO.getModel());
-        model.addAttribute("totalPage", resultDO.getTotalPage());
-        model.addAttribute("currentPage", currentPage);
-
-        return "/analyse/data/list";
     }
 
     @RequestMapping(value = "/list")
     String list(Model model,
                     @RequestParam(value = "expId", required = true) String expId,
+                    @RequestParam(value = "msLevel", required = false) Integer msLevel,
                     @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                    @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize) {
+                    @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
+                    RedirectAttributes redirectAttributes) {
 
         model.addAttribute("pageSize", pageSize);
+        model.addAttribute("expId", expId);
+        model.addAttribute("msLevel", msLevel);
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getOneByExpId(expId);
         if(overviewResult.isSuccess()){
             model.addAttribute("overview",overviewResult.getModel());
         }else{
-            model.addAttribute(ERROR_MSG, ResultCode.EVOLUTION_DATA_NOT_EXISTED.getMessage());
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.EVOLUTION_DATA_NOT_EXISTED.getMessage());
+            return "redirect:/experiment/list";
+
         }
         AnalyseDataQuery query = new AnalyseDataQuery();
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
+        if(msLevel != null){
+            query.setMsLevel(msLevel);
+        }
+        query.setOverviewId(overviewResult.getModel().getId());
         ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
+        List<AnalyseDataDO> datas = resultDO.getModel();
+        List<AnalyseDataVO> dataList = new ArrayList<>();
+        //TODO 此处可以优化一下
+        if(datas != null && datas.size() > 0){
+            for(AnalyseDataDO dataDO : datas){
+                AnalyseDataVO vo = new AnalyseDataVO(dataDO);
+                ResultDO<TransitionDO> re = transitionService.getById(dataDO.getTransitionId());
+                if(re.isFailured()){
+                    continue;
+                }
 
-        model.addAttribute("datas", resultDO.getModel());
+                vo.setFullName(re.getModel().getFullName());
+                vo.setAnnotations(re.getModel().getAnnotations());
+                dataList.add(vo);
+            }
+        }
+        model.addAttribute("datas", dataList);
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
 
         return "/analyse/list";
+    }
+
+    @RequestMapping(value = "/view")
+    @ResponseBody
+    ResultDO<JSONObject> view(Model model,
+                              @RequestParam(value = "id", required = false) String analyseDataId) {
+
+        ResultDO<AnalyseDataDO> dataResult = analyseDataService.getById(analyseDataId);
+
+        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
+        if (dataResult.isFailured()) {
+            resultDO.setErrorResult(ResultCode.ANALYSE_DATA_NOT_EXISTED);
+            return resultDO;
+        }
+
+        AnalyseDataDO dataDO = dataResult.getModel();
+
+        JSONObject res = new JSONObject();
+        JSONArray rtArray = new JSONArray();
+        JSONArray intensityArray = new JSONArray();
+
+        Float[] pairRtArray = dataDO.getRtArray();
+        Float[] pairIntensityArray = dataDO.getIntensityArray();
+        for (int n = 0; n < pairRtArray.length; n++) {
+            rtArray.add(pairRtArray[n]);
+            intensityArray.add(pairIntensityArray[n]);
+        }
+
+        res.put("rt", rtArray);
+        res.put("intensity", intensityArray);
+        resultDO.setModel(res);
+        return resultDO;
     }
 }

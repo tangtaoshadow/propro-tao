@@ -70,7 +70,7 @@ public class MzXmlParser {
         airXStream.fromXML(new String(reader), scan);
         if (scan.getPeaksList() != null && scan.getPeaksList().size() >= 1) {
             Peaks peaks = scan.getPeaksList().get(0);
-            return getPeakMap(peaks.getValue(), peaks.getPrecision(), false);
+            return getPeakMap(peaks.getValue(), peaks.getPrecision(), peaks.getCompressionType() != null && "zlib".equalsIgnoreCase(peaks.getCompressionType()));
         }
 
         return null;
@@ -88,7 +88,7 @@ public class MzXmlParser {
             airXStream.fromXML(new String(reader), scan);
             if (scan.getPeaksList() != null && scan.getPeaksList().size() >= 1) {
                 Peaks peaks = scan.getPeaksList().get(0);
-                return getPeakMap(peaks.getValue(), peaks.getPrecision(), true);
+                return getPeakMap(peaks.getValue(), peaks.getPrecision(), peaks.getCompressionType() != null && "zlib".equalsIgnoreCase(peaks.getCompressionType()));
             }
         } catch (IOException e) {
             e.printStackTrace();

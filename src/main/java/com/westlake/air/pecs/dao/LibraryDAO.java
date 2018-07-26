@@ -22,6 +22,7 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 public class LibraryDAO {
 
     public static String CollectionName = "library";
+
     @Autowired
     MongoTemplate mongoTemplate;
 

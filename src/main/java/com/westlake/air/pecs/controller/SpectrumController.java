@@ -57,7 +57,7 @@ public class SpectrumController {
 
     @RequestMapping(value = "/mzmlextractor")
     String mzmlextractor(Model model,
-                         @RequestParam(value = "isCompression", required = false) boolean isCompression,
+                         @RequestParam(value = "isCompression", required = false) boolean isZlibCompression,
                          @RequestParam(value = "mz", required = false) String mz,
                          @RequestParam(value = "intensity", required = false) String intensity,
                          @RequestParam(value = "mzPrecision", required = false, defaultValue = "32") Integer mzPrecision,
@@ -68,7 +68,7 @@ public class SpectrumController {
         model.addAttribute("intensityPrecision", intensityPrecision);
 
         if (mz != null && !mz.isEmpty() && intensity != null && !intensity.isEmpty()) {
-            Map<Float, Float> peakMap = mzXmlParser.getPeakMap(mz.trim(), intensity.trim(), mzPrecision, intensityPrecision, isCompression);
+            Map<Float, Float> peakMap = mzXmlParser.getPeakMap(mz.trim(), intensity.trim(), mzPrecision, intensityPrecision, isZlibCompression);
             model.addAttribute("peakMap", peakMap);
         }
 

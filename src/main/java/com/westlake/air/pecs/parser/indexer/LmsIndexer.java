@@ -326,7 +326,7 @@ public class LmsIndexer {
 
         //仅关注两个attribute msLevel和retentionTime.因此如果扫描到这两个属性以后就可以跳出循环以节省时间开销
         int focusAttributeCount = 2;
-        byte[] readBytes = read(raf, scanIndexDO.getStart() + 1, 500);
+        byte[] readBytes = read(raf, scanIndexDO.getStart() + 1, 600);
 
         String read = new String(readBytes);
         String precursorMz;
