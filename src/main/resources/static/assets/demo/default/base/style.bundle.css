@@ -1082,7 +1082,7 @@ pre {
   .table th,
   .table td {
       word-wrap: break-word;
-    padding: 0.75rem;
+    /*padding: 0.75rem;*/
     vertical-align: middle;
     border-top: 1px solid #f4f5f8; }
   .table thead th {
@@ -1112,7 +1112,7 @@ pre {
   background-color: #f4f5f8; }
 
 .table-hover tbody tr:hover {
-  background-color: #f7f8fa; }
+  background-color: #fae5c1; }
 
 .table-primary,
 .table-primary > th,

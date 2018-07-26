@@ -46,6 +46,8 @@ public class TransitionDAO {
         fieldsDoc.put("precursorMz",true);
         fieldsDoc.put("productMz",true);
         fieldsDoc.put("rt",true);
+        fieldsDoc.put("precursorMzStart",true);
+        fieldsDoc.put("precursorMzEnd",true);
 
         Query query = new BasicQuery(queryDoc, fieldsDoc);
         return mongoTemplate.find(query, TargetTransition.class, CollectionName);

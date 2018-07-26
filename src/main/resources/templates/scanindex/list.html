@@ -73,14 +73,11 @@
         <!--end: Search Form -->
         <!--begin: Datatable -->
         <div>
-            <table class="table table-bordered" style="table-layout:fixed;">
+            <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
                     <th width="5%">
                         No.
-                    </th>
-                    <th width="15%">
-                        实验ID
                     </th>
                     <th width="10%">
                         实验名称
@@ -89,19 +86,28 @@
                         父节点
                     </th>
                     <th width="5%">
-                        内部序列号
+                        序列号
                     </th>
-                    <th width="10%">
-                        MSLevel
+                    <th width="5%">
+                        MS
                     </th>
-                    <th width="20%">
+                    <th width="15%">
                         RT
                     </th>
                     <th width="10%">
-                        起始位置
+                        文件起始位置
                     </th>
                     <th width="10%">
-                        结束位置
+                        文件结束位置
+                    </th>
+                    <th width="10%">
+                        MZ窗口起始位置
+                    </th>
+                    <th width="10%">
+                        MZ窗口结束位置
+                    </th>
+                    <th width="5%">
+                        窗口宽度
                     </th>
                     <th width="10%">
                         操作
@@ -113,9 +119,8 @@
                     <td th:text="${status.index+1}"></td>
                     <td>
                         <a th:href="|/experiment/detail/${scanIndex.experimentId}|"
-                           th:text="${scanIndex.experimentId}"></a>
+                           th:text="${experiment.name}"></a>
                     </td>
-                    <td th:text="${experiment.name}"></td>
                     <td th:text="${scanIndex.parentNum}"></td>
 
                     <td th:text="${scanIndex.num}"></td>
@@ -124,6 +129,9 @@
                     <td th:text="${scanIndex.rtStr}"></td>
                     <td th:text="${scanIndex.start}"></td>
                     <td th:text="${scanIndex.end}"></td>
+                    <td th:text="${scanIndex.precursorMzStart}"></td>
+                    <td th:text="${scanIndex.precursorMzEnd}"></td>
+                    <td th:text="${scanIndex.windowWideness}"></td>
                     <td>
                         <a th:href="|/scanindex/detail/${scanIndex.id}|"
                            class="btn btn-success btn-sm">详情

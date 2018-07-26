@@ -337,14 +337,14 @@ public class ExperimentServiceImpl implements ExperimentService {
 
         ScanIndexQuery query = new ScanIndexQuery();
         query.setExperimentId(expId);
-        query.setMsLevel(1);
+        query.setMsLevel(2);
 
         long totalCount = scanIndexService.count(query);
 
-        logger.info("MS1 坐标总计" + coordinates.size() + "条");
-        logger.info("MS1 实验光谱数" + totalCount + "条");
+        logger.info("MS2 坐标总计" + coordinates.size() + "条");
+        logger.info("MS2 实验光谱数" + totalCount + "条");
 
-        //如果MS1的实验数据不存在,则跳过
+        //如果MS2的实验数据不存在,则跳过
         if (totalCount == 0) {
             return;
         }
