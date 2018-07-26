@@ -13,4 +13,10 @@ public class MzIntensityPairs{
 
     Float[] intensityArray;
 
+    public MzIntensityPairs(){}
+
+    public MzIntensityPairs(Float[] mzArray, Float[] intensityArray){
+        this.mzArray = mzArray;
+        this.intensityArray = intensityArray;
+    }
 }

@@ -104,6 +104,9 @@ public class ScanIndexDAO {
         if (scanIndexQuery.getRtStart() != null && scanIndexQuery.getRtEnd() != null) {
             query.addCriteria(where("rt").gte(scanIndexQuery.getRtStart()).lte(scanIndexQuery.getRtEnd()));
         }
+        if (scanIndexQuery.getParentNum() != null && scanIndexQuery.getParentNum() != null) {
+            query.addCriteria(where("parentNum").is(scanIndexQuery.getParentNum()));
+        }
         return query;
     }
 }

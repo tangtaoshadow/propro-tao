@@ -82,6 +82,14 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
+                            <label for="fileLocation" class="col-2 col-form-label">
+                                文件类型
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="fileType" readonly th:value="${experiment?.fileType}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
                             <label for="ms1Count" class="col-2 col-form-label">
                                 MS1数目
                             </label>

@@ -36,11 +36,10 @@
                             <input type="text" class="form-control m-input" name="id" id="id" readonly th:value="${experiment?.id}">
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="libraryName">
-                                库文件名称
+                            <label for="name">
+                                实验名称
                             </label>
-                            <input type="text" class="form-control m-input" id="libraryName" name="name" readonly th:value="${library?.name}">
-                            <span class="m-form__help">库名称全局唯一</span>
+                            <input type="text" class="form-control m-input" id="name" name="name" th:value="${experiment?.name}">
                         </div>
                         <div class="form-group m-form__group">
                             <label for="library">
@@ -49,10 +48,21 @@
                             <select class="form-control m-input" id="library" name="libraryId">
                                 <option th:each="library:${libraries}" th:value="${library.id}" th:text="${library.name}" th:selected="${experiment.libraryId}==${library.id}?true:false"></option>
                             </select>
-                            <!--<input type="text" class="form-control m-input" id="library" readonly th:value="|${experiment?.libraryName}(${experiment?.libraryId})|">-->
-
                         </div>
-
+                        <div class="form-group m-form__group">
+                            <label for="fileLocation">
+                                文件位置
+                            </label>
+                            <input type="text" class="form-control m-input" id="fileLocation" name="fileLocation" th:value="${experiment?.fileLocation}">
+                            <span class="m-form__help">一般情况下不要乱改本字段</span>
+                        </div>
+                        <div class="form-group m-form__group">
+                            <label for="fileType">
+                                文件类型
+                            </label>
+                            <input type="text" class="form-control m-input" id="fileType" name="fileType" th:value="${experiment?.fileType}">
+                            <span class="m-form__help">目前只支持mzxml和mzml,全部小写</span>
+                        </div>
                         <div class="form-group m-form__group">
                             <label for="description">
                                 详细描述

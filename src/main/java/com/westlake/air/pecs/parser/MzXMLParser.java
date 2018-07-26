@@ -1,38 +1,144 @@
-package com.westlake.air.pecs.parser.indexer;
+package com.westlake.air.pecs.parser;
 
+import com.westlake.air.pecs.domain.bean.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.parser.model.mzxml.*;
-import com.westlake.air.pecs.parser.xml.AirXStream;
-import com.westlake.air.pecs.parser.xml.PrecursorMzConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
- * ">"的byte编码是62
- * <p>
  * Created by James Lu MiaoShan
- * Time: 2018-07-04 20:29
+ * Time: 2018-07-19 16:50
  */
-@Component("lmsIndexer")
-public class LmsIndexer {
+@Component
+public class MzXMLParser extends BaseExpParser {
 
-    public static int TAIL_TRY = 30;
+    public final Logger logger = LoggerFactory.getLogger(MzXMLParser.class);
 
-    private static final Pattern attrPattern = Pattern.compile("(\\w+)=\"([^\"]*)\"");
+    public Class<?>[] classes = new Class[]{
+            DataProcessing.class, Maldi.class, MsInstrument.class, MsRun.class, MzXML.class, NameValue.class,
+            OntologyEntry.class, Operator.class, Orientation.class, ParentFile.class, Pattern.class,
+            Peaks.class, Plate.class, PrecursorMz.class, Robot.class, Scan.class, ScanOrigin.class,
+            Separation.class, SeparationTechnique.class, Software.class, Spot.class, Spotting.class,
+    };
 
-    public final Logger logger = LoggerFactory.getLogger(LmsIndexer.class);
+    public MzXMLParser() {}
+
+    private void prepare() {
+        airXStream.processAnnotations(classes);
+        airXStream.allowTypes(classes);
+//        airXStream.registerConverter(new PeaksConverter());
+//        airXStream.registerConverter(new PrecursorMzConverter());
+    }
+
+    @Override
+    public List<ScanIndexDO> index(File file, String experimentId) {
+        RandomAccessFile raf = null;
+        List<ScanIndexDO> list = null;
+        try {
+            raf = new RandomAccessFile(file, "r");
+            list = indexForSwath(file);
+            int count = 0;
+
+            ScanIndexDO currentMS1 = null;
+            for (ScanIndexDO scanIndex : list) {
+                parseAttribute(raf, scanIndex);
+                scanIndex.setExperimentId(experimentId);
+
+                if(scanIndex.getMsLevel() == 1){
+                    currentMS1 = scanIndex;
+                }else{
+                    if(currentMS1 == null){
+                        continue;
+                    }else{
+                        scanIndex.setParentNum(currentMS1.getNum());
+                    }
+                }
+
+                count++;
+                if (count % 10000 == 0) {
+                    logger.info("已扫描索引:" + count + "/" + list.size() + "条");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (raf != null) {
+                    raf.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return list;
+    }
+
+    @Override
+    public MzIntensityPairs parseOne(RandomAccessFile raf, long start, long end) {
+        prepare();
+        try{
+            raf.seek(start);
+            byte[] reader = new byte[(int) (end - start)];
+            raf.read(reader);
+            Scan scan = new Scan();
+            airXStream.fromXML(new String(reader), scan);
+            if (scan.getPeaksList() != null && scan.getPeaksList().size() >= 1) {
+                Peaks peaks = scan.getPeaksList().get(0);
+                return getPeakMap(peaks.getValue(), peaks.getPrecision(), peaks.getCompressionType() != null && "zlib".equalsIgnoreCase(peaks.getCompressionType()));
+            }
+        }catch (Exception e){
+            logger.error(e.getMessage());
+        }
+
+        return null;
+    }
+
+    //For MzXML
+    @Override
+    public MzIntensityPairs getPeakMap(byte[] value, int precision, boolean isZlibCompression) {
+
+        Float[] values = getValues(value, precision, isZlibCompression);
+
+        TreeMap<Float, Float> map = new TreeMap<>();
+        for (int peakIndex = 0; peakIndex < values.length - 1; peakIndex += 2) {
+            Float mz = values[peakIndex];
+            Float intensity = values[peakIndex + 1];
+            map.put(mz, intensity);
+        }
+
+        Float[] mzArray = new Float[map.size()];
+        Float[] intensityArray = new Float[map.size()];
+        int i = 0;
+        for (Float key : map.keySet()) {
+            mzArray[i] = key;
+            intensityArray[i] = map.get(key);
+            i++;
+        }
+
+        MzIntensityPairs pairs = new MzIntensityPairs();
+        pairs.setMzArray(mzArray);
+        pairs.setIntensityArray(intensityArray);
+
+        return pairs;
+    }
+
+    //不需要实现
+    @Override
+    public MzIntensityPairs getPeakMap(byte[] mz, byte[] intensity, int mzPrecision, int intensityPrecision, boolean isZlibCompression) {
+
+        return null;
+
+    }
 
     /**
      * 本算法得到的ScanIndex的End包含了换行符
@@ -44,7 +150,7 @@ public class LmsIndexer {
      * @return
      * @throws IOException
      */
-    public List<ScanIndexDO> index(File file) {
+    private List<ScanIndexDO> index(File file) {
 
         List<ScanIndexDO> indexList = new ArrayList<>();
         RandomAccessFile raf = null;
@@ -168,7 +274,7 @@ public class LmsIndexer {
      * @return
      * @throws IOException
      */
-    public List<ScanIndexDO> indexForSwath(File file) {
+    private List<ScanIndexDO> indexForSwath(File file) {
 
         List<ScanIndexDO> indexList = new ArrayList<>();
         RandomAccessFile raf = null;
@@ -215,48 +321,7 @@ public class LmsIndexer {
         return indexList;
     }
 
-    public List<ScanIndexDO> index(File file, String experimentId) {
-        RandomAccessFile raf = null;
-        List<ScanIndexDO> list = null;
-        try {
-            raf = new RandomAccessFile(file, "r");
-            list = indexForSwath(file);
-            int count = 0;
 
-            ScanIndexDO currentMS1 = null;
-            for (ScanIndexDO scanIndex : list) {
-                parseAttribute(raf, scanIndex);
-                scanIndex.setExperimentId(experimentId);
-
-                if(scanIndex.getMsLevel() == 1){
-                    currentMS1 = scanIndex;
-                }else{
-                    if(currentMS1 == null){
-                        continue;
-                    }else{
-                        scanIndex.setParentNum(currentMS1.getNum());
-                    }
-                }
-
-                count++;
-                if (count % 10000 == 0) {
-                    logger.info("已扫描索引:" + count + "/" + list.size() + "条");
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (raf != null) {
-                    raf.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return list;
-    }
 
     private Long parseIndexOffset(RandomAccessFile rf) throws IOException {
         long position = rf.length() - 1;

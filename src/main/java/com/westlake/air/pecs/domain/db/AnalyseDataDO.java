@@ -21,6 +21,10 @@ public class AnalyseDataDO {
 
     String transitionId;
 
+    String fullName;
+
+    String annotations;
+
     Integer msLevel;
 
     Float mz;

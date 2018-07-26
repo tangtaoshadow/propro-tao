@@ -24,4 +24,6 @@ public class ScanIndexQuery extends PageQuery {
     Double rtStart;
 
     Double rtEnd;
+
+    Integer parentNum;
 }

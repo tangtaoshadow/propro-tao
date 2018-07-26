@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.controller;
 
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
@@ -8,8 +9,8 @@ import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
-import com.westlake.air.pecs.parser.MzXmlParser;
-import com.westlake.air.pecs.parser.indexer.LmsIndexer;
+import com.westlake.air.pecs.parser.MzMLParser;
+import com.westlake.air.pecs.parser.MzXMLParser;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.LibraryService;
 import com.westlake.air.pecs.service.ScanIndexService;
@@ -37,19 +38,14 @@ public class ExperimentController extends BaseController {
 
     @Autowired
     LibraryService libraryService;
-
     @Autowired
     TransitionService transitionService;
-
     @Autowired
     ExperimentService experimentService;
-
     @Autowired
-    MzXmlParser mzXmlParser;
-
+    MzXMLParser mzXMLParser;
     @Autowired
-    LmsIndexer lmsIndexer;
-
+    MzMLParser mzMLParser;
     @Autowired
     ScanIndexService scanIndexService;
 
@@ -107,8 +103,10 @@ public class ExperimentController extends BaseController {
             return "experiment/create";
         }
 
+
         ExperimentDO experimentDO = new ExperimentDO();
         experimentDO.setName(name);
+        experimentDO.setFileType(fileLocation.substring(fileLocation.lastIndexOf(".") + 1).trim().toLowerCase());
         experimentDO.setDescription(description);
         experimentDO.setFileLocation(fileLocation);
 
@@ -128,7 +126,14 @@ public class ExperimentController extends BaseController {
             long start = System.currentTimeMillis();
             //建立索引
             logger.info("开始构建索引");
-            List<ScanIndexDO> indexList = lmsIndexer.index(file, experimentDO.getId());
+            List<ScanIndexDO> indexList = null;
+            //传入不同的文件类型会调用不同的解析层
+            if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZXML)) {
+                indexList = mzXMLParser.index(file, experimentDO.getId());
+            } else {
+                indexList = mzMLParser.index(file, experimentDO.getId());
+            }
+
             logger.info("索引构建完毕,开始存储索引");
             ResultDO resultDO = scanIndexService.insertAll(indexList, true);
             logger.info("索引存储完毕");
@@ -190,6 +195,8 @@ public class ExperimentController extends BaseController {
     String update(Model model,
                   @RequestParam(value = "id", required = true) String id,
                   @RequestParam(value = "name") String name,
+                  @RequestParam(value = "fileType") String fileType,
+                  @RequestParam(value = "fileLocation") String fileLocation,
                   @RequestParam(value = "description") String description,
                   @RequestParam(value = "libraryId") String libraryId,
                   RedirectAttributes redirectAttributes) {
@@ -203,6 +210,8 @@ public class ExperimentController extends BaseController {
         ExperimentDO experimentDO = resultDO.getModel();
         if (resultLib.isSuccess()) {
             experimentDO.setLibraryId(libraryId);
+            experimentDO.setFileType(fileType);
+            experimentDO.setFileLocation(fileLocation);
             experimentDO.setLibraryName(resultLib.getModel().getName());
         }
         experimentDO.setDescription(description);
@@ -255,6 +264,5 @@ public class ExperimentController extends BaseController {
 
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.EXTRACT_DATA_SUCCESS);
         return "redirect:/analyse/list?expId=" + id;
-
     }
 }

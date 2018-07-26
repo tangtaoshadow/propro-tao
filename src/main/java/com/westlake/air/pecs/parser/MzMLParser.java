@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.parser;
 
+import com.westlake.air.pecs.domain.bean.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +18,62 @@ import java.util.List;
  * Time: 2018-07-25 20-14
  */
 @Component
-public class MzMLParser {
+public class MzMLParser extends BaseExpParser{
 
     public final Logger logger = LoggerFactory.getLogger(MzMLParser.class);
 
-    public List<ScanIndexDO> index(File file) {
+    @Override
+    public List<ScanIndexDO> index(File file, String experimentId) {
+        RandomAccessFile raf = null;
+        List<ScanIndexDO> list = null;
+        try {
+            raf = new RandomAccessFile(file, "r");
+            list = index(file);
+            int count = 0;
+            for (ScanIndexDO scanIndex : list) {
+                parseAttribute(raf, scanIndex);
+                scanIndex.setExperimentId(experimentId);
+                System.out.println(++count);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (raf != null) {
+                    raf.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return list;
+    }
+
+    @Override
+    public MzIntensityPairs parseOne(RandomAccessFile raf, long start, long end) {
+        return null;
+    }
+
+    //不需要实现!!!
+    @Override
+    public MzIntensityPairs getPeakMap(byte[] value, int precision, boolean isZlibCompression) {
+        return null;
+    }
+
+    @Override
+    public MzIntensityPairs getPeakMap(byte[] mz, byte[] intensity, int mzPrecision, int intensityPrecision, boolean isZlibCompression) {
+        Float[] mzArray = getValues(mz, mzPrecision, isZlibCompression);
+        Float[] intensityArray = getValues(intensity, intensityPrecision, isZlibCompression);
+
+        if (mzArray == null || intensityArray == null || mzArray.length != intensityArray.length) {
+            return null;
+        }
+
+        return new MzIntensityPairs(mzArray, intensityArray);
+    }
+
+    private List<ScanIndexDO> index(File file) {
 
         List<ScanIndexDO> indexList = new ArrayList<>();
         RandomAccessFile raf = null;
@@ -55,33 +107,6 @@ public class MzMLParser {
         }
 
         return indexList;
-    }
-
-    public List<ScanIndexDO> index(File file, String experimentId) {
-        RandomAccessFile raf = null;
-        List<ScanIndexDO> list = null;
-        try {
-            raf = new RandomAccessFile(file, "r");
-            list = index(file);
-            int count = 0;
-            for (ScanIndexDO scanIndex : list) {
-                parseAttribute(raf, scanIndex);
-                scanIndex.setExperimentId(experimentId);
-                System.out.println(++count);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (raf != null) {
-                    raf.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return list;
     }
 
     private Long parseIndexOffset(RandomAccessFile rf) throws IOException {

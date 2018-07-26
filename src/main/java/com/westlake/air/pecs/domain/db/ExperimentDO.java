@@ -24,6 +24,9 @@ public class ExperimentDO extends BaseDO {
 
     String fileLocation;
 
+    //目前只支持MzML和MzXML
+    String fileType;
+
     String libraryId;
 
     String libraryName;

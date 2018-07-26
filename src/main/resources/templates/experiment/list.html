@@ -47,12 +47,18 @@
                         关联的标准库名称
                     </th>
                     <th width="15%">
+                        文件位置
+                    </th>
+                    <th width="5%">
+                        文件类型
+                    </th>
+                    <th width="15%">
                         创建时间
                     </th>
                     <th width="15%">
                         最后修改时间
                     </th>
-                    <th width="50%">
+                    <th width="30%">
                         操作
                     </th>
                 </tr>
@@ -61,6 +67,8 @@
                 <tr th:each="experiment:${experiments}">
                     <td th:text="${experiment.name}"></td>
                     <td th:text="${experiment.libraryName}"></td>
+                    <td th:text="${experiment.fileLocation}"></td>
+                    <td th:text="${experiment.fileType}"></td>
                     <td th:text="${#dates.format(experiment.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(experiment.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>

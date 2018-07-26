@@ -38,7 +38,7 @@
                         <div class="input-group col-lg-6">
                             <div class="m-checkbox-list">
                                 <label class="m-checkbox">
-                                    <input id="isCompression" type="checkbox" checked name="isCompression">
+                                    <input id="isZlibCompression" type="checkbox" checked name="isZlibCompression">
                                     是否是压缩数据
                                     <span></span>
                                 </label>
@@ -77,10 +77,10 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="entry,status:${peakMap}">
+                    <tr th:each="intensity,status:${intensityArray}">
                         <td th:text="${status.index+1}"></td>
-                        <td th:text="${entry.key}"></td>
-                        <td th:text="${entry.value}"></td>
+                        <td th:text="${mzArray[status.index]}"></td>
+                        <td th:text="${intensity}"></td>
                     </tr>
                     </tbody>
                 </table>

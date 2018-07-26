@@ -10,4 +10,7 @@ public class Constants {
     public static final int MAX_PAGE_SIZE_FOR_FRAGMENT = 100000;
     public static final int DECOY_GENERATOR_TRY_TIMES = 10;
     public static final int MAX_INSERT_RECORD_FOR_TRANSITION = 100000;
+
+    public static String EXP_SUFFIX_MZXML = "mzxml";
+    public static String EXP_SUFFIX_MZML = "mzml";
 }

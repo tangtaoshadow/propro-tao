@@ -10,7 +10,6 @@ import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
-import com.westlake.air.pecs.domain.vo.AnalyseDataVO;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.TransitionService;
@@ -111,24 +110,10 @@ public class AnalyseController extends BaseController {
         query.setOverviewId(overviewResult.getModel().getId());
         ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
         List<AnalyseDataDO> datas = resultDO.getModel();
-        List<AnalyseDataVO> dataList = new ArrayList<>();
-        //TODO 此处可以优化一下
-        if(datas != null && datas.size() > 0){
-            for(AnalyseDataDO dataDO : datas){
-                AnalyseDataVO vo = new AnalyseDataVO(dataDO);
-                ResultDO<TransitionDO> re = transitionService.getById(dataDO.getTransitionId());
-                if(re.isFailured()){
-                    continue;
-                }
-
-                vo.setFullName(re.getModel().getFullName());
-                vo.setAnnotations(re.getModel().getAnnotations());
-                dataList.add(vo);
-            }
-        }
-        model.addAttribute("datas", dataList);
+        model.addAttribute("datas", datas);
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalNum", resultDO.getTotalNum());
 
         return "/analyse/list";
     }

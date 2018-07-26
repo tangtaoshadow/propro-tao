@@ -29,10 +29,8 @@ public class DecoyController extends BaseController {
 
     @Autowired
     FragmentCalculator fragmentCalculator;
-
     @Autowired
     ShuffleGenerator shuffleGenerator;
-
     @Autowired
     TransitionService transitionService;
 

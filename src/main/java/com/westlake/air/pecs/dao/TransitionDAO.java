@@ -46,6 +46,7 @@ public class TransitionDAO {
         fieldsDoc.put("precursorMz",true);
         fieldsDoc.put("productMz",true);
         fieldsDoc.put("rt",true);
+        fieldsDoc.put("annotations",true);
         fieldsDoc.put("precursorMzStart",true);
         fieldsDoc.put("precursorMzEnd",true);
 
