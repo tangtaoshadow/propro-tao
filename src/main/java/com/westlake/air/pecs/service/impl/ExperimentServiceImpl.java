@@ -177,7 +177,13 @@ public class ExperimentServiceImpl implements ExperimentService {
         RandomAccessFile raf = null;
 
         //卷积前查看之前是否已经做过卷积处理,如果做过的话先删除原有的卷积数据
-        analyseOverviewDAO.getOneByExperimentId(expId);
+        AnalyseOverviewDO overviewOldDO = analyseOverviewDAO.getOneByExperimentId(expId);
+        if(overviewOldDO != null){
+            logger.info("发现已有的卷积数据,原有卷积数据卷积日期为"+overviewOldDO.getCreateDate()+";正在删除中");
+            analyseDataDAO.deleteAllByOverviewId(overviewOldDO.getId());
+            analyseOverviewDAO.delete(overviewOldDO.getId());
+            logger.info("原有卷积数据删除完毕,开始准备创建新的卷积数据");
+        }
 
         //创建实验初始化概览数据
         AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
