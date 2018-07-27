@@ -76,13 +76,14 @@ public class MzMLParser extends BaseExpParser{
     }
 
     // 一个循环，解决每个数据块的end，experiment id, parentNum, precurserMz, precurserMzStrart, precurserMzEnd, precurserWindow, ms level, rt,
-
     private void parseAttributes(RandomAccessFile rf, String experimentId, List<ScanIndexDO> list) throws IOException {
         int len = list.size();
         int level = 0, parentNum = 0;
         Float rt, precursorMz, precursorMzStart, precursorMzEnd, offset;
-        String line;
+        String line, dataBlock;
+        String[] datas;
         Long pos;
+        byte words[] = new byte[4000]; // 4000个能够保证读满说明字段
         long start = System.currentTimeMillis();
         for (int i = 0; i < len; i++) { // 倒数第一个数据块稍后处理
             ScanIndexDO scanIndexDO = list.get(i);
@@ -93,8 +94,11 @@ public class MzMLParser extends BaseExpParser{
             scanIndexDO.setExperimentId(experimentId);
             // ms_level and parentNum, precursorMzStart, preceursorMzEnd,
             rf.seek(scanIndexDO.getStart());
-            while (true) {
-                line = rf.readLine(); // 读后文件指针调到下一行行首
+            rf.read(words);
+            dataBlock = String.valueOf(words);
+            datas = dataBlock.split("\n");
+            for (int j = 0; j < datas.length; j++) {
+                line = datas[j]; // 读后文件指针调到下一行行首
                 if (line.contains("ms level")) {
                     level = searchValue(line).intValue();
                     if (level == 1)
@@ -122,7 +126,7 @@ public class MzMLParser extends BaseExpParser{
                     break;
                 }
             }
-            if (i % 100 == 0) {
+            if (i % 10000 == 0) {
                 logger.info(String.format("已扫描索引: %.2f%%，平均每个光谱用时：%.2f ms", (double)i/len*100, (double)(System.currentTimeMillis() - start)/i));
             }
         }
