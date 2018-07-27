@@ -133,7 +133,7 @@ public class ExperimentController extends BaseController {
             //传入不同的文件类型会调用不同的解析层
             if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZXML)) {
                 indexList = mzXMLParser.index(file, experimentDO.getId());
-            } else {
+            } else if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZML)){
                 indexList = mzMLParser.index(file, experimentDO.getId());
             }
 
