@@ -223,7 +223,7 @@ public class LibraryController extends BaseController {
                     @RequestParam(value = "rtExtractionWindow", required = true,defaultValue = "1.0") float rtExtractionWindow,
                     RedirectAttributes redirectAttributes) {
         redirectAttributes.addFlashAttribute("rtExtractionWindow",rtExtractionWindow);
-        LibraryCoordinate lc = transitionService.buildMS(id, rtExtractionWindow);
+        LibraryCoordinate lc = transitionService.buildCoordinates(id, rtExtractionWindow);
 
         return "redirect:/library/detail/"+id;
     }

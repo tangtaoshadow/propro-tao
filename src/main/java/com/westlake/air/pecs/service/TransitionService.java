@@ -36,9 +36,9 @@ public interface TransitionService {
 
     Long countByPeptideSequence(String libraryId);
 
-    LibraryCoordinate buildMS(String libraryId, float rtExtractionWindows);
+    LibraryCoordinate buildCoordinates(String libraryId, float rtExtractionWindows);
 
-    List<TargetTransition> buildMS1(String libraryId, float rtExtractionWindows);
+    List<TargetTransition> buildMS1Coordinates(String libraryId, float rtExtractionWindows);
 
-    List<TargetTransition> buildMS2(String libraryId, float rtExtractionWindows);
+    List<TargetTransition> buildMS2Coordinates(String libraryId, float rtExtractionWindows,float precursorMzStart, float precursorMzEnd);
 }

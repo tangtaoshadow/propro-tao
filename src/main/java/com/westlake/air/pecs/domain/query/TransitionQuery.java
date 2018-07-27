@@ -59,5 +59,14 @@ public class TransitionQuery extends PageQuery {
      */
     String fullName;
 
+    Double precursorMzStart;
 
+    Double precursorMzEnd;
+
+    public TransitionQuery() {
+    }
+
+    public TransitionQuery(String libraryId) {
+        this.libraryId = libraryId;
+    }
 }

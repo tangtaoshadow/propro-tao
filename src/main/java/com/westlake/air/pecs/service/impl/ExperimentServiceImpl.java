@@ -196,15 +196,12 @@ public class ExperimentServiceImpl implements ExperimentService {
 
             //构建卷积坐标(耗时操作)
             if (buildType == 0) {
-                LibraryCoordinate lc = transitionService.buildMS(experimentDO.getLibraryId(), rtExtractWindow);
-                extractMS1(raf, experimentDO, overviewDO.getId(), lc.getMs1List(), rtExtractWindow, mzExtractWindow);
-                extractMS2(raf, experimentDO, overviewDO.getId(), lc.getMs2List(), rtExtractWindow, mzExtractWindow);
+                extractMS1(raf, experimentDO, overviewDO.getId(), rtExtractWindow, mzExtractWindow);
+                extractMS2(raf, experimentDO, overviewDO.getId(), rtExtractWindow, mzExtractWindow);
             } else if (buildType == 1) {
-                List<TargetTransition> targetTransitions = transitionService.buildMS1(experimentDO.getLibraryId(), rtExtractWindow);
-                extractMS1(raf, experimentDO, overviewDO.getId(), targetTransitions, rtExtractWindow, mzExtractWindow);
+                extractMS1(raf, experimentDO, overviewDO.getId(), rtExtractWindow, mzExtractWindow);
             } else if (buildType == 2) {
-                List<TargetTransition> targetTransitions = transitionService.buildMS2(experimentDO.getLibraryId(), rtExtractWindow);
-                extractMS2(raf, experimentDO, overviewDO.getId(), targetTransitions, rtExtractWindow, mzExtractWindow);
+                extractMS2(raf, experimentDO, overviewDO.getId(), rtExtractWindow, mzExtractWindow);
             }
 
         } catch (Exception e) {
@@ -222,185 +219,49 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     @Override
-    public void extractMS1(RandomAccessFile raf, ExperimentDO exp, String overviewId, List<TargetTransition> coordinates, float rtExtractWindow, float mzExtractWindow) throws IOException {
+    public void extractMS1(RandomAccessFile raf, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow) {
 
-        BaseExpParser baseExpParser = getParser(exp.getFileType());
-
-        //用于存储最终的卷积结果
-        List<AnalyseDataDO> dataList = new ArrayList<>();
-        //用于存储从XML中解压缩出来的数据
-        TreeMap<Float, MzIntensityPairs> rtMap = new TreeMap<>();
-
-        ScanIndexQuery query = new ScanIndexQuery();
-        query.setExperimentId(exp.getId());
-        query.setMsLevel(1);
-
-        long totalCount = scanIndexDAO.count(query);
-
-        logger.info("MS1 坐标总计" + coordinates.size() + "条");
-        logger.info("MS1 实验光谱数" + totalCount + "条");
-
-        //如果MS1的实验数据不存在,则跳过
-        if (totalCount == 0) {
+        //Step1.获取标准库目标卷积片段
+        List<TargetTransition> coordinates = transitionService.buildMS1Coordinates(exp.getLibraryId(), rtExtractWindow);
+        if (coordinates == null || coordinates.size() == 0) {
+            logger.error("标准库目标为空");
             return;
         }
-        if (coordinates.size() == 0) {
-            logger.info("坐标系为空");
-            return;
-        }
-
-        List<SimpleScanIndex> indexes = scanIndexDAO.getSimpleAll(query);
-
-        //如果MS1存在,则进行MS1的光谱扫描
-        float mzStart = 0;
-        float mzEnd = -1;
-
-        long start = System.currentTimeMillis();
-        long start2 = System.currentTimeMillis();
-        logger.info("开始创建MS1图谱");
-        int k = 0;
-        for (SimpleScanIndex index : indexes) {
-            rtMap.put(index.getRt(), baseExpParser.parseOne(raf, index.getStart(), index.getEnd()));
-            k++;
-            if (k % 100 == 0) {
-                logger.info("解析100个光谱耗时:" + (System.currentTimeMillis() - start2));
-                start2 = System.currentTimeMillis();
-            }
-        }
-        logger.info("解析XML文件总计耗时:" + (System.currentTimeMillis() - start));
-        int logCountForMS1Target = 0;
-        start = System.currentTimeMillis();
-        for (TargetTransition ms1 : coordinates) {
-
-            //设置mz卷积窗口
-            mzStart = ms1.getPrecursorMz() - mzExtractWindow / 2;
-            mzEnd = ms1.getPrecursorMz() + mzExtractWindow / 2;
-
-            Float[] rtArray = new Float[rtMap.size()];
-            rtMap.keySet().toArray(rtArray);
-            Float[] intensityArray = new Float[rtMap.size()];
-
-            int i = 0;
-            for (Float rt : rtMap.keySet()) {
-                MzIntensityPairs pairs = rtMap.get(rt);
-                Float[] pairMzArray = pairs.getMzArray();
-                Float[] pairIntensityArray = pairs.getIntensityArray();
-                intensityArray[i] = evolution(pairMzArray, pairIntensityArray, mzStart, mzEnd);
-                i++;
-            }
-
-            AnalyseDataDO dataDO = new AnalyseDataDO();
-            dataDO.setTransitionId(ms1.getId());
-            dataDO.setMz(ms1.getPrecursorMz());
-            dataDO.setRtArray(rtArray);
-            dataDO.setIntensityArray(intensityArray);
-            dataDO.setMsLevel(1);
-            dataDO.setOverviewId(overviewId);
-            dataDO.setFullName(ms1.getFullName());
-            dataDO.setAnnotations(ms1.getAnnotations());
-            dataList.add(dataDO);
-
-            //每隔1000条数据落库一次,以减少对内存的依赖
-            logCountForMS1Target++;
-            if (logCountForMS1Target % 10000 == 0) {
-                logger.info("已扫描MS1目标:" + logCountForMS1Target + "条,累计耗时:" + (System.currentTimeMillis() - start));
-                analyseDataDAO.insert(dataList);
-                logger.info("数据存入数据库成功");
-                dataList.clear();
-            }
-        }
-        analyseDataDAO.insert(dataList);
-        logger.info("全部数据处理完毕");
+        //Step2.获取指定索引列表
+        List<SimpleScanIndex> indexes = scanIndexDAO.getSimpleAll(new ScanIndexQuery(exp.getId(), 1));
+        //Step4.提取指定原始谱图
+        TreeMap<Float, MzIntensityPairs> rtMap = parseSpectrum(raf, indexes, getParser(exp.getFileType()));
+        //Step5.卷积并且存储数据
+        convoluteAndInsert(coordinates, rtMap, overviewId, mzExtractWindow, true);
     }
 
     @Override
-    public void extractMS2(RandomAccessFile raf, ExperimentDO exp, String overviewId, List<TargetTransition> coordinates, float rtExtractWindow, float mzExtractWindow) throws IOException {
+    public void extractMS2(RandomAccessFile raf, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow) {
 
-        //用于存储最终的卷积结果
-        List<AnalyseDataDO> dataList = new ArrayList<>();
-        //用于存储从XML中解压缩出来的数据
-        TreeMap<Float, MzIntensityPairs> rtMap = new TreeMap<>();
+        //Step1.获取窗口信息.
+        List<WindowRang> rangs = getWindows(exp.getId());
+        logger.info("总计有窗口:" + rangs.size() + "个");
 
-        ScanIndexQuery query = new ScanIndexQuery();
-        query.setExperimentId(exp.getId());
-        query.setMsLevel(2);
-
-        long totalCount = scanIndexDAO.count(query);
-
-        logger.info("MS2 坐标总计" + coordinates.size() + "条");
-        logger.info("MS2 实验光谱数" + totalCount + "条");
-
-        //如果MS2的实验数据不存在,则跳过
-        if (totalCount == 0) {
-            return;
+        //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
+        int count = 1;
+        logger.info("开始进行MS2卷积计算");
+        for (WindowRang rang : rangs) {
+            long start = System.currentTimeMillis();
+            //Step2.获取指定索引列表
+            ScanIndexQuery query = new ScanIndexQuery(exp.getId(), 2);
+            query.setPrecursorMzStart(rang.getMzStart());
+            query.setPrecursorMzEnd(rang.getMzEnd());
+            List<SimpleScanIndex> indexes = scanIndexDAO.getSimpleAll(query);
+            logger.info("本批次将扫描谱图" + indexes.size() + "张");
+            //Step3.获取标准库的目标肽段片段的坐标
+            List<TargetTransition> coordinates = transitionService.buildMS2Coordinates(exp.getLibraryId(), rtExtractWindow, rang.getMzStart(), rang.getMzEnd());
+            //Step4.提取指定原始谱图
+            TreeMap<Float, MzIntensityPairs> rtMap = parseSpectrum(raf, indexes, getParser(exp.getFileType()));
+            //Step5.卷积并且存储数据
+            convoluteAndInsert(coordinates, rtMap, overviewId, mzExtractWindow, false);
+            logger.info("第" + count + "批数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
+            count++;
         }
-        if (coordinates.size() == 0) {
-            logger.info("坐标系为空");
-            return;
-        }
-
-        //开始按窗口区间获取所有的光谱图
-
-        List<SimpleScanIndex> indexes = scanIndexDAO.getSimpleAll(query);
-
-        //如果MS1存在,则进行MS1的光谱扫描
-        float mzStart = 0;
-        float mzEnd = -1;
-
-        long start = System.currentTimeMillis();
-        long start2 = System.currentTimeMillis();
-        logger.info("开始创建MS1图谱");
-        int k = 0;
-        for (SimpleScanIndex index : indexes) {
-            rtMap.put(index.getRt(), mzXMLParser.parseOne(raf, index.getStart(), index.getEnd()));
-            k++;
-            if (k % 100 == 0) {
-                logger.info("解析100个光谱耗时:" + (System.currentTimeMillis() - start2));
-                start2 = System.currentTimeMillis();
-            }
-        }
-        logger.info("解析XML文件总计耗时:" + (System.currentTimeMillis() - start));
-        int logCountForMS1Target = 0;
-        start = System.currentTimeMillis();
-        for (TargetTransition ms1 : coordinates) {
-
-            //设置mz卷积窗口
-            mzStart = ms1.getPrecursorMz() - mzExtractWindow / 2;
-            mzEnd = ms1.getPrecursorMz() + mzExtractWindow / 2;
-
-            Float[] rtArray = new Float[rtMap.size()];
-            rtMap.keySet().toArray(rtArray);
-            Float[] intensityArray = new Float[rtMap.size()];
-
-            int i = 0;
-            for (Float rt : rtMap.keySet()) {
-                MzIntensityPairs pairs = rtMap.get(rt);
-                Float[] pairMzArray = pairs.getMzArray();
-                Float[] pairIntensityArray = pairs.getIntensityArray();
-                intensityArray[i] = evolution(pairMzArray, pairIntensityArray, mzStart, mzEnd);
-                i++;
-            }
-
-            AnalyseDataDO dataDO = new AnalyseDataDO();
-            dataDO.setTransitionId(ms1.getId());
-            dataDO.setMz(ms1.getPrecursorMz());
-            dataDO.setRtArray(rtArray);
-            dataDO.setIntensityArray(intensityArray);
-            dataDO.setMsLevel(1);
-            dataDO.setOverviewId(overviewId);
-            dataList.add(dataDO);
-
-            //每隔1000条数据落库一次,以减少对内存的依赖
-            logCountForMS1Target++;
-            if (logCountForMS1Target % 10000 == 0) {
-                logger.info("已扫描MS1目标:" + logCountForMS1Target + "条,累计耗时:" + (System.currentTimeMillis() - start));
-                analyseDataDAO.insert(dataList);
-                logger.info("数据存入数据库成功");
-                dataList.clear();
-            }
-        }
-        analyseDataDAO.insert(dataList);
-        logger.info("全部数据处理完毕");
     }
 
     @Override
@@ -455,6 +316,80 @@ public class ExperimentServiceImpl implements ExperimentService {
         return resultDO;
     }
 
+    private TreeMap<Float, MzIntensityPairs> parseSpectrum(RandomAccessFile raf, List<SimpleScanIndex> indexes, BaseExpParser baseExpParser) {
+        long start = System.currentTimeMillis();
+        long start2 = System.currentTimeMillis();
+        logger.info("开始创建MS图谱");
+        TreeMap<Float, MzIntensityPairs> rtMap = new TreeMap<>();
+        int k = 0;
+        for (SimpleScanIndex index : indexes) {
+            rtMap.put(index.getRt(), baseExpParser.parseOne(raf, index.getStart(), index.getEnd()));
+            k++;
+            if (k % 500 == 0) {
+                logger.info("解析500个图谱耗时:" + (System.currentTimeMillis() - start2));
+                start2 = System.currentTimeMillis();
+            }
+        }
+        logger.info("解析最后" + k % 500 + "个图谱耗时:" + (System.currentTimeMillis() - start2));
+        logger.info("解析XML文件总计耗时:" + (System.currentTimeMillis() - start));
+        return rtMap;
+    }
+
+    private void convoluteAndInsert(List<TargetTransition> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float mzExtractWindow, boolean isMS1) {
+        int logCountForMSTarget = 0;
+        Long start = System.currentTimeMillis();
+        float mzStart = 0;
+        float mzEnd = -1;
+        List<AnalyseDataDO> dataList = new ArrayList<>();
+
+        for (TargetTransition ms : coordinates) {
+
+            //设置mz卷积窗口
+            mzStart = ms.getPrecursorMz() - mzExtractWindow / 2;
+            mzEnd = ms.getPrecursorMz() + mzExtractWindow / 2;
+
+            Float[] rtArray = new Float[rtMap.size()];
+            rtMap.keySet().toArray(rtArray);
+            Float[] intensityArray = new Float[rtMap.size()];
+
+            int i = 0;
+            for (Float rt : rtMap.keySet()) {
+                MzIntensityPairs pairs = rtMap.get(rt);
+                Float[] pairMzArray = pairs.getMzArray();
+                Float[] pairIntensityArray = pairs.getIntensityArray();
+                intensityArray[i] = accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd);
+                i++;
+            }
+
+            AnalyseDataDO dataDO = new AnalyseDataDO();
+            dataDO.setTransitionId(ms.getId());
+            if (isMS1) {
+                dataDO.setMz(ms.getPrecursorMz());
+                dataDO.setMsLevel(1);
+            } else {
+                dataDO.setMz(ms.getProductMz());
+                dataDO.setMsLevel(2);
+            }
+            dataDO.setRtArray(rtArray);
+            dataDO.setIntensityArray(intensityArray);
+            dataDO.setOverviewId(overviewId);
+            dataDO.setFullName(ms.getFullName());
+            dataDO.setAnnotations(ms.getAnnotations());
+            dataList.add(dataDO);
+
+            //每隔1000条数据落库一次,以减少对内存的依赖
+            logCountForMSTarget++;
+            if (logCountForMSTarget % 10000 == 0) {
+                logger.info("已扫描MS目标:" + logCountForMSTarget + "条,累计耗时:" + (System.currentTimeMillis() - start));
+                analyseDataDAO.insert(dataList);
+                logger.info("数据存入数据库成功");
+                dataList.clear();
+            }
+        }
+        analyseDataDAO.insert(dataList);
+        logger.info("全部数据处理完毕");
+    }
+
     /**
      * 计算 mz在[mzStart, mzEnd]范围对应的intensity和
      *
@@ -464,7 +399,7 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @param mzEnd
      * @return
      */
-    private Float evolution(Float[] mzArray, Float[] intensityArray, Float mzStart, Float mzEnd) {
+    private Float accumulation(Float[] mzArray, Float[] intensityArray, Float mzStart, Float mzEnd) {
         Float result = 0f;
         int start = findIndex(mzArray, mzStart);
         int end = findIndex(mzArray, mzEnd) - 1;

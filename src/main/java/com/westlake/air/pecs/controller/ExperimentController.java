@@ -212,6 +212,7 @@ public class ExperimentController extends BaseController {
         ResultDO<LibraryDO> resultLib = libraryService.getById(libraryId);
         ExperimentDO experimentDO = resultDO.getModel();
         if (resultLib.isSuccess()) {
+            experimentDO.setName(name);
             experimentDO.setLibraryId(libraryId);
             experimentDO.setFileType(fileType);
             experimentDO.setFileLocation(fileLocation);
@@ -273,7 +274,6 @@ public class ExperimentController extends BaseController {
     @ResponseBody
     ResultDO<JSONObject> getWindows(Model model,
                               @RequestParam(value = "expId", required = false) String expId) {
-
 
         List<WindowRang> rangs = experimentService.getWindows(expId);
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);

@@ -107,6 +107,12 @@ public class ScanIndexDAO {
         if (scanIndexQuery.getParentNum() != null && scanIndexQuery.getParentNum() != null) {
             query.addCriteria(where("parentNum").is(scanIndexQuery.getParentNum()));
         }
+        if (scanIndexQuery.getPrecursorMzStart() != null && scanIndexQuery.getPrecursorMzStart() != null) {
+            query.addCriteria(where("precursorMzStart").is(scanIndexQuery.getPrecursorMzStart()));
+        }
+        if (scanIndexQuery.getPrecursorMzEnd() != null && scanIndexQuery.getPrecursorMzEnd() != null) {
+            query.addCriteria(where("precursorMzEnd").is(scanIndexQuery.getPrecursorMzEnd()));
+        }
         return query;
     }
 }

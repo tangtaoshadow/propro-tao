@@ -35,24 +35,24 @@ public class TransitionDAO {
     }
 
     //这个函数目前只获取真肽段
-    public List<TargetTransition> getTargetTransitionsByLibraryId(String libraryId){
-        Document queryDoc = new Document();
-        queryDoc.put("libraryId",libraryId);
-        queryDoc.put("isDecoy",false);
-
-        Document fieldsDoc = new Document();
-        fieldsDoc.put("id",true);//这个字段的加入会占用较大内存
-        fieldsDoc.put("fullName",true);
-        fieldsDoc.put("precursorMz",true);
-        fieldsDoc.put("productMz",true);
-        fieldsDoc.put("rt",true);
-        fieldsDoc.put("annotations",true);
-        fieldsDoc.put("precursorMzStart",true);
-        fieldsDoc.put("precursorMzEnd",true);
-
-        Query query = new BasicQuery(queryDoc, fieldsDoc);
-        return mongoTemplate.find(query, TargetTransition.class, CollectionName);
-    }
+//    public List<TargetTransition> getTTList(TransitionQuery transitionQuery){
+//        Document queryDoc = new Document();
+//        if(transitionQuery.getLibraryId() != null){
+//            queryDoc.put("libraryId",transitionQuery.getLibraryId());
+//        }
+//        queryDoc.put("isDecoy",false);
+//
+//        Document fieldsDoc = new Document();
+//        fieldsDoc.put("id",true);//这个字段的加入会占用较大内存
+//        fieldsDoc.put("fullName",true);
+//        fieldsDoc.put("precursorMz",true);
+//        fieldsDoc.put("productMz",true);
+//        fieldsDoc.put("rt",true);
+//        fieldsDoc.put("annotations",true);
+//
+//        Query query = new BasicQuery(queryDoc, fieldsDoc);
+//        return mongoTemplate.find(query, TargetTransition.class, CollectionName);
+//    }
 
     public List<TransitionDO> getAllByLibraryIdAndIsDecoy(String libraryId, boolean isDecoy){
         Query query = new Query(where("libraryId").is(libraryId));
@@ -62,6 +62,10 @@ public class TransitionDAO {
 
     public List<TransitionDO> getList(TransitionQuery query) {
         return mongoTemplate.find(buildQuery(query), TransitionDO.class, CollectionName);
+    }
+
+    public List<TargetTransition> getTTAll(TransitionQuery query) {
+        return mongoTemplate.find(buildQueryWithoutPage(query), TargetTransition.class, CollectionName);
     }
 
     public long count(TransitionQuery query){
@@ -167,7 +171,9 @@ public class TransitionDAO {
         if (transitionQuery.getName() != null) {
             query.addCriteria(where("name").regex(transitionQuery.getName(),"i"));
         }
-
+        if (transitionQuery.getPrecursorMzStart() != null) {
+            query.addCriteria(where("precursorMz").gte(transitionQuery.getPrecursorMzStart()).lte(transitionQuery.getPrecursorMzEnd()));
+        }
         return query;
     }
 
