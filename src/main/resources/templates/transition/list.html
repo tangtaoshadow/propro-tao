@@ -77,25 +77,25 @@
                     <table class="table table-bordered table-hover" style="table-layout:fixed;">
                         <thead>
                             <tr>
-                                <th width="3%">
+                                <th width="2%">
                                     No.
                                 </th>
-                                <th width="7%">
+                                <th width="8%">
                                     对应标准库名称
                                 </th>
-                                <th width="8%">
+                                <th width="10%">
                                     对应蛋白质名称
                                 </th>
-                                <th width="10%">
+                                <th width="15%">
                                     名称
                                 </th>
                                 <th width="8%">
                                     原始肽段序列
                                 </th>
-                                <th width="9%">
-                                    肽段序列
-                                </th>
-                                <th width="10%">
+                                <!--<th width="9%">-->
+                                    <!--肽段序列-->
+                                <!--</th>-->
+                                <th width="14%">
                                     肽段全名
                                 </th>
                                 <th width="7%">
@@ -108,12 +108,12 @@
                                     Annotations
                                 </th>
                                 <th width="5%">
-                                    是否是伪肽段
+                                    是否伪肽段
                                 </th>
                                 <th width="8%">
                                     离子强度
                                 </th>
-                                <th width="8%">
+                                <th width="6%">
                                     归一化RT
                                 </th>
                                 <th width="5%">
@@ -133,10 +133,10 @@
                                        th:text="${transition.proteinName}"></a>
                                 </td>
                                 <td th:text="${transition.name}"></td>
-                                <td>
-                                    <a th:href="|/transition/list?sequence=${transition.targetSequence}|"
-                                       th:text="${transition.targetSequence}"></a>
-                                </td>
+                                <!--<td>-->
+                                    <!--<a th:href="|/transition/list?sequence=${transition.targetSequence}|"-->
+                                       <!--th:text="${transition.targetSequence}"></a>-->
+                                <!--</td>-->
                                 <td>
                                     <a th:href="|/transition/list?sequence=${transition.sequence}|"
                                        th:text="${transition.sequence}"></a>

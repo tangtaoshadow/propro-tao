@@ -51,25 +51,23 @@ public interface ExperimentService {
      *
      * @param raf
      * @param exp
-     * @param coordinates
      * @param rtExtractWindow
      * @param mzExtractWindow
      * @return
      * @throws IOException
      */
-    void extractMS1(RandomAccessFile raf, ExperimentDO exp, String overviewId, List<TargetTransition> coordinates, float rtExtractWindow, float mzExtractWindow) throws IOException;
+    void extractMS1(RandomAccessFile raf, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow) throws IOException;
 
     /**
      * 进行MS2数据卷积
      * @param raf
      * @param exp
      * @param overviewId
-     * @param coordinates
      * @param rtExtractWindow
      * @param mzExtractWindow
      * @throws IOException
      */
-    void extractMS2(RandomAccessFile raf, ExperimentDO exp, String overviewId, List<TargetTransition> coordinates, float rtExtractWindow, float mzExtractWindow) throws IOException;
+    void extractMS2(RandomAccessFile raf, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow) throws IOException;
 
     /**
      * 获取一个实验的Swath Windows窗口信息

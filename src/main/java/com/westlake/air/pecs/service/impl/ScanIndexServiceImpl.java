@@ -60,7 +60,6 @@ public class ScanIndexServiceImpl implements ScanIndexService {
     @Override
     public List<SimpleScanIndex> getSimpleList(ScanIndexQuery query) {
         return scanIndexDAO.getSimpleList(query);
-
     }
 
     @Override

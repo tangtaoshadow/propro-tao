@@ -29,12 +29,6 @@ public class TargetTransition {
 
     float rtEnd;
 
-    //前体的荷质比窗口开始位置
-    float precursorMzStart;
-
-    //前体的荷质比窗口结束位置
-    float precursorMzEnd;
-
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
