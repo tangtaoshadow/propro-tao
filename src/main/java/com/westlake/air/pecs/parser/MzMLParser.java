@@ -2,6 +2,7 @@ package com.westlake.air.pecs.parser;
 
 import com.westlake.air.pecs.domain.bean.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
+import com.westlake.air.pecs.parser.model.mzxml.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Created by Song Jian
@@ -21,6 +23,18 @@ import java.util.List;
 public class MzMLParser extends BaseExpParser{
 
     public final Logger logger = LoggerFactory.getLogger(MzMLParser.class);
+
+    public Class<?>[] classes = new Class[]{
+            DataProcessing.class, Maldi.class, MsInstrument.class, MsRun.class, MzXML.class, NameValue.class,
+            OntologyEntry.class, Operator.class, Orientation.class, ParentFile.class, Pattern.class,
+            Peaks.class, Plate.class, PrecursorMz.class, Robot.class, Scan.class, ScanOrigin.class,
+            Separation.class, SeparationTechnique.class, Software.class, Spot.class, Spotting.class,
+    };
+
+    private void prepare() {
+        airXStream.processAnnotations(classes);
+        airXStream.allowTypes(classes);
+    }
 
     /**
      * 为了加快解析，采取两个循环：解析索引区循环，然后根据索引找到数据区，对数据区一次循环获取属性，而不是分成很多次循环
@@ -176,6 +190,20 @@ public class MzMLParser extends BaseExpParser{
 
     @Override
     public MzIntensityPairs parseOne(RandomAccessFile raf, long start, long end) {
+        prepare();
+        try{
+            raf.seek(start);
+            byte[] reader = new byte[(int) (end - start)];
+            raf.read(reader);
+            Scan scan = new Scan();
+            airXStream.fromXML(new String(reader), scan);
+            if (scan.getPeaksList() != null && scan.getPeaksList().size() >= 1) {
+                Peaks peaks = scan.getPeaksList().get(0);
+                return getPeakMap(peaks.getValue(), peaks.getPrecision(), peaks.getCompressionType() != null && "zlib".equalsIgnoreCase(peaks.getCompressionType()));
+            }
+        }catch (Exception e){
+            logger.error(e.getMessage());
+        }
         return null;
     }
 
