@@ -23087,8 +23087,8 @@ body.m-portlet--fullscreen {
 
 .m-form .m-form__group {
   margin-bottom: 0;
-  padding-top: 15px;
-  padding-bottom: 15px; }
+  padding-top: 5px;
+  padding-bottom: 5px; }
   .m-form .m-form__group .form-control-label,
   .m-form .m-form__group label {
     font-weight: 400;
@@ -23182,7 +23182,7 @@ body.m-portlet--fullscreen {
   font-weight: 500; }
 
 .m-form .m-form__actions {
-  padding: 30px; }
+  padding: 10px; }
   .m-form .m-form__actions:before, .m-form .m-form__actions:after {
     content: " ";
     display: table; }
@@ -30493,8 +30493,8 @@ body.m-content--skin-light2 {
   -o-transition: none;
   transition: none;
   height: 70px;
-  width: 255px;
-  padding: 0px 30px; }
+  width: 220px;
+  padding: 0px 15px; }
   .m-brand--hidden .m-brand {
     display: none; }
   .m-brand .m-brand__logo {
@@ -31143,7 +31143,7 @@ body.m-content--skin-light2 {
   -ms-transition: none;
   -o-transition: none;
   transition: none;
-  width: 255px; }
+  width: 220px; }
   .m-aside-left.m-aside-left--skin-dark {
     background-color: #2c2e3e; }
   .m-aside-left.m-aside-left--skin-light {
@@ -33505,7 +33505,7 @@ body.m-content--skin-light2 {
         .m-aside-menu .m-menu__nav > .m-menu__item .m-menu__submenu .m-menu__item > .m-menu__link .m-menu__link-bullet {
           vertical-align: middle;
           text-align: left;
-          width: 20px; }
+          width: 10px; }
           .m-aside-menu .m-menu__nav > .m-menu__item .m-menu__submenu .m-menu__item > .m-menu__heading .m-menu__link-bullet > span,
           .m-aside-menu .m-menu__nav > .m-menu__item .m-menu__submenu .m-menu__item > .m-menu__link .m-menu__link-bullet > span {
             vertical-align: middle;
@@ -33590,8 +33590,8 @@ body.m-content--skin-light2 {
       padding: 0 30px;
       padding-left: 75px; }
   .m-aside-menu .m-menu__nav > .m-menu__item > .m-menu__submenu .m-menu__subnav > .m-menu__item > .m-menu__link {
-    padding: 0 30px;
-    padding-left: 45px; }
+    padding: 0 15px;
+    padding-left: 30px; }
   .m-aside-menu .m-menu__nav > .m-menu__item > .m-menu__submenu .m-menu__subnav > .m-menu__item > .m-menu__submenu .m-menu__subnav {
     padding: 0; }
     .m-aside-menu .m-menu__nav > .m-menu__item > .m-menu__submenu .m-menu__subnav > .m-menu__item > .m-menu__submenu .m-menu__subnav > .m-menu__item > .m-menu__link {
@@ -34997,7 +34997,7 @@ body.m-content--skin-light2 {
     -ms-transition: none;
     -o-transition: none;
     transition: none;
-    margin-left: 255px;
+    margin-left: 220px;
     margin-top: -60px; }
   .m-footer--push.m-aside-left--enabled:not(.m-footer--fixed).m-aside-left--minimize .m-footer {
     -webkit-transition: none;

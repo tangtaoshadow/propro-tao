@@ -28,7 +28,7 @@
 
     <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-8">
             <!--begin::Portlet-->
             <div class="m-portlet m-portlet--tab">
                 <div class="m-portlet__head">
@@ -148,9 +148,6 @@
                 <!--end::Form-->
             </div>
             <!--end::Portlet-->
-        </div>
-        <div class="col-md-8">
-            <!--begin::Portlet-->
             <div class="m-portlet m-portlet--tab">
                 <div class="m-portlet__head">
                     <div class="m-portlet__head-caption">
@@ -222,18 +219,9 @@
                 </form>
                 <!--end::Form-->
             </div>
-            <!--end::Portlet-->
+        </div>
+        <div class="col-md-4">
             <div class="m-portlet m-portlet--tab">
-                <div class="m-portlet__head">
-                    <div class="m-portlet__head-caption">
-                        <div class="m-portlet__head-title">
-                            <span class="m-portlet__head-icon m--hide">
-                                <i class="la la-gear"></i>
-                            </span>
-                            <h3 class="m-portlet__head-text">实验的窗口数据</h3>
-                        </div>
-                    </div>
-                </div>
                 <div id="windows_rang" class="m-portlet__body" style="width: auto;height:600px;">
                 </div>
             </div>
@@ -265,7 +253,7 @@
             option = {
                 title: {
                     text: '实验数据窗口区间',
-                    subtext: '实验名称:' + name
+                    subtext: name
                 },
                 tooltip: {
                     trigger: 'axis',
@@ -273,8 +261,9 @@
                         type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
                     },
                     formatter: function (params) {
-                        var tar = params[0];
-                        return tar.name + '<br/>' + tar.seriesName + ' : ' + tar.value;
+                        var start = params[0];
+                        var windows = params[1];
+                        return '窗口间隔:'+start.name +'毫秒'+ '<br/>' + '区间:' + start.value+'-'+(start.value+windows.value);
                     }
                 },
                 grid: {
@@ -290,7 +279,7 @@
                 },
                 yAxis: {
                     type: 'value',
-                    min: min,
+                    min: min-10,
                     max: max
                 },
                 series: [
@@ -318,7 +307,7 @@
                         label: {
                             normal: {
                                 show: true,
-                                position: 'inside'
+                                position: 'top'
                             }
                         },
                         data: rangs
