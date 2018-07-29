@@ -67,7 +67,7 @@ public class TransitionTsvParser {
             ResultDO resultDOTmp = transitionService.deleteAllByLibraryId(library.getId());
             logger.info("删除旧数据完毕");
 
-            if (resultDOTmp.isFailured()) {
+            if (resultDOTmp.isFailed()) {
                 logger.error(resultDOTmp.getMsgInfo());
                 return ResultDO.buildError(ResultCode.DELETE_ERROR);
             }
@@ -78,7 +78,7 @@ public class TransitionTsvParser {
                 if (resultDO == null) {
                     continue;
                 }
-                if (resultDO.isFailured()) {
+                if (resultDO.isFailed()) {
                     tranResult.addErrorMsg(resultDO.getMsgInfo());
                 } else {
                     transitions.add(resultDO.getModel());

@@ -7,7 +7,10 @@ import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
 import com.westlake.air.pecs.dao.ExperimentDAO;
 import com.westlake.air.pecs.dao.ScanIndexDAO;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.*;
+import com.westlake.air.pecs.domain.bean.MzIntensityPairs;
+import com.westlake.air.pecs.domain.bean.SimpleScanIndex;
+import com.westlake.air.pecs.domain.bean.TargetTransition;
+import com.westlake.air.pecs.domain.bean.WindowRang;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
@@ -17,7 +20,8 @@ import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.BaseExpParser;
 import com.westlake.air.pecs.parser.MzMLParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
-import com.westlake.air.pecs.service.*;
+import com.westlake.air.pecs.service.ExperimentService;
+import com.westlake.air.pecs.service.TransitionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 /**
  * Created by James Lu MiaoShan
@@ -165,7 +170,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         logger.info("基本条件检查开始");
         ExperimentDO experimentDO = experimentDAO.getById(expId);
         ResultDO checkResult = checkExperiment(experimentDO);
-        if (checkResult.isFailured()) {
+        if (checkResult.isFailed()) {
             return checkResult;
         }
 
@@ -197,11 +202,11 @@ public class ExperimentServiceImpl implements ExperimentService {
             //构建卷积坐标(耗时操作)
             if (buildType == 0) {
                 extractMS1(raf, experimentDO, overviewDO.getId(), rtExtractWindow, mzExtractWindow);
-                extractMS2(raf, experimentDO, overviewDO.getId(), rtExtractWindow, mzExtractWindow);
+                extractMS2(file, experimentDO, overviewDO.getId(), rtExtractWindow, mzExtractWindow);
             } else if (buildType == 1) {
                 extractMS1(raf, experimentDO, overviewDO.getId(), rtExtractWindow, mzExtractWindow);
             } else if (buildType == 2) {
-                extractMS2(raf, experimentDO, overviewDO.getId(), rtExtractWindow, mzExtractWindow);
+                extractMS2(file, experimentDO, overviewDO.getId(), rtExtractWindow, mzExtractWindow);
             }
 
         } catch (Exception e) {
@@ -235,32 +240,79 @@ public class ExperimentServiceImpl implements ExperimentService {
         convoluteAndInsert(coordinates, rtMap, overviewId, mzExtractWindow, true);
     }
 
+//    @Override
+//    public void extractMS2(File file, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow) {
+//
+//        long start = System.currentTimeMillis();
+//        //Step1.获取窗口信息.
+//        List<WindowRang> rangs = getWindows(exp.getId());
+//        logger.info("总计有窗口:" + rangs.size() + "个");
+//
+//        //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
+//        logger.info("开始进行MS2卷积计算");
+//        List<ListenableFuture<Integer>> futures = Lists.newArrayList();
+//        ExecutorService pool = Executors.newFixedThreadPool(3);//定义线程数
+//        ListeningExecutorService executorService = MoreExecutors.listeningDecorator(pool);
+//        for (int i = 0; i < rangs.size(); i++) {
+//            futures.add(executorService.submit(new Task(file, exp, overviewId, rtExtractWindow, mzExtractWindow, rangs.get(i))));
+//        }
+//
+//        final ListenableFuture<List<Integer>> resultsFuture = Futures.successfulAsList(futures);
+//        try {//所有都执行完毕
+//            resultsFuture.get();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            System.out.println("操作完毕");
+//            pool.shutdown();
+//        }
+//        logger.info("MS2卷积总计耗时:"+(System.currentTimeMillis() - start));
+//    }
+
     @Override
-    public void extractMS2(RandomAccessFile raf, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow) {
+    public void extractMS2(File file, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow) {
 
         //Step1.获取窗口信息.
         List<WindowRang> rangs = getWindows(exp.getId());
         logger.info("总计有窗口:" + rangs.size() + "个");
 
         //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
-        int count = 1;
         logger.info("开始进行MS2卷积计算");
-        for (WindowRang rang : rangs) {
-            long start = System.currentTimeMillis();
-            //Step2.获取指定索引列表
-            ScanIndexQuery query = new ScanIndexQuery(exp.getId(), 2);
-            query.setPrecursorMzStart(rang.getMzStart());
-            query.setPrecursorMzEnd(rang.getMzEnd());
-            List<SimpleScanIndex> indexes = scanIndexDAO.getSimpleAll(query);
-            logger.info("本批次将扫描谱图" + indexes.size() + "张");
-            //Step3.获取标准库的目标肽段片段的坐标
-            List<TargetTransition> coordinates = transitionService.buildMS2Coordinates(exp.getLibraryId(), rtExtractWindow, rang.getMzStart(), rang.getMzEnd());
-            //Step4.提取指定原始谱图
-            TreeMap<Float, MzIntensityPairs> rtMap = parseSpectrum(raf, indexes, getParser(exp.getFileType()));
-            //Step5.卷积并且存储数据
-            convoluteAndInsert(coordinates, rtMap, overviewId, mzExtractWindow, false);
-            logger.info("第" + count + "批数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
-            count++;
+        RandomAccessFile raf = null;
+        int count = 1;
+        try {
+            raf = new RandomAccessFile(file, "r");
+            for (WindowRang rang : rangs) {
+
+                long start = System.currentTimeMillis();
+                List<TargetTransition> coordinates;
+                TreeMap<Float, MzIntensityPairs> rtMap;
+
+                //Step2.获取指定索引列表
+                ScanIndexQuery query = new ScanIndexQuery(exp.getId(), 2);
+                query.setPrecursorMzStart(rang.getMzStart());
+                query.setPrecursorMzEnd(rang.getMzEnd());
+                List<SimpleScanIndex> indexes = scanIndexDAO.getSimpleAll(query);
+                logger.info("本批次将扫描谱图" + indexes.size() + "张");
+                //Step3.获取标准库的目标肽段片段的坐标
+                coordinates = transitionService.buildMS2Coordinates(exp.getLibraryId(), rtExtractWindow, rang.getMzStart(), rang.getMzEnd());
+                //Step4.提取指定原始谱图
+                rtMap = parseSpectrum(raf, indexes, getParser(exp.getFileType()));
+
+                //Step5.卷积并且存储数据
+                convoluteAndInsert(coordinates, rtMap, overviewId, mzExtractWindow, false);
+                logger.info("第" + count + "数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
+                count++;
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            try {
+                if (raf != null) {
+                    raf.close();
+                }
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         }
     }
 
@@ -323,14 +375,15 @@ public class ExperimentServiceImpl implements ExperimentService {
         TreeMap<Float, MzIntensityPairs> rtMap = new TreeMap<>();
         int k = 0;
         for (SimpleScanIndex index : indexes) {
+//            baseExpParser.parseOne(raf, index.getStart(), index.getEnd());
             rtMap.put(index.getRt(), baseExpParser.parseOne(raf, index.getStart(), index.getEnd()));
             k++;
-            if (k % 500 == 0) {
-                logger.info("解析500个图谱耗时:" + (System.currentTimeMillis() - start2));
+            if (k % 1000 == 0) {
+                logger.info("解析1000个图谱耗时:" + (System.currentTimeMillis() - start2));
                 start2 = System.currentTimeMillis();
             }
         }
-        logger.info("解析最后" + k % 500 + "个图谱耗时:" + (System.currentTimeMillis() - start2));
+        logger.info("解析最后" + k % 1000 + "个图谱耗时:" + (System.currentTimeMillis() - start2));
         logger.info("解析XML文件总计耗时:" + (System.currentTimeMillis() - start));
         return rtMap;
     }
@@ -434,6 +487,67 @@ public class ExperimentServiceImpl implements ExperimentService {
             return mzXMLParser;
         } else {
             return mzMLParser;
+        }
+    }
+
+    class Task implements Callable<Integer> {
+        File file;
+        ExperimentDO exp;
+        String overviewId;
+        float rtExtractWindow;
+        float mzExtractWindow;
+        WindowRang rang;
+
+
+        public Task(File file, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow, WindowRang rang) {
+            this.file = file;
+            this.exp = exp;
+            this.overviewId = overviewId;
+            this.rtExtractWindow = rtExtractWindow;
+            this.mzExtractWindow = mzExtractWindow;
+            this.rang = rang;
+        }
+
+        @Override
+        public Integer call() throws Exception {
+            logger.info("开始处理线程:" + rang.getMzStart() + "-" + rang.getMzEnd());
+            runMs1Extractor(file, exp, overviewId, rtExtractWindow, mzExtractWindow, rang);
+            return 1;
+        }
+
+        private void runMs1Extractor(File file, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow, WindowRang rang) {
+            RandomAccessFile raf = null;
+            try {
+                logger.info("分线程开始进行数据卷积");
+                long start = System.currentTimeMillis();
+                List<TargetTransition> coordinates;
+                TreeMap<Float, MzIntensityPairs> rtMap;
+                raf = new RandomAccessFile(file, "r");
+
+                //Step2.获取指定索引列表
+                ScanIndexQuery query = new ScanIndexQuery(exp.getId(), 2);
+                query.setPrecursorMzStart(rang.getMzStart());
+                query.setPrecursorMzEnd(rang.getMzEnd());
+                List<SimpleScanIndex> indexes = scanIndexDAO.getSimpleAll(query);
+                logger.info("本批次将扫描谱图" + indexes.size() + "张");
+                //Step3.获取标准库的目标肽段片段的坐标
+                coordinates = transitionService.buildMS2Coordinates(exp.getLibraryId(), rtExtractWindow, rang.getMzStart(), rang.getMzEnd());
+                //Step4.提取指定原始谱图
+                rtMap = parseSpectrum(raf, indexes, getParser(exp.getFileType()));
+
+                //Step5.卷积并且存储数据
+//                convoluteAndInsert(coordinates, rtMap, overviewId, mzExtractWindow, false);
+                logger.info("数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                try {
+                    if (raf != null) {
+                        raf.close();
+                    }
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
     }
 }

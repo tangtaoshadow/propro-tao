@@ -219,7 +219,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
                     </div>
-                    <div id="modal-body" class="modal-body" style="width: 800px;height:600px;">
+                    <div id="modal-body" class="modal-body" style="width: 1200px;height:600px;">
 
                     </div>
                     <div class="modal-footer">
@@ -313,7 +313,7 @@
                 },
                 yAxis: {},
                 series: [{
-                    name: 'rt',
+                    name: 'intensity',
                     type: 'bar',
                     data: data_intensity,
                     animationDelay: function (idx) {
@@ -328,7 +328,6 @@
 
             var chart = echarts.init(document.getElementById('modal-body'));
             chart.setOption(option);
-
         }
     </script>
 </th:block>

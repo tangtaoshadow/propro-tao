@@ -82,7 +82,7 @@ public class LibraryController extends BaseController {
         library.setInstrument(instrument);
         library.setDescription(description);
         ResultDO resultDO = libraryService.save(library);
-        if (resultDO.isFailured()) {
+        if (resultDO.isFailed()) {
             logger.warn(resultDO.getMsgInfo());
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             redirectAttributes.addFlashAttribute("library", library);
@@ -102,7 +102,7 @@ public class LibraryController extends BaseController {
                 }
             }
 
-            if (result.isFailured()) {
+            if (result.isFailed()) {
                 redirectAttributes.addFlashAttribute(ResultCode.SAVE_ERROR.getMessage(), result.getMsgInfo());
                 return "redirect:/library/list";
             }
@@ -121,7 +121,7 @@ public class LibraryController extends BaseController {
     String aggregate(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
 
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
-        if (resultDO.isFailured()) {
+        if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/library/list";
         }
@@ -135,7 +135,7 @@ public class LibraryController extends BaseController {
     @RequestMapping(value = "/edit/{id}")
     String edit(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
-        if (resultDO.isFailured()) {
+        if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/library/list";
         } else {
@@ -174,7 +174,7 @@ public class LibraryController extends BaseController {
             library.setDescription(description);
             library.setInstrument(instrument);
             ResultDO updateResult = libraryService.update(library);
-            if (updateResult.isFailured()) {
+            if (updateResult.isFailed()) {
                 redirectAttributes.addFlashAttribute(ResultCode.UPDATE_ERROR.getMessage(), updateResult.getMsgInfo());
                 return "redirect:/library/list";
             }

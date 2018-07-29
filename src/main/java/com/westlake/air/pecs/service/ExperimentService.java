@@ -7,6 +7,7 @@ import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.List;
@@ -60,14 +61,14 @@ public interface ExperimentService {
 
     /**
      * 进行MS2数据卷积
-     * @param raf
+     * @param file
      * @param exp
      * @param overviewId
      * @param rtExtractWindow
      * @param mzExtractWindow
      * @throws IOException
      */
-    void extractMS2(RandomAccessFile raf, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow) throws IOException;
+    void extractMS2(File file, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow) throws IOException;
 
     /**
      * 获取一个实验的Swath Windows窗口信息

@@ -2,7 +2,6 @@ package com.westlake.air.pecs.controller;
 
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.WindowRang;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
@@ -58,7 +57,7 @@ public class ScanIndexController extends BaseController {
         }
 
         ResultDO<ExperimentDO> expResult = experimentService.getById(experimentId);
-        if (expResult.isFailured()) {
+        if (expResult.isFailed()) {
             model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
             return "/scanindex/list";
         }

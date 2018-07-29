@@ -7,7 +7,6 @@ import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
-import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -126,7 +124,7 @@ public class AnalyseController extends BaseController {
         ResultDO<AnalyseDataDO> dataResult = analyseDataService.getById(analyseDataId);
 
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
-        if (dataResult.isFailured()) {
+        if (dataResult.isFailed()) {
             resultDO.setErrorResult(ResultCode.ANALYSE_DATA_NOT_EXISTED);
             return resultDO;
         }

@@ -3,6 +3,7 @@ package com.westlake.air.pecs.parser;
 import com.westlake.air.pecs.domain.bean.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.parser.model.mzxml.*;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,19 +84,61 @@ public class MzXMLParser extends BaseExpParser {
         return list;
     }
 
+//    @Override
+//    public MzIntensityPairs parseOne(RandomAccessFile raf, long start, long end) {
+//        prepare();
+//        try{
+//            long startTime = System.currentTimeMillis();
+//            raf.seek(start);
+//            byte[] reader = new byte[(int) (end - start)];
+//            raf.read(reader);
+//            Scan scan = new Scan();
+//            logger.info("读取耗时:"+(System.currentTimeMillis() - startTime));
+//            startTime = System.currentTimeMillis();
+//            airXStream.fromXML(new String(reader), scan);
+//            logger.info("解析耗时:"+(System.currentTimeMillis() - startTime));
+//            startTime = System.currentTimeMillis();
+//            if (scan.getPeaksList() != null && scan.getPeaksList().size() >= 1) {
+//                Peaks peaks = scan.getPeaksList().get(0);
+//                MzIntensityPairs pairs = getPeakMap(peaks.getValue(), peaks.getPrecision(), peaks.getCompressionType() != null && "zlib".equalsIgnoreCase(peaks.getCompressionType()));
+//                logger.info("解码耗时:"+(System.currentTimeMillis() - startTime));
+//                return pairs;
+//            }
+//        }catch (Exception e){
+//            logger.error(e.getMessage());
+//        }
+//
+//        return null;
+//    }
+
     @Override
     public MzIntensityPairs parseOne(RandomAccessFile raf, long start, long end) {
-        prepare();
         try{
             raf.seek(start);
             byte[] reader = new byte[(int) (end - start)];
             raf.read(reader);
-            Scan scan = new Scan();
-            airXStream.fromXML(new String(reader), scan);
-            if (scan.getPeaksList() != null && scan.getPeaksList().size() >= 1) {
-                Peaks peaks = scan.getPeaksList().get(0);
-                return getPeakMap(peaks.getValue(), peaks.getPrecision(), peaks.getCompressionType() != null && "zlib".equalsIgnoreCase(peaks.getCompressionType()));
+            String tmp = new String(reader);
+            String[] content = tmp.substring(tmp.indexOf("<peaks"),tmp.indexOf("</peaks>")).split(">");
+            String[] attributes = content[0].split("\n");
+            String precision = null;
+            String compressionType = null;
+            int targetCount = 0;
+            for(String attribute : attributes){
+                if(attribute.trim().contains("compressionType")){
+                    compressionType = attribute.split("=")[1].replace("\"","");
+                    targetCount++;
+                }
+                if(attribute.trim().contains("precision")){
+                    precision = attribute.split("=")[1].replace("\"","");
+                    targetCount++;
+                }
+                if(targetCount == 2){
+                    break;
+                }
             }
+            String value = content[1];
+            MzIntensityPairs pairs = getPeakMap(new Base64().decode(value), Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType));
+            return pairs;
         }catch (Exception e){
             logger.error(e.getMessage());
         }

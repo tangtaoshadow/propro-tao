@@ -6,7 +6,6 @@ import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.MzIntensityPairs;
 import com.westlake.air.pecs.domain.bean.WindowRang;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
@@ -26,9 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.List;
 
 /**
@@ -120,7 +117,7 @@ public class ExperimentController extends BaseController {
         }
 
         ResultDO result = experimentService.insert(experimentDO);
-        if (result.isFailured()) {
+        if (result.isFailed()) {
             model.addAttribute(ERROR_MSG, result.getMsgInfo());
             return "experiment/create";
         }
@@ -141,7 +138,7 @@ public class ExperimentController extends BaseController {
             ResultDO resultDO = scanIndexService.insertAll(indexList, true);
             logger.info("索引存储完毕");
 
-            if (resultDO.isFailured()) {
+            if (resultDO.isFailed()) {
                 logger.info("索引存储失败" + result.getMsgInfo());
                 experimentService.delete(experimentDO.getId());
                 model.addAttribute(ERROR_MSG, result.getMsgInfo());
@@ -164,7 +161,7 @@ public class ExperimentController extends BaseController {
 
         model.addAttribute("libraries", getLibraryList());
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
-        if (resultDO.isFailured()) {
+        if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/experiment/list";
         } else {
@@ -205,7 +202,7 @@ public class ExperimentController extends BaseController {
                   RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
-        if (resultDO.isFailured()) {
+        if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/experiment/list";
         }
@@ -221,7 +218,7 @@ public class ExperimentController extends BaseController {
         experimentDO.setDescription(description);
 
         ResultDO result = experimentService.update(experimentDO);
-        if (result.isFailured()) {
+        if (result.isFailed()) {
             model.addAttribute(ERROR_MSG, result.getMsgInfo());
             return "experiment/create";
         }

@@ -69,7 +69,7 @@ public class ResultDO<T> implements Serializable {
         return success;
     }
 
-    public boolean isFailured() {
+    public boolean isFailed() {
         return !success;
     }
 

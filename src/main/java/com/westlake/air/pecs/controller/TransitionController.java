@@ -102,7 +102,7 @@ public class TransitionController extends BaseController {
     String generateDecoy(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<TransitionDO> resultDO = transitionService.getById(id);
 
-        if (resultDO.isFailured()) {
+        if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/transition/list";
         }

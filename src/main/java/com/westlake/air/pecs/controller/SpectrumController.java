@@ -92,12 +92,12 @@ public class SpectrumController {
 
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
         MzIntensityPairs pairs = null;
-        if (expResult.isFailured()) {
+        if (expResult.isFailed()) {
             resultDO.setErrorResult(ResultCode.EXPERIMENT_NOT_EXISTED);
             return resultDO;
         }
 
-        if (indexResult.isFailured()) {
+        if (indexResult.isFailed()) {
             resultDO.setErrorResult(ResultCode.SCAN_INDEX_NOT_EXISTED);
             return resultDO;
         }
