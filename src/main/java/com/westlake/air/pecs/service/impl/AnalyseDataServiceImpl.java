@@ -17,7 +17,7 @@ import java.util.List;
  * Created by James Lu MiaoShan
  * Time: 2018-07-19 16:10
  */
-@Service("convolutionDataService")
+@Service("analyseDataService")
 public class AnalyseDataServiceImpl implements AnalyseDataService {
 
     public final Logger logger = LoggerFactory.getLogger(AnalyseDataServiceImpl.class);
