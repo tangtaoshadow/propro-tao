@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface AnalyseDataService {
 
-    List<AnalyseDataDO> getAllByRecordId(String expId);
+    List<AnalyseDataDO> getAllByOverviewId(String overviewId);
 
     Long count(AnalyseDataQuery query);
 

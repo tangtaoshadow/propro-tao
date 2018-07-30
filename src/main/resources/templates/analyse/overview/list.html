@@ -43,25 +43,28 @@
                     <th width="15%">
                         原始实验ID
                     </th>
+                    <th width="10%">
+                        原始实验名称
+                    </th>
                     <th width="8%">
                         标准库名称
                     </th>
                     <th width="7%">
                         创建人
                     </th>
-                    <th width="10%">
+                    <th width="7%">
                         MS1-RT卷积窗口
                     </th>
-                    <th width="10%">
+                    <th width="7%">
                         MS1-MZ卷积窗口
                     </th>
-                    <th width="10%">
+                    <th width="7%">
                         MS2-RT卷积窗口
                     </th>
-                    <th width="10%">
+                    <th width="7%">
                         MS2-MZ卷积窗口
                     </th>
-                    <th width="10%">
+                    <th width="12%">
                         创建时间
                     </th>
                     <th width="20%">
@@ -72,6 +75,7 @@
                 <tbody>
                 <tr th:each="overview:${overviews}">
                     <td th:text="${overview.expId}"></td>
+                    <td th:text="${experiment.name}"></td>
                     <td th:text="${overview.libraryName}"></td>
                     <td th:text="${overview.creator}"></td>
                     <td th:text="${overview.rtExtractWindowForMS1}"></td>

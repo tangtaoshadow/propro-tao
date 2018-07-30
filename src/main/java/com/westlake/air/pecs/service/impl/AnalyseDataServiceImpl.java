@@ -2,8 +2,11 @@ package com.westlake.air.pecs.service.impl;
 
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
+import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
+import com.westlake.air.pecs.dao.ExperimentDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
+import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import org.slf4j.Logger;
@@ -26,8 +29,8 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     AnalyseDataDAO analyseDataDAO;
 
     @Override
-    public List<AnalyseDataDO> getAllByRecordId(String recordId) {
-        return analyseDataDAO.getAllByExperimentId(recordId);
+    public List<AnalyseDataDO> getAllByOverviewId(String overviewId) {
+        return analyseDataDAO.getAllByOverviewId(overviewId);
     }
 
     @Override
@@ -48,7 +51,6 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
 
     @Override
     public ResultDO insert(AnalyseDataDO dataDO) {
-
         try {
             analyseDataDAO.insert(dataDO);
             return ResultDO.build(dataDO);

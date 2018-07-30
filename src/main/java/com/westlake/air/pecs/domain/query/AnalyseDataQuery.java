@@ -18,4 +18,6 @@ public class AnalyseDataQuery extends PageQuery{
     String transitionId;
 
     Integer msLevel;
+
+    String fullName;
 }

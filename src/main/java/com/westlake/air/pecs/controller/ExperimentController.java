@@ -264,7 +264,7 @@ public class ExperimentController extends BaseController {
         }
 
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.EXTRACT_DATA_SUCCESS);
-        return "redirect:/analyse/list?expId=" + id;
+        return "redirect:/analyse/overview/list?expId=" + id;
     }
 
     @RequestMapping(value = "/getWindows")

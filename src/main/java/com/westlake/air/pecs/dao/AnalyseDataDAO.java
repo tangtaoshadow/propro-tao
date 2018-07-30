@@ -23,8 +23,14 @@ public class AnalyseDataDAO {
     @Autowired
     MongoTemplate mongoTemplate;
 
-    public List<AnalyseDataDO> getAllByExperimentId(String recordId){
-        Query query = new Query(where("recordId").is(recordId));
+    public List<AnalyseDataDO> getAllByOverviewId(String overviewId) {
+        Query query = new Query(where("overviewId").is(overviewId));
+        return mongoTemplate.find(query, AnalyseDataDO.class, CollectionName);
+    }
+
+    public List<AnalyseDataDO> getAllByOverviewIdAndFullName(String overviewId, String fullName) {
+        Query query = new Query(where("overviewId").is(overviewId));
+        query.addCriteria(where("fullName").is(fullName));
         return mongoTemplate.find(query, AnalyseDataDO.class, CollectionName);
     }
 
@@ -32,7 +38,7 @@ public class AnalyseDataDAO {
         return mongoTemplate.find(buildQuery(query), AnalyseDataDO.class, CollectionName);
     }
 
-    public long count(AnalyseDataQuery query){
+    public long count(AnalyseDataQuery query) {
         return mongoTemplate.count(buildQueryWithoutPage(query), AnalyseDataDO.class, CollectionName);
     }
 
@@ -57,7 +63,7 @@ public class AnalyseDataDAO {
 
     public void delete(String id) {
         Query query = new Query(where("id").is(id));
-        mongoTemplate.remove(query,AnalyseDataDO.class, CollectionName);
+        mongoTemplate.remove(query, AnalyseDataDO.class, CollectionName);
     }
 
     public void deleteAllByOverviewId(String overviewId) {
@@ -88,6 +94,9 @@ public class AnalyseDataDAO {
         }
         if (analyseDataQuery.getMsLevel() != null) {
             query.addCriteria(where("msLevel").is(analyseDataQuery.getMsLevel()));
+        }
+        if (analyseDataQuery.getFullName() != null) {
+            query.addCriteria(where("fullName").is(analyseDataQuery.getFullName()));
         }
 
         return query;

@@ -7,10 +7,12 @@ import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
+import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
+import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.TransitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -37,18 +39,34 @@ public class AnalyseController extends BaseController {
     AnalyseDataService analyseDataService;
     @Autowired
     TransitionService transitionService;
+    @Autowired
+    ExperimentService experimentService;
 
     @RequestMapping(value = "/overview/list")
     String overviewList(Model model,
+                        @RequestParam(value = "expId", required = false) String expId,
                         @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                         @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize) {
 
         model.addAttribute("pageSize", pageSize);
+        model.addAttribute("expId", expId);
+
+        ResultDO<ExperimentDO> expResult = null;
+        if(expId != null){
+            expResult = experimentService.getById(expId);
+            if(expResult.isFailed()){
+                model.addAttribute(ERROR_MSG,ResultCode.EXPERIMENT_NOT_EXISTED);
+                return "/analyse/overview/list";
+            }
+        }
+
         AnalyseOverviewQuery query = new AnalyseOverviewQuery();
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
+        query.setExpId(expId);
         ResultDO<List<AnalyseOverviewDO>> resultDO = analyseOverviewService.getList(query);
 
+        model.addAttribute("experiment", expResult.getModel());
         model.addAttribute("overviews", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
@@ -79,33 +97,25 @@ public class AnalyseController extends BaseController {
         return "redirect:/analyse/overview/list";
     }
 
-    @RequestMapping(value = "/list")
-    String list(Model model,
-                    @RequestParam(value = "expId", required = true) String expId,
+    @RequestMapping(value = "/data/list")
+    String dataList(Model model,
+                    @RequestParam(value = "overviewId", required = true) String overviewId,
                     @RequestParam(value = "msLevel", required = false) Integer msLevel,
                     @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                     @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
                     RedirectAttributes redirectAttributes) {
 
         model.addAttribute("pageSize", pageSize);
-        model.addAttribute("expId", expId);
+        model.addAttribute("overviewId", overviewId);
         model.addAttribute("msLevel", msLevel);
 
-        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getOneByExpId(expId);
-        if(overviewResult.isSuccess()){
-            model.addAttribute("overview",overviewResult.getModel());
-        }else{
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.EVOLUTION_DATA_NOT_EXISTED.getMessage());
-            return "redirect:/experiment/list";
-
-        }
         AnalyseDataQuery query = new AnalyseDataQuery();
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
         if(msLevel != null){
             query.setMsLevel(msLevel);
         }
-        query.setOverviewId(overviewResult.getModel().getId());
+        query.setOverviewId(overviewId);
         ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
         List<AnalyseDataDO> datas = resultDO.getModel();
         model.addAttribute("datas", datas);
