@@ -15,7 +15,8 @@ public class RTNormalizer {
 
     private List<float[]> removeOutlierIterative(List<float[]> pairs,float confidenceInterval, float minRsq, float minCoverage, boolean useIterativeChauvenet, String outlierMethod){
 
-        if(pairs.size() < 3){ return null;}
+        int pairsSize = pairs.size();
+        if( pairsSize < 3){ return null;}
 
         //获取斜率和截距
         WeightedObservedPoints obs = new WeightedObservedPoints();
@@ -23,13 +24,28 @@ public class RTNormalizer {
             obs.add(rtPair[0],rtPair[1]);
         }
         PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
-        double[] coeff = fitter.fit(obs.toList());
+        double[] coeff;
+        float rsq = 0;
+        while(pairs.size() >= pairsSize * minCoverage && rsq< minRsq) {
+            coeff = fitter.fit(obs.toList());
 
-        float rsq = RTNormalizeUtil.getRsq(pairs);
-        //List
-        if(rsq<minRsq){
-            // calculate residual
-
+            rsq = RTNormalizeUtil.getRsq(pairs);
+            List<Float> residual = new ArrayList<Float>();
+            if (rsq < minRsq) {
+                // calculate residual and get max index
+                float res = 0, max = 0;
+                int maxIndex = 0;
+                for (int i = 0; i < pairs.size(); i++) {
+                    res = (float) (Math.abs(pairs.get(i)[1] - (coeff[0] + coeff[1] * pairs.get(i)[0])));
+                    residual.add(res);
+                    if (res > max) {
+                        max = res;
+                        maxIndex = i;
+                    }
+                }
+                //remove outlier of pairs iteratively
+                pairs.remove(maxIndex);
+            }
         }
         return pairs;
 
