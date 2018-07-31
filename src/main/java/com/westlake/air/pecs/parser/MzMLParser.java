@@ -3,6 +3,7 @@ package com.westlake.air.pecs.parser;
 import com.westlake.air.pecs.domain.bean.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.parser.model.mzxml.*;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -110,6 +111,8 @@ public class MzMLParser extends BaseExpParser{
             rf.seek(scanIndexDO.getStart());
             rf.read(words);
             dataBlock = String.valueOf(words);
+            dataBlock = words.toString();
+            dataBlock = new String(words);
             datas = dataBlock.split("\n");
             for (int j = 0; j < datas.length; j++) {
                 line = datas[j]; // 读后文件指针调到下一行行首
@@ -123,11 +126,13 @@ public class MzMLParser extends BaseExpParser{
                 } else if (line.contains("scan start time") && line.contains("minute")) {
                     rt = searchValue(line) * 60.0F;
                     scanIndexDO.setRt(rt);
+                    scanIndexDO.setRtStr(String.format("%.3f", rt));
                     if (level == 1)
                         break;
                 } else if (line.contains("scan start time") && line.contains("second")) {
                     rt = searchValue(line);
                     scanIndexDO.setRt(rt);
+                    scanIndexDO.setRtStr(String.format("%.3f", rt));
                 } else if (level == 2 && line.contains("isolation window target m/z")) {
                     precursorMz = searchValue(line);
                     scanIndexDO.setPrecursorMz(precursorMz);
@@ -137,6 +142,7 @@ public class MzMLParser extends BaseExpParser{
                     precursorMzEnd = scanIndexDO.getPrecursorMz() + offset;
                     scanIndexDO.setPrecursorMzStart(precursorMzStart);
                     scanIndexDO.setPrecursorMzEnd(precursorMzEnd);
+                    scanIndexDO.setWindowWideness(2*offset);
                     break;
                 }
             }
@@ -190,18 +196,42 @@ public class MzMLParser extends BaseExpParser{
 
     @Override
     public MzIntensityPairs parseOne(RandomAccessFile raf, long start, long end) {
-        prepare();
-        try{
+        try {
+            boolean isMzBinary = false;
+            boolean isIntensityBinary = false;
+            String mzPrecision = null, intensityPrecision = null;
+            String mzCompressionType = null, intensityCompressionType = null;
+            String mzBinary = null, intensityBinary = null;
             raf.seek(start);
             byte[] reader = new byte[(int) (end - start)];
             raf.read(reader);
-            Scan scan = new Scan();
-            airXStream.fromXML(new String(reader), scan);
-            if (scan.getPeaksList() != null && scan.getPeaksList().size() >= 1) {
-                Peaks peaks = scan.getPeaksList().get(0);
-                return getPeakMap(peaks.getValue(), peaks.getPrecision(), peaks.getCompressionType() != null && "zlib".equalsIgnoreCase(peaks.getCompressionType()));
+            String dataBlock = new String(reader);
+            String binaryBlock = dataBlock.substring(dataBlock.indexOf("<binaryDataArrayList"), dataBlock.indexOf("</binaryDataArrayList"));
+            String[] lines = binaryBlock.split("\n");
+            for (String line : lines) {
+                if (line.contains("64-bit float") && mzPrecision == null) {
+                    mzPrecision = "64";
+                } else if (line.contains("64-bit float")) {
+                    intensityPrecision = "64";
+                }
+                if (line.contains("zlib") && mzCompressionType == null) {
+                    mzCompressionType = "zlib";
+                } else if (line.contains("zlib")) {
+                    intensityCompressionType = "zlib";
+                }
+                if (line.contains("<binary>") && mzBinary == null) {
+                    mzBinary = line.substring(line.indexOf(">")+1, line.indexOf("</binary>"));
+                } else if (line.contains("<binary>")) {
+                    intensityBinary = line.substring(line.indexOf(">")+1, line.indexOf("</binary>"));
+                }
             }
-        }catch (Exception e){
+            MzIntensityPairs pairs = getPeakMap(new Base64().decode(mzBinary),
+                    new Base64().decode(intensityBinary),
+                    Integer.parseInt(mzPrecision),
+                    Integer.parseInt(intensityPrecision),
+                    "zlib".equalsIgnoreCase(intensityCompressionType));
+            return pairs;
+        } catch (Exception e) {
             logger.error(e.getMessage());
         }
         return null;
