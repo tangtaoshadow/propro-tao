@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteOrder;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -31,7 +32,8 @@ public class MzXMLParser extends BaseExpParser {
             Separation.class, SeparationTechnique.class, Software.class, Spot.class, Spotting.class,
     };
 
-    public MzXMLParser() {}
+    public MzXMLParser() {
+    }
 
     private void prepare() {
         airXStream.processAnnotations(classes);
@@ -54,12 +56,12 @@ public class MzXMLParser extends BaseExpParser {
                 parseAttribute(raf, scanIndex);
                 scanIndex.setExperimentId(experimentId);
 
-                if(scanIndex.getMsLevel() == 1){
+                if (scanIndex.getMsLevel() == 1) {
                     currentMS1 = scanIndex;
-                }else{
-                    if(currentMS1 == null){
+                } else {
+                    if (currentMS1 == null) {
                         continue;
-                    }else{
+                    } else {
                         scanIndex.setParentNum(currentMS1.getNum());
                     }
                 }
@@ -113,33 +115,33 @@ public class MzXMLParser extends BaseExpParser {
 
     @Override
     public MzIntensityPairs parseOne(RandomAccessFile raf, long start, long end) {
-        try{
+        try {
             raf.seek(start);
             byte[] reader = new byte[(int) (end - start)];
             raf.read(reader);
             String tmp = new String(reader);
-            String[] content = tmp.substring(tmp.indexOf("<peaks"),tmp.indexOf("</peaks>")).split(">");
+            String[] content = tmp.substring(tmp.indexOf("<peaks"), tmp.indexOf("</peaks>")).split(">");
             String[] attributes = content[0].split("\n");
             String precision = null;
             String compressionType = null;
             int targetCount = 0;
-            for(String attribute : attributes){
-                if(attribute.trim().contains("compressionType")){
-                    compressionType = attribute.split("=")[1].replace("\"","");
+            for (String attribute : attributes) {
+                if (attribute.trim().contains("compressionType")) {
+                    compressionType = attribute.split("=")[1].replace("\"", "");
                     targetCount++;
                 }
-                if(attribute.trim().contains("precision")){
-                    precision = attribute.split("=")[1].replace("\"","");
+                if (attribute.trim().contains("precision")) {
+                    precision = attribute.split("=")[1].replace("\"", "");
                     targetCount++;
                 }
-                if(targetCount == 2){
+                if (targetCount == 2) {
                     break;
                 }
             }
             String value = content[1];
             MzIntensityPairs pairs = getPeakMap(new Base64().decode(value), Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType));
             return pairs;
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error(e.getMessage());
         }
 
@@ -150,7 +152,7 @@ public class MzXMLParser extends BaseExpParser {
     @Override
     public MzIntensityPairs getPeakMap(byte[] value, int precision, boolean isZlibCompression) {
 
-        Float[] values = getValues(value, precision, isZlibCompression);
+        Float[] values = getValues(value, precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
 
         TreeMap<Float, Float> map = new TreeMap<>();
         for (int peakIndex = 0; peakIndex < values.length - 1; peakIndex += 2) {
@@ -365,7 +367,6 @@ public class MzXMLParser extends BaseExpParser {
     }
 
 
-
     private Long parseIndexOffset(RandomAccessFile rf) throws IOException {
         long position = rf.length() - 1;
         rf.seek(position);
@@ -438,14 +439,14 @@ public class MzXMLParser extends BaseExpParser {
 
         String read = new String(readBytes);
         String precursorMz;
-        if(read.contains("precursorMz")){
-            precursorMz = read.substring(read.indexOf("<precursorMz"),read.indexOf("</precursorMz>")+14);
-            scanIndexDO.setPrecursorMz(Float.parseFloat(precursorMz.substring(precursorMz.indexOf(">")+1,precursorMz.indexOf("</"))));
+        if (read.contains("precursorMz")) {
+            precursorMz = read.substring(read.indexOf("<precursorMz"), read.indexOf("</precursorMz>") + 14);
+            scanIndexDO.setPrecursorMz(Float.parseFloat(precursorMz.substring(precursorMz.indexOf(">") + 1, precursorMz.indexOf("</"))));
             String attributeForPrecursorMz = precursorMz.substring(0, precursorMz.indexOf(">"));
             String[] tmp = null;
-            if(attributeForPrecursorMz.contains("\n")){
+            if (attributeForPrecursorMz.contains("\n")) {
                 tmp = attributeForPrecursorMz.split("\n");
-            }else{
+            } else {
                 tmp = attributeForPrecursorMz.split(" ");
             }
             for (String tmpStr : tmp) {
@@ -455,8 +456,8 @@ public class MzXMLParser extends BaseExpParser {
                     break;
                 }
             }
-            scanIndexDO.setPrecursorMzStart(scanIndexDO.getPrecursorMz() - scanIndexDO.getWindowWideness()/2);
-            scanIndexDO.setPrecursorMzEnd(scanIndexDO.getPrecursorMz() + scanIndexDO.getWindowWideness()/2);
+            scanIndexDO.setPrecursorMzStart(scanIndexDO.getPrecursorMz() - scanIndexDO.getWindowWideness() / 2);
+            scanIndexDO.setPrecursorMzEnd(scanIndexDO.getPrecursorMz() + scanIndexDO.getWindowWideness() / 2);
         }
 
         String scan = read.substring(0, read.indexOf(">"));

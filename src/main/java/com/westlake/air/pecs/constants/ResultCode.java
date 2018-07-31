@@ -33,6 +33,7 @@ public enum ResultCode implements Serializable {
     USER_NOT_EXISTED("USER_NOT_EXISTED", "该用户不存在"),
     ID_CANNOT_BE_NULL_OR_ZERO("ID_CANNOT_BE_NULL_OR_ZERO", "ID不能为空或者0"),
     LINE_IS_EMPTY("LINE_IS_EMPTY", "内容为空"),
+    EXTRACT_FAILED("EXTRACT_FAILED", "解压缩失败"),
 
     /**
      * ******
