@@ -46,6 +46,9 @@
                     <th width="10%">
                         关联的标准库名称
                     </th>
+                    <th width="10%">
+                        关联的校准库名称
+                    </th>
                     <th width="15%">
                         文件位置
                     </th>
@@ -66,7 +69,8 @@
                 <tbody>
                 <tr th:each="experiment:${experiments}">
                     <td th:text="${experiment.name}"></td>
-                    <td th:text="${experiment.libraryName}"></td>
+                    <td th:text="${experiment.sLibraryName}"></td>
+                    <td th:text="${experiment.vLibraryName}"></td>
                     <td th:text="${experiment.fileLocation}"></td>
                     <td th:text="${experiment.fileType}"></td>
                     <td th:text="${#dates.format(experiment.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>

@@ -30,7 +30,7 @@ import java.io.RandomAccessFile;
  */
 @Controller
 @RequestMapping("spectrum")
-public class SpectrumController {
+public class SpectrumController extends BaseController {
 
     @Autowired
     MzXMLParser mzXMLParser;
@@ -73,9 +73,13 @@ public class SpectrumController {
         model.addAttribute("isZlibCompression", isZlibCompression);
 
         if (mz != null && !mz.isEmpty() && intensity != null && !intensity.isEmpty()) {
-            MzIntensityPairs pairs = mzXMLParser.getPeakMap(new Base64().decode(mz.trim()), new Base64().decode(intensity.trim()), mzPrecision, intensityPrecision, isZlibCompression);
-            model.addAttribute("mzArray", pairs.getMzArray());
-            model.addAttribute("intensityArray", pairs.getIntensityArray());
+            MzIntensityPairs pairs = mzMLParser.getPeakMap(new Base64().decode(mz.trim()), new Base64().decode(intensity.trim()), mzPrecision, intensityPrecision, isZlibCompression);
+            if (pairs != null) {
+                model.addAttribute("mzArray", pairs.getMzArray());
+                model.addAttribute("intensityArray", pairs.getIntensityArray());
+            } else {
+                model.addAttribute(ERROR_MSG, ResultCode.EXTRACT_FAILED.getMessage());
+            }
         }
 
         return "spectrum/mzmlextractor";
@@ -107,10 +111,10 @@ public class SpectrumController {
 
         File file = new File(experimentDO.getFileLocation());
         try {
-            RandomAccessFile raf = new RandomAccessFile(file,"r");
-            if(experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZXML)){
+            RandomAccessFile raf = new RandomAccessFile(file, "r");
+            if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZXML)) {
                 pairs = mzXMLParser.parseOne(raf, scanIndexDO.getStart(), scanIndexDO.getEnd());
-            }else{
+            } else {
                 pairs = mzMLParser.parseOne(raf, scanIndexDO.getStart(), scanIndexDO.getEnd());
 
             }
