@@ -112,6 +112,13 @@ public class TransitionDO {
      */
     List<AminoAcid> acidList = new ArrayList<>();
 
+    Boolean detecting = true;
+    Boolean identifying = false;
+    Boolean quantifying = true;
+
+
     String features;
+
+
 
 }

@@ -24,6 +24,9 @@ public class LibraryDO extends BaseDO {
     @Indexed(unique = true)
     String name;
 
+    //0:标准库,1:校准库
+    Integer type;
+
     String description;
 
     String instrument;

@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -43,27 +45,16 @@ public abstract class BaseExpParser {
 
     public abstract MzIntensityPairs getPeakMap(byte[] mz, byte[] intensity, int mzPrecision, int intensityPrecision, boolean isZlibCompression);
 
-    protected Float[] getValues(byte[] value, int precision, boolean isCompression) {
+    protected Float[] getValues(byte[] value, int precision, boolean isCompression, ByteOrder byteOrder) {
         double[] doubleValues;
         Float[] floatValues;
         ByteBuffer byteBuffer = ByteBuffer.wrap(value);
 
         if (isCompression) {
-            Inflater decompresser = new Inflater();
-            decompresser.setInput(byteBuffer.array());
-
-            byte[] decompressedData = new byte[byteBuffer.capacity() * 10];
-
-            try {
-                int usedLength = decompresser.inflate(decompressedData);
-                byteBuffer = ByteBuffer.wrap(decompressedData, 0, usedLength);
-            } catch (DataFormatException e) {
-                logger.error("Decompress failed!", e);
-            }
+            byteBuffer = ByteBuffer.wrap(decompress(byteBuffer.array()));
         }
 
-        byteBuffer.order(ByteOrder.BIG_ENDIAN);
-
+        byteBuffer.order(byteOrder);
         if (precision == PRECISION_64) {
             doubleValues = new double[byteBuffer.asDoubleBuffer().capacity()];
             byteBuffer.asDoubleBuffer().get(doubleValues);
@@ -82,5 +73,35 @@ public abstract class BaseExpParser {
 
         byteBuffer.clear();
         return floatValues;
+    }
+
+    public byte[] decompress(byte[] data) {
+        byte[] output = new byte[0];
+
+        Inflater decompresser = new Inflater();
+        decompresser.reset();
+        decompresser.setInput(data);
+
+        ByteArrayOutputStream o = new ByteArrayOutputStream(data.length);
+        try {
+            byte[] buf = new byte[1024];
+            while (!decompresser.finished()) {
+                int i = decompresser.inflate(buf);
+                o.write(buf, 0, i);
+            }
+            output = o.toByteArray();
+        } catch (Exception e) {
+            output = data;
+            e.printStackTrace();
+        } finally {
+            try {
+                o.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        decompresser.end();
+        return output;
     }
 }

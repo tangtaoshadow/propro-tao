@@ -127,7 +127,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="peptideSequence" class="col-2 col-form-label">
+                                    <label for="sequence" class="col-2 col-form-label">
                                         对应肽段序列
                                     </label>
                                     <div class="col-10">
@@ -184,6 +184,36 @@
                                         <input type="text" class="form-control m-input" id="precursorCharge"
                                                name="precursorCharge" readonly
                                                th:value="${transition?.precursorCharge}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="detecting" class="col-2 col-form-label">
+                                        Detecting?
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="detecting"
+                                               name="detecting" readonly
+                                               th:value="${transition?.detecting}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="identifying" class="col-2 col-form-label">
+                                        Identifying?
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="identifying"
+                                               name="identifying" readonly
+                                               th:value="${transition?.identifying}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="Quantifying" class="col-2 col-form-label">
+                                        Quantifying?
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="quantifying"
+                                               name="quantifying" readonly
+                                               th:value="${transition?.quantifying}">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">

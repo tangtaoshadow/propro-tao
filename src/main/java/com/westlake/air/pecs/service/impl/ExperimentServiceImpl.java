@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -189,9 +190,12 @@ public class ExperimentServiceImpl implements ExperimentService {
         //创建实验初始化概览数据
         AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
         overviewDO.setExpId(expId);
+        overviewDO.setName(experimentDO.getName() + "-" + experimentDO.getSLibraryName() + "-"+ experimentDO.getVLibraryName() + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
         overviewDO.setExpName(experimentDO.getName());
-        overviewDO.setLibraryId(experimentDO.getLibraryId());
-        overviewDO.setLibraryName(experimentDO.getLibraryName());
+        overviewDO.setSLibraryId(experimentDO.getSLibraryId());
+        overviewDO.setSLibraryName(experimentDO.getSLibraryName());
+        overviewDO.setVLibraryId(experimentDO.getVLibraryId());
+        overviewDO.setVLibraryName(experimentDO.getVLibraryName());
         overviewDO.setCreator(creator);
         overviewDO.setCreateDate(new Date());
         analyseOverviewDAO.insert(overviewDO);
@@ -227,7 +231,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     public void extractMS1(RandomAccessFile raf, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow) {
 
         //Step1.获取标准库目标卷积片段
-        List<TargetTransition> coordinates = transitionService.buildMS1Coordinates(exp.getLibraryId(), rtExtractWindow);
+        List<TargetTransition> coordinates = transitionService.buildMS1Coordinates(exp.getSLibraryId(), rtExtractWindow);
         if (coordinates == null || coordinates.size() == 0) {
             logger.error("标准库目标为空");
             return;
@@ -295,7 +299,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                 List<SimpleScanIndex> indexes = scanIndexDAO.getSimpleAll(query);
                 logger.info("本批次将扫描谱图" + indexes.size() + "张");
                 //Step3.获取标准库的目标肽段片段的坐标
-                coordinates = transitionService.buildMS2Coordinates(exp.getLibraryId(), rtExtractWindow, rang.getMzStart(), rang.getMzEnd());
+                coordinates = transitionService.buildMS2Coordinates(exp.getSLibraryId(), rtExtractWindow, rang.getMzStart(), rang.getMzEnd());
                 //Step4.提取指定原始谱图
                 rtMap = parseSpectrum(raf, indexes, getParser(exp.getFileType()));
 
@@ -355,7 +359,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         if (experimentDO.getFileLocation() == null || experimentDO.getFileLocation().isEmpty()) {
             return ResultDO.buildError(ResultCode.FILE_NOT_SET);
         }
-        if (experimentDO.getLibraryId() == null || experimentDO.getLibraryId().isEmpty()) {
+        if (experimentDO.getSLibraryId() == null || experimentDO.getSLibraryId().isEmpty()) {
             return ResultDO.buildError(ResultCode.LIBRARY_NAME_CANNOT_BE_EMPTY);
         }
         File file = new File(experimentDO.getFileLocation());
@@ -531,7 +535,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                 List<SimpleScanIndex> indexes = scanIndexDAO.getSimpleAll(query);
                 logger.info("本批次将扫描谱图" + indexes.size() + "张");
                 //Step3.获取标准库的目标肽段片段的坐标
-                coordinates = transitionService.buildMS2Coordinates(exp.getLibraryId(), rtExtractWindow, rang.getMzStart(), rang.getMzEnd());
+                coordinates = transitionService.buildMS2Coordinates(exp.getSLibraryId(), rtExtractWindow, rang.getMzStart(), rang.getMzEnd());
                 //Step4.提取指定原始谱图
                 rtMap = parseSpectrum(raf, indexes, getParser(exp.getFileType()));
 

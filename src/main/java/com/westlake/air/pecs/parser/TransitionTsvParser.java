@@ -44,6 +44,9 @@ public class TransitionTsvParser {
     private static String PrecursorCharge = "precursorcharge";
     private static String PeptideGroupLabel = "peptidegrouplabel";
     private static String TransitionGroupId = "transition_group_id";
+    private static String Detecting = "detecting_transition";
+    private static String Identifying = "identifying_transition";
+    private static String Quantifying = "quantifying_transition";
 
     public static final Pattern unimodPattern = Pattern.compile("([a-z])[\\(]unimod[\\:](\\d*)[\\)]");
 
@@ -136,6 +139,20 @@ public class TransitionTsvParser {
         transitionDO.setIntensity(Double.parseDouble(row[columnMap.get(ProductIonIntensity)]));
         transitionDO.setSequence(row[columnMap.get(PeptideSequence)]);
         transitionDO.setProteinName(row[columnMap.get(ProteinName)]);
+
+        if(columnMap.get(Detecting) != null){
+            boolean detecting = !row[columnMap.get(Detecting)].equals("0");
+            transitionDO.setDetecting(detecting);
+        }
+        if(columnMap.get(Identifying) != null) {
+            boolean indentifying = !row[columnMap.get(Identifying)].equals("0");
+            transitionDO.setIdentifying(indentifying);
+        }
+        if(columnMap.get(Quantifying) != null){
+            boolean quantifying = !row[columnMap.get(Quantifying)].equals("0");
+            transitionDO.setQuantifying(quantifying);
+        }
+
         String annotations = row[columnMap.get(Annotation)].replaceAll("\"", "");
         if (annotations.contains("[")) {
             transitionDO.setWithBrackets(true);

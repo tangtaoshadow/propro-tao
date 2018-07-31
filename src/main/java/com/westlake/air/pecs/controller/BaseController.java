@@ -17,8 +17,9 @@ public class BaseController {
     @Autowired
     LibraryService libraryService;
 
-    public List<LibraryDO> getLibraryList(){
-        return libraryService.getSimpleAll();
+    //0:标准库,1:校准库
+    public List<LibraryDO> getLibraryList(Integer type){
+        return libraryService.getSimpleAll(type);
     }
 
     public final Logger logger = LoggerFactory.getLogger(getClass());

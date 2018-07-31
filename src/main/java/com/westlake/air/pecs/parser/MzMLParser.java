@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -245,8 +246,8 @@ public class MzMLParser extends BaseExpParser{
 
     @Override
     public MzIntensityPairs getPeakMap(byte[] mz, byte[] intensity, int mzPrecision, int intensityPrecision, boolean isZlibCompression) {
-        Float[] mzArray = getValues(mz, mzPrecision, isZlibCompression);
-        Float[] intensityArray = getValues(intensity, intensityPrecision, isZlibCompression);
+        Float[] mzArray = getValues(mz, mzPrecision, isZlibCompression, ByteOrder.LITTLE_ENDIAN);
+        Float[] intensityArray = getValues(intensity, intensityPrecision, isZlibCompression, ByteOrder.LITTLE_ENDIAN);
 
         if (mzArray == null || intensityArray == null || mzArray.length != intensityArray.length) {
             return null;

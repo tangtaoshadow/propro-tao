@@ -21,9 +21,15 @@ public class AnalyseOverviewDO {
 
     String expName;
 
-    String libraryId;
+    String name;
 
-    String libraryName;
+    String sLibraryId;
+
+    String sLibraryName;
+
+    String vLibraryId;
+
+    String vLibraryName;
 
     Double rtExtractWindowForMS1;
 
