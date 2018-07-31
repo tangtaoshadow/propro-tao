@@ -1,5 +1,9 @@
 package com.westlake.air.pecs.rtnormalizer;
 
+import com.westlake.air.pecs.domain.db.AnalyseDataDO;
+import com.westlake.air.pecs.domain.db.ScanIndexDO;
+import com.westlake.air.pecs.domain.db.TransitionDO;
+import com.westlake.air.pecs.rtnormalizer.domain.ExperimentFeature;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoint;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
@@ -13,31 +17,49 @@ import java.util.List;
  */
 public class RTNormalizer {
 
-    private List<float[]> removeOutlierIterative(List<float[]> pairs,float confidenceInterval, float minRsq, float minCoverage, boolean useIterativeChauvenet, String outlierMethod){
+//    private void mapExperimentToTransitionList(List<AnalyseDataDO> expMzML, List<TransitionDO> libTraML){
+//        //chromatogramMap: chromatogramId, int i; cptr:
+//    }
+//
+//
+//    private List<float[]> simpleFindBestFeature(List<ExperimentFeature> experimentFeatures, ){
+//
+//    }
+
+    /**
+     * 先进行线性拟合，每次从pairs中选取一个residual最大的点丢弃，获得pairsCorrected
+     * @param pairs RTPairs
+     * @param minRsq goal of iteration
+     * @param minCoverage limit of picking
+     * @return pairsCorrected
+     */
+    private List<float[]> removeOutlierIterative(List<float[]> pairs, float minRsq, float minCoverage){
 
         int pairsSize = pairs.size();
-        if( pairsSize < 3){ return null;}
+        if( pairsSize < 3){
+            return null;
+        }
 
         //获取斜率和截距
-        WeightedObservedPoints obs = new WeightedObservedPoints();
-        for(float[] rtPair:pairs){
-            obs.add(rtPair[0],rtPair[1]);
-        }
-        PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
-        double[] coeff;
         float rsq = 0;
+        double[] coEff;
+
+        WeightedObservedPoints obs = new WeightedObservedPoints();
         while(pairs.size() >= pairsSize * minCoverage && rsq< minRsq) {
-            coeff = fitter.fit(obs.toList());
+            obs.clear();
+            for(float[] rtPair:pairs){
+                obs.add(rtPair[0],rtPair[1]);
+            }
+            PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
+            coEff = fitter.fit(obs.toList());
 
             rsq = RTNormalizeUtil.getRsq(pairs);
-            List<Float> residual = new ArrayList<Float>();
             if (rsq < minRsq) {
                 // calculate residual and get max index
-                float res = 0, max = 0;
+                float res, max = 0;
                 int maxIndex = 0;
                 for (int i = 0; i < pairs.size(); i++) {
-                    res = (float) (Math.abs(pairs.get(i)[1] - (coeff[0] + coeff[1] * pairs.get(i)[0])));
-                    residual.add(res);
+                    res = (float) (Math.abs(pairs.get(i)[1] - (coEff[0] + coEff[1] * pairs.get(i)[0])));
                     if (res > max) {
                         max = res;
                         maxIndex = i;
@@ -47,8 +69,11 @@ public class RTNormalizer {
                 pairs.remove(maxIndex);
             }
         }
-        return pairs;
-
+        if(rsq < minRsq){
+            return null; //TODO: RTNormalizer: unable to perform outlier detection
+        }else {
+            return pairs;
+        }
     }
 
     /**

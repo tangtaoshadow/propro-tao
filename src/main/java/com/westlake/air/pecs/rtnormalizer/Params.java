@@ -10,11 +10,7 @@ import lombok.Data;
 @Data
 public class Params {
 
-    float confidenceInterval = 0.95f;
-
-
-
-
+//    float confidenceInterval = 0.95f;
 
     float minRsq = 0.95f;
 
@@ -92,7 +88,7 @@ public class Params {
     float span = (float)(2.0/3);
     int numNodes = 5;
     String outlierMethod = "iter_residual";
-    boolean useIterativeChauvenet = false;
+//    boolean useIterativeChauvenet = false;
     int ransacMaxIterations = 1000;
     int ransacMaxPercentRtThreshold = 3;
     int ransacSamplingSize = 10;
