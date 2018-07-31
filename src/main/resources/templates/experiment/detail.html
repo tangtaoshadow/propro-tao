@@ -64,12 +64,21 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="library" class="col-2 col-form-label">
+                            <label for="sLibrary" class="col-2 col-form-label">
                                 关联标准库名称及ID
                             </label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="library" readonly
-                                       th:value="|${experiment?.libraryName}(${experiment?.libraryId})|">
+                                <input type="text" class="form-control m-input" id="sLibrary" readonly
+                                       th:value="|${experiment?.sLibraryName}(${experiment?.sLibraryId})|">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="vLibrary" class="col-2 col-form-label">
+                                关联校准库名称及ID
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="vLibrary" readonly
+                                       th:value="|${experiment?.vLibraryName}(${experiment?.vLibraryId})|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">

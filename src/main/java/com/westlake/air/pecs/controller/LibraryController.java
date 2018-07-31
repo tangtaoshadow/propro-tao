@@ -5,9 +5,11 @@ import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.LibraryCoordinate;
 import com.westlake.air.pecs.domain.db.LibraryDO;
+import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.LibraryQuery;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
 import com.westlake.air.pecs.parser.TransitionTsvParser;
+import com.westlake.air.pecs.parser.model.traml.Transition;
 import com.westlake.air.pecs.service.LibraryService;
 import com.westlake.air.pecs.service.TransitionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,11 +42,11 @@ public class LibraryController extends BaseController {
 
     int errorListNumberLimit = 10;
 
-    @RequestMapping(value = "/list")
-    String list(Model model,
-                @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
-                @RequestParam(value = "searchName", required = false) String searchName) {
+    @RequestMapping(value = "/listStandard")
+    String listStandard(Model model,
+                        @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+                        @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
+                        @RequestParam(value = "searchName", required = false) String searchName) {
         model.addAttribute("searchName", searchName);
         model.addAttribute("pageSize", pageSize);
         LibraryQuery query = new LibraryQuery();
@@ -53,6 +55,29 @@ public class LibraryController extends BaseController {
         }
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
+        query.setType(0);
+        ResultDO<List<LibraryDO>> resultDO = libraryService.getList(query);
+
+        model.addAttribute("libraryList", resultDO.getModel());
+        model.addAttribute("totalPage", resultDO.getTotalPage());
+        model.addAttribute("currentPage", currentPage);
+        return "library/list";
+    }
+
+    @RequestMapping(value = "/listVerify")
+    String listVerify(Model model,
+                      @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+                      @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
+                      @RequestParam(value = "searchName", required = false) String searchName) {
+        model.addAttribute("searchName", searchName);
+        model.addAttribute("pageSize", pageSize);
+        LibraryQuery query = new LibraryQuery();
+        if (searchName != null && !searchName.isEmpty()) {
+            query.setName(searchName);
+        }
+        query.setPageSize(pageSize);
+        query.setPageNo(currentPage);
+        query.setType(1);
         ResultDO<List<LibraryDO>> resultDO = libraryService.getList(query);
 
         model.addAttribute("libraryList", resultDO.getModel());
@@ -70,6 +95,7 @@ public class LibraryController extends BaseController {
     String add(Model model,
                @RequestParam(value = "name", required = true) String name,
                @RequestParam(value = "instrument", required = false) String instrument,
+               @RequestParam(value = "type", required = true) Integer type,
                @RequestParam(value = "description", required = false) String description,
                @RequestParam(value = "justReal", required = false) boolean justReal,
                @RequestParam(value = "file") MultipartFile file,
@@ -81,6 +107,7 @@ public class LibraryController extends BaseController {
         library.setName(name);
         library.setInstrument(instrument);
         library.setDescription(description);
+        library.setType(type);
         ResultDO resultDO = libraryService.save(library);
         if (resultDO.isFailed()) {
             logger.warn(resultDO.getMsgInfo());
@@ -152,7 +179,7 @@ public class LibraryController extends BaseController {
             return "/library/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/library/list";
+            return "redirect:/library/listStandard";
         }
     }
 
@@ -161,10 +188,18 @@ public class LibraryController extends BaseController {
                   @RequestParam(value = "id", required = true) String id,
                   @RequestParam(value = "name") String name,
                   @RequestParam(value = "instrument") String instrument,
+                  @RequestParam(value = "type") Integer type,
                   @RequestParam(value = "description") String description,
                   @RequestParam(value = "justReal", required = false) boolean justReal,
                   @RequestParam(value = "file") MultipartFile file,
                   RedirectAttributes redirectAttributes) {
+
+        String redirectListUrl = null;
+        if (type == 1) {
+            redirectListUrl = "redirect:/library/listVerify";
+        } else {
+            redirectListUrl = "redirect:/library/listStandard";
+        }
 
         long startTime = System.currentTimeMillis();
 
@@ -173,10 +208,11 @@ public class LibraryController extends BaseController {
             LibraryDO library = resultDO.getModel();
             library.setDescription(description);
             library.setInstrument(instrument);
+            library.setType(type);
             ResultDO updateResult = libraryService.update(library);
             if (updateResult.isFailed()) {
                 redirectAttributes.addFlashAttribute(ResultCode.UPDATE_ERROR.getMessage(), updateResult.getMsgInfo());
-                return "redirect:/library/list";
+                return redirectListUrl;
             }
 
             if (file != null && file.getOriginalFilename() != null && !file.getOriginalFilename().isEmpty()) {
@@ -200,32 +236,42 @@ public class LibraryController extends BaseController {
 
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/library/list";
+            return redirectListUrl;
         }
     }
 
     @RequestMapping(value = "/delete/{id}")
     String delete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO resultDO = libraryService.delete(id);
+        ResultDO<LibraryDO> res = libraryService.getById(id);
+        if (res.isFailed()) {
+            return "redirect:/library/detail/" + id;
+        }
+        String redirectListUrl = null;
+        if (res.getModel().getType() == 1) {
+            redirectListUrl = "redirect:/library/listVerify";
+        } else {
+            redirectListUrl = "redirect:/library/listStandard";
+        }
         transitionService.deleteAllByLibraryId(id);
         if (resultDO.isSuccess()) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_LIBRARY_SUCCESS);
-            return "redirect:/library/list";
+            return redirectListUrl;
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/library/list";
+            return redirectListUrl;
         }
     }
 
     @RequestMapping(value = "/buildCoordinate")
     String buildCoordinate(Model model,
-                    @RequestParam(value = "id", required = true) String id,
-                    @RequestParam(value = "rtExtractionWindow", required = true,defaultValue = "1.0") float rtExtractionWindow,
-                    RedirectAttributes redirectAttributes) {
-        redirectAttributes.addFlashAttribute("rtExtractionWindow",rtExtractionWindow);
+                           @RequestParam(value = "id", required = true) String id,
+                           @RequestParam(value = "rtExtractionWindow", required = true, defaultValue = "1.0") float rtExtractionWindow,
+                           RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("rtExtractionWindow", rtExtractionWindow);
         LibraryCoordinate lc = transitionService.buildCoordinates(id, rtExtractionWindow);
 
-        return "redirect:/library/detail/"+id;
+        return "redirect:/library/detail/" + id;
     }
 
     private ResultDO parseAndInsertTsv(MultipartFile file, LibraryDO library, boolean justReal) {

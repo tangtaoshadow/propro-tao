@@ -82,14 +82,17 @@ public class ExperimentController extends BaseController {
                @RequestParam(value = "name", required = true) String name,
                @RequestParam(value = "description", required = false) String description,
                @RequestParam(value = "fileLocation", required = true) String fileLocation,
-               @RequestParam(value = "libraryId", required = false) String libraryId,
+               @RequestParam(value = "sLibraryId", required = false) String sLibraryId,
+               @RequestParam(value = "vLibraryId", required = false) String vLibraryId,
                RedirectAttributes redirectAttributes) {
 
-        model.addAttribute("libraries", getLibraryList());
+        model.addAttribute("sLibraries", getLibraryList(0));
+        model.addAttribute("vLibraries", getLibraryList(1));
 
         model.addAttribute("name", name);
         model.addAttribute("description", description);
-        model.addAttribute("libraryId", libraryId);
+        model.addAttribute("sLibraryId", sLibraryId);
+        model.addAttribute("vLibraryId", vLibraryId);
 
         if (fileLocation == null || fileLocation.isEmpty()) {
             model.addAttribute(ERROR_MSG, ResultCode.FILE_LOCATION_CANNOT_BE_EMPTY.getMessage());
@@ -110,10 +113,16 @@ public class ExperimentController extends BaseController {
         experimentDO.setDescription(description);
         experimentDO.setFileLocation(fileLocation);
 
-        ResultDO<LibraryDO> resultLib = libraryService.getById(libraryId);
-        if (resultLib.isSuccess()) {
-            experimentDO.setLibraryId(libraryId);
-            experimentDO.setLibraryName(resultLib.getModel().getName());
+        ResultDO<LibraryDO> resultSLib = libraryService.getById(sLibraryId);
+        if (resultSLib.isSuccess()) {
+            experimentDO.setSLibraryId(sLibraryId);
+            experimentDO.setSLibraryName(resultSLib.getModel().getName());
+        }
+
+        ResultDO<LibraryDO> resultVLib = libraryService.getById(vLibraryId);
+        if (resultVLib.isSuccess()) {
+            experimentDO.setSLibraryId(vLibraryId);
+            experimentDO.setSLibraryName(resultVLib.getModel().getName());
         }
 
         ResultDO result = experimentService.insert(experimentDO);
@@ -159,7 +168,8 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/edit/{id}")
     String edit(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
 
-        model.addAttribute("libraries", getLibraryList());
+        model.addAttribute("sLibraries", getLibraryList(0));
+        model.addAttribute("vLibraries", getLibraryList(1));
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
@@ -198,7 +208,8 @@ public class ExperimentController extends BaseController {
                   @RequestParam(value = "fileType") String fileType,
                   @RequestParam(value = "fileLocation") String fileLocation,
                   @RequestParam(value = "description") String description,
-                  @RequestParam(value = "libraryId") String libraryId,
+                  @RequestParam(value = "sLibraryId", required = false) String sLibraryId,
+                  @RequestParam(value = "vLibraryId", required = false) String vLibraryId,
                   RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
@@ -206,15 +217,23 @@ public class ExperimentController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/experiment/list";
         }
-        ResultDO<LibraryDO> resultLib = libraryService.getById(libraryId);
         ExperimentDO experimentDO = resultDO.getModel();
-        if (resultLib.isSuccess()) {
-            experimentDO.setName(name);
-            experimentDO.setLibraryId(libraryId);
-            experimentDO.setFileType(fileType);
-            experimentDO.setFileLocation(fileLocation);
-            experimentDO.setLibraryName(resultLib.getModel().getName());
+
+        ResultDO<LibraryDO> resultSLib = libraryService.getById(sLibraryId);
+        if (resultSLib.isSuccess()) {
+            experimentDO.setSLibraryId(sLibraryId);
+            experimentDO.setSLibraryName(resultSLib.getModel().getName());
         }
+
+        ResultDO<LibraryDO> resultVLib = libraryService.getById(vLibraryId);
+        if (resultVLib.isSuccess()) {
+            experimentDO.setSLibraryId(vLibraryId);
+            experimentDO.setSLibraryName(resultVLib.getModel().getName());
+        }
+
+        experimentDO.setName(name);
+        experimentDO.setFileType(fileType);
+        experimentDO.setFileLocation(fileLocation);
         experimentDO.setDescription(description);
 
         ResultDO result = experimentService.update(experimentDO);

@@ -57,19 +57,31 @@
                         </div>
 
                         <div class="form-group m-form__group row">
-                            <label for="libraryId" class="col-2 col-form-label">
+                            <label for="sLibraryId" class="col-2 col-form-label">
                                 相关的标准库
                             </label>
                             <div class="col-10">
-                                <select class="form-control m-input" id="libraryId" name="libraryId">
-                                    <option th:each="library:${libraries}" th:value="${library.id}" th:text="${library.name}"></option>
+                                <select class="form-control m-input" id="sLibraryId" name="sLibraryId">
+                                    <option th:each="library:${slibraries}" th:value="${library.id}" th:text="${library.name}"></option>
                                 </select>
                                 <span class="m-form__help">关联标准库一旦设定无法修改</span>
                             </div>
                         </div>
 
                         <div class="form-group m-form__group row">
-                            <label for="libraryId" class="col-2 col-form-label">
+                            <label for="vLibraryId" class="col-2 col-form-label">
+                                相关的校准库
+                            </label>
+                            <div class="col-10">
+                                <select class="form-control m-input" id="vLibraryId" name="vLibraryId">
+                                    <option th:each="library:${vlibraries}" th:value="${library.id}" th:text="${library.name}"></option>
+                                </select>
+                                <span class="m-form__help">关联校准库一旦设定无法修改</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="preRTWindow" class="col-2 col-form-label">
                                 预设RT卷积窗口
                             </label>
                             <div class="col-10">

@@ -41,7 +41,7 @@
                 <thead>
                 <tr>
                     <th width="15%">
-                        原始实验ID
+                        卷积代号
                     </th>
                     <th width="10%">
                         原始实验名称
@@ -74,7 +74,7 @@
                 </thead>
                 <tbody>
                 <tr th:each="overview:${overviews}">
-                    <td th:text="${overview.expId}"></td>
+                    <td th:text="${overview.name}"></td>
                     <td th:text="${experiment.name}"></td>
                     <td th:text="${overview.libraryName}"></td>
                     <td th:text="${overview.creator}"></td>

@@ -32,8 +32,8 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public List<LibraryDO> getSimpleAll() {
-        return libraryDAO.getSimpleAll();
+    public List<LibraryDO> getSimpleAll(Integer type) {
+        return libraryDAO.getSimpleAll(type);
     }
 
     @Override

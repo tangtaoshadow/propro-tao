@@ -17,7 +17,7 @@ public interface LibraryService {
 
     List<LibraryDO> getAll();
 
-    List<LibraryDO> getSimpleAll();
+    List<LibraryDO> getSimpleAll(Integer type);
 
     ResultDO save(LibraryDO libraryDO);
 

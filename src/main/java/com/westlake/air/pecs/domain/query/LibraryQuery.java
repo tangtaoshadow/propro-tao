@@ -17,6 +17,8 @@ public class LibraryQuery extends PageQuery {
 
     String name;
 
+    Integer type;
+
     Date createDate;
 
     Date lastModifiedDate;

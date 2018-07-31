@@ -55,6 +55,15 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
+                            <label for="instrument" class="col-2 col-form-label">
+                                库类型
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="type" name="type"
+                                       placeholder="0:标准库,1:校准库" th:value="${library?.type}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
                             <label class="col-2 col-form-label">
                                 是否录入所有肽段
                             </label>

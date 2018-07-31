@@ -38,8 +38,11 @@ public class LibraryDAO {
         return mongoTemplate.findAll(LibraryDO.class, CollectionName);
     }
 
-    public List<LibraryDO> getSimpleAll() {
+    public List<LibraryDO> getSimpleAll(Integer type) {
         Document queryDoc = new Document();
+        if(type != null){
+            queryDoc.put("type",type);
+        }
 
         Document fieldsDoc = new Document();
         fieldsDoc.put("id",true);
@@ -99,6 +102,9 @@ public class LibraryDAO {
         }
         if (libraryQuery.getName() != null) {
             query.addCriteria(where("name").regex(libraryQuery.getName()));
+        }
+        if (libraryQuery.getType() != null) {
+            query.addCriteria(where("type").is(libraryQuery.getType()));
         }
         return query;
     }
