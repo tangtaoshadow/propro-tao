@@ -257,6 +257,10 @@ public class ExperimentController extends BaseController {
         try {
             long start = System.currentTimeMillis();
             ResultDO resultDO = experimentService.extract(id, creator, rtExtractWindow, mzExtractWindow, buildType);
+            if(resultDO.isFailed()){
+                redirectAttributes.addFlashAttribute(ERROR_MSG,resultDO.getMsgInfo());
+                return "redirect:/experiment/detail/"+id;
+            }
             logger.info("全部卷积完成,总共耗时:" + (System.currentTimeMillis() - start));
         } catch (IOException e) {
             logger.error("卷积报错了:", e);

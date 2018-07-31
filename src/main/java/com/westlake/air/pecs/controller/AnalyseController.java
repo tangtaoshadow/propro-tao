@@ -58,15 +58,16 @@ public class AnalyseController extends BaseController {
                 model.addAttribute(ERROR_MSG,ResultCode.EXPERIMENT_NOT_EXISTED);
                 return "/analyse/overview/list";
             }
+            model.addAttribute("experiment", expResult.getModel());
         }
 
         AnalyseOverviewQuery query = new AnalyseOverviewQuery();
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
-        query.setExpId(expId);
+        if(expId != null){
+            query.setExpId(expId);
+        }
         ResultDO<List<AnalyseOverviewDO>> resultDO = analyseOverviewService.getList(query);
-
-        model.addAttribute("experiment", expResult.getModel());
         model.addAttribute("overviews", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);

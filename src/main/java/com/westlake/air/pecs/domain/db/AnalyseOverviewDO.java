@@ -23,6 +23,8 @@ public class AnalyseOverviewDO {
 
     String libraryId;
 
+    String name;
+
     String libraryName;
 
     Double rtExtractWindowForMS1;

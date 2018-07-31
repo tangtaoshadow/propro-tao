@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -189,6 +190,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         //创建实验初始化概览数据
         AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
         overviewDO.setExpId(expId);
+        overviewDO.setName(experimentDO.getName() + "-" + experimentDO.getLibraryName() + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
         overviewDO.setExpName(experimentDO.getName());
         overviewDO.setLibraryId(experimentDO.getLibraryId());
         overviewDO.setLibraryName(experimentDO.getLibraryName());
