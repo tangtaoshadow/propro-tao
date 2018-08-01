@@ -1,6 +1,9 @@
 package com.westlake.air.pecs.rtnormalizer;
 
+import com.westlake.air.pecs.utils.MathUtil;
+
 import java.util.List;
+
 
 /**
  * Created by Nico Wang Ruimin
@@ -10,13 +13,13 @@ public class PeakSpline {
     private float[] a, b, c, d, x;
 
     public float derivatives(float value){
-        int i = bisection(value);
+        int i = MathUtil.bisection(x, value);
         float xx = value - x[i];
         return b[i] + 2 * c[i] * xx + 3 * d[i] * xx * xx;
     }
 
     public float eval(float value){
-        int i = bisection(value);
+        int i = MathUtil.bisection(x, value);
         float xx = value - x[i];
         return ((d[i] * xx + c[i]) * xx + b[i]) * xx + a[i];
     }
@@ -55,18 +58,5 @@ public class PeakSpline {
         }
     }
 
-    private int bisection(float value){
-        int high = x.length -1;
-        int low = 0;
-        int mid;
-        while(high - low != 1){
-            mid = low + (high - low + 1) / 2;
-            if(x[mid] <= value){
-                low = mid;
-            }else {
-                high = mid;
-            }
-        }
-        return low;
-    }
+
 }
