@@ -48,7 +48,7 @@ public class SignalToNoiseEstimator {
 
         //Main loop
         int positionCenter = 0;
-        while (positionCenter != windowsOverall) {
+        while (positionCenter <= windowsOverall) {
 
             //get left/right borders
             for (int left = positionCenter; left >= 0; left--) {
@@ -61,7 +61,7 @@ public class SignalToNoiseEstimator {
                     break;
                 }
             }
-            for (int right = positionCenter + 1; right < windowsOverall; right++) {
+            for (int right = positionCenter + 1; right <= windowsOverall; right++) {
                 if (rtIntensity.get(right)[0] <= rtIntensity.get(positionCenter)[0] + windowHalfSize) {
                     toBin = Math.max(Math.min((int) (rtIntensity.get(right)[0] / binSize), binCount - 1), 0);
                     histogram[toBin]++;
