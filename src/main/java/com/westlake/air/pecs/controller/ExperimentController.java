@@ -108,7 +108,6 @@ public class ExperimentController extends BaseController {
             return "experiment/create";
         }
 
-
         ExperimentDO experimentDO = new ExperimentDO();
         experimentDO.setName(name);
         experimentDO.setFileType(fileLocation.substring(fileLocation.lastIndexOf(".") + 1).trim().toLowerCase());

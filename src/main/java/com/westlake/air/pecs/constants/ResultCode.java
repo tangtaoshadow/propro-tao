@@ -43,6 +43,7 @@ public enum ResultCode implements Serializable {
     LIBRARY_NAME_CANNOT_BE_EMPTY("LIBRARY_NAME_CANNOT_BE_EMPTY","标准库名称不能为空"),
     LIBRARY_CANNOT_BE_EMPTY("LIBRARY_CANNOT_BE_EMPTY","标准库不能为空"),
     DATA_IS_EMPTY("DATA_IS_EMPTY","数据为空"),
+    INPUT_FILE_TYPE_MUST_BE_TSV_OR_TRAML("INPUT_FILE_TYPE_MUST_BE_TSV_OR_TRAML","上传的文件格式必须为TSV或者是TraML"),
 
     /**
      * ******

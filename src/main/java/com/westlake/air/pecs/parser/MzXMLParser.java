@@ -38,8 +38,6 @@ public class MzXMLParser extends BaseExpParser {
     private void prepare() {
         airXStream.processAnnotations(classes);
         airXStream.allowTypes(classes);
-//        airXStream.registerConverter(new PeaksConverter());
-//        airXStream.registerConverter(new PrecursorMzConverter());
     }
 
     @Override

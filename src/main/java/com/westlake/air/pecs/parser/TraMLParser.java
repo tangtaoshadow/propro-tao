@@ -1,14 +1,17 @@
 package com.westlake.air.pecs.parser;
 
+import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.parser.model.traml.*;
 import com.westlake.air.pecs.parser.xml.AirXStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.InputStream;
 
 @Component
-public class TraMLParser {
+public class TraMLParser extends BaseTransitionParser{
 
     @Autowired
     AirXStream airXStream;
@@ -36,5 +39,10 @@ public class TraMLParser {
     public String parse(TraML traML){
         prepare();
         return airXStream.toXML(traML);
+    }
+
+    @Override
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, boolean justReal) {
+        return null;
     }
 }

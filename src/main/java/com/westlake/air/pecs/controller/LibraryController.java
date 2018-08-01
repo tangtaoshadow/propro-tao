@@ -8,6 +8,7 @@ import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.LibraryQuery;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
+import com.westlake.air.pecs.parser.TraMLParser;
 import com.westlake.air.pecs.parser.TransitionTsvParser;
 import com.westlake.air.pecs.parser.model.traml.Transition;
 import com.westlake.air.pecs.service.LibraryService;
@@ -35,6 +36,8 @@ public class LibraryController extends BaseController {
 
     @Autowired
     TransitionTsvParser tsvParser;
+    @Autowired
+    TraMLParser traMLParser;
     @Autowired
     LibraryService libraryService;
     @Autowired
@@ -285,7 +288,16 @@ public class LibraryController extends BaseController {
 
         ResultDO resultDO = new ResultDO<>(true);
         try {
-            resultDO = tsvParser.parseAndInsert(file.getInputStream(), library, justReal);
+            if(file != null && file.getOriginalFilename() != null){
+                if(file.getOriginalFilename().toLowerCase().endsWith("tsv")||file.getOriginalFilename().toLowerCase().endsWith("csv")){
+                    resultDO = tsvParser.parseAndInsert(file.getInputStream(), library, justReal);
+                }else if(file.getOriginalFilename().toLowerCase().endsWith("tsv")){
+                    resultDO = traMLParser.parseAndInsert(file.getInputStream(), library, justReal);
+                }else{
+                    return ResultDO.buildError(ResultCode.INPUT_FILE_TYPE_MUST_BE_TSV_OR_TRAML);
+                }
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

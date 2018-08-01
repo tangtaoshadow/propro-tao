@@ -27,10 +27,8 @@ public class FormulaCalculator {
 
     @Autowired
     AminoAcidDAO aminoAcidDAO;
-
     @Autowired
     ElementsDAO elementsDAO;
-
     @Autowired
     UnimodParser unimodParser;
 

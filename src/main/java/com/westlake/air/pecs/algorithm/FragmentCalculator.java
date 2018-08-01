@@ -32,7 +32,6 @@ public class FragmentCalculator {
 
     @Autowired
     TransitionService transitionService;
-
     @Autowired
     FormulaCalculator formulaCalculator;
 

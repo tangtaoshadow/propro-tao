@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * Time: 2018-06-07 11:07
  */
 @Component
-public class TransitionTsvParser {
+public class TransitionTsvParser extends BaseTransitionParser{
 
     public final Logger logger = LoggerFactory.getLogger(TransitionTsvParser.class);
 
@@ -48,12 +48,7 @@ public class TransitionTsvParser {
     private static String Identifying = "identifying_transition";
     private static String Quantifying = "quantifying_transition";
 
-    public static final Pattern unimodPattern = Pattern.compile("([a-z])[\\(]unimod[\\:](\\d*)[\\)]");
-
-
-    @Autowired
-    TransitionService transitionService;
-
+    @Override
     public ResultDO parseAndInsert(InputStream in, LibraryDO library, boolean justReal) {
         List<TransitionDO> transitions = new ArrayList<>();
         ResultDO<List<TransitionDO>> tranResult = new ResultDO<>(true);
@@ -176,83 +171,5 @@ public class TransitionTsvParser {
         return resultDO;
     }
 
-    private ResultDO<Annotation> parseAnnotation(String annotations) {
-        ResultDO<Annotation> resultDO = new ResultDO<>(true);
-        String[] annotationStrs = annotations.split(",");
-        Annotation annotation = new Annotation();
 
-        try {
-            String annotationStr = annotationStrs[0];
-            String[] forDeviation = annotationStr.split("/");
-            if (forDeviation.length > 1) {
-                annotation.setDeviation(Double.parseDouble(forDeviation[1]));
-            }
-
-            if (forDeviation[0].endsWith("i")) {
-                annotation.setIsotope(true);
-                forDeviation[0] = forDeviation[0].replace("i", "");
-            }
-
-            String[] forCharge = forDeviation[0].split("\\^");
-            if (forCharge.length == 2) {
-                annotation.setCharge(Integer.parseInt(forCharge[1]));
-            }
-            //默认为负,少数情况下校准值为正
-            String nOrP = "-";
-            String[] forAdjust;
-            if (forCharge[0].contains("+")) {
-                nOrP = "+";
-                forAdjust = forCharge[0].split("\\+");
-                if (forAdjust.length == 2) {
-                    annotation.setAdjust(Integer.parseInt(nOrP + forAdjust[1]));
-                }
-            } else if (forCharge[0].contains("-")) {
-                forAdjust = forCharge[0].split("-");
-                if (forAdjust.length == 2) {
-                    annotation.setAdjust(Integer.parseInt(nOrP + forAdjust[1]));
-                }
-            } else {
-                forAdjust = forCharge;
-            }
-
-            String finalStr = forAdjust[0];
-            //第一位必定是字母,代表fragment类型
-            annotation.setType(finalStr.substring(0, 1));
-            String location = finalStr.substring(1, finalStr.length());
-            if (!location.isEmpty()) {
-                annotation.setLocation(Integer.parseInt(location));
-            }
-
-
-        } catch (Exception e) {
-            resultDO.setSuccess(false);
-            resultDO.setErrorResult(ResultCode.PARSE_ERROR.getCode(), "解析Annotation错误,Annotation:" + annotations);
-        } finally {
-            resultDO.setModel(annotation);
-        }
-        return resultDO;
-    }
-
-    /**
-     * 解析出Modification的位置
-     *
-     * @param transitionDO
-     */
-    public void parseModification(TransitionDO transitionDO) {
-        //不论是真肽段还是伪肽段,fullUniModPeptideName字段都是真肽段的完整版
-        String peptide = transitionDO.getFullName();
-        peptide = peptide.toLowerCase();
-        HashMap<Integer, String> unimodMap = new HashMap<>();
-
-        while (peptide.contains("(unimod:") && peptide.indexOf("(unimod:") != 0) {
-            Matcher matcher = unimodPattern.matcher(peptide);
-            if (matcher.find()) {
-                unimodMap.put(matcher.start(), matcher.group(2));
-                peptide = StringUtils.replaceOnce(peptide, matcher.group(0), matcher.group(1));
-            }
-        }
-        if (unimodMap.size() > 0) {
-            transitionDO.setUnimodMap(unimodMap);
-        }
-    }
 }
