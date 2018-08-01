@@ -30,5 +30,5 @@ public interface AnalyseDataService {
 
     ResultDO<AnalyseDataDO> getMS1Data(String overviewId, String fullName, Integer charge);
 
-    ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String fullName, String annotations);
+    ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String fullName, String cutInfo);
 }

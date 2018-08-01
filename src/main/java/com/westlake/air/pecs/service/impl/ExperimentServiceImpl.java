@@ -433,6 +433,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             dataDO.setFullName(ms.getFullName());
             dataDO.setAnnotations(ms.getAnnotations());
             dataDO.setPrecursorCharge(ms.getPrecursorCharge());
+            dataDO.setCutInfo(ms.getCutInfo());
             dataList.add(dataDO);
 
             //每隔1000条数据落库一次,以减少对内存的依赖

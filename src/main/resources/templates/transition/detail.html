@@ -167,6 +167,16 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
+                                    <label for="annotation" class="col-2 col-form-label">
+                                        关键注释信息
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="cutInfo"
+                                               name="cutInfo"
+                                               readonly th:value="${transition?.cutInfo}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
                                     <label for="fullUniModPeptideName" class="col-2 col-form-label">
                                         完整版肽段名称(含修饰基团)
                                     </label>

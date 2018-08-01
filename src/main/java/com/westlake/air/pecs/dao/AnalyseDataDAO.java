@@ -35,10 +35,10 @@ public class AnalyseDataDAO {
         return mongoTemplate.findOne(query, AnalyseDataDO.class, CollectionName);
     }
 
-    public AnalyseDataDO getMS2Data(String overviewId, String fullName, String annotations) {
+    public AnalyseDataDO getMS2Data(String overviewId, String fullName, String cutInfo) {
         Query query = new Query(where("overviewId").is(overviewId));
         query.addCriteria(where("fullName").is(fullName));
-        query.addCriteria(where("annotations").is(annotations));
+        query.addCriteria(where("cutInfo").is(cutInfo));
         return mongoTemplate.findOne(query, AnalyseDataDO.class, CollectionName);
     }
 

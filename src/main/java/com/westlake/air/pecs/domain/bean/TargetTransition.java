@@ -25,6 +25,8 @@ public class TargetTransition {
 
     String annotations;
 
+    String cutInfo;
+
     float rt;
 
     float rtStart;

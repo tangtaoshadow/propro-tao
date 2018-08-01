@@ -27,6 +27,8 @@ public class AnalyseDataDO {
 
     String annotations;
 
+    String cutInfo;
+
     Integer msLevel;
 
     Float mz;

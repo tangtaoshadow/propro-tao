@@ -137,9 +137,9 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     @Override
-    public ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String fullName, String annotations) {
+    public ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String fullName, String cutInfo) {
         try {
-            AnalyseDataDO analyseDataDO = analyseDataDAO.getMS2Data(overviewId, fullName, annotations);
+            AnalyseDataDO analyseDataDO = analyseDataDAO.getMS2Data(overviewId, fullName, cutInfo);
             if (analyseDataDO == null) {
                 return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
             } else {

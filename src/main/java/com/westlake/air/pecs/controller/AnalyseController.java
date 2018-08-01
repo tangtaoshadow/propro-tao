@@ -162,6 +162,7 @@ public class AnalyseController extends BaseController {
             data.setAnnotations(transitionDO.getAnnotations());
             data.setPrecursorCharge(transitionDO.getPrecursorCharge());
             data.setMsLevel(2);
+            data.setCutInfo(transitionDO.getCutInfo());
             data.setMz(new Float(transitionDO.getProductMz()));
 
             datas.add(data);
@@ -179,12 +180,12 @@ public class AnalyseController extends BaseController {
                               @RequestParam(value = "dataId", required = false, defaultValue = "") String dataId,
                               @RequestParam(value = "overviewId", required = false) String overviewId,
                               @RequestParam(value = "fullName", required = false) String fullName,
-                              @RequestParam(value = "annotations", required = false) String annotations) {
+                              @RequestParam(value = "cutInfo", required = false) String cutInfo) {
         ResultDO<AnalyseDataDO> dataResult = null;
         if (dataId != null && !dataId.isEmpty() && !dataId.equals("null")) {
             dataResult = analyseDataService.getById(dataId);
-        } else if (overviewId != null && fullName != null && annotations != null) {
-            dataResult = analyseDataService.getMS2Data(overviewId, fullName, annotations);
+        } else if (overviewId != null && fullName != null && cutInfo != null) {
+            dataResult = analyseDataService.getMS2Data(overviewId, fullName, cutInfo);
         } else {
             return ResultDO.buildError(ResultCode.ANALYSE_DATA_NOT_EXISTED);
         }
