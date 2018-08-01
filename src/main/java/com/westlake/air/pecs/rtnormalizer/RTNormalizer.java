@@ -1,14 +1,9 @@
 package com.westlake.air.pecs.rtnormalizer;
 
-import com.westlake.air.pecs.domain.db.AnalyseDataDO;
-import com.westlake.air.pecs.domain.db.ScanIndexDO;
-import com.westlake.air.pecs.domain.db.TransitionDO;
-import com.westlake.air.pecs.rtnormalizer.domain.ExperimentFeature;
+import com.westlake.air.pecs.utils.MathUtil;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
-import org.apache.commons.math3.fitting.WeightedObservedPoint;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,7 +48,7 @@ public class RTNormalizer {
             PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
             coEff = fitter.fit(obs.toList());
 
-            rsq = RTNormalizeUtil.getRsq(pairs);
+            rsq = MathUtil.getRsq(pairs);
             if (rsq < minRsq) {
                 // calculate residual and get max index
                 float res, max = 0;

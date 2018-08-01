@@ -16,6 +16,9 @@ import java.util.Date;
 @Document(collection = "library")
 public class LibraryDO extends BaseDO {
 
+    public static Integer TYPE_STANDARD = 0;
+    public static Integer TYPE_VERIFY = 1;
+
     private static final long serialVersionUID = -3258829839160856625L;
 
     @Id

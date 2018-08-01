@@ -18,7 +18,8 @@ public class PageQuery implements Serializable {
     protected int pageNo = 1;
     protected int pageSize = DEFAULT_PAGE_SIZE;
     protected int start = 0;
-    protected Sort.Direction orderBy = Sort.Direction.DESC;
+    //Sort.Direction.DESC
+    protected Sort.Direction orderBy = null;
     protected String sortColumn = DEFAULT_SORT_COLUMN;
     protected long totalNum = 0;
 

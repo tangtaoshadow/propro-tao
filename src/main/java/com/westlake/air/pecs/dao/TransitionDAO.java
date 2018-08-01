@@ -6,6 +6,7 @@ import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
@@ -144,7 +145,9 @@ public class TransitionDAO {
         query.skip((transitionQuery.getPageNo() - 1) * transitionQuery.getPageSize());
         query.limit(transitionQuery.getPageSize());
         //默认没有排序功能(排序会带来极大的性能开销)
-//        query.with(new Sort(transitionQuery.getOrderBy(), transitionQuery.getSortColumn()));
+        if(transitionQuery.getOrderBy() != null){
+            query.with(new Sort(transitionQuery.getOrderBy(), transitionQuery.getSortColumn()));
+        }
         return query;
     }
 

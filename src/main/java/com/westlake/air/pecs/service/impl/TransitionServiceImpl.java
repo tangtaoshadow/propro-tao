@@ -12,6 +12,7 @@ import com.westlake.air.pecs.service.TransitionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -127,6 +128,25 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
+    public Double[] getRTRange(String libraryId) {
+        Double[] range = new Double[2];
+        TransitionQuery query = new TransitionQuery(libraryId);
+        query.setPageSize(1);
+        query.setOrderBy(Sort.Direction.ASC);
+        query.setSortColumn("rt");
+        List<TransitionDO> descList = transitionDAO.getList(query);
+        if(descList != null && descList.size() == 1){
+            range[0] = descList.get(0).getRt();
+        }
+        query.setOrderBy(Sort.Direction.DESC);
+        List<TransitionDO> ascList = transitionDAO.getList(query);
+        if(ascList != null && ascList.size() == 1){
+            range[1] = ascList.get(0).getRt();
+        }
+        return range;
+    }
+
+    @Override
     public Long countByProteinName(String libraryId) {
         return transitionDAO.countByProteinName(libraryId);
     }
@@ -195,7 +215,6 @@ public class TransitionServiceImpl implements TransitionService {
         logger.info("构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
         return list;
     }
-
 
     private List<TargetTransition> sortMS1Coordinates(List<TargetTransition> targetList) {
         //存储set中从而过滤出MS1

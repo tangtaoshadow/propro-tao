@@ -32,6 +32,8 @@ public interface TransitionService {
 
     ResultDO<TransitionDO> getById(String id);
 
+    Double[] getRTRange(String libraryId);
+
     Long countByProteinName(String libraryId);
 
     Long countByPeptideSequence(String libraryId);
@@ -41,4 +43,7 @@ public interface TransitionService {
     List<TargetTransition> buildMS1Coordinates(String libraryId, float rtExtractionWindows);
 
     List<TargetTransition> buildMS2Coordinates(String libraryId, float rtExtractionWindows,float precursorMzStart, float precursorMzEnd);
+
+
+
 }
