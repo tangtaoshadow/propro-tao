@@ -27,4 +27,8 @@ public interface AnalyseDataService {
     ResultDO deleteAllByOverviewId(String overviewId);
 
     ResultDO<AnalyseDataDO> getById(String id);
+
+    ResultDO<AnalyseDataDO> getMS1Data(String overviewId, String fullName, Integer charge);
+
+    ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String fullName, String annotations);
 }

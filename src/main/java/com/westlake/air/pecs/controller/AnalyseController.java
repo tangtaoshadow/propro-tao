@@ -8,6 +8,7 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
+import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,11 +53,10 @@ public class AnalyseController extends BaseController {
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("expId", expId);
 
-        ResultDO<ExperimentDO> expResult = null;
-        if(expId != null){
-            expResult = experimentService.getById(expId);
-            if(expResult.isFailed()){
-                model.addAttribute(ERROR_MSG,ResultCode.EXPERIMENT_NOT_EXISTED);
+        if (expId != null) {
+            ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
+            if (expResult.isFailed()) {
+                model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED);
                 return "/analyse/overview/list";
             }
             model.addAttribute("experiment", expResult.getModel());
@@ -64,7 +65,7 @@ public class AnalyseController extends BaseController {
         AnalyseOverviewQuery query = new AnalyseOverviewQuery();
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
-        if(expId != null){
+        if (expId != null) {
             query.setExpId(expId);
         }
         ResultDO<List<AnalyseOverviewDO>> resultDO = analyseOverviewService.getList(query);
@@ -101,20 +102,29 @@ public class AnalyseController extends BaseController {
     @RequestMapping(value = "/data/list")
     String dataList(Model model,
                     @RequestParam(value = "overviewId", required = true) String overviewId,
+                    @RequestParam(value = "fullName", required = false) String fullName,
                     @RequestParam(value = "msLevel", required = false) Integer msLevel,
                     @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                    @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
+                    @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
                     RedirectAttributes redirectAttributes) {
 
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("overviewId", overviewId);
         model.addAttribute("msLevel", msLevel);
+        model.addAttribute("fullName", fullName);
 
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        if (overviewResult.isSuccess()) {
+            model.addAttribute("overview", overviewResult.getModel());
+        }
         AnalyseDataQuery query = new AnalyseDataQuery();
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
-        if(msLevel != null){
+        if (msLevel != null) {
             query.setMsLevel(msLevel);
+        }
+        if (fullName != null) {
+            query.setFullName(fullName);
         }
         query.setOverviewId(overviewId);
         ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
@@ -124,15 +134,60 @@ public class AnalyseController extends BaseController {
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalNum", resultDO.getTotalNum());
 
-        return "/analyse/list";
+        return "/analyse/data/list";
+    }
+
+    @RequestMapping(value = "/data/vliblist")
+    String vlibList(Model model,
+                    @RequestParam(value = "overviewId", required = false) String overviewId,
+                    @RequestParam(value = "expId", required = false) String expId,
+                    RedirectAttributes redirectAttributes) {
+
+        model.addAttribute("overviewId", overviewId);
+
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        if (overviewResult.isFailed()) {
+            model.addAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
+            return "/analyse/overview/list?expId=" + expId;
+        }
+
+        AnalyseOverviewDO overview = overviewResult.getModel();
+
+        List<TransitionDO> transitionDOList = transitionService.getAllByLibraryId(overview.getVLibraryId());
+        List<AnalyseDataDO> datas = new ArrayList<>();
+        for (TransitionDO transitionDO : transitionDOList) {
+            AnalyseDataDO data = new AnalyseDataDO();
+            data.setOverviewId(overviewId);
+            data.setFullName(transitionDO.getFullName());
+            data.setAnnotations(transitionDO.getAnnotations());
+            data.setPrecursorCharge(transitionDO.getPrecursorCharge());
+            data.setMsLevel(2);
+            data.setMz(new Float(transitionDO.getProductMz()));
+
+            datas.add(data);
+        }
+        model.addAttribute("overview", overview);
+        model.addAttribute("overviewId", overview.getId());
+        model.addAttribute("datas", datas);
+
+        return "/analyse/data/list";
     }
 
     @RequestMapping(value = "/view")
     @ResponseBody
     ResultDO<JSONObject> view(Model model,
-                              @RequestParam(value = "id", required = false) String analyseDataId) {
-
-        ResultDO<AnalyseDataDO> dataResult = analyseDataService.getById(analyseDataId);
+                              @RequestParam(value = "dataId", required = false, defaultValue = "") String dataId,
+                              @RequestParam(value = "overviewId", required = false) String overviewId,
+                              @RequestParam(value = "fullName", required = false) String fullName,
+                              @RequestParam(value = "annotations", required = false) String annotations) {
+        ResultDO<AnalyseDataDO> dataResult = null;
+        if (dataId != null && !dataId.isEmpty() && !dataId.equals("null")) {
+            dataResult = analyseDataService.getById(dataId);
+        } else if (overviewId != null && fullName != null && annotations != null) {
+            dataResult = analyseDataService.getMS2Data(overviewId, fullName, annotations);
+        } else {
+            return ResultDO.buildError(ResultCode.ANALYSE_DATA_NOT_EXISTED);
+        }
 
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
         if (dataResult.isFailed()) {

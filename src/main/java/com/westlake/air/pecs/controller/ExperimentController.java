@@ -72,8 +72,10 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/create")
     String create(Model model) {
-        List<LibraryDO> list = libraryService.getAll();
-        model.addAttribute("libraries", list);
+        List<LibraryDO> slist = getLibraryList(0);
+        List<LibraryDO> vlist = getLibraryList(1);
+        model.addAttribute("sLibraries", slist);
+        model.addAttribute("vLibraries", vlist);
         return "experiment/create";
     }
 
@@ -121,8 +123,8 @@ public class ExperimentController extends BaseController {
 
         ResultDO<LibraryDO> resultVLib = libraryService.getById(vLibraryId);
         if (resultVLib.isSuccess()) {
-            experimentDO.setSLibraryId(vLibraryId);
-            experimentDO.setSLibraryName(resultVLib.getModel().getName());
+            experimentDO.setVLibraryId(vLibraryId);
+            experimentDO.setVLibraryName(resultVLib.getModel().getName());
         }
 
         ResultDO result = experimentService.insert(experimentDO);
@@ -248,7 +250,7 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/delete/{id}")
     String delete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO resultDO = experimentService.delete(id);
-
+        scanIndexService.deleteAllByExperimentId(id);
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_LIBRARY_SUCCESS);
         return "redirect:/experiment/list";
 

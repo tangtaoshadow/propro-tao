@@ -62,7 +62,7 @@
                             </label>
                             <div class="col-10">
                                 <select class="form-control m-input" id="sLibraryId" name="sLibraryId">
-                                    <option th:each="library:${slibraries}" th:value="${library.id}" th:text="${library.name}"></option>
+                                    <option th:each="library:${sLibraries}" th:value="${library.id}" th:text="${library.name}"></option>
                                 </select>
                                 <span class="m-form__help">关联标准库一旦设定无法修改</span>
                             </div>
@@ -74,7 +74,7 @@
                             </label>
                             <div class="col-10">
                                 <select class="form-control m-input" id="vLibraryId" name="vLibraryId">
-                                    <option th:each="library:${vlibraries}" th:value="${library.id}" th:text="${library.name}"></option>
+                                    <option th:each="library:${vLibraries}" th:value="${library.id}" th:text="${library.name}"></option>
                                 </select>
                                 <span class="m-form__help">关联校准库一旦设定无法修改</span>
                             </div>

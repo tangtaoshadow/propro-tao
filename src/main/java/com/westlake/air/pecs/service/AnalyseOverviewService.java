@@ -26,5 +26,5 @@ public interface AnalyseOverviewService {
 
     ResultDO<AnalyseOverviewDO> getById(String id);
 
-    ResultDO<AnalyseOverviewDO> getOneByExpId(String id);
+    ResultDO<AnalyseOverviewDO> getFirstByExpId(String expId);
 }

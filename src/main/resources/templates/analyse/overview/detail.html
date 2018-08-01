@@ -51,100 +51,55 @@
                                 ID
                             </label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="id" name="id" readonly
-                                       th:value="${overview?.id}">
+                                <input type="text" class="form-control m-input" id="id" name="id" readonly th:value="${overview?.id}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="id" class="col-2 col-form-label">
-                                原始实验ID
-                            </label>
+                            <label for="id" class="col-2 col-form-label">原始实验ID</label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="expId" name="expId" readonly
-                                       th:value="${overview?.expId}">
+                                <input type="text" class="form-control m-input" id="expId" name="expId" readonly th:value="${overview?.expId}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="id" class="col-2 col-form-label">
-                                卷积代号
-                            </label>
+                            <label for="id" class="col-2 col-form-label">卷积代号</label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="name" name="name" readonly
-                                       th:value="${overview?.name}">
+                                <input type="text" class="form-control m-input" id="name" name="name" readonly th:value="${overview?.name}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="libraryId" class="col-2 col-form-label">
-                                关联标准库ID
-                            </label>
+                            <label for="sLibrary" class="col-2 col-form-label">关联标准库</label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="libraryId" readonly
-                                       th:value="|${overview?.libraryId}|">
+                                <input type="text" class="form-control m-input" id="sLibrary" readonly th:value="|${overview?.sLibraryName}(${overview?.sLibraryId})|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="libraryName" class="col-2 col-form-label">
-                                关联标准库名称
-                            </label>
+                            <label for="vLibrary" class="col-2 col-form-label">关联校准库</label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="libraryName" readonly
-                                       th:value="|${overview?.libraryName}|">
+                                <input type="text" class="form-control m-input" id="vLibrary" readonly th:value="|${overview?.vLibraryName}(${overview?.vLibraryId})|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="creator" class="col-2 col-form-label">
-                                创建人
-                            </label>
+                            <label for="ExtractWindowForMS1" class="col-2 col-form-label">MS1-RT/MZ卷积窗口</label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="creator" readonly
-                                       th:value="|${overview?.creator}|">
+                                <input type="text" class="form-control m-input" id="ExtractWindowForMS1" readonly th:value="|${overview?.rtExtractWindowForMS1}/${overview?.mzExtractWindowForMS1}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="rtExtractWindowForMS1" class="col-2 col-form-label">
-                                MS1-RT卷积窗口
-                            </label>
+                            <label for="ExtractWindowForMS2" class="col-2 col-form-label">MS2-RT/MZ卷积窗口</label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="rtExtractWindowForMS1" readonly
-                                       th:value="${overview?.rtExtractWindowForMS1}">
+                                <input type="text" class="form-control m-input" id="ExtractWindowForMS2" readonly th:value="|${overview?.rtExtractWindowForMS2}/${overview?.mzExtractWindowForMS2}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="mzExtractWindowForMS1" class="col-2 col-form-label">
-                                MS1-MZ卷积窗口
-                            </label>
+                            <label for="creator" class="col-2 col-form-label">创建人</label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="mzExtractWindowForMS1" readonly
-                                       th:value="${overview?.mzExtractWindowForMS1}">
+                                <input type="text" class="form-control m-input" id="creator" readonly th:value="|${overview?.creator}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="rtExtractWindowForMS2" class="col-2 col-form-label">
-                                MS1-RT卷积窗口
-                            </label>
+                            <label for="createDate" class="col-2 col-form-label">创建时间</label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="rtExtractWindowForMS2" readonly
-                                       th:value="${overview?.rtExtractWindowForMS2}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="mzExtractWindowForMS2" class="col-2 col-form-label">
-                                MS2-MZ卷积窗口
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="mzExtractWindowForMS2" readonly
-                                       th:value="${overview?.mzExtractWindowForMS2}">
-                            </div>
-                        </div>
-
-                        <div class="form-group m-form__group row">
-                            <label for="createDate" class="col-2 col-form-label">
-                                创建时间
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="createDate" name="createDate"
-                                       readonly
-                                       th:value="${#dates.format(overview?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
+                                <input type="text" class="form-control m-input" id="createDate" name="createDate" readonly th:value="${#dates.format(overview?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
                             </div>
                         </div>
                     </div>

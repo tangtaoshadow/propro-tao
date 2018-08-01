@@ -101,6 +101,8 @@ public class TransitionDO {
      */
     Annotation annotation;
 
+    String cutInfo;
+
     /**
      * 如果是伪肽段,则本字段代表的是伪肽段中unimod的位置
      * key为unimod在肽段中的位置,位置从0开始计数,value为unimod的Id(参见unimod.obo文件)
@@ -115,7 +117,6 @@ public class TransitionDO {
     Boolean detecting = true;
     Boolean identifying = false;
     Boolean quantifying = true;
-
 
     String features;
 

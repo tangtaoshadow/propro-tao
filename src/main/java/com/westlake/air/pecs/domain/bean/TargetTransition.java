@@ -21,6 +21,8 @@ public class TargetTransition {
     //对应的肽段全名(包含unimod)
     String fullName;
 
+    Integer precursorCharge;
+
     String annotations;
 
     float rt;

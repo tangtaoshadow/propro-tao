@@ -104,9 +104,9 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
     }
 
     @Override
-    public ResultDO<AnalyseOverviewDO> getOneByExpId(String expId) {
+    public ResultDO<AnalyseOverviewDO> getFirstByExpId(String expId) {
         try {
-            AnalyseOverviewDO overviewDO = analyseOverviewDAO.getOneByExperimentId(expId);
+            AnalyseOverviewDO overviewDO = analyseOverviewDAO.getFirstByExperimentId(expId);
             if (overviewDO == null) {
                 return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
             } else {

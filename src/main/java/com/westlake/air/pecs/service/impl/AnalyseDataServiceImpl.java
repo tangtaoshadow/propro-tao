@@ -119,4 +119,36 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
     }
+
+    @Override
+    public ResultDO<AnalyseDataDO> getMS1Data(String overviewId, String fullName, Integer charge) {
+        try {
+            AnalyseDataDO analyseDataDO = analyseDataDAO.getMS1Data(overviewId, fullName, charge);
+            if (analyseDataDO == null) {
+                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
+            } else {
+                ResultDO<AnalyseDataDO> resultDO = new ResultDO<>(true);
+                resultDO.setModel(analyseDataDO);
+                return resultDO;
+            }
+        } catch (Exception e) {
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String fullName, String annotations) {
+        try {
+            AnalyseDataDO analyseDataDO = analyseDataDAO.getMS2Data(overviewId, fullName, annotations);
+            if (analyseDataDO == null) {
+                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
+            } else {
+                ResultDO<AnalyseDataDO> resultDO = new ResultDO<>(true);
+                resultDO.setModel(analyseDataDO);
+                return resultDO;
+            }
+        } catch (Exception e) {
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
+        }
+    }
 }
