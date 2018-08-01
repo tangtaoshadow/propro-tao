@@ -116,7 +116,6 @@ public class TransitionDO {
     Boolean identifying = false;
     Boolean quantifying = true;
 
-
     String features;
 
 

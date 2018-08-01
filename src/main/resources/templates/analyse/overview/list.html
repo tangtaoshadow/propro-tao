@@ -5,7 +5,6 @@
 <head>
     <title>欢迎登陆西湖大学PECS分析平台</title>
     <link th:href="@{/assets/css/pagination.css}" rel="stylesheet" type="text/css" />
-
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -15,26 +14,6 @@
     <div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>
     <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
     <div class="m-portlet__body">
-        <!--begin: Search Form -->
-        <div class="clearfix">
-            <form id="searchForm" method="post" role="form" class="form-inline" action="/analyse/overview/list">
-                <input id="currentPage" type="hidden" class="form-control" name="currentPage">
-                <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
-
-                <div class="form-group m-form__group">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="searchName" name="searchName" placeholder="实验名称"
-                               th:value="${searchName}">
-                        <div class="input-group-append">
-                            <button class="btn btn-primary" type="submit">
-                                查找
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <!--end: Search Form -->
         <!--begin: Datatable -->
         <div>
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
@@ -49,20 +28,17 @@
                     <th width="8%">
                         标准库名称
                     </th>
+                    <th width="8%">
+                        校准库名称
+                    </th>
                     <th width="7%">
                         创建人
                     </th>
-                    <th width="7%">
-                        MS1-RT卷积窗口
+                    <th width="10%">
+                        MS1-RT/MZ卷积窗口
                     </th>
-                    <th width="7%">
-                        MS1-MZ卷积窗口
-                    </th>
-                    <th width="7%">
-                        MS2-RT卷积窗口
-                    </th>
-                    <th width="7%">
-                        MS2-MZ卷积窗口
+                    <th width="10%">
+                        MS2-RT/MZ卷积窗口
                     </th>
                     <th width="12%">
                         创建时间
@@ -76,12 +52,11 @@
                 <tr th:each="overview:${overviews}">
                     <td th:text="${overview.name}"></td>
                     <td th:text="${experiment.name}"></td>
-                    <td th:text="${overview.libraryName}"></td>
+                    <td th:text="${overview.sLibraryName}"></td>
+                    <td th:text="${overview.vLibraryName}"></td>
                     <td th:text="${overview.creator}"></td>
-                    <td th:text="${overview.rtExtractWindowForMS1}"></td>
-                    <td th:text="${overview.mzExtractWindowForMS1}"></td>
-                    <td th:text="${overview.rtExtractWindowForMS2}"></td>
-                    <td th:text="${overview.mzExtractWindowForMS2}"></td>
+                    <td th:text="|${overview.rtExtractWindowForMS1}/${overview.mzExtractWindowForMS1}|"></td>
+                    <td th:text="|${overview.rtExtractWindowForMS2}/${overview.mzExtractWindowForMS2}|"></td>
                     <td th:text="${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
                         <a th:href="|/analyse/overview/detail/${overview.id}|"

@@ -124,7 +124,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalNum", resultDO.getTotalNum());
 
-        return "/analyse/list";
+        return "/analyse/data/list";
     }
 
     @RequestMapping(value = "/view")
