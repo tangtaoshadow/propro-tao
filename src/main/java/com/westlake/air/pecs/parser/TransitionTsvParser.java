@@ -141,16 +141,13 @@ public class TransitionTsvParser {
         transitionDO.setProteinName(row[columnMap.get(ProteinName)]);
 
         if(columnMap.get(Detecting) != null){
-            boolean detecting = !row[columnMap.get(Detecting)].equals("0");
-            transitionDO.setDetecting(detecting);
+            transitionDO.setDetecting(!row[columnMap.get(Detecting)].equals("0"));
         }
         if(columnMap.get(Identifying) != null) {
-            boolean indentifying = !row[columnMap.get(Identifying)].equals("0");
-            transitionDO.setIdentifying(indentifying);
+            transitionDO.setIdentifying(!row[columnMap.get(Identifying)].equals("0"));
         }
         if(columnMap.get(Quantifying) != null){
-            boolean quantifying = !row[columnMap.get(Quantifying)].equals("0");
-            transitionDO.setQuantifying(quantifying);
+            transitionDO.setQuantifying(!row[columnMap.get(Quantifying)].equals("0"));
         }
 
         String annotations = row[columnMap.get(Annotation)].replaceAll("\"", "");
@@ -163,7 +160,9 @@ public class TransitionTsvParser {
         transitionDO.setPrecursorCharge(Integer.parseInt(row[columnMap.get(PrecursorCharge)]));
         try {
             ResultDO<Annotation> annotationResult = parseAnnotation(transitionDO.getAnnotations());
-            transitionDO.setAnnotation(annotationResult.getModel());
+            Annotation annotation = annotationResult.getModel();
+            transitionDO.setAnnotation(annotation);
+            transitionDO.setCutInfo(annotation.getType()+annotation.getLocation()+(annotation.getCharge()==1?"":("^"+annotation.getCharge())));
             resultDO.setModel(transitionDO);
         } catch (Exception e) {
             resultDO.setSuccess(false);

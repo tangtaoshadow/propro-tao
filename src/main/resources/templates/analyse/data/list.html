@@ -34,13 +34,27 @@
     <div class="row">
         <div class="col-md-12">
             <div class="clearfix">
-                <form id="searchForm" method="post" role="form" class="form-inline" action="/analyse/list">
+                <form id="searchForm" method="post" role="form" class="form-inline" action="/analyse/data/list">
                     <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                     <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
-                    <input id="expId" type="hidden" th:value="${expId}" class="form-control" name="expId">
+                    <input id="overviewId" type="hidden" th:value="${overviewId}" class="form-control" name="overviewId">
 
                     <div class="form-group m-form__group">
                         <div class="input-group">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-success" type="button">
+                                    肽段全称:
+                                </button>
+                            </div>
+                            <input type="text" class="form-control m-input" name="fullName" placeholder="肽段全称"
+                                   th:value="${fullName}">
+                        </div>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-success" type="button">
+                                    MS等级:
+                                </button>
+                            </div>
                             <input type="text" class="form-control" id="msLevel" name="msLevel" placeholder="MS等级"
                                    th:value="${msLevel}">
                             <div class="input-group-append">
@@ -59,22 +73,25 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="50%">肽段全称</th>
-                    <th width="30%">标记</th>
-                    <th width="10%">MS等级</th>
-                    <th width="20%">MZ</th>
+                    <th width="20%">概览Id</th>
+                    <th width="25%">肽段全称</th>
+                    <th width="20%">标记</th>
+                    <th width="5%">MS等级</th>
+                    <th width="10%">MZ</th>
                     <th width="20%">操作</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="data:${datas}">
+                    <td th:text="${data.overviewId}"></td>
                     <td th:text="${data.fullName}"></td>
                     <td th:text="${data.annotations}"></td>
                     <td th:text="${data.msLevel}"></td>
                     <td th:text="${data.mz}"></td>
                     <td>
                         <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
-                                data-target="#m_modal_target" th:onclick="|query('${data.fullName}','${data.id}')|">
+                                data-target="#m_modal_target"
+                                th:onclick="|query('${data.id}','${overviewId}','${data.fullName}','${data.annotations}')|">
                             查看谱图
                         </button>
                     </td>
@@ -100,100 +117,82 @@
                 <form class="m-form m-form--fit m-form--label-align-right">
                     <div class="m-portlet__body">
                         <div class="form-group m-form__group row">
-                            <label for="id" class="col-2 col-form-label">
+                            <label for="id" class="col-3 col-form-label">
                                 ID
                             </label>
-                            <div class="col-10">
+                            <div class="col-9">
                                 <input type="text" class="form-control m-input" id="id" name="id" readonly
                                        th:value="${overview?.id}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="id" class="col-2 col-form-label">
+                            <label for="id" class="col-3 col-form-label">
                                 实验ID
                             </label>
-                            <div class="col-10">
+                            <div class="col-9">
                                 <input type="text" class="form-control m-input" id="expId" name="expId" readonly
                                        th:value="${overview?.expId}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="libraryId" class="col-2 col-form-label">
-                                标准库ID
+                            <label for="sLibrary" class="col-3 col-form-label">
+                                关联标准库
                             </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="libraryId" readonly
-                                       th:value="|${overview?.libraryId}|">
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="sLibrary" readonly
+                                       th:value="|${overview?.sLibraryName}(${overview?.sLibraryId})|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="libraryName" class="col-2 col-form-label">
-                                标准库名称
+                            <label for="vLibrary" class="col-3 col-form-label">
+                                关联校准库
                             </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="libraryName" readonly
-                                       th:value="|${overview?.libraryName}|">
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="vLibrary" readonly
+                                       th:value="|${overview?.vLibraryName}(${overview?.vLibraryId})|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="creator" class="col-2 col-form-label">
-                                创建人
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="creator" readonly
-                                       th:value="|${overview?.creator}|">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="evolutionMSDataNum" class="col-2 col-form-label">
+                            <label for="evolutionMSDataNum" class="col-3 col-form-label">
                                 总计卷积数据
                             </label>
-                            <div class="col-10">
+                            <div class="col-9">
                                 <input type="text" class="form-control m-input" id="evolutionMSDataNum" readonly
                                        th:value="|${totalNum}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="rtExtractWindowForMS1" class="col-2 col-form-label">
-                                MS1-RT卷积窗口
+                            <label for="ExtractWindowForMS1" class="col-3 col-form-label">
+                                MS1-RT/MZ卷积窗口
                             </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="rtExtractWindowForMS1" readonly
-                                       th:value="${overview?.rtExtractWindowForMS1}">
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="ExtractWindowForMS1" readonly
+                                       th:value="|${overview?.rtExtractWindowForMS1}/${overview?.mzExtractWindowForMS1}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="mzExtractWindowForMS1" class="col-2 col-form-label">
-                                MS1-MZ卷积窗口
+                            <label for="ExtractWindowForMS2" class="col-3 col-form-label">
+                                MS2-RT/MZ卷积窗口
                             </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="mzExtractWindowForMS1" readonly
-                                       th:value="${overview?.mzExtractWindowForMS1}">
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="ExtractWindowForMS2" readonly
+                                       th:value="|${overview?.rtExtractWindowForMS2}/${overview?.mzExtractWindowForMS2}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="rtExtractWindowForMS2" class="col-2 col-form-label">
-                                MS1-RT卷积窗口
+                            <label for="creator" class="col-3 col-form-label">
+                                创建人
                             </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="rtExtractWindowForMS2" readonly
-                                       th:value="${overview?.rtExtractWindowForMS2}">
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="creator" readonly
+                                       th:value="|${overview?.creator}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="mzExtractWindowForMS2" class="col-2 col-form-label">
-                                MS2-MZ卷积窗口
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="mzExtractWindowForMS2" readonly
-                                       th:value="${overview?.mzExtractWindowForMS2}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="createDate" class="col-2 col-form-label">
+                            <label for="createDate" class="col-3 col-form-label">
                                 创建时间
                             </label>
-                            <div class="col-10">
+                            <div class="col-9">
                                 <input type="text" class="form-control m-input" id="createDate" name="createDate"
                                        readonly
                                        th:value="${#dates.format(overview?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
@@ -262,15 +261,20 @@
             });
         });
 
-        function query(fullName,id) {
-            var result = $.ajax({url: "/analyse/view?id=" + id, async: false});
+        function query(dataId, overviewId, fullName, annotations) {
+            var result = $.ajax({
+                url: "/analyse/view?dataId=" + dataId + "&overviewId=" + overviewId + "&fullName=" + fullName + "&annotations=" + annotations,
+                async: false
+            });
+
+
             var datas = result.responseJSON.model;
             var data_rt = datas.rt;
             var data_intensity = datas.intensity;
 
             option = {
                 title: {
-                    text: fullName+":"+data_rt.length + "个信号",
+                    text: fullName + ":" + data_rt.length + "个信号",
                     left: 10
                 },
                 legend: {

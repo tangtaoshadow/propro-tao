@@ -179,7 +179,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         RandomAccessFile raf = null;
 
         //卷积前查看之前是否已经做过卷积处理,如果做过的话先删除原有的卷积数据
-        AnalyseOverviewDO overviewOldDO = analyseOverviewDAO.getOneByExperimentId(expId);
+        AnalyseOverviewDO overviewOldDO = analyseOverviewDAO.getFirstByExperimentId(expId);
         if (overviewOldDO != null) {
             logger.info("发现已有的卷积数据,原有卷积数据卷积日期为" + overviewOldDO.getCreateDate() + ";正在删除中");
             analyseDataDAO.deleteAllByOverviewId(overviewOldDO.getId());
@@ -432,6 +432,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             dataDO.setOverviewId(overviewId);
             dataDO.setFullName(ms.getFullName());
             dataDO.setAnnotations(ms.getAnnotations());
+            dataDO.setPrecursorCharge(ms.getPrecursorCharge());
             dataList.add(dataDO);
 
             //每隔1000条数据落库一次,以减少对内存的依赖

@@ -69,7 +69,8 @@ public enum ResultCode implements Serializable {
      * *******
      */
     EVOLUTION_DATA_NOT_EXISTED("EVOLUTION_DATA_NOT_EXISTED","卷积数据不存在,请到详细页面进行卷积操作"),
-    ANALYSE_DATA_NOT_EXISTED("ANALYSE_DATA_NOT_EXISTED","数据不存在"),
+    ANALYSE_DATA_NOT_EXISTED("ANALYSE_DATA_NOT_EXISTED","卷积数据不存在"),
+    ANALYSE_OVERVIEW_NOT_EXISTED("ANALYSE_OVERVIEW_NOT_EXISTED","卷积数据概览不存在"),
     ;
 
     private String code = "";

@@ -28,10 +28,18 @@ public class AnalyseDataDAO {
         return mongoTemplate.find(query, AnalyseDataDO.class, CollectionName);
     }
 
-    public List<AnalyseDataDO> getAllByOverviewIdAndFullName(String overviewId, String fullName) {
+    public AnalyseDataDO getMS1Data(String overviewId, String fullName, Integer charge) {
         Query query = new Query(where("overviewId").is(overviewId));
         query.addCriteria(where("fullName").is(fullName));
-        return mongoTemplate.find(query, AnalyseDataDO.class, CollectionName);
+        query.addCriteria(where("precursorCharge").is(charge));
+        return mongoTemplate.findOne(query, AnalyseDataDO.class, CollectionName);
+    }
+
+    public AnalyseDataDO getMS2Data(String overviewId, String fullName, String annotations) {
+        Query query = new Query(where("overviewId").is(overviewId));
+        query.addCriteria(where("fullName").is(fullName));
+        query.addCriteria(where("annotations").is(annotations));
+        return mongoTemplate.findOne(query, AnalyseDataDO.class, CollectionName);
     }
 
     public List<AnalyseDataDO> getList(AnalyseDataQuery query) {

@@ -23,6 +23,8 @@ public class AnalyseDataDO {
 
     String fullName;
 
+    Integer precursorCharge;
+
     String annotations;
 
     Integer msLevel;
