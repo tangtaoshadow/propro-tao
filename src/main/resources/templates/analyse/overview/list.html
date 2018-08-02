@@ -35,10 +35,7 @@
                         创建人
                     </th>
                     <th width="10%">
-                        MS1-RT/MZ卷积窗口
-                    </th>
-                    <th width="10%">
-                        MS2-RT/MZ卷积窗口
+                        RT/MZ卷积窗口
                     </th>
                     <th width="12%">
                         创建时间
@@ -55,8 +52,7 @@
                     <td th:text="${overview.sLibraryName}"></td>
                     <td th:text="${overview.vLibraryName}"></td>
                     <td th:text="${overview.creator}"></td>
-                    <td th:text="|${overview.rtExtractWindowForMS1}/${overview.mzExtractWindowForMS1}|"></td>
-                    <td th:text="|${overview.rtExtractWindowForMS2}/${overview.mzExtractWindowForMS2}|"></td>
+                    <td th:text="|${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></td>
                     <td th:text="${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
                         <a th:href="|/analyse/overview/detail/${overview.id}|" class="btn btn-success btn-sm">详情</a>

@@ -198,6 +198,8 @@ public class ExperimentServiceImpl implements ExperimentService {
         overviewDO.setVLibraryName(experimentDO.getVLibraryName());
         overviewDO.setCreator(creator);
         overviewDO.setCreateDate(new Date());
+        overviewDO.setRtExtractWindow(rtExtractWindow);
+        overviewDO.setMzExtractWindow(mzExtractWindow);
         analyseOverviewDAO.insert(overviewDO);
 
         try {
@@ -382,6 +384,9 @@ public class ExperimentServiceImpl implements ExperimentService {
             ArrayList<Float> intList = new ArrayList<>();
 
             for (Float rt : rtMap.keySet()) {
+                if(rtExtractWindow != -1 && rt>ms.getRtEnd()){
+                    break;
+                }
                 if(rtExtractWindow == -1 || (rt >= ms.getRtStart() && rt<= ms.getRtEnd())){
                     MzIntensityPairs pairs = rtMap.get(rt);
                     Float[] pairMzArray = pairs.getMzArray();
@@ -400,8 +405,12 @@ public class ExperimentServiceImpl implements ExperimentService {
                 dataDO.setMz(ms.getProductMz());
                 dataDO.setMsLevel(2);
             }
-            dataDO.setRtArray((Float[])rtList.toArray());
-            dataDO.setIntensityArray((Float[])intList.toArray());
+            Float[] rtArray = new Float[rtList.size()];
+            Float[] intArray = new Float[intList.size()];
+            rtList.toArray(rtArray);
+            intList.toArray(intArray);
+            dataDO.setRtArray(rtArray);
+            dataDO.setIntensityArray(intArray);
             dataDO.setOverviewId(overviewId);
             dataDO.setFullName(ms.getFullName());
             dataDO.setAnnotations(ms.getAnnotations());

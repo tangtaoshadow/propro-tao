@@ -260,11 +260,11 @@ public class ExperimentController extends BaseController {
                    @RequestParam(value = "id", required = true) String id,
                    @RequestParam(value = "buildType", required = true) int buildType,
                    @RequestParam(value = "creator", required = false) String creator,
-                   @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "1.0") Float rtExtractWindow,
+                   @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
                    @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
                    RedirectAttributes redirectAttributes) {
         if (rtExtractWindow == null) {
-            rtExtractWindow = 1.0f;
+            rtExtractWindow = 600f;
         }
         if (mzExtractWindow == null) {
             mzExtractWindow = 0.05f;

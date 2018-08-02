@@ -31,13 +31,11 @@ public class AnalyseOverviewDO {
 
     String vLibraryName;
 
-    Double rtExtractWindowForMS1;
+    //MS1是全光谱扫描的.没有RTwindow的参数,MS2有
+    Float rtExtractWindow;
 
-    Double rtExtractWindowForMS2;
-
-    Double mzExtractWindowForMS1;
-
-    Double mzExtractWindowForMS2;
+    //MS1和MS2的mzWindow是共用同一个的
+    Float mzExtractWindow;
 
     String creator;
 

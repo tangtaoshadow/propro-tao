@@ -166,21 +166,12 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="ExtractWindowForMS1" class="col-3 col-form-label">
-                                MS1-RT/MZ卷积窗口
+                            <label for="ExtractWindow" class="col-3 col-form-label">
+                                RT/MZ卷积窗口
                             </label>
                             <div class="col-9">
-                                <input type="text" class="form-control m-input" id="ExtractWindowForMS1" readonly
-                                       th:value="|${overview?.rtExtractWindowForMS1}/${overview?.mzExtractWindowForMS1}|">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="ExtractWindowForMS2" class="col-3 col-form-label">
-                                MS2-RT/MZ卷积窗口
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="ExtractWindowForMS2" readonly
-                                       th:value="|${overview?.rtExtractWindowForMS2}/${overview?.mzExtractWindowForMS2}|">
+                                <input type="text" class="form-control m-input" id="ExtractWindow" readonly
+                                       th:value="|${overview?.rtExtractWindow}/${overview?.mzExtractWindow}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
