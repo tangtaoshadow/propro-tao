@@ -1,7 +1,10 @@
 package com.westlake.air.pecs.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
+import org.apache.commons.math3.fitting.GaussianCurveFitter;
+import org.apache.commons.math3.fitting.WeightedObservedPoints;
 
+import java.security.Guard;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +64,7 @@ public class GaussFilter {
             int j = i;
 
             // left side of i
-            while (j != 0 && rtArray[j-1] > startPosition) {
+            while (j != 0 && rtArray[j - 1] > startPosition) {
 
                 distanceInGaussian = Math.abs(rtArray[i] - rtArray[j]);
                 leftPosition = (int) (distanceInGaussian / spacing);
@@ -73,7 +76,7 @@ public class GaussFilter {
                     coeffRight = coeffs[leftPosition];
                 }
 
-                distanceInGaussian = Math.abs(rtArray[i] - rtArray[j-1]);
+                distanceInGaussian = Math.abs(rtArray[i] - rtArray[j - 1]);
                 leftPosition = (int) (distanceInGaussian / spacing);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing) - distanceInGaussian) / spacing;
@@ -83,8 +86,8 @@ public class GaussFilter {
                     coeffLeft = coeffs[leftPosition];
                 }
 
-                norm += Math.abs(rtArray[i-1] - rtArray[i]) * (coeffRight + coeffLeft) / 2.0;
-                v += Math.abs(rtArray[i-1] - rtArray[i]) * (intArray[i-1] * coeffLeft + intArray[i] * coeffRight) / 2.0;
+                norm += Math.abs(rtArray[i - 1] - rtArray[i]) * (coeffRight + coeffLeft) / 2.0;
+                v += Math.abs(rtArray[i - 1] - rtArray[i]) * (intArray[i - 1] * coeffLeft + intArray[i] * coeffRight) / 2.0;
 
                 j--;
 
@@ -93,7 +96,7 @@ public class GaussFilter {
             j = i;
 
             // right side of i
-            while (j != listSize - 1 && rtArray[j-1] < endPosition) {
+            while (j != listSize - 1 && rtArray[j + 1] < endPosition) {
                 distanceInGaussian = Math.abs(rtArray[i] - rtArray[j]);
                 leftPosition = (int) (distanceInGaussian / spacing);
                 rightPosition = leftPosition + 1;
@@ -104,7 +107,7 @@ public class GaussFilter {
                     coeffLeft = coeffs[leftPosition];
                 }
 
-                distanceInGaussian = Math.abs(rtArray[i]  - rtArray[j+1]);
+                distanceInGaussian = Math.abs(rtArray[i] - rtArray[j + 1]);
                 leftPosition = (int) (distanceInGaussian / spacing);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing) - distanceInGaussian) / spacing;
@@ -114,8 +117,8 @@ public class GaussFilter {
                     coeffRight = coeffs[leftPosition];
                 }
 
-                norm += Math.abs(rtArray[i+1] - rtArray[i] ) * (coeffLeft + coeffRight) / 2.0;
-                v += Math.abs(rtArray[i+1] - rtArray[i] ) * (intArray[i] * coeffLeft + intArray[i+1] * coeffRight) / 2.0;
+                norm += Math.abs(rtArray[i + 1] - rtArray[i]) * (coeffLeft + coeffRight) / 2.0;
+                v += Math.abs(rtArray[i + 1] - rtArray[i]) * (intArray[i] * coeffLeft + intArray[i + 1] * coeffRight) / 2.0;
 
                 j++;
 
@@ -145,6 +148,58 @@ public class GaussFilter {
             coeffs[i] = (float) (1.0 / (sigma * Math.sqrt(2.0 * Math.PI)) * Math.exp(-((i * spacing) * (i * spacing)) / (2 * sigma * sigma)));
         }
         return coeffs;
+    }
+
+    public static void main(String[] args) {
+
+
+//        WeightedObservedPoints obs = new WeightedObservedPoints();
+//        for (int i = 0; i < 9; i++) {
+//            if(i==3){
+//                obs.add(500.0 + 0.03 * i, 1.0);
+//            }else if(i==4){
+//                obs.add(500.0 + 0.03 * i, 0.8);
+//            }else if(i==5){
+//                obs.add(500.0 + 0.03 * i, 1.2);
+//            }else{
+//                obs.add(500.0 + 0.03 * i, 0.0);
+//            }
+//        }
+//
+//        double[] result = GaussianCurveFitter.create().fit(obs.toList());
+//        System.out.println("Norm:"+result[0]);
+//        System.out.println("Mean:"+result[1]);
+//        System.out.println("Sigma:"+result[2]);
+//
+//        GaussianCurveFitter.ParameterGuesser guesser = new GaussianCurveFitter.ParameterGuesser(obs.toList());
+//        double[] guessRes = guesser.guess();
+//        System.out.println("Norm:"+guessRes[0]);
+//        System.out.println("Mean:"+guessRes[1]);
+//        System.out.println("Sigma:"+guessRes[2]);
+
+        Float[] rtArray = new Float[9];
+        Float[] intArray = new Float[9];
+        for (int i = 0; i < 9; i++) {
+            rtArray[i] = 500.0f + 0.03f * i;
+            if(i==3){
+                intArray[i] = 1.0f;
+            }else if(i==4){
+                intArray[i] = 0.8f;
+            }else if(i==5){
+                intArray[i] = 1.2f;
+            }else{
+                intArray[i] = 0f;
+            }
+        }
+
+        RtIntensityPairs pairs = new RtIntensityPairs(rtArray, intArray);
+        GaussFilter filter = new GaussFilter();
+        filter.sigma = 0.025f;
+        filter.spacing = 0.01f;
+        RtIntensityPairs resultPair = filter.gaussFilter(pairs);
+        for(float f : resultPair.getIntensityArray()){
+            System.out.println(f);
+        }
     }
 
 }
