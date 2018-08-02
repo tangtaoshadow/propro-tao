@@ -241,37 +241,8 @@ public class ExperimentServiceImpl implements ExperimentService {
         //Step4.提取指定原始谱图
         TreeMap<Float, MzIntensityPairs> rtMap = parseSpectrum(raf, indexes, getParser(exp.getFileType()));
         //Step5.卷积并且存储数据
-        convoluteAndInsert(coordinates, rtMap, overviewId, mzExtractWindow, true);
+        convoluteAndInsert(coordinates, rtMap, overviewId, rtExtractWindow, mzExtractWindow, true);
     }
-
-//    @Override
-//    public void extractMS2(File file, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow) {
-//
-//        long start = System.currentTimeMillis();
-//        //Step1.获取窗口信息.
-//        List<WindowRang> rangs = getWindows(exp.getId());
-//        logger.info("总计有窗口:" + rangs.size() + "个");
-//
-//        //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
-//        logger.info("开始进行MS2卷积计算");
-//        List<ListenableFuture<Integer>> futures = Lists.newArrayList();
-//        ExecutorService pool = Executors.newFixedThreadPool(3);//定义线程数
-//        ListeningExecutorService executorService = MoreExecutors.listeningDecorator(pool);
-//        for (int i = 0; i < rangs.size(); i++) {
-//            futures.add(executorService.submit(new Task(file, exp, overviewId, rtExtractWindow, mzExtractWindow, rangs.get(i))));
-//        }
-//
-//        final ListenableFuture<List<Integer>> resultsFuture = Futures.successfulAsList(futures);
-//        try {//所有都执行完毕
-//            resultsFuture.get();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            System.out.println("操作完毕");
-//            pool.shutdown();
-//        }
-//        logger.info("MS2卷积总计耗时:"+(System.currentTimeMillis() - start));
-//    }
 
     @Override
     public void extractMS2(File file, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow) {
@@ -304,7 +275,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                 rtMap = parseSpectrum(raf, indexes, getParser(exp.getFileType()));
 
                 //Step5.卷积并且存储数据
-                convoluteAndInsert(coordinates, rtMap, overviewId, mzExtractWindow, false);
+                convoluteAndInsert(coordinates, rtMap, overviewId, rtExtractWindow, mzExtractWindow, false);
                 logger.info("第" + count + "数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
                 count++;
             }
@@ -379,7 +350,6 @@ public class ExperimentServiceImpl implements ExperimentService {
         TreeMap<Float, MzIntensityPairs> rtMap = new TreeMap<>();
         int k = 0;
         for (SimpleScanIndex index : indexes) {
-//            baseExpParser.parseOne(raf, index.getStart(), index.getEnd());
             rtMap.put(index.getRt(), baseExpParser.parseOne(raf, index.getStart(), index.getEnd()));
             k++;
             if (k % 1000 == 0) {
@@ -392,7 +362,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         return rtMap;
     }
 
-    private void convoluteAndInsert(List<TargetTransition> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float mzExtractWindow, boolean isMS1) {
+    private void convoluteAndInsert(List<TargetTransition> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow, boolean isMS1) {
         int logCountForMSTarget = 0;
         Long start = System.currentTimeMillis();
         float mzStart = 0;
@@ -405,17 +375,20 @@ public class ExperimentServiceImpl implements ExperimentService {
             mzStart = ms.getPrecursorMz() - mzExtractWindow / 2;
             mzEnd = ms.getPrecursorMz() + mzExtractWindow / 2;
 
-            Float[] rtArray = new Float[rtMap.size()];
-            rtMap.keySet().toArray(rtArray);
-            Float[] intensityArray = new Float[rtMap.size()];
+//            Float[] rtArray = new Float[rtMap.size()];
+//            rtMap.keySet().toArray(rtArray);
+//            Float[] intensityArray = new Float[rtMap.size()];
+            ArrayList<Float> rtList = new ArrayList<>();
+            ArrayList<Float> intList = new ArrayList<>();
 
-            int i = 0;
             for (Float rt : rtMap.keySet()) {
-                MzIntensityPairs pairs = rtMap.get(rt);
-                Float[] pairMzArray = pairs.getMzArray();
-                Float[] pairIntensityArray = pairs.getIntensityArray();
-                intensityArray[i] = accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd);
-                i++;
+                if(rtExtractWindow == -1 || (rt >= ms.getRtStart() && rt<= ms.getRtEnd())){
+                    MzIntensityPairs pairs = rtMap.get(rt);
+                    Float[] pairMzArray = pairs.getMzArray();
+                    Float[] pairIntensityArray = pairs.getIntensityArray();
+                    rtList.add(rt);
+                    intList.add(accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd));
+                }
             }
 
             AnalyseDataDO dataDO = new AnalyseDataDO();
@@ -427,8 +400,8 @@ public class ExperimentServiceImpl implements ExperimentService {
                 dataDO.setMz(ms.getProductMz());
                 dataDO.setMsLevel(2);
             }
-            dataDO.setRtArray(rtArray);
-            dataDO.setIntensityArray(intensityArray);
+            dataDO.setRtArray((Float[])rtList.toArray());
+            dataDO.setIntensityArray((Float[])intList.toArray());
             dataDO.setOverviewId(overviewId);
             dataDO.setFullName(ms.getFullName());
             dataDO.setAnnotations(ms.getAnnotations());
