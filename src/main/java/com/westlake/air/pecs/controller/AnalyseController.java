@@ -15,6 +15,7 @@ import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.TransitionService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -123,7 +124,7 @@ public class AnalyseController extends BaseController {
         if (msLevel != null) {
             query.setMsLevel(msLevel);
         }
-        if (fullName != null) {
+        if (StringUtils.isNotEmpty(fullName)) {
             query.setFullName(fullName);
         }
         query.setOverviewId(overviewId);

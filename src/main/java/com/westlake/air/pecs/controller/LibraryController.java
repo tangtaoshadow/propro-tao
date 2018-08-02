@@ -297,7 +297,6 @@ public class LibraryController extends BaseController {
                     return ResultDO.buildError(ResultCode.INPUT_FILE_TYPE_MUST_BE_TSV_OR_TRAML);
                 }
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }

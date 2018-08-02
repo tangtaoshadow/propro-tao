@@ -1,5 +1,7 @@
 package com.westlake.air.pecs.rtnormalizer;
 
+import com.westlake.air.pecs.domain.bean.IntensityRtLeftRtRightPairs;
+import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
 import com.westlake.air.pecs.utils.MathUtil;
 
 import java.util.List;
@@ -12,42 +14,43 @@ public class ChromatogramPicker {
 
     private float signalToNoiseLimit = 1.0f;
 
-    public float[][] pickChromatogram(List<float[]> rtIntensity, float[] signalToNoise, List<float[]> maxPeaks) {
-        int maxPeakSize = maxPeaks.size();
-        int[][] leftRight = new int[maxPeakSize][2];
-        float[][] intensityLeftrtRightrt = new float[maxPeakSize][3];
-        int leftIndex, rightIndex;
-
-        int closestPeakIndex;
-        for (int i = 0; i < maxPeakSize; i++) {
-            closestPeakIndex = findClosestPeak(rtIntensity, maxPeaks.get(i)[0]);
-
-            //to the left
-            leftIndex = closestPeakIndex;
-            while(leftIndex > 0 &&
-                    rtIntensity.get(leftIndex - 1)[1] < rtIntensity.get(leftIndex)[1] &&
-                    signalToNoise[leftIndex] >= signalToNoiseLimit){
-                leftIndex--;
-            }
-
-            //to the right
-            rightIndex = closestPeakIndex;
-            while(rightIndex < rtIntensity.size() - 1 &&
-                    rtIntensity.get(rightIndex + 1)[1] < rtIntensity.get(rightIndex)[1] &&
-                    signalToNoise[rightIndex] >= signalToNoiseLimit){
-                rightIndex++;
-            }
-
-            leftRight[i][0] = leftIndex;
-            leftRight[i][1] = rightIndex;
-            intensityLeftrtRightrt[i][1] = rtIntensity.get(leftIndex)[0];
-            intensityLeftrtRightrt[i][2] = rtIntensity.get(rightIndex)[0];
-
-        }
-
-        intensityLeftrtRightrt = integratePeaks(rtIntensity, leftRight, intensityLeftrtRightrt);
-
-        return intensityLeftrtRightrt;
+    public IntensityRtLeftRtRightPairs pickChromatogram(RtIntensityPairs rtIntensityPairs, float[] signalToNoise, RtIntensityPairs maxPeakPairs) {
+//        int maxPeakSize = maxPeakPairs.getRtArray().length;
+//        int[][] leftRight = new int[maxPeakSize][2];
+//        float[][] intensityLeftrtRightrt = new float[maxPeakSize][3];
+//        int leftIndex, rightIndex;
+//
+//        int closestPeakIndex;
+//        for (int i = 0; i < maxPeakSize; i++) {
+//            closestPeakIndex = findClosestPeak(rtIntensity, maxPeaks.get(i)[0]);
+//
+//            //to the left
+//            leftIndex = closestPeakIndex;
+//            while(leftIndex > 0 &&
+//                    rtIntensity.get(leftIndex - 1)[1] < rtIntensity.get(leftIndex)[1] &&
+//                    signalToNoise[leftIndex] >= signalToNoiseLimit){
+//                leftIndex--;
+//            }
+//
+//            //to the right
+//            rightIndex = closestPeakIndex;
+//            while(rightIndex < rtIntensity.size() - 1 &&
+//                    rtIntensity.get(rightIndex + 1)[1] < rtIntensity.get(rightIndex)[1] &&
+//                    signalToNoise[rightIndex] >= signalToNoiseLimit){
+//                rightIndex++;
+//            }
+//
+//            leftRight[i][0] = leftIndex;
+//            leftRight[i][1] = rightIndex;
+//            intensityLeftrtRightrt[i][1] = rtIntensity.get(leftIndex)[0];
+//            intensityLeftrtRightrt[i][2] = rtIntensity.get(rightIndex)[0];
+//
+//        }
+//
+//        intensityLeftrtRightrt = integratePeaks(rtIntensity, leftRight, intensityLeftrtRightrt);
+//
+//        return intensityLeftrtRightrt;
+        return null;
     }
 
     private int findClosestPeak(List<float[]> rtIntensity, float rt) {
