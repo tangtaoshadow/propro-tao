@@ -12,9 +12,13 @@ import java.util.List;
  */
 public class RTNormalizer {
 
-//    private void mapExperimentToTransitionList(List<AnalyseDataDO> expMzML, List<TransitionDO> libTraML){
-//        //chromatogramMap: chromatogramId, int i; cptr:
-//    }
+
+    public static void rtNormalizer(){
+
+        //get chromatogram from database
+
+
+   }
 //
 //
 //    private List<float[]> simpleFindBestFeature(List<ExperimentFeature> experimentFeatures, ){

@@ -291,7 +291,7 @@ public class LibraryController extends BaseController {
             if(file != null && file.getOriginalFilename() != null){
                 if(file.getOriginalFilename().toLowerCase().endsWith("tsv")||file.getOriginalFilename().toLowerCase().endsWith("csv")){
                     resultDO = tsvParser.parseAndInsert(file.getInputStream(), library, justReal);
-                }else if(file.getOriginalFilename().toLowerCase().endsWith("tsv")){
+                }else if(file.getOriginalFilename().toLowerCase().endsWith("traml")){
                     resultDO = traMLParser.parseAndInsert(file.getInputStream(), library, justReal);
                 }else{
                     return ResultDO.buildError(ResultCode.INPUT_FILE_TYPE_MUST_BE_TSV_OR_TRAML);

@@ -41,6 +41,10 @@ public class TransitionDO {
     Double productMz;
 
     /**
+     * 离子片段的带电量
+     */
+    Integer productCharge;
+    /**
      * 归一化RT
      */
     Double rt;

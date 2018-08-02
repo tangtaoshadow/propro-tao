@@ -19,4 +19,10 @@ public class RtIntensityPairs {
         this.rtArray = rtArray;
         this.intensityArray = intensityArray;
     }
+
+    public RtIntensityPairs(RtIntensityPairs rtIntensityPairs){
+        this.rtArray = rtIntensityPairs.getRtArray().clone();
+        this.intensityArray = rtIntensityPairs.getIntensityArray().clone();
+    }
+
 }

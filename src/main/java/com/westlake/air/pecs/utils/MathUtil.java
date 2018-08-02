@@ -1,5 +1,7 @@
 package com.westlake.air.pecs.utils;
 
+import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
+
 import java.util.List;
 
 /**
@@ -39,7 +41,7 @@ public class MathUtil {
         return (covXY * covXY) / (varX * varY);
     }
 
-    public static int bisection( float[] x ,float value){
+    public static int bisection(float[] x ,float value){
         int high = x.length -1;
         int low = 0;
         int mid;
@@ -53,13 +55,13 @@ public class MathUtil {
         }
         return low;
     }
-    public static int bisection(List<float[]> x ,float value){
-        int high = x.size() -1;
+    public static int bisection(RtIntensityPairs x , float value){
+        int high = x.getRtArray().length -1;
         int low = 0;
         int mid;
         while(high - low != 1){
             mid = low + (high - low + 1) / 2;
-            if(x.get(mid)[0] <= value){
+            if(x.getRtArray()[mid] <= value){
                 low = mid;
             }else {
                 high = mid;
