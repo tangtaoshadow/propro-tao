@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class GaussFilter {
 
-    private float sigma = 0.1f;
+    private float sigma = 0.025f;
     private float spacing = 0.01f;
 
     public RtIntensityPairs gaussFilter(RtIntensityPairs pairs) {
@@ -43,6 +43,8 @@ public class GaussFilter {
 
         for (int i = 0; i < listSize; i++) {
 
+            norm = 0;
+            v = 0;
             //startPosition
             if ((rtArray[i] - middle * spacing) > minRt) {
                 startPosition = rtArray[i] - middle * spacing;
@@ -61,7 +63,7 @@ public class GaussFilter {
             int j = i;
 
             // left side of i
-            while (j != 0 && rtArray[j-1] > startPosition) {
+            while (j > 0 && rtArray[j-1] > startPosition) {
 
                 distanceInGaussian = Math.abs(rtArray[i] - rtArray[j]);
                 leftPosition = (int) (distanceInGaussian / spacing);
@@ -76,15 +78,15 @@ public class GaussFilter {
                 distanceInGaussian = Math.abs(rtArray[i] - rtArray[j-1]);
                 leftPosition = (int) (distanceInGaussian / spacing);
                 rightPosition = leftPosition + 1;
-                residualPercent = (Math.abs(leftPosition * spacing) - distanceInGaussian) / spacing;
+                residualPercent = (Math.abs(leftPosition * spacing - distanceInGaussian)) / spacing;
                 if (rightPosition < middle) {
                     coeffLeft = (1 - residualPercent) * coeffs[leftPosition] + residualPercent * coeffs[rightPosition];
                 } else {
                     coeffLeft = coeffs[leftPosition];
                 }
 
-                norm += Math.abs(rtArray[i-1] - rtArray[i]) * (coeffRight + coeffLeft) / 2.0;
-                v += Math.abs(rtArray[i-1] - rtArray[i]) * (intArray[i-1] * coeffLeft + intArray[i] * coeffRight) / 2.0;
+                norm += Math.abs(rtArray[j-1] - rtArray[j]) * (coeffRight + coeffLeft) / 2.0;
+                v += Math.abs(rtArray[j-1] - rtArray[j]) * (intArray[j-1] * coeffLeft + intArray[j] * coeffRight) / 2.0;
 
                 j--;
 
@@ -93,7 +95,7 @@ public class GaussFilter {
             j = i;
 
             // right side of i
-            while (j != listSize - 1 && rtArray[j-1] < endPosition) {
+            while (j < listSize - 1 && rtArray[j + 1] < endPosition) {
                 distanceInGaussian = Math.abs(rtArray[i] - rtArray[j]);
                 leftPosition = (int) (distanceInGaussian / spacing);
                 rightPosition = leftPosition + 1;
@@ -107,15 +109,15 @@ public class GaussFilter {
                 distanceInGaussian = Math.abs(rtArray[i]  - rtArray[j+1]);
                 leftPosition = (int) (distanceInGaussian / spacing);
                 rightPosition = leftPosition + 1;
-                residualPercent = (Math.abs(leftPosition * spacing) - distanceInGaussian) / spacing;
+                residualPercent = (Math.abs(leftPosition * spacing - distanceInGaussian)) / spacing;
                 if (rightPosition < middle) {
                     coeffRight = (1 - residualPercent) * coeffs[leftPosition] + residualPercent * coeffs[rightPosition];
                 } else {
                     coeffRight = coeffs[leftPosition];
                 }
 
-                norm += Math.abs(rtArray[i+1] - rtArray[i] ) * (coeffLeft + coeffRight) / 2.0;
-                v += Math.abs(rtArray[i+1] - rtArray[i] ) * (intArray[i] * coeffLeft + intArray[i+1] * coeffRight) / 2.0;
+                norm += Math.abs(rtArray[j+1] - rtArray[j] ) * (coeffLeft + coeffRight) / 2.0;
+                v += Math.abs(rtArray[j+1] - rtArray[j] ) * (intArray[j] * coeffLeft + intArray[j+1] * coeffRight) / 2.0;
 
                 j++;
 
