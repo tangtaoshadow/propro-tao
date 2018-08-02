@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.rtnormalizer;
 
+import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
 import com.westlake.air.pecs.utils.MathUtil;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class PeakSpline {
         return ((d[i] * xx + c[i]) * xx + b[i]) * xx + a[i];
     }
 
-    public void init(List<float[]> rtIntensity, int leftBoundary, int rightBoundary){
+    public void init(RtIntensityPairs rtIntensityPairs, int leftBoundary, int rightBoundary){
         int maxIndex = rightBoundary - leftBoundary;
         x = new float[maxIndex + 1];
         a = new float[maxIndex + 1];
@@ -37,8 +38,8 @@ public class PeakSpline {
 
         float l;
         for(int i = 0; i<= maxIndex; i++){
-            x[i] = rtIntensity.get(leftBoundary + i)[0];
-            a[i] = rtIntensity.get(leftBoundary + i)[1];
+            x[i] = rtIntensityPairs.getRtArray()[leftBoundary + i];
+            a[i] = rtIntensityPairs.getIntensityArray()[leftBoundary + i];
         }
 
         // do the 0'th element manually
