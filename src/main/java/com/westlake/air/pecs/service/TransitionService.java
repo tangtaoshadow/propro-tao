@@ -2,8 +2,11 @@ package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.LibraryCoordinate;
-import com.westlake.air.pecs.domain.bean.TargetTransition;
+import com.westlake.air.pecs.domain.db.simple.Peptide;
+import com.westlake.air.pecs.domain.db.simple.Protein;
+import com.westlake.air.pecs.domain.db.simple.TargetTransition;
 import com.westlake.air.pecs.domain.db.TransitionDO;
+import com.westlake.air.pecs.domain.query.PageQuery;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
 
 import java.util.List;
@@ -33,6 +36,10 @@ public interface TransitionService {
     ResultDO<TransitionDO> getById(String id);
 
     Double[] getRTRange(String libraryId);
+
+    ResultDO<List<Protein>> getProteinList(TransitionQuery query);
+
+    ResultDO<List<Peptide>> getPeptideList(TransitionQuery query);
 
     Long countByProteinName(String libraryId);
 

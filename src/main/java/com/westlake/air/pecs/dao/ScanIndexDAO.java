@@ -1,6 +1,6 @@
 package com.westlake.air.pecs.dao;
 
-import com.westlake.air.pecs.domain.bean.SimpleScanIndex;
+import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import org.springframework.beans.factory.annotation.Autowired;

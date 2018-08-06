@@ -20,7 +20,9 @@
         <!--begin: Search Form -->
         <div class="clearfix row">
             <div class="col-lg-6">
-                <form id="searchForm" method="post" role="form" class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed" action="/spectrum/mzmlextractor">
+                <form id="searchForm" method="post" role="form"
+                      class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
+                      action="/spectrum/mzmlextractor">
                     <div class="form-group m-form__group row">
                         <div class="input-group col-lg-4">
                             <div class="input-group-prepend">
@@ -51,7 +53,8 @@
                         <div class="input-group col-lg-4">
                             <div class="m-checkbox-list">
                                 <label class="m-checkbox">
-                                    <input id="isZlibCompression" type="checkbox" th:checked="${isZlibCompression}" name="isZlibCompression">
+                                    <input id="isZlibCompression" type="checkbox" th:checked="${isZlibCompression}"
+                                           name="isZlibCompression">
                                     是否是压缩数据
                                     <span></span>
                                 </label>

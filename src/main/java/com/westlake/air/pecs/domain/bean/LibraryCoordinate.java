@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.domain.bean;
 
+import com.westlake.air.pecs.domain.db.simple.TargetTransition;
 import lombok.Data;
 
 import java.util.List;

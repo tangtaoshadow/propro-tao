@@ -2,11 +2,16 @@ package com.westlake.air.pecs.service.impl;
 
 import com.google.common.collect.Ordering;
 import com.westlake.air.pecs.constants.ResultCode;
+import com.westlake.air.pecs.dao.LibraryDAO;
 import com.westlake.air.pecs.dao.TransitionDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.LibraryCoordinate;
-import com.westlake.air.pecs.domain.bean.TargetTransition;
+import com.westlake.air.pecs.domain.db.LibraryDO;
+import com.westlake.air.pecs.domain.db.simple.Peptide;
+import com.westlake.air.pecs.domain.db.simple.Protein;
+import com.westlake.air.pecs.domain.db.simple.TargetTransition;
 import com.westlake.air.pecs.domain.db.TransitionDO;
+import com.westlake.air.pecs.domain.query.PageQuery;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
 import com.westlake.air.pecs.service.TransitionService;
 import org.slf4j.Logger;
@@ -30,6 +35,8 @@ public class TransitionServiceImpl implements TransitionService {
 
     @Autowired
     TransitionDAO transitionDAO;
+    @Autowired
+    LibraryDAO libraryDAO;
 
     @Override
     public List<TransitionDO> getAllByLibraryId(String libraryId) {
@@ -135,15 +142,37 @@ public class TransitionServiceImpl implements TransitionService {
         query.setOrderBy(Sort.Direction.ASC);
         query.setSortColumn("rt");
         List<TransitionDO> descList = transitionDAO.getList(query);
-        if(descList != null && descList.size() == 1){
+        if (descList != null && descList.size() == 1) {
             range[0] = descList.get(0).getRt();
         }
         query.setOrderBy(Sort.Direction.DESC);
         List<TransitionDO> ascList = transitionDAO.getList(query);
-        if(ascList != null && ascList.size() == 1){
+        if (ascList != null && ascList.size() == 1) {
             range[1] = ascList.get(0).getRt();
         }
         return range;
+    }
+
+    @Override
+    public ResultDO<List<Protein>> getProteinList(TransitionQuery query) {
+        LibraryDO libraryDO = libraryDAO.getById(query.getLibraryId());
+        List<Protein> proteins = transitionDAO.getProteinList(query);
+        ResultDO<List<Protein>> resultDO = new ResultDO<>(true);
+        resultDO.setModel(proteins);
+        resultDO.setTotalNum(libraryDO.getProteinCount());
+        resultDO.setPageSize(query.getPageSize());
+        return resultDO;
+    }
+
+    @Override
+    public ResultDO<List<Peptide>> getPeptideList(TransitionQuery query) {
+        LibraryDO libraryDO = libraryDAO.getById(query.getLibraryId());
+        List<Peptide> peptides = transitionDAO.getPeptideList(query);
+        ResultDO<List<Peptide>> resultDO = new ResultDO<>(true);
+        resultDO.setModel(peptides);
+        resultDO.setTotalNum(libraryDO.getPeptideCount());
+        resultDO.setPageSize(query.getPageSize());
+        return resultDO;
     }
 
     @Override

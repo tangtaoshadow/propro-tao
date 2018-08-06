@@ -1,10 +1,8 @@
 package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.TargetTransition;
 import com.westlake.air.pecs.domain.bean.WindowRang;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
-import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 
 import java.io.File;

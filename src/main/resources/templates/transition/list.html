@@ -26,17 +26,33 @@
                         <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
 
                         <div class="form-group m-form__group row">
-                            <div class="input-group col-lg-3">
+                            <div class="input-group col-lg-2">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-success" type="button">
                                         标准库:
                                     </button>
                                 </div>
                                 <select class="form-control m-input" id="libraryId" name="libraryId">
-                                    <option th:each="library:${libraries}" th:value="${library.id}" th:text="${library.name}" th:selected="${libraryId}==${library.id}?true:false"></option>
+                                    <option th:each="library:${libraries}" th:value="${library.id}"
+                                            th:text="|${library.name}(${library.id})|"
+                                            th:selected="${libraryId}==${library.id}?true:false"></option>
                                 </select>
                             </div>
-                            <div class="input-group col-lg-3">
+                            <!--<div class="input-group col-lg-2">-->
+                                <!--<div class="m-checkbox-inline">-->
+                                    <!--<label class="m-checkbox">-->
+                                        <!--<input type="checkbox" th:checked="${withProtein}" name="withProtein">-->
+                                        <!--按蛋白质聚合-->
+                                        <!--<span></span>-->
+                                    <!--</label>-->
+                                    <!--<label class="m-checkbox">-->
+                                        <!--<input type="checkbox" th:checked="${withPeptide}" name="withPeptide">-->
+                                        <!--按肽段聚合-->
+                                        <!--<span></span>-->
+                                    <!--</label>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                            <div class="input-group col-lg-2">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-success" type="button">
                                         蛋白质名称:
@@ -45,7 +61,7 @@
                                 <input type="text" class="form-control m-input" name="proteinName"
                                        placeholder="proteinName" th:value="${proteinName}">
                             </div>
-                            <div class="input-group col-lg-3">
+                            <div class="input-group col-lg-2">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-success" type="button">
                                         肽段:
@@ -54,7 +70,7 @@
                                 <input type="text" class="form-control m-input" name="sequence"
                                        placeholder="sequence" th:value="${sequence}">
                             </div>
-                            <div class="input-group col-lg-3">
+                            <div class="input-group col-lg-2">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-success" type="button">
                                         Transition名称:
@@ -131,8 +147,8 @@
                                 </td>
                                 <td th:text="${transition.name}"></td>
                                 <!--<td>-->
-                                    <!--<a th:href="|/transition/list?sequence=${transition.targetSequence}|"-->
-                                       <!--th:text="${transition.targetSequence}"></a>-->
+                                <!--<a th:href="|/transition/list?sequence=${transition.targetSequence}|"-->
+                                <!--th:text="${transition.targetSequence}"></a>-->
                                 <!--</td>-->
                                 <td>
                                     <a th:href="|/transition/list?sequence=${transition.sequence}|"

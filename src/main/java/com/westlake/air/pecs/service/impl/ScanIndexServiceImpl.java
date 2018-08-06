@@ -3,7 +3,7 @@ package com.westlake.air.pecs.service.impl;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.ScanIndexDAO;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.SimpleScanIndex;
+import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.service.ScanIndexService;

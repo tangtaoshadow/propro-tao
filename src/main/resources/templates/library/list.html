@@ -22,7 +22,7 @@
                 <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
                 <div class="form-group m-form__group">
                     <div class="input-group">
-                        <input type="text" class="form-control" id="searchName" name="searchName" placeholder="标准库名称"
+                        <input type="text" class="form-control" id="searchName" name="searchName" placeholder="库名称"
                                th:value="${searchName}">
                         <div class="input-group-append">
                             <button class="btn btn-primary" type="submit">
@@ -42,7 +42,7 @@
                     <th width="20%">
                         库名
                     </th>
-                    <th width="10%">
+                    <th width="5%">
                         设备名称
                     </th>
                     <th width="5%">
@@ -66,7 +66,7 @@
                     <th width="15%">
                         最后修改时间
                     </th>
-                    <th width="15%">
+                    <th width="20%">
                         操作
                     </th>
                 </tr>
@@ -83,18 +83,11 @@
                     <td th:text="${#dates.format(library.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(library.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
-                        <a th:href="|/library/edit/${library.id}|"
-                           class="btn btn-primary btn-sm">编辑
-                            <!--<i class="la la-edit"></i>-->
-                        </a>
-                        <a th:href="|/library/detail/${library.id}|"
-                           class="btn btn-success btn-sm">详情
-                            <!--<i class="la la-navicon"></i>-->
-                        </a>
-                        <a th:href="|/transition/list?libraryId=${library.id}|"
-                           class="btn btn-info btn-sm">片段
-                            <!--<i class="la la-navicon"></i>-->
-                        </a>
+                        <a th:href="|/library/edit/${library.id}|" class="btn btn-primary btn-sm">编辑</a>
+                        <a th:href="|/library/detail/${library.id}|" class="btn btn-success btn-sm">详情</a>
+                        <a th:href="|/transition/list?libraryId=${library.id}|" class="btn btn-info btn-sm">片段</a>
+                        <a th:href="|/transition/protein?libraryId=${library.id}|" class="btn btn-success btn-sm">蛋白列表</a>
+                        <a th:href="|/transition/peptide?libraryId=${library.id}|" class="btn btn-warning btn-sm">肽段列表</a>
                     </td>
                 </tr>
                 </tbody>

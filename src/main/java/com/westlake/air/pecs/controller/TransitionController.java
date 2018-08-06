@@ -6,6 +6,8 @@ import com.westlake.air.pecs.algorithm.FragmentCalculator;
 import com.westlake.air.pecs.decoy.generator.ShuffleGenerator;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
+import com.westlake.air.pecs.domain.db.simple.Peptide;
+import com.westlake.air.pecs.domain.db.simple.Protein;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
 import com.westlake.air.pecs.service.TransitionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +86,64 @@ public class TransitionController extends BaseController {
                 .append(resultDO.getTotalNum()).append("条");
         model.addAttribute("searchResult", builder.toString());
         return "transition/list";
+    }
+
+    @RequestMapping(value = "/protein")
+    String protein(Model model,
+                @RequestParam(value = "libraryId", required = false) String libraryId,
+                @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+                @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
+        long startTime = System.currentTimeMillis();
+        model.addAttribute("libraryId", libraryId);
+        model.addAttribute("pageSize", pageSize);
+
+        TransitionQuery query = new TransitionQuery();
+
+        if (libraryId != null && !libraryId.isEmpty()) {
+            query.setLibraryId(libraryId);
+        }
+
+        query.setPageSize(pageSize);
+        query.setPageNo(currentPage);
+        ResultDO<List<Protein>> resultDO = transitionService.getProteinList(query);
+
+        model.addAttribute("proteins", resultDO.getModel());
+        model.addAttribute("totalPage", resultDO.getTotalPage());
+        model.addAttribute("currentPage", currentPage);
+        StringBuilder builder = new StringBuilder();
+        builder.append("本次搜索耗时:").append(System.currentTimeMillis() - startTime).append("毫秒;包含搜索结果总计:")
+                .append(resultDO.getTotalNum()).append("条");
+        model.addAttribute("searchResult", builder.toString());
+        return "transition/protein";
+    }
+
+    @RequestMapping(value = "/peptide")
+    String peptide(Model model,
+                @RequestParam(value = "libraryId", required = false) String libraryId,
+                @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+                @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
+        long startTime = System.currentTimeMillis();
+        model.addAttribute("libraryId", libraryId);
+        model.addAttribute("pageSize", pageSize);
+
+        TransitionQuery query = new TransitionQuery();
+
+        if (libraryId != null && !libraryId.isEmpty()) {
+            query.setLibraryId(libraryId);
+        }
+
+        query.setPageSize(pageSize);
+        query.setPageNo(currentPage);
+        ResultDO<List<Peptide>> resultDO = transitionService.getPeptideList(query);
+
+        model.addAttribute("peptides", resultDO.getModel());
+        model.addAttribute("totalPage", resultDO.getTotalPage());
+        model.addAttribute("currentPage", currentPage);
+        StringBuilder builder = new StringBuilder();
+        builder.append("本次搜索耗时:").append(System.currentTimeMillis() - startTime).append("毫秒;包含搜索结果总计:")
+                .append(resultDO.getTotalNum()).append("条");
+        model.addAttribute("searchResult", builder.toString());
+        return "transition/peptide";
     }
 
     @RequestMapping(value = "/detail/{id}")

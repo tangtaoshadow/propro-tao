@@ -138,7 +138,7 @@ public class LibraryController extends BaseController {
             /**
              * 如果全部存储成功,开始统计蛋白质数目,肽段数目和Transition数目
              */
-            countAndMarkAndUpdateForLibrary(library);
+            countAndUpdateForLibrary(library);
         }
         long deltaTime = System.currentTimeMillis() - startTime;
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS + "总共耗时:" + deltaTime + "毫秒;");
@@ -155,7 +155,7 @@ public class LibraryController extends BaseController {
         }
 
         LibraryDO library = resultDO.getModel();
-        countAndMarkAndUpdateForLibrary(library);
+        countAndUpdateForLibrary(library);
 
         return "redirect:/library/detail/" + library.getId();
     }
@@ -235,7 +235,7 @@ public class LibraryController extends BaseController {
                     }
                 }
 
-                countAndMarkAndUpdateForLibrary(library);
+                countAndUpdateForLibrary(library);
             }
 
             long deltaTime = System.currentTimeMillis() - startTime;
@@ -301,7 +301,7 @@ public class LibraryController extends BaseController {
         return resultDO;
     }
 
-    private void countAndMarkAndUpdateForLibrary(LibraryDO library) {
+    private void countAndUpdateForLibrary(LibraryDO library) {
         try {
             library.setProteinCount(transitionService.countByProteinName(library.getId()));
             library.setPeptideCount(transitionService.countByPeptideRef(library.getId()));
