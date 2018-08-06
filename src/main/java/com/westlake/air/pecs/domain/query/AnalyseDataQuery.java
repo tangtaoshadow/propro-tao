@@ -17,7 +17,9 @@ public class AnalyseDataQuery extends PageQuery{
 
     String transitionId;
 
+    String libraryId;
+
     Integer msLevel;
 
-    String fullName;
+    String peptideRef;
 }

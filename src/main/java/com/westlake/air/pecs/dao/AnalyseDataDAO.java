@@ -4,7 +4,9 @@ import com.mongodb.BasicDBObject;
 import com.westlake.air.pecs.domain.bean.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
+import com.westlake.air.pecs.domain.db.simple.Peptide;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
+import com.westlake.air.pecs.domain.query.TransitionQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -13,6 +15,7 @@ import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
@@ -85,20 +88,25 @@ public class AnalyseDataDAO {
         mongoTemplate.remove(query, AnalyseDataDO.class, CollectionName);
     }
 
-    public List<TransitionGroup> getTransitionGroup(String libraryId){
-        LookupOperation lookupOverviewId = LookupOperation.newLookup().
-                from(AnalyseDataDAO.CollectionName).
-                localField("_id").
-                foreignField("transitionId").
-                as("sameId");
+    public List<TransitionGroup> getTransitionGroup(AnalyseDataQuery query) {
 
-        AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
+        LookupOperation lookup = LookupOperation.newLookup().
+                from(AnalyseDataDAO.CollectionName).
+                localField("peptideRef").
+                foreignField("peptideRef").
+                as("dataList");
+        AggregationResults<TransitionGroup> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(
-                        Aggregation.match(where("libraryId").is(libraryId)),
-                        lookupOverviewId,
-                        Aggregation.limit(10)
-                                ).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), TransitionDAO.CollectionName,
-                BasicDBObject.class);
+                        Peptide.class,
+                        Aggregation.match(where("libraryId").is(query.getLibraryId())),
+                        Aggregation.group("peptideRef").
+                                first("proteinName").as("proteinName").
+                                first("peptideRef").as("peptideRef"),
+                        lookup,
+                        Aggregation.skip((query.getPageNo() - 1) * query.getPageSize()),
+                        Aggregation.limit(query.getPageSize())
+                ).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), TransitionDAO.CollectionName,
+                TransitionGroup.class);
 
         return null;
     }
@@ -127,8 +135,8 @@ public class AnalyseDataDAO {
         if (analyseDataQuery.getMsLevel() != null) {
             query.addCriteria(where("msLevel").is(analyseDataQuery.getMsLevel()));
         }
-        if (analyseDataQuery.getFullName() != null) {
-            query.addCriteria(where("fullName").is(analyseDataQuery.getFullName()));
+        if (analyseDataQuery.getPeptideRef() != null) {
+            query.addCriteria(where("peptideRef").is(analyseDataQuery.getPeptideRef()));
         }
 
         return query;

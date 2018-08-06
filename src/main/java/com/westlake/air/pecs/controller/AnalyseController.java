@@ -104,7 +104,7 @@ public class AnalyseController extends BaseController {
     @RequestMapping(value = "/data/list")
     String dataList(Model model,
                     @RequestParam(value = "overviewId", required = true) String overviewId,
-                    @RequestParam(value = "fullName", required = false) String fullName,
+                    @RequestParam(value = "peptideRef", required = false) String peptideRef,
                     @RequestParam(value = "msLevel", required = false) Integer msLevel,
                     @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                     @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
@@ -113,7 +113,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("overviewId", overviewId);
         model.addAttribute("msLevel", msLevel);
-        model.addAttribute("fullName", fullName);
+        model.addAttribute("peptideRef", peptideRef);
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         if (overviewResult.isSuccess()) {
@@ -125,8 +125,8 @@ public class AnalyseController extends BaseController {
         if (msLevel != null) {
             query.setMsLevel(msLevel);
         }
-        if (StringUtils.isNotEmpty(fullName)) {
-            query.setFullName(fullName);
+        if (StringUtils.isNotEmpty(peptideRef)) {
+            query.setPeptideRef(peptideRef);
         }
         query.setOverviewId(overviewId);
         ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
@@ -155,7 +155,11 @@ public class AnalyseController extends BaseController {
             model.addAttribute("overview", overviewResult.getModel());
         }
 
-        ResultDO<List<TransitionGroup>> resultDO = analyseDataService.getTransitionGroup(overviewResult.getModel().getSLibraryId());
+        AnalyseDataQuery query = new AnalyseDataQuery();
+        query.setLibraryId(overviewResult.getModel().getSLibraryId());
+        query.setPageSize(pageSize);
+        query.setPageNo(currentPage);
+        ResultDO<List<TransitionGroup>> resultDO = analyseDataService.getTransitionGroup(query);
         List<TransitionGroup> groups = resultDO.getModel();
         model.addAttribute("groups", groups);
         model.addAttribute("totalPage", resultDO.getTotalPage());
@@ -186,7 +190,8 @@ public class AnalyseController extends BaseController {
         for (TransitionDO transitionDO : transitionDOList) {
             AnalyseDataDO data = new AnalyseDataDO();
             data.setOverviewId(overviewId);
-            data.setFullName(transitionDO.getFullName());
+            data.setPeptideRef(transitionDO.getPeptideRef());
+            data.setProteinName(transitionDO.getProteinName());
             data.setAnnotations(transitionDO.getAnnotations());
             data.setPrecursorCharge(transitionDO.getPrecursorCharge());
             data.setMsLevel(2);

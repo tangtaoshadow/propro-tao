@@ -43,7 +43,7 @@
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <button class="btn btn-success" type="button">
-                                    肽段全称:
+                                    PeptideRef:
                                 </button>
                             </div>
                             <input type="text" class="form-control m-input" name="peptideRef" placeholder="肽段全称"
@@ -73,19 +73,17 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="20%">概览Id</th>
-                    <th width="25%">蛋白名称</th>
+                    <th width="30%">蛋白名称</th>
                     <th width="25%">肽段全称</th>
                     <th width="15%">标记</th>
                     <th width="5%">切分标记</th>
                     <th width="5%">MS等级</th>
                     <th width="10%">MZ</th>
-                    <th width="15%">操作</th>
+                    <th width="10%">操作</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="data:${datas}">
-                    <td th:text="${data.overviewId}"></td>
                     <td th:text="${data.proteinName}"></td>
                     <td th:text="${data.peptideRef}"></td>
                     <td th:text="${data.annotations}"></td>

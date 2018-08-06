@@ -6,6 +6,7 @@ import com.westlake.air.pecs.dao.LibraryDAO;
 import com.westlake.air.pecs.dao.TransitionDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.LibraryCoordinate;
+import com.westlake.air.pecs.domain.bean.TransitionGroup;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.simple.Peptide;
 import com.westlake.air.pecs.domain.db.simple.Protein;

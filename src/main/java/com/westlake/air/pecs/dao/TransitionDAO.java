@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.dao;
 
 import com.mongodb.BasicDBObject;
+import com.westlake.air.pecs.domain.bean.TransitionGroup;
 import com.westlake.air.pecs.domain.db.simple.Peptide;
 import com.westlake.air.pecs.domain.db.simple.Protein;
 import com.westlake.air.pecs.domain.db.simple.TargetTransition;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 

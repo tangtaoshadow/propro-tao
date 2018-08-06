@@ -33,5 +33,5 @@ public interface AnalyseDataService {
 
     ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String fullName, String cutInfo);
 
-    ResultDO<List<TransitionGroup>> getTransitionGroup(String libraryId);
+    ResultDO<List<TransitionGroup>> getTransitionGroup(AnalyseDataQuery query);
 }

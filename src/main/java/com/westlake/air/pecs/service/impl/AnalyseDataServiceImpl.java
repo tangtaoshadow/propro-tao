@@ -4,11 +4,13 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
 import com.westlake.air.pecs.dao.ExperimentDAO;
+import com.westlake.air.pecs.dao.TransitionDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
+import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,8 +156,8 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     @Override
-    public ResultDO<List<TransitionGroup>> getTransitionGroup(String libraryId) {
-        List<TransitionGroup> group = analyseDataDAO.getTransitionGroup(libraryId);
+    public ResultDO<List<TransitionGroup>> getTransitionGroup(AnalyseDataQuery query) {
+        List<TransitionGroup> group = analyseDataDAO.getTransitionGroup(query);
         return new ResultDO<>(true);
     }
 }

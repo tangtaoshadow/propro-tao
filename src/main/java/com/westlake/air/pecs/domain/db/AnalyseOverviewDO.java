@@ -23,10 +23,16 @@ public class AnalyseOverviewDO {
 
     String name;
 
+    /**
+     * 标准库ID
+     */
     String sLibraryId;
 
     String sLibraryName;
 
+    /**
+     * 校准库ID
+     */
     String vLibraryId;
 
     String vLibraryName;
