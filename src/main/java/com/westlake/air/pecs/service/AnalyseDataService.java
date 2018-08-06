@@ -1,7 +1,7 @@
 package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.TransitionGroup;
+import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 
@@ -29,9 +29,22 @@ public interface AnalyseDataService {
 
     ResultDO<AnalyseDataDO> getById(String id);
 
-    ResultDO<AnalyseDataDO> getMS1Data(String overviewId, String fullName, Integer charge);
+    /**
+     * 获取MS1的卷积卷积信息
+     * @param overviewId
+     * @param peptideRef
+     * @return
+     */
+    ResultDO<AnalyseDataDO> getMS1Data(String overviewId, String peptideRef);
 
-    ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String fullName, String cutInfo);
+    /**
+     * 获取MS2的卷积数据
+     * @param overviewId
+     * @param peptideRef
+     * @param cutInfo
+     * @return
+     */
+    ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String peptideRef, String cutInfo);
 
     ResultDO<List<TransitionGroup>> getTransitionGroup(AnalyseDataQuery query);
 }

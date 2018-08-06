@@ -93,7 +93,7 @@
                     <td>
                         <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
                                 data-target="#m_modal_target"
-                                th:onclick="|query('${data.id}','${overviewId}','${data.fullName}','${data.cutInfo}')|">
+                                th:onclick="|query('${data.id}','${overviewId}','${data.peptideRef}','${data.cutInfo}')|">
                             查看谱图
                         </button>
                     </td>
@@ -254,9 +254,9 @@
             });
         });
 
-        function query(dataId, overviewId, fullName, cutInfo) {
+        function query(dataId, overviewId, peptideRef, cutInfo) {
             var result = $.ajax({
-                url: "/analyse/view?dataId=" + dataId + "&overviewId=" + overviewId + "&fullName=" + fullName + "&cutInfo=" + cutInfo,
+                url: "/analyse/view?dataId=" + dataId + "&overviewId=" + overviewId + "&peptideRef=" + peptideRef + "&cutInfo=" + cutInfo,
                 async: false
             });
 

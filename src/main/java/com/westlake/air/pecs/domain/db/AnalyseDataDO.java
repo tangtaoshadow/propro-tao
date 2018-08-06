@@ -27,10 +27,6 @@ public class AnalyseDataDO {
 
     String transitionId;
 
-    String fullName;
-
-    Integer precursorCharge;
-
     String annotations;
 
     String cutInfo;
@@ -44,4 +40,6 @@ public class AnalyseDataDO {
 
     //一一映射rt的intensity数据
     Float[] intensityArray;
+
+    Boolean isGaussSmooth = false;
 }

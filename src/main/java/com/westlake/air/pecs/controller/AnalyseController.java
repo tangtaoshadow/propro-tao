@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.TransitionGroup;
+import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
@@ -193,7 +193,6 @@ public class AnalyseController extends BaseController {
             data.setPeptideRef(transitionDO.getPeptideRef());
             data.setProteinName(transitionDO.getProteinName());
             data.setAnnotations(transitionDO.getAnnotations());
-            data.setPrecursorCharge(transitionDO.getPrecursorCharge());
             data.setMsLevel(2);
             data.setCutInfo(transitionDO.getCutInfo());
             data.setMz(new Float(transitionDO.getProductMz()));
@@ -212,13 +211,13 @@ public class AnalyseController extends BaseController {
     ResultDO<JSONObject> view(Model model,
                               @RequestParam(value = "dataId", required = false, defaultValue = "") String dataId,
                               @RequestParam(value = "overviewId", required = false) String overviewId,
-                              @RequestParam(value = "fullName", required = false) String fullName,
+                              @RequestParam(value = "peptideRef", required = false) String peptideRef,
                               @RequestParam(value = "cutInfo", required = false) String cutInfo) {
         ResultDO<AnalyseDataDO> dataResult = null;
         if (dataId != null && !dataId.isEmpty() && !dataId.equals("null")) {
             dataResult = analyseDataService.getById(dataId);
-        } else if (overviewId != null && fullName != null && cutInfo != null) {
-            dataResult = analyseDataService.getMS2Data(overviewId, fullName, cutInfo);
+        } else if (overviewId != null && peptideRef != null && cutInfo != null) {
+            dataResult = analyseDataService.getMS2Data(overviewId, peptideRef, cutInfo);
         } else {
             return ResultDO.buildError(ResultCode.ANALYSE_DATA_NOT_EXISTED);
         }

@@ -1,4 +1,4 @@
-package com.westlake.air.pecs.domain.bean;
+package com.westlake.air.pecs.domain.db.simple;
 
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import lombok.Data;

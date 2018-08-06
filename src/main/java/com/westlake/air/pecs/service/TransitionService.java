@@ -2,12 +2,10 @@ package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.LibraryCoordinate;
-import com.westlake.air.pecs.domain.bean.TransitionGroup;
 import com.westlake.air.pecs.domain.db.simple.Peptide;
 import com.westlake.air.pecs.domain.db.simple.Protein;
 import com.westlake.air.pecs.domain.db.simple.TargetTransition;
 import com.westlake.air.pecs.domain.db.TransitionDO;
-import com.westlake.air.pecs.domain.query.PageQuery;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
 
 import java.util.List;
@@ -36,6 +34,11 @@ public interface TransitionService {
 
     ResultDO<TransitionDO> getById(String id);
 
+    /**
+     * 获取某一个标准库中所有的Transition的RT的取值范围
+     * @param libraryId
+     * @return
+     */
     Double[] getRTRange(String libraryId);
 
     ResultDO<List<Protein>> getProteinList(TransitionQuery query);
@@ -48,8 +51,22 @@ public interface TransitionService {
 
     LibraryCoordinate buildCoordinates(String libraryId, float rtExtractionWindows);
 
+    /**
+     * 创建MS1的坐标系
+     * @param libraryId
+     * @param rtExtractionWindows
+     * @return
+     */
     List<TargetTransition> buildMS1Coordinates(String libraryId, float rtExtractionWindows);
 
+    /**
+     * 创建MS2的坐标系
+     * @param libraryId
+     * @param rtExtractionWindows
+     * @param precursorMzStart
+     * @param precursorMzEnd
+     * @return
+     */
     List<TargetTransition> buildMS2Coordinates(String libraryId, float rtExtractionWindows,float precursorMzStart, float precursorMzEnd);
 
 }

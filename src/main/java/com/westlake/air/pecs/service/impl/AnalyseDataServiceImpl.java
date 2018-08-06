@@ -2,15 +2,12 @@ package com.westlake.air.pecs.service.impl;
 
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
-import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
-import com.westlake.air.pecs.dao.ExperimentDAO;
-import com.westlake.air.pecs.dao.TransitionDAO;
+import com.westlake.air.pecs.dao.LibraryDAO;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.TransitionGroup;
+import com.westlake.air.pecs.domain.db.LibraryDO;
+import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
-import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
-import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +27,8 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
 
     @Autowired
     AnalyseDataDAO analyseDataDAO;
+    @Autowired
+    LibraryDAO libraryDAO;
 
     @Override
     public List<AnalyseDataDO> getAllByOverviewId(String overviewId) {
@@ -124,9 +123,9 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     @Override
-    public ResultDO<AnalyseDataDO> getMS1Data(String overviewId, String fullName, Integer charge) {
+    public ResultDO<AnalyseDataDO> getMS1Data(String overviewId, String peptideRef) {
         try {
-            AnalyseDataDO analyseDataDO = analyseDataDAO.getMS1Data(overviewId, fullName, charge);
+            AnalyseDataDO analyseDataDO = analyseDataDAO.getMS1Data(overviewId, peptideRef);
             if (analyseDataDO == null) {
                 return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
             } else {
@@ -140,9 +139,9 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     @Override
-    public ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String fullName, String cutInfo) {
+    public ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String peptideRef, String cutInfo) {
         try {
-            AnalyseDataDO analyseDataDO = analyseDataDAO.getMS2Data(overviewId, fullName, cutInfo);
+            AnalyseDataDO analyseDataDO = analyseDataDAO.getMS2Data(overviewId, peptideRef, cutInfo);
             if (analyseDataDO == null) {
                 return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
             } else {
@@ -157,7 +156,13 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
 
     @Override
     public ResultDO<List<TransitionGroup>> getTransitionGroup(AnalyseDataQuery query) {
+        LibraryDO libraryDO = libraryDAO.getById(query.getLibraryId());
         List<TransitionGroup> group = analyseDataDAO.getTransitionGroup(query);
-        return new ResultDO<>(true);
+
+        ResultDO<List<TransitionGroup>> resultDO = new ResultDO<>(true);
+        resultDO.setModel(group);
+        resultDO.setTotalNum(libraryDO.getPeptideCount());
+        resultDO.setPageSize(query.getPageSize());
+        return resultDO;
     }
 }

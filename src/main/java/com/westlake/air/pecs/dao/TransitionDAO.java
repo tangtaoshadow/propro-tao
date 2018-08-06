@@ -1,24 +1,19 @@
 package com.westlake.air.pecs.dao;
 
 import com.mongodb.BasicDBObject;
-import com.westlake.air.pecs.domain.bean.TransitionGroup;
 import com.westlake.air.pecs.domain.db.simple.Peptide;
 import com.westlake.air.pecs.domain.db.simple.Protein;
 import com.westlake.air.pecs.domain.db.simple.TargetTransition;
 import com.westlake.air.pecs.domain.db.TransitionDO;
-import com.westlake.air.pecs.domain.query.PageQuery;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
-import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;

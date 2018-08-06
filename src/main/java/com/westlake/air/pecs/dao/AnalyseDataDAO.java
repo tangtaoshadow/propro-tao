@@ -1,12 +1,9 @@
 package com.westlake.air.pecs.dao;
 
-import com.mongodb.BasicDBObject;
-import com.westlake.air.pecs.domain.bean.TransitionGroup;
+import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
-import com.westlake.air.pecs.domain.db.simple.Peptide;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
-import com.westlake.air.pecs.domain.query.TransitionQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -15,7 +12,6 @@ import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
@@ -37,16 +33,15 @@ public class AnalyseDataDAO {
         return mongoTemplate.find(query, AnalyseDataDO.class, CollectionName);
     }
 
-    public AnalyseDataDO getMS1Data(String overviewId, String fullName, Integer charge) {
+    public AnalyseDataDO getMS1Data(String overviewId, String peptideRef) {
         Query query = new Query(where("overviewId").is(overviewId));
-        query.addCriteria(where("fullName").is(fullName));
-        query.addCriteria(where("precursorCharge").is(charge));
+        query.addCriteria(where("peptideRef").is(peptideRef));
         return mongoTemplate.findOne(query, AnalyseDataDO.class, CollectionName);
     }
 
-    public AnalyseDataDO getMS2Data(String overviewId, String fullName, String cutInfo) {
+    public AnalyseDataDO getMS2Data(String overviewId, String peptideRef, String cutInfo) {
         Query query = new Query(where("overviewId").is(overviewId));
-        query.addCriteria(where("fullName").is(fullName));
+        query.addCriteria(where("peptideRef").is(peptideRef));
         query.addCriteria(where("cutInfo").is(cutInfo));
         return mongoTemplate.findOne(query, AnalyseDataDO.class, CollectionName);
     }
@@ -97,7 +92,7 @@ public class AnalyseDataDAO {
                 as("dataList");
         AggregationResults<TransitionGroup> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(
-                        Peptide.class,
+                        TransitionDO.class,
                         Aggregation.match(where("libraryId").is(query.getLibraryId())),
                         Aggregation.group("peptideRef").
                                 first("proteinName").as("proteinName").
@@ -108,7 +103,7 @@ public class AnalyseDataDAO {
                 ).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), TransitionDAO.CollectionName,
                 TransitionGroup.class);
 
-        return null;
+        return a.getMappedResults();
     }
 
     private Query buildQuery(AnalyseDataQuery analyseDataQuery) {
