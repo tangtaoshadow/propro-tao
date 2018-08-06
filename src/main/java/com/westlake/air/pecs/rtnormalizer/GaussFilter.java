@@ -65,7 +65,8 @@ public class GaussFilter {
             // left side of i
             while (j > 0 && rtArray[j-1] > startPosition) {
 
-                distanceInGaussian = Math.abs(rtArray[i] - rtArray[j]);
+//                distanceInGaussian = Math.abs(rtArray[i] - rtArray[j]);
+                distanceInGaussian = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j]) * 10000)) / 10000;
                 leftPosition = (int) (distanceInGaussian / spacing);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing) - distanceInGaussian) / spacing;
@@ -75,7 +76,7 @@ public class GaussFilter {
                     coeffRight = coeffs[leftPosition];
                 }
 
-                distanceInGaussian = Math.abs(rtArray[i] - rtArray[j-1]);
+                distanceInGaussian = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j-1]) * 10000)) / 10000;
                 leftPosition = (int) (distanceInGaussian / spacing);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing - distanceInGaussian)) / spacing;
@@ -96,7 +97,7 @@ public class GaussFilter {
 
             // right side of i
             while (j < listSize - 1 && rtArray[j + 1] < endPosition) {
-                distanceInGaussian = Math.abs(rtArray[i] - rtArray[j]);
+                distanceInGaussian = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j]) * 10000)) / 10000;
                 leftPosition = (int) (distanceInGaussian / spacing);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing) - distanceInGaussian) / spacing;
@@ -106,7 +107,8 @@ public class GaussFilter {
                     coeffLeft = coeffs[leftPosition];
                 }
 
-                distanceInGaussian = Math.abs(rtArray[i]  - rtArray[j+1]);
+                //(float)(Math.round(a*100))/100
+                distanceInGaussian = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j+1]) * 10000)) / 10000;
                 leftPosition = (int) (distanceInGaussian / spacing);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing - distanceInGaussian)) / spacing;
