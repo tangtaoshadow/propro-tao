@@ -12,20 +12,21 @@ public class TargetTransition {
     //对应的transition的Id,如果是MS1的则为对应的第一条transition的Id(一个MS1会对应多条transition记录)
     String id;
 
+    String proteinName;
+
+    String peptideRef;
+
     //对应的MS1荷质比
     float precursorMz;
 
     //对应的MS2荷质比
     float productMz;
 
-    //对应的肽段全名(包含unimod)
-    String fullName;
-
-    Integer precursorCharge;
-
     String annotations;
 
     String cutInfo;
+
+
 
     float rt;
 
@@ -41,7 +42,7 @@ public class TargetTransition {
 
         if (obj instanceof TargetTransition) {
             TargetTransition target = (TargetTransition) obj;
-            if (this.fullName.equals(target.getFullName())) {
+            if (this.getPeptideRef().equals(target.getPeptideRef())) {
                 return true;
             }
 
@@ -53,6 +54,6 @@ public class TargetTransition {
 
     @Override
     public int hashCode() {
-        return (fullName).hashCode();
+        return (peptideRef).hashCode();
     }
 }

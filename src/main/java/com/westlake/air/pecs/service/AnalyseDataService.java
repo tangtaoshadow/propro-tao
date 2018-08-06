@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 
@@ -31,4 +32,6 @@ public interface AnalyseDataService {
     ResultDO<AnalyseDataDO> getMS1Data(String overviewId, String fullName, Integer charge);
 
     ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String fullName, String cutInfo);
+
+    ResultDO<List<TransitionGroup>> getTransitionGroup(String libraryId);
 }

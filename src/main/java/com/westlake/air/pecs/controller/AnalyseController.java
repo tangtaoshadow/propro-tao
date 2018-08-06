@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
@@ -131,6 +132,32 @@ public class AnalyseController extends BaseController {
         ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
         List<AnalyseDataDO> datas = resultDO.getModel();
         model.addAttribute("datas", datas);
+        model.addAttribute("totalPage", resultDO.getTotalPage());
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalNum", resultDO.getTotalNum());
+
+        return "/analyse/data/list";
+    }
+
+    @RequestMapping(value = "/data/group")
+    String dataGroup(Model model,
+                    @RequestParam(value = "overviewId", required = true) String overviewId,
+                    @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+                    @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
+                    RedirectAttributes redirectAttributes) {
+
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("overviewId", overviewId);
+        model.addAttribute("overviewId", overviewId);
+
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        if (overviewResult.isSuccess()) {
+            model.addAttribute("overview", overviewResult.getModel());
+        }
+
+        ResultDO<List<TransitionGroup>> resultDO = analyseDataService.getTransitionGroup(overviewResult.getModel().getSLibraryId());
+        List<TransitionGroup> groups = resultDO.getModel();
+        model.addAttribute("groups", groups);
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalNum", resultDO.getTotalNum());

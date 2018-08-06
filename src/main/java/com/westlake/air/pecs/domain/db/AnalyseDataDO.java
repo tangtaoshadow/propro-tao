@@ -19,6 +19,12 @@ public class AnalyseDataDO {
     @Indexed
     String overviewId;
 
+    @Indexed
+    String proteinName;
+
+    @Indexed
+    String peptideRef;
+
     String transitionId;
 
     String fullName;

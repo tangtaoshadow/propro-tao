@@ -5,12 +5,10 @@ import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.LibraryCoordinate;
 import com.westlake.air.pecs.domain.db.LibraryDO;
-import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.LibraryQuery;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
 import com.westlake.air.pecs.parser.TraMLParser;
 import com.westlake.air.pecs.parser.TransitionTsvParser;
-import com.westlake.air.pecs.parser.model.traml.Transition;
 import com.westlake.air.pecs.service.LibraryService;
 import com.westlake.air.pecs.service.TransitionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,7 +138,7 @@ public class LibraryController extends BaseController {
             /**
              * 如果全部存储成功,开始统计蛋白质数目,肽段数目和Transition数目
              */
-            countAndUpdateForLibrary(library);
+            countAndMarkAndUpdateForLibrary(library);
         }
         long deltaTime = System.currentTimeMillis() - startTime;
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.CREATE_LIBRARY_SUCCESS + "总共耗时:" + deltaTime + "毫秒;");
@@ -157,7 +155,7 @@ public class LibraryController extends BaseController {
         }
 
         LibraryDO library = resultDO.getModel();
-        countAndUpdateForLibrary(library);
+        countAndMarkAndUpdateForLibrary(library);
 
         return "redirect:/library/detail/" + library.getId();
     }
@@ -237,7 +235,7 @@ public class LibraryController extends BaseController {
                     }
                 }
 
-                countAndUpdateForLibrary(library);
+                countAndMarkAndUpdateForLibrary(library);
             }
 
             long deltaTime = System.currentTimeMillis() - startTime;
@@ -251,14 +249,13 @@ public class LibraryController extends BaseController {
     }
 
     @RequestMapping(value = "/delete/{id}")
-    String delete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+    String delete(Model model, @PathVariable("id") String id,
+                  @RequestParam(value = "type", required = false) Integer type,
+                  RedirectAttributes redirectAttributes) {
         ResultDO resultDO = libraryService.delete(id);
-        ResultDO<LibraryDO> res = libraryService.getById(id);
-        if (res.isFailed()) {
-            return "redirect:/library/detail/" + id;
-        }
+
         String redirectListUrl = null;
-        if (res.getModel().getType() == 1) {
+        if (type == 1) {
             redirectListUrl = "redirect:/library/listVerify";
         } else {
             redirectListUrl = "redirect:/library/listStandard";
@@ -304,10 +301,11 @@ public class LibraryController extends BaseController {
         return resultDO;
     }
 
-    private void countAndUpdateForLibrary(LibraryDO library) {
+    private void countAndMarkAndUpdateForLibrary(LibraryDO library) {
         try {
             library.setProteinCount(transitionService.countByProteinName(library.getId()));
-            library.setPeptideCount(transitionService.countByPeptideSequence(library.getId()));
+            library.setPeptideCount(transitionService.countByPeptideRef(library.getId()));
+
             TransitionQuery query = new TransitionQuery();
             query.setLibraryId(library.getId());
             library.setTotalCount(transitionService.count(query));

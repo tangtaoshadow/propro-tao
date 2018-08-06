@@ -377,9 +377,6 @@ public class ExperimentServiceImpl implements ExperimentService {
             mzStart = ms.getPrecursorMz() - mzExtractWindow / 2;
             mzEnd = ms.getPrecursorMz() + mzExtractWindow / 2;
 
-//            Float[] rtArray = new Float[rtMap.size()];
-//            rtMap.keySet().toArray(rtArray);
-//            Float[] intensityArray = new Float[rtMap.size()];
             ArrayList<Float> rtList = new ArrayList<>();
             ArrayList<Float> intList = new ArrayList<>();
 
@@ -412,10 +409,10 @@ public class ExperimentServiceImpl implements ExperimentService {
             dataDO.setRtArray(rtArray);
             dataDO.setIntensityArray(intArray);
             dataDO.setOverviewId(overviewId);
-            dataDO.setFullName(ms.getFullName());
             dataDO.setAnnotations(ms.getAnnotations());
-            dataDO.setPrecursorCharge(ms.getPrecursorCharge());
             dataDO.setCutInfo(ms.getCutInfo());
+            dataDO.setPeptideRef(ms.getPeptideRef());
+            dataDO.setProteinName(ms.getProteinName());
             dataList.add(dataDO);
 
             //每隔1000条数据落库一次,以减少对内存的依赖

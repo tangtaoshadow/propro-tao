@@ -152,8 +152,8 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
-    public Long countByPeptideSequence(String libraryId) {
-        return transitionDAO.countByFullName(libraryId);
+    public Long countByPeptideRef(String libraryId) {
+        return transitionDAO.countByPeptideRef(libraryId);
     }
 
     @Override

@@ -1,9 +1,15 @@
 package com.westlake.air.pecs.dao;
 
+import com.mongodb.BasicDBObject;
+import com.westlake.air.pecs.domain.bean.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
+import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
@@ -77,6 +83,24 @@ public class AnalyseDataDAO {
     public void deleteAllByOverviewId(String overviewId) {
         Query query = new Query(where("overviewId").is(overviewId));
         mongoTemplate.remove(query, AnalyseDataDO.class, CollectionName);
+    }
+
+    public List<TransitionGroup> getTransitionGroup(String libraryId){
+        LookupOperation lookupOverviewId = LookupOperation.newLookup().
+                from(AnalyseDataDAO.CollectionName).
+                localField("_id").
+                foreignField("transitionId").
+                as("sameId");
+
+        AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
+                Aggregation.newAggregation(
+                        Aggregation.match(where("libraryId").is(libraryId)),
+                        lookupOverviewId,
+                        Aggregation.limit(10)
+                                ).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), TransitionDAO.CollectionName,
+                BasicDBObject.class);
+
+        return null;
     }
 
     private Query buildQuery(AnalyseDataQuery analyseDataQuery) {

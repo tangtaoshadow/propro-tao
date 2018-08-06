@@ -36,14 +36,12 @@ public interface TransitionService {
 
     Long countByProteinName(String libraryId);
 
-    Long countByPeptideSequence(String libraryId);
+    Long countByPeptideRef(String libraryId);
 
     LibraryCoordinate buildCoordinates(String libraryId, float rtExtractionWindows);
 
     List<TargetTransition> buildMS1Coordinates(String libraryId, float rtExtractionWindows);
 
     List<TargetTransition> buildMS2Coordinates(String libraryId, float rtExtractionWindows,float precursorMzStart, float precursorMzEnd);
-
-
 
 }

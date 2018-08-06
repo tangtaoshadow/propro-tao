@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,7 +28,7 @@ import java.util.regex.Pattern;
  * Time: 2018-06-07 11:07
  */
 @Component
-public class TransitionTsvParser extends BaseTransitionParser{
+public class TransitionTsvParser extends BaseTransitionParser {
 
     public final Logger logger = LoggerFactory.getLogger(TransitionTsvParser.class);
 
@@ -71,6 +72,8 @@ public class TransitionTsvParser extends BaseTransitionParser{
             }
 
             int count = 0;
+            HashSet<String> proteinNameSet = new HashSet<>();
+            HashSet<String> peptideRefSet = new HashSet<>();
             while ((line = reader.readLine()) != null) {
                 ResultDO<TransitionDO> resultDO = parseTransition(line, columnMap, library, justReal);
                 if (resultDO == null) {
@@ -79,6 +82,15 @@ public class TransitionTsvParser extends BaseTransitionParser{
                 if (resultDO.isFailed()) {
                     tranResult.addErrorMsg(resultDO.getMsgInfo());
                 } else {
+
+                    if(!proteinNameSet.contains(resultDO.getModel().getProteinName())){
+                        proteinNameSet.add(resultDO.getModel().getProteinName());
+                        resultDO.getModel().setMarkProtein(true);
+                    }
+                    if(!peptideRefSet.contains(resultDO.getModel().getPeptideRef())){
+                        peptideRefSet.add(resultDO.getModel().getPeptideRef());
+                        resultDO.getModel().setMarkPeptide(true);
+                    }
                     transitions.add(resultDO.getModel());
                 }
                 //每存储满50000条存储一次,由于之前已经删除过原有的数据,因此不再删除原有数据
@@ -135,13 +147,13 @@ public class TransitionTsvParser extends BaseTransitionParser{
         transitionDO.setSequence(row[columnMap.get(PeptideSequence)]);
         transitionDO.setProteinName(row[columnMap.get(ProteinName)]);
 
-        if(columnMap.get(Detecting) != null){
+        if (columnMap.get(Detecting) != null) {
             transitionDO.setDetecting(!row[columnMap.get(Detecting)].equals("0"));
         }
-        if(columnMap.get(Identifying) != null) {
+        if (columnMap.get(Identifying) != null) {
             transitionDO.setIdentifying(!row[columnMap.get(Identifying)].equals("0"));
         }
-        if(columnMap.get(Quantifying) != null){
+        if (columnMap.get(Quantifying) != null) {
             transitionDO.setQuantifying(!row[columnMap.get(Quantifying)].equals("0"));
         }
 
@@ -153,11 +165,12 @@ public class TransitionTsvParser extends BaseTransitionParser{
         transitionDO.setAnnotations(annotations);
         transitionDO.setFullName(row[columnMap.get(FullUniModPeptideName)]);
         transitionDO.setPrecursorCharge(Integer.parseInt(row[columnMap.get(PrecursorCharge)]));
+        transitionDO.setPeptideRef(transitionDO.getFullName() + "_" + transitionDO.getPrecursorCharge());
         try {
             ResultDO<Annotation> annotationResult = parseAnnotation(transitionDO.getAnnotations());
             Annotation annotation = annotationResult.getModel();
             transitionDO.setAnnotation(annotation);
-            transitionDO.setCutInfo(annotation.getType()+annotation.getLocation()+(annotation.getCharge()==1?"":("^"+annotation.getCharge())));
+            transitionDO.setCutInfo(annotation.getType() + annotation.getLocation() + (annotation.getCharge() == 1 ? "" : ("^" + annotation.getCharge())));
             resultDO.setModel(transitionDO);
         } catch (Exception e) {
             resultDO.setSuccess(false);

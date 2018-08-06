@@ -4,6 +4,7 @@ import com.westlake.air.pecs.domain.bean.AminoAcid;
 import com.westlake.air.pecs.domain.bean.Annotation;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -27,6 +28,21 @@ public class TransitionDO {
      */
     @Indexed
     String libraryId;
+
+    /**
+     * 对应蛋白质名称
+     */
+    @Indexed
+    String proteinName;
+
+    /**
+     * 肽段的唯一识别符,格式为 : fullName_precursorCharge
+     */
+    @Indexed
+    String peptideRef;
+
+    boolean markPeptide = false;
+    boolean markProtein = false;
 
     String libraryName;
 
@@ -74,11 +90,6 @@ public class TransitionDO {
      * 对应肽段序列,如果是伪肽段,则为对应的伪肽段的序列
      */
     String sequence;
-
-    /**
-     * 对应蛋白质名称
-     */
-    String proteinName;
 
     /**
      * 注释

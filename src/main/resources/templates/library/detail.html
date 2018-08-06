@@ -161,7 +161,7 @@
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
                             <a th:href="|/library/edit/${library?.id}|" class="btn btn-primary">修改</a>
-                            <a th:href="|/library/delete/${library?.id}|" class="btn btn-danger">删除</a>
+                            <a th:href="|/library/delete/${library?.id}?type=${library.type}|" class="btn btn-danger">删除</a>
                         </div>
                     </div>
                 </form>

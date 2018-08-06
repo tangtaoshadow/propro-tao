@@ -2,6 +2,7 @@ package com.westlake.air.pecs.dao;
 
 import com.mongodb.BasicDBObject;
 import com.westlake.air.pecs.domain.bean.TargetTransition;
+import com.westlake.air.pecs.domain.bean.TransitionGroup;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
 import org.bson.Document;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -118,12 +120,12 @@ public class TransitionDAO {
         return (long)a.getMappedResults().size();
     }
 
-    public long countByFullName(String libraryId) {
+    public long countByPeptideRef(String libraryId) {
         AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(
                         TransitionDO.class,
                         Aggregation.match(where("libraryId").is(libraryId)),
-                        Aggregation.group("fullName").count().as("count")).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
+                        Aggregation.group("peptideRef").count().as("count")).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
                 BasicDBObject.class);
 
         return (long)a.getMappedResults().size();

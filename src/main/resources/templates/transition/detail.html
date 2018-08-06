@@ -107,6 +107,15 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
+                                    <label for="peptideRef" class="col-2 col-form-label">
+                                        PeptideRef
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="peptideRef"
+                                               name="peptideRef" readonly th:value="${transition?.peptideRef}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
                                     <label for="intensity" class="col-2 col-form-label">
                                         离子强度
                                     </label>

@@ -7,6 +7,7 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.WindowRang;
+import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
@@ -14,10 +15,7 @@ import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.MzMLParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
-import com.westlake.air.pecs.service.ExperimentService;
-import com.westlake.air.pecs.service.LibraryService;
-import com.westlake.air.pecs.service.ScanIndexService;
-import com.westlake.air.pecs.service.TransitionService;
+import com.westlake.air.pecs.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -42,6 +40,10 @@ public class ExperimentController extends BaseController {
     TransitionService transitionService;
     @Autowired
     ExperimentService experimentService;
+    @Autowired
+    AnalyseOverviewService analyseOverviewService;
+    @Autowired
+    AnalyseDataService analyseDataService;
     @Autowired
     MzXMLParser mzXMLParser;
     @Autowired
@@ -140,7 +142,7 @@ public class ExperimentController extends BaseController {
             //传入不同的文件类型会调用不同的解析层
             if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZXML)) {
                 indexList = mzXMLParser.index(file, experimentDO.getId());
-            } else if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZML)){
+            } else if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZML)) {
                 indexList = mzMLParser.index(file, experimentDO.getId());
             }
 
@@ -228,8 +230,8 @@ public class ExperimentController extends BaseController {
 
         ResultDO<LibraryDO> resultVLib = libraryService.getById(vLibraryId);
         if (resultVLib.isSuccess()) {
-            experimentDO.setSLibraryId(vLibraryId);
-            experimentDO.setSLibraryName(resultVLib.getModel().getName());
+            experimentDO.setVLibraryId(vLibraryId);
+            experimentDO.setVLibraryName(resultVLib.getModel().getName());
         }
 
         experimentDO.setName(name);
@@ -248,8 +250,15 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/delete/{id}")
     String delete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
-        ResultDO resultDO = experimentService.delete(id);
+        experimentService.delete(id);
         scanIndexService.deleteAllByExperimentId(id);
+        List<AnalyseOverviewDO> overviewDOList = analyseOverviewService.getAllByExpId(id);
+        for (AnalyseOverviewDO overviewDO : overviewDOList) {
+            analyseDataService.deleteAllByOverviewId(overviewDO.getId());
+        }
+
+        analyseOverviewService.deleteAllByExpId(id);
+
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_LIBRARY_SUCCESS);
         return "redirect:/experiment/list";
 
@@ -277,9 +286,9 @@ public class ExperimentController extends BaseController {
         try {
             long start = System.currentTimeMillis();
             ResultDO resultDO = experimentService.extract(id, creator, rtExtractWindow, mzExtractWindow, buildType);
-            if(resultDO.isFailed()){
-                redirectAttributes.addFlashAttribute(ERROR_MSG,resultDO.getMsgInfo());
-                return "redirect:/experiment/detail/"+id;
+            if (resultDO.isFailed()) {
+                redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
+                return "redirect:/experiment/detail/" + id;
             }
             logger.info("全部卷积完成,总共耗时:" + (System.currentTimeMillis() - start));
         } catch (IOException e) {
@@ -294,7 +303,7 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/getWindows")
     @ResponseBody
     ResultDO<JSONObject> getWindows(Model model,
-                              @RequestParam(value = "expId", required = false) String expId) {
+                                    @RequestParam(value = "expId", required = false) String expId) {
 
         List<WindowRang> rangs = experimentService.getWindows(expId);
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
@@ -303,16 +312,16 @@ public class ExperimentController extends BaseController {
         JSONArray indexArray = new JSONArray();
         JSONArray mzStartArray = new JSONArray();
         JSONArray mzRangArray = new JSONArray();
-        for(int i = 0 ;i<rangs.size();i++){
-            indexArray.add((int)(rangs.get(i).getMs2Interval()*1000)+"ms");
+        for (int i = 0; i < rangs.size(); i++) {
+            indexArray.add((int) (rangs.get(i).getMs2Interval() * 1000) + "ms");
             mzStartArray.add(rangs.get(i).getMzStart());
-            mzRangArray.add((rangs.get(i).getMzEnd()-rangs.get(i).getMzStart()));
+            mzRangArray.add((rangs.get(i).getMzEnd() - rangs.get(i).getMzStart()));
         }
         res.put("indexes", indexArray);
         res.put("starts", mzStartArray);
         res.put("rangs", mzRangArray);
         res.put("min", rangs.get(0).getMzStart());
-        res.put("max", rangs.get(rangs.size()-1).getMzEnd());
+        res.put("max", rangs.get(rangs.size() - 1).getMzEnd());
         resultDO.setModel(res);
         return resultDO;
     }

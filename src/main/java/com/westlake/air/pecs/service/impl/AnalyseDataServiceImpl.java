@@ -5,6 +5,7 @@ import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
 import com.westlake.air.pecs.dao.ExperimentDAO;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
@@ -150,5 +151,11 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
         } catch (Exception e) {
             return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
+    }
+
+    @Override
+    public ResultDO<List<TransitionGroup>> getTransitionGroup(String libraryId) {
+        List<TransitionGroup> group = analyseDataDAO.getTransitionGroup(libraryId);
+        return new ResultDO<>(true);
     }
 }

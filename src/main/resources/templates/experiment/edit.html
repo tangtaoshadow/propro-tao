@@ -42,19 +42,19 @@
                             <input type="text" class="form-control m-input" id="name" name="name" th:value="${experiment?.name}">
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="library">
+                            <label for="sLibrary">
                                 关联标准库名称及ID
                             </label>
-                            <select class="form-control m-input" id="library" name="libraryId">
-                                <option th:each="library:${sLibraries}" th:value="${library.id}" th:text="${library.name}" th:selected="${experiment.sLibraryId}==${library.id}?true:false"></option>
+                            <select class="form-control m-input" id="sLibrary" name="sLibraryId">
+                                <option th:each="library:${sLibraries}" th:value="${library.id}" th:text="|${library.name}(${library.id})|" th:selected="${experiment.sLibraryId}==${library.id}?true:false"></option>
                             </select>
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="library">
+                            <label for="vLibrary">
                                 关联校准库名称及ID
                             </label>
-                            <select class="form-control m-input" id="library" name="libraryId">
-                                <option th:each="library:${vLibraries}" th:value="${library.id}" th:text="${library.name}" th:selected="${experiment.vLibraryId}==${library.id}?true:false"></option>
+                            <select class="form-control m-input" id="vLibrary" name="vLibraryId">
+                                <option th:each="library:${vLibraries}" th:value="${library.id}" th:text="|${library.name}(${library.id})|" th:selected="${experiment.vLibraryId}==${library.id}?true:false"></option>
                             </select>
                         </div>
                         <div class="form-group m-form__group">
