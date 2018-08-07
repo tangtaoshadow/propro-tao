@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface RTNormalizerService {
 
-    ResultDO compute(String overviewId, float sigma, float space);
+    ResultDO compute(String overviewId, Float sigma, Float space);
 
 }

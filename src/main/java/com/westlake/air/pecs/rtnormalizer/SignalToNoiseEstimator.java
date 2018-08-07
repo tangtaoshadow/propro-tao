@@ -1,21 +1,29 @@
 package com.westlake.air.pecs.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
+import org.springframework.stereotype.Component;
 
+import javax.naming.Name;
 import java.util.List;
 
 /**
  * Created by Nico Wang Ruimin
  * Time: 2018-07-31 19-30
  */
+@Component("signalToNoiseEstimator")
 public class SignalToNoiseEstimator {
 
-    private float autoMaxStdevFactor = 3.0f;
-//    private float windowLength = 200.0f;
-//    private int binCount = 30;
-    private int minRequiredElements = 10;
-    private float noiseForEmptyWindow = (float) Math.pow(10.0,20);
+    private static final float AUTO_MAX_STDEV_FACTOR = 3.0f;
+    private static final int MIN_REQUIRED_ELEMENTS = 10;
+    private static final float NOISE_FOR_EMPTY_WINDOW = (float) Math.pow(10.0,20);
 
+    /**
+     * 计算信噪比
+     * @param rtIntensity
+     * @param windowLength
+     * @param binCount
+     * @return
+     */
     public float[] computeSTN(RtIntensityPairs rtIntensity, float windowLength, int binCount) {
 
         //final result
@@ -25,7 +33,7 @@ public class SignalToNoiseEstimator {
         float[] meanVariance = getMeanVariance(rtIntensity);
 
         //get max intensity
-        float maxIntensity = meanVariance[0] + meanVariance[1] * autoMaxStdevFactor;
+        float maxIntensity = meanVariance[0] + meanVariance[1] * AUTO_MAX_STDEV_FACTOR;
 
         //bin params
         float windowHalfSize = windowLength / 2.0f;
@@ -74,8 +82,8 @@ public class SignalToNoiseEstimator {
             }
 
             //noise
-            if(elementsInWindow < minRequiredElements){
-                noise = noiseForEmptyWindow;
+            if(elementsInWindow < MIN_REQUIRED_ELEMENTS){
+                noise = NOISE_FOR_EMPTY_WINDOW;
                 sparseWindowPercent++;
             }else {
                 medianBin = -1;
