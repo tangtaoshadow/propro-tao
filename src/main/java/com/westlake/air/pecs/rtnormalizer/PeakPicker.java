@@ -20,7 +20,7 @@ public class PeakPicker {
     private static final int MISSING_LIMIT = 1;
     private static final float THRESHOLD = 0.000001f;
 
-    public List<float[]> pickMaxPeak(RtIntensityPairs rtIntensityPairs, float[] signalToNoise){
+    public RtIntensityPairs pickMaxPeak(RtIntensityPairs rtIntensityPairs, float[] signalToNoise){
         if(rtIntensityPairs.getRtArray().length < 5) {
             return null;
         }
@@ -120,8 +120,8 @@ public class PeakPicker {
 
                 PeakSpline peakSpline = new PeakSpline();
                 peakSpline.init(rtIntensityPairs, leftBoundary, rightBoundary);
-                maxPeakRt =  centralPeakRt;
-                maxPeakInt = centralPeakInt;
+//                maxPeakRt =  centralPeakRt;
+//                maxPeakInt = centralPeakInt;
                 leftHand = leftNeighborRt;
                 rightHand = rightNeighborRt;
 
@@ -147,7 +147,14 @@ public class PeakPicker {
                 i = rightBoundary;
             }
         }
-        return maxPeaks;
+        Float[] rt = new Float[maxPeaks.size()];
+        Float[] intensity = new Float[maxPeaks.size()];
+
+        for(int i = 0; i< maxPeaks.size(); i++){
+            rt[i] = maxPeaks.get(i)[0];
+            intensity[i] = maxPeaks.get(i)[1];
+        }
+        return new RtIntensityPairs(rt, intensity);
     }
 
 }
