@@ -158,7 +158,7 @@ public class AnalyseController extends BaseController {
         query.setLibraryId(overviewResult.getModel().getSLibraryId());
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
-        ResultDO<List<TransitionGroup>> resultDO = analyseDataService.getTransitionGroup(query);
+        ResultDO<List<TransitionGroup>> resultDO = analyseDataService.getTransitionGroup(query,false);
         List<TransitionGroup> groups = resultDO.getModel();
         model.addAttribute("groups", groups);
         model.addAttribute("totalPage", resultDO.getTotalPage());
@@ -166,6 +166,29 @@ public class AnalyseController extends BaseController {
         model.addAttribute("totalNum", resultDO.getTotalNum());
 
         return "/analyse/data/group";
+    }
+
+    @RequestMapping(value = "/data/compute")
+    @ResponseBody
+    String compute(Model model,
+                     @RequestParam(value = "overviewId", required = true) String overviewId,
+                     RedirectAttributes redirectAttributes) {
+
+        model.addAttribute("overviewId", overviewId);
+
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        if (overviewResult.isSuccess()) {
+            model.addAttribute("overview", overviewResult.getModel());
+        }
+
+        AnalyseDataQuery query = new AnalyseDataQuery();
+        query.setLibraryId(overviewResult.getModel().getSLibraryId());
+
+        ResultDO<List<TransitionGroup>> resultDO = analyseDataService.getTransitionGroup(query,true);
+        List<TransitionGroup> groups = resultDO.getModel();
+
+
+        return JSONArray.toJSONString(groups);
     }
 
     @RequestMapping(value = "/data/vliblist")

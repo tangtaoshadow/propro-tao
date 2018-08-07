@@ -155,9 +155,9 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     @Override
-    public ResultDO<List<TransitionGroup>> getTransitionGroup(AnalyseDataQuery query) {
+    public ResultDO<List<TransitionGroup>> getTransitionGroup(AnalyseDataQuery query,boolean getAll) {
         LibraryDO libraryDO = libraryDAO.getById(query.getLibraryId());
-        List<TransitionGroup> group = analyseDataDAO.getTransitionGroup(query);
+        List<TransitionGroup> group = analyseDataDAO.getTransitionGroup(query,getAll);
 
         ResultDO<List<TransitionGroup>> resultDO = new ResultDO<>(true);
         resultDO.setModel(group);

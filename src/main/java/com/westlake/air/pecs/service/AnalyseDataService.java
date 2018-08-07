@@ -46,5 +46,5 @@ public interface AnalyseDataService {
      */
     ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String peptideRef, String cutInfo);
 
-    ResultDO<List<TransitionGroup>> getTransitionGroup(AnalyseDataQuery query);
+    ResultDO<List<TransitionGroup>> getTransitionGroup(AnalyseDataQuery query, boolean getAll);
 }
