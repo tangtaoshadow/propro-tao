@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.rtnormalizer;
 
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
 import org.springframework.stereotype.Component;
 
@@ -13,12 +14,9 @@ import java.util.List;
 @Component("signalToNoiseEstimator")
 public class SignalToNoiseEstimator {
 
-    private static final float AUTO_MAX_STDEV_FACTOR = 3.0f;
-    private static final int MIN_REQUIRED_ELEMENTS = 10;
-    private static final float NOISE_FOR_EMPTY_WINDOW = (float) Math.pow(10.0,20);
-
     /**
      * 计算信噪比
+     *
      * @param rtIntensity
      * @param windowLength
      * @param binCount
@@ -33,7 +31,7 @@ public class SignalToNoiseEstimator {
         float[] meanVariance = getMeanVariance(rtIntensity);
 
         //get max intensity
-        float maxIntensity = meanVariance[0] + meanVariance[1] * AUTO_MAX_STDEV_FACTOR;
+        float maxIntensity = meanVariance[0] + meanVariance[1] * Constants.AUTO_MAX_STDEV_FACTOR;
 
         //bin params
         float windowHalfSize = windowLength / 2.0f;
@@ -82,26 +80,26 @@ public class SignalToNoiseEstimator {
             }
 
             //noise
-            if(elementsInWindow < MIN_REQUIRED_ELEMENTS){
-                noise = NOISE_FOR_EMPTY_WINDOW;
+            if (elementsInWindow < Constants.MIN_REQUIRED_ELEMENTS) {
+                noise = Constants.NOISE_FOR_EMPTY_WINDOW;
                 sparseWindowPercent++;
-            }else {
+            } else {
                 medianBin = -1;
-                elementsInWindowHalf = (elementsInWindow + 1)/2;
-                while(medianBin < binCount - 1 && elementIncCount < elementsInWindowHalf) {
-                    ++ medianBin;
+                elementsInWindowHalf = (elementsInWindow + 1) / 2;
+                while (medianBin < binCount - 1 && elementIncCount < elementsInWindowHalf) {
+                    ++medianBin;
                     elementIncCount += histogram[medianBin];
                 }
                 noise = Math.max(1.0f, binValue[medianBin]);
             }
             stnResults[positionCenter] = rtIntensity.getIntensityArray()[positionCenter] / noise;
             positionCenter++;
-            windowCount ++;
+            windowCount++;
         }
 
         sparseWindowPercent = sparseWindowPercent * 100 / windowCount;
-        if(sparseWindowPercent > 20){
-            System.out.println("Warning in SignalToNoiseEstimator: "+ sparseWindowPercent +"% of windows were sparse.\nIncreasing windowLength or decreasing minRequiredElements");
+        if (sparseWindowPercent > 20) {
+            System.out.println("Warning in SignalToNoiseEstimator: " + sparseWindowPercent + "% of windows were sparse.\nIncreasing windowLength or decreasing minRequiredElements");
         }
 
         return stnResults;

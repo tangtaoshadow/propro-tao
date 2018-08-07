@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.rtnormalizer;
 
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.stereotype.Component;
@@ -11,14 +12,8 @@ import java.util.List;
  * Created by Nico Wang Ruimin
  * Time: 2018-07-31 19-16
  */
-
-//get picked chromatogram
 @Component("peakPicker")
 public class PeakPicker {
-
-    private static final float SIGNAL_TO_NOISE_LIMIT = 1.0f;
-    private static final int MISSING_LIMIT = 1;
-    private static final float THRESHOLD = 0.000001f;
 
     public RtIntensityPairs pickMaxPeak(RtIntensityPairs rtIntensityPairs, float[] signalToNoise){
         if(rtIntensityPairs.getRtArray().length < 5) {
@@ -54,9 +49,9 @@ public class PeakPicker {
 
             if(centralPeakInt > leftBoundaryInt &&
                     centralPeakInt > rightBoundaryInt &&
-                    stnLeft >= SIGNAL_TO_NOISE_LIMIT &&
-                    stnMiddle >= SIGNAL_TO_NOISE_LIMIT &&
-                    stnRight >= SIGNAL_TO_NOISE_LIMIT){
+                    stnLeft >= Constants.SIGNAL_TO_NOISE_LIMIT &&
+                    stnMiddle >= Constants.SIGNAL_TO_NOISE_LIMIT &&
+                    stnRight >= Constants.SIGNAL_TO_NOISE_LIMIT){
 
                 // find left boundary
                 missing = 0;
@@ -71,12 +66,12 @@ public class PeakPicker {
                     }
 
                     if(rtIntensityPairs.getIntensityArray()[i - left] < leftBoundaryInt){
-                        if(stnLeft >= SIGNAL_TO_NOISE_LIMIT){
+                        if(stnLeft >= Constants.SIGNAL_TO_NOISE_LIMIT){
                             leftBoundaryInt = rtIntensityPairs.getIntensityArray()[i - left];
                             leftBoundary = i - left;
                         }else {
                             missing ++;
-                            if(missing <= MISSING_LIMIT){
+                            if(missing <= Constants.MISSING_LIMIT){
                                 leftBoundaryInt = rtIntensityPairs.getIntensityArray()[i - left];
                                 leftBoundary = i - left;
                             }else {
@@ -101,12 +96,12 @@ public class PeakPicker {
                     }
 
                     if(rtIntensityPairs.getIntensityArray()[i + right] < rightBoundaryInt){
-                        if(stnRight >= SIGNAL_TO_NOISE_LIMIT){
+                        if(stnRight >= Constants.SIGNAL_TO_NOISE_LIMIT){
                             rightBoundaryInt = rtIntensityPairs.getIntensityArray()[i + right];
                             rightBoundary = i + right;
                         }else {
                             missing ++;
-                            if(missing <= MISSING_LIMIT){
+                            if(missing <= Constants.MISSING_LIMIT){
                                 rightBoundaryInt = rtIntensityPairs.getIntensityArray()[i + right];
                                 rightBoundary = i + right;
                             }else {
@@ -125,7 +120,7 @@ public class PeakPicker {
                 leftHand = leftNeighborRt;
                 rightHand = rightNeighborRt;
 
-                while (rightHand - leftHand > THRESHOLD){
+                while (rightHand - leftHand > Constants.THRESHOLD){
                     mid = (leftHand + rightHand) / 2.0f;
                     midDerivVal = peakSpline.derivatives(mid);
                     if(Math.abs(midDerivVal) < 0.0001){

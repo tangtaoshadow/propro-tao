@@ -14,7 +14,6 @@ import java.util.List;
 public class GaussFilter {
 
     /**
-     *
      * @param pairs
      * @param sigma 一般默认为 30/8
      * @param spacing 一般默认为0.01

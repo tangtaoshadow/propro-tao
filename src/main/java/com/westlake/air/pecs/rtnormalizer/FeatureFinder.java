@@ -4,6 +4,7 @@ import com.westlake.air.pecs.domain.bean.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
 import com.westlake.air.pecs.rtnormalizer.domain.ExperimentFeature;
 import com.westlake.air.pecs.utils.MathUtil;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,11 +13,10 @@ import java.util.List;
  * Created by Nico Wang Ruimin
  * Time: 2018-08-01 22：42
  */
+@Component("featureFinder")
 public class FeatureFinder {
 
     public void findFeatures(List<RtIntensityPairs> chromatograms, List<RtIntensityPairs> pickedChroms, List<IntensityRtLeftRtRightPairs> intensityLeftRight){
-
-
 
         int[] chrPeakIndex = new int[2];
         chrPeakIndex[0] = -1;

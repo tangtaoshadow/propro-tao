@@ -1,8 +1,10 @@
 package com.westlake.air.pecs.rtnormalizer;
 
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
 import com.westlake.air.pecs.utils.MathUtil;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -10,9 +12,8 @@ import java.util.List;
  * Created by Nico Wang Ruimin
  * Time: 2018-08-01 20：26
  */
+@Component("chromatogramPicker")
 public class ChromatogramPicker {
-
-    private float signalToNoiseLimit = 1.0f;
 
     public IntensityRtLeftRtRightPairs pickChromatogram(RtIntensityPairs rtIntensityPairs, float[] signalToNoise, RtIntensityPairs maxPeakPairs) {
         int maxPeakSize = maxPeakPairs.getRtArray().length;
@@ -29,7 +30,7 @@ public class ChromatogramPicker {
             leftIndex = closestPeakIndex;
             while(leftIndex > 0 &&
                     rtIntensityPairs.getIntensityArray()[leftIndex - 1] < rtIntensityPairs.getIntensityArray()[leftIndex] &&
-                    signalToNoise[leftIndex] >= signalToNoiseLimit){
+                    signalToNoise[leftIndex] >= Constants.SIGNAL_TO_NOISE_LIMIT){
                 leftIndex--;
             }
 
@@ -37,7 +38,7 @@ public class ChromatogramPicker {
             rightIndex = closestPeakIndex;
             while(rightIndex < rtIntensityPairs.getIntensityArray().length - 1 &&
                     rtIntensityPairs.getIntensityArray()[rightIndex + 1] < rtIntensityPairs.getIntensityArray()[rightIndex] &&
-                    signalToNoise[rightIndex] >= signalToNoiseLimit){
+                    signalToNoise[rightIndex] >= Constants.SIGNAL_TO_NOISE_LIMIT){
                 rightIndex++;
             }
 
