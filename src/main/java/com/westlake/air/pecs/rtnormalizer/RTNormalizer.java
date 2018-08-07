@@ -1,9 +1,14 @@
 package com.westlake.air.pecs.rtnormalizer;
 
+import com.westlake.air.pecs.domain.bean.RtPair;
+import com.westlake.air.pecs.domain.bean.ScoreRtPair;
+import com.westlake.air.pecs.domain.bean.SlopeIntercept;
+import com.westlake.air.pecs.rtnormalizer.domain.ExperimentFeature;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,11 +24,32 @@ public class RTNormalizer {
 
 
    }
-//
-//
-//    private List<float[]> simpleFindBestFeature(List<ExperimentFeature> experimentFeatures, ){
-//
-//    }
+
+
+    /**
+     * get rt pairs for every peptideRef
+     * @param scoresList peptideRef list of List<ScoreRtPair>
+     * @param rt get from groupsResult.getModel()
+     * @return rt pairs
+     */
+    private List<RtPair> simpleFindBestFeature(List<List<ScoreRtPair>> scoresList, List<Float> rt){
+        float max = Float.MIN_VALUE;
+        List<RtPair> pairs = new ArrayList<>();
+        RtPair rtPair = new RtPair();
+        for(int i=0; i<scoresList.size(); i++){
+            List<ScoreRtPair> scores = scoresList.get(i);
+            //find max score's rt
+            for(int j=0; j<scores.size(); j++){
+                if(scores.get(j).getScore() > max){
+                    max = scores.get(j).getScore();
+                    rtPair.setExpRt(scores.get(j).getRt());
+                }
+            }
+            rtPair.setTheoRt(rt.get(i));
+            pairs.add(rtPair);
+        }
+        return pairs;
+    }
 
     /**
      * 先进行线性拟合，每次从pairs中选取一个residual最大的点丢弃，获得pairsCorrected
@@ -32,7 +58,7 @@ public class RTNormalizer {
      * @param minCoverage limit of picking
      * @return pairsCorrected
      */
-    private List<float[]> removeOutlierIterative(List<float[]> pairs, float minRsq, float minCoverage){
+    private List<RtPair> removeOutlierIterative(List<RtPair> pairs, float minRsq, float minCoverage){
 
         int pairsSize = pairs.size();
         if( pairsSize < 3){
@@ -46,8 +72,8 @@ public class RTNormalizer {
         WeightedObservedPoints obs = new WeightedObservedPoints();
         while(pairs.size() >= pairsSize * minCoverage && rsq< minRsq) {
             obs.clear();
-            for(float[] rtPair:pairs){
-                obs.add(rtPair[0],rtPair[1]);
+            for(RtPair rtPair:pairs){
+                obs.add(rtPair.getExpRt(),rtPair.getTheoRt());
             }
             PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
             coEff = fitter.fit(obs.toList());
@@ -58,7 +84,7 @@ public class RTNormalizer {
                 float res, max = 0;
                 int maxIndex = 0;
                 for (int i = 0; i < pairs.size(); i++) {
-                    res = (float) (Math.abs(pairs.get(i)[1] - (coEff[0] + coEff[1] * pairs.get(i)[0])));
+                    res = (float) (Math.abs(pairs.get(i).getTheoRt() - (coEff[0] + coEff[1] * pairs.get(i).getExpRt())));
                     if (res > max) {
                         max = res;
                         maxIndex = i;
@@ -84,13 +110,13 @@ public class RTNormalizer {
      * @param minBinsFilled 需要满足↑条件的bin的数量
      * @return boolean 是否覆盖
      */
-    private boolean computeBinnedCoverage(float[] rtRange, List<float[]> pairsCorrected, int rtBins, int minPeptidesPerBin, int minBinsFilled){
+    private boolean computeBinnedCoverage(float[] rtRange, List<RtPair> pairsCorrected, int rtBins, int minPeptidesPerBin, int minBinsFilled){
         int[] binCounter = new int[rtBins];
         float rtDistance = rtRange[1] - rtRange[0];
 
         //获得theorRt部分的分布
-        for(float[] pair: pairsCorrected){
-            float percent = (pair[1] - rtRange[0])/rtDistance;
+        for(RtPair pair: pairsCorrected){
+            float percent = (pair.getTheoRt() - rtRange[0])/rtDistance;
             int bin = (int)(percent * rtBins);
             if(bin>=rtBins){
                 bin = rtBins -1;
@@ -111,16 +137,16 @@ public class RTNormalizer {
      * @param rtPairs <exp_rt, theor_rt>
      * @return 斜率和截距
      */
-    private float[] fitRTPairs(List<float[]> rtPairs){
+    private SlopeIntercept fitRTPairs(List<RtPair> rtPairs){
         WeightedObservedPoints obs = new WeightedObservedPoints();
-        for(float[] rtPair:rtPairs){
-            obs.add(rtPair[0],rtPair[1]);
+        for(RtPair rtPair:rtPairs){
+            obs.add(rtPair.getExpRt(),rtPair.getTheoRt());
         }
         PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
         double[] coeff = fitter.fit(obs.toList());
-        float[] slopeIntercept = new float[2];
-        slopeIntercept[0] = (float)coeff[1];
-        slopeIntercept[1] = (float)coeff[0];
+        SlopeIntercept slopeIntercept = new SlopeIntercept();
+        slopeIntercept.setSlope((float)coeff[1]);
+        slopeIntercept.setIntercept((float)coeff[0]);
         return slopeIntercept;
     }
 

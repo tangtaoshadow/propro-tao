@@ -16,9 +16,9 @@ public class TransitionGroup {
 
     String peptideRef;
 
-    String intensity;
+    Double intensity;
 
-    String rt;
+    Double rt;
 
     List<AnalyseDataDO> dataList;
 
