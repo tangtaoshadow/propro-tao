@@ -155,7 +155,7 @@ public class AnalyseController extends BaseController {
         }
 
         AnalyseDataQuery query = new AnalyseDataQuery();
-        query.setLibraryId(overviewResult.getModel().getSLibraryId());
+        query.setLibraryId(overviewResult.getModel().getVLibraryId());
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
         ResultDO<List<TransitionGroup>> resultDO = analyseDataService.getTransitionGroup(query);
