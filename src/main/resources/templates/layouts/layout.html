@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout">
+<html th:with="url='https://wias.oss-cn-shanghai.aliyuncs.com'" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout">
 <!-- begin::Head -->
 <head>
     <meta charset="utf-8" />
@@ -11,16 +11,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!--begin::Base Styles -->
     <!--begin::Page Vendors -->
-    <link th:href="@{/assets/vendors/custom/fullcalendar/fullcalendar.bundle.css}" rel="stylesheet" type="text/css" />
+    <link th:href="|${url}/assets/vendors/custom/fullcalendar/fullcalendar.bundle.css|" rel="stylesheet" type="text/css" />
     <!--end::Page Vendors -->
-    <link th:href="@{/assets/vendors/base/vendors.bundle.css}" rel="stylesheet" type="text/css" />
-    <link th:href="@{/assets/demo/default/base/style.bundle.css}" rel="stylesheet" type="text/css" />
+    <link th:href="|${url}/assets/vendors/base/vendors.bundle.css|" rel="stylesheet" type="text/css" />
+    <link th:href="|${url}/assets/demo/default/base/style.bundle.css|" rel="stylesheet" type="text/css" />
     <!--end::Base Styles -->
-    <link th:href="@{/assets/favicon.ico}" rel="shortcut icon" />
+    <link th:href="|${url}/assets/favicon.ico|" rel="shortcut icon" />
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
-<body class="m-page--fluid m--skin- m-content--skin-light2 m-header--fixed m-header--fixed-mobile m-aside-left--enabled m-aside-left--skin-dark m-aside-left--offcanvas m-footer--push m-aside--offcanvas-default"  >
+<body class="m-page--fluid m--skin- m-content--skin-light2 m-header--fixed m-header--fixed-mobile m-aside-left--enabled m-aside-left--skin-dark m-aside-left--offcanvas m-footer--push m-aside--offcanvas-default">
 <!-- begin:: Page -->
 <div class="m-grid m-grid--hor m-grid--root m-page">
     <!-- BEGIN: Header -->
@@ -32,7 +32,7 @@
                     <div class="m-stack m-stack--ver m-stack--general">
                         <div class="m-stack__item m-stack__item--middle m-brand__logo">
                             <a href="index.html" class="m-brand__logo-wrapper">
-                                <img alt="" th:src="@{/assets/logo-inverse.png}"/>
+                                <img alt="" th:src="|${url}/assets/logo-inverse.png|"/>
                             </a>
                         </div>
                         <div class="m-stack__item m-stack__item--middle m-brand__tools">
@@ -147,7 +147,7 @@
                                     </div>
                                     <div class="m-widget4__item">
                                         <div class="m-widget4__img m-widget4__img--logo">
-                                            <img src="assets/app/media/img/client-logos/logo3.png" alt="">
+                                            <img th:src="|${url}/assets/app/media/img/client-logos/logo3.png|" alt="">
                                         </div>
                                         <div class="m-widget4__info">
 													<span class="m-widget4__title">
@@ -166,7 +166,7 @@
                                     </div>
                                     <div class="m-widget4__item">
                                         <div class="m-widget4__img m-widget4__img--logo">
-                                            <img src="assets/app/media/img/client-logos/logo1.png" alt="">
+                                            <img th:src="|${url}assets/app/media/img/client-logos/logo1.png|" alt="">
                                         </div>
                                         <div class="m-widget4__info">
 													<span class="m-widget4__title">
@@ -185,7 +185,7 @@
                                     </div>
                                     <div class="m-widget4__item">
                                         <div class="m-widget4__img m-widget4__img--logo">
-                                            <img src="assets/app/media/img/client-logos/logo2.png" alt="">
+                                            <img th:src="|${url}assets/app/media/img/client-logos/logo2.png|" alt="">
                                         </div>
                                         <div class="m-widget4__info">
 													<span class="m-widget4__title">
@@ -360,7 +360,7 @@
                             <div class="m-portlet__body">
                                 <div class="m-widget19">
                                     <div class="m-widget19__pic m-portlet-fit--top m-portlet-fit--sides" style="min-height-: 286px">
-                                        <img src="assets/app/media/img//blog/blog1.jpg" alt="">
+                                        <img th:src="|${url}assets/app/media/img//blog/blog1.jpg|" alt="">
                                         <h3 class="m-widget19__title m--font-light">
                                             Introducing New Feature
                                         </h3>
@@ -369,7 +369,7 @@
                                     <div class="m-widget19__content">
                                         <div class="m-widget19__header">
                                             <div class="m-widget19__user-img">
-                                                <img class="m-widget19__img" src="assets/app/media/img//users/user1.jpg" alt="">
+                                                <img class="m-widget19__img" th:src="|${url}assets/app/media/img//users/user1.jpg|" alt="">
                                             </div>
                                             <div class="m-widget19__info">
 														<span class="m-widget19__username">
@@ -419,8 +419,8 @@
 </div>
 <!-- end::Scroll Top -->
 <!--begin::Base Scripts -->
-<script th:src="@{/assets/vendors/base/vendors.bundle.js}" type="text/javascript"></script>
-<script th:src="@{/assets/demo/default/base/scripts.bundle.js}" type="text/javascript"></script>
+<script th:src="|${url}/assets/vendors/base/vendors.bundle.js|" type="text/javascript"></script>
+<script th:src="|${url}/assets/demo/default/base/scripts.bundle.js|" type="text/javascript"></script>
 <!--end::Base Scripts -->
 <th:block layout:fragment="script"/>
 </body>
