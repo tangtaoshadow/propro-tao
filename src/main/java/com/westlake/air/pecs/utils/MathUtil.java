@@ -70,4 +70,44 @@ public class MathUtil {
         return low;
     }
 
+    /**
+     * (data - mean) / std
+     */
+    public static float[] standardizeData(List<Float> data){
+        int dataLength = data.size();
+
+        //get mean
+        float sum = 0f;
+        for(float value: data){
+            sum += value;
+        }
+        float mean = sum / dataLength;
+
+        //get std
+        sum = 0f;
+        for(float value: data){
+            sum += (value - mean) * (value - mean);
+        }
+        float std = (float) Math.sqrt(sum / dataLength);
+
+        //get standardized data
+        float[] standardizedData = new float[dataLength];
+        for(int i = 0; i< dataLength; i++){
+            standardizedData[i] = (data.get(i) - mean)/ std;
+        }
+        return standardizedData;
+    }
+
+    public static int findMaxIndex(Float[] data){
+        float max = data[0];
+        int index = 0;
+        for(int i = 0; i < data.length; i++){
+            if(data[i] > max){
+                max = data[i];
+                index = i;
+            }
+        }
+        return index;
+    }
+
 }

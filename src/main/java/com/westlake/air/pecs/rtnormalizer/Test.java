@@ -8,6 +8,8 @@ import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
  */
 public class Test {
     public static void main(String args[]){
+
+        // gaussFilter test
         Float[] rt = new Float[9];
         Float[] intensity = new Float[9];
         for(int i = 0; i<9;i++){
