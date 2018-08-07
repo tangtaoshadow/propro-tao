@@ -35,7 +35,7 @@ public class PeakScorer {
      *              scores.elution_model_fit_score          *  1.88443209; //0
      */
 
-    public List<Float> score(List<RtIntensityPairs> chromatograms, List<List<ExperimentFeature>> experimentFeatures){
+    public List<Float> score(List<RtIntensityPairs> chromatograms, List<List<ExperimentFeature>> experimentFeatures, List<Double> libraryIntensity){
 
         //get signal to noise list
         List<float[]> signalToNoiseList = new ArrayList<>();
@@ -48,7 +48,7 @@ public class PeakScorer {
         for(List<ExperimentFeature> features: experimentFeatures){
             RTNormalizationScores scores = new RTNormalizationScores();
             calculateChromatographicScores(chromatograms, features, signalToNoiseList, scores);
-
+            calculateLibraryScores(features,libraryIntensity, scores);
             float ldaScore = calculateLdaPrescore(scores);
             finalScores.add(ldaScore);
         }
@@ -156,7 +156,26 @@ public class PeakScorer {
         }
         scores.setLibraryNormManhattan(sum / x.length);
 
-
+        //get library_corr
+        float corr = 0.0f, m1 = 0.0f, m2 = 0.0f, s1 = 0.0f, s2 = 0.0f;
+        for(int i=0;i<libraryIntensity.size(); i++){
+            corr += experimentIntensity.get(i) * libraryIntensity.get(i);
+            m1 += experimentIntensity.get(i);
+            m2 += libraryIntensity.get(i);
+            s1 += experimentIntensity.get(i) * experimentIntensity.get(i);
+            s2 += libraryIntensity.get(i) * libraryIntensity.get(i);
+        }
+        m1 /= libraryIntensity.size();
+        m2 /= libraryIntensity.size();
+        s1 -= m1 * m1 * libraryIntensity.size();
+        s2 -= m2 * m2 * libraryIntensity.size();
+        if(s1 < Math.pow(1,-12) || s2 < Math.pow(1,-12)){
+            scores.setLibraryCorr(0.0f);
+        }else {
+            corr -= m1 * m2 * libraryIntensity.size();
+            corr /= Math.sqrt(s1 * s2);
+            scores.setLibraryCorr(corr);
+        }
     }
 
     /**
