@@ -17,7 +17,7 @@
     <div class="d-flex align-items-center">
         <div class="mr-auto">
             <h3 class="m-subheader__title m-subheader__title--separator">
-                实验分析数据概述详情页面
+                实验卷积数据列表页面
             </h3>
         </div>
     </div>
@@ -256,7 +256,15 @@
 
         function query(dataId, overviewId, peptideRef, cutInfo) {
             var result = $.ajax({
-                url: "/analyse/view?dataId=" + dataId + "&overviewId=" + overviewId + "&peptideRef=" + peptideRef + "&cutInfo=" + cutInfo,
+                type:"POST",
+                url: "/analyse/view",
+                data:{
+                    dataId:dataId,
+                    overviewId:overviewId,
+                    peptideRef:peptideRef,
+                    cutInfo:cutInfo
+                },
+                dataType:"json",
                 async: false
             });
 
@@ -267,7 +275,7 @@
 
             option = {
                 title: {
-                    text: fullName + ":" + data_rt.length + "个信号",
+                    text: peptideRef + ":" + data_rt.length + "个信号",
                     left: 10
                 },
                 legend: {

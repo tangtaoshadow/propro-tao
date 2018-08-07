@@ -148,7 +148,6 @@ public class AnalyseController extends BaseController {
 
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("overviewId", overviewId);
-        model.addAttribute("overviewId", overviewId);
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         if (overviewResult.isSuccess()) {
@@ -166,7 +165,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalNum", resultDO.getTotalNum());
 
-        return "/analyse/data/list";
+        return "/analyse/data/group";
     }
 
     @RequestMapping(value = "/data/vliblist")

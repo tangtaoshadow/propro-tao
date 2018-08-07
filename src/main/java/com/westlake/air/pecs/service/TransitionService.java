@@ -24,6 +24,8 @@ public interface TransitionService {
 
     ResultDO<List<TransitionDO>> getList(TransitionQuery transitionQuery);
 
+    List<Double> getIntensityList(String libraryId);
+
     ResultDO insert(TransitionDO transitionDO);
 
     ResultDO insertAll(List<TransitionDO> transitions, boolean isDeleteOld);
@@ -45,10 +47,26 @@ public interface TransitionService {
 
     ResultDO<List<Peptide>> getPeptideList(TransitionQuery query);
 
+    /**
+     * 计算不同蛋白质的数目
+     * @param libraryId
+     * @return
+     */
     Long countByProteinName(String libraryId);
 
+    /**
+     * 计算不同肽段的数目
+     * @param libraryId
+     * @return
+     */
     Long countByPeptideRef(String libraryId);
 
+    /**
+     * 同时创建MS1和MS2的卷积坐标
+     * @param libraryId
+     * @param rtExtractionWindows
+     * @return
+     */
     LibraryCoordinate buildCoordinates(String libraryId, float rtExtractionWindows);
 
     /**

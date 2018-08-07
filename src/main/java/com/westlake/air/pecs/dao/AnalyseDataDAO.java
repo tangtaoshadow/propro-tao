@@ -96,7 +96,9 @@ public class AnalyseDataDAO {
                         Aggregation.match(where("libraryId").is(query.getLibraryId())),
                         Aggregation.group("peptideRef").
                                 first("proteinName").as("proteinName").
-                                first("peptideRef").as("peptideRef"),
+                                first("peptideRef").as("peptideRef").
+                                first("rt").as("rt").
+                                first("intensity").as("intensity"),
                         lookup,
                         Aggregation.skip((query.getPageNo() - 1) * query.getPageSize()),
                         Aggregation.limit(query.getPageSize())

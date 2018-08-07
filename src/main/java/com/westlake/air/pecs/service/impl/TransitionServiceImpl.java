@@ -65,6 +65,11 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
+    public List<Double> getIntensityList(String libraryId) {
+        return transitionDAO.getIntensityList(libraryId);
+    }
+
+    @Override
     public ResultDO insert(TransitionDO transitionDO) {
         try {
             transitionDAO.insert(transitionDO);

@@ -16895,7 +16895,7 @@ code {
       position: relative;
       z-index: 1; }
   .m-portlet .m-portlet__body {
-    padding: 2.2rem 2.2rem; }
+    padding: 1rem 1rem; }
     .m-portlet .m-portlet__body.m-portlet__body--no-padding {
       padding: 0; }
     .m-portlet .m-portlet__body.m-portlet__body--no-top-padding {

@@ -6,11 +6,13 @@ import com.westlake.air.pecs.domain.db.simple.Protein;
 import com.westlake.air.pecs.domain.db.simple.TargetTransition;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
@@ -63,6 +65,20 @@ public class TransitionDAO {
 
     public List<TransitionDO> getList(TransitionQuery query) {
         return mongoTemplate.find(buildQuery(query), TransitionDO.class, CollectionName);
+    }
+
+    public List<Double> getIntensityList(String libraryId) {
+        Document queryDoc = new Document();
+        queryDoc.put("libraryId",libraryId);
+
+        Document fieldsDoc = new Document();
+        fieldsDoc.put("peptideRef",true);
+        fieldsDoc.put("intensity",true);
+        fieldsDoc.put("rt",true);
+        fieldsDoc.put("_id",false);
+        Query query = new BasicQuery(queryDoc, fieldsDoc);
+        List<BasicDBObject> intensities = mongoTemplate.find(query, BasicDBObject.class, CollectionName);
+        return null;
     }
 
     public List<TargetTransition> getTTAll(TransitionQuery query) {
