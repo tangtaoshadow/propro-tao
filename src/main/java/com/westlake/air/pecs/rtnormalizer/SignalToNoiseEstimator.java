@@ -1,5 +1,7 @@
 package com.westlake.air.pecs.rtnormalizer;
 
+import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
+
 import java.util.List;
 
 /**
@@ -9,16 +11,15 @@ import java.util.List;
 public class SignalToNoiseEstimator {
 
     private float autoMaxStdevFactor = 3.0f;
-    private float windowLength = 200.0f;
-    private int binCount = 30;
+//    private float windowLength = 200.0f;
+//    private int binCount = 30;
     private int minRequiredElements = 10;
     private float noiseForEmptyWindow = (float) Math.pow(10.0,20);
 
-    public float[] computeSTN(List<float[]> rtIntensity) {
+    public float[] computeSTN(RtIntensityPairs rtIntensity, float windowLength, int binCount) {
 
         //final result
-        float[] stnResults = new float[rtIntensity.size()-1];
-
+        float[] stnResults = new float[rtIntensity.getRtArray().length];
 
         //get mean and variance
         float[] meanVariance = getMeanVariance(rtIntensity);
@@ -43,7 +44,7 @@ public class SignalToNoiseEstimator {
         int windowCount = 0;// number of windows
         int elementsInWindowHalf;// number of elements where we find the median
         float noise;// noise value of a data point
-        int windowsOverall = rtIntensity.size() - 1;// determine how many elements we need to estimate (for progress estimation)
+        int windowsOverall = rtIntensity.getRtArray().length - 1;// determine how many elements we need to estimate (for progress estimation)
         float sparseWindowPercent = 0;
 
         //Main loop
@@ -52,8 +53,8 @@ public class SignalToNoiseEstimator {
 
             //get left/right borders
             for (int left = positionCenter; left >= 0; left--) {
-                if (rtIntensity.get(left)[0] >= rtIntensity.get(positionCenter)[0] - windowHalfSize) {
-                    toBin = Math.max(Math.min((int) (rtIntensity.get(left)[0] / binSize), binCount - 1), 0);
+                if (rtIntensity.getRtArray()[left] >= rtIntensity.getRtArray()[positionCenter] - windowHalfSize) {
+                    toBin = Math.max(Math.min((int) (rtIntensity.getRtArray()[left] / binSize), binCount - 1), 0);
                     histogram[toBin]++;
                     elementsInWindow++;
                     left--;
@@ -62,8 +63,8 @@ public class SignalToNoiseEstimator {
                 }
             }
             for (int right = positionCenter + 1; right <= windowsOverall; right++) {
-                if (rtIntensity.get(right)[0] <= rtIntensity.get(positionCenter)[0] + windowHalfSize) {
-                    toBin = Math.max(Math.min((int) (rtIntensity.get(right)[0] / binSize), binCount - 1), 0);
+                if (rtIntensity.getRtArray()[right] <= rtIntensity.getRtArray()[positionCenter] + windowHalfSize) {
+                    toBin = Math.max(Math.min((int) (rtIntensity.getRtArray()[right] / binSize), binCount - 1), 0);
                     histogram[toBin]++;
                     elementsInWindow++;
                     right++;
@@ -85,7 +86,7 @@ public class SignalToNoiseEstimator {
                 }
                 noise = Math.max(1.0f, binValue[medianBin]);
             }
-            stnResults[positionCenter] = rtIntensity.get(positionCenter)[1] / noise;
+            stnResults[positionCenter] = rtIntensity.getIntensityArray()[positionCenter] / noise;
             positionCenter++;
             windowCount ++;
         }
@@ -105,23 +106,24 @@ public class SignalToNoiseEstimator {
      * @param rtIntensity k,v
      * @return 0:mean 1:variance
      */
-    private float[] getMeanVariance(List<float[]> rtIntensity) {
+    private float[] getMeanVariance(RtIntensityPairs rtIntensity) {
 
         float[] meanVariance = new float[2];
+        Float[] intensity = rtIntensity.getIntensityArray();
 
         //get mean
         float sum = 0;
         int count = 0;
-        for (float[] rtInt : rtIntensity) {
-            sum += rtInt[1];
+        for (float intens : intensity) {
+            sum += intens;
             count++;
         }
         meanVariance[0] = sum / count;
 
         //get variance
-        for (float[] rtInt : rtIntensity) {
+        for (float intens : intensity) {
             sum = 0;
-            sum += Math.pow((meanVariance[0] - rtInt[1]), 2);
+            sum += Math.pow((meanVariance[0] - intens), 2);
         }
         meanVariance[1] = sum / count;
 

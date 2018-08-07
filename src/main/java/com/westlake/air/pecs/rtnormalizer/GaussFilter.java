@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,12 +10,17 @@ import java.util.List;
  * Created by Nico Wang Ruimin
  * Time: 2018-07-31 16-28
  */
+@Component("gaussFilter")
 public class GaussFilter {
 
-    private float sigma = 0.025f;
-    private float spacing = 0.01f;
-
-    public RtIntensityPairs gaussFilter(RtIntensityPairs pairs) {
+    /**
+     *
+     * @param pairs
+     * @param sigma 一般默认为 30/8
+     * @param spacing 一般默认为0.01
+     * @return
+     */
+    public RtIntensityPairs filter(RtIntensityPairs pairs, float sigma, float spacing) {
 
         //coeffs: 以0为中心，sigma为标准差的正态分布参数
         float[] coeffs = getCoeffs(sigma, spacing, getRightNum(sigma, spacing));

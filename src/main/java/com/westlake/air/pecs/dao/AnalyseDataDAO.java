@@ -83,27 +83,44 @@ public class AnalyseDataDAO {
         mongoTemplate.remove(query, AnalyseDataDO.class, CollectionName);
     }
 
-    public List<TransitionGroup> getTransitionGroup(AnalyseDataQuery query) {
+    public List<TransitionGroup> getTransitionGroup(AnalyseDataQuery query,boolean getAll) {
 
         LookupOperation lookup = LookupOperation.newLookup().
                 from(AnalyseDataDAO.CollectionName).
                 localField("peptideRef").
                 foreignField("peptideRef").
                 as("dataList");
-        AggregationResults<TransitionGroup> a = mongoTemplate.aggregate(
-                Aggregation.newAggregation(
-                        TransitionDO.class,
-                        Aggregation.match(where("libraryId").is(query.getLibraryId())),
-                        Aggregation.group("peptideRef").
-                                first("proteinName").as("proteinName").
-                                first("peptideRef").as("peptideRef").
-                                first("rt").as("rt").
-                                first("intensity").as("intensity"),
-                        lookup,
-                        Aggregation.skip((query.getPageNo() - 1) * query.getPageSize()),
-                        Aggregation.limit(query.getPageSize())
-                ).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), TransitionDAO.CollectionName,
-                TransitionGroup.class);
+
+        AggregationResults<TransitionGroup> a = null;
+        if(getAll){
+            a = mongoTemplate.aggregate(
+                    Aggregation.newAggregation(
+                            TransitionDO.class,
+                            Aggregation.match(where("libraryId").is(query.getLibraryId())),
+                            Aggregation.group("peptideRef").
+                                    first("proteinName").as("proteinName").
+                                    first("peptideRef").as("peptideRef").
+                                    first("rt").as("rt").
+                                    first("intensity").as("intensity"),
+                            lookup
+                    ).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), TransitionDAO.CollectionName,
+                    TransitionGroup.class);
+        }else{
+            a = mongoTemplate.aggregate(
+                    Aggregation.newAggregation(
+                            TransitionDO.class,
+                            Aggregation.match(where("libraryId").is(query.getLibraryId())),
+                            Aggregation.group("peptideRef").
+                                    first("proteinName").as("proteinName").
+                                    first("peptideRef").as("peptideRef").
+                                    first("rt").as("rt").
+                                    first("intensity").as("intensity"),
+                            lookup,
+                            Aggregation.skip((query.getPageNo() - 1) * query.getPageSize()),
+                            Aggregation.limit(query.getPageSize())
+                    ).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), TransitionDAO.CollectionName,
+                    TransitionGroup.class);
+        }
 
         return a.getMappedResults();
     }

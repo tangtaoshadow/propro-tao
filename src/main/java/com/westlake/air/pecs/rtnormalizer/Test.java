@@ -8,6 +8,8 @@ import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
  */
 public class Test {
     public static void main(String args[]){
+
+        // gaussFilter test
         Float[] rt = new Float[9];
         Float[] intensity = new Float[9];
         for(int i = 0; i<9;i++){
@@ -19,7 +21,7 @@ public class Test {
         intensity[5] = 1.2f;
         RtIntensityPairs rtIntensityPairs = new RtIntensityPairs(rt, intensity);
 
-        RtIntensityPairs filteredPairs = new GaussFilter().gaussFilter(rtIntensityPairs);
+        RtIntensityPairs filteredPairs = new GaussFilter().filter(rtIntensityPairs, 30/8, 0.01f);
 
         System.out.println("Test Finish.");
     }
