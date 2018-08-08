@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.utils;
 
 import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.RtPair;
 
 import java.util.List;
 
@@ -10,30 +11,30 @@ import java.util.List;
  */
 public class MathUtil {
 
-    public static float getRsq(List<float[]> pairs){
+    public static float getRsq(List<RtPair> pairs){
         //step1 compute mean
         float sumX = 0, sumY = 0;
         int length = pairs.size();
-        for(float[] pair : pairs){
-            sumX += pair[0];
-            sumY += pair[1];
+        for(RtPair pair : pairs){
+            sumX += pair.getExpRt();
+            sumY += pair.getTheoRt();
         }
         float meanX = sumX / length;
         float meanY = sumY / length;
 
         //step2 compute variance
         sumX = 0; sumY = 0;
-        for(float[] pair : pairs){
-            sumX += Math.pow(pair[0] - meanX, 2);
-            sumY += Math.pow(pair[1] - meanY, 2);
+        for(RtPair pair : pairs){
+            sumX += Math.pow(pair.getExpRt() - meanX, 2);
+            sumY += Math.pow(pair.getTheoRt() - meanY, 2);
         }
         float varX = sumX / (length - 1);
         float varY = sumY / (length - 1);
 
         //step3 compute covariance
         float sum = 0;
-        for(float[] pair: pairs){
-            sum += (pair[0] - meanX) * (pair[1] - meanY);
+        for(RtPair pair: pairs){
+            sum += (pair.getExpRt() - meanX) * (pair.getTheoRt() - meanY);
         }
         float covXY = sum / length;
 

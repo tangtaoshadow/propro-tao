@@ -4,6 +4,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.westlake.air.pecs.domain.bean.RTNormalizationScores;
 import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.ScoreRtPair;
 import com.westlake.air.pecs.rtnormalizer.domain.ExperimentFeature;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.apache.commons.math3.analysis.function.Exp;
@@ -20,22 +21,26 @@ public class PeakScorer {
     private int windowLength = 1000;
     private int binCount = 30;
 
-    private float rtNormalizationFactor = 1.0f;
-    private int addUpSpectra = 1;
-    private float spacingForSpectraResampling = 0.005f;
-    //score use params
+//    private float rtNormalizationFactor = 1.0f;
+//    private int addUpSpectra = 1;
+//    private float spacingForSpectraResampling = 0.005f;
+//    //score use params
+
 
     /**
-     *       return scores.library_corr                     * -0.34664267 + 2
-     *              scores.library_norm_manhattan           *  2.98700722 + 2
-     *              scores.norm_rt_score                    *  7.05496384 + //0
-     *              scores.xcorr_coelution_score            *  0.09445371 + 1
-     *              scores.xcorr_shape_score                * -5.71823862 + 1
-     *              scores.log_sn_score                     * -0.72989582 + 1
-     *              scores.elution_model_fit_score          *  1.88443209; //0
+     *        return scores.library_corr                     * -0.34664267 +
+     *               scores.library_norm_manhattan           *  2.98700722 +
+     *               scores.norm_rt_score                    *  7.05496384 +
+     *               scores.xcorr_coelution_score            *  0.09445371 +
+     *               scores.xcorr_shape_score                * -5.71823862 +
+     *               scores.log_sn_score                     * -0.72989582 +
+     *               scores.elution_model_fit_score          *  1.88443209;
+     * @param chromatograms chromatogramList in transitionGroup
+     * @param experimentFeatures features extracted from chromatogramList in transitionGroup
+     * @param libraryIntensity intensity in transitionList in transitionGroup
+     * @return List of overallQuality
      */
-
-    public List<Float> score(List<RtIntensityPairs> chromatograms, List<List<ExperimentFeature>> experimentFeatures, List<Double> libraryIntensity){
+    public List<ScoreRtPair> score(List<RtIntensityPairs> chromatograms, List<List<ExperimentFeature>> experimentFeatures, List<Double> libraryIntensity){
 
         //get signal to noise list
         List<float[]> signalToNoiseList = new ArrayList<>();
@@ -44,13 +49,16 @@ public class PeakScorer {
             signalToNoiseList.add(signalToNoise);
         }
 
-        List<Float> finalScores = new ArrayList<>();
+        List<ScoreRtPair> finalScores = new ArrayList<>();
         for(List<ExperimentFeature> features: experimentFeatures){
             RTNormalizationScores scores = new RTNormalizationScores();
             calculateChromatographicScores(chromatograms, features, signalToNoiseList, scores);
             calculateLibraryScores(features,libraryIntensity, scores);
             float ldaScore = calculateLdaPrescore(scores);
-            finalScores.add(ldaScore);
+            ScoreRtPair scoreRtPair = new ScoreRtPair();
+            scoreRtPair.setRt(features.get(0).getRt());
+            scoreRtPair.setScore(ldaScore);
+            finalScores.add(scoreRtPair);
         }
 
         return finalScores;
@@ -126,20 +134,13 @@ public class PeakScorer {
 
 
 
-    /**
-     *       return scores.library_corr                     * -0.34664267 + 2
-     *              scores.library_norm_manhattan           *  2.98700722 + 2
-     *              scores.norm_rt_score                    *  7.05496384 + //0
-     *              scores.xcorr_coelution_score            *  0.09445371 + 1
-     *              scores.xcorr_shape_score                * -5.71823862 + 1
-     *              scores.log_sn_score                     * -0.72989582 + 1
-     *              scores.elution_model_fit_score          *  1.88443209; //0
-     */
 
     /**
-     *
-     * @param experimentFeatures
-     * @param libraryIntensity
+     * scores.library_corr
+     * scores.library_norm_manhattan
+     * @param experimentFeatures get experimentIntensity: from features extracted
+     * @param libraryIntensity get libraryIntensity: from transitions
+     * @param scores library_corr, library_norm_manhattan
      */
     private void calculateLibraryScores(List<ExperimentFeature> experimentFeatures, List<Double> libraryIntensity, RTNormalizationScores scores){
         List<Float> experimentIntensity = new ArrayList<>();
