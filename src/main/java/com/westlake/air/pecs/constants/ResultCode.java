@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.constants;
 
 import java.io.Serializable;
+import java.text.Normalizer;
 
 /**
  * Created by James Lu MiaoShan
@@ -73,6 +74,13 @@ public enum ResultCode implements Serializable {
     ANALYSE_DATA_NOT_EXISTED("ANALYSE_DATA_NOT_EXISTED","卷积数据不存在"),
     ANALYSE_OVERVIEW_NOT_EXISTED("ANALYSE_OVERVIEW_NOT_EXISTED","卷积数据概览不存在"),
     ONLY_SUPPORT_VERIFY_LIBRARY_SEARCH("ONLY_SUPPORT_VERIFY_LIBRARY_SEARCH","本接口只支持校准库的数据聚合查询"),
+
+    /**
+     * ******
+     * RT Normalizer
+     * *******
+     */
+    NOT_ENOUGH_IRT_PEPTIDES("NOT_ENOUGH_IRT_PEPTIDES","There are less than 2 iRT peptides, not enough for an RT correction"),
     ;
 
     private String code = "";

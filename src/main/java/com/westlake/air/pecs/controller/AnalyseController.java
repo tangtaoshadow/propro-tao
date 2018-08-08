@@ -5,19 +5,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
-import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
+import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
+import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
-import com.westlake.air.pecs.domain.query.TransitionQuery;
-import com.westlake.air.pecs.service.AnalyseDataService;
-import com.westlake.air.pecs.service.AnalyseOverviewService;
-import com.westlake.air.pecs.service.ExperimentService;
-import com.westlake.air.pecs.service.TransitionService;
+import com.westlake.air.pecs.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -47,6 +43,8 @@ public class AnalyseController extends BaseController {
     TransitionService transitionService;
     @Autowired
     ExperimentService experimentService;
+    @Autowired
+    RTNormalizerService rtNormalizerService;
 
     @RequestMapping(value = "/overview/list")
     String overviewList(Model model,
@@ -170,6 +168,8 @@ public class AnalyseController extends BaseController {
     @ResponseBody
     String compute(Model model,
                      @RequestParam(value = "overviewId", required = true) String overviewId,
+                     @RequestParam(value = "sigma", required = false) Float sigma,
+                     @RequestParam(value = "spacing", required = false) Float spacing,
                      RedirectAttributes redirectAttributes) {
 
         model.addAttribute("overviewId", overviewId);
@@ -181,10 +181,10 @@ public class AnalyseController extends BaseController {
 
         AnalyseDataQuery query = new AnalyseDataQuery();
         query.setLibraryId(overviewResult.getModel().getVLibraryId());
-
-        List<IntensityGroup> intList = transitionService.getIntensityGroup(overviewResult.getModel().getVLibraryId());
-
-        return JSONArray.toJSONString(intList);
+        long start = System.currentTimeMillis();
+        ResultDO rtResult = rtNormalizerService.compute(overviewId, sigma, spacing);
+        System.out.println("Cost:"+(System.currentTimeMillis() - start));
+        return JSONArray.toJSONString(rtResult);
     }
 
     @RequestMapping(value = "/data/vliblist")

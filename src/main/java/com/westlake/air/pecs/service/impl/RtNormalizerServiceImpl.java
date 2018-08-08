@@ -19,6 +19,8 @@ import com.westlake.air.pecs.service.TransitionService;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,8 @@ import java.util.List;
 
 @Service("rtNormalizerService")
 public class RtNormalizerServiceImpl implements RTNormalizerService {
+
+    public final Logger logger = LoggerFactory.getLogger(RtNormalizerServiceImpl.class);
 
     @Autowired
     AnalyseDataService analyseDataService;
@@ -113,8 +117,8 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
 //            System.out.println("There were not enough bins with the minimal number of peptides.");
 //        }
         if(pairsCorrected == null || pairsCorrected.size() < 2){
-            System.out.println("There are less than 2 iRT normalization peptides, not enough for an RT correction.");
-            slopeInterceptResultDO.setMsgInfo("There are less than 2 iRT normalization peptides, not enough for an RT correction.");
+            logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
+            slopeInterceptResultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
             return slopeInterceptResultDO;
         }
 
