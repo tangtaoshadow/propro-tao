@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.test.dao;
 
+import com.westlake.air.pecs.dao.TransitionDAO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;

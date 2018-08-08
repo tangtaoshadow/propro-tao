@@ -1,7 +1,7 @@
 package com.westlake.air.pecs.decoy.generator;
 
-import com.westlake.air.pecs.test.algorithm.FormulaCalculator;
-import com.westlake.air.pecs.test.algorithm.FragmentCalculator;
+import com.westlake.air.pecs.algorithm.FormulaCalculator;
+import com.westlake.air.pecs.algorithm.FragmentCalculator;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.decoy.BaseGenerator;
 import com.westlake.air.pecs.domain.bean.AminoAcid;

@@ -2,10 +2,10 @@ package com.westlake.air.pecs.service.impl;
 
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
-import com.westlake.air.pecs.test.dao.AnalyseDataDAO;
-import com.westlake.air.pecs.test.dao.AnalyseOverviewDAO;
-import com.westlake.air.pecs.test.dao.ExperimentDAO;
-import com.westlake.air.pecs.test.dao.ScanIndexDAO;
+import com.westlake.air.pecs.dao.AnalyseDataDAO;
+import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
+import com.westlake.air.pecs.dao.ExperimentDAO;
+import com.westlake.air.pecs.dao.ScanIndexDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;

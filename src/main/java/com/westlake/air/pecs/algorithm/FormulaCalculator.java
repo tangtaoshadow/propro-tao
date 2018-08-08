@@ -1,8 +1,8 @@
-package com.westlake.air.pecs.test.algorithm;
+package com.westlake.air.pecs.algorithm;
 
 import com.westlake.air.pecs.constants.ResidueType;
-import com.westlake.air.pecs.test.dao.AminoAcidDAO;
-import com.westlake.air.pecs.test.dao.ElementsDAO;
+import com.westlake.air.pecs.dao.AminoAcidDAO;
+import com.westlake.air.pecs.dao.ElementsDAO;
 import com.westlake.air.pecs.domain.bean.Fragment;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.parser.UnimodParser;

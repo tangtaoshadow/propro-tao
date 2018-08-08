@@ -1,4 +1,4 @@
-package com.westlake.air.pecs.test.dao;
+package com.westlake.air.pecs.dao;
 
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.query.LibraryQuery;

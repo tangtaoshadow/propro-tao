@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.test.algorithm;
 
+import com.westlake.air.pecs.algorithm.FormulaCalculator;
 import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

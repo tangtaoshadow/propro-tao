@@ -1,4 +1,4 @@
-package com.westlake.air.pecs.test.algorithm;
+package com.westlake.air.pecs.algorithm;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;

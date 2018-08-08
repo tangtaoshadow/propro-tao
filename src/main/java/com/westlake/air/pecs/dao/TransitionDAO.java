@@ -1,4 +1,4 @@
-package com.westlake.air.pecs.test.dao;
+package com.westlake.air.pecs.dao;
 
 import com.mongodb.BasicDBObject;
 import com.westlake.air.pecs.domain.db.TransitionDO;
