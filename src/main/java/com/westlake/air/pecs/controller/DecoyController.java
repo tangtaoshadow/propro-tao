@@ -1,6 +1,6 @@
 package com.westlake.air.pecs.controller;
 
-import com.westlake.air.pecs.algorithm.FragmentCalculator;
+import com.westlake.air.pecs.test.algorithm.FragmentCalculator;
 import com.westlake.air.pecs.decoy.generator.ShuffleGenerator;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.FragmentResult;

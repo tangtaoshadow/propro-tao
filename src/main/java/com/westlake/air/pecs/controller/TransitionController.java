@@ -1,8 +1,8 @@
 package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.westlake.air.pecs.algorithm.FormulaCalculator;
-import com.westlake.air.pecs.algorithm.FragmentCalculator;
+import com.westlake.air.pecs.test.algorithm.FormulaCalculator;
+import com.westlake.air.pecs.test.algorithm.FragmentCalculator;
 import com.westlake.air.pecs.decoy.generator.ShuffleGenerator;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;

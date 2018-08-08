@@ -12,5 +12,4 @@ public class SlopeIntercept {
     float slope;
 
     float intercept;
-
 }
