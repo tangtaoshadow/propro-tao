@@ -60,10 +60,7 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
             return ResultDO.buildError(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
         }
 
-        AnalyseDataQuery analyseDataQuery = new AnalyseDataQuery();
-        analyseDataQuery.setLibraryId(overviewDOResult.getModel().getVLibraryId());
-        analyseDataQuery.setOverviewId(overviewId);
-        ResultDO<List<TransitionGroup>> groupsResult = analyseDataService.getTransitionGroup(analyseDataQuery,true);
+        ResultDO<List<TransitionGroup>> groupsResult = analyseDataService.getTransitionGroup(overviewId, overviewDOResult.getModel().getVLibraryId());
         if(groupsResult.isFailed()){
             ResultDO resultDO = new ResultDO(false);
             resultDO.setErrorResult(groupsResult.getMsgCode(), groupsResult.getMsgInfo());

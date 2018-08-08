@@ -156,11 +156,7 @@ public class AnalyseController extends BaseController {
             model.addAttribute("overview", overviewResult.getModel());
         }
 
-        AnalyseDataQuery query = new AnalyseDataQuery();
-        query.setLibraryId(overviewResult.getModel().getVLibraryId());
-        query.setPageSize(pageSize);
-        query.setPageNo(currentPage);
-        ResultDO<List<TransitionGroup>> resultDO = analyseDataService.getTransitionGroup(query,false);
+        ResultDO<List<TransitionGroup>> resultDO = analyseDataService.getTransitionGroup(overviewId,overviewResult.getModel().getVLibraryId());
         List<TransitionGroup> groups = resultDO.getModel();
         model.addAttribute("groups", groups);
         model.addAttribute("totalPage", resultDO.getTotalPage());

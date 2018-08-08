@@ -2,9 +2,14 @@ package com.westlake.air.pecs.service.impl;
 
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
+import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
 import com.westlake.air.pecs.dao.LibraryDAO;
+import com.westlake.air.pecs.dao.TransitionDAO;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
+import com.westlake.air.pecs.domain.db.TransitionDO;
+import com.westlake.air.pecs.domain.db.simple.Peptide;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
@@ -14,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,7 +34,11 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     @Autowired
     AnalyseDataDAO analyseDataDAO;
     @Autowired
+    AnalyseOverviewDAO analyseOverviewDAO;
+    @Autowired
     LibraryDAO libraryDAO;
+    @Autowired
+    TransitionDAO transitionDAO;
 
     @Override
     public List<AnalyseDataDO> getAllByOverviewId(String overviewId) {
@@ -155,12 +165,30 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     @Override
-    public ResultDO<List<TransitionGroup>> getTransitionGroup(AnalyseDataQuery query,boolean getAll) {
-        LibraryDO libraryDO = libraryDAO.getById(query.getLibraryId());
-        List<TransitionGroup> group = analyseDataDAO.getTransitionGroup(query,getAll);
+    public ResultDO<List<TransitionGroup>> getTransitionGroup(String overviewId, String vlibraryId) {
+        LibraryDO libraryDO = libraryDAO.getById(vlibraryId);
+        if (libraryDO.getType().equals(LibraryDO.TYPE_STANDARD)) {
+            return ResultDO.buildError(ResultCode.ONLY_SUPPORT_VERIFY_LIBRARY_SEARCH);
+        }
 
+        List<Peptide> peptides = transitionDAO.getPeptideList(vlibraryId);
+        List<TransitionGroup> groups = new ArrayList<>();
+
+        AnalyseDataQuery query = new AnalyseDataQuery();
+        query.setOverviewId(overviewId);
+        query.setPageSize(10000);
+        for (Peptide peptide : peptides) {
+            query.setPeptideRef(peptide.getPeptideRef());
+            List<AnalyseDataDO> dataList = analyseDataDAO.getList(query);
+            TransitionGroup group = new TransitionGroup();
+            group.setPeptideRef(peptide.getPeptideRef());
+            group.setProteinName(peptide.getProteinName());
+            group.setRt(peptide.getRt());
+            group.setDataList(dataList);
+            groups.add(group);
+        }
         ResultDO<List<TransitionGroup>> resultDO = new ResultDO<>(true);
-        resultDO.setModel(group);
+        resultDO.setModel(groups);
         resultDO.setTotalNum(libraryDO.getPeptideCount());
         resultDO.setPageSize(query.getPageSize());
         return resultDO;

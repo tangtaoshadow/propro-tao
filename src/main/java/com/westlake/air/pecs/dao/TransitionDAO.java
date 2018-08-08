@@ -1,9 +1,8 @@
 package com.westlake.air.pecs.dao;
 
 import com.mongodb.BasicDBObject;
-import com.westlake.air.pecs.domain.db.simple.*;
 import com.westlake.air.pecs.domain.db.TransitionDO;
-import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
+import com.westlake.air.pecs.domain.db.simple.*;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
@@ -109,6 +107,27 @@ public class TransitionDAO {
         return a.getMappedResults();
     }
 
+    //全部获取,有性能风险,慎用
+    public List<Peptide> getPeptideList(String libraryId) {
+        AggregationResults<Peptide> a = mongoTemplate.aggregate(
+                Aggregation.newAggregation(
+                        TransitionDO.class,
+                        Aggregation.match(where("libraryId").is(libraryId)),
+                        Aggregation.group("peptideRef").
+                                first("proteinName").as("proteinName").
+                                first("peptideRef").as("peptideRef").
+                                first("libraryId").as("libraryId").
+                                first("libraryName").as("libraryName").
+                                first("id").as("transitionId").
+                                first("rt").as("rt").
+                                first("isDecoy").as("isDecoy")
+                ).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
+                Peptide.class);
+
+        return a.getMappedResults();
+    }
+
+    //分页获取
     public List<Peptide> getPeptideList(TransitionQuery query) {
         AggregationResults<Peptide> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(
@@ -121,7 +140,6 @@ public class TransitionDAO {
                                 first("libraryName").as("libraryName").
                                 first("id").as("transitionId").
                                 first("rt").as("rt").
-                                first("intensity").as("intensity").
                                 first("isDecoy").as("isDecoy"),
                         Aggregation.skip((query.getPageNo() - 1) * query.getPageSize()),
                         Aggregation.limit(query.getPageSize())
@@ -132,6 +150,7 @@ public class TransitionDAO {
     }
 
     public List<IntensityGroup> getIntensityGroup(String libraryId) {
+
         Document queryDoc = new Document();
         if (libraryId != null) {
             queryDoc.put("libraryId", libraryId);

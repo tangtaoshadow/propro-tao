@@ -23,7 +23,5 @@ public class Peptide {
 
     Double rt;
 
-    Double intensity;
-
     Boolean isDecoy;
 }
