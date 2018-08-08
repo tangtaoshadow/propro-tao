@@ -1,8 +1,9 @@
 package com.westlake.air.pecs.rtnormalizer;
 
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
-import com.westlake.air.pecs.rtnormalizer.domain.ExperimentFeature;
+import com.westlake.air.pecs.domain.bean.ExperimentFeature;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.springframework.stereotype.Component;
 
@@ -16,35 +17,59 @@ import java.util.List;
 @Component("featureFinder")
 public class FeatureFinder {
 
-    public void findFeatures(List<RtIntensityPairs> chromatograms, List<RtIntensityPairs> pickedChroms, List<IntensityRtLeftRtRightPairs> intensityLeftRight){
+    public List<List<ExperimentFeature>> findFeatures(List<RtIntensityPairs> chromatograms, List<RtIntensityPairs> pickedChroms, List<IntensityRtLeftRtRightPairs> intensityLeftRight){
 
         int[] chrPeakIndex = new int[2];
-        chrPeakIndex[0] = -1;
-        chrPeakIndex[1] = -1;
-        chrPeakIndex = findLargestPeak(pickedChroms);
-        if(chrPeakIndex[0] == -1 || chrPeakIndex[1] == -1){
-            System.out.println("FindLargestPeak Error.");
-        }
 
-        float bestLeft = intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]];
-        float bestRight = intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]];
-        float peakApex = pickedChroms.get(chrPeakIndex[0]).getRtArray()[chrPeakIndex[1]];
-
-        RtIntensityPairs chromatogram;
-        RtIntensityPairs masterChromatogram = new RtIntensityPairs(chromatograms.get(chrPeakIndex[0]));
-
-        float totalXic = 0.0f;
-
-        for(int i = 0; i < chromatograms.size(); i++){
-            chromatogram = chromatograms.get(i);
-            for(float intensity: chromatogram.getIntensityArray()){
-                totalXic += intensity;
+        List<List<ExperimentFeature>> experimentFeatures = new ArrayList<>();
+        while (true) {
+            chrPeakIndex[0] = -1;
+            chrPeakIndex[1] = -1;
+            chrPeakIndex = findLargestPeak(pickedChroms);
+            if (chrPeakIndex[0] == -1 || chrPeakIndex[1] == -1) {
+                break;
             }
-            RtIntensityPairs usedChromatogram = raster(chromatogram, masterChromatogram, bestLeft, bestRight);
-            //calculatePeakApexInt
+
+            float bestLeft = intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]];
+            float bestRight = intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]];
+            float peakApex = pickedChroms.get(chrPeakIndex[0]).getRtArray()[chrPeakIndex[1]];
+
+            RtIntensityPairs rtInt = pickedChroms.get(chrPeakIndex[0]);
+            Float[] rtArray = rtInt.getRtArray();
+            rtArray[chrPeakIndex[1]] = 0.0f;
+            rtInt.setRtArray(rtArray);
+            pickedChroms.set(chrPeakIndex[0], rtInt);
+
+
+            RtIntensityPairs chromatogram;
+            RtIntensityPairs masterChromatogram = new RtIntensityPairs(chromatograms.get(chrPeakIndex[0]));
+
+            float totalXic = 0.0f;
+
+            List<ExperimentFeature> mrmFeature = new ArrayList<>();
+            for (int i = 0; i < chromatograms.size(); i++) {
+                chromatogram = chromatograms.get(i);
+                for (float intensity : chromatogram.getIntensityArray()) {
+                    totalXic += intensity;
+                }
+                RtIntensityPairs usedChromatogram = raster(chromatogram, masterChromatogram, bestLeft, bestRight);
+                ExperimentFeature feature = calculatePeakApexInt(usedChromatogram, bestLeft, bestRight, peakApex);
+                mrmFeature.add(feature);
+            }
+            float sum = 0.0f;
+            for(ExperimentFeature feature: mrmFeature){
+                sum += feature.getIntensity();
+            }
+            if(sum > 0){
+                experimentFeatures.add(mrmFeature);
+            }
+            if(sum > 0 && sum / totalXic < Constants.STOP_AFTER_INTENSITY_RATIO){
+                break;
+            }
         }
+        checkOverlappingFeatures(experimentFeatures);
 
-
+        return experimentFeatures;
     }
 
     private int[] findLargestPeak(List<RtIntensityPairs> pickedChroms){
@@ -170,6 +195,8 @@ public class FeatureFinder {
         feature.setRt(peakApexRt);
         feature.setIntensity(intSum);
         feature.setPeakApexInt(peakApexInt);
+        feature.setBestLeft(bestLeft);
+        feature.setBestRight(bestRight);
         feature.setHullRt(hullRt);
         feature.setHullInt(hullInt);
 
@@ -180,6 +207,25 @@ public class FeatureFinder {
     private float linearInterpolate(float x, float x0, float x1, float y0, float y1){
 
         return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
+    }
+
+    private void checkOverlappingFeatures(List<List<ExperimentFeature>> experimentFeatures){
+        boolean skip;
+        int i = 0;
+        while (i < experimentFeatures.size()){
+            skip = false;
+            for(int j=0; j<i; j++){
+                if(experimentFeatures.get(i).get(0).getBestLeft() >= experimentFeatures.get(j).get(0).getBestLeft() &&
+                        experimentFeatures.get(i).get(0).getBestRight() <= experimentFeatures.get(j).get(0).getBestRight()){
+                    skip = true;
+                }
+            }
+            if(skip){
+                experimentFeatures.remove(i);
+                i--;
+            }
+            i++;
+        }
     }
 
 

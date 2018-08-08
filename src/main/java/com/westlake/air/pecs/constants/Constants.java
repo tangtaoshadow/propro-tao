@@ -18,6 +18,12 @@ public class Constants {
     public static final float AUTO_MAX_STDEV_FACTOR = 3.0f;
     public static final int MIN_REQUIRED_ELEMENTS = 10;
     public static final float NOISE_FOR_EMPTY_WINDOW = (float) Math.pow(10.0,20);
+    public static final float STOP_AFTER_INTENSITY_RATIO = 0.0001f;
+    public static final float MIN_RSQ = 0.95f;
+    public static final float MIN_COVERAGE = 0.6f;
+    public static final int RT_BINS = 10;
+    public static final int MIN_PEPTIDES_PER_BIN = 1;
+    public static final int MIN_BINS_FILLED = 8;
 
     public static String EXP_SUFFIX_MZXML = "mzxml";
     public static String EXP_SUFFIX_MZML = "mzml";

@@ -1,4 +1,4 @@
-package com.westlake.air.pecs.rtnormalizer.domain;
+package com.westlake.air.pecs.domain.bean;
 
 import lombok.Data;
 
@@ -16,6 +16,10 @@ public class ExperimentFeature {
     float intensity;
 
     float peakApexInt;
+
+    float bestLeft;
+
+    float bestRight;
 
     List<Float> hullRt;
     List<Float> hullInt;

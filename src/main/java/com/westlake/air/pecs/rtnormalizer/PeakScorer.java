@@ -5,10 +5,9 @@ import com.google.common.collect.Table;
 import com.westlake.air.pecs.domain.bean.RTNormalizationScores;
 import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.ScoreRtPair;
-import com.westlake.air.pecs.rtnormalizer.domain.ExperimentFeature;
+import com.westlake.air.pecs.domain.bean.ExperimentFeature;
 import com.westlake.air.pecs.utils.MathUtil;
-import org.apache.commons.math3.analysis.function.Exp;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
@@ -16,10 +15,11 @@ import java.util.*;
  * Created by Nico Wang Ruimin
  * Time: 2018-08-05 17:18
  */
+@Component("peakScorer")
 public class PeakScorer {
 
-    private int windowLength = 1000;
-    private int binCount = 30;
+//    private float windowLength = 1000;
+//    private int binCount = 30;
 
 //    private float rtNormalizationFactor = 1.0f;
 //    private int addUpSpectra = 1;
@@ -40,7 +40,7 @@ public class PeakScorer {
      * @param libraryIntensity intensity in transitionList in transitionGroup
      * @return List of overallQuality
      */
-    public List<ScoreRtPair> score(List<RtIntensityPairs> chromatograms, List<List<ExperimentFeature>> experimentFeatures, List<Double> libraryIntensity){
+    public List<ScoreRtPair> score(List<RtIntensityPairs> chromatograms, List<List<ExperimentFeature>> experimentFeatures, List<Float> libraryIntensity, float windowLength, int binCount){
 
         //get signal to noise list
         List<float[]> signalToNoiseList = new ArrayList<>();
@@ -142,13 +142,13 @@ public class PeakScorer {
      * @param libraryIntensity get libraryIntensity: from transitions
      * @param scores library_corr, library_norm_manhattan
      */
-    private void calculateLibraryScores(List<ExperimentFeature> experimentFeatures, List<Double> libraryIntensity, RTNormalizationScores scores){
+    private void calculateLibraryScores(List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, RTNormalizationScores scores){
         List<Float> experimentIntensity = new ArrayList<>();
         for(ExperimentFeature experimentFeature: experimentFeatures){
             experimentIntensity.add(experimentFeature.getIntensity());
         }
         // experimentIntensity, libraryIntensity same size
-        // get library_norm_manhattan
+        //library_norm_manhattan
         float sum = 0.0f;
         float[] x = normalizeSum(libraryIntensity);
         float[] y = normalizeSum(experimentIntensity);
@@ -157,7 +157,7 @@ public class PeakScorer {
         }
         scores.setLibraryNormManhattan(sum / x.length);
 
-        //get library_corr
+        //library_corr
         float corr = 0.0f, m1 = 0.0f, m2 = 0.0f, s1 = 0.0f, s2 = 0.0f;
         for(int i=0;i<libraryIntensity.size(); i++){
             corr += experimentIntensity.get(i) * libraryIntensity.get(i);
