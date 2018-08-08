@@ -7,6 +7,7 @@ import com.westlake.air.pecs.dao.TransitionDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.LibraryCoordinate;
 import com.westlake.air.pecs.domain.db.LibraryDO;
+import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.Peptide;
 import com.westlake.air.pecs.domain.db.simple.Protein;
 import com.westlake.air.pecs.domain.db.simple.TargetTransition;
@@ -62,11 +63,6 @@ public class TransitionServiceImpl implements TransitionService {
         resultDO.setTotalNum(totalCount);
         resultDO.setPageSize(query.getPageSize());
         return resultDO;
-    }
-
-    @Override
-    public List<Double> getIntensityList(String libraryId) {
-        return transitionDAO.getIntensityList(libraryId);
     }
 
     @Override
@@ -247,6 +243,11 @@ public class TransitionServiceImpl implements TransitionService {
         List<TargetTransition> list = sortMS2Coordinates(targetList);
         logger.info("构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
         return list;
+    }
+
+    @Override
+    public List<IntensityGroup> getIntensityGroup(String libraryId) {
+        return transitionDAO.getIntensityGroup(libraryId);
     }
 
     private List<TargetTransition> sortMS1Coordinates(List<TargetTransition> targetList) {

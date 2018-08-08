@@ -279,18 +279,6 @@ public class LibraryController extends BaseController {
         return "redirect:/library/detail/" + id;
     }
 
-    @RequestMapping(value = "/intensity")
-    @ResponseBody
-    String intensity(Model model,
-                           @RequestParam(value = "id", required = true) String id,
-                           RedirectAttributes redirectAttributes) {
-        List<Double> intensities = transitionService.getIntensityList(id);
-
-        return JSON.toJSONString(intensities);
-    }
-
-
-
     private ResultDO parseAndInsertTsv(MultipartFile file, LibraryDO library, boolean justReal) {
 
         ResultDO resultDO = new ResultDO<>(true);

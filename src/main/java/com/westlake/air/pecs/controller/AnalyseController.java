@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
@@ -12,6 +13,7 @@ import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
+import com.westlake.air.pecs.domain.query.TransitionQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.ExperimentService;
@@ -182,13 +184,11 @@ public class AnalyseController extends BaseController {
         }
 
         AnalyseDataQuery query = new AnalyseDataQuery();
-        query.setLibraryId(overviewResult.getModel().getSLibraryId());
+        query.setLibraryId(overviewResult.getModel().getVLibraryId());
 
-        ResultDO<List<TransitionGroup>> resultDO = analyseDataService.getTransitionGroup(query,true);
-        List<TransitionGroup> groups = resultDO.getModel();
+        List<IntensityGroup> intList = transitionService.getIntensityGroup(overviewResult.getModel().getVLibraryId());
 
-
-        return JSONArray.toJSONString(groups);
+        return JSONArray.toJSONString(intList);
     }
 
     @RequestMapping(value = "/data/vliblist")

@@ -1,10 +1,9 @@
 package com.westlake.air.pecs.dao;
 
 import com.mongodb.BasicDBObject;
-import com.westlake.air.pecs.domain.db.simple.Peptide;
-import com.westlake.air.pecs.domain.db.simple.Protein;
-import com.westlake.air.pecs.domain.db.simple.TargetTransition;
+import com.westlake.air.pecs.domain.db.simple.*;
 import com.westlake.air.pecs.domain.db.TransitionDO;
+import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +11,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
@@ -37,26 +40,6 @@ public class TransitionDAO {
         return mongoTemplate.find(query, TransitionDO.class, CollectionName);
     }
 
-    //这个函数目前只获取真肽段
-//    public List<TargetTransition> getTTList(TransitionQuery transitionQuery){
-//        Document queryDoc = new Document();
-//        if(transitionQuery.getLibraryId() != null){
-//            queryDoc.put("libraryId",transitionQuery.getLibraryId());
-//        }
-//        queryDoc.put("isDecoy",false);
-//
-//        Document fieldsDoc = new Document();
-//        fieldsDoc.put("id",true);//这个字段的加入会占用较大内存
-//        fieldsDoc.put("fullName",true);
-//        fieldsDoc.put("precursorMz",true);
-//        fieldsDoc.put("productMz",true);
-//        fieldsDoc.put("rt",true);
-//        fieldsDoc.put("annotations",true);
-//
-//        Query query = new BasicQuery(queryDoc, fieldsDoc);
-//        return mongoTemplate.find(query, TargetTransition.class, CollectionName);
-//    }
-
     public List<TransitionDO> getAllByLibraryIdAndIsDecoy(String libraryId, boolean isDecoy) {
         Query query = new Query(where("libraryId").is(libraryId));
         query.addCriteria(where("isDecoy").is(isDecoy));
@@ -65,20 +48,6 @@ public class TransitionDAO {
 
     public List<TransitionDO> getList(TransitionQuery query) {
         return mongoTemplate.find(buildQuery(query), TransitionDO.class, CollectionName);
-    }
-
-    public List<Double> getIntensityList(String libraryId) {
-        Document queryDoc = new Document();
-        queryDoc.put("libraryId",libraryId);
-
-        Document fieldsDoc = new Document();
-        fieldsDoc.put("peptideRef",true);
-        fieldsDoc.put("intensity",true);
-        fieldsDoc.put("rt",true);
-        fieldsDoc.put("_id",false);
-        Query query = new BasicQuery(queryDoc, fieldsDoc);
-        List<BasicDBObject> intensities = mongoTemplate.find(query, BasicDBObject.class, CollectionName);
-        return null;
     }
 
     public List<TargetTransition> getTTAll(TransitionQuery query) {
@@ -160,6 +129,38 @@ public class TransitionDAO {
                 Peptide.class);
 
         return a.getMappedResults();
+    }
+
+    public List<IntensityGroup> getIntensityGroup(String libraryId) {
+        Document queryDoc = new Document();
+        if (libraryId != null) {
+            queryDoc.put("libraryId", libraryId);
+        }
+
+        Document fieldsDoc = new Document();
+        fieldsDoc.put("peptideRef", true);
+        fieldsDoc.put("proteinName", true);
+        fieldsDoc.put("intensity", true);
+
+        Query query = new BasicQuery(queryDoc, fieldsDoc);
+
+        List<TransitionDO> list = mongoTemplate.find(query, TransitionDO.class, CollectionName);
+        HashMap<String, IntensityGroup> hashMap = new HashMap<>();
+        List<IntensityGroup> intensityGroups = new ArrayList<>();
+        for (TransitionDO transition : list) {
+            IntensityGroup group = hashMap.get(transition.getPeptideRef());
+            if (group == null) {
+                group = new IntensityGroup();
+                group.setPeptideRef(transition.getPeptideRef());
+                group.setProteinName(transition.getProteinName());
+                intensityGroups.add(group);
+                hashMap.put(transition.getPeptideRef(), group);
+            }
+
+            group.getIntensityList().add(Float.parseFloat(transition.getIntensity().toString()));
+        }
+
+        return intensityGroups;
     }
 
     public long countByProteinName(String libraryId) {
