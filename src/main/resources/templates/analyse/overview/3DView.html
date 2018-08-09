@@ -58,20 +58,18 @@
                 url: "/analyse/getAllPoints?overviewId=" + overviewId,
                 dataType: "json",
                 async: true,
-                success:function(result){
+                success: function (result) {
                     data = result.model;
                     option = {
                         visualMap: {
                             show: false,
-                            barSize: 1000,
                             inRange: {
                                 color: ['#FF5500', '#ed9e53', '#FF5C77', '#cca785', '#607523', '#cc7d79']
                             }
                         },
                         xAxis3D: {
                             type: 'value',
-                            min:400,
-                            max:600
+                            min: 400
                         },
                         yAxis3D: {
                             type: 'value'
@@ -98,8 +96,19 @@
                             }
                         },
                         series: [{
-                            type: 'surface',
+                            type: 'bar3D',
+                            silent: true,
+                            shading: 'realistic',
+                            realisticMaterial: {
+                                roughness: 0.5,
+                                metalness: 0
+                            },
+                            instancing: true,
+                            barSize: 1,
                             data: data,
+                            lineStyle: {
+                                width: 4
+                            },
                             label: {
                                 formatter: function (param) {
                                     return param.value[2].toFixed(1);
@@ -111,9 +120,6 @@
                     myChart.hideLoading();
                 }
             });
-
-
-
 
 
         };

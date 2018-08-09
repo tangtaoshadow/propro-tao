@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.domain.query;
 
+import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import lombok.Data;
 
 /**
@@ -22,4 +23,13 @@ public class AnalyseDataQuery extends PageQuery{
     Integer msLevel;
 
     String peptideRef;
+
+    Boolean isHit;
+
+    public AnalyseDataQuery(){}
+
+    public AnalyseDataQuery(String overviewId, Integer msLevel){
+        this.overviewId = overviewId;
+        this.msLevel = msLevel;
+    }
 }

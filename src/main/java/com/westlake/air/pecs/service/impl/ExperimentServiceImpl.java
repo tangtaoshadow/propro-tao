@@ -15,6 +15,8 @@ import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
+import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
+import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.BaseExpParser;
@@ -179,15 +181,16 @@ public class ExperimentServiceImpl implements ExperimentService {
         RandomAccessFile raf = null;
 
         //卷积前查看之前是否已经做过卷积处理,如果做过的话先删除原有的卷积数据
-        AnalyseOverviewDO overviewOldDO = analyseOverviewDAO.getFirstByExperimentId(expId);
-        if (overviewOldDO != null) {
-            logger.info("发现已有的卷积数据,原有卷积数据卷积日期为" + overviewOldDO.getCreateDate() + ";正在删除中");
-            analyseDataDAO.deleteAllByOverviewId(overviewOldDO.getId());
-            analyseOverviewDAO.delete(overviewOldDO.getId());
-            logger.info("原有卷积数据删除完毕,开始准备创建新的卷积数据");
-        }
+//        AnalyseOverviewDO overviewOldDO = analyseOverviewDAO.getFirstByExperimentId(expId);
+//        if (overviewOldDO != null) {
+//            logger.info("发现已有的卷积数据,原有卷积数据卷积日期为" + overviewOldDO.getCreateDate() + ";正在删除中");
+//            analyseDataDAO.deleteAllByOverviewId(overviewOldDO.getId());
+//            analyseOverviewDAO.delete(overviewOldDO.getId());
+//            logger.info("原有卷积数据删除完毕,开始准备创建新的卷积数据");
+//        }
 
         //创建实验初始化概览数据
+        logger.info("开始创建卷积概览");
         AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
         overviewDO.setExpId(expId);
         overviewDO.setName(experimentDO.getName() + "-" + experimentDO.getSLibraryName() + "-" + experimentDO.getVLibraryName() + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
@@ -385,6 +388,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             ArrayList<Float> rtList = new ArrayList<>();
             ArrayList<Float> intList = new ArrayList<>();
 
+            boolean isHit = false;
             for (Float rt : rtMap.keySet()) {
                 if (rtExtractWindow != -1 && rt > ms.getRtEnd()) {
                     break;
@@ -394,8 +398,16 @@ public class ExperimentServiceImpl implements ExperimentService {
                     Float[] pairMzArray = pairs.getMzArray();
                     Float[] pairIntensityArray = pairs.getIntensityArray();
                     rtList.add(rt);
-                    intList.add(accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd));
+                    Float acc = accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd);
+                    if(acc != 0){
+                        isHit = true;
+                    }
+                    intList.add(acc);
                 }
+            }
+
+            if(!isHit){
+                continue;
             }
 
             AnalyseDataDO dataDO = new AnalyseDataDO();
@@ -407,12 +419,14 @@ public class ExperimentServiceImpl implements ExperimentService {
                 dataDO.setMz(ms.getProductMz());
                 dataDO.setMsLevel(2);
             }
+
             Float[] rtArray = new Float[rtList.size()];
             Float[] intArray = new Float[intList.size()];
             rtList.toArray(rtArray);
             intList.toArray(intArray);
             dataDO.setRtArray(rtArray);
             dataDO.setIntensityArray(intArray);
+            dataDO.setIsHit(true);
             dataDO.setOverviewId(overviewId);
             dataDO.setAnnotations(ms.getAnnotations());
             dataDO.setCutInfo(ms.getCutInfo());

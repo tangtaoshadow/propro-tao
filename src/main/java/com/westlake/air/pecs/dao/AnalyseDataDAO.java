@@ -82,7 +82,9 @@ public class AnalyseDataDAO {
         Query query = buildQueryWithoutPage(analyseDataQuery);
 
         query.skip((analyseDataQuery.getPageNo() - 1) * analyseDataQuery.getPageSize());
-        query.limit(analyseDataQuery.getPageSize());
+        if(analyseDataQuery.getPageSize() != -1){
+            query.limit(analyseDataQuery.getPageSize());
+        }
         //默认没有排序功能(排序会带来极大的性能开销)
 //        query.with(new Sort(transitionQuery.getOrderBy(), transitionQuery.getSortColumn()));
         return query;
@@ -104,6 +106,9 @@ public class AnalyseDataDAO {
         }
         if (analyseDataQuery.getPeptideRef() != null) {
             query.addCriteria(where("peptideRef").is(analyseDataQuery.getPeptideRef()));
+        }
+        if (analyseDataQuery.getIsHit() != null) {
+            query.addCriteria(where("isHit").is(analyseDataQuery.getIsHit()));
         }
 
         return query;

@@ -50,10 +50,6 @@ public class PageQuery implements Serializable {
 
     public void setPageSize(final int pageSize) {
         this.pageSize = pageSize;
-
-        if (pageSize < 1) {
-            this.pageSize = DEFAULT_PAGE_SIZE;
-        }
     }
 
     public Integer getFirst() {
