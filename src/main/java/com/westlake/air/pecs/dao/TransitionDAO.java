@@ -241,6 +241,9 @@ public class TransitionDAO {
         if (transitionQuery.getSequence() != null) {
             query.addCriteria(where("sequence").regex(transitionQuery.getSequence(), "i"));
         }
+        if (transitionQuery.getPeptideRef() != null) {
+            query.addCriteria(where("peptideRef").is(transitionQuery.getPeptideRef()));
+        }
         if (transitionQuery.getProteinName() != null) {
             query.addCriteria(where("proteinName").is(transitionQuery.getProteinName()));
         }

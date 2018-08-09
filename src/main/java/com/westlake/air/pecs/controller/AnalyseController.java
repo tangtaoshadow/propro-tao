@@ -1,18 +1,22 @@
 package com.westlake.air.pecs.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.WindowRang;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
+import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
+import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -263,5 +267,51 @@ public class AnalyseController extends BaseController {
         res.put("intensity", intensityArray);
         resultDO.setModel(res);
         return resultDO;
+    }
+
+    @RequestMapping(value = "/data/bigview")
+    String bigview(Model model,
+                        @RequestParam(value = "overviewId", required = true) String overviewId){
+        model.addAttribute("overviewId",overviewId);
+        return "analyse/overview/3DView";
+    }
+
+    @RequestMapping(value = "/getAllPoints")
+    @ResponseBody
+    String getAllPoints(Model model,
+                       @RequestParam(value = "overviewId", required = true) String overviewId) {
+
+//        List<AnalyseDataDO> dataList = analyseDataService.getAllByOverviewId(overviewId);
+        AnalyseDataQuery query = new AnalyseDataQuery();
+        query.setPageSize(20);
+        query.setOverviewId(overviewId);
+        query.setMsLevel(2);
+        List<AnalyseDataDO> dataList = analyseDataService.getList(query).getModel();
+        List<Float[]> points = new ArrayList<>();
+        for(AnalyseDataDO dataDO : dataList){
+            for(int i=0;i<dataDO.getRtArray().length;i++){
+                Float[] point = new Float[3];
+                if(dataDO.getMz() < 400 || dataDO.getMz() > 1600){
+                    continue;
+                }
+                point[0] = dataDO.getMz();
+                point[1] = dataDO.getRtArray()[i];
+                if(dataDO.getIntensityArray()[i] == 0){
+                    continue;
+                }else{
+                    if(dataDO.getIntensityArray()[i] > 5000000){
+                        point[2] = 500f;
+                    }else{
+                        point[2] = dataDO.getIntensityArray()[i]/10000;
+                    }
+                }
+
+                points.add(point);
+            }
+        }
+
+        ResultDO resultDO = new ResultDO(true);
+        resultDO.setModel(points);
+        return JSON.toJSONString(resultDO);
     }
 }

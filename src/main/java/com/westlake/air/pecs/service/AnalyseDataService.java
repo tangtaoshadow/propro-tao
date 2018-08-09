@@ -17,9 +17,9 @@ public interface AnalyseDataService {
 
     Long count(AnalyseDataQuery query);
 
-    ResultDO<List<AnalyseDataDO>> getList(AnalyseDataQuery convQuery);
+    ResultDO<List<AnalyseDataDO>> getList(AnalyseDataQuery query);
 
-    ResultDO insert(AnalyseDataDO convData);
+    ResultDO insert(AnalyseDataDO dataDO);
 
     ResultDO insertAll(List<AnalyseDataDO> convList, boolean isDeleteOld);
 

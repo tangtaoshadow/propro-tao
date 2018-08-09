@@ -49,13 +49,13 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     @Override
-    public ResultDO<List<AnalyseDataDO>> getList(AnalyseDataQuery targetQuery) {
-        List<AnalyseDataDO> dataList = analyseDataDAO.getList(targetQuery);
-        long totalCount = analyseDataDAO.count(targetQuery);
+    public ResultDO<List<AnalyseDataDO>> getList(AnalyseDataQuery query) {
+        List<AnalyseDataDO> dataList = analyseDataDAO.getList(query);
+        long totalCount = analyseDataDAO.count(query);
         ResultDO<List<AnalyseDataDO>> resultDO = new ResultDO<>(true);
         resultDO.setModel(dataList);
         resultDO.setTotalNum(totalCount);
-        resultDO.setPageSize(targetQuery.getPageSize());
+        resultDO.setPageSize(query.getPageSize());
         return resultDO;
     }
 

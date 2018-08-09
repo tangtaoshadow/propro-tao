@@ -190,7 +190,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         //创建实验初始化概览数据
         AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
         overviewDO.setExpId(expId);
-        overviewDO.setName(experimentDO.getName() + "-" + experimentDO.getSLibraryName() + "-"+ experimentDO.getVLibraryName() + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
+        overviewDO.setName(experimentDO.getName() + "-" + experimentDO.getSLibraryName() + "-" + experimentDO.getVLibraryName() + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
         overviewDO.setExpName(experimentDO.getName());
         overviewDO.setSLibraryId(experimentDO.getSLibraryId());
         overviewDO.setSLibraryName(experimentDO.getSLibraryName());
@@ -374,17 +374,22 @@ public class ExperimentServiceImpl implements ExperimentService {
         for (TargetTransition ms : coordinates) {
 
             //设置mz卷积窗口
-            mzStart = ms.getPrecursorMz() - mzExtractWindow / 2;
-            mzEnd = ms.getPrecursorMz() + mzExtractWindow / 2;
+            if(isMS1){
+                mzStart = ms.getPrecursorMz() - mzExtractWindow / 2;
+                mzEnd = ms.getPrecursorMz() + mzExtractWindow / 2;
+            }else{
+                mzStart = ms.getProductMz() - mzExtractWindow / 2;
+                mzEnd = ms.getProductMz() + mzExtractWindow / 2;
+            }
 
             ArrayList<Float> rtList = new ArrayList<>();
             ArrayList<Float> intList = new ArrayList<>();
 
             for (Float rt : rtMap.keySet()) {
-                if(rtExtractWindow != -1 && rt>ms.getRtEnd()){
+                if (rtExtractWindow != -1 && rt > ms.getRtEnd()) {
                     break;
                 }
-                if(rtExtractWindow == -1 || (rt >= ms.getRtStart() && rt<= ms.getRtEnd())){
+                if (rtExtractWindow == -1 || (rt >= ms.getRtStart() && rt <= ms.getRtEnd())) {
                     MzIntensityPairs pairs = rtMap.get(rt);
                     Float[] pairMzArray = pairs.getMzArray();
                     Float[] pairIntensityArray = pairs.getIntensityArray();

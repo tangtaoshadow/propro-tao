@@ -14267,7 +14267,7 @@ $.fn.repeater = function (fig) {
 //# sourceMappingURL=jquery.form.min.js.map
 
 /*
-== malihu jquery custom scrollbar plugin == 
+== malihu jquery custom scrollbar plugin ==
 Version: 3.1.5 
 Plugin URI: http://manos.malihu.gr/jquery-custom-content-scroller 
 Author: malihu
@@ -14299,8 +14299,8 @@ THE SOFTWARE.
 
 /*
 The code below is fairly long, fully commented and should be normally used in development. 
-For production, use either the minified jquery.mCustomScrollbar.min.js script or 
-the production-ready jquery.mCustomScrollbar.concat.min.js which contains the plugin 
+For production, use either the minified jquery.mCustomScrollbar.min.js script or
+the production-ready jquery.mCustomScrollbar.concat.min.js which contains the plugin
 and dependencies (minified). 
 */
 
@@ -14317,12 +14317,12 @@ and dependencies (minified).
 	var _rjs=typeof define==="function" && define.amd, /* RequireJS */
 		_njs=typeof module !== "undefined" && module.exports, /* NodeJS */
 		_dlp=("https:"==document.location.protocol) ? "https:" : "http:", /* location protocol */
-		_url="cdnjs.cloudflare.com/ajax/libs/jquery-mousewheel/3.1.13/jquery.mousewheel.min.js";
+		_url="https://wias.oss-cn-shanghai.aliyuncs.com/assets/js/jquery-mousewheel/jquery.mousewheel.min.js";
 	if(!_rjs){
 		if(_njs){
 			require("jquery-mousewheel")($);
 		}else{
-			/* load jquery-mousewheel plugin (via CDN) if it's not present or not loaded via RequireJS 
+			/* load jquery-mousewheel plugin (via CDN) if it's not present or not loaded via RequireJS
 			(works when mCustomScrollbar fn is called on window load) */
 			$.event.special.mousewheel || $("head").append(decodeURI("%3Cscript src="+_dlp+"//"+_url+"%3E%3C/script%3E"));
 		}
@@ -16468,7 +16468,7 @@ and dependencies (minified).
 		
 		/* 
 		CUSTOM JAVASCRIPT ANIMATION TWEEN 
-		Lighter and faster than jquery animate() and css transitions 
+		Lighter and faster than jquery animate() and css transitions
 		Animates top/left properties and includes easings 
 		*/
 		_tweenTo=function(el,prop,to,duration,easing,overwrite,callbacks){

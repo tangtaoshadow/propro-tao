@@ -42,7 +42,7 @@ public class TransitionController extends BaseController {
     String list(Model model,
                 @RequestParam(value = "libraryId", required = false) String libraryId,
                 @RequestParam(value = "proteinName", required = false) String proteinName,
-                @RequestParam(value = "sequence", required = false) String sequence,
+                @RequestParam(value = "peptideRef", required = false) String peptideRef,
                 @RequestParam(value = "name", required = false) String name,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "isDecoy", required = false) Boolean isDecoy,
@@ -50,7 +50,7 @@ public class TransitionController extends BaseController {
         long startTime = System.currentTimeMillis();
         model.addAttribute("libraryId", libraryId);
         model.addAttribute("proteinName", proteinName);
-        model.addAttribute("sequence", sequence);
+        model.addAttribute("peptideRef", peptideRef);
         model.addAttribute("name", name);
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("isDecoy", isDecoy);
@@ -61,8 +61,8 @@ public class TransitionController extends BaseController {
         if (libraryId != null && !libraryId.isEmpty()) {
             query.setLibraryId(libraryId);
         }
-        if (sequence != null && !sequence.isEmpty()) {
-            query.setSequence(sequence);
+        if (peptideRef != null && !peptideRef.isEmpty()) {
+            query.setPeptideRef(peptideRef);
         }
         if (proteinName != null && !proteinName.isEmpty()) {
             query.setProteinName(proteinName);

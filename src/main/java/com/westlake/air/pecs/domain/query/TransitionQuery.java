@@ -55,6 +55,10 @@ public class TransitionQuery extends PageQuery {
     String proteinName;
 
     /**
+     * 肽段
+     */
+    String peptideRef;
+    /**
      * 完整版肽段名称(含修饰基团)
      */
     String fullName;
