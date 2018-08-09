@@ -12,7 +12,9 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -84,33 +86,6 @@ public class MzXMLParser extends BaseExpParser {
         return list;
     }
 
-//    @Override
-//    public MzIntensityPairs parseOne(RandomAccessFile raf, long start, long end) {
-//        prepare();
-//        try{
-//            long startTime = System.currentTimeMillis();
-//            raf.seek(start);
-//            byte[] reader = new byte[(int) (end - start)];
-//            raf.read(reader);
-//            Scan scan = new Scan();
-//            logger.info("读取耗时:"+(System.currentTimeMillis() - startTime));
-//            startTime = System.currentTimeMillis();
-//            airXStream.fromXML(new String(reader), scan);
-//            logger.info("解析耗时:"+(System.currentTimeMillis() - startTime));
-//            startTime = System.currentTimeMillis();
-//            if (scan.getPeaksList() != null && scan.getPeaksList().size() >= 1) {
-//                Peaks peaks = scan.getPeaksList().get(0);
-//                MzIntensityPairs pairs = getPeakMap(peaks.getValue(), peaks.getPrecision(), peaks.getCompressionType() != null && "zlib".equalsIgnoreCase(peaks.getCompressionType()));
-//                logger.info("解码耗时:"+(System.currentTimeMillis() - startTime));
-//                return pairs;
-//            }
-//        }catch (Exception e){
-//            logger.error(e.getMessage());
-//        }
-//
-//        return null;
-//    }
-
     @Override
     public MzIntensityPairs parseOne(RandomAccessFile raf, long start, long end) {
         try {
@@ -178,11 +153,28 @@ public class MzXMLParser extends BaseExpParser {
     //不需要实现
     @Override
     public MzIntensityPairs getPeakMap(byte[] mz, byte[] intensity, int mzPrecision, int intensityPrecision, boolean isZlibCompression) {
-
         return null;
-
     }
 
+    public Long parseIndexOffset(RandomAccessFile rf) throws IOException {
+        long position = rf.length() - 1;
+        rf.seek(position);
+        byte words[] = new byte[1];
+        for (int i = 0; i < 1000; i++) {
+            rf.read(words);
+            if (words[0] == '\n') {
+                //detect the line break symbol
+                String line = rf.readLine();
+                if (line != null && line.contains("<indexOffset>")) {
+                    line = line.trim().replace("<indexOffset>", "").replace("</indexOffset>", "");
+                    return Long.valueOf(line);
+                }
+            }
+
+            rf.seek(--position);
+        }
+        return 0L;
+    }
     /**
      * 本算法得到的ScanIndex的End包含了换行符
      * ">"的byte编码是62
@@ -317,7 +309,7 @@ public class MzXMLParser extends BaseExpParser {
      * @return
      * @throws IOException
      */
-    private List<ScanIndexDO> indexForSwath(File file) {
+    public List<ScanIndexDO> indexForSwath(File file) {
 
         List<ScanIndexDO> indexList = new ArrayList<>();
         RandomAccessFile raf = null;
@@ -364,28 +356,7 @@ public class MzXMLParser extends BaseExpParser {
         return indexList;
     }
 
-
-    private Long parseIndexOffset(RandomAccessFile rf) throws IOException {
-        long position = rf.length() - 1;
-        rf.seek(position);
-        byte words[] = new byte[1];
-        for (int i = 0; i < 1000; i++) {
-            rf.read(words);
-            if (words[0] == '\n') {
-                //detect the line break symbol
-                String line = rf.readLine();
-                if (line != null && line.contains("<indexOffset>")) {
-                    line = line.trim().replace("<indexOffset>", "").replace("</indexOffset>", "");
-                    return Long.valueOf(line);
-                }
-            }
-
-            rf.seek(--position);
-        }
-        return 0L;
-    }
-
-    private HashMap<Integer, ScanIndexDO> parseScanStartPosition(Long indexOffset, RandomAccessFile rf) throws IOException {
+    public HashMap<Integer, ScanIndexDO> parseScanStartPosition(Long indexOffset, RandomAccessFile rf) throws IOException {
         HashMap<Integer, ScanIndexDO> indexMap = new HashMap<>();
         rf.seek(indexOffset);
         int indexSize = (int) (rf.length() - 1 - indexOffset);
@@ -420,7 +391,7 @@ public class MzXMLParser extends BaseExpParser {
         return 0L;
     }
 
-    private byte[] read(RandomAccessFile raf, long start, int size) throws IOException {
+    public byte[] read(RandomAccessFile raf, long start, int size) throws IOException {
         byte[] tmp = new byte[size];
         raf.seek(start);
         raf.read(tmp);

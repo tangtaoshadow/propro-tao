@@ -16,6 +16,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.List;
 import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 /**
@@ -45,7 +46,7 @@ public abstract class BaseExpParser {
 
     public abstract MzIntensityPairs getPeakMap(byte[] mz, byte[] intensity, int mzPrecision, int intensityPrecision, boolean isZlibCompression);
 
-    protected Float[] getValues(byte[] value, int precision, boolean isCompression, ByteOrder byteOrder) {
+    public Float[] getValues(byte[] value, int precision, boolean isCompression, ByteOrder byteOrder) {
         double[] doubleValues;
         Float[] floatValues;
         ByteBuffer byteBuffer = ByteBuffer.wrap(value);
@@ -73,6 +74,37 @@ public abstract class BaseExpParser {
 
         byteBuffer.clear();
         return floatValues;
+    }
+
+    //byte[]压缩为byte[]
+    public byte[] compress(byte[] data) {
+        byte[] output;
+
+        Deflater compresser = new Deflater();
+
+        compresser.reset();
+        compresser.setInput(data);
+        compresser.finish();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
+        try {
+            byte[] buf = new byte[1024];
+            while (!compresser.finished()) {
+                int i = compresser.deflate(buf);
+                bos.write(buf, 0, i);
+            }
+            output = bos.toByteArray();
+        } catch (Exception e) {
+            output = data;
+            e.printStackTrace();
+        } finally {
+            try {
+                bos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        compresser.end();
+        return output;
     }
 
     public byte[] decompress(byte[] data) {
