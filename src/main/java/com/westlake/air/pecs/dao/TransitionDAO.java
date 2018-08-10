@@ -32,6 +32,10 @@ public class TransitionDAO {
     @Autowired
     MongoTemplate mongoTemplate;
 
+    public List<TransitionDO> getAll(TransitionQuery query) {
+        return mongoTemplate.find(buildQueryWithoutPage(query), TransitionDO.class, CollectionName);
+    }
+
     public List<TransitionDO> getAllByLibraryId(String libraryId) {
         Query query = new Query(where("libraryId").is(libraryId));
         return mongoTemplate.find(query, TransitionDO.class, CollectionName);

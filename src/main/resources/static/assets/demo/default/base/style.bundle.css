@@ -30493,7 +30493,7 @@ body.m-content--skin-light2 {
   -o-transition: none;
   transition: none;
   height: 70px;
-  width: 220px;
+  width: 180px;
   padding: 0px 15px; }
   .m-brand--hidden .m-brand {
     display: none; }
@@ -30816,10 +30816,10 @@ body.m-content--skin-light2 {
       -ms-transform: translateY(0);
       -o-transform: translateY(0);
       transform: translateY(0); }
-  body.m-aside-left--skin-dark .m-header .m-header-head {
-    -webkit-box-shadow: 0px 1px 15px 1px rgba(69, 65, 78, 0.1) ;
-    -moz-box-shadow: 0px 1px 15px 1px rgba(69, 65, 78, 0.1) ;
-    box-shadow: 0px 1px 15px 1px rgba(69, 65, 78, 0.1) ; }
+  /*body.m-aside-left--skin-dark .m-header .m-header-head {*/
+    /*-webkit-box-shadow: 0px 1px 15px 1px rgba(69, 65, 78, 0.1) ;*/
+    /*-moz-box-shadow: 0px 1px 15px 1px rgba(69, 65, 78, 0.1) ;*/
+    /*box-shadow: 0px 1px 15px 1px rgba(69, 65, 78, 0.1) ; }*/
   body.m-aside-left--skin-light .m-header {
     -webkit-box-shadow: 0px 1px 15px 1px rgba(69, 65, 78, 0.1) ;
     -moz-box-shadow: 0px 1px 15px 1px rgba(69, 65, 78, 0.1) ;
@@ -34997,7 +34997,6 @@ body.m-content--skin-light2 {
     -ms-transition: none;
     -o-transition: none;
     transition: none;
-    margin-left: 220px;
     margin-top: -60px; }
   .m-footer--push.m-aside-left--enabled:not(.m-footer--fixed).m-aside-left--minimize .m-footer {
     -webkit-transition: none;

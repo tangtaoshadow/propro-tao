@@ -2,33 +2,169 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <!-- BEGIN: Horizontal Menu -->
-<button class="m-aside-header-menu-mobile-close  m-aside-header-menu-mobile-close--skin-dark "
+<button class="m-aside-header-menu-mobile-close  m-aside-header-menu-mobile-close--skin-dark"
         id="m_aside_header_menu_mobile_close_btn">
     <i class="la la-close"></i>
 </button>
-<div id="m_header_menu"
-     class="m-header-menu m-aside-header-menu-mobile m-aside-header-menu-mobile--offcanvas  m-header-menu--skin-light m-header-menu--submenu-skin-light m-aside-header-menu-mobile--skin-dark m-aside-header-menu-mobile--submenu-skin-dark ">
+<!-- END: Horizontal Menu -->
+<div id="m_header_menu" class="m-header-menu m-aside-header-menu-mobile m-aside-header-menu-mobile--offcanvas  m-header-menu--skin-light m-header-menu--submenu-skin-light m-aside-header-menu-mobile--skin-dark m-aside-header-menu-mobile--submenu-skin-dark ">
     <ul class="m-menu__nav  m-menu__nav--submenu-arrow ">
-        <!--<li class="m-menu__item" data-redirect="true" aria-haspopup="true">-->
-            <!--<a th:href="@{/library/create}" class="m-menu__link">-->
-                <!--<i class="m-menu__link-icon flaticon-add"></i>-->
-                <!--<span class="m-menu__link-text">导入TraML格式标准库</span>-->
-            <!--</a>-->
-        <!--</li>-->
-        <li class="m-menu__item" data-redirect="true" aria-haspopup="true">
-            <a th:href="@{/library/create}" class="m-menu__link">
-                <i class="m-menu__link-icon flaticon-add"></i>
-                <span class="m-menu__link-text">导入TSV或TraML格式标准库</span>
+
+        <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel">
+            <a th:href="@{/home}" class="m-menu__link">
+                <span class="m-menu__link-text">Dashboard</span>
             </a>
         </li>
-        <li class="m-menu__item" data-redirect="true" aria-haspopup="true">
-            <a th:href="@{/experiment/create}" class="m-menu__link">
-                <i class="m-menu__link-icon flaticon-add"></i>
-                <span class="m-menu__link-text">导入MzXML或MzML格式实验数据</span>
+
+
+        <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel" data-menu-submenu-toggle="click"
+            aria-haspopup="true">
+            <a href="#" class="m-menu__link m-menu__toggle">
+                <span class="m-menu__link-text">文件导入</span>
+                <i class="m-menu__hor-arrow la la-angle-down"></i>
+                <i class="m-menu__ver-arrow la la-angle-right"></i>
             </a>
+            <div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left">
+                <span class="m-menu__arrow m-menu__arrow--adjust"></span>
+                <ul class="m-menu__subnav">
+                    <li class="m-menu__item " aria-haspopup="true">
+                        <a th:href="@{/library/create}" class="m-menu__link ">
+                            <i class="m-menu__link-icon flaticon-file"></i>
+                            <span class="m-menu__link-text">
+                                导入TSV或TraML文件
+                            </span>
+                        </a>
+                    </li>
+                    <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
+                        <a th:href="@{/experiment/create}" class="m-menu__link ">
+                            <i class="m-menu__link-icon flaticon-diagram"></i>
+                            <span class="m-menu__link-text">
+                                导入MzXML或MzML文件
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+        <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel" data-menu-submenu-toggle="click"
+            aria-haspopup="true">
+            <a href="#" class="m-menu__link m-menu__toggle">
+                <span class="m-menu__link-text">标准库&iRT校准库</span>
+                <i class="m-menu__hor-arrow la la-angle-down"></i>
+                <i class="m-menu__ver-arrow la la-angle-right"></i>
+            </a>
+            <div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left">
+                <span class="m-menu__arrow m-menu__arrow--adjust"></span>
+                <ul class="m-menu__subnav">
+                    <li class="m-menu__item " aria-haspopup="true">
+                        <a th:href="@{/library/listStandard}" class="m-menu__link ">
+                            <i class="m-menu__link-icon flaticon-file"></i>
+                            <span class="m-menu__link-text">
+                                标准库列表
+                            </span>
+                        </a>
+                    </li>
+                    <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
+                        <a th:href="@{/library/listVerify}" class="m-menu__link ">
+                            <i class="m-menu__link-icon flaticon-diagram"></i>
+                            <span class="m-menu__link-text">
+                                iRT校准库列表
+                            </span>
+                        </a>
+                    </li>
+                    <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
+                        <a th:href="@{/transition/list}" class="m-menu__link ">
+                            <i class="m-menu__link-icon flaticon-map"></i>
+                            <span class="m-menu__link-text">
+                                Transition列表
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+
+        <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel">
+            <a th:href="@{/experiment/list}" class="m-menu__link">
+                <span class="m-menu__link-text">实验数据</span>
+            </a>
+        </li>
+
+        <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel">
+            <a th:href="@{/analyse/overview/list}" class="m-menu__link">
+                <span class="m-menu__link-text">卷积实验</span>
+            </a>
+        </li>
+
+        <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel" data-menu-submenu-toggle="click"
+            aria-haspopup="true">
+            <a href="#" class="m-menu__link m-menu__toggle">
+                <span class="m-menu__link-text">工具集</span>
+                <i class="m-menu__hor-arrow la la-angle-down"></i>
+                <i class="m-menu__ver-arrow la la-angle-right"></i>
+            </a>
+            <div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left">
+                <span class="m-menu__arrow m-menu__arrow--adjust"></span>
+                <ul class="m-menu__subnav">
+                    <li class="m-menu__item " aria-haspopup="true">
+                        <a th:href="@{/transition/calculator}" class="m-menu__link ">
+                            <i class="m-menu__link-icon flaticon-file"></i>
+                            <span class="m-menu__link-text">
+                                分子质量计算器
+                            </span>
+                        </a>
+                    </li>
+                    <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
+                        <a th:href="@{/spectrum/mzxmlextractor}" class="m-menu__link ">
+                            <i class="m-menu__link-icon flaticon-diagram"></i>
+                            <span class="m-menu__link-text">
+                                MzXML扫描数据解压缩
+                            </span>
+                        </a>
+                    </li>
+                    <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
+                        <a th:href="@{/spectrum/mzmlextractor}" class="m-menu__link ">
+                            <i class="m-menu__link-icon flaticon-folder"></i>
+                            <span class="m-menu__link-text">
+                                MzML扫描数据解压缩
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+
+        <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel" data-menu-submenu-toggle="click"
+            aria-haspopup="true">
+            <a href="#" class="m-menu__link m-menu__toggle">
+                <span class="m-menu__link-text">文档专区</span>
+                <i class="m-menu__hor-arrow la la-angle-down"></i>
+                <i class="m-menu__ver-arrow la la-angle-right"></i>
+            </a>
+            <div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left">
+                <span class="m-menu__arrow m-menu__arrow--adjust"></span>
+                <ul class="m-menu__subnav">
+                    <li class="m-menu__item " aria-haspopup="true">
+                        <a th:href="@{/document/feature}" class="m-menu__link ">
+                            <i class="m-menu__link-icon flaticon-file"></i>
+                            <span class="m-menu__link-text">
+                                Feature字段说明
+                            </span>
+                        </a>
+                    </li>
+                    <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
+                        <a href="#" class="m-menu__link ">
+                            <i class="m-menu__link-icon flaticon-diagram"></i>
+                            <span class="m-menu__link-text">
+                                PECS使用白皮书
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </li>
     </ul>
 </div>
-<!-- END: Horizontal Menu -->
+
 </body>
 </html>

@@ -73,4 +73,9 @@ public class TransitionQuery extends PageQuery {
     public TransitionQuery(String libraryId) {
         this.libraryId = libraryId;
     }
+
+    public TransitionQuery(String libraryId, String peptideRef) {
+        this.libraryId = libraryId;
+        this.peptideRef = peptideRef;
+    }
 }

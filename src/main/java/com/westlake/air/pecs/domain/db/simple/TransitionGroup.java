@@ -3,6 +3,7 @@ package com.westlake.air.pecs.domain.db.simple;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import lombok.Data;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -19,5 +20,4 @@ public class TransitionGroup {
     Double rt;
 
     List<AnalyseDataDO> dataList;
-
 }

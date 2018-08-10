@@ -281,7 +281,6 @@ public class AnalyseController extends BaseController {
     String getAllPoints(Model model,
                         @RequestParam(value = "overviewId", required = true) String overviewId) {
 
-//        List<AnalyseDataDO> dataList = analyseDataService.getAllByOverviewId(overviewId);
         AnalyseDataQuery query = new AnalyseDataQuery();
         query.setPageSize(-1);
         query.setOverviewId(overviewId);
