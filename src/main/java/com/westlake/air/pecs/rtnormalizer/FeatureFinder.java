@@ -23,8 +23,6 @@ public class FeatureFinder {
 
         List<List<ExperimentFeature>> experimentFeatures = new ArrayList<>();
         while (true) {
-            chrPeakIndex[0] = -1;
-            chrPeakIndex[1] = -1;
             chrPeakIndex = findLargestPeak(pickedChroms);
             if (chrPeakIndex[0] == -1 || chrPeakIndex[1] == -1) {
                 break;
@@ -35,9 +33,9 @@ public class FeatureFinder {
             float peakApex = pickedChroms.get(chrPeakIndex[0]).getRtArray()[chrPeakIndex[1]];
 
             RtIntensityPairs rtInt = pickedChroms.get(chrPeakIndex[0]);
-            Float[] rtArray = rtInt.getRtArray();
-            rtArray[chrPeakIndex[1]] = 0.0f;
-            rtInt.setRtArray(rtArray);
+            Float[] intensityArray = rtInt.getIntensityArray();
+            intensityArray[chrPeakIndex[1]] = 0.0f;
+            rtInt.setIntensityArray(intensityArray);
             pickedChroms.set(chrPeakIndex[0], rtInt);
 
 
@@ -75,8 +73,10 @@ public class FeatureFinder {
     private int[] findLargestPeak(List<RtIntensityPairs> pickedChroms){
         float largest = 0.0f;
         int[] chrPeakIndex = new int[2];
+        chrPeakIndex[0] = -1;
+        chrPeakIndex[1] = -1;
         for(int i = 0; i < pickedChroms.size(); i++){
-            for(int j = 0; j < pickedChroms.get(0).getRtArray().length; i++){
+            for(int j = 0; j < pickedChroms.get(0).getRtArray().length; j++){
                 if(pickedChroms.get(i).getIntensityArray()[j] > largest){
                     largest = pickedChroms.get(i).getIntensityArray()[j];
                     chrPeakIndex[0] = i;
@@ -103,39 +103,47 @@ public class FeatureFinder {
         chromatogramRight = MathUtil.bisection(chromatogram, rightBoundary) + 1;
         masterChromLeft = MathUtil.bisection(masterChromatogram, leftBoundary);
         masterChromRight = MathUtil.bisection(masterChromatogram, rightBoundary) + 1;
+        int masterChromLeftStatic = masterChromLeft;
 
         Float[] rt = new Float[masterChromRight - masterChromLeft + 1];
         Float[] intensity = new Float[masterChromRight - masterChromLeft + 1];
         float distLeft, distRight;
 
+        for(int i=0; i<rt.length; i++){
+            rt[i] = 0f;
+            intensity[i] = 0f;
+        }
+
         //set rt
         for(int i=masterChromLeft; i<=masterChromRight; i++){
-            rt[i] = masterChromatogram.getRtArray()[i];
+            rt[i - masterChromLeftStatic] = masterChromatogram.getRtArray()[i];
         }
 
         //set intensity
         while(chromatogramLeft <= chromatogramRight && chromatogram.getRtArray()[chromatogramLeft] < masterChromatogram.getRtArray()[masterChromLeft]){
-            intensity[masterChromLeft] += chromatogram.getIntensityArray()[chromatogramLeft];
+            intensity[masterChromLeft-masterChromLeftStatic] += chromatogram.getIntensityArray()[chromatogramLeft];
             chromatogramLeft ++;
         }
         while (chromatogramLeft <= chromatogramRight){
             while (masterChromLeft <= masterChromRight && chromatogram.getRtArray()[chromatogramLeft] > masterChromatogram.getRtArray()[masterChromLeft]){
                 masterChromLeft ++;
             }
+            if(masterChromLeft != masterChromLeftStatic){
+                masterChromLeft--;
+            }
             if(masterChromLeft == masterChromRight){
                 break;
             }
-            masterChromLeft--;
             distLeft = Math.abs(chromatogram.getRtArray()[chromatogramLeft] - masterChromatogram.getRtArray()[masterChromLeft]);
             distRight = Math.abs(chromatogram.getRtArray()[chromatogramLeft] - masterChromatogram.getRtArray()[masterChromLeft + 1]);
 
-            intensity[masterChromLeft] += chromatogram.getIntensityArray()[chromatogramLeft] * distRight / (distRight + distLeft);
-            intensity[masterChromLeft + 1] += chromatogram.getIntensityArray()[chromatogramLeft] * distLeft / (distRight + distLeft);
+            intensity[masterChromLeft - masterChromLeftStatic] += chromatogram.getIntensityArray()[chromatogramLeft] * distRight / (distRight + distLeft);
+            intensity[masterChromLeft - masterChromLeftStatic + 1] += chromatogram.getIntensityArray()[chromatogramLeft] * distLeft / (distRight + distLeft);
 
             chromatogramLeft ++;
         }
         while (chromatogramLeft <= chromatogramRight){
-            intensity[masterChromLeft] += chromatogram.getIntensityArray()[chromatogramLeft];
+            intensity[masterChromLeft - masterChromLeftStatic + 1] += chromatogram.getIntensityArray()[chromatogramLeft];
             chromatogramLeft ++;
         }
 

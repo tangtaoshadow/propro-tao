@@ -45,7 +45,7 @@ public class SignalToNoiseEstimator {
         int[] histogram = new int[binCount];
         int toBin;// bin in which a datapoint would fall
         int medianBin;// index of bin where the median is located
-        int elementIncCount = 0;// additive number of elements from left to x in histogram
+        int elementIncCount;// additive number of elements from left to x in histogram
         int elementsInWindow = 0;// tracks elements in current window, which may vary because of unevenly spaced data
         int windowCount = 0;// number of windows
         int elementsInWindowHalf;// number of elements where we find the median
@@ -63,8 +63,8 @@ public class SignalToNoiseEstimator {
                     toBin = Math.max(Math.min((int) (rtIntensity.getRtArray()[left] / binSize), binCount - 1), 0);
                     histogram[toBin]++;
                     elementsInWindow++;
-                    left--;
                 } else {
+
                     break;
                 }
             }
@@ -73,7 +73,6 @@ public class SignalToNoiseEstimator {
                     toBin = Math.max(Math.min((int) (rtIntensity.getRtArray()[right] / binSize), binCount - 1), 0);
                     histogram[toBin]++;
                     elementsInWindow++;
-                    right++;
                 } else {
                     break;
                 }
@@ -85,6 +84,7 @@ public class SignalToNoiseEstimator {
                 sparseWindowPercent++;
             } else {
                 medianBin = -1;
+                elementIncCount = 0;
                 elementsInWindowHalf = (elementsInWindow + 1) / 2;
                 while (medianBin < binCount - 1 && elementIncCount < elementsInWindowHalf) {
                     ++medianBin;

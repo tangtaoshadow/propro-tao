@@ -99,7 +99,7 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
                 //根据信噪比和峰值形状选择最高峰
                 RtIntensityPairs maxPeakPairs = peakPicker.pickMaxPeak(rtIntensityPairsAfterSmooth, noises200);
                 //根据信噪比和最高峰选择谱图
-                IntensityRtLeftRtRightPairs intensityRtLeftRtRightPairs = chromatogramPicker.pickChromatogram(rtIntensityPairsAfterSmooth, noises1000, maxPeakPairs);
+                IntensityRtLeftRtRightPairs intensityRtLeftRtRightPairs = chromatogramPicker.pickChromatogram(rtIntensityPairsOrigin, rtIntensityPairsAfterSmooth, noises1000, maxPeakPairs);
                 rtIntensityPairsOriginList.add(rtIntensityPairsOrigin);
                 maxRtIntensityPairsList.add(maxPeakPairs);
                 intensityRtLeftRtRightPairsList.add(intensityRtLeftRtRightPairs);
@@ -125,6 +125,7 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
         SlopeIntercept slopeIntercept = fitRTPairs(pairsCorrected);
         slopeInterceptResultDO.setSuccess(true);
         slopeInterceptResultDO.setModel(slopeIntercept);
+        //TODO: dealing with RTNormalizer results(not knowing the accuracy of final result)
 
         return slopeInterceptResultDO;
     }

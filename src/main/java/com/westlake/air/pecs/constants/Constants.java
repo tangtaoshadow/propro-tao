@@ -14,7 +14,7 @@ public class Constants {
     //RT Normalizer
     public static final float SIGNAL_TO_NOISE_LIMIT = 1.0f;
     public static final int MISSING_LIMIT = 1;
-    public static final float THRESHOLD = 0.000001f;
+    public static final float THRESHOLD = 0.01f;
     public static final float AUTO_MAX_STDEV_FACTOR = 3.0f;
     public static final int MIN_REQUIRED_ELEMENTS = 10;
     public static final float NOISE_FOR_EMPTY_WINDOW = (float) Math.pow(10.0,20);
