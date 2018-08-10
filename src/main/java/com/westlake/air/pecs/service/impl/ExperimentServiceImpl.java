@@ -406,9 +406,9 @@ public class ExperimentServiceImpl implements ExperimentService {
                 }
             }
 
-//            if(!isHit){
-//                continue;
-//            }
+            if(!isHit){
+                continue;
+            }
 
             AnalyseDataDO dataDO = new AnalyseDataDO();
             dataDO.setTransitionId(ms.getId());
@@ -419,15 +419,14 @@ public class ExperimentServiceImpl implements ExperimentService {
                 dataDO.setMz(ms.getProductMz());
                 dataDO.setMsLevel(2);
             }
-            if(isHit){
-                Float[] rtArray = new Float[rtList.size()];
-                Float[] intArray = new Float[intList.size()];
-                rtList.toArray(rtArray);
-                intList.toArray(intArray);
-                dataDO.setRtArray(rtArray);
-                dataDO.setIntensityArray(intArray);
-                dataDO.setIsHit(true);
-            }
+
+            Float[] rtArray = new Float[rtList.size()];
+            Float[] intArray = new Float[intList.size()];
+            rtList.toArray(rtArray);
+            intList.toArray(intArray);
+            dataDO.setRtArray(rtArray);
+            dataDO.setIntensityArray(intArray);
+            dataDO.setIsHit(true);
 
             dataDO.setOverviewId(overviewId);
             dataDO.setAnnotations(ms.getAnnotations());

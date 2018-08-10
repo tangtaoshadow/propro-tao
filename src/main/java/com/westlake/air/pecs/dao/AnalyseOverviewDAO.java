@@ -32,7 +32,7 @@ public class AnalyseOverviewDAO {
         Query query = new Query(where("expId").is(expId));
         query.limit(1);
         List<AnalyseOverviewDO> list = mongoTemplate.find(query, AnalyseOverviewDO.class, CollectionName);
-        if(list == null || list.size() == 0){
+        if(list.size() == 0){
             return null;
         }else{
             return list.get(0);

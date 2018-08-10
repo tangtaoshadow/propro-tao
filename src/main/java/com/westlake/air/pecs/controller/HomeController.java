@@ -45,7 +45,7 @@ public class HomeController {
         model.addAttribute("libraries",libraries);
         model.addAttribute("experiments",experiments);
         model.addAttribute("overviews",overviews);
-        return "home";
+        return "/home";
     }
 
 

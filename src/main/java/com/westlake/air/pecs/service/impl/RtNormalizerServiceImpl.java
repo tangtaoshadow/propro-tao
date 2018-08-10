@@ -64,7 +64,7 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
             return ResultDO.buildError(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
         }
 
-        ResultDO<List<TransitionGroup>> groupsResult = analyseDataService.getTransitionGroup(overviewId, overviewDOResult.getModel().getVLibraryId());
+        ResultDO<List<TransitionGroup>> groupsResult = analyseDataService.getTransitionGroup(overviewId, overviewDOResult.getModel().getVLibraryId(), null);
         if(groupsResult.isFailed()){
             ResultDO resultDO = new ResultDO(false);
             resultDO.setErrorResult(groupsResult.getMsgCode(), groupsResult.getMsgInfo());
@@ -77,7 +77,7 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
         List<Float> compoundRt = new ArrayList<>();
         ResultDO<SlopeIntercept> slopeInterceptResultDO = new ResultDO<>();
         for(TransitionGroup group : groupsResult.getModel()){
-            if(group.getDataList() == null || group.getDataList().size() == 0){
+            if(group.getDataMap() == null || group.getDataMap().size() == 0){
                 continue;
             }
 
@@ -85,7 +85,8 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
             List<RtIntensityPairs> rtIntensityPairsOriginList = new ArrayList<>();
             List<RtIntensityPairs> maxRtIntensityPairsList = new ArrayList<>();
             List<IntensityRtLeftRtRightPairs> intensityRtLeftRtRightPairsList = new ArrayList<>();
-            for(AnalyseDataDO dataDO : group.getDataList()){
+            for(AnalyseDataDO dataDO : group.getDataMap().values()){
+                //TODO @王瑞敏 判空指针
                 //不考虑MS1的卷积结果
                 if(dataDO.getMsLevel() == 1){
                     continue;

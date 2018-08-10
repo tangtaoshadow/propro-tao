@@ -4,6 +4,7 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
+import com.westlake.air.pecs.domain.query.PageQuery;
 
 import java.util.List;
 
@@ -31,6 +32,7 @@ public interface AnalyseDataService {
 
     /**
      * 获取MS1的卷积卷积信息
+     *
      * @param overviewId
      * @param peptideRef
      * @return
@@ -39,6 +41,7 @@ public interface AnalyseDataService {
 
     /**
      * 获取MS2的卷积数据
+     *
      * @param overviewId
      * @param peptideRef
      * @param cutInfo
@@ -47,10 +50,10 @@ public interface AnalyseDataService {
     ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String peptideRef, String cutInfo);
 
     /**
-     *
      * @param overviewId
-     * @param vlibraryId
+     * @param libraryId
+     * @param pageQuery
      * @return
      */
-    ResultDO<List<TransitionGroup>> getTransitionGroup(String overviewId, String vlibraryId);
+    ResultDO<List<TransitionGroup>> getTransitionGroup(String overviewId, String libraryId, PageQuery pageQuery);
 }

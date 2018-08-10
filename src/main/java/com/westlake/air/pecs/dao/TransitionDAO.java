@@ -1,10 +1,12 @@
 package com.westlake.air.pecs.dao;
 
 import com.mongodb.BasicDBObject;
+import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.db.simple.*;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
@@ -34,6 +37,23 @@ public class TransitionDAO {
 
     public List<TransitionDO> getAll(TransitionQuery query) {
         return mongoTemplate.find(buildQueryWithoutPage(query), TransitionDO.class, CollectionName);
+    }
+
+    public List<String> getTransitionGroupIds(String libraryId, String peptideRef) {
+        Document queryDoc = new Document();
+        queryDoc.put("libraryId",libraryId);
+        queryDoc.put("peptideRef",peptideRef);
+
+        Document fieldsDoc = new Document();
+        fieldsDoc.put("id",true);
+
+        Query query = new BasicQuery(queryDoc, fieldsDoc);
+        List<TransitionDO> trans = mongoTemplate.find(query, TransitionDO.class, CollectionName);
+        List<String> ids = new ArrayList<>();
+        for(TransitionDO tran : trans){
+            ids.add(tran.getId());
+        }
+        return ids;
     }
 
     public List<TransitionDO> getAllByLibraryId(String libraryId) {
