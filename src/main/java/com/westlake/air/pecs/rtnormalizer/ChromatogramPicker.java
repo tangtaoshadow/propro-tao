@@ -15,7 +15,7 @@ import java.util.List;
 @Component("chromatogramPicker")
 public class ChromatogramPicker {
 
-    public IntensityRtLeftRtRightPairs pickChromatogram(RtIntensityPairs rtIntensityPairs, float[] signalToNoise, RtIntensityPairs maxPeakPairs) {
+    public IntensityRtLeftRtRightPairs pickChromatogram(RtIntensityPairs rtIntensityPairs, RtIntensityPairs smoothedRtIntensityPairs, float[] signalToNoise, RtIntensityPairs maxPeakPairs) {
         int maxPeakSize = maxPeakPairs.getRtArray().length;
         int[][] leftRight = new int[maxPeakSize][2];
         Float[] leftRt = new Float[maxPeakSize];
@@ -24,28 +24,28 @@ public class ChromatogramPicker {
 
         int closestPeakIndex;
         for (int i = 0; i < maxPeakSize; i++) {
-            closestPeakIndex = findClosestPeak(rtIntensityPairs, maxPeakPairs.getRtArray()[i]);
+            closestPeakIndex = findClosestPeak(smoothedRtIntensityPairs, maxPeakPairs.getRtArray()[i]);
 
             //to the left
             leftIndex = closestPeakIndex;
             while(leftIndex > 0 &&
-                    rtIntensityPairs.getIntensityArray()[leftIndex - 1] < rtIntensityPairs.getIntensityArray()[leftIndex] &&
+                    smoothedRtIntensityPairs.getIntensityArray()[leftIndex - 1] < smoothedRtIntensityPairs.getIntensityArray()[leftIndex] &&
                     signalToNoise[leftIndex] >= Constants.SIGNAL_TO_NOISE_LIMIT){
                 leftIndex--;
             }
 
             //to the right
             rightIndex = closestPeakIndex;
-            while(rightIndex < rtIntensityPairs.getIntensityArray().length - 1 &&
-                    rtIntensityPairs.getIntensityArray()[rightIndex + 1] < rtIntensityPairs.getIntensityArray()[rightIndex] &&
+            while(rightIndex <smoothedRtIntensityPairs.getIntensityArray().length - 1 &&
+                    smoothedRtIntensityPairs.getIntensityArray()[rightIndex + 1] < smoothedRtIntensityPairs.getIntensityArray()[rightIndex] &&
                     signalToNoise[rightIndex] >= Constants.SIGNAL_TO_NOISE_LIMIT){
                 rightIndex++;
             }
 
             leftRight[i][0] = leftIndex;
             leftRight[i][1] = rightIndex;
-            leftRt[i] = rtIntensityPairs.getRtArray()[leftIndex];
-            rightRt[i] = rtIntensityPairs.getRtArray()[rightIndex];
+            leftRt[i] = smoothedRtIntensityPairs.getRtArray()[leftIndex];
+            rightRt[i] = smoothedRtIntensityPairs.getRtArray()[rightIndex];
 
         }
 
@@ -72,10 +72,10 @@ public class ChromatogramPicker {
         int leftIndex, rightIndex, size;
         Float[] intensity = new Float[leftRight.length];
         for(int i = 0; i< leftRight.length; i++){
+            intensity[i] = 0f;
             leftIndex = leftRight[i][0];
             rightIndex = leftRight[i][1];
-            size = rightIndex - leftIndex;
-            for(int j=leftIndex; j<= leftIndex + size; j++){
+            for(int j=leftIndex; j<= rightIndex; j++){
                 intensity[i] += rtIntensityPairs.getIntensityArray()[j];
             }
         }

@@ -17,7 +17,7 @@ public class IntensityRtLeftRtRightPairs {
 
     public IntensityRtLeftRtRightPairs(){}
 
-    public IntensityRtLeftRtRightPairs(Float[] rtLeftArray, Float[] rtRightArray, Float[] intensityArray){
+    public IntensityRtLeftRtRightPairs(Float[] intensityArray, Float[] rtLeftArray, Float[] rtRightArray){
         this.rtLeftArray = rtLeftArray;
         this.rtRightArray = rtRightArray;
         this.intensityArray = intensityArray;
