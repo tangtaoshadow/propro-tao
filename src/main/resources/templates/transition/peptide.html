@@ -48,14 +48,11 @@
                                 <th width="30%">
                                     对应蛋白质名称
                                 </th>
-                                <th width="20%">
+                                <th width="25%">
                                     肽段名称
                                 </th>
                                 <th width="5%">
                                     RT
-                                </th>
-                                <th width="5%">
-                                    Intensity强度
                                 </th>
                                 <th width="5%">
                                     是否是为肽段
@@ -73,7 +70,6 @@
                                 <td th:text="${peptide.proteinName}"></td>
                                 <td th:text="${peptide.peptideRef}"></td>
                                 <td th:text="${peptide.rt}"></td>
-                                <td th:text="${peptide.intensity}"></td>
                                 <td th:if="${peptide.isDecoy}">
                                     <span class="m-badge m-badge--danger m-badge--wide">
                                         伪
