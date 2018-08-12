@@ -111,17 +111,18 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        <tr th:each="data:${group.dataList}">
-                                            <td th:text="${data.proteinName}"></td>
-                                            <td th:text="${data.peptideRef}"></td>
-                                            <td th:text="${data.annotations}"></td>
-                                            <td th:text="${data.cutInfo}"></td>
-                                            <td th:text="${data.msLevel}"></td>
-                                            <td th:text="${data.mz}"></td>
+                                        <tr th:each="entry:${group.dataMap}">
+
+                                            <td th:if="${entry.value} != null" th:text="${entry.value.proteinName}"></td>
+                                            <td th:if="${entry.value} != null" th:text="${entry.value.peptideRef}"></td>
+                                            <td th:if="${entry.value} != null" th:text="${entry.value.annotations}"></td>
+                                            <td th:if="${entry.value} != null" th:text="${entry.value.cutInfo}"></td>
+                                            <td th:if="${entry.value} != null" th:text="${entry.value.msLevel}"></td>
+                                            <td th:if="${entry.value} != null" th:text="${entry.value.mz}"></td>
                                             <td>
-                                                <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
+                                                <button th:if="${entry.value} != null" type="button" class="btn btn-sm btn-info" data-toggle="modal"
                                                         data-target="#m_modal_target"
-                                                        th:onclick="|query('${data.id}','${overviewId}','${data.peptideRef}','${data.cutInfo}')|">
+                                                        th:onclick="|query('${entry.value.id}','${overviewId}','${entry.value.peptideRef}','${entry.value.cutInfo}')|">
                                                     查看谱图
                                                 </button>
                                             </td>

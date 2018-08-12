@@ -20,4 +20,5 @@ public class TransitionGroup {
     Double rt;
 
     HashMap<String, AnalyseDataDO> dataMap;
+
 }
