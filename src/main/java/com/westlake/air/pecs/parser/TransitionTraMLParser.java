@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Component
-public class TraMLParser extends BaseTransitionParser{
+public class TransitionTraMLParser extends BaseTransitionParser{
 
     @Autowired
     AirXStream airXStream;

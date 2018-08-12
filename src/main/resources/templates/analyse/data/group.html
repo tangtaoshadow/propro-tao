@@ -112,7 +112,6 @@
                                         </thead>
                                         <tbody>
                                         <tr th:each="entry:${group.dataMap}">
-
                                             <td th:if="${entry.value} != null" th:text="${entry.value.proteinName}"></td>
                                             <td th:if="${entry.value} != null" th:text="${entry.value.peptideRef}"></td>
                                             <td th:if="${entry.value} != null" th:text="${entry.value.annotations}"></td>

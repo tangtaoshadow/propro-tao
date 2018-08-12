@@ -1,6 +1,5 @@
 package com.westlake.air.pecs.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
@@ -8,7 +7,7 @@ import com.westlake.air.pecs.domain.bean.LibraryCoordinate;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.query.LibraryQuery;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
-import com.westlake.air.pecs.parser.TraMLParser;
+import com.westlake.air.pecs.parser.TransitionTraMLParser;
 import com.westlake.air.pecs.parser.TransitionTsvParser;
 import com.westlake.air.pecs.service.LibraryService;
 import com.westlake.air.pecs.service.TransitionService;
@@ -33,7 +32,7 @@ public class LibraryController extends BaseController {
     @Autowired
     TransitionTsvParser tsvParser;
     @Autowired
-    TraMLParser traMLParser;
+    TransitionTraMLParser transitionTraMLParser;
     @Autowired
     LibraryService libraryService;
     @Autowired
@@ -287,7 +286,7 @@ public class LibraryController extends BaseController {
                 if(file.getOriginalFilename().toLowerCase().endsWith("tsv")||file.getOriginalFilename().toLowerCase().endsWith("csv")){
                     resultDO = tsvParser.parseAndInsert(file.getInputStream(), library, justReal);
                 }else if(file.getOriginalFilename().toLowerCase().endsWith("traml")){
-                    resultDO = traMLParser.parseAndInsert(file.getInputStream(), library, justReal);
+                    resultDO = transitionTraMLParser.parseAndInsert(file.getInputStream(), library, justReal);
                 }else{
                     return ResultDO.buildError(ResultCode.INPUT_FILE_TYPE_MUST_BE_TSV_OR_TRAML);
                 }
