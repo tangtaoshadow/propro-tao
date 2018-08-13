@@ -1,8 +1,7 @@
 package com.westlake.air.pecs.rtnormalizer;
 
 import com.westlake.air.pecs.constants.Constants;
-import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

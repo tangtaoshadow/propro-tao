@@ -1,6 +1,6 @@
 package com.westlake.air.pecs.parser;
 
-import com.westlake.air.pecs.domain.bean.MzIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.parser.model.mzxml.*;
 import org.apache.commons.codec.binary.Base64;
@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 

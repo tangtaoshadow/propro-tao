@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.domain.db;
 
+import com.westlake.air.pecs.domain.BaseDO;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -11,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  */
 @Data
 @Document(collection = "analyseData")
-public class AnalyseDataDO {
+public class AnalyseDataDO extends BaseDO {
 
     @Id
     String id;

@@ -1,10 +1,10 @@
 package com.westlake.air.pecs.domain.db;
 
-import com.westlake.air.pecs.domain.bean.AminoAcid;
-import com.westlake.air.pecs.domain.bean.Annotation;
+import com.westlake.air.pecs.domain.BaseDO;
+import com.westlake.air.pecs.domain.bean.transition.AminoAcid;
+import com.westlake.air.pecs.domain.bean.transition.Annotation;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Data
 @Document(collection = "transition")
-public class TransitionDO {
+public class TransitionDO extends BaseDO {
 
     @Id
     String id;

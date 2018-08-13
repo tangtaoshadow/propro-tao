@@ -1,4 +1,4 @@
-package com.westlake.air.pecs.domain.bean;
+package com.westlake.air.pecs.domain.bean.analyse;
 
 import com.westlake.air.pecs.domain.db.simple.TargetTransition;
 import lombok.Data;

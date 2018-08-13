@@ -39,7 +39,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">标准库详情页</h3>
+                            <h3 class="m-portlet__head-text">标准库</h3>
                         </div>
                     </div>
                 </div>
@@ -47,174 +47,29 @@
                 <form class="m-form m-form--fit m-form--label-align-right">
                     <div class="m-portlet__body">
                         <div class="form-group m-form__group row">
-                            <label for="id" class="col-2 col-form-label">
-                                库文件ID
+                            <label for="libraryId" class="col-2 col-form-label">
+                                相关的标准库
                             </label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="id" name="id" readonly
-                                       th:value="${library?.id}">
-                                <span class="m-form__help">库ID全局唯一</span>
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="libraryName" class="col-2 col-form-label">
-                                库文件名称
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="libraryName" name="name" readonly
-                                       th:value="${library?.name}">
-                                <span class="m-form__help">库名称全局唯一</span>
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="instrument" class="col-2 col-form-label">
-                                设备名称
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="instrument" name="instrument"
-                                       readonly th:value="${library?.instrument}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="proteinCount" class="col-2 col-form-label">
-                                蛋白质数目
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="proteinCount" name="proteinCount"
-                                       readonly th:value="${library?.proteinCount}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="peptideCount" class="col-2 col-form-label">
-                                肽段数目
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="peptideCount" name="peptideCount"
-                                       readonly th:value="${library?.peptideCount}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="totalCount" class="col-2 col-form-label">
-                                总数目
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="totalCount"
-                                       name="totalCount" readonly th:value="${library?.totalCount}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="totalTargetCount" class="col-2 col-form-label">
-                                真实Trans总数目
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="totalTargetCount"
-                                       name="totalTargetCount" readonly th:value="${library?.totalTargetCount}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="totalDecoyCount" class="col-2 col-form-label">
-                                伪Trans总数目
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="totalDecoyCount"
-                                       name="totalDecoyCount" readonly th:value="${library?.totalDecoyCount}">
-                            </div>
-                        </div>
-                        <div th:if="${minRt}" class="form-group m-form__group row">
-                            <label for="rtRange" class="col-2 col-form-label">
-                                RT范围
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="rtRange"
-                                       name="rtRange" readonly th:value="|[${minRt},  ${maxRt}]|">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="description" class="col-2 col-form-label">
-                                详细描述
-                            </label>
-                            <div class="col-10">
-                                <textarea class="form-control m-input" id="description" name="description" rows="3"
-                                          readonly th:text="${library?.description}"></textarea>
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="createDate" class="col-2 col-form-label">
-                                创建时间
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="createDate" name="createDate"
-                                       readonly th:value="${#dates.format(library?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="lastModifiedDate" class="col-2 col-form-label">
-                                最后修改时间
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="lastModifiedDate"
-                                       name="lastModifiedDate" readonly
-                                       th:value="${#dates.format(library?.lastModifiedDate, 'yyyy-MM-dd HH:mm:ss')}">
+                                <select class="form-control m-input" id="libraryId" name="libraryId">
+                                    <option th:each="library:${libraries}" th:value="${library.id}" th:text="${library.name}"></option>
+                                </select>
                             </div>
                         </div>
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <a th:href="|/library/edit/${library?.id}|" class="btn btn-primary">修改</a>
-                            <a th:href="|/library/delete/${library?.id}?type=${library.type}|" class="btn btn-danger">删除</a>
+                            <a th:href="|/library/aggregate/${library?.id}|" class="btn btn-warning">重新计算蛋白质,肽段数目</a>
+                            <a th:href="|/decoy/overview/${library?.id}|" class="btn btn-primary">进行伪肽段覆盖率诊断</a>
+                            <a th:href="|/decoy/check?id=${library?.id}&isDecoy=true|" class="btn btn-success">检测伪肽段MZ计算误差</a>
+                            <a th:href="|/decoy/check?id=${library?.id}&isDecoy=false|" class="btn btn-info">检测真实肽段MZ计算误差</a>
+                            <a th:href="|/decoy/generate?id=${library?.id}|" class="btn btn-success">生成伪肽段</a>
                         </div>
                     </div>
                 </form>
                 <!--end::Form-->
             </div>
             <!--end::Portlet-->
-        </div>
-        <div class="col-md-6">
-            <div class="m-portlet m-portlet--tab">
-                <div class="m-portlet__head">
-                    <div class="m-portlet__head-caption">
-                        <div class="m-portlet__head-title">
-                            <span class="m-portlet__head-icon m--hide">
-                                <i class="la la-gear"></i>
-                            </span>
-                            <h3 class="m-portlet__head-text">肽段分析</h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="m-portlet__body">
-                    <a th:href="|/library/aggregate/${library?.id}|" class="btn btn-warning">重新计算蛋白质,肽段数目</a>
-                    <a th:href="|/decoy/overview/${library?.id}|" class="btn btn-primary">进行伪肽段覆盖率诊断</a>
-                    <a th:href="|/decoy/check?id=${library?.id}&isDecoy=true|" class="btn btn-success">检测伪肽段MZ计算误差</a>
-                    <a th:href="|/decoy/check?id=${library?.id}&isDecoy=false|" class="btn btn-info">检测真实肽段MZ计算误差</a>
-                    <a th:href="|/decoy/generate?id=${library?.id}|" class="btn btn-success">生成伪肽段</a>
-
-                    <form id="searchForm" method="post" role="form"
-                          class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
-                          action="/library/buildCoordinate">
-                        <div class="form-group m-form__group row">
-                            <div class="input-group col-lg-12">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-success" type="button">
-                                        RT Extraction Window:
-                                    </button>
-                                </div>
-                                <input hidden="hidden" name="id" th:value="${library?.id}">
-                                <input type="text" class="form-control m-input" name="rtExtractionWindow"
-                                       placeholder="rtExtractionWindow,通常为1.0" th:value="${rtExtractionWindow}">
-                                <div class="input-group-append">
-                                    <button class="btn btn-warning" type="submit">
-                                        生成MS坐标
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </form>
-
-
-                </div>
-            </div>
         </div>
     </div>
 

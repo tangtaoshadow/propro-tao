@@ -1,7 +1,7 @@
 package com.westlake.air.pecs.utils;
 
-import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
-import com.westlake.air.pecs.domain.bean.RtPair;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.score.RtPair;
 
 import java.util.List;
 

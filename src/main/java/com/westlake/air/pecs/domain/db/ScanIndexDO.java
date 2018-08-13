@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.domain.db;
 
+import com.westlake.air.pecs.domain.BaseDO;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -13,7 +14,7 @@ import java.awt.datatransfer.FlavorListener;
  */
 @Data
 @Document(collection = "scanIndex")
-public class ScanIndexDO {
+public class ScanIndexDO extends BaseDO {
 
     @Id
     String id;

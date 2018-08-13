@@ -3,7 +3,7 @@ package com.westlake.air.pecs.controller;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.LibraryCoordinate;
+import com.westlake.air.pecs.domain.bean.analyse.LibraryCoordinate;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.query.LibraryQuery;
 import com.westlake.air.pecs.domain.query.TransitionQuery;

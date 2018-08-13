@@ -1,4 +1,4 @@
-package com.westlake.air.pecs.domain.bean;
+package com.westlake.air.pecs.domain.bean.transition;
 
 import lombok.Data;
 

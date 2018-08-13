@@ -1,11 +1,8 @@
 package com.westlake.air.pecs.rtnormalizer;
 
 import com.westlake.air.pecs.constants.Constants;
-import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import org.springframework.stereotype.Component;
-
-import javax.naming.Name;
-import java.util.List;
 
 /**
  * Created by Nico Wang Ruimin

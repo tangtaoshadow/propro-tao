@@ -2,10 +2,8 @@ package com.westlake.air.pecs.parser;
 
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.Annotation;
-import com.westlake.air.pecs.domain.bean.MzIntensityPairs;
+import com.westlake.air.pecs.domain.bean.transition.Annotation;
 import com.westlake.air.pecs.domain.db.LibraryDO;
-import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.parser.xml.AirXStream;
 import com.westlake.air.pecs.service.TransitionService;
@@ -15,14 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.util.HashMap;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.Inflater;
 
 /**
  * Created by James Lu MiaoShan

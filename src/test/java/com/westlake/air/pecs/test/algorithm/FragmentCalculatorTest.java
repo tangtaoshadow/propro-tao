@@ -2,10 +2,10 @@ package com.westlake.air.pecs.test.algorithm;
 
 import com.westlake.air.pecs.algorithm.FormulaCalculator;
 import com.westlake.air.pecs.algorithm.FragmentCalculator;
-import com.westlake.air.pecs.domain.bean.AminoAcid;
-import com.westlake.air.pecs.domain.bean.Fragment;
-import com.westlake.air.pecs.domain.bean.FragmentResult;
-import com.westlake.air.pecs.domain.bean.MzResult;
+import com.westlake.air.pecs.domain.bean.transition.AminoAcid;
+import com.westlake.air.pecs.domain.bean.transition.Fragment;
+import com.westlake.air.pecs.domain.bean.transition.FragmentResult;
+import com.westlake.air.pecs.domain.bean.analyse.MzResult;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.service.TransitionService;
 import com.westlake.air.pecs.test.BaseTest;
@@ -33,7 +33,7 @@ public class FragmentCalculatorTest extends BaseTest {
         Fragment fragment = fragmentCalculator.getFragment(transitionDO);
         List<Fragment> expect = new ArrayList<>();
 
-        assert (fragment == expect);
+        assert (fragment.equals(expect));
     }
 
     @Test

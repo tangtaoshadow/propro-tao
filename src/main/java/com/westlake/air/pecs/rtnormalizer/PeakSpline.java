@@ -1,9 +1,7 @@
 package com.westlake.air.pecs.rtnormalizer;
 
-import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.utils.MathUtil;
-
-import java.util.List;
 
 
 /**

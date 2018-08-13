@@ -3,8 +3,9 @@ package com.westlake.air.pecs.controller;
 import com.westlake.air.pecs.algorithm.FragmentCalculator;
 import com.westlake.air.pecs.decoy.generator.ShuffleGenerator;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.FragmentResult;
-import com.westlake.air.pecs.domain.bean.MzResult;
+import com.westlake.air.pecs.domain.bean.transition.FragmentResult;
+import com.westlake.air.pecs.domain.bean.analyse.MzResult;
+import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
 import com.westlake.air.pecs.service.TransitionService;
@@ -54,6 +55,12 @@ public class DecoyController extends BaseController {
         return "/decoy/check";
     }
 
+    @RequestMapping(value = "/manager")
+    String manager(Model model) {
+        model.addAttribute("libraries",getLibraryList(LibraryDO.TYPE_STANDARD));
+        return "/decoy/manager";
+    }
+
     @RequestMapping(value = "/generate")
     String generate(Model model,
                     @RequestParam(value = "id", required = true) String id) {
@@ -81,7 +88,6 @@ public class DecoyController extends BaseController {
             }
         }
 
-//        model.addAttribute("resultList", result.size() > 100 ? result.subList(0, 100) : result);
         return "redirect:/transition/list?libraryId="+id+"&isDecoy=true";
     }
 }

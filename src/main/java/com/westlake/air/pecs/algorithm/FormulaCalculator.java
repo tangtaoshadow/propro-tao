@@ -3,7 +3,7 @@ package com.westlake.air.pecs.algorithm;
 import com.westlake.air.pecs.constants.ResidueType;
 import com.westlake.air.pecs.dao.AminoAcidDAO;
 import com.westlake.air.pecs.dao.ElementsDAO;
-import com.westlake.air.pecs.domain.bean.Fragment;
+import com.westlake.air.pecs.domain.bean.transition.Fragment;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.parser.UnimodParser;
 import com.westlake.air.pecs.parser.model.chemistry.Unimod;

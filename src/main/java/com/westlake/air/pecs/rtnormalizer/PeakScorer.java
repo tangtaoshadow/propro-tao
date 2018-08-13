@@ -2,10 +2,10 @@ package com.westlake.air.pecs.rtnormalizer;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.westlake.air.pecs.domain.bean.RTNormalizationScores;
-import com.westlake.air.pecs.domain.bean.RtIntensityPairs;
-import com.westlake.air.pecs.domain.bean.ScoreRtPair;
-import com.westlake.air.pecs.domain.bean.ExperimentFeature;
+import com.westlake.air.pecs.domain.bean.score.RTNormalizationScores;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.score.ScoreRtPair;
+import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.springframework.stereotype.Component;
 

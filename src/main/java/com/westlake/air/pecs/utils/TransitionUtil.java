@@ -1,6 +1,6 @@
 package com.westlake.air.pecs.utils;
 
-import com.westlake.air.pecs.domain.bean.AminoAcid;
+import com.westlake.air.pecs.domain.bean.transition.AminoAcid;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 
 import java.util.List;
