@@ -11,6 +11,7 @@ import com.westlake.air.pecs.utils.MathUtil;
 public class PeakSpline {
     private float[] a, b, c, d, x;
 
+    // TODO: 暂时只有1阶导数
     public float derivatives(float value){
         int i = MathUtil.bisection(x, value);
         float xx = value - x[i];
