@@ -2,10 +2,10 @@ package com.westlake.air.pecs.test.algorithm;
 
 import com.westlake.air.pecs.algorithm.FormulaCalculator;
 import com.westlake.air.pecs.algorithm.FragmentCalculator;
+import com.westlake.air.pecs.domain.bean.analyse.MzResult;
 import com.westlake.air.pecs.domain.bean.transition.AminoAcid;
 import com.westlake.air.pecs.domain.bean.transition.Fragment;
 import com.westlake.air.pecs.domain.bean.transition.FragmentResult;
-import com.westlake.air.pecs.domain.bean.analyse.MzResult;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.service.TransitionService;
 import com.westlake.air.pecs.test.BaseTest;
@@ -30,10 +30,78 @@ public class FragmentCalculatorTest extends BaseTest {
     @Test
     public void getFragmentsTest() {
         TransitionDO transitionDO = getJsonFromFileTest();
-        Fragment fragment = fragmentCalculator.getFragment(transitionDO);
-        List<Fragment> expect = new ArrayList<>();
+        Fragment result = fragmentCalculator.getFragment(transitionDO);
+        Fragment fragment = new Fragment();
+        fragment.setSequence(fragmentCalculator.getFragmentSequence("AGVETTTPSK","y",7));
+        fragment.setStart(3);
+        fragment.setEnd(9);
+        fragment.setIsotope(false);
+        fragment.setDeviation(0.0);
+        fragment.setLocation(7);
+        fragment.setAdjust(0);
+        fragment.setType("y");
+        fragment.setCharge(1);
+        fragment.setMonoMz(formulaCalculator.getMonoMz(fragment));
+        fragment.setAverageMz(formulaCalculator.getAverageMz(fragment));
+        assert (result.equals(fragment));
+    }
 
-        assert (fragment.equals(expect));
+    @Test
+    public void getFragmentsTest_1() {
+        TransitionDO transitionDO = getJsonFromFileTest1();
+        Fragment result = fragmentCalculator.getFragment(transitionDO);
+        Fragment fragment = new Fragment();
+        fragment.setSequence(fragmentCalculator.getFragmentSequence("YLYEIAR","b",3));
+        fragment.setStart(0);
+        fragment.setEnd(6);
+        fragment.setIsotope(false);
+        fragment.setDeviation(-0.0);
+        fragment.setLocation(3);
+        fragment.setAdjust(0);
+        fragment.setType("b");
+        fragment.setCharge(1);
+        fragment.setMonoMz(formulaCalculator.getMonoMz(fragment));
+        fragment.setAverageMz(formulaCalculator.getAverageMz(fragment));
+        assert (result.equals(fragment));
+    }
+
+    @Test
+    public void getFragmentsTest_2() {
+        TransitionDO transitionDO = getJsonFromFileTest2();
+        Fragment result = fragmentCalculator.getFragment(transitionDO);
+        Fragment fragment = new Fragment();
+        fragment.setSequence(fragmentCalculator.getFragmentSequence("KVPQVSTPTLVEVSR","y",5));
+        fragment.setStart(10);
+        fragment.setEnd(14);
+        fragment.setIsotope(false);
+        fragment.setDeviation(0.0);
+        fragment.setLocation(5);
+        fragment.setAdjust(0);
+        fragment.setType("y");
+        fragment.setCharge(1);
+        fragment.setMonoMz(formulaCalculator.getMonoMz(fragment));
+        fragment.setAverageMz(formulaCalculator.getAverageMz(fragment));
+        assert (result.equals(fragment));
+    }
+
+    @Test
+    public void getFragmentsTest_3() {
+        TransitionDO transitionDO = getJsonFromFileTest3();
+        Fragment result = fragmentCalculator.getFragment(transitionDO);
+        Fragment fragment = new Fragment();
+        fragment.setSequence(fragmentCalculator.getFragmentSequence("VHTECCHGDLLECADDR","b",10));
+        fragment.setStart(0);
+        fragment.setEnd(16);
+        fragment.setIsotope(false);
+        fragment.setDeviation(0.0);
+        fragment.setLocation(10);
+        fragment.setAdjust(0);
+        fragment.setType("b");
+        fragment.setCharge(2);
+        fragment.setMonoMz(formulaCalculator.getMonoMz(fragment));
+        fragment.setAverageMz(formulaCalculator.getAverageMz(fragment));
+        fragment.setUnimodMap(transitionDO.getUnimodMap());
+        assert (result.equals(fragment));
     }
 
     @Test

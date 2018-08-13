@@ -37,7 +37,6 @@ public class FormulaCalculatorTest extends BaseTest {
         assert (Math.abs(result - expect) < range);
     }
 
-    //检测到result为Infinity,后续是否有影响需要再判断
     @Test
     public void getMonoMzTest_RealSample_TransitionDO_3() {
         TransitionDO transitionDO = getJsonFromFileTest();
@@ -46,7 +45,7 @@ public class FormulaCalculatorTest extends BaseTest {
         assert (result == Infinity);
     }
 
-    //get到null类型出现java.nullpointerexception
+
     @Test
     public void getMonoMzTest_RealSample_TransitionDO_4() {
         TransitionDO transitionDO = null;
