@@ -1,10 +1,8 @@
 package com.westlake.air.pecs.test;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.PecsPlatformApplication;
 import com.westlake.air.pecs.domain.db.TransitionDO;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -12,7 +10,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 /**
  * Created by James Lu MiaoShan
@@ -27,14 +24,50 @@ public class BaseTest {
         assert true;
     }
 
-    @Test
-    public void getJsonFromFileTest(){
+
+    public TransitionDO getJsonFromFileTest(){
         try {
-            TransitionDO transitionDO = getJsonFromFile("json/transition.json", TransitionDO.class);
-            assert transitionDO.getPeptideRef().equals("TC(UniMod:4)VADESAENC(UniMod:4)DK_2");
+            return getJsonFromFile("json/transition.json", TransitionDO.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
+    }
+
+    public TransitionDO getJsonFromFileTest1(){
+        try {
+            return getJsonFromFile("json/transition1.json", TransitionDO.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public TransitionDO getJsonFromFileTest2(){
+        try {
+            return getJsonFromFile("json/transition2.json", TransitionDO.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public TransitionDO getJsonFromFileTest3(){
+        try {
+            return getJsonFromFile("json/transition3.json", TransitionDO.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public TransitionDO getJsonFromFileTest4(){
+        try {
+            return getJsonFromFile("json/transition4.json", TransitionDO.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public <T> T getJsonFromFile(String filePath, Class<T> clazz) throws Exception {
