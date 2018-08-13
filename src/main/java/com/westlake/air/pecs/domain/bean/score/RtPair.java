@@ -11,4 +11,8 @@ public class RtPair {
 
     float expRt;
     float theoRt;
+
+
+    float startRt;
+    float endRt;
 }

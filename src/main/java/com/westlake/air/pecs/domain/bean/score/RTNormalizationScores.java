@@ -17,10 +17,31 @@ public class RTNormalizationScores {
      *              scores.log_sn_score                     * -0.72989582 + 1
      *              scores.elution_model_fit_score          *  1.88443209; //0
      */
-    float libraryCorr;
-    float libraryNormManhattan;
-    float xcorrCoelutionScore;
-    float xcorrShapeScore;
-    float logSnScore;
+    float varLibraryCorr;
+    float varLibraryRsmd;
+
+    float varXcorrCoelution;
+    float varXcorrCoelutionWeighted;
+
+    float varXcorrShape;
+    float varXcorrShapeWeighted;
+
+    float varNormRtScore;
+
+    float varIntensityScore;
+
+    float varLogSnScore;
+
+    float varElutionModelFitScore;
+
+    float varIsotopeCorrelationScore;
+    float varIsotopeOverlapScore;
+    float varMassdevScore;
+    float varMassdevScoreWeighted;
+    float varBseriesScore;
+    float varYseriesScore;
+
+
+
 
 }

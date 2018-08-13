@@ -6,37 +6,14 @@ import java.util.Scanner;
 
 public class Test {
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int rounds = sc.nextInt();
-        for(int i=0; i<rounds; i++){
-            float result;
-            float number = sc.nextInt();
-            if(number <= 5000){
-                System.out.println("0");
-            }else {
-                number -= 5000;
-                if(number <= 3000){
-                    result = number * 0.03f;
-                }else if(number <= 12000){
-                    result = 3000 * 0.03f + (number - 3000) * 0.1f;
-                }else if(number <= 25000){
-                    result = 3000 * 0.03f + 9000 * 0.1f + (number - 12000) * 0.2f;
-                }else if(number <= 35000){
-                    result = 3000 * 0.03f + 9000 * 0.1f + 13000 * 0.2f + (number - 25000) * 0.25f;
-                }else if(number <= 55000){
-                    result = 3000 * 0.03f + 9000 * 0.1f + 13000 * 0.2f + 10000 * 0.25f + (number - 35000) * 0.3f;
-                }else if(number <= 80000){
-                    result = 3000 * 0.03f + 9000 * 0.1f + 13000 * 0.2f + 10000 * 0.25f + 20000 * 0.3f + (number - 55000) * 0.35f;
-                }else {
-                    result = 3000 * 0.03f + 9000 * 0.1f + 13000 * 0.2f + 10000 * 0.25f + 20000 * 0.3f + 25000 * 0.35f + (number - 80000) * 0.45f;
-                }
-                float res = result - (int)result;
-                if(res>=0.5){
-                    System.out.println((int)result + 1);
-                }else {
-                    System.out.println((int)result);
-                }
-            }
+        List<Float> testList = new ArrayList<>();
+        testList.add(2f);
+        testList.add(3f);
+        testList.add(4f);
+
+        testList.set(1, 5f);
+        for(float i: testList){
+            System.out.println(i);
         }
 
     }

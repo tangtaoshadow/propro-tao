@@ -106,7 +106,9 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
             List<List<ExperimentFeature>> experimentFeatures = featureFinder.findFeatures(rtIntensityPairsOriginList, maxRtIntensityPairsList, intensityRtLeftRtRightPairsList);
             //list of library intensity List(Double)
             String peptideRef = group.getPeptideRef();
-            List<ScoreRtPair> scoreRtPairs = peakScorer.score(rtIntensityPairsOriginList, experimentFeatures, getIntensityGroupByPep(intensityGroupList, peptideRef).getIntensityList(), 1000, 30);
+            SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
+            float groupRt = group.getRt().floatValue();
+            List<ScoreRtPair> scoreRtPairs = peakScorer.score(rtIntensityPairsOriginList, experimentFeatures, getIntensityGroupByPep(intensityGroupList, peptideRef).getIntensityList(), slopeIntercept, groupRt, 1000, 30);
             scoresList.add(scoreRtPairs);
             compoundRt.add(group.getRt().floatValue());
         }

@@ -21,6 +21,8 @@ public class ExperimentFeature {
 
     float bestRight;
 
+    float totalXic;
+
     List<Float> hullRt;
     List<Float> hullInt;
 }

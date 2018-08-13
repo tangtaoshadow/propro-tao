@@ -57,6 +57,7 @@ public class FeatureFinder {
             float sum = 0.0f;
             for(ExperimentFeature feature: mrmFeature){
                 sum += feature.getIntensity();
+                feature.setTotalXic(totalXic);
             }
             if(sum > 0){
                 experimentFeatures.add(mrmFeature);

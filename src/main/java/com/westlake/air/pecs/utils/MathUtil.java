@@ -2,7 +2,9 @@ package com.westlake.air.pecs.utils;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.score.RtPair;
+import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,6 +45,20 @@ public class MathUtil {
     }
 
     public static int bisection(float[] x ,float value){
+        int high = x.length -1;
+        int low = 0;
+        int mid;
+        while(high - low != 1){
+            mid = low + (high - low + 1) / 2;
+            if(x[mid] <= value){
+                low = mid;
+            }else {
+                high = mid;
+            }
+        }
+        return low;
+    }
+    public static int bisection(Float[] x ,float value){
         int high = x.length -1;
         int low = 0;
         int mid;
@@ -110,5 +126,54 @@ public class MathUtil {
         }
         return index;
     }
+    public static int findMaxIndex(List<Float> data){
+        float max = data.get(0);
+        int index = 0;
+        for(int i = 0; i < data.size(); i++){
+            if(data.get(i) > max){
+                max = data.get(i);
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    public static SlopeIntercept trafoInverter(SlopeIntercept slopeIntercept){
+        float slope = slopeIntercept.getSlope();
+        float intercept = slopeIntercept.getIntercept();
+        SlopeIntercept slopeInterceptInvert = new SlopeIntercept();
+
+        if(slope == 0f){
+            slope = 0.000001f;
+        }
+        slopeInterceptInvert.setSlope(1 / slope);
+        slopeInterceptInvert.setIntercept(- intercept / slope);
+
+        return slopeInterceptInvert;
+    }
+
+    public static float trafoApplier(SlopeIntercept slopeInterceptInvert, float value){
+        return value * slopeInterceptInvert.getSlope() + slopeInterceptInvert.getIntercept();
+    }
+
+    public static int getLog2n(int value){
+        int log2n = 0;
+        while (value > Math.pow(2,log2n)){
+            log2n ++;
+        }
+        return log2n;
+    }
+
+    public static void renormalize(List<Float> floatList){
+        float sum = 0.0f;
+        for(float value: floatList){
+            sum += value;
+        }
+        for(int i=0; i<floatList.size(); i++) {
+            floatList.set(i, floatList.get(i) / sum);
+        }
+    }
+
+
 
 }
