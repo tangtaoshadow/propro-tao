@@ -35,8 +35,7 @@ public class FragmentCalculator {
     @Autowired
     FormulaCalculator formulaCalculator;
 
-    public List<Fragment> getFragments(TransitionDO transitionDO) {
-        List<Fragment> fragments = new ArrayList<>();
+    public Fragment getFragment(TransitionDO transitionDO) {
         Fragment fragment = new Fragment(transitionDO.getId());
         String sequence = transitionDO.getSequence();
         Annotation annotation = transitionDO.getAnnotation();
@@ -65,9 +64,8 @@ public class FragmentCalculator {
         fragment.setCharge(annotation.getCharge());
         fragment.setMonoMz(formulaCalculator.getMonoMz(fragment));
         fragment.setAverageMz(formulaCalculator.getAverageMz(fragment));
-        fragments.add(fragment);
 
-        return fragments;
+        return fragment;
     }
 
     /**
@@ -76,8 +74,7 @@ public class FragmentCalculator {
      * @param transitionDO
      * @return
      */
-    public List<Fragment> getBaseFragments(TransitionDO transitionDO) {
-        List<Fragment> fragments = new ArrayList<>();
+    public Fragment getBaseFragment(TransitionDO transitionDO) {
         Fragment fragment = new Fragment();
         String sequence = transitionDO.getSequence();
         Annotation annotation = transitionDO.getAnnotation();
@@ -92,9 +89,8 @@ public class FragmentCalculator {
         fragment.setSequence(fs);
         fragment.setType(annotation.getType());
         fragment.setCharge(annotation.getCharge());
-        fragments.add(fragment);
 
-        return fragments;
+        return fragment;
     }
 
     public String getFragmentSequence(String originSequence, String type, int location) {
@@ -148,23 +144,22 @@ public class FragmentCalculator {
             List<TransitionDO> list = resultTmp.getModel();
 
             for (TransitionDO transition : list) {
-                List<Fragment> tmp = getBaseFragments(transition);
-                if (tmp != null && tmp.size() > 0) {
-                    for (Fragment fragment : tmp) {
-                        if (transition.getIsDecoy()) {
-                            countDecoy++;
-                            if (decoyFragments.contains(fragment)) {
-                                fragment.count();
-                            } else {
-                                decoyFragments.add(fragment);
-                            }
+                Fragment fragment = getBaseFragment(transition);
+                if (fragment != null) {
+
+                    if (transition.getIsDecoy()) {
+                        countDecoy++;
+                        if (decoyFragments.contains(fragment)) {
+                            fragment.count();
                         } else {
-                            countTarget++;
-                            if (targetFragments.contains(fragment)) {
-                                fragment.count();
-                            } else {
-                                targetFragments.add(fragment);
-                            }
+                            decoyFragments.add(fragment);
+                        }
+                    } else {
+                        countTarget++;
+                        if (targetFragments.contains(fragment)) {
+                            fragment.count();
+                        } else {
+                            targetFragments.add(fragment);
                         }
                     }
                 }
@@ -227,7 +222,7 @@ public class FragmentCalculator {
 
     }
 
-    public List<AminoAcid> parseAminoAcid(String sequence, HashMap<Integer,String> unimodMap){
+    public List<AminoAcid> parseAminoAcid(String sequence, HashMap<Integer, String> unimodMap) {
 
         List<AminoAcid> aminoAcids = new ArrayList<>();
         char[] sequenceArray = sequence.toCharArray();
@@ -269,38 +264,36 @@ public class FragmentCalculator {
             List<TransitionDO> list = resultDO.getModel();
 
             for (TransitionDO transition : list) {
-                List<Fragment> tmp = getFragments(transition);
-                if (tmp != null && tmp.size() > 0) {
-                    for (Fragment fragment : tmp) {
+                Fragment fragment = getFragment(transition);
+                if (fragment != null) {
+
+                    count++;
+                    if (!fragments.contains(fragment)) {
                         count++;
-                        if (!fragments.contains(fragment)) {
-                            count++;
-                            fragments.add(fragment);
-                            double result = Math.abs(transition.getProductMz() - fragment.getMonoMz());
-                            if (result > threshold) {
-                                MzResult mzResult = new MzResult();
-                                mzResult.setOriginMz(transition.getProductMz());
-                                mzResult.setNewMz(fragment.getMonoMz());
-                                mzResult.setDelta(result);
-                                mzResult.setCharge(fragment.getCharge());
-                                mzResult.setSequence(transition.getSequence());
-                                mzResult.setType(fragment.getType());
-                                mzResult.setOriginSequence(transition.getFullName());
-                                mzResult.setFragmentSequence(fragment.getSequence());
-                                mzResult.setAnnotations(transition.getAnnotations());
-                                mzResult.setPrecursorCharge(transition.getPrecursorCharge());
-                                mzResult.setPrecursorMz(transition.getPrecursorMz());
-                                mzResult.setNewPrecursorMz(formulaCalculator.getMonoMz(transition));
-                                mzResult.setLocation(fragment.getLocation());
-                                if (Math.abs(transition.getPrecursorMz() - mzResult.getNewPrecursorMz()) > threshold) {
-                                    mzResult.setDelatPrecursorMz(Math.abs(transition.getPrecursorMz() - mzResult.getNewPrecursorMz()));
-                                }
-                                mzResultList.add(mzResult);
-
-                                countForError++;
+                        fragments.add(fragment);
+                        double result = Math.abs(transition.getProductMz() - fragment.getMonoMz());
+                        if (result > threshold) {
+                            MzResult mzResult = new MzResult();
+                            mzResult.setOriginMz(transition.getProductMz());
+                            mzResult.setNewMz(fragment.getMonoMz());
+                            mzResult.setDelta(result);
+                            mzResult.setCharge(fragment.getCharge());
+                            mzResult.setSequence(transition.getSequence());
+                            mzResult.setType(fragment.getType());
+                            mzResult.setOriginSequence(transition.getFullName());
+                            mzResult.setFragmentSequence(fragment.getSequence());
+                            mzResult.setAnnotations(transition.getAnnotations());
+                            mzResult.setPrecursorCharge(transition.getPrecursorCharge());
+                            mzResult.setPrecursorMz(transition.getPrecursorMz());
+                            mzResult.setNewPrecursorMz(formulaCalculator.getMonoMz(transition));
+                            mzResult.setLocation(fragment.getLocation());
+                            if (Math.abs(transition.getPrecursorMz() - mzResult.getNewPrecursorMz()) > threshold) {
+                                mzResult.setDelatPrecursorMz(Math.abs(transition.getPrecursorMz() - mzResult.getNewPrecursorMz()));
                             }
-                        }
+                            mzResultList.add(mzResult);
 
+                            countForError++;
+                        }
                     }
                 }
             }
