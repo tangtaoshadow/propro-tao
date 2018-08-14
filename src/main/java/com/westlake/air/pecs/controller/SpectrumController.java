@@ -85,6 +85,12 @@ public class SpectrumController extends BaseController {
         return "spectrum/mzmlextractor";
     }
 
+    @RequestMapping(value = "/mzxmlcompressor")
+    String mzxmlCompressor(Model model) {
+
+        return "spectrum/mzmlextractor";
+    }
+
     @RequestMapping(value = "/view")
     @ResponseBody
     ResultDO<JSONObject> view(Model model,

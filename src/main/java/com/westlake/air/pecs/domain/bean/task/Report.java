@@ -12,6 +12,4 @@ public class Report {
     MachineInfo machineInfo;
 
     String type;
-
-
 }

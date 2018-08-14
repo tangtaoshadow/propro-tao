@@ -1,4 +1,4 @@
-package com.westlake.air.pecs.converter;
+package com.westlake.air.pecs.compressor;
 
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.parser.MzMLParser;
@@ -23,7 +23,7 @@ import java.util.List;
  * Time: 2018-08-09 14:57
  */
 @Component("mzXMLCompressionConverter")
-public class MzXMLCompressionConverter {
+public class MzXMLCompressor {
 
     public final Logger logger = LoggerFactory.getLogger(MzMLParser.class);
 

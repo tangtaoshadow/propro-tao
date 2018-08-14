@@ -6,7 +6,9 @@ import com.westlake.air.pecs.dao.ElementsDAO;
 import com.westlake.air.pecs.domain.bean.transition.Fragment;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.parser.UnimodParser;
+import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
 import com.westlake.air.pecs.parser.model.chemistry.Unimod;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +35,22 @@ public class FormulaCalculator {
     UnimodParser unimodParser;
 
     public double getMonoMz(TransitionDO transitionDO) {
+        if (transitionDO == null){
+            return 0;
+        }
+        if (StringUtils.isEmpty(transitionDO.getSequence())) {
+            return 0;
+        }
         return getMonoMz(transitionDO.getSequence(), ResidueType.Full, transitionDO.getPrecursorCharge(), 0, 0, false, parseUnimodIds(transitionDO));
     }
 
     public double getAverageMz(TransitionDO transitionDO) {
+        if (transitionDO == null){
+            return 0;
+        }
+        if (StringUtils.isEmpty(transitionDO.getSequence())) {
+            return 0;
+        }
         return getAverageMz(transitionDO.getSequence(), ResidueType.Full, transitionDO.getPrecursorCharge(), 0, 0, false, parseUnimodIds(transitionDO));
     }
 
@@ -135,7 +149,12 @@ public class FormulaCalculator {
     private double getAcidMonoWeight(String sequence) {
         double monoWeight = 0;
         for (char acidCode : sequence.toCharArray()) {
-            monoWeight += aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCode)).getMonoIsotopicMass();
+            AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCode));
+            if (aa == null) {
+                logger.error("UNKNOWN AMINOACID CODE: " + acidCode);
+                continue;
+            }
+            monoWeight += aa.getMonoIsotopicMass();
         }
         return monoWeight;
     }
@@ -184,7 +203,14 @@ public class FormulaCalculator {
     private double getAcidAverageWeight(String sequence) {
         double averageWeight = 0;
         for (char acidCode : sequence.toCharArray()) {
-            averageWeight += aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCode)).getAverageMass();
+
+            AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCode));
+            if (aa == null) {
+                logger.error("UNKNOWN AMINOACID CODE: " + acidCode);
+                continue;
+            }
+
+            averageWeight += aa.getAverageMass();
         }
         return averageWeight;
     }
