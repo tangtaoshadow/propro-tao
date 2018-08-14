@@ -325,4 +325,10 @@ public class ExperimentController extends BaseController {
         resultDO.setModel(res);
         return resultDO;
     }
+
+    @RequestMapping(value = "/compressor")
+    String compressor(Model model) {
+
+        return "experiment/compressor";
+    }
 }
