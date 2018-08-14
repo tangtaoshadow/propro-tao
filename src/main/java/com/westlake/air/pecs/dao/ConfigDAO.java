@@ -26,7 +26,6 @@ public class ConfigDAO {
     }
 
     public Boolean updateConfig(ConfigDO configDO) {
-
         if (configDO.getId() == null || configDO.getId().isEmpty()) {
             logger.error("Config Id cannot been empty");
             return false;
@@ -38,6 +37,5 @@ public class ConfigDAO {
             logger.error(e.getMessage());
             return false;
         }
-
     }
 }

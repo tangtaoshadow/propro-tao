@@ -1,4 +1,4 @@
-package com.westlake.air.pecs.parser;
+package com.westlake.air.pecs.dao;
 
 import com.westlake.air.pecs.parser.model.chemistry.Unimod;
 import org.slf4j.Logger;
@@ -17,14 +17,14 @@ import java.util.HashMap;
  * Time: 2018-06-20 09:51
  */
 @Component
-public class UnimodParser {
+public class UnimodDAO {
 
-    public final Logger logger = LoggerFactory.getLogger(UnimodParser.class);
+    public final Logger logger = LoggerFactory.getLogger(UnimodDAO.class);
 
-    public static HashMap<String, Unimod> unimodMap = new HashMap<>();
+    public HashMap<String, Unimod> unimodMap = new HashMap<>();
 
     @PostConstruct
-    public void parse() {
+    public void init() {
         String filepath = getClass().getClassLoader().getResource("dbfile/unimod.obo").getPath();
         File file = new File(filepath);
 
@@ -66,7 +66,10 @@ public class UnimodParser {
                 unimodMap.put(unimod.getId(), unimod);
             }
             reader.close();
+            logger.info("Init Unimod Database file success!!!");
+
         } catch (IOException e) {
+            logger.info("Init Unimod Database file failed!!!");
             e.printStackTrace();
         } finally {
             if (reader != null) {

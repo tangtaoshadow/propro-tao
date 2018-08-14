@@ -5,7 +5,7 @@ import com.westlake.air.pecs.dao.AminoAcidDAO;
 import com.westlake.air.pecs.dao.ElementsDAO;
 import com.westlake.air.pecs.domain.bean.transition.Fragment;
 import com.westlake.air.pecs.domain.db.TransitionDO;
-import com.westlake.air.pecs.parser.UnimodParser;
+import com.westlake.air.pecs.dao.UnimodDAO;
 import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
 import com.westlake.air.pecs.parser.model.chemistry.Unimod;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +32,7 @@ public class FormulaCalculator {
     @Autowired
     ElementsDAO elementsDAO;
     @Autowired
-    UnimodParser unimodParser;
+    UnimodDAO unimodDAO;
 
     public double getMonoMz(TransitionDO transitionDO) {
         if (transitionDO == null){
@@ -79,7 +79,7 @@ public class FormulaCalculator {
         double unimodMonoMass = 0;
         if (unimodIds != null) {
             for (String unimodId : unimodIds) {
-                Unimod unimod = unimodParser.getUnimod(unimodId);
+                Unimod unimod = unimodDAO.getUnimod(unimodId);
                 if (unimod != null) {
                     unimodMonoMass += unimod.getMonoMass();
                 }
@@ -111,7 +111,7 @@ public class FormulaCalculator {
         double unimodAverageMass = 0;
         if (unimodIds != null) {
             for (String unimodId : unimodIds) {
-                Unimod unimod = unimodParser.getUnimod(unimodId);
+                Unimod unimod = unimodDAO.getUnimod(unimodId);
                 if (unimod != null) {
                     unimodAverageMass += unimod.getAverageMass();
                 }
