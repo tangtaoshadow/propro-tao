@@ -43,6 +43,7 @@ public class Constants {
     public static final float O = 1.4773f;
     public static final float S = 0.0417f;
     public static final float P = 0f;
+    public static final double PROTON_MASS_U = 1.0072764667710f;
 
 
     public static String EXP_SUFFIX_MZXML = "mzxml";

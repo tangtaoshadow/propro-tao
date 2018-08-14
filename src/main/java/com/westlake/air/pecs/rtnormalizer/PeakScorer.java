@@ -2,6 +2,8 @@ package com.westlake.air.pecs.rtnormalizer;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.westlake.air.pecs.dao.AminoAcidDAO;
+import com.westlake.air.pecs.dao.UnimodDAO;
 import com.westlake.air.pecs.domain.bean.score.RTNormalizationScores;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.score.ScoreRtPair;
@@ -10,10 +12,13 @@ import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.dao.ElementsDAO;
 import com.westlake.air.pecs.domain.bean.*;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
+import com.westlake.air.pecs.domain.bean.transition.Annotation;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
+import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
 import com.westlake.air.pecs.parser.model.chemistry.Element;
+import com.westlake.air.pecs.parser.model.chemistry.Unimod;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.omg.PortableServer.ServantLocatorPOA;
 import org.springframework.stereotype.Component;
@@ -327,11 +332,11 @@ public class PeakScorer {
             float averageWeightS = (float)new ElementsDAO().getElementBySymbol(Element.S).getAverageWeight();
             float averageWeightP = (float)new ElementsDAO().getElementBySymbol(Element.P).getAverageWeight();
             float avgTotal = Constants.C * averageWeightC +
-                             Constants.H * averageWeightH +
-                             Constants.N * averageWeightN +
-                             Constants.O * averageWeightO +
-                             Constants.S * averageWeightS +
-                             Constants.P * averageWeightP;
+                    Constants.H * averageWeightH +
+                    Constants.N * averageWeightN +
+                    Constants.O * averageWeightO +
+                    Constants.S * averageWeightS +
+                    Constants.P * averageWeightP;
             float factor = averageWeight / avgTotal;
             HashMap<String, Integer> formula = new HashMap<>();
             formula.put("C", Math.round(Constants.C * factor));
@@ -341,10 +346,10 @@ public class PeakScorer {
             formula.put("P", Math.round(Constants.P * factor));
 
             float getAverageWeight = averageWeightC * formula.get("C") +
-                                     averageWeightN * formula.get("N") +
-                                     averageWeightO * formula.get("O") +
-                                     averageWeightS * formula.get("S") +
-                                     averageWeightP * formula.get("P");
+                    averageWeightN * formula.get("N") +
+                    averageWeightO * formula.get("O") +
+                    averageWeightS * formula.get("S") +
+                    averageWeightP * formula.get("P");
             float remainingMass = averageWeight - getAverageWeight;
             formula.put("H", Math.round(remainingMass / averageWeightH));
 
@@ -518,6 +523,34 @@ public class PeakScorer {
         return result;
     }
 
+    private void calculateBYIonScore(){}
+
+    private void getBYSeries(Annotation annotation, HashMap<Integer, String> unimodHashMap, String sequence, int charge){
+        double monoWeight = Constants.PROTON_MASS_U * charge;
+        if(unimodHashMap.containsKey(0)){
+            Unimod unimod = new UnimodDAO().getUnimod(unimodHashMap.get(0));
+            if(unimod != null){
+                monoWeight += unimod.getMonoMass();
+            }
+        }
+
+        List<Double> bIonMzList = new ArrayList<>();
+        char[] acidCodeArray = sequence.toCharArray();
+        for (int i=0; i<acidCodeArray.length - 1; i++) {
+            AminoAcid aa = new AminoAcidDAO().getAminoAcidByCode(String.valueOf(acidCodeArray[i]));
+            if (aa == null) {
+                continue;
+            }
+            if(i == 0){
+                monoWeight += aa.getMonoIsotopicMass();
+                continue;
+            }
+            monoWeight += aa.getMonoIsotopicMass();
+
+        }
+//        monoWeight +=
+
+    }
 
     private void calculateElutionModelScore(List<ExperimentFeature> experimentFeatures){
         for(ExperimentFeature feature: experimentFeatures){
