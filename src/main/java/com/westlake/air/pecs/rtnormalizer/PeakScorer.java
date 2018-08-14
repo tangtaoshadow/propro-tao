@@ -4,14 +4,11 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.westlake.air.pecs.dao.AminoAcidDAO;
 import com.westlake.air.pecs.dao.UnimodDAO;
-import com.westlake.air.pecs.domain.bean.score.RTNormalizationScores;
+import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
-import com.westlake.air.pecs.domain.bean.score.ScoreRtPair;
-import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.dao.ElementsDAO;
 import com.westlake.air.pecs.domain.bean.*;
-import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.bean.transition.Annotation;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
@@ -20,6 +17,8 @@ import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
 import com.westlake.air.pecs.parser.model.chemistry.Element;
 import com.westlake.air.pecs.parser.model.chemistry.Unimod;
 import com.westlake.air.pecs.utils.MathUtil;
+import org.jcp.xml.dsig.internal.DigesterOutputStream;
+import org.jcp.xml.dsig.internal.dom.DOMUtils;
 import org.omg.PortableServer.ServantLocatorPOA;
 import org.springframework.stereotype.Component;
 
@@ -523,9 +522,73 @@ public class PeakScorer {
         return result;
     }
 
-    private void calculateBYIonScore(){}
+    private void calculateBYIonScore(List<Double> spectrumMzArray, List<Double> spectrumIntArray, Annotation annotation, HashMap<Integer, String> unimodHashMap, String sequence, int charge, RTNormalizationScores scores){
+        BYSeries bySeries = getBYSeries(annotation, unimodHashMap, sequence, charge);
+        List<Double> bSeriesList = bySeries.getBSeries();
+        int bSeriesScore = getSeriesScore(bSeriesList, spectrumMzArray, spectrumIntArray);
 
-    private void getBYSeries(Annotation annotation, HashMap<Integer, String> unimodHashMap, String sequence, int charge){
+        List<Double> ySeriesList = bySeries.getYSeries();
+        int ySeriesScore = getSeriesScore(ySeriesList, spectrumMzArray, spectrumIntArray);
+
+        scores.setVarBseriesScore(bSeriesScore);
+        scores.setVarYseriesScore(ySeriesScore);
+    }
+
+    /**
+     * score unit of BYSeries scores
+     * @param seriesList ySeriesList or bSeriesList
+     * @param spectrumMzArray mzArray of certain spectrum
+     * @param spectrumIntArray intArray of certain spectrum
+     * @return score of b or y
+     */
+    private int getSeriesScore(List<Double> seriesList, List<Double> spectrumMzArray, List<Double> spectrumIntArray){
+        int seriesScore = 0;
+        for(double seriesMz: seriesList){
+            double left = seriesMz - Constants.DIA_EXTRACT_WINDOW / 2f;
+            double right = seriesMz + Constants.DIA_EXTRACT_WINDOW/ 2f;
+
+            IntegrateWindowMzIntensity mzIntensity = integrateWindow(spectrumMzArray, spectrumIntArray, left, right);
+            double ppmDiff = Math.abs(seriesMz - mzIntensity.getMz()) * 1000000 / seriesMz;
+            if(mzIntensity.isSignalFound() &&
+                    ppmDiff < Constants.DIA_BYSERIES_PPM_DIFF &&
+                    mzIntensity.getIntensity() > Constants.DIA_BYSERIES_INTENSITY_MIN){
+                seriesScore ++;
+            }
+        }
+        return seriesScore;
+    }
+
+    private IntegrateWindowMzIntensity integrateWindow(List<Double> spectrumMzArray, List<Double> spectrumIntArray, double left, double right){
+        float mz = 0f, intensity = 0f;
+        int leftIndex = MathUtil.bisection(spectrumMzArray, left);
+        int rightIndex = MathUtil.bisection(spectrumMzArray, right);
+        //TODO: bisection series
+        if(spectrumMzArray.get(0) < left){
+            leftIndex ++;
+        }
+        if(spectrumMzArray.get(spectrumMzArray.size()-1) < right){
+            rightIndex ++;
+        }
+        for(int index = leftIndex; index <=rightIndex; index ++){
+            intensity += spectrumIntArray.get(index);
+            mz += spectrumMzArray.get(index) * spectrumIntArray.get(index);
+        }
+        if(intensity > 0f) {
+            mz /= intensity;
+        }else {
+            mz = -1;
+            intensity = 0;
+        }
+
+        return null;
+    }
+
+    private BYSeries getBYSeries(Annotation annotation, HashMap<Integer, String> unimodHashMap, String sequence, int charge){
+
+        BYSeries bySeries = new BYSeries();
+
+        //bSeries
+        List<Double> bSeries = new ArrayList<>();
         double monoWeight = Constants.PROTON_MASS_U * charge;
         if(unimodHashMap.containsKey(0)){
             Unimod unimod = new UnimodDAO().getUnimod(unimodHashMap.get(0));
@@ -534,7 +597,6 @@ public class PeakScorer {
             }
         }
 
-        List<Double> bIonMzList = new ArrayList<>();
         char[] acidCodeArray = sequence.toCharArray();
         for (int i=0; i<acidCodeArray.length - 1; i++) {
             AminoAcid aa = new AminoAcidDAO().getAminoAcidByCode(String.valueOf(acidCodeArray[i]));
@@ -546,10 +608,33 @@ public class PeakScorer {
                 continue;
             }
             monoWeight += aa.getMonoIsotopicMass();
-
+            bSeries.add(monoWeight);
         }
-//        monoWeight +=
 
+        //ySeries
+        List<Double> ySeries = new ArrayList<>();
+        monoWeight = Constants.PROTON_MASS_U * charge;
+        if(unimodHashMap.containsKey(acidCodeArray.length-1)){
+            Unimod unimod = new UnimodDAO().getUnimod(unimodHashMap.get(acidCodeArray.length-1));
+            if(unimod != null){
+                monoWeight += unimod.getMonoMass();
+            }
+        }
+
+        for (int i = acidCodeArray.length - 1; i > 0; i--) {
+            AminoAcid aa = new AminoAcidDAO().getAminoAcidByCode(String.valueOf(acidCodeArray[i]));
+            if (aa == null) {
+                continue;
+            }
+            monoWeight += aa.getMonoIsotopicMass();
+            monoWeight += new ElementsDAO().getMonoWeight("H:2,O:1");
+            ySeries.add(monoWeight);
+        }
+
+        bySeries.setBSeries(bSeries);
+        bySeries.setYSeries(ySeries);
+
+        return bySeries;
     }
 
     private void calculateElutionModelScore(List<ExperimentFeature> experimentFeatures){
