@@ -5,7 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 /**
  * Created by James Lu MiaoShan
@@ -22,7 +25,16 @@ public class ConfigDAO {
     MongoTemplate mongoTemplate;
 
     public ConfigDO getConfig() {
-        return mongoTemplate.findOne(null, ConfigDO.class, CollectionName);
+        ConfigDO configDO = mongoTemplate.findOne(new Query(), ConfigDO.class, CollectionName);
+
+        if (configDO == null) {
+            configDO = new ConfigDO();
+            configDO.setCreateDate(new Date());
+            configDO.setLastModifiedDate(new Date());
+            updateConfig(configDO);
+        }
+
+        return configDO;
     }
 
     public Boolean updateConfig(ConfigDO configDO) {
