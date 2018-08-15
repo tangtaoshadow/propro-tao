@@ -36,7 +36,7 @@ public class HomeController {
     @Autowired
     AnalyseOverviewService analyseOverviewService;
 
-    @RequestMapping("/home")
+    @RequestMapping("/")
     String home(Model model) {
         ResultDO<List<LibraryDO>> libraries = libraryService.getList(new LibraryQuery());
         ResultDO<List<ExperimentDO>> experiments = experimentService.getList(new ExperimentQuery());

@@ -72,6 +72,20 @@ public class MathUtil {
         }
         return low;
     }
+    public static int bisection(List<Double> x, double value){
+        int high = x.size() -1;
+        int low = 0;
+        int mid;
+        while(high - low != 1){
+            mid = low + (high - low + 1) / 2;
+            if(x.get(mid) <= value){
+                low = mid;
+            }else {
+                high = mid;
+            }
+        }
+        return low;
+    }
     public static int bisection(RtIntensityPairs x , float value){
         int high = x.getRtArray().length -1;
         int low = 0;

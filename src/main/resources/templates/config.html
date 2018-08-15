@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="/layouts/layout">
+<!-- begin::Head -->
+<head>
+    <title>
+        欢迎登陆西湖大学PECS分析平台
+    </title>
+</head>
+<!-- end::Head -->
+<!-- end::Body -->
+<body>
+<div class="m-content" layout:fragment="content">
+
+    <div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>
+    <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!--begin::Portlet-->
+            <div class="m-portlet m-portlet--tab">
+                <div class="m-portlet__head">
+                    <div class="m-portlet__head-caption">
+                        <div class="m-portlet__head-title">
+                            <span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
+                            <h3 class="m-portlet__head-text">网站全局配置</h3>
+                        </div>
+                    </div>
+                </div>
+                <!--begin::Form-->
+                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/config/update}" th:method="post">
+                    <div class="m-portlet__body">
+                        <div class="form-group m-form__group m--margin-top-10">
+                            <div class="alert m-alert m-alert--default" role="alert">
+                                请谨慎配置网站的全局配置
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="experimentFilePath" class="col-3 col-form-label">
+                                实验文件存储路径(MzXML,MzML)
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="experimentFilePath"
+                                       placeholder="Enter Experiment File Path" name="experimentFilePath" th:value="${config?.experimentFilePath}">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="libraryFilePath" class="col-3 col-form-label">
+                                标准库/iRT校准库文件存储路径(TSV,CSV,TraML)
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="libraryFilePath"
+                                       placeholder="Enter Library File Path" name="libraryFilePath" th:value="${config?.libraryFilePath}">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="oldExperimentFilePath" class="col-3 col-form-label">
+                                老实验数据存储位置
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="oldExperimentFilePath"
+                                       placeholder="Enter Old Experiment File Path" name="oldExperimentFilePath"
+                                       th:value="${config?.oldExperimentFilePath}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="suffixForCompressorFile" class="col-3 col-form-label">
+                                压缩后的文件后缀
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="suffixForCompressorFile"
+                                       placeholder="Enter Suffix For Compressor File" name="suffixForCompressorFile"
+                                       th:value="${config?.suffixForCompressorFile}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="lastModifiedDate" class="col-3 col-form-label">
+                                最后修改时间
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="lastModifiedDate" readonly name="lastModifiedDate" th:value="${#dates.format(config?.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="createDate" class="col-3 col-form-label">
+                                创建时间
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="createDate" readonly name="createDate" th:value="${#dates.format(config?.createDate,'yyyy-MM-dd HH:mm:ss')}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m-portlet__foot m-portlet__foot--fit">
+                        <div class="m-form__actions">
+                            <button type="submit" class="btn btn-primary">
+                                更新
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <!--end::Form-->
+            </div>
+            <!--end::Portlet-->
+        </div>
+    </div>
+
+</div>
+
+
+</body>
+
+<!-- end::Body -->
+</html>

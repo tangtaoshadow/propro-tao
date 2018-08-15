@@ -36,6 +36,8 @@ public class Constants {
     public static final int DIA_NR_CHARGES = 4;
     public static final float C13C12_MASSDIFF_U = 1.0033548f;
     public static final float PEAK_BEFORE_MONO_MAX_PPM_DIFF = 20.0f;
+    public static final float DIA_BYSERIES_PPM_DIFF = 10.0f;
+    public static final float DIA_BYSERIES_INTENSITY_MIN = 300.0f;
 
     public static final float C = 4.9384f;
     public static final float H = 7.7583f;
@@ -43,6 +45,7 @@ public class Constants {
     public static final float O = 1.4773f;
     public static final float S = 0.0417f;
     public static final float P = 0f;
+    public static final double PROTON_MASS_U = 1.0072764667710f;
 
 
     public static String EXP_SUFFIX_MZXML = "mzxml";
