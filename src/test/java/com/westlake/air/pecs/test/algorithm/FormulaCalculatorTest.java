@@ -143,7 +143,7 @@ public class FormulaCalculatorTest extends BaseTest {
         transitionDO.setQuantifying(false);
         double result = formulaCalculator.getMonoMz(transitionDO);
         double expect = (71.037114 + 57.021464 + 99.068414 + 129.042593 + 101.047679 * 3 + 97.052764 + 87.032028 + 128.094963 + 1.0078250319 * 4 + 15.994915) / 2;
-        assert (Math.abs(result-expect)<0.00000001);
+        assert (Math.abs(result - expect) < range);
     }
 
     @Test
@@ -174,14 +174,14 @@ public class FormulaCalculatorTest extends BaseTest {
         transitionDO.setQuantifying(false);
         Double result = formulaCalculator.getMonoMz(transitionDO);
         double expect = (71.037114 + 57.021464 + 99.068414 + 129.042593 + 101.047679 * 3 + 97.052764 + 87.032028 + 128.094963 + 1.0078250319 * 4 + 15.994915) / 2;
-        assert (Math.abs(result-expect)<0.00000001);
+        assert (Math.abs(result - expect) < range);
     }
 
     @Test
     public void getMonoMzTest_RealSample1_TransitionDO_1() {
         double result = formulaCalculator.getMonoMz(getJsonFromFileTest1());
         Double expect = (113.084064 * 2 + 163.06332 * 2 + 129.042593 + 71.037114 + 156.101111 + 1.0078250319 * 2 + 15.994915 + 1.0078250319 * 2) / 2;
-        assert (result == expect);
+        assert (Math.abs(result - expect) < range);
     }
 
     @Test
@@ -190,7 +190,7 @@ public class FormulaCalculatorTest extends BaseTest {
         transitionDO.setPrecursorCharge(1);
         double result = formulaCalculator.getMonoMz(transitionDO);
         Double expect = 113.084064 * 2 + 163.06332 * 2 + 129.042593 + 71.037114 + 156.101111 + 1.0078250319 * 2 + 15.994915 + 1.0078250319;
-        assert (result == expect);
+        assert (Math.abs(result - expect) < range);
     }
 
     @Test
@@ -219,7 +219,7 @@ public class FormulaCalculatorTest extends BaseTest {
         transitionDO.setQuantifying(false);
         double result = formulaCalculator.getMonoMz(transitionDO);
         Double expect = (113.084064 * 2 + 163.06332 * 2 + 129.042593 + 71.037114 + 156.101111 + 1.0078250319 * 2 + 15.994915 + 1.0078250319 * 2) / 2;
-        assert (result == expect);
+        assert (Math.abs(result - expect) < range);
     }
 
     //检测到result为Infinity,后续是否有影响需要再判断
@@ -437,35 +437,35 @@ public class FormulaCalculatorTest extends BaseTest {
     public void getAverageMz_RealSample_TransitionDO() {
         double result = formulaCalculator.getAverageMz(getJsonFromFileTest());
         double expect = (71.0779 + 57.0513 + 99.1311 + 129.114 + 101.1039 * 3 + 97.1152 + 87.0773 + 128.1723 + 1.0079407537168315 * 4 + 15.999405323160001) / 2;
-        assert (result == expect);
+        assert (Math.abs(result - expect) < range);
     }
 
     @Test
     public void getAverageMz_RealSample1_TransitionDO() {
         double result = formulaCalculator.getAverageMz(getJsonFromFileTest1());
         double expect = (163.1733 * 2 + 113.1576 * 2 + 129.114 + 71.0779 + 156.1857 + 1.0079407537168315 * 4 + 15.999405323160001) / 2;
-        assert (result == expect);
+        assert (Math.abs(result - expect) < range);
     }
 
     @Test
     public void getAverageMz_RealSample2_TransitionDO() {
         double result = formulaCalculator.getAverageMz(getJsonFromFileTest2());
         double expect = (128.1723 + 99.1311 + 97.1152 + 128.1292 + 99.1311 + 87.0773 + 101.1039 + 97.1152 + 101.1039 + 113.1576 + 99.1311 + 129.114 + 99.1311 + 87.0773 + 156.1857 + 1.0079407537168315 * 5 + 15.999405323160001) / 3;
-        assert (result == expect);
+        assert (Math.abs(result - expect) < range);
     }
 
     @Test
     public void getAverageMz_RealSample3_TransitionDO() {
         double result = formulaCalculator.getAverageMz(getJsonFromFileTest3());
         double expect = (99.1311 + 137.1393 + 101.1039 + 129.114 + 103.1429 * 2 + 137.1393 + 57.0513 + 115.0874 + 113.1576 * 2 + 129.114 + 103.1429 + 71.0779 + 115.0874 * 2 + 156.1857 + 1.0079407537168315 * 6 + 15.999405323160001 + 57.0513 * 3) / 4;
-        assert (result == expect);
+        assert (Math.abs(result - expect) < range);
     }
 
     @Test
     public void getAverageMz_RealSample4_TransitionDO() {
         double result = formulaCalculator.getAverageMz(getJsonFromFileTest4());
         double expect = (101.1039 + 103.1429 + 99.1311 + 71.0779 + 115.0874 + 129.114 + 87.0773 + 71.0779 + 129.114 + 114.1026 + 103.1429 + 115.0874 + 128.1723 + 1.0079407537168315 * 4 + 15.999405323160001 + 57.0513 * 2) / 2;
-        assert (result == expect);
+        assert (Math.abs(result - expect) < range);
     }
 
     @Test
@@ -473,7 +473,7 @@ public class FormulaCalculatorTest extends BaseTest {
         TransitionDO transitionDO = getJsonFromFileTest();
         double result = formulaCalculator.getAverageMz(transitionDO.getSequence(), ResidueType.Full, transitionDO.getPrecursorCharge(), 0, 0, false, null);
         double expect = (71.0779 + 57.0513 + 99.1311 + 129.114 + 101.1039 * 3 + 97.1152 + 87.0773 + 128.1723 + 1.0079407537168315 * 4 + 15.999405323160001) / 2;
-        assert (result == expect);
+        assert (Math.abs(result - expect) < range);
     }
 
     @Test
@@ -481,7 +481,7 @@ public class FormulaCalculatorTest extends BaseTest {
         TransitionDO transitionDO = getJsonFromFileTest1();
         double result = formulaCalculator.getAverageMz(transitionDO.getSequence(), ResidueType.Full, transitionDO.getPrecursorCharge(), 0, 0, false, null);
         double expect = (163.1733 * 2 + 113.1576 * 2 + 129.114 + 71.0779 + 156.1857 + 1.0079407537168315 * 4 + 15.999405323160001) / 2;
-        assert (result == expect);
+        assert (Math.abs(result - expect) < range);
     }
 
     @Test
@@ -489,7 +489,7 @@ public class FormulaCalculatorTest extends BaseTest {
         TransitionDO transitionDO = getJsonFromFileTest2();
         double result = formulaCalculator.getAverageMz(transitionDO.getSequence(), ResidueType.Full, transitionDO.getPrecursorCharge(), 0, 0, false, null);
         double expect = (128.1723 + 99.1311 + 97.1152 + 128.1292 + 99.1311 + 87.0773 + 101.1039 + 97.1152 + 101.1039 + 113.1576 + 99.1311 + 129.114 + 99.1311 + 87.0773 + 156.1857 + 1.0079407537168315 * 5 + 15.999405323160001) / 3;
-        assert (result == expect);
+        assert (Math.abs(result - expect) < range);
     }
 
     @Test
@@ -497,7 +497,7 @@ public class FormulaCalculatorTest extends BaseTest {
         TransitionDO transitionDO = getJsonFromFileTest3();
         double result = formulaCalculator.getAverageMz(transitionDO.getSequence(), ResidueType.Full, transitionDO.getPrecursorCharge(), 0, 0, false, null);
         double expect = (99.1311 + 137.1393 + 101.1039 + 129.114 + 103.1429 * 2 + 137.1393 + 57.0513 + 115.0874 + 113.1576 * 2 + 129.114 + 103.1429 + 71.0779 + 115.0874 * 2 + 156.1857 + 1.0079407537168315 * 6 + 15.999405323160001) / 4;
-        assert (result == expect);
+        assert (Math.abs(result - expect) < range);
     }
 
     @Test
@@ -505,7 +505,7 @@ public class FormulaCalculatorTest extends BaseTest {
         TransitionDO transitionDO = getJsonFromFileTest4();
         double result = formulaCalculator.getAverageMz(transitionDO.getSequence(), ResidueType.Full, transitionDO.getPrecursorCharge(), 0, 0, false, null);
         double expect = (101.1039 + 103.1429 + 99.1311 + 71.0779 + 115.0874 + 129.114 + 87.0773 + 71.0779 + 129.114 + 114.1026 + 103.1429 + 115.0874 + 128.1723 + 1.0079407537168315 * 4 + 15.999405323160001) / 2;
-        assert (result == expect);
+        assert (Math.abs(result - expect) < range);
     }
 }
 
