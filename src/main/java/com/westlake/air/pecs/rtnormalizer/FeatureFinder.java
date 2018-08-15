@@ -20,7 +20,7 @@ public class FeatureFinder {
 
     public List<List<ExperimentFeature>> findFeatures(List<RtIntensityPairs> chromatograms, List<RtIntensityPairs> pickedChroms, List<IntensityRtLeftRtRightPairs> intensityLeftRight){
 
-        int[] chrPeakIndex = new int[2];
+        int[] chrPeakIndex;
 
         List<List<ExperimentFeature>> experimentFeatures = new ArrayList<>();
         while (true) {

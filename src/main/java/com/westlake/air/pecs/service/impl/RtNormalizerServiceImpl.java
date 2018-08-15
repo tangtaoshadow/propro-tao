@@ -79,16 +79,23 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
                 continue;
             }
 
+            String peptideRef = group.getPeptideRef();
             compoundRt.add(group.getRt().floatValue());
             List<RtIntensityPairs> rtIntensityPairsOriginList = new ArrayList<>();
             List<RtIntensityPairs> maxRtIntensityPairsList = new ArrayList<>();
             List<IntensityRtLeftRtRightPairs> intensityRtLeftRtRightPairsList = new ArrayList<>();
+            List<Float> libraryIntensityList = new ArrayList<>();
+            List<Float> libraryIntensityListAll = getIntensityGroupByPep(intensityGroupList, peptideRef).getIntensityList();
+            assert libraryIntensityListAll.size() != 0;
+            int count = 0;
             for(AnalyseDataDO dataDO : group.getDataMap().values()){
                 //TODO @王瑞敏 判空指针
-                //不考虑MS1的卷积结果
-                if(dataDO.getMsLevel() == 1){
+                //
+                if(dataDO == null || dataDO.getMsLevel() == 1){
+                    count ++;
                     continue;
                 }
+
                 RtIntensityPairs rtIntensityPairsOrigin = new RtIntensityPairs(dataDO.getRtArray(), dataDO.getIntensityArray());
                 RtIntensityPairs rtIntensityPairsAfterSmooth = gaussFilter.filter(rtIntensityPairsOrigin, sigma, spacing);
                 //TODO 需要排插一下这两个入参的情况,此处的入参直接写为30,2000
@@ -102,13 +109,17 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
                 rtIntensityPairsOriginList.add(rtIntensityPairsOrigin);
                 maxRtIntensityPairsList.add(maxPeakPairs);
                 intensityRtLeftRtRightPairsList.add(intensityRtLeftRtRightPairs);
+                libraryIntensityList.add(libraryIntensityListAll.get(count));
+                count ++;
+            }
+            if(rtIntensityPairsOriginList.size() == 0){
+                continue;
             }
             List<List<ExperimentFeature>> experimentFeatures = featureFinder.findFeatures(rtIntensityPairsOriginList, maxRtIntensityPairsList, intensityRtLeftRtRightPairsList);
             //list of library intensity List(Double)
-            String peptideRef = group.getPeptideRef();
             SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
             float groupRt = group.getRt().floatValue();
-            List<ScoreRtPair> scoreRtPairs = peakScorer.score(rtIntensityPairsOriginList, experimentFeatures, getIntensityGroupByPep(intensityGroupList, peptideRef).getIntensityList(), slopeIntercept, groupRt, 1000, 30);
+            List<ScoreRtPair> scoreRtPairs = peakScorer.score(rtIntensityPairsOriginList, experimentFeatures, libraryIntensityList, slopeIntercept, groupRt, 1000, 30);
             scoresList.add(scoreRtPairs);
             compoundRt.add(group.getRt().floatValue());
         }
@@ -262,6 +273,7 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
                 return intensityGroup;
             }
         }
+        System.out.println("GetIntensityGroupByPep Error.");
         return null;
     }
 }
