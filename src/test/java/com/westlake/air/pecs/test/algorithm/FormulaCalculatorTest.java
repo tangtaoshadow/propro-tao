@@ -130,20 +130,20 @@ public class FormulaCalculatorTest extends BaseTest {
         transitionDO.setName(null);
         transitionDO.setIntensity(null);
         transitionDO.setIsDecoy(true);
-        transitionDO.setSequence("AGVETTTPSK" + "J");
+        transitionDO.setSequence("AGVETTTPSKJ");
         transitionDO.setAnnotations(null);
         transitionDO.setWithBrackets(true);
         transitionDO.setFullName(null);
-        transitionDO.setPrecursorCharge(1);
+        transitionDO.setPrecursorCharge(2);
         transitionDO.setAnnotations(null);
         transitionDO.setCutInfo(null);
         transitionDO.setAcidList(null);
         transitionDO.setDetecting(false);
         transitionDO.setIdentifying(true);
         transitionDO.setQuantifying(false);
-        Double result = formulaCalculator.getMonoMz(transitionDO);
+        double result = formulaCalculator.getMonoMz(transitionDO);
         double expect = (71.037114 + 57.021464 + 99.068414 + 129.042593 + 101.047679 * 3 + 97.052764 + 87.032028 + 128.094963 + 1.0078250319 * 4 + 15.994915) / 2;
-        assert (result == expect);
+        assert (Math.abs(result-expect)<0.00000001);
     }
 
     @Test
@@ -165,7 +165,7 @@ public class FormulaCalculatorTest extends BaseTest {
         transitionDO.setAnnotations(null);
         transitionDO.setWithBrackets(true);
         transitionDO.setFullName(null);
-        transitionDO.setPrecursorCharge(1);
+        transitionDO.setPrecursorCharge(2);
         transitionDO.setAnnotations(null);
         transitionDO.setCutInfo(null);
         transitionDO.setAcidList(null);
@@ -174,7 +174,7 @@ public class FormulaCalculatorTest extends BaseTest {
         transitionDO.setQuantifying(false);
         Double result = formulaCalculator.getMonoMz(transitionDO);
         double expect = (71.037114 + 57.021464 + 99.068414 + 129.042593 + 101.047679 * 3 + 97.052764 + 87.032028 + 128.094963 + 1.0078250319 * 4 + 15.994915) / 2;
-        assert (result == expect);
+        assert (Math.abs(result-expect)<0.00000001);
     }
 
     @Test

@@ -214,8 +214,10 @@ public class FragmentCalculatorTest extends BaseTest {
 
     @Test
     public void decoyOverviewTest() {
-        TransitionDO transition = getJsonFromFileTest2();
-        FragmentResult result = fragmentCalculator.decoyOverview(transition.getLibraryId());
+        TransitionDO transition = getJsonFromFileTest();
+        FragmentResult result = fragmentCalculator.decoyOverview("5b6712012ada5f2dc8de57d7");
+        FragmentResult fragmentResult = new FragmentResult();
+
     }
 
     @Test
