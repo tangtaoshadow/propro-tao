@@ -69,29 +69,6 @@ public class MathUtil {
         bisectionLowHigh.setHigh(high);
         return bisectionLowHigh;
     }
-    public static BisectionLowHigh bisection(Float[] x ,float value){
-        BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
-        int high = x.length -1;
-        int low = 0;
-        int mid;
-        if(value < x[0]){
-            high = 0;
-        }else if(value > x[x.length - 1]){
-            low = x.length - 1;
-        }else {
-            while (high - low != 1) {
-                mid = low + (high - low + 1) / 2;
-                if (x[mid] < value) {
-                    low = mid;
-                } else {
-                    high = mid;
-                }
-            }
-        }
-        bisectionLowHigh.setLow(low);
-        bisectionLowHigh.setHigh(high);
-        return bisectionLowHigh;
-    }
 
     /**
      * 调用之前必须保证输入数据为升序
@@ -99,7 +76,7 @@ public class MathUtil {
      * @param value 目标数据
      * @return left and right index of x
      */
-    public static BisectionLowHigh bisection(List<Double> x, double value){
+    public static BisectionLowHigh bisection(List<Float> x, double value){
         BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
         int high = x.size() -1;
         int low = 0;
@@ -197,23 +174,6 @@ public class MathUtil {
         return index;
     }
 
-    public static SlopeIntercept trafoInverter(SlopeIntercept slopeIntercept){
-        float slope = slopeIntercept.getSlope();
-        float intercept = slopeIntercept.getIntercept();
-        SlopeIntercept slopeInterceptInvert = new SlopeIntercept();
-
-        if(slope == 0f){
-            slope = 0.000001f;
-        }
-        slopeInterceptInvert.setSlope(1 / slope);
-        slopeInterceptInvert.setIntercept(- intercept / slope);
-
-        return slopeInterceptInvert;
-    }
-
-    public static float trafoApplier(SlopeIntercept slopeInterceptInvert, float value){
-        return value * slopeInterceptInvert.getSlope() + slopeInterceptInvert.getIntercept();
-    }
 
     public static int getLog2n(int value){
         int log2n = 0;

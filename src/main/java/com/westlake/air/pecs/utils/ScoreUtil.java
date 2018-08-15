@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.utils;
 
 import com.westlake.air.pecs.domain.bean.score.IntegrateWindowMzIntensity;
+import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 
 import java.util.List;
 
@@ -9,6 +10,24 @@ import java.util.List;
  * Time: 2018-08-15 19:38
  */
 public class ScoreUtil {
+
+    public static SlopeIntercept trafoInverter(SlopeIntercept slopeIntercept){
+        float slope = slopeIntercept.getSlope();
+        float intercept = slopeIntercept.getIntercept();
+        SlopeIntercept slopeInterceptInvert = new SlopeIntercept();
+
+        if(slope == 0f){
+            slope = 0.000001f;
+        }
+        slopeInterceptInvert.setSlope(1 / slope);
+        slopeInterceptInvert.setIntercept(- intercept / slope);
+
+        return slopeInterceptInvert;
+    }
+
+    public static float trafoApplier(SlopeIntercept slopeInterceptInvert, float value){
+        return value * slopeInterceptInvert.getSlope() + slopeInterceptInvert.getIntercept();
+    }
 
     public static float[] normalizeSum(List libraryIntensity){
         float[] normalizedLibraryIntensity = new float[libraryIntensity.size()];
@@ -27,7 +46,7 @@ public class ScoreUtil {
         return normalizedLibraryIntensity;
     }
 
-    public static IntegrateWindowMzIntensity integrateWindow(List<Double> spectrumMzArray, List<Double> spectrumIntArray, double left, double right){
+    public static IntegrateWindowMzIntensity integrateWindow(List<Float> spectrumMzArray, List<Float> spectrumIntArray, double left, double right){
         IntegrateWindowMzIntensity mzIntensity = new IntegrateWindowMzIntensity();
 
         float mz = 0f, intensity = 0f;
