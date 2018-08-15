@@ -9,7 +9,7 @@ import com.westlake.air.pecs.utils.MathUtil;
  * Time: 2018-08-01 15：27
  */
 public class PeakSpline {
-    private float[] a, b, c, d, x;
+    private double[] a, b, c, d, x;
 
     // TODO: 暂时只有1阶导数
     public float derivatives(float value){
@@ -17,8 +17,8 @@ public class PeakSpline {
         if(x[i] > value || x[x.length-1] == value){
             --i;
         }
-        float xx = value - x[i];
-        return b[i] + 2 * c[i] * xx + 3 * d[i] * xx * xx;
+        double xx = value - x[i];
+        return (float)(b[i] + 2 * c[i] * xx + 3 * d[i] * xx * xx);
     }
 
     public float eval(float value){
@@ -26,22 +26,22 @@ public class PeakSpline {
         if(x[i] > value || x[x.length-1] == value){
             --i;
         }
-        float xx = value - x[i];
-        return ((d[i] * xx + c[i]) * xx + b[i]) * xx + a[i];
+        double xx = value - x[i];
+        return (float)(((d[i] * xx + c[i]) * xx + b[i]) * xx + a[i]);
     }
 
     public void init(RtIntensityPairs rtIntensityPairs, int leftBoundary, int rightBoundary){
         int maxIndex = rightBoundary - leftBoundary;
-        x = new float[maxIndex + 1];
-        a = new float[maxIndex + 1];
-        b = new float[maxIndex];
-        d = new float[maxIndex];
-        c = new float[maxIndex + 1]; //c[maxIndex] = 0;
-        float[] h = new float[maxIndex];
-        float[] mu = new float[maxIndex];
-        float[] z = new float[maxIndex];
+        x = new double[maxIndex + 1];
+        a = new double[maxIndex + 1];
+        b = new double[maxIndex];
+        d = new double[maxIndex];
+        c = new double[maxIndex + 1]; //c[maxIndex] = 0;
+        double[] h = new double[maxIndex];
+        double[] mu = new double[maxIndex];
+        double[] z = new double[maxIndex];
 
-        float l;
+        double l;
         for(int i = 0; i<= maxIndex; i++){
             x[i] = rtIntensityPairs.getRtArray()[leftBoundary + i];
             a[i] = rtIntensityPairs.getIntensityArray()[leftBoundary + i];

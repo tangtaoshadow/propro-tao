@@ -45,7 +45,7 @@ public class MathUtil {
         return (covXY * covXY) / (varX * varY);
     }
 
-    public static BisectionLowHigh bisection(float[] x ,float value){
+    public static BisectionLowHigh bisection(double[] x ,double value){
         BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
         int high = x.length -1;
         int low = 0;
