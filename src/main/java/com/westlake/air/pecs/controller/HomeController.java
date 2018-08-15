@@ -27,7 +27,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/")
-public class HomeController {
+public class HomeController extends BaseController{
 
     private Logger logger = LoggerFactory.getLogger(HomeController.class);
 
@@ -41,17 +41,24 @@ public class HomeController {
     TaskService taskService;
     @Autowired
     ConfigDAO configDAO;
+
+    public static int SHOW_NUM = 4;
     @RequestMapping("/")
     String home(Model model) {
-        LibraryQuery libraryQuery = new LibraryQuery(1, 5, Sort.Direction.DESC, "createDate");
+        LibraryQuery libraryQuery = new LibraryQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");
         ResultDO<List<LibraryDO>> libRes = libraryService.getList(libraryQuery);
-        ResultDO<List<ExperimentDO>> expRes = experimentService.getList(new ExperimentQuery(1, 5));
-        ResultDO<List<AnalyseOverviewDO>> overviewRes = analyseOverviewService.getList(new AnalyseOverviewQuery(1, 5));
-        TaskQuery query = new TaskQuery(1, 5);
+        ResultDO<List<ExperimentDO>> expRes = experimentService.getList(new ExperimentQuery(1, SHOW_NUM));
+        ResultDO<List<AnalyseOverviewDO>> overviewRes = analyseOverviewService.getList(new AnalyseOverviewQuery(1, SHOW_NUM));
+        TaskQuery query = new TaskQuery(1, SHOW_NUM);
         ResultDO<List<TaskDO>> taskTotalRes = taskService.getList(query);
         query.setStatus(TaskDO.STATUS_RUNNING);
         ResultDO<List<TaskDO>> taskRunningRes = taskService.getList(query);
         ConfigDO configDO = configDAO.getConfig();
+
+        List<LibraryDO> slist = getLibraryList(0);
+        List<LibraryDO> iRtlist = getLibraryList(1);
+        model.addAttribute("libraries", slist);
+        model.addAttribute("iRtLibraries", iRtlist);
 
         model.addAttribute("taskRunningCount", taskRunningRes.getTotalNum());
         model.addAttribute("taskTotalCount", taskTotalRes.getTotalNum());

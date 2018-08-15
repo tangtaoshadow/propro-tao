@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.service.impl;
 
 import com.westlake.air.pecs.constants.ResultCode;
+import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.TaskDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
@@ -83,5 +84,10 @@ public class TaskServiceImpl implements TaskService {
         } catch (Exception e) {
             return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
+    }
+
+    @Override
+    public ResultDO doTask(TaskTemplate taskTemplate) {
+        return null;
     }
 }

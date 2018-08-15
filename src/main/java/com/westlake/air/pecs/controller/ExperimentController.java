@@ -84,8 +84,8 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/add")
     String add(Model model,
                @RequestParam(value = "name", required = true) String name,
-               @RequestParam(value = "description", required = false) String description,
                @RequestParam(value = "fileLocation", required = true) String fileLocation,
+               @RequestParam(value = "description", required = false) String description,
                @RequestParam(value = "libraryId", required = false) String libraryId,
                @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
                RedirectAttributes redirectAttributes) {
