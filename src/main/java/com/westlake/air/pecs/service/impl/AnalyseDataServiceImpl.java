@@ -179,15 +179,20 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
 
             //根据标准库ID和PeptideRef获取实际卷积所得的对象列表
             query.setPeptideRef(peptide.getPeptideRef());
+            query.setMsLevel(2);
             List<AnalyseDataDO> dataList = analyseDataDAO.getAll(query);
 
-            //开始比对结果,组成最终的HashMap,
+            //开始比对结果,组成最终的HashMap
             HashMap<String, AnalyseDataDO> dataMap = new HashMap<>();
             for (String cutInfo : cutInfos) {
                 dataMap.put(cutInfo, null);
             }
             for (AnalyseDataDO dataDO : dataList) {
-                dataMap.put(dataDO.getCutInfo(), dataDO);
+                //以库里面的cutInfos为准,这里做这个contains判断是因为有时候标准库和iRT校准库中同一个Peptide对应的Transition不同,当出现不同的时候,
+                //卷积数据中的数据和Library可能会不一一匹配,因此需要舍弃掉卷积结果中的无关数据,所以有这层判断
+                if(dataMap.containsKey(dataDO.getCutInfo())){
+                    dataMap.put(dataDO.getCutInfo(), dataDO);
+                }
             }
 
             TransitionGroup group = new TransitionGroup();
