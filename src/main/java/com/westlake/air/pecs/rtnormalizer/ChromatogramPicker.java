@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.rtnormalizer;
 
 import com.westlake.air.pecs.constants.Constants;
+import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.utils.MathUtil;
@@ -55,9 +56,9 @@ public class ChromatogramPicker {
     private int findClosestPeak(RtIntensityPairs rtIntensityPairs, float rt) {
 
         //bisection
-        int low = MathUtil.bisection(rtIntensityPairs, rt);
-        int high = rtIntensityPairs.getRtArray().length - 1;
-
+        BisectionLowHigh bisectionLowHigh = MathUtil.bisection(rtIntensityPairs, rt);
+        int low = bisectionLowHigh.getLow();
+        int high = bisectionLowHigh.getHigh();
 
         if( Math.abs(rtIntensityPairs.getRtArray()[low] - rt) < Math.abs(rtIntensityPairs.getRtArray()[high] - rt)){
             return low;

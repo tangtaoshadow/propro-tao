@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.rtnormalizer;
 
 import com.westlake.air.pecs.constants.Constants;
+import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
@@ -100,10 +101,10 @@ public class FeatureFinder {
     private RtIntensityPairs raster(RtIntensityPairs chromatogram, RtIntensityPairs masterChromatogram, float leftBoundary, float rightBoundary){
         int chromatogramLeft, chromatogramRight;
         int masterChromLeft, masterChromRight;
-        chromatogramLeft = MathUtil.bisection(chromatogram, leftBoundary);
-        chromatogramRight = MathUtil.bisection(chromatogram, rightBoundary) + 1;
-        masterChromLeft = MathUtil.bisection(masterChromatogram, leftBoundary);
-        masterChromRight = MathUtil.bisection(masterChromatogram, rightBoundary) + 1;
+        chromatogramLeft = MathUtil.bisection(chromatogram, leftBoundary).getLow();
+        chromatogramRight = MathUtil.bisection(chromatogram, rightBoundary).getHigh();
+        masterChromLeft = MathUtil.bisection(masterChromatogram, leftBoundary).getLow();
+        masterChromRight = MathUtil.bisection(masterChromatogram, rightBoundary).getHigh();
         int masterChromLeftStatic = masterChromLeft;
 
         Float[] rt = new Float[masterChromRight - masterChromLeft + 1];

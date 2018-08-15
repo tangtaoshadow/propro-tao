@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.utils;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.RtPair;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 
@@ -44,61 +45,105 @@ public class MathUtil {
         return (covXY * covXY) / (varX * varY);
     }
 
-    public static int bisection(float[] x ,float value){
+    public static BisectionLowHigh bisection(float[] x ,float value){
+        BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
         int high = x.length -1;
         int low = 0;
         int mid;
-        while(high - low != 1){
-            mid = low + (high - low + 1) / 2;
-            if(x[mid] <= value){
-                low = mid;
-            }else {
-                high = mid;
+
+        if(value < x[0]){
+            high = 0;
+        }else if(value > x[x.length - 1]){
+            low = x.length - 1;
+        }else {
+            while (high - low != 1) {
+                mid = low + (high - low + 1) / 2;
+                if (x[mid] < value) {
+                    low = mid;
+                } else {
+                    high = mid;
+                }
             }
         }
-        return low;
+        bisectionLowHigh.setLow(low);
+        bisectionLowHigh.setHigh(high);
+        return bisectionLowHigh;
     }
-    public static int bisection(Float[] x ,float value){
+    public static BisectionLowHigh bisection(Float[] x ,float value){
+        BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
         int high = x.length -1;
         int low = 0;
         int mid;
-        while(high - low != 1){
-            mid = low + (high - low + 1) / 2;
-            if(x[mid] <= value){
-                low = mid;
-            }else {
-                high = mid;
+        if(value < x[0]){
+            high = 0;
+        }else if(value > x[x.length - 1]){
+            low = x.length - 1;
+        }else {
+            while (high - low != 1) {
+                mid = low + (high - low + 1) / 2;
+                if (x[mid] < value) {
+                    low = mid;
+                } else {
+                    high = mid;
+                }
             }
         }
-        return low;
+        bisectionLowHigh.setLow(low);
+        bisectionLowHigh.setHigh(high);
+        return bisectionLowHigh;
     }
-    public static int bisection(List<Double> x, double value){
+
+    /**
+     * 调用之前必须保证输入数据为升序
+     * @param x 输入数据
+     * @param value 目标数据
+     * @return left and right index of x
+     */
+    public static BisectionLowHigh bisection(List<Double> x, double value){
+        BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
         int high = x.size() -1;
         int low = 0;
         int mid;
-        while(high - low != 1){
-            mid = low + (high - low + 1) / 2;
-            if(x.get(mid) <= value){
-                low = mid;
-            }else {
-                high = mid;
+        if(x.get(0)> value){
+            high = 0;
+        }else if(x.get(x.size()-1) < value){
+            low = x.size() - 1;
+        }else {
+            while (high - low != 1) {
+                mid = low + (high - low + 1) / 2;
+                if (x.get(mid) < value) {
+                    low = mid;
+                } else {
+                    high = mid;
+                }
             }
         }
-        return low;
+        bisectionLowHigh.setLow(low);
+        bisectionLowHigh.setHigh(high);
+        return bisectionLowHigh;
     }
-    public static int bisection(RtIntensityPairs x , float value){
+    public static BisectionLowHigh bisection(RtIntensityPairs x , float value){
+        BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
         int high = x.getRtArray().length -1;
         int low = 0;
         int mid;
-        while(high - low != 1){
-            mid = low + (high - low + 1) / 2;
-            if(x.getRtArray()[mid] <= value){
-                low = mid;
-            }else {
-                high = mid;
+        if(x.getRtArray()[0]>value){
+            high = 0;
+        }else if(x.getRtArray()[x.getRtArray().length-1]<value){
+            low = x.getRtArray().length - 1;
+        }else {
+            while (high - low != 1) {
+                mid = low + (high - low + 1) / 2;
+                if (x.getRtArray()[mid] < value) {
+                    low = mid;
+                } else {
+                    high = mid;
+                }
             }
         }
-        return low;
+        bisectionLowHigh.setLow(low);
+        bisectionLowHigh.setHigh(high);
+        return bisectionLowHigh;
     }
 
     /**

@@ -13,13 +13,13 @@ public class PeakSpline {
 
     // TODO: 暂时只有1阶导数
     public float derivatives(float value){
-        int i = MathUtil.bisection(x, value);
+        int i = MathUtil.bisection(x, value).getHigh();
         float xx = value - x[i];
         return b[i] + 2 * c[i] * xx + 3 * d[i] * xx * xx;
     }
 
     public float eval(float value){
-        int i = MathUtil.bisection(x, value);
+        int i = MathUtil.bisection(x, value).getHigh();
         float xx = value - x[i];
         return ((d[i] * xx + c[i]) * xx + b[i]) * xx + a[i];
     }

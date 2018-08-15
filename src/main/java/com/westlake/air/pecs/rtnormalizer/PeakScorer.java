@@ -4,6 +4,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.westlake.air.pecs.dao.AminoAcidDAO;
 import com.westlake.air.pecs.dao.UnimodDAO;
+import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.constants.Constants;
@@ -146,8 +147,9 @@ public class PeakScorer {
         }
         for(int k = 0; k<signalToNoiseList.size();k++){
             rt = experimentFeatures.get(0).getRt();
-            leftIndex = MathUtil.bisection(chromatograms.get(k), rt);
-            rightIndex = leftIndex + 1;
+            BisectionLowHigh bisectionLowHigh = MathUtil.bisection(chromatograms.get(k), rt);
+            leftIndex = bisectionLowHigh.getLow();
+            rightIndex = bisectionLowHigh.getHigh();
             if(Math.abs(chromatograms.get(k).getRtArray()[leftIndex] - rt) < Math.abs(chromatograms.get(k).getRtArray()[rightIndex] - rt)){
                 snScore += signalToNoiseList.get(k)[leftIndex];
             }else {
@@ -245,8 +247,8 @@ public class PeakScorer {
 
             //integrate window
             float mz = 0f, intensity = 0f;
-            int leftIndex = MathUtil.bisection(spectrumMzArray, left);
-            int rightIndex = MathUtil.bisection(spectrumMzArray, right);
+            int leftIndex = MathUtil.bisection(spectrumMzArray, left).getHigh();
+            int rightIndex = MathUtil.bisection(spectrumMzArray, right).getHigh();
             if(spectrumMzArray[0] < left){
                 leftIndex ++;
             }
@@ -296,8 +298,8 @@ public class PeakScorer {
 
                 //integrate window
                 float mz = 0f, intensity = 0f;
-                int leftIndex = MathUtil.bisection(spectrumMzArray, left);
-                int rightIndex = MathUtil.bisection(spectrumMzArray, right);
+                int leftIndex = MathUtil.bisection(spectrumMzArray, left).getHigh();
+                int rightIndex = MathUtil.bisection(spectrumMzArray, right).getHigh();
                 //TODO: bisection series
                 if(spectrumMzArray[0] < left){
                     leftIndex ++;
@@ -425,14 +427,9 @@ public class PeakScorer {
 
                 //integrate window
                 float mz = 0f, intensity = 0f;
-                int leftIndex = MathUtil.bisection(spectrumMzArray, left);
-                int rightIndex = MathUtil.bisection(spectrumMzArray, right);
-                if(spectrumMzArray[0] < left){
-                    leftIndex ++;
-                }
-                if(spectrumMzArray[spectrumMzArray.length-1] < right){
-                    rightIndex ++;
-                }
+                int leftIndex = MathUtil.bisection(spectrumMzArray, left).getHigh();
+                int rightIndex = MathUtil.bisection(spectrumMzArray, right).getHigh();
+
                 for(int index = leftIndex; index <=rightIndex; index ++){
                     intensity += spectrumIntArray[index];
                     mz += spectrumMzArray[index] * spectrumIntArray[index];
@@ -560,15 +557,9 @@ public class PeakScorer {
 
     private IntegrateWindowMzIntensity integrateWindow(List<Double> spectrumMzArray, List<Double> spectrumIntArray, double left, double right){
         float mz = 0f, intensity = 0f;
-        int leftIndex = MathUtil.bisection(spectrumMzArray, left);
-        int rightIndex = MathUtil.bisection(spectrumMzArray, right);
-        //TODO: bisection series
-        if(spectrumMzArray.get(0) < left){
-            leftIndex ++;
-        }
-        if(spectrumMzArray.get(spectrumMzArray.size()-1) < right){
-            rightIndex ++;
-        }
+        int leftIndex = MathUtil.bisection(spectrumMzArray, left).getHigh();
+        int rightIndex = MathUtil.bisection(spectrumMzArray, right).getLow();
+
         for(int index = leftIndex; index <=rightIndex; index ++){
             intensity += spectrumIntArray.get(index);
             mz += spectrumMzArray.get(index) * spectrumIntArray.get(index);
