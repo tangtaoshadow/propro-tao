@@ -91,7 +91,7 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
             for(AnalyseDataDO dataDO : group.getDataMap().values()){
                 //TODO @王瑞敏 判空指针
                 //
-                if(dataDO == null || dataDO.getMsLevel() == 1){
+                if(dataDO == null){
                     count ++;
                     continue;
                 }
