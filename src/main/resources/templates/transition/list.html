@@ -141,10 +141,7 @@
                                     <a th:href="|/library/detail/${transition.libraryId}|"
                                        th:text="${transition.libraryName}"></a>
                                 </td>
-                                <td>
-                                    <a th:href="|/transition/list?proteinName=${transition.proteinName}|"
-                                       th:text="${transition.proteinName}"></a>
-                                </td>
+                                <td th:text="${transition.proteinName}"></td>
                                 <td th:text="${transition.name}"></td>
                                 <!--<td>-->
                                 <!--<a th:href="|/transition/list?sequence=${transition.targetSequence}|"-->

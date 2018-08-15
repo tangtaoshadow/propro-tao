@@ -20,7 +20,7 @@
                     <!--begin::New Users-->
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">Tasks</h2>
+                            <h2 class="m-widget24__title">任务(Tasks)</h2>
                             <br>
                             <span class="m-widget24__desc">Running Tasks / Total Tasks</span>
                             <span class="m-widget24__stats m--font-success" th:text="${taskTotalCount}"></span>
@@ -30,7 +30,7 @@
                             <div class="m-widget2">
                                 <div th:each="task:${runningTasks}" class="m-widget2__item m-widget2__item--success">
                                     <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc">
+                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/task/detail/${task.id}'|">
                                         <span class="m-widget2__text" th:text="${task.name}"></span>
                                         <br>
                                         <span class="m-widget2__user-name">
@@ -47,7 +47,7 @@
                     <!--begin::Total Profit-->
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">Experiments</h2>
+                            <h2 class="m-widget24__title">实验数据(Experiments)</h2>
                             <br>
                             <span class="m-widget24__desc">MzXML or MzXML Format</span>
                             <span class="m-widget24__stats m--font-brand" th:text="${expCount}"></span>
@@ -55,8 +55,9 @@
                             <div class="m-widget2">
                                 <div th:each="exp:${exps}" class="m-widget2__item m-widget2__item--warning">
                                     <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc">
-                                        <span class="m-widget2__text" th:text="${exp.name}"></span>
+                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/experiment/detail/${exp.id}'|">
+                                        <span class="m-widget2__text" th:text="${exp.name}">
+                                        </span>
                                         <br>
                                         <span class="m-widget2__user-name">
 										    <a href="#" class="m-widget2__link" th:text="|${exp.creator}-${#dates.format(exp.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
@@ -72,7 +73,7 @@
                     <!--begin::New Feedbacks-->
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">Libraries</h2>
+                            <h2 class="m-widget24__title">标准库(Libraries)</h2>
                             <br>
                             <span class="m-widget24__desc">Include Standard and iRT libraries</span>
                             <span class="m-widget24__stats m--font-info" th:text="${libCount}"></span>
@@ -80,7 +81,7 @@
                             <div class="m-widget2">
                                 <div th:each="lib:${libs}" class="m-widget2__item m-widget2__item--info">
                                     <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc">
+                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/library/detail/${lib.id}'|">
                                         <span class="m-widget2__text" th:text="${lib.name}"></span>
                                         <br>
                                         <span class="m-widget2__user-name">
@@ -97,7 +98,7 @@
                     <!--begin::New Orders-->
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">Analyses</h2>
+                            <h2 class="m-widget24__title">卷积分析(Analyses)</h2>
                             <br>
                             <span class="m-widget24__desc">The convoluted data</span>
                             <span class="m-widget24__stats m--font-danger" th:text="${overviewCount}"></span>
@@ -105,7 +106,7 @@
                             <div class="m-widget2">
                                 <div th:each="overview:${overviews}" class="m-widget2__item m-widget2__item--accent">
                                     <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc">
+                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/analyse/overview/detail/${overview.id}'|">
                                         <span class="m-widget2__text" th:text="${overview.name}"></span>
                                         <br>
                                         <span class="m-widget2__user-name">
@@ -124,54 +125,269 @@
     <!--End::Section-->
 
     <div class="row">
-        <div class="col-xl-6">
-            <!--begin:: Widgets/Company Summary-->
-            <div class="m-portlet m-portlet--full-height ">
+        <div class="col-md-4">
+            <!--begin::Portlet-->
+            <div class="m-portlet m-portlet--tab">
                 <div class="m-portlet__head">
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
-                            <h3 class="m-portlet__head-text">
-                               全局环境配置(Global Environment Config)
-                            </h3>
+                            <span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
+                            <h3 class="m-portlet__head-text">导入实验数据(支持MzXML,MzML格式的文件)</h3>
                         </div>
                     </div>
                 </div>
-                <div class="m-portlet__body">
-                    <div class="m-widget13">
-                        <div class="m-widget13__item">
-							<span class="m-widget13__desc m--align-right">
-								原始实验文件存储路径(Experiment File Path):
-							</span>
-                            <span class="m-widget13__text m-widget13__text-bolder" th:text="${config?.experimentFilePath}"></span>
+                <!--begin::Form-->
+                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/experiment/add}" th:method="post" enctype="multipart/form-data">
+                    <div class="m-portlet__body">
+                        <div class="form-group m-form__group m--margin-top-10">
+                            <div class="alert m-alert m-alert--default" role="alert" th:if="${exp_error_msg}"></div>
+                            <div class="alert m-alert m-alert--default" role="alert" th:if="${exp_success_msg}"></div>
                         </div>
-                        <div class="m-widget13__item">
-							<span class="m-widget13__desc m--align-right">
-								标准库文件存储路径(Library File Path):
-							</span>
-                            <span class="m-widget13__text m-widget13__text-bolder" th:text="${config?.experimentFilePath}"></span>
+                        <div class="form-group m-form__group row">
+                            <label for="name" class="col-2 col-form-label">
+                                实验数据名称
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="name"
+                                       placeholder="Enter Experiment Name" name="name" th:value="${name}">
+                                <span class="m-form__help">实验数据名称全局唯一</span>
+                            </div>
                         </div>
-                        <div class="m-widget13__item">
-							<span class="m-widget13__desc m--align-right">
-								MzXML压缩文件默认后缀(Default Suffix of the Compressed MzXML File):
-							</span>
-                            <span class="m-widget13__text m-widget13__text-bolder" th:text="${config?.suffixForCompressorFile}"></span>
+                        <div class="form-group m-form__group row">
+                            <label for="fileLocation" class="col-2 col-form-label">
+                                文件绝对路径
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="fileLocation"
+                                       placeholder="Enter File Location,such as D:/data/xxx.mzXML" name="fileLocation" th:value="${fileLocation}">
+                                <span class="m-form__help">文件在服务器上的绝对路径</span>
+                            </div>
                         </div>
-                        <div class="m-widget13__item">
-							<span class="m-widget13__desc m--align-right">
-								老旧实验文件存储路径(Old Experiment File Path):
-							</span>
-                            <span class="m-widget13__text m-widget13__text-bolder" th:text="${config?.oldExperimentFilePath}"></span>
+                        <div class="form-group m-form__group row">
+                            <label for="libraryId" class="col-2 col-form-label">
+                                默认的相关标准库
+                            </label>
+                            <div class="col-10">
+                                <select class="form-control m-input" id="libraryId" name="libraryId">
+                                    <option th:each="library:${libraries}" th:value="${library.id}" th:text="${library.name}"></option>
+                                </select>
+                            </div>
                         </div>
-
-                        <div class="m-widget13__action m--align-right">
-                            <button onclick="window.location.href='/config/config'" type="button" class="m-widget__detalis  btn m-btn--pill  btn-accent">
-                                修改(Modified)
+                        <div class="form-group m-form__group row">
+                            <label for="iRtLibraryId" class="col-2 col-form-label">
+                                默认的相关iRT校准库
+                            </label>
+                            <div class="col-10">
+                                <select class="form-control m-input" id="iRtLibraryId" name="iRtLibraryId">
+                                    <option th:each="library:${iRtLibraries}" th:value="${library.id}" th:text="${library.name}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="description" class="col-2 col-form-label">
+                                详细描述
+                            </label>
+                            <div class="col-10">
+                            <textarea class="form-control m-input" id="description" name="description"
+                                      rows="3" th:value="${description}"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m-portlet__foot m-portlet__foot--fit">
+                        <div class="m-form__actions">
+                            <button type="submit" class="btn btn-primary">
+                                提交
                             </button>
                         </div>
                     </div>
-                </div>
+                </form>
+                <!--end::Form-->
             </div>
-            <!--end:: Widgets/Company Summary-->
+            <!--end::Portlet-->
+        </div>
+        <div class="col-md-4">
+            <!--begin::Portlet-->
+            <div class="m-portlet m-portlet--tab">
+                <div class="m-portlet__head">
+                    <div class="m-portlet__head-caption">
+                        <div class="m-portlet__head-title">
+                            <span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
+                            <h3 class="m-portlet__head-text">创建标准库(支持TSV,CSV,TraML格式)</h3>
+                        </div>
+                    </div>
+                </div>
+                <!--begin::Form-->
+                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/library/add}" th:method="post"
+                      enctype="multipart/form-data">
+                    <div class="m-portlet__body">
+                        <div class="form-group m-form__group m--margin-top-10">
+                            <div class="alert m-alert m-alert--default" role="alert" th:if="${lib_error_msg}"></div>
+                            <div class="alert m-alert m-alert--default" role="alert" th:if="${lib_success_msg}"></div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="libraryName" class="col-2 col-form-label">
+                                库文件名称
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="libraryName"
+                                       placeholder="Enter Library Name" name="name" th:value="${library?.name}">
+                                <span class="m-form__help">库名称全局唯一</span>
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="instrument" class="col-2 col-form-label">
+                                设备名称
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="instrument" name="instrument"
+                                       placeholder="Instrument Name" th:value="${library?.instrument}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="instrument" class="col-2 col-form-label">
+                                库类型
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="type" name="type"
+                                       placeholder="0:标准库,1:校准库" th:value="${library?.type}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label class="col-2 col-form-label">
+                                是否录入所有肽段
+                            </label>
+                            <div class="col-10">
+                                <div class="m-checkbox-list">
+                                    <label class="m-checkbox">
+                                        <input type="checkbox" name="justReal">
+                                        仅录入真实肽段
+                                        <span></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="description" class="col-2 col-form-label">
+                                详细描述
+                            </label>
+                            <div class="col-10">
+                            <textarea class="form-control m-input" id="description" name="description"
+                                      rows="3" th:value="${library?.description}"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label class="col-2 col-form-label">
+                                上传TSV格式文件
+                            </label>
+                            <div class="col-10">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" name="file" id="file">
+                                    <label class="custom-file-label" for="file">
+                                        选择文件
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="m-portlet__foot m-portlet__foot--fit">
+                        <div class="m-form__actions">
+                            <button type="submit" class="btn btn-primary">
+                                提交
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <!--end::Form-->
+            </div>
+            <!--end::Portlet-->
+        </div>
+        <div class="col-md-4">
+            <div class="m-portlet m-portlet--tab">
+                <div class="m-portlet__head">
+                    <div class="m-portlet__head-caption">
+                        <div class="m-portlet__head-title">
+                            <span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
+                            <h3 class="m-portlet__head-text">全局环境配置(Global Environment Config)</h3>
+                        </div>
+                    </div>
+                </div>
+                <!--begin::Form-->
+                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/config/update}" th:method="post">
+                    <div class="m-portlet__body">
+                        <div class="form-group m-form__group m--margin-top-10">
+                            <div class="alert m-alert m-alert--default" role="alert" th:if="${config_error_msg}"></div>
+                            <div class="alert m-alert m-alert--default" role="alert" th:if="${config_success_msg}"></div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="experimentFilePath" class="col-3 col-form-label">
+                                实验文件存储路径(MzXML,MzML)
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="experimentFilePath"
+                                       placeholder="Enter Experiment File Path" name="experimentFilePath" th:value="${config?.experimentFilePath}">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="libraryFilePath" class="col-3 col-form-label">
+                                标准库/iRT校准库文件存储路径(TSV,CSV,TraML)
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="libraryFilePath"
+                                       placeholder="Enter Library File Path" name="libraryFilePath" th:value="${config?.libraryFilePath}">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="oldExperimentFilePath" class="col-3 col-form-label">
+                                老实验数据存储位置
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="oldExperimentFilePath"
+                                       placeholder="Enter Old Experiment File Path" name="oldExperimentFilePath"
+                                       th:value="${config?.oldExperimentFilePath}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="suffixForCompressorFile" class="col-3 col-form-label">
+                                压缩后的文件后缀
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="suffixForCompressorFile"
+                                       placeholder="Enter Suffix For Compressor File" name="suffixForCompressorFile"
+                                       th:value="${config?.suffixForCompressorFile}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="lastModifiedDate" class="col-3 col-form-label">
+                                最后修改时间
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="lastModifiedDate" readonly name="lastModifiedDate" th:value="${#dates.format(config?.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="createDate" class="col-3 col-form-label">
+                                创建时间
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="createDate" readonly name="createDate" th:value="${#dates.format(config?.createDate,'yyyy-MM-dd HH:mm:ss')}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m-portlet__foot m-portlet__foot--fit">
+                        <div class="m-form__actions">
+                            <button type="submit" class="btn btn-primary">
+                                更新
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <!--end::Form-->
+            </div>
         </div>
     </div>
 </div>
