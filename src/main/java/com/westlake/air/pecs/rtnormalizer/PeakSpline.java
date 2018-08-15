@@ -12,22 +12,22 @@ public class PeakSpline {
     private double[] a, b, c, d, x;
 
     // TODO: 暂时只有1阶导数
-    public float derivatives(float value){
+    public double derivatives(float value){
         int i = MathUtil.bisection(x, value).getHigh();
         if(x[i] > value || x[x.length-1] == value){
             --i;
         }
         double xx = value - x[i];
-        return (float)(b[i] + 2 * c[i] * xx + 3 * d[i] * xx * xx);
+        return (b[i] + 2 * c[i] * xx + 3 * d[i] * xx * xx);
     }
 
-    public float eval(float value){
+    public double eval(float value){
         int i = MathUtil.bisection(x, value).getHigh();
         if(x[i] > value || x[x.length-1] == value){
             --i;
         }
         double xx = value - x[i];
-        return (float)(((d[i] * xx + c[i]) * xx + b[i]) * xx + a[i]);
+        return (((d[i] * xx + c[i]) * xx + b[i]) * xx + a[i]);
     }
 
     public void init(RtIntensityPairs rtIntensityPairs, int leftBoundary, int rightBoundary){
