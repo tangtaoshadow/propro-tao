@@ -18,7 +18,7 @@ public interface AnalyseOverviewService {
 
     ResultDO<List<AnalyseOverviewDO>> getList(AnalyseOverviewQuery targetQuery);
 
-    ResultDO insert(AnalyseOverviewDO recordDO);
+    ResultDO insert(AnalyseOverviewDO overviewDO);
 
     ResultDO delete(String id);
 

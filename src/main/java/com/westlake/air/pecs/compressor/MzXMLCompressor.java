@@ -22,7 +22,7 @@ import java.util.List;
  * Created by James Lu MiaoShan
  * Time: 2018-08-09 14:57
  */
-@Component("mzXMLCompressionConverter")
+@Component("mzXMLCompressor")
 public class MzXMLCompressor {
 
     public final Logger logger = LoggerFactory.getLogger(MzMLParser.class);

@@ -173,7 +173,7 @@ public class LibraryController extends BaseController {
     String detail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
         if (resultDO.isSuccess()) {
-            if(resultDO.getModel().getType().equals(LibraryDO.TYPE_VERIFY)){
+            if(resultDO.getModel().getType().equals(LibraryDO.TYPE_IRT)){
                 Double[] range = transitionService.getRTRange(id);
                 if(range != null && range.length == 2){
                     model.addAttribute("minRt",range[0]);

@@ -38,13 +38,17 @@ public class HomeController {
 
     @RequestMapping("/")
     String home(Model model) {
-        ResultDO<List<LibraryDO>> libraries = libraryService.getList(new LibraryQuery());
-        ResultDO<List<ExperimentDO>> experiments = experimentService.getList(new ExperimentQuery());
-        ResultDO<List<AnalyseOverviewDO>> overviews = analyseOverviewService.getList(new AnalyseOverviewQuery());
+        ResultDO<List<LibraryDO>> libRes = libraryService.getList(new LibraryQuery());
+        ResultDO<List<ExperimentDO>> expRes = experimentService.getList(new ExperimentQuery());
+        ResultDO<List<AnalyseOverviewDO>> overviewRes = analyseOverviewService.getList(new AnalyseOverviewQuery());
 
-        model.addAttribute("libraries",libraries);
-        model.addAttribute("experiments",experiments);
-        model.addAttribute("overviews",overviews);
+        model.addAttribute("libCount", libRes.getTotalNum());
+        model.addAttribute("expCount", expRes.getTotalNum());
+        model.addAttribute("overviewCount", overviewRes.getTotalNum());
+        model.addAttribute("taskCount", 0);
+        model.addAttribute("libraries", libRes.getModel());
+        model.addAttribute("experiments", expRes.getModel());
+        model.addAttribute("overviews", overviewRes.getModel());
         return "/home";
     }
 

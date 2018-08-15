@@ -83,7 +83,7 @@ public class AnalyseController extends BaseController {
         if (resultDO.isSuccess()) {
             model.addAttribute("overview", resultDO.getModel());
             Long count = analyseDataService.count(new AnalyseDataQuery(id, 2));
-            ResultDO<LibraryDO> resLib = libraryService.getById(resultDO.getModel().getSLibraryId());
+            ResultDO<LibraryDO> resLib = libraryService.getById(resultDO.getModel().getLibraryId());
             if(resLib.isFailed()){
                 redirectAttributes.addFlashAttribute(ERROR_MSG, resLib.getMsgInfo());
                 return "redirect:/analyse/overview/list";
@@ -158,7 +158,7 @@ public class AnalyseController extends BaseController {
             model.addAttribute("overview", overviewResult.getModel());
         }
 
-        ResultDO<List<TransitionGroup>> resultDO = analyseDataService.getTransitionGroup(overviewId, overviewResult.getModel().getVLibraryId(), null);
+        ResultDO<List<TransitionGroup>> resultDO = analyseDataService.getTransitionGroup(overviewId, overviewResult.getModel().getIRtLibraryId(), null);
         List<TransitionGroup> groups = resultDO.getModel();
         model.addAttribute("groups", groups);
         model.addAttribute("totalPage", resultDO.getTotalPage());
@@ -184,7 +184,7 @@ public class AnalyseController extends BaseController {
         }
 
         AnalyseDataQuery query = new AnalyseDataQuery();
-        query.setLibraryId(overviewResult.getModel().getVLibraryId());
+        query.setLibraryId(overviewResult.getModel().getIRtLibraryId());
         long start = System.currentTimeMillis();
         ResultDO rtResult = rtNormalizerService.compute(overviewId, sigma, spacing);
         System.out.println("Cost:" + (System.currentTimeMillis() - start));
@@ -207,7 +207,7 @@ public class AnalyseController extends BaseController {
 
         AnalyseOverviewDO overview = overviewResult.getModel();
 
-        List<TransitionDO> transitionDOList = transitionService.getAllByLibraryId(overview.getVLibraryId());
+        List<TransitionDO> transitionDOList = transitionService.getAllByLibraryId(overview.getIRtLibraryId());
         List<AnalyseDataDO> datas = new ArrayList<>();
         for (TransitionDO transitionDO : transitionDOList) {
             AnalyseDataDO data = new AnalyseDataDO();

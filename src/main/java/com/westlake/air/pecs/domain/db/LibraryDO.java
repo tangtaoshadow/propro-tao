@@ -17,7 +17,7 @@ import java.util.Date;
 public class LibraryDO extends BaseDO {
 
     public static Integer TYPE_STANDARD = 0;
-    public static Integer TYPE_VERIFY = 1;
+    public static Integer TYPE_IRT = 1;
 
     private static final long serialVersionUID = -3258829839160856625L;
 
@@ -27,7 +27,7 @@ public class LibraryDO extends BaseDO {
     @Indexed(unique = true)
     String name;
 
-    //0:标准库,1:校准库
+    //0:标准库,1:iRT校准库
     Integer type;
 
     String description;

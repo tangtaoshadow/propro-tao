@@ -23,21 +23,21 @@ public class TaskDO extends BaseDO {
 
     String creator;
 
-    String experimentId;
+    String expId;
 
-    String sLibraryId;
+    String libraryId;
 
-    String sLibraryName;
+    String libraryName;
 
-    String vLibraryId;
+    String iRtLibraryId;
 
-    String vLibraryName;
+    String iRtLibraryName;
 
     String overviewId;
 
     String currentStep;
 
-    String workflow;
+    String taskTemplate;
 
     Date createDate;
 

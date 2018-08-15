@@ -62,14 +62,14 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
             return ResultDO.buildError(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
         }
 
-        ResultDO<List<TransitionGroup>> groupsResult = analyseDataService.getTransitionGroup(overviewId, overviewDOResult.getModel().getVLibraryId(), null);
+        ResultDO<List<TransitionGroup>> groupsResult = analyseDataService.getTransitionGroup(overviewId, overviewDOResult.getModel().getIRtLibraryId(), null);
         if(groupsResult.isFailed()){
             ResultDO resultDO = new ResultDO(false);
             resultDO.setErrorResult(groupsResult.getMsgCode(), groupsResult.getMsgInfo());
             return resultDO;
         }
 
-        List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(overviewDOResult.getModel().getVLibraryId());
+        List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(overviewDOResult.getModel().getIRtLibraryId());
 
         List<List<ScoreRtPair>> scoresList = new ArrayList<>();
         List<Float> compoundRt = new ArrayList<>();

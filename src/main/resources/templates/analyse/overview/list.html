@@ -49,8 +49,8 @@
                 <tr th:each="overview:${overviews}">
                     <td th:text="${overview.name}"></td>
                     <td th:text="${experiment?.name}"></td>
-                    <td th:text="${overview.sLibraryName}"></td>
-                    <td th:text="${overview.vLibraryName}"></td>
+                    <td th:text="${overview.libraryName}"></td>
+                    <td th:text="${overview.iRtLibraryName}"></td>
                     <td th:text="${overview.creator}"></td>
                     <td th:text="|${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></td>
                     <td th:text="${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>

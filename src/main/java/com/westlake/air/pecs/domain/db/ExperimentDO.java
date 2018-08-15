@@ -27,13 +27,13 @@ public class ExperimentDO extends BaseDO {
     //目前只支持MzML和MzXML
     String fileType;
 
-    String sLibraryId;
+    String libraryId;
 
-    String sLibraryName;
+    String libraryName;
 
-    String vLibraryId;
+    String iRtLibraryId;
 
-    String vLibraryName;
+    String iRtLibraryName;
 
     //预设定的RT卷积窗口宽度
     Double preRTWindow;
