@@ -120,7 +120,7 @@ public class PeakPicker {
 
                 while (rightHand - leftHand > Constants.THRESHOLD){
                     mid = (leftHand + rightHand) / 2.0f;
-                    midDerivVal = peakSpline.derivatives(mid);
+                    midDerivVal = (float) peakSpline.derivatives(mid);
                     if(Math.abs(midDerivVal) < 0.0001){
                         break;
                     }
@@ -132,7 +132,7 @@ public class PeakPicker {
                 }
 
                 maxPeakRt = (leftHand + rightHand) /2.0f;
-                maxPeakInt = peakSpline.eval(maxPeakRt);
+                maxPeakInt = (float) peakSpline.eval(maxPeakRt);
 
                 float[] peak = new float[2];
                 peak[0] = maxPeakRt;
