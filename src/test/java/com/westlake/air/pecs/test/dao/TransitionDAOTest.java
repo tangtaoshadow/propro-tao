@@ -24,9 +24,10 @@ public class TransitionDAOTest extends BaseTest {
         assert true;
     }
 
+    //TODO asw 类名改了,重新写一下测试用例
     @Test
-    public void getTransitionGroupIdsTest() {
-        List<String> result = transitionDAO.getTransitionGroupIds("5b67136d2ada5f15749a0140", "AGVETTTPSK_2");
+    public void getTransitionCutInfosTest() {
+        List<String> result = transitionDAO.getTransitionCutInfos("5b67136d2ada5f15749a0140", "AGVETTTPSK_2");
         List<TransitionDO> list = transitionDAO.getAllByLibraryId("5b6712012ada5f2dc8de57d7");
         assert true;
     }

@@ -32,6 +32,13 @@ public class PageQuery implements Serializable {
         this.pageSize = pageSize;
     }
 
+    public PageQuery(int pageNo, int pageSize, Sort.Direction direction, String sortColumn) {
+        this.pageNo = pageNo;
+        this.pageSize = pageSize;
+        this.sortColumn = sortColumn;
+        this.orderBy = direction;
+    }
+
     public int getPageNo() {
         return pageNo;
     }

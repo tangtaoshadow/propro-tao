@@ -39,21 +39,21 @@ public class TransitionDAO {
         return mongoTemplate.find(buildQueryWithoutPage(query), TransitionDO.class, CollectionName);
     }
 
-    public List<String> getTransitionGroupIds(String libraryId, String peptideRef) {
+    public List<String> getTransitionCutInfos(String libraryId, String peptideRef) {
         Document queryDoc = new Document();
         queryDoc.put("libraryId",libraryId);
         queryDoc.put("peptideRef",peptideRef);
 
         Document fieldsDoc = new Document();
-        fieldsDoc.put("id",true);
-
+//        fieldsDoc.put("id",true);
+        fieldsDoc.put("cutInfo",true);
         Query query = new BasicQuery(queryDoc, fieldsDoc);
         List<TransitionDO> trans = mongoTemplate.find(query, TransitionDO.class, CollectionName);
-        List<String> ids = new ArrayList<>();
+        List<String> cutInfos = new ArrayList<>();
         for(TransitionDO tran : trans){
-            ids.add(tran.getId());
+            cutInfos.add(tran.getCutInfo());
         }
-        return ids;
+        return cutInfos;
     }
 
     public List<TransitionDO> getAllByLibraryId(String libraryId) {

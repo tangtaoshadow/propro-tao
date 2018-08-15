@@ -40,6 +40,8 @@ public class ExperimentDO extends BaseDO {
 
     String description;
 
+    String creator = "Admin";
+
     Date createDate;
 
     Date lastModifiedDate;

@@ -7,13 +7,11 @@ import com.westlake.air.pecs.dao.LibraryDAO;
 import com.westlake.air.pecs.dao.TransitionDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
-import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.db.simple.Peptide;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.PageQuery;
-import com.westlake.air.pecs.domain.query.TransitionQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +21,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by James Lu MiaoShan
@@ -178,7 +175,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
         query.setOverviewId(overviewId);
         for (Peptide peptide : peptides) {
             //获取改组的目标卷积对象列表
-            List<String> ids = transitionDAO.getTransitionGroupIds(libraryId, peptide.getPeptideRef());
+            List<String> cutInfos = transitionDAO.getTransitionCutInfos(libraryId, peptide.getPeptideRef());
 
             //根据标准库ID和PeptideRef获取实际卷积所得的对象列表
             query.setPeptideRef(peptide.getPeptideRef());
@@ -186,11 +183,11 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
 
             //开始比对结果,组成最终的HashMap,
             HashMap<String, AnalyseDataDO> dataMap = new HashMap<>();
-            for (String id : ids) {
-                dataMap.put(id, null);
+            for (String cutInfo : cutInfos) {
+                dataMap.put(cutInfo, null);
             }
             for (AnalyseDataDO dataDO : dataList) {
-                dataMap.put(dataDO.getTransitionId(), dataDO);
+                dataMap.put(dataDO.getCutInfo(), dataDO);
             }
 
             TransitionGroup group = new TransitionGroup();

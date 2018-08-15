@@ -47,4 +47,7 @@ public class LibraryDO extends BaseDO {
     Date createDate;
 
     Date lastModifiedDate;
+
+    String creator = "Admin";
+
 }

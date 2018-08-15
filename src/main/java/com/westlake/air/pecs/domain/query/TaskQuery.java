@@ -2,6 +2,9 @@ package com.westlake.air.pecs.domain.query;
 
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-08-15 10:06
@@ -24,6 +27,31 @@ public class TaskQuery extends PageQuery{
     String currentStep;
 
     String taskTemplate;
+
+    List<String> statusList;
+
+    public void setStatus(String status){
+        if(statusList == null){
+            statusList = new ArrayList<>();
+        }else{
+            statusList.clear();
+        }
+        statusList.add(status);
+    }
+
+    public void addStatus(String status){
+        if(statusList == null){
+            statusList = new ArrayList<>();
+        }
+        statusList.add(status);
+    }
+
+    public void clearStatus(){
+        if(statusList == null){
+            return;
+        }
+        statusList.clear();
+    }
 
     public TaskQuery(){}
 

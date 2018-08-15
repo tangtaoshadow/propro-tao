@@ -89,6 +89,9 @@ public class TaskDAO {
         if (targetQuery.getTaskTemplate() != null) {
             query.addCriteria(where("taskTemplate").is(targetQuery.getTaskTemplate()));
         }
+        if (targetQuery.getStatusList() != null) {
+            query.addCriteria(where("status").in(targetQuery.getStatusList()));
+        }
 
         return query;
     }

@@ -44,7 +44,7 @@ public class AnalyseOverviewDO extends BaseDO {
     //MS1和MS2的mzWindow是共用同一个的
     Float mzExtractWindow;
 
-    String creator;
+    String creator = "Admin";
 
     Date createDate;
 }

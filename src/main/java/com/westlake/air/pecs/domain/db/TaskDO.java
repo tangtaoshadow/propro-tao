@@ -17,13 +17,20 @@ import java.util.List;
 @Document(collection = "task")
 public class TaskDO extends BaseDO {
 
+    public static String STATUS_UNKNOWN;
+    public static String STATUS_RUNNING;
+    public static String STATUS_FAILED;
+    public static String STATUS_SUCCESS;
+
     String id;
 
     String name;
 
-    String creator;
+    String creator = "Admin";
 
     String expId;
+
+    String status;
 
     String libraryId;
 
