@@ -14,12 +14,18 @@ public class PeakSpline {
     // TODO: 暂时只有1阶导数
     public float derivatives(float value){
         int i = MathUtil.bisection(x, value).getHigh();
+        if(x[i] > value || x[x.length-1] == value){
+            --i;
+        }
         float xx = value - x[i];
         return b[i] + 2 * c[i] * xx + 3 * d[i] * xx * xx;
     }
 
     public float eval(float value){
         int i = MathUtil.bisection(x, value).getHigh();
+        if(x[i] > value || x[x.length-1] == value){
+            --i;
+        }
         float xx = value - x[i];
         return ((d[i] * xx + c[i]) * xx + b[i]) * xx + a[i];
     }
@@ -48,7 +54,7 @@ public class PeakSpline {
             h[i] = x[i+1] - x[i];
             l = 2 * (x[i+1] - x[i-1]) - h[i - 1] * mu[i - 1];
             mu[i] = h[i] / l;
-            z[i] = 3 *((a[i + 1] * h[i - 1] - a[i] * (x[i + 1] - x[i - 1]) + a[i - 1] * h[i]) / (h[i - 1] * h[i]) - h[i - 1] * z[i - 1])/l;
+            z[i] = (3 *(a[i + 1] * h[i - 1] - a[i] * (x[i + 1] - x[i - 1]) + a[i - 1] * h[i]) / (h[i - 1] * h[i]) - h[i - 1] * z[i - 1])/l;
         }
 
         for(int j = maxIndex - 1; j>=0;j--){
