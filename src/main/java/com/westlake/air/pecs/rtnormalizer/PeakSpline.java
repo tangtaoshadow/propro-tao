@@ -63,6 +63,39 @@ public class PeakSpline {
             d[j] = (c[j + 1] - c[j]) / (3 * h[j]);
         }
     }
+    public void init(Double[] rt, Double[] intensity, int leftBoundary, int rightBoundary){
+        int maxIndex = rightBoundary - leftBoundary;
+        x = new double[maxIndex + 1];
+        a = new double[maxIndex + 1];
+        b = new double[maxIndex];
+        d = new double[maxIndex];
+        c = new double[maxIndex + 1]; //c[maxIndex] = 0;
+        double[] h = new double[maxIndex];
+        double[] mu = new double[maxIndex];
+        double[] z = new double[maxIndex];
+
+        double l;
+        for(int i = 0; i<= maxIndex; i++){
+            x[i] = rt[leftBoundary + i];
+            a[i] = intensity[leftBoundary + i];
+        }
+
+        // do the 0'th element manually
+        h[0] = x[1] - x[0];
+
+        for(int i=1; i<maxIndex; i++){
+            h[i] = x[i+1] - x[i];
+            l = 2 * (x[i+1] - x[i-1]) - h[i - 1] * mu[i - 1];
+            mu[i] = h[i] / l;
+            z[i] = (3 *(a[i + 1] * h[i - 1] - a[i] * (x[i + 1] - x[i - 1]) + a[i - 1] * h[i]) / (h[i - 1] * h[i]) - h[i - 1] * z[i - 1])/l;
+        }
+
+        for(int j = maxIndex - 1; j>=0;j--){
+            c[j] = z[j] - mu[j] * c[j + 1];
+            b[j] = (a[j + 1] - a[j]) / h[j] - h[j] * (c[j + 1] + 2 * c[j]) / 3;
+            d[j] = (c[j + 1] - c[j]) / (3 * h[j]);
+        }
+    }
 
 
 }
