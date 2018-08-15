@@ -40,4 +40,8 @@ public class ScanIndexQuery extends PageQuery {
         this.experimentId = experimentId;
         this.msLevel = msLevel;
     }
+
+    public ScanIndexQuery(int pageNo,int pageSize){
+        super(pageNo, pageSize);
+    }
 }

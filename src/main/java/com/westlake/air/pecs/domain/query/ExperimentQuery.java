@@ -20,4 +20,10 @@ public class ExperimentQuery extends PageQuery {
     Date createDate;
 
     Date lastModifiedDate;
+
+    public ExperimentQuery(){}
+
+    public ExperimentQuery(int pageNo,int pageSize){
+        super(pageNo, pageSize);
+    }
 }

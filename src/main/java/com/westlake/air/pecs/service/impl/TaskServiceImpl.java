@@ -3,13 +3,13 @@ package com.westlake.air.pecs.service.impl;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.TaskDAO;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.TaskQuery;
 import com.westlake.air.pecs.service.TaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
@@ -18,6 +18,7 @@ import java.util.List;
  * Created by James Lu MiaoShan
  * Time: 2018-08-15 10:05
  */
+@Service("taskService")
 public class TaskServiceImpl implements TaskService {
 
     public final Logger logger = LoggerFactory.getLogger(TaskServiceImpl.class);

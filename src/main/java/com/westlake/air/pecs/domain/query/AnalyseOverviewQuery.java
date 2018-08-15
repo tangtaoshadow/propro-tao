@@ -14,4 +14,10 @@ public class AnalyseOverviewQuery extends PageQuery {
     String expId;
 
     String libraryId;
+
+    public AnalyseOverviewQuery(){}
+
+    public AnalyseOverviewQuery(int pageNo,int pageSize){
+        super(pageNo, pageSize);
+    }
 }

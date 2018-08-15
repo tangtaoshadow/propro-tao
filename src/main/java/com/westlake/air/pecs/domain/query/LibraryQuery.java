@@ -22,4 +22,10 @@ public class LibraryQuery extends PageQuery {
     Date createDate;
 
     Date lastModifiedDate;
+
+    public LibraryQuery(){}
+
+    public LibraryQuery(int pageNo,int pageSize){
+        super(pageNo, pageSize);
+    }
 }

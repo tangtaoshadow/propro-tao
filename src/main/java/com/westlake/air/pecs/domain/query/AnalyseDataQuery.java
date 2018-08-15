@@ -32,4 +32,8 @@ public class AnalyseDataQuery extends PageQuery{
         this.overviewId = overviewId;
         this.msLevel = msLevel;
     }
+
+    public AnalyseDataQuery(int pageNo,int pageSize){
+        super(pageNo, pageSize);
+    }
 }

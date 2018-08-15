@@ -78,4 +78,8 @@ public class TransitionQuery extends PageQuery {
         this.libraryId = libraryId;
         this.peptideRef = peptideRef;
     }
+
+    public TransitionQuery(int pageNo,int pageSize){
+        super(pageNo, pageSize);
+    }
 }

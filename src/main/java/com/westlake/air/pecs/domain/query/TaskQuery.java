@@ -24,4 +24,10 @@ public class TaskQuery extends PageQuery{
     String currentStep;
 
     String taskTemplate;
+
+    public TaskQuery(){}
+
+    public TaskQuery(int pageNo,int pageSize){
+        super(pageNo, pageSize);
+    }
 }
