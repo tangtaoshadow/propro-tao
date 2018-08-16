@@ -39,7 +39,7 @@ public class DIAScorer {
      * @param libraryIntensity unNormalized library intensity(in transition)
      * @param scores score for JProphet
      */
-    private void calculateDiaMassDiffScore(Float[] productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Float> libraryIntensity, RTNormalizationScores scores){
+    public void calculateDiaMassDiffScore(Float[] productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Float> libraryIntensity, RTNormalizationScores scores){
 
         float ppmScore = 0.0f;
         float ppmScoreWeighted = 0.0f;
@@ -71,7 +71,7 @@ public class DIAScorer {
      * @param productCharge charge in transition
      * @param scores score for JProphet
      */
-    private void calculateDiaIsotopeScores(List<ExperimentFeature> experimentFeatures, List<Float> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Integer> productCharge, RTNormalizationScores scores){
+    public void calculateDiaIsotopeScores(List<ExperimentFeature> experimentFeatures, List<Float> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Integer> productCharge, RTNormalizationScores scores){
         float isotopeCorr = 0f;
         float isotopeOverlap = 0f;
 
