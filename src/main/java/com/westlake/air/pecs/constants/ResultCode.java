@@ -81,6 +81,13 @@ public enum ResultCode implements Serializable {
      * *******
      */
     NOT_ENOUGH_IRT_PEPTIDES("NOT_ENOUGH_IRT_PEPTIDES","There are less than 2 iRT peptides, not enough for an RT correction"),
+
+    /**
+     * ******
+     * TASK
+     * *******
+     */
+    TASK_TEMPLATE_NOT_EXISTED("TASK_TEMPLATE_NOT_EXISTED","任务模板不存在"),
     ;
 
     private String code = "";

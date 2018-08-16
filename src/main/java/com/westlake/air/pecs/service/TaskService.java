@@ -19,6 +19,8 @@ public interface TaskService {
 
     ResultDO insert(TaskDO taskDO);
 
+    ResultDO update(TaskDO taskDO);
+
     ResultDO delete(String id);
 
     ResultDO<TaskDO> getById(String id);

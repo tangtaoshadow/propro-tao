@@ -28,7 +28,8 @@
                     </div>
                 </div>
                 <!--begin::Form-->
-                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/config/update}" th:method="post">
+                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/config/update}"
+                      th:method="post">
                     <div class="m-portlet__body">
                         <div class="form-group m-form__group m--margin-top-10">
                             <div class="alert m-alert m-alert--default" role="alert">
@@ -41,7 +42,8 @@
                             </label>
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="experimentFilePath"
-                                       placeholder="Enter Experiment File Path" name="experimentFilePath" th:value="${config?.experimentFilePath}">
+                                       placeholder="Enter Experiment File Path" name="experimentFilePath"
+                                       th:value="${config?.experimentFilePath}">
                             </div>
                         </div>
 
@@ -51,7 +53,8 @@
                             </label>
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="libraryFilePath"
-                                       placeholder="Enter Library File Path" name="libraryFilePath" th:value="${config?.libraryFilePath}">
+                                       placeholder="Enter Library File Path" name="libraryFilePath"
+                                       th:value="${config?.libraryFilePath}">
                             </div>
                         </div>
 
@@ -80,7 +83,9 @@
                                 最后修改时间
                             </label>
                             <div class="col-9">
-                                <input type="text" class="form-control m-input" id="lastModifiedDate" readonly name="lastModifiedDate" th:value="${#dates.format(config?.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}">
+                                <input type="text" class="form-control m-input" id="lastModifiedDate" readonly
+                                       name="lastModifiedDate"
+                                       th:value="${#dates.format(config?.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}">
                             </div>
                         </div>
 
@@ -89,7 +94,9 @@
                                 创建时间
                             </label>
                             <div class="col-9">
-                                <input type="text" class="form-control m-input" id="createDate" readonly name="createDate" th:value="${#dates.format(config?.createDate,'yyyy-MM-dd HH:mm:ss')}">
+                                <input type="text" class="form-control m-input" id="createDate" readonly
+                                       name="createDate"
+                                       th:value="${#dates.format(config?.createDate,'yyyy-MM-dd HH:mm:ss')}">
                             </div>
                         </div>
                     </div>
@@ -108,9 +115,6 @@
     </div>
 
 </div>
-
-
 </body>
-
 <!-- end::Body -->
 </html>

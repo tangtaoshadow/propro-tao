@@ -2,11 +2,14 @@ package com.westlake.air.pecs.parser;
 
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
+import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.parser.model.mzxml.*;
+import com.westlake.air.pecs.service.TaskService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -25,6 +28,9 @@ public class MzXMLParser extends BaseExpParser {
 
     public final Logger logger = LoggerFactory.getLogger(MzXMLParser.class);
 
+    @Autowired
+    TaskService taskService;
+
     public Class<?>[] classes = new Class[]{
             DataProcessing.class, Maldi.class, MsInstrument.class, MsRun.class, MzXML.class, NameValue.class,
             OntologyEntry.class, Operator.class, Orientation.class, ParentFile.class, Pattern.class,
@@ -41,7 +47,7 @@ public class MzXMLParser extends BaseExpParser {
     }
 
     @Override
-    public List<ScanIndexDO> index(File file, String experimentId) {
+    public List<ScanIndexDO> index(File file, String experimentId, TaskDO taskDO) {
         RandomAccessFile raf = null;
         List<ScanIndexDO> list = null;
         try {
@@ -66,7 +72,8 @@ public class MzXMLParser extends BaseExpParser {
 
                 count++;
                 if (count % 10000 == 0) {
-                    logger.info("已扫描索引:" + count + "/" + list.size() + "条");
+                    taskDO.addLog("已扫描索引:" + count + "/" + list.size() + "条");
+                    taskService.update(taskDO);
                 }
             }
         } catch (Exception e) {

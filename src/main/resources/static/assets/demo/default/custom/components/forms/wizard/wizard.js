@@ -7,10 +7,10 @@ var WizardDemo = function () {
     var wizard;
     
     //== Private functions
-    var initWizard = function () {
+    var initWizard = function (currentStep) {
         //== Initialize form wizard
         wizard = wizardEl.mWizard({
-            startStep: 1
+            startStep: currentStep
         });
 
         //== Validation before going to next page
@@ -195,17 +195,13 @@ var WizardDemo = function () {
 
     return {
         // public functions
-        init: function() {
+        init: function(currentStep) {
             wizardEl = $('#m_wizard');
             formEl = $('#m_form');
 
-            initWizard(); 
+            initWizard(currentStep);
             initValidation();
             initSubmit();
         }
     };
 }();
-
-jQuery(document).ready(function() {    
-    WizardDemo.init();
-});

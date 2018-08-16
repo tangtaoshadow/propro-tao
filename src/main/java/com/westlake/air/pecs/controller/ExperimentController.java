@@ -5,18 +5,17 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
+import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
-import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
-import com.westlake.air.pecs.domain.db.ExperimentDO;
-import com.westlake.air.pecs.domain.db.LibraryDO;
-import com.westlake.air.pecs.domain.db.ScanIndexDO;
+import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.MzMLParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
 import com.westlake.air.pecs.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -50,6 +49,10 @@ public class ExperimentController extends BaseController {
     MzMLParser mzMLParser;
     @Autowired
     ScanIndexService scanIndexService;
+    @Autowired
+    TaskService taskService;
+    @Autowired
+    AsyncTaskService asyncTaskService;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -98,6 +101,7 @@ public class ExperimentController extends BaseController {
         model.addAttribute("libraryId", libraryId);
         model.addAttribute("iRtLibraryId", iRtLibraryId);
 
+        //Check Params Start
         if (fileLocation == null || fileLocation.isEmpty()) {
             model.addAttribute(ERROR_MSG, ResultCode.FILE_LOCATION_CANNOT_BE_EMPTY.getMessage());
             return "experiment/create";
@@ -132,40 +136,20 @@ public class ExperimentController extends BaseController {
         if (result.isFailed()) {
             model.addAttribute(ERROR_MSG, result.getMsgInfo());
             return "experiment/create";
-        }
+        }//Check Params End
 
-        try {
-            long start = System.currentTimeMillis();
-            //建立索引
-            logger.info("开始构建索引");
-            List<ScanIndexDO> indexList = null;
-            //传入不同的文件类型会调用不同的解析层
-            if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZXML)) {
-                indexList = mzXMLParser.index(file, experimentDO.getId());
-            } else if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZML)) {
-                indexList = mzMLParser.index(file, experimentDO.getId());
-            }
+        TaskDO taskDO = new TaskDO();
+        taskDO.setTaskTemplate(TaskTemplate.UPLOAD_EXPERIMENT_FILE.getTemplateName());
+        taskDO.setName(TaskTemplate.UPLOAD_EXPERIMENT_FILE.getTemplateName()+experimentDO.getName());
+        taskDO.setStatus(TaskDO.STATUS_RUNNING);
+        taskDO.setCurrentStep(1);
+        taskDO.addLog("开始构建索引");
+        taskDO.setExpId(experimentDO.getId());
+        taskDO.start();
+        taskService.insert(taskDO);
 
-            logger.info("索引构建完毕,开始存储索引");
-            ResultDO resultDO = scanIndexService.insertAll(indexList, true);
-            logger.info("索引存储完毕");
-
-            if (resultDO.isFailed()) {
-                logger.info("索引存储失败" + result.getMsgInfo());
-                experimentService.delete(experimentDO.getId());
-                model.addAttribute(ERROR_MSG, result.getMsgInfo());
-                return "experiment/create";
-            } else {
-                redirectAttributes.addAttribute(SUCCESS_MSG, SuccessMsg.CREATE_EXPERIMENT_AND_INDEX_SUCCESS + ",耗时:" + (System.currentTimeMillis() - start) + "毫秒");
-                return "redirect:/experiment/list";
-            }
-
-        } catch (Exception e) {
-            logger.info("索引存储失败", e.getMessage());
-            e.printStackTrace();
-            redirectAttributes.addFlashAttribute(ERROR_MSG, e.getMessage());
-            return "redirect:/experiment/list";
-        }
+        asyncTaskService.addExperimentTask(experimentDO,taskDO,file);
+        return "redirect:/task/detail/"+taskDO.getId();
     }
 
     @RequestMapping(value = "/edit/{id}")
