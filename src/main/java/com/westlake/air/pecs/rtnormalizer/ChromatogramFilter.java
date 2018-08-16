@@ -4,6 +4,7 @@ import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.utils.MathUtil;
+import com.westlake.air.pecs.utils.ScoreUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +24,8 @@ public class ChromatogramFilter {
     }
 
     private RtIntensityPairs pickChromatogramByRt(RtIntensityPairs chromatogram, float pepRefRt, SlopeIntercept slopeIntercept){
-        SlopeIntercept invertedSlopeIntercept = MathUtil.trafoInverter(slopeIntercept);
-        float normalizedExperimentRt = MathUtil.trafoApplier(invertedSlopeIntercept, pepRefRt);
+        SlopeIntercept invertedSlopeIntercept = ScoreUtil.trafoInverter(slopeIntercept);
+        float normalizedExperimentRt = ScoreUtil.trafoApplier(invertedSlopeIntercept, pepRefRt);
         float rtMax = normalizedExperimentRt + Constants.RT_EXTRACTION_WINDOW;
         float rtMin = normalizedExperimentRt - Constants.RT_EXTRACTION_WINDOW;
         Float[] rtArray = chromatogram.getRtArray();

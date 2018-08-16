@@ -60,7 +60,7 @@ public class LibraryScorer {
 
         //varNormRtScore
         float experimentalRt = experimentFeatures.get(0).getRt();
-        float normalizedExperimentalRt = MathUtil.trafoApplier(slopeIntercept, experimentalRt);
+        float normalizedExperimentalRt = ScoreUtil.trafoApplier(slopeIntercept, experimentalRt);
         if(groupRt <= -1000f){
             scores.setVarNormRtScore(0);
         }else {

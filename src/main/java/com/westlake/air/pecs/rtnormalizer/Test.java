@@ -8,18 +8,7 @@ import java.util.Scanner;
 
 public class Test {
     public static void main(String[] args) {
-        Float[] test = new Float[10];
-        for(int i=0; i<test.length;i++){
-            test[i] = i + 0.5f;
-        }
-        int outputLow = MathUtil.bisection(test, 4).getLow();
-        int outputHigh = MathUtil.bisection(test, 4).getHigh();
-        for(float value: test){
-            System.out.print(value + " ");
-        }
-        System.out.println(" ");
-        System.out.println(outputLow);
-        System.out.println(outputHigh);
+
     }
 }
 

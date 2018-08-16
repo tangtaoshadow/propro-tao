@@ -47,6 +47,9 @@ public class Constants {
     public static final float P = 0f;
     public static final double PROTON_MASS_U = 1.0072764667710f;
 
+    public static final float STATISTICS_VARIANCE = 1.0f;
+    public static final float TOLERANCE_STDEV_BOUNDING_BOX = 3.0f;
+
 
     public static String EXP_SUFFIX_MZXML = "mzxml";
     public static String EXP_SUFFIX_MZML = "mzml";

@@ -20,10 +20,18 @@ import java.util.*;
 /**
  * Created by Nico Wang Ruimin
  * Time: 2018-08-15 16:09
+ *
+ * scores.massdev_score
+ * scores.weighted_massdev_score
+ *
+ * scores.isotope_correlation
+ * scores.isotope_overlap
  */
 public class DIAScorer {
 
     /**
+     * scores.massdev_score
+     * scores.weighted_massdev_score
      *
      * @param productMzArray 根据transitionGroup获得存在transition中的productMz，存成Float array
      * @param spectrumMzArray 根据transitionGroup选取的RT选择的最近的Spectrum对应的mzArray
@@ -31,7 +39,7 @@ public class DIAScorer {
      * @param libraryIntensity unNormalized library intensity(in transition)
      * @param scores score for JProphet
      */
-    private void calculateDiaMassDiffScore(Float[] productMzArray, Float[] spectrumMzArray, Float[] spectrumIntArray, List<Float> libraryIntensity, RTNormalizationScores scores){
+    public void calculateDiaMassDiffScore(Float[] productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Float> libraryIntensity, RTNormalizationScores scores){
 
         float ppmScore = 0.0f;
         float ppmScoreWeighted = 0.0f;
@@ -40,22 +48,9 @@ public class DIAScorer {
             float right = productMzArray[i] + Constants.DIA_EXTRACT_WINDOW/ 2f;
 
             //integrate window
-            float mz = 0f, intensity = 0f;
-            int leftIndex = MathUtil.bisection(spectrumMzArray, left).getHigh();
-            int rightIndex = MathUtil.bisection(spectrumMzArray, right).getHigh();
-            if(spectrumMzArray[0] < left){
-                leftIndex ++;
-            }
-            if(spectrumMzArray[spectrumMzArray.length-1] < right){
-                rightIndex ++;
-            }
-            for(int index = leftIndex; index <=rightIndex; index ++){
-                intensity += spectrumIntArray[index];
-                mz += spectrumMzArray[index] * spectrumIntArray[index];
-            }
-            if(intensity > 0f){
-                mz /= intensity;
-                float diffPpm = Math.abs(mz - productMzArray[i]) * 1000000f / productMzArray[i];
+            IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left, right);
+            if(mzIntensity.isSignalFound()){
+                float diffPpm = Math.abs(mzIntensity.getMz() - productMzArray[i]) * 1000000f / productMzArray[i];
                 ppmScore += diffPpm;
                 ppmScoreWeighted += diffPpm * libraryIntensity.get(i);
             }
@@ -65,7 +60,18 @@ public class DIAScorer {
     }
 
 
-    private void calculateDiaIsotopeScores(List<ExperimentFeature> experimentFeatures, Float[] productMzArray, Float[] spectrumMzArray, Float[] spectrumIntArray, List<Integer> productCharge, RTNormalizationScores scores){
+    /**
+     * scores.isotope_correlation
+     * scores.isotope_overlap
+     *
+     * @param experimentFeatures single mrmFeature
+     * @param productMzArray mz of transition
+     * @param spectrumMzArray mz array of selected Rt
+     * @param spectrumIntArray intensity array of selected Rt
+     * @param productCharge charge in transition
+     * @param scores score for JProphet
+     */
+    public void calculateDiaIsotopeScores(List<ExperimentFeature> experimentFeatures, List<Float> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Integer> productCharge, RTNormalizationScores scores){
         float isotopeCorr = 0f;
         float isotopeOverlap = 0f;
 
@@ -85,41 +91,22 @@ public class DIAScorer {
             List<Float> isotopesIntList = new ArrayList<>();
             float maxIntensity = 0.0f;
             for(int iso=0; iso<=Constants.DIA_NR_ISOTOPES; iso++){
-                float left = productMzArray[i] + iso * Constants.C13C12_MASSDIFF_U / putativeFragmentCharge;
+                float left = productMzArray.get(i) + iso * Constants.C13C12_MASSDIFF_U / putativeFragmentCharge;
                 float right = left;
                 left -= Constants.DIA_EXTRACT_WINDOW / 2f;
                 right += Constants.DIA_EXTRACT_WINDOW/ 2f;
 
                 //integrate window
-                float mz = 0f, intensity = 0f;
-                int leftIndex = MathUtil.bisection(spectrumMzArray, left).getHigh();
-                int rightIndex = MathUtil.bisection(spectrumMzArray, right).getHigh();
-                //TODO: bisection series
-                if(spectrumMzArray[0] < left){
-                    leftIndex ++;
+                IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left, right);
+                if(mzIntensity.getIntensity() > maxIntensity){
+                    maxIntensity = mzIntensity.getIntensity();
                 }
-                if(spectrumMzArray[spectrumMzArray.length-1] < right){
-                    rightIndex ++;
-                }
-                for(int index = leftIndex; index <=rightIndex; index ++){
-                    intensity += spectrumIntArray[index];
-                    mz += spectrumMzArray[index] * spectrumIntArray[index];
-                }
-                if(intensity > 0f) {
-                    mz /= intensity;
-                }else {
-                    mz = -1;
-                    intensity = 0;
-                }
-                if(intensity > maxIntensity){
-                    maxIntensity = intensity;
-                }
-                isotopesIntList.add(intensity);
+                isotopesIntList.add(mzIntensity.getIntensity());
             }
 
-            //get isotopeCorr
+            //get scores.isotope_correlation
             List<Float> isotopeDistList;
-            float averageWeight = Math.abs(productMzArray[i] * putativeFragmentCharge);
+            float averageWeight = Math.abs(productMzArray.get(i) * putativeFragmentCharge);
             float averageWeightC = (float)new ElementsDAO().getElementBySymbol(Element.C).getAverageWeight();
             float averageWeightH = (float)new ElementsDAO().getElementBySymbol(Element.H).getAverageWeight();
             float averageWeightN = (float)new ElementsDAO().getElementBySymbol(Element.N).getAverageWeight();
@@ -210,37 +197,26 @@ public class DIAScorer {
             }
 
 
-            //get isotopeOverlap
+            //get scores.isotope_overlap
             int nrOccurences = 0;
             float ratio, maxRatio = 0.0f;
             for(int ch = 1; ch <= Constants.DIA_NR_CHARGES; ch ++){
-                float left = productMzArray[i] - Constants.C13C12_MASSDIFF_U/(float)ch;
+                float left = productMzArray.get(i) - Constants.C13C12_MASSDIFF_U/(float)ch;
                 float right = left;
                 left -= Constants.DIA_EXTRACT_WINDOW / 2f;
                 right += Constants.DIA_EXTRACT_WINDOW/ 2f;
 
-                //TODO: integrate window
-                //IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow();
-                float mz = 0f, intensity = 0f;
-                int leftIndex = MathUtil.bisection(spectrumMzArray, left).getHigh();
-                int rightIndex = MathUtil.bisection(spectrumMzArray, right).getHigh();
-
-                for(int index = leftIndex; index <=rightIndex; index ++){
-                    intensity += spectrumIntArray[index];
-                    mz += spectrumMzArray[index] * spectrumIntArray[index];
-                }
-                if(intensity > 0f) {
-                    mz /= intensity;
-
+                IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left, right);
+                if(mzIntensity.isSignalFound()){
                     if(isotopesIntList.get(0)!=0){
-                        ratio = intensity / isotopesIntList.get(0);
+                        ratio = mzIntensity.getIntensity() / isotopesIntList.get(0);
                     }else {
                         ratio = 0f;
                     }
                     if(ratio > maxRatio){
                         maxRatio = ratio;
                     }
-                    float ddiffPpm = (float) Math.abs(mz - (productMzArray[i] - 1.0/(float)ch)) * 1000000f / productMzArray[i];
+                    float ddiffPpm = (float) Math.abs(mzIntensity.getMz() - (productMzArray.get(i) - 1.0/(float)ch)) * 1000000f / productMzArray.get(i);
                     if(ratio > 1 && ddiffPpm < Constants.PEAK_BEFORE_MONO_MAX_PPM_DIFF){
                         nrOccurences ++;
                     }
@@ -252,7 +228,7 @@ public class DIAScorer {
         scores.setVarIsotopeOverlapScore(isotopeOverlap);
     }
 
-    private void calculateBYIonScore(List<Double> spectrumMzArray, List<Double> spectrumIntArray, Annotation annotation, HashMap<Integer, String> unimodHashMap, String sequence, int charge, RTNormalizationScores scores){
+    public  void calculateBYIonScore(List<Float> spectrumMzArray, List<Float> spectrumIntArray, Annotation annotation, HashMap<Integer, String> unimodHashMap, String sequence, int charge, RTNormalizationScores scores){
         BYSeries bySeries = getBYSeries(annotation, unimodHashMap, sequence, charge);
         List<Double> bSeriesList = bySeries.getBSeries();
         int bSeriesScore = getSeriesScore(bSeriesList, spectrumMzArray, spectrumIntArray);
@@ -389,7 +365,7 @@ public class DIAScorer {
      * @param spectrumIntArray intArray of certain spectrum
      * @return score of b or y
      */
-    private int getSeriesScore(List<Double> seriesList, List<Double> spectrumMzArray, List<Double> spectrumIntArray){
+    private int getSeriesScore(List<Double> seriesList, List<Float> spectrumMzArray, List<Float> spectrumIntArray){
         int seriesScore = 0;
         for(double seriesMz: seriesList){
             double left = seriesMz - Constants.DIA_EXTRACT_WINDOW / 2f;
