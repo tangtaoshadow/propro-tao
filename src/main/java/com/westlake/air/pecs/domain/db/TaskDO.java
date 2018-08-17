@@ -48,10 +48,11 @@ public class TaskDO extends BaseDO {
 
     public TaskDO(){}
 
-    public TaskDO(TaskTemplate taskTemplate){
+    public TaskDO(TaskTemplate taskTemplate, String taskSuffixName){
         this.taskTemplate = taskTemplate.getTemplateName();
         this.status = STATUS_RUNNING;
         this.currentStep = 1;
+        this.name = TaskTemplate.UPLOAD_EXPERIMENT_FILE.getTemplateName() + "-" + taskSuffixName;
         start();
     }
 

@@ -153,6 +153,15 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
+    public String getNameById(String id) {
+        LibraryDO libraryDO = libraryDAO.getById(id);
+        if(libraryDO != null){
+            return libraryDO.getName();
+        }
+        return null;
+    }
+
+    @Override
     public ResultDO parseAndInsertTsv(LibraryDO library, InputStream in, String fileName, boolean justReal, TaskDO taskDO) {
 
         ResultDO resultDO;

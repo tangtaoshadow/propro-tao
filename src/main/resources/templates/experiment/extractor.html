@@ -40,7 +40,7 @@
                     </div>
                 </div>
                 <!--begin::Form-->
-                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/experiment/doExtract}">
+                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/experiment/doextract}">
                     <div class="m-portlet__body">
                         <input type="text" name="id" hidden="hidden" th:value="${experiment?.id}">
                         <div class="form-group m-form__group row">
@@ -64,18 +64,6 @@
                                 </select>
                             </div>
 
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="iRtLibraryId" class="col-2 col-form-label">
-                                关联校准库名称及ID
-                            </label>
-                            <div class="col-10">
-                                <select class="form-control m-input" id="iRtLibraryId" name="iRtLibraryId">
-                                    <option th:each="library:${iRtLibraries}" th:value="${library.id}"
-                                            th:text="|${library.name}(${library.id})|"
-                                            th:selected="${experiment.iRtLibraryId}==${library.id}?true:false"></option>
-                                </select>
-                            </div>
                         </div>
                         <div class="form-group m-form__group row">
                             <label for="rtExtractWindow" class="col-2 col-form-label">

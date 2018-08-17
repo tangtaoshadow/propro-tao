@@ -116,13 +116,11 @@ public class LibraryController extends BaseController {
             return "redirect:/library/create";
         }
 
-        TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_LIBRARY_FILE);
-        taskDO.setName(TaskTemplate.UPLOAD_LIBRARY_FILE.getTemplateName() + "-" + library.getName());
-        taskDO.addLog("开始清理原有旧文件");
+        TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_LIBRARY_FILE, library.getName());
         taskService.insert(taskDO);
 
         try {
-            asyncTaskManager.saveLibraryTask(library, file.getInputStream(), file.getOriginalFilename(), justReal, taskDO);
+            libraryTask.saveLibraryTask(library, file.getInputStream(), file.getOriginalFilename(), justReal, taskDO);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -214,13 +212,11 @@ public class LibraryController extends BaseController {
             return "redirect:/library/detail/" + library.getId();
         }
 
-        TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_LIBRARY_FILE);
-        taskDO.setName(TaskTemplate.UPLOAD_LIBRARY_FILE.getTemplateName() + "-" + library.getName());
-        taskDO.addLog("开始清理原有旧文件");
+        TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_LIBRARY_FILE, library.getName());
         taskService.insert(taskDO);
 
         try {
-            asyncTaskManager.saveLibraryTask(library, file.getInputStream(), file.getOriginalFilename(), justReal, taskDO);
+            libraryTask.saveLibraryTask(library, file.getInputStream(), file.getOriginalFilename(), justReal, taskDO);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -248,16 +244,5 @@ public class LibraryController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return redirectListUrl;
         }
-    }
-
-    @RequestMapping(value = "/buildCoordinate")
-    String buildCoordinate(Model model,
-                           @RequestParam(value = "id", required = true) String id,
-                           @RequestParam(value = "rtExtractionWindow", required = true, defaultValue = "1.0") float rtExtractionWindow,
-                           RedirectAttributes redirectAttributes) {
-        redirectAttributes.addFlashAttribute("rtExtractionWindow", rtExtractionWindow);
-        LibraryCoordinate lc = transitionService.buildCoordinates(id, rtExtractionWindow);
-
-        return "redirect:/library/detail/" + id;
     }
 }

@@ -132,11 +132,10 @@ public class ExperimentController extends BaseController {
             return "experiment/create";
         }//Check Params End
 
-        TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_EXPERIMENT_FILE);
-        taskDO.setName(TaskTemplate.UPLOAD_EXPERIMENT_FILE.getTemplateName() + "-" + experimentDO.getName());
-        taskDO.addLog("开始构建索引");
+        TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_EXPERIMENT_FILE, experimentDO.getName());
         taskService.insert(taskDO);
-        asyncTaskManager.saveExperimentTask(experimentDO, file, taskDO);
+
+        experimentTask.saveExperimentTask(experimentDO, file, taskDO);
         return "redirect:/task/detail/" + taskDO.getId();
     }
 
@@ -249,11 +248,12 @@ public class ExperimentController extends BaseController {
         return "/experiment/extractor";
     }
 
-    @RequestMapping(value = "/extract")
+    @RequestMapping(value = "/doextract")
     String doExtract(Model model,
                      @RequestParam(value = "id", required = true) String id,
                      @RequestParam(value = "buildType", required = true) int buildType,
                      @RequestParam(value = "creator", required = false) String creator,
+                     @RequestParam(value = "libraryId", required = true) String libraryId,
                      @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
                      RedirectAttributes redirectAttributes) {
@@ -263,26 +263,17 @@ public class ExperimentController extends BaseController {
         if (mzExtractWindow == null) {
             mzExtractWindow = 0.05f;
         }
-        redirectAttributes.addFlashAttribute("rtExtractWindow", rtExtractWindow);
-        redirectAttributes.addFlashAttribute("mzExtractWindow", mzExtractWindow);
-        redirectAttributes.addFlashAttribute("buildType", buildType);
-        redirectAttributes.addFlashAttribute("creator", creator);
 
-        try {
-            long start = System.currentTimeMillis();
-            ResultDO resultDO = experimentService.extract(id, creator, rtExtractWindow, mzExtractWindow, buildType);
-            if (resultDO.isFailed()) {
-                redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-                return "redirect:/experiment/detail/" + id;
-            }
-            logger.info("全部卷积完成,总共耗时:" + (System.currentTimeMillis() - start));
-        } catch (IOException e) {
-            logger.error("卷积报错了:", e);
-            e.printStackTrace();
+        ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
+        if (resultDO.isFailed()) {
+            return "redirect:/extractor/" + id;
         }
 
-        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.EXTRACT_DATA_SUCCESS);
-        return "redirect:/analyse/overview/list?expId=" + id;
+        TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_CONVOLUTION, resultDO.getModel().getName());
+        taskService.insert(taskDO);
+        experimentTask.extract(resultDO.getModel(), libraryId, creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
+
+        return "redirect:/task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/getWindows")

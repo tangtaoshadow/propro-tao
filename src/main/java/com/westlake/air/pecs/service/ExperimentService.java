@@ -32,43 +32,6 @@ public interface ExperimentService {
     ResultDO<ExperimentDO> getByName(String name);
 
     /**
-     * @param expId
-     * @param rtExtractWindow
-     * @param mzExtractWindow
-     * @param buildType       0:解压缩MS1和MS2; 1:解压缩MS1; 2:解压缩MS2
-     * @return
-     * @throws IOException
-     */
-    ResultDO extract(String expId, String creator, float rtExtractWindow, float mzExtractWindow, int buildType) throws IOException;
-
-    /**
-     * 解压缩MS1数据的话会把所有的索引全部读入到内存中进行卷积
-     * PECS在进行MS1谱图解析时的几个特点:
-     * 1.全光谱读取
-     * 2.由于是全光谱解析,因此解析过后的RTArray都是一样的,因此只存储一份从而减少内存的开销
-     * 3.
-     *
-     * @param raf
-     * @param exp
-     * @param rtExtractWindow
-     * @param mzExtractWindow
-     * @return
-     * @throws IOException
-     */
-    void extractMS1(RandomAccessFile raf, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow) throws IOException;
-
-    /**
-     * 进行MS2数据卷积
-     * @param file
-     * @param exp
-     * @param overviewId
-     * @param rtExtractWindow
-     * @param mzExtractWindow
-     * @throws IOException
-     */
-    void extractMS2(File file, ExperimentDO exp, String overviewId, float rtExtractWindow, float mzExtractWindow) throws IOException;
-
-    /**
      * 获取一个实验的Swath Windows窗口信息
      * @param expId
      * @return

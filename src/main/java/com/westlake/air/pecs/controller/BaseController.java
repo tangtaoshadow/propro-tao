@@ -1,9 +1,10 @@
 package com.westlake.air.pecs.controller;
 
+import com.westlake.air.pecs.async.ExperimentTask;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.service.LibraryService;
 import com.westlake.air.pecs.service.TaskService;
-import com.westlake.air.pecs.task.AsyncTaskManager;
+import com.westlake.air.pecs.async.LibraryTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,9 @@ public class BaseController {
     @Autowired
     TaskService taskService;
     @Autowired
-    AsyncTaskManager asyncTaskManager;
+    LibraryTask libraryTask;
+    @Autowired
+    ExperimentTask experimentTask;
 
     //0:标准库,1:校准库
     public List<LibraryDO> getLibraryList(Integer type){

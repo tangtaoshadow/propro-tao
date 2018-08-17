@@ -32,6 +32,8 @@ public interface LibraryService {
 
     ResultDO<LibraryDO> getByName(String name);
 
+    String getNameById(String id);
+
     ResultDO parseAndInsertTsv(LibraryDO library, InputStream in, String fileName, boolean justReal, TaskDO taskDO);
 
     void countAndUpdateForLibrary(LibraryDO library);

@@ -11,12 +11,16 @@ import java.util.List;
 public enum TaskTemplate {
 
     UPLOAD_EXPERIMENT_FILE("UPLOAD_EXPERIMENT_FILE", 3,
-            "['开始构建索引','索引构建完毕,开始存储索引','索引存储完毕,流程结束']",
+            "['构建索引','索引构建完毕,开始存储索引','索引存储完毕,流程结束']",
             "/experiment/create"),
 
     UPLOAD_LIBRARY_FILE("UPLOAD_LIBRARY_FILE", 4,
-            "['开始清理原有旧文件','开始解析并存储文件','统计标准库基本情况','存储完毕,流程结束']",
+            "['清理原有旧文件','解析并存储文件','统计标准库基本情况','存储完毕,流程结束']",
             "/library/create"),
+
+    SWATH_CONVOLUTION("SWATH_CONVOLUTION", 8,
+            "['基本条件检查','构建MS1卷积坐标','获取全部MS1谱图索引列表','解析MS1指定谱图','开始卷积MS1数据','获取Swath窗口信息','卷积MS2数据','卷积完毕']",
+            "/experiment/extractor"),
 
     SWATH_WORKFLOW("SWATH_WORKFLOW", 0,
             "[]",

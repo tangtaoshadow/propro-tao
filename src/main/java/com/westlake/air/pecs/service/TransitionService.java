@@ -2,6 +2,7 @@ package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.LibraryCoordinate;
+import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.Peptide;
 import com.westlake.air.pecs.domain.db.simple.Protein;
@@ -64,22 +65,13 @@ public interface TransitionService {
     Long countByPeptideRef(String libraryId);
 
     /**
-     * 同时创建MS1和MS2的卷积坐标
-     *
-     * @param libraryId
-     * @param rtExtractionWindows
-     * @return
-     */
-    LibraryCoordinate buildCoordinates(String libraryId, float rtExtractionWindows);
-
-    /**
      * 创建MS1的坐标系
      *
      * @param libraryId
      * @param rtExtractionWindows
      * @return
      */
-    List<TargetTransition> buildMS1Coordinates(String libraryId, float rtExtractionWindows);
+    List<TargetTransition> buildMS1Coordinates(String libraryId, float rtExtractionWindows, TaskDO taskDO);
 
     /**
      * 创建MS2的坐标系
@@ -90,10 +82,11 @@ public interface TransitionService {
      * @param precursorMzEnd
      * @return
      */
-    List<TargetTransition> buildMS2Coordinates(String libraryId, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd);
+    List<TargetTransition> buildMS2Coordinates(String libraryId, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd, TaskDO taskDO);
 
     /**
      * 根据LibraryId获取按照PeptideRef进行分组的Intensity列表
+     *
      * @param libraryId
      * @return
      */
