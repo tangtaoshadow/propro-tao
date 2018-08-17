@@ -133,11 +133,11 @@ public class ExperimentController extends BaseController {
         }//Check Params End
 
         TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_EXPERIMENT_FILE);
-        taskDO.setName(TaskTemplate.UPLOAD_EXPERIMENT_FILE.getTemplateName()+"-"+experimentDO.getName());
+        taskDO.setName(TaskTemplate.UPLOAD_EXPERIMENT_FILE.getTemplateName() + "-" + experimentDO.getName());
         taskDO.addLog("开始构建索引");
         taskService.insert(taskDO);
-        asyncTaskManager.saveExperimentTask(experimentDO,file,taskDO);
-        return "redirect:/task/detail/"+taskDO.getId();
+        asyncTaskManager.saveExperimentTask(experimentDO, file, taskDO);
+        return "redirect:/task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/edit/{id}")
@@ -236,14 +236,27 @@ public class ExperimentController extends BaseController {
 
     }
 
+    @RequestMapping(value = "/extractor/{id}")
+    String extractor(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+        ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
+        if (resultDO.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OBJECT_NOT_EXISTED);
+            return "redirect:/experiment/list";
+        }
+        model.addAttribute("libraries", getLibraryList(0));
+        model.addAttribute("iRtLibraries", getLibraryList(1));
+        model.addAttribute("experiment", resultDO.getModel());
+        return "/experiment/extractor";
+    }
+
     @RequestMapping(value = "/extract")
-    String extract(Model model,
-                   @RequestParam(value = "id", required = true) String id,
-                   @RequestParam(value = "buildType", required = true) int buildType,
-                   @RequestParam(value = "creator", required = false) String creator,
-                   @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
-                   @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
-                   RedirectAttributes redirectAttributes) {
+    String doExtract(Model model,
+                     @RequestParam(value = "id", required = true) String id,
+                     @RequestParam(value = "buildType", required = true) int buildType,
+                     @RequestParam(value = "creator", required = false) String creator,
+                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
+                     @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
+                     RedirectAttributes redirectAttributes) {
         if (rtExtractWindow == null) {
             rtExtractWindow = 600f;
         }

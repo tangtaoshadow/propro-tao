@@ -26,7 +26,7 @@
                             <h3 class="m-portlet__head-text"
                                 th:text="|任务详情  :  ${task?.taskTemplate}--${task?.status}|"></h3>
                             <h5 class="m-portlet__head-text" th:if="${task?.totalCost}"
-                                th:text="|任务耗时  :  ${task?.totalCost}毫秒|"></h5>
+                                th:text="|任务耗时  :  ${task?.totalCost/1000}秒|"></h5>
                         </div>
                     </div>
                 </div>
@@ -131,28 +131,23 @@
             WizardDemo.init(currentStep);
         });
 
-        function refresh() {
+        function compare() {
             if (status === "RUNNING") {
-                window.location.reload();
+                var result = $.ajax({
+                    type: "GET",
+                    url: "/task/getTaskInfo/" + taskId,
+                    dataType: "json",
+                    async: false,
+                    success: function (result) {
+                        if (result != lastModifiedDate) {
+                            window.location.reload();
+                        }
+                    }
+                });
             }
         }
 
-        function compare() {
-            var result = $.ajax({
-                type: "GET",
-                url: "/task/getTaskInfo/" + taskId,
-                dataType: "json",
-                async: false,
-                success: function (result) {
-                    if (result != lastModifiedDate) {
-                        window.location.reload();
-                    }
-                }
-            });
-        }
-
         setInterval(compare, 5000); //指定5秒刷新一次
-
     </script>
 
 </th:block>
