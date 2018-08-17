@@ -191,8 +191,6 @@ public class TransitionServiceImpl implements TransitionService {
 
     @Override
     public List<TargetTransition> buildMS1Coordinates(String libraryId, float rtExtractionWindows, TaskDO taskDO) {
-        taskDO.addLog("构建卷积MS1坐标");
-        taskService.update(taskDO);
         long start = System.currentTimeMillis();
         TransitionQuery query = new TransitionQuery(libraryId);
         query.setIsDecoy(false);
@@ -213,8 +211,6 @@ public class TransitionServiceImpl implements TransitionService {
     @Override
     public List<TargetTransition> buildMS2Coordinates(String libraryId, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd, TaskDO taskDO) {
 
-        taskDO.addLog("构建卷积MS2坐标");
-        taskService.update(taskDO);
         long start = System.currentTimeMillis();
         TransitionQuery query = new TransitionQuery(libraryId);
         query.setIsDecoy(false);
@@ -228,7 +224,7 @@ public class TransitionServiceImpl implements TransitionService {
             targetTransition.setRtEnd(targetTransition.getRt() + rtExtractionWindows / 2.0f);
         }
         List<TargetTransition> list = sortMS2Coordinates(targetList);
-        taskDO.addLog("读取数据库耗时:" + readDB + "构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
+        taskDO.addLog("构建卷积MS2坐标,读取数据库耗时:" + readDB + "构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
         taskService.update(taskDO);
         return list;
     }

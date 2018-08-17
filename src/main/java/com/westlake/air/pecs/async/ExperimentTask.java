@@ -231,7 +231,7 @@ public class ExperimentTask {
                 //Step5.卷积并且存储数据
                 convoluteAndInsert(coordinates, rtMap, overviewId, rtExtractWindow, mzExtractWindow, false, taskDO);
 
-                taskDO.addLog("第" + count + "数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
+                taskDO.addLog("第" + count + "轮数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
                 taskService.update(taskDO);
                 count++;
             }
@@ -252,22 +252,12 @@ public class ExperimentTask {
 
     private TreeMap<Float, MzIntensityPairs> parseSpectrum(RandomAccessFile raf, List<SimpleScanIndex> indexes, BaseExpParser baseExpParser, TaskDO taskDO) {
         long start = System.currentTimeMillis();
-        long start2 = System.currentTimeMillis();
 
-        taskDO.addLog("开始创图谱");
-        taskService.update(taskDO);
         TreeMap<Float, MzIntensityPairs> rtMap = new TreeMap<>();
-        int k = 0;
         for (SimpleScanIndex index : indexes) {
             rtMap.put(index.getRt(), baseExpParser.parseOne(raf, index.getStart(), index.getEnd()));
-            k++;
-            if (k % 1000 == 0) {
-                taskDO.addLog("解析1000个图谱耗时:" + (System.currentTimeMillis() - start2));
-                taskService.update(taskDO);
-                start2 = System.currentTimeMillis();
-            }
         }
-        taskDO.addLog("解析XML文件总计耗时:" + (System.currentTimeMillis() - start));
+        taskDO.addLog("解析"+indexes.size()+"条XML谱图文件总计耗时:" + (System.currentTimeMillis() - start));
         taskService.update(taskDO);
         return rtMap;
     }
@@ -350,8 +340,6 @@ public class ExperimentTask {
             }
         }
         analyseDataDAO.insert(dataList);
-        taskDO.addLog("本轮数据全部处理完毕");
-        taskService.update(taskDO);
     }
 
     private BaseExpParser getParser(String fileType) {
