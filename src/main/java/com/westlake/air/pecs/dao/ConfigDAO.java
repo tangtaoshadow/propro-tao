@@ -31,10 +31,20 @@ public class ConfigDAO {
             configDO = new ConfigDO();
             configDO.setCreateDate(new Date());
             configDO.setLastModifiedDate(new Date());
-            updateConfig(configDO);
+            addConfig(configDO);
         }
 
         return configDO;
+    }
+
+    public Boolean addConfig(ConfigDO configDO) {
+        try {
+            mongoTemplate.insert(configDO, CollectionName);
+            return true;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return false;
+        }
     }
 
     public Boolean updateConfig(ConfigDO configDO) {
