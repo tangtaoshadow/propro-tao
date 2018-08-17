@@ -47,9 +47,12 @@ public class HomeController extends BaseController{
     String home(Model model) {
         LibraryQuery libraryQuery = new LibraryQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");
         ResultDO<List<LibraryDO>> libRes = libraryService.getList(libraryQuery);
-        ResultDO<List<ExperimentDO>> expRes = experimentService.getList(new ExperimentQuery(1, SHOW_NUM));
-        ResultDO<List<AnalyseOverviewDO>> overviewRes = analyseOverviewService.getList(new AnalyseOverviewQuery(1, SHOW_NUM));
-        TaskQuery query = new TaskQuery(1, SHOW_NUM);
+        ExperimentQuery experimentQuery = new ExperimentQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");
+        ResultDO<List<ExperimentDO>> expRes = experimentService.getList(experimentQuery);
+        AnalyseOverviewQuery overviewQuery = new AnalyseOverviewQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");
+        ResultDO<List<AnalyseOverviewDO>> overviewRes = analyseOverviewService.getList(overviewQuery);
+
+        TaskQuery query = new TaskQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");
         ResultDO<List<TaskDO>> taskTotalRes = taskService.getList(query);
         query.setStatus(TaskDO.STATUS_RUNNING);
         ResultDO<List<TaskDO>> taskRunningRes = taskService.getList(query);
@@ -66,7 +69,7 @@ public class HomeController extends BaseController{
         model.addAttribute("expCount", expRes.getTotalNum());
         model.addAttribute("overviewCount", overviewRes.getTotalNum());
         model.addAttribute("runningTasks", taskRunningRes.getModel());
-        model.addAttribute("totalTasks", taskTotalRes.getModel());
+        model.addAttribute("tasks", taskTotalRes.getModel());
         model.addAttribute("libs", libRes.getModel());
         model.addAttribute("exps", expRes.getModel());
         model.addAttribute("overviews", overviewRes.getModel());

@@ -4,13 +4,21 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.LibraryDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
+import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.LibraryQuery;
+import com.westlake.air.pecs.domain.query.TransitionQuery;
+import com.westlake.air.pecs.parser.TransitionTraMLParser;
+import com.westlake.air.pecs.parser.TransitionTsvParser;
 import com.westlake.air.pecs.service.LibraryService;
+import com.westlake.air.pecs.service.TransitionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
@@ -25,6 +33,12 @@ public class LibraryServiceImpl implements LibraryService {
 
     @Autowired
     LibraryDAO libraryDAO;
+    @Autowired
+    TransitionService transitionService;
+    @Autowired
+    TransitionTsvParser tsvParser;
+    @Autowired
+    TransitionTraMLParser traMLParser;
 
     @Override
     public List<LibraryDO> getAll() {
@@ -59,7 +73,11 @@ public class LibraryServiceImpl implements LibraryService {
             return ResultDO.build(libraryDO);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            return ResultDO.buildError(ResultCode.INSERT_ERROR);
+            if (e.getMessage().contains("E11000")) {
+                return ResultDO.buildError(ResultCode.DUPLICATE_KEY_ERROR);
+            } else {
+                return ResultDO.buildError(ResultCode.INSERT_ERROR);
+            }
         }
     }
 
@@ -131,6 +149,42 @@ public class LibraryServiceImpl implements LibraryService {
         } catch (Exception e) {
             logger.warn(e.getMessage());
             return ResultDO.buildError(ResultCode.QUERY_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO parseAndInsertTsv(LibraryDO library, InputStream in, String fileName, boolean justReal, TaskDO taskDO) {
+
+        ResultDO resultDO;
+
+        if (fileName.toLowerCase().endsWith("tsv") || fileName.toLowerCase().endsWith("csv")) {
+            resultDO = tsvParser.parseAndInsert(in, library, justReal, taskDO);
+        } else if (fileName.toLowerCase().endsWith("traml")) {
+            resultDO = traMLParser.parseAndInsert(in, library, justReal, taskDO);
+        } else {
+            return ResultDO.buildError(ResultCode.INPUT_FILE_TYPE_MUST_BE_TSV_OR_TRAML);
+        }
+
+        return resultDO;
+    }
+
+    @Override
+    public void countAndUpdateForLibrary(LibraryDO library) {
+        try {
+            library.setProteinCount(transitionService.countByProteinName(library.getId()));
+            library.setPeptideCount(transitionService.countByPeptideRef(library.getId()));
+
+            TransitionQuery query = new TransitionQuery();
+            query.setLibraryId(library.getId());
+            library.setTotalCount(transitionService.count(query));
+            query.setIsDecoy(false);
+            library.setTotalTargetCount(transitionService.count(query));
+            query.setIsDecoy(true);
+            library.setTotalDecoyCount(transitionService.count(query));
+
+            update(library);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
         }
     }
 }

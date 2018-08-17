@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.domain.query;
 
 import lombok.Data;
+import org.springframework.data.domain.Sort;
 
 import java.util.Date;
 
@@ -23,7 +24,7 @@ public class ExperimentQuery extends PageQuery {
 
     public ExperimentQuery(){}
 
-    public ExperimentQuery(int pageNo,int pageSize){
-        super(pageNo, pageSize);
+    public ExperimentQuery(int pageNo, int pageSize, Sort.Direction direction, String sortColumn){
+        super(pageNo, pageSize, direction, sortColumn);
     }
 }

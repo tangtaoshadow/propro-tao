@@ -1,4 +1,4 @@
-package com.westlake.air.pecs.service.impl;
+package com.westlake.air.pecs.task;
 
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.ResultDO;
@@ -8,23 +8,25 @@ import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.parser.MzMLParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
-import com.westlake.air.pecs.service.AsyncTaskService;
 import com.westlake.air.pecs.service.ExperimentService;
+import com.westlake.air.pecs.service.LibraryService;
 import com.westlake.air.pecs.service.ScanIndexService;
 import com.westlake.air.pecs.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
- * Time: 2018-08-16 15:02
+ * Time: 2018-08-17 10:40
  */
-@Service("asyncTaskService")
-public class AsyncTaskServiceImpl implements AsyncTaskService {
+@Component("asyncTaskManager")
+public class AsyncTaskManager {
 
     @Autowired
     MzXMLParser mzXMLParser;
@@ -36,9 +38,13 @@ public class AsyncTaskServiceImpl implements AsyncTaskService {
     ScanIndexService scanIndexService;
     @Autowired
     ExperimentService experimentService;
+    @Autowired
+    LibraryService libraryService;
+
+    int errorListNumberLimit = 10;
 
     @Async
-    public void addExperimentTask(ExperimentDO experimentDO, TaskDO taskDO, File file){
+    public void saveExperimentTask(ExperimentDO experimentDO, File file, TaskDO taskDO){
         try {
             long start = System.currentTimeMillis();
             //建立索引
@@ -57,34 +63,57 @@ public class AsyncTaskServiceImpl implements AsyncTaskService {
             ResultDO resultDO = scanIndexService.insertAll(indexList, true);
 
             taskDO.setCurrentStep(3);
-            taskService.update(taskDO);
 
             if (resultDO.isFailed()) {
-                taskDO.setStatus(TaskDO.STATUS_FAILED);
                 taskDO.addLog("索引存储失败" + resultDO.getMsgInfo());
-                taskDO.finish();
+                taskDO.finish(TaskDO.STATUS_FAILED);
                 taskService.update(taskDO);
                 experimentService.delete(experimentDO.getId());
                 scanIndexService.deleteAllByExperimentId(experimentDO.getId());
 
             } else {
-                taskDO.setStatus(TaskDO.STATUS_SUCCESS);
                 taskDO.addLog("索引存储成功");
-                taskDO.finish();
+                taskDO.finish(TaskDO.STATUS_SUCCESS);
                 taskService.update(taskDO);
             }
 
         } catch (Exception e) {
-            taskDO.setStatus(TaskDO.STATUS_SUCCESS);
             taskDO.addLog("索引存储失败:"+e.getMessage());
-            taskDO.finish();
+            taskDO.finish(TaskDO.STATUS_FAILED);
             taskService.update(taskDO);
             e.printStackTrace();
         }
     }
 
-    @Override
-    public void addLibraryTask(LibraryDO libraryDO, TaskDO taskDO, File file) {
+    @Async
+    public void saveLibraryTask(LibraryDO library, InputStream in, String fileName, Boolean justReal, TaskDO taskDO) {
+        //先Parse文件,再作数据库的操作
+        ResultDO result = libraryService.parseAndInsertTsv(library, in, fileName,  justReal, taskDO);
+        if (result.getErrorList() != null) {
+            if (result.getErrorList().size() > errorListNumberLimit) {
+                taskDO.addLog("解析错误,错误的条数过多,这边只显示" + errorListNumberLimit + "条错误信息");
+                taskDO.addLog(result.getErrorList().subList(0, errorListNumberLimit));
+            } else {
+                taskDO.addLog(result.getErrorList());
+            }
+        }
 
+        if (result.isFailed()) {
+            taskDO.addLog(result.getMsgInfo());
+            taskDO.finish(TaskDO.STATUS_FAILED);
+        }
+
+        /**
+         * 如果全部存储成功,开始统计蛋白质数目,肽段数目和Transition数目
+         */
+        taskDO.setCurrentStep(3);
+        taskDO.addLog("开始统计蛋白质数目,肽段数目和Transition数目");
+        taskService.update(taskDO);
+        libraryService.countAndUpdateForLibrary(library);
+
+        taskDO.addLog("统计完毕");
+        taskDO.setCurrentStep(4);
+        taskDO.finish(TaskDO.STATUS_SUCCESS);
+        taskService.update(taskDO);
     }
 }

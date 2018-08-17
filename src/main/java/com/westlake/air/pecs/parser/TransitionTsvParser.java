@@ -5,10 +5,13 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.transition.Annotation;
 import com.westlake.air.pecs.domain.db.LibraryDO;
+import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
+import com.westlake.air.pecs.service.TaskService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -23,8 +26,11 @@ import java.util.List;
  * Created by James Lu MiaoShan
  * Time: 2018-06-07 11:07
  */
-@Component
+@Component("tsvParser")
 public class TransitionTsvParser extends BaseTransitionParser {
+
+    @Autowired
+    TaskService taskService;
 
     public final Logger logger = LoggerFactory.getLogger(TransitionTsvParser.class);
 
@@ -46,7 +52,7 @@ public class TransitionTsvParser extends BaseTransitionParser {
     private static String Quantifying = "quantifying_transition";
 
     @Override
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library, boolean justReal) {
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, boolean justReal, TaskDO taskDO) {
         List<TransitionDO> transitions = new ArrayList<>();
         ResultDO<List<TransitionDO>> tranResult = new ResultDO<>(true);
         try {
@@ -60,7 +66,9 @@ public class TransitionTsvParser extends BaseTransitionParser {
 
             //开始插入前先清空原有的数据库数据
             ResultDO resultDOTmp = transitionService.deleteAllByLibraryId(library.getId());
-            logger.info("删除旧数据完毕");
+            taskDO.setCurrentStep(2);
+            taskDO.addLog("删除旧数据完毕,开始文件解析");
+            taskService.update(taskDO);
 
             if (resultDOTmp.isFailed()) {
                 logger.error(resultDOTmp.getMsgInfo());
@@ -93,7 +101,8 @@ public class TransitionTsvParser extends BaseTransitionParser {
                 if (transitions.size() > Constants.MAX_INSERT_RECORD_FOR_TRANSITION) {
                     count += Constants.MAX_INSERT_RECORD_FOR_TRANSITION;
                     transitionService.insertAll(transitions, false);
-                    logger.info(count + "条数据插入成功");
+                    taskDO.addLog(count + "条数据插入成功");
+                    taskService.update(taskDO);
                     transitions = new ArrayList<>();
                 }
             }

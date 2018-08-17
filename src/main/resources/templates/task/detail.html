@@ -24,7 +24,9 @@
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
                             <h3 class="m-portlet__head-text"
-                                th:text="|任务详情  :  ${task?.name}--${task?.status}|"></h3>
+                                th:text="|任务详情  :  ${task?.taskTemplate}--${task?.status}|"></h3>
+                            <h5 class="m-portlet__head-text" th:if="${task?.totalCost}"
+                                th:text="|任务耗时  :  ${task?.totalCost}毫秒|"></h5>
                         </div>
                     </div>
                 </div>
@@ -74,7 +76,8 @@
                                 <!--begin: Form Wizard Form-->
                                 <div class="m-wizard__form">
                                     <form class="m-form m-form--label-align-left- m-form--state-" id="m_form">
-                                        <div th:if="${task?.status}=='RUNNING'" class="m-loader m-loader--brand m-loader--right">
+                                        <div th:if="${task?.status}=='RUNNING'"
+                                             class="m-loader m-loader--brand m-loader--right">
                                             <input type="text" class="form-control" value="任务执行中...">
                                         </div>
                                         <!--begin: Form Body -->
@@ -120,6 +123,8 @@
         /*<![CDATA[*/
         var currentStep = [[${task?.currentStep}]];
         var status = [[${task?.status}]];
+        var taskId = [[${task?.id}]];
+        var lastModifiedDate = [[${#dates.format(task?.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}]];
         /*]]>*/
 
         $(document).ready(function () {
@@ -132,7 +137,21 @@
             }
         }
 
-        setTimeout('refresh()', 5000); //指定5秒刷新一次
+        function compare() {
+            var result = $.ajax({
+                type: "GET",
+                url: "/task/getTaskInfo/" + taskId,
+                dataType: "json",
+                async: false,
+                success: function (result) {
+                    if (result != lastModifiedDate) {
+                        window.location.reload();
+                    }
+                }
+            });
+        }
+
+        setInterval(compare, 5000); //指定5秒刷新一次
 
     </script>
 

@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.domain.query;
 
 import lombok.Data;
+import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +56,7 @@ public class TaskQuery extends PageQuery{
 
     public TaskQuery(){}
 
-    public TaskQuery(int pageNo,int pageSize){
-        super(pageNo, pageSize);
+    public TaskQuery(int pageNo, int pageSize, Sort.Direction direction, String sortColumn){
+        super(pageNo, pageSize, direction, sortColumn);
     }
 }

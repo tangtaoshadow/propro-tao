@@ -2,7 +2,6 @@ package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
@@ -15,7 +14,6 @@ import com.westlake.air.pecs.parser.MzMLParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
 import com.westlake.air.pecs.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -49,10 +47,6 @@ public class ExperimentController extends BaseController {
     MzMLParser mzMLParser;
     @Autowired
     ScanIndexService scanIndexService;
-    @Autowired
-    TaskService taskService;
-    @Autowired
-    AsyncTaskService asyncTaskService;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -138,17 +132,11 @@ public class ExperimentController extends BaseController {
             return "experiment/create";
         }//Check Params End
 
-        TaskDO taskDO = new TaskDO();
-        taskDO.setTaskTemplate(TaskTemplate.UPLOAD_EXPERIMENT_FILE.getTemplateName());
-        taskDO.setName(TaskTemplate.UPLOAD_EXPERIMENT_FILE.getTemplateName()+experimentDO.getName());
-        taskDO.setStatus(TaskDO.STATUS_RUNNING);
-        taskDO.setCurrentStep(1);
+        TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_EXPERIMENT_FILE);
+        taskDO.setName(TaskTemplate.UPLOAD_EXPERIMENT_FILE.getTemplateName()+"-"+experimentDO.getName());
         taskDO.addLog("开始构建索引");
-        taskDO.setExpId(experimentDO.getId());
-        taskDO.start();
         taskService.insert(taskDO);
-
-        asyncTaskService.addExperimentTask(experimentDO,taskDO,file);
+        asyncTaskManager.saveExperimentTask(experimentDO,file,taskDO);
         return "redirect:/task/detail/"+taskDO.getId();
     }
 

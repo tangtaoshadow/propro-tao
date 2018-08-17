@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
@@ -24,6 +25,12 @@ public class TaskController extends BaseController {
 
     @Autowired
     TaskService taskService;
+
+    @RequestMapping(value = "/list")
+    String list(Model model) {
+//        taskService.getList()
+        return null;
+    }
 
     @RequestMapping(value = "/create")
     String create(Model model,
@@ -59,7 +66,11 @@ public class TaskController extends BaseController {
     @ResponseBody
     String getTaskInfo(Model model, @PathVariable("id") String id) {
         ResultDO<TaskDO> resultDO = taskService.getById(id);
-        return JSON.toJSONString(resultDO);
+        if(resultDO.isSuccess() && resultDO.getModel() != null){
+            return JSON.toJSONString(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(resultDO.getModel().getLastModifiedDate()));
+        }else{
+            return null;
+        }
     }
 
     @RequestMapping(value = "/delete/{id}")

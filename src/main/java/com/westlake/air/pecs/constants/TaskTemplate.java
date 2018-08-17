@@ -14,8 +14,8 @@ public enum TaskTemplate {
             "['开始构建索引','索引构建完毕,开始存储索引','索引存储完毕,流程结束']",
             "/experiment/create"),
 
-    UPLOAD_LIBRARY_FILE("UPLOAD_LIBRARY_FILE", 0,
-            "[]",
+    UPLOAD_LIBRARY_FILE("UPLOAD_LIBRARY_FILE", 4,
+            "['开始清理原有旧文件','开始解析并存储文件','统计标准库基本情况','存储完毕,流程结束']",
             "/library/create"),
 
     SWATH_WORKFLOW("SWATH_WORKFLOW", 0,

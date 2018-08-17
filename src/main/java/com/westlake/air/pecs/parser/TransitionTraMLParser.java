@@ -5,6 +5,7 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.transition.Annotation;
 import com.westlake.air.pecs.domain.db.LibraryDO;
+import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.parser.model.traml.*;
 import com.westlake.air.pecs.parser.xml.AirXStream;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-@Component
+@Component("traMLParser")
 public class TransitionTraMLParser extends BaseTransitionParser{
 
     @Autowired
@@ -152,7 +153,7 @@ public class TransitionTraMLParser extends BaseTransitionParser{
     }
 
     @Override
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library, boolean justReal) {
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, boolean justReal, TaskDO taskDO) {
         TraML traML = parse(in);
         System.out.println(traML.getProteinList().size());
 

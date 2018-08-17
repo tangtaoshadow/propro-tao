@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.domain.db;
 
+import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.BaseDO;
 import com.westlake.air.pecs.domain.bean.task.MachineInfo;
 import com.westlake.air.pecs.domain.bean.task.TaskLog;
@@ -29,19 +30,7 @@ public class TaskDO extends BaseDO {
 
     String creator = "Admin";
 
-    String expId;
-
     String status;
-
-    String libraryId;
-
-    String libraryName;
-
-    String iRtLibraryId;
-
-    String iRtLibraryName;
-
-    String overviewId;
 
     Integer currentStep;
 
@@ -57,6 +46,15 @@ public class TaskDO extends BaseDO {
 
     Long totalCost;
 
+    public TaskDO(){}
+
+    public TaskDO(TaskTemplate taskTemplate){
+        this.taskTemplate = taskTemplate.getTemplateName();
+        this.status = STATUS_RUNNING;
+        this.currentStep = 1;
+        start();
+    }
+
     public void addLog(String content) {
         if (logs == null) {
             logs = new ArrayList<>();
@@ -65,6 +63,17 @@ public class TaskDO extends BaseDO {
         TaskLog taskLog = new TaskLog(content);
 
         logs.add(taskLog);
+    }
+
+    public void addLog(List<String> contents) {
+        if (logs == null) {
+            logs = new ArrayList<>();
+            logs.add(new TaskLog("Task Started"));
+        }
+        for(String content : contents){
+            TaskLog taskLog = new TaskLog(content);
+            logs.add(taskLog);
+        }
     }
 
     public void start(){
@@ -82,8 +91,9 @@ public class TaskDO extends BaseDO {
         return taskLog.getTime().getTime();
     }
 
-    public void finish(){
+    public void finish(String status){
         addLog("Task Ended");
+        this.status = status;
         totalCost = System.currentTimeMillis() - getStartTime();
     }
 }
