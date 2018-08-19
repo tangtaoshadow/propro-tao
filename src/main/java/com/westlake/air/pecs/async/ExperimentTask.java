@@ -74,13 +74,10 @@ public class ExperimentTask {
                 indexList = mzMLParser.index(file, experimentDO.getId(), taskDO);
             }
 
-            taskDO.setCurrentStep(2);
             taskDO.addLog("索引构建完毕,开始存储索引");
             taskService.update(taskDO);
 
             ResultDO resultDO = scanIndexService.insertAll(indexList, true);
-
-            taskDO.setCurrentStep(3);
             if (resultDO.isFailed()) {
                 taskDO.addLog("索引存储失败" + resultDO.getMsgInfo());
                 taskDO.finish(TaskDO.STATUS_FAILED);
@@ -167,7 +164,6 @@ public class ExperimentTask {
     public void extractMS1(RandomAccessFile raf, ExperimentDO exp, String overviewId, String libraryId, float rtExtractWindow, float mzExtractWindow, TaskDO taskDO) {
 
         //Step1.获取标准库目标卷积片段
-        taskDO.setCurrentStep(2);
         taskDO.addLog("构建MS1卷积坐标");
         taskService.update(taskDO);
         List<TargetTransition> coordinates = transitionService.buildMS1Coordinates(libraryId, rtExtractWindow, taskDO);
@@ -179,19 +175,16 @@ public class ExperimentTask {
         }
 
         //Step2.获取指定索引列表
-        taskDO.setCurrentStep(3);
         taskDO.addLog("获取全部MS1谱图索引列表");
         taskService.update(taskDO);
         List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(new ScanIndexQuery(exp.getId(), 1));
 
         //Step4.提取指定原始谱图
-        taskDO.setCurrentStep(4);
         taskDO.addLog("解析MS1指定谱图");
         taskService.update(taskDO);
         TreeMap<Float, MzIntensityPairs> rtMap = parseSpectrum(raf, indexes, getParser(exp.getFileType()), taskDO);
 
         //Step5.卷积并且存储数据
-        taskDO.setCurrentStep(5);
         taskDO.addLog("开始卷积MS1数据");
         taskService.update(taskDO);
         convoluteAndInsert(coordinates, rtMap, overviewId, rtExtractWindow, mzExtractWindow, true, taskDO);
@@ -200,13 +193,11 @@ public class ExperimentTask {
     public void extractMS2(File file, ExperimentDO exp, String overviewId, String libraryId, float rtExtractWindow, float mzExtractWindow, TaskDO taskDO) {
 
         //Step1.获取窗口信息.
-        taskDO.setCurrentStep(6);
         taskDO.addLog("获取Swath窗口信息");
         taskService.update(taskDO);
         List<WindowRang> rangs = experimentService.getWindows(exp.getId());
 
         //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
-        taskDO.setCurrentStep(7);
         taskDO.addLog("总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
         taskService.update(taskDO);
 

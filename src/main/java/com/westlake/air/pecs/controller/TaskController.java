@@ -58,7 +58,6 @@ public class TaskController extends BaseController {
             model.addAttribute(ERROR_MSG, ResultCode.OBJECT_NOT_EXISTED.getMessage());
             return "task/detail";
         }
-        model.addAttribute("steps", taskTemplate.getSteps());
         return "task/detail";
     }
 

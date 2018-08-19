@@ -54,13 +54,11 @@ public class LibraryTask {
         /**
          * 如果全部存储成功,开始统计蛋白质数目,肽段数目和Transition数目
          */
-        taskDO.setCurrentStep(3);
         taskDO.addLog("开始统计蛋白质数目,肽段数目和Transition数目");
         taskService.update(taskDO);
         libraryService.countAndUpdateForLibrary(library);
 
         taskDO.addLog("统计完毕");
-        taskDO.setCurrentStep(4);
         taskDO.finish(TaskDO.STATUS_SUCCESS);
         taskService.update(taskDO);
     }

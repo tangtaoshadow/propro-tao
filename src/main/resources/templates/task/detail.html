@@ -33,80 +33,22 @@
                 <!--end: Portlet Head-->
                 <!--begin: Portlet Body-->
                 <div class="m-portlet__body m-portlet__body--no-padding">
-                    <!--begin: Form Wizard-->
-                    <div class="m-wizard m-wizard--3 m-wizard--success" id="m_wizard">
-                        <!--begin: Message container -->
-                        <div class="m-portlet__padding-x">
-                            <!-- Here you can put a message or alert -->
-                        </div>
-                        <!--end: Message container -->
-                        <div class="row m-row--no-padding">
-                            <div class="col-xl-4 col-lg-12">
-                                <!--begin: Form Wizard Head -->
-                                <div class="m-wizard__head">
-                                    <!--begin: Form Wizard Progress -->
-                                    <div class="m-wizard__progress">
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar" aria-valuenow="100"
-                                                 aria-valuemin="0" aria-valuemax="100"></div>
-                                        </div>
+                    <div class="m-demo">
+                        <div class="m-demo__preview">
+                            <div class="m-list-timeline">
+                                <div class="m-list-timeline__items">
+                                    <div th:each="log:${task?.logs}"
+                                         class="m-list-timeline__item">
+                                        <span class="m-list-timeline__badge"></span>
+                                        <span class="m-list-timeline__text"
+                                              th:text="${log.content}"></span>
+                                        <span class="m-list-timeline__time"
+                                              th:text="${#dates.format(log.time,'yyyy-MM-dd HH:mm:ss')}"></span>
                                     </div>
-                                    <!--end: Form Wizard Progress -->
-                                    <!--begin: Form Wizard Nav -->
-                                    <div class="m-wizard__nav">
-                                        <div class="m-wizard__steps">
-                                            <div th:each="step, status:${steps}" class="m-wizard__step">
-                                                <div class="m-wizard__step-info">
-                                                    <a href="#" class="m-wizard__step-number">
-														<span>
-															<span th:text="${status.count}"></span>
-														</span>
-                                                    </a>
-                                                    <div class="m-wizard__step-line"><span></span></div>
-                                                    <div class="m-wizard__step-label" th:text="${step}"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!--end: Form Wizard Nav -->
                                 </div>
-                                <!--end: Form Wizard Head -->
-                            </div>
-                            <div class="col-xl-8 col-lg-12">
-                                <!--begin: Form Wizard Form-->
-                                <div class="m-wizard__form">
-                                    <form class="m-form m-form--label-align-left- m-form--state-" id="m_form">
-                                        <div th:if="${task?.status}=='RUNNING'"
-                                             class="m-loader m-loader--brand m-loader--right">
-                                            <input type="text" class="form-control" value="任务执行中...">
-                                        </div>
-                                        <!--begin: Form Body -->
-                                        <div class="m-portlet__body m-portlet__body--no-padding">
-                                            <div class="m-demo">
-                                                <div class="m-demo__preview">
-                                                    <div class="m-list-timeline">
-                                                        <div class="m-list-timeline__items">
-                                                            <div th:each="log:${task?.logs}"
-                                                                 class="m-list-timeline__item">
-                                                                <span class="m-list-timeline__badge"></span>
-                                                                <span class="m-list-timeline__text"
-                                                                      th:text="${log.content}"></span>
-                                                                <span class="m-list-timeline__time"
-                                                                      th:text="${#dates.format(log.time,'yyyy-MM-dd HH:mm:ss')}"></span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!--end: Form Body -->
-                                    </form>
-                                </div>
-                                <!--end: Form Wizard Form-->
                             </div>
                         </div>
                     </div>
-                    <!--end: Form Wizard-->
                 </div>
                 <!--end: Portlet Body-->
             </div>
@@ -117,19 +59,12 @@
 </div>
 
 <th:block layout:fragment="script">
-    <script th:src="@{/assets/demo/default/custom/components/forms/wizard/wizard.js}" type="text/javascript"></script>
+    <!--<script th:src="@{/assets/demo/default/custom/components/forms/wizard/wizard.js}" type="text/javascript"></script>-->
 
     <script th:inline="javascript">
-        /*<![CDATA[*/
-        var currentStep = [[${task?.currentStep}]];
         var status = [[${task?.status}]];
         var taskId = [[${task?.id}]];
         var lastModifiedDate = [[${#dates.format(task?.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}]];
-        /*]]>*/
-
-        $(document).ready(function () {
-            WizardDemo.init(currentStep);
-        });
 
         function compare() {
             if (status === "RUNNING") {

@@ -66,7 +66,6 @@ public class TransitionTsvParser extends BaseTransitionParser {
 
             //开始插入前先清空原有的数据库数据
             ResultDO resultDOTmp = transitionService.deleteAllByLibraryId(library.getId());
-            taskDO.setCurrentStep(2);
             taskDO.addLog("删除旧数据完毕,开始文件解析");
             taskService.update(taskDO);
 
