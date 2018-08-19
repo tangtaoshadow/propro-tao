@@ -4,7 +4,7 @@ import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.score.EmgModelParams;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
-import com.westlake.air.pecs.domain.bean.score.RTNormalizationScores;
+import com.westlake.air.pecs.domain.bean.score.PecsScores;
 import com.westlake.air.pecs.utils.MathUtil;
 import net.finmath.optimizer.LevenbergMarquardt;
 import net.finmath.optimizer.SolverException;
@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class ElutionScorer {
 
-    public void calculateElutionModelScore(List<ExperimentFeature> experimentFeatures, RTNormalizationScores scores){
+    public void calculateElutionModelScore(List<ExperimentFeature> experimentFeatures, PecsScores scores){
         float avgScore = 0.0f;
         for(ExperimentFeature feature: experimentFeatures){
             RtIntensityPairs preparedHullPoints = prepareElutionFit(feature);

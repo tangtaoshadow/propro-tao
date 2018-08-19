@@ -1,9 +1,8 @@
 package com.westlake.air.pecs.scorer;
 
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
-import com.westlake.air.pecs.domain.bean.score.RTNormalizationScores;
+import com.westlake.air.pecs.domain.bean.score.PecsScores;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
-import com.westlake.air.pecs.utils.MathUtil;
 import com.westlake.air.pecs.utils.ScoreUtil;
 
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ public class LibraryScorer {
      * @param libraryIntensity get libraryIntensity: from transitions
      * @param scores library_corr, library_norm_manhattan
      */
-    public void calculateLibraryScores(List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, RTNormalizationScores scores, SlopeIntercept slopeIntercept, float groupRt){
+    public void calculateLibraryScores(List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, PecsScores scores, SlopeIntercept slopeIntercept, float groupRt){
         List<Float> experimentIntensity = new ArrayList<>();
         for(ExperimentFeature experimentFeature: experimentFeatures){
             experimentIntensity.add(experimentFeature.getIntensity());
@@ -68,7 +67,7 @@ public class LibraryScorer {
         }
     }
 
-    public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, RTNormalizationScores scores){
+    public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, PecsScores scores){
         float intensitySum = 0.0f;
         for(ExperimentFeature feature: experimentFeatures){
             intensitySum += feature.getIntensity();

@@ -48,7 +48,7 @@ public class PeakScorer {
 
         List<ScoreRtPair> finalScores = new ArrayList<>();
         for(List<ExperimentFeature> features: experimentFeatures){
-            RTNormalizationScores scores = new RTNormalizationScores();
+            PecsScores scores = new PecsScores();
             new ChromatograpicScorer().calculateChromatographicScores(chromatograms, features, libraryIntensity, signalToNoiseList, scores);
             new LibraryScorer().calculateLibraryScores(features,libraryIntensity, scores, slopeIntercept, groupRt);
             float ldaScore = calculateLdaPrescore(scores);
@@ -67,7 +67,7 @@ public class PeakScorer {
      * @param scores pre-calculated
      * @return final score
      */
-    private float calculateLdaPrescore(RTNormalizationScores scores){
+    private float calculateLdaPrescore(PecsScores scores){
         return  scores.getVarLibraryCorr()              * -0.34664267f +
                 scores.getVarLibraryRsmd()              *  2.98700722f +
                 scores.getVarXcorrCoelution()           *  0.09445371f +

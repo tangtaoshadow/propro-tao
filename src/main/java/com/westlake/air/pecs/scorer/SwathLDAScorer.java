@@ -1,13 +1,13 @@
 package com.westlake.air.pecs.scorer;
 
-import com.westlake.air.pecs.domain.bean.score.RTNormalizationScores;
+import com.westlake.air.pecs.domain.bean.score.PecsScores;
 
 /**
  * Created by Nico Wang Ruimin
  * Time: 2018-08-19 21:05
  */
 public class SwathLDAScorer {
-    public double calculateSwathLdaPrescore(RTNormalizationScores scores){
+    public double calculateSwathLdaPrescore(PecsScores scores){
         return scores.getVarLibraryCorr()               * -0.19011762 +
                 scores.getVarLibraryRsmd()              *  2.47298914 +
                 scores.getVarNormRtScore()              *  5.63906731 +
