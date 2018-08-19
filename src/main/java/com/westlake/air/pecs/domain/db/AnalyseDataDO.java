@@ -39,6 +39,8 @@ public class AnalyseDataDO extends BaseDO {
     //是否命中原始数据,如果原始数据中没有此Transition对应的数据则为false
     Boolean isHit = false;
 
+    Boolean isDecoy = false;
+
     //排序后的rt
     Float[] rtArray;
 

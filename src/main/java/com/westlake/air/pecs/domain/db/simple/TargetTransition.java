@@ -26,6 +26,8 @@ public class TargetTransition {
 
     String cutInfo;
 
+    Boolean isDecoy;
+
     float rt;
 
     float rtStart;

@@ -2,6 +2,7 @@ package com.westlake.air.pecs.parser;
 
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
+import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.parser.model.mzxml.*;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -44,7 +45,7 @@ public class MzMLParser extends BaseExpParser{
      * @return List<ScanIndexDO>
      */
     @Override
-    public List<ScanIndexDO> index(File file, String experimentId) {
+    public List<ScanIndexDO> index(File file, String experimentId, TaskDO taskDO) {
         RandomAccessFile raf = null;
         List<ScanIndexDO> list = new ArrayList<>();
         try {

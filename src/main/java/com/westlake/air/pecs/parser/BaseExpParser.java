@@ -2,6 +2,7 @@ package com.westlake.air.pecs.parser;
 
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
+import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.parser.xml.AirXStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ public abstract class BaseExpParser {
     private static byte[] prefix = "<scanList>".getBytes();
     private static byte[] suffix = "</scanList>".getBytes();
 
-    public abstract List<ScanIndexDO> index(File file, String experimentId);
+    public abstract List<ScanIndexDO> index(File file, String experimentId, TaskDO taskDO);
 
     public abstract MzIntensityPairs parseOne(RandomAccessFile raf, long start, long end);
 

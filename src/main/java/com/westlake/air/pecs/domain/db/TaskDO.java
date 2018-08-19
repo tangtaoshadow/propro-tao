@@ -1,11 +1,13 @@
 package com.westlake.air.pecs.domain.db;
 
+import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.BaseDO;
-import com.westlake.air.pecs.domain.bean.task.Report;
-import com.westlake.air.pecs.domain.bean.task.StepLog;
+import com.westlake.air.pecs.domain.bean.task.MachineInfo;
+import com.westlake.air.pecs.domain.bean.task.TaskLog;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -17,10 +19,10 @@ import java.util.List;
 @Document(collection = "task")
 public class TaskDO extends BaseDO {
 
-    public static String STATUS_UNKNOWN;
-    public static String STATUS_RUNNING;
-    public static String STATUS_FAILED;
-    public static String STATUS_SUCCESS;
+    public static String STATUS_UNKNOWN = "UNKNOWN";
+    public static String STATUS_RUNNING = "RUNNING";
+    public static String STATUS_FAILED = "FAILED";
+    public static String STATUS_SUCCESS = "SUCCESS";
 
     String id;
 
@@ -28,21 +30,7 @@ public class TaskDO extends BaseDO {
 
     String creator = "Admin";
 
-    String expId;
-
     String status;
-
-    String libraryId;
-
-    String libraryName;
-
-    String iRtLibraryId;
-
-    String iRtLibraryName;
-
-    String overviewId;
-
-    String currentStep;
 
     String taskTemplate;
 
@@ -50,7 +38,60 @@ public class TaskDO extends BaseDO {
 
     Date lastModifiedDate;
 
-    List<StepLog> stepLogs;
+    MachineInfo machineInfo;
 
-    List<Report> reports;
+    List<TaskLog> logs;
+
+    Long totalCost;
+
+    public TaskDO(){}
+
+    public TaskDO(TaskTemplate taskTemplate, String taskSuffixName){
+        this.taskTemplate = taskTemplate.getTemplateName();
+        this.status = STATUS_RUNNING;
+        this.name = TaskTemplate.UPLOAD_EXPERIMENT_FILE.getTemplateName() + "-" + taskSuffixName;
+        start();
+    }
+
+    public void addLog(String content) {
+        if (logs == null) {
+            logs = new ArrayList<>();
+            logs.add(new TaskLog("Task Started"));
+        }
+        TaskLog taskLog = new TaskLog(content);
+
+        logs.add(taskLog);
+    }
+
+    public void addLog(List<String> contents) {
+        if (logs == null) {
+            logs = new ArrayList<>();
+            logs.add(new TaskLog("Task Started"));
+        }
+        for(String content : contents){
+            TaskLog taskLog = new TaskLog(content);
+            logs.add(taskLog);
+        }
+    }
+
+    public void start(){
+        if(logs == null || logs.size() == 0){
+            logs = new ArrayList<>();
+            logs.add(new TaskLog("Task Started"));
+        }
+    }
+
+    public Long getStartTime(){
+        if(logs == null || logs.size() == 0){
+            return null;
+        }
+        TaskLog taskLog = logs.get(0);
+        return taskLog.getTime().getTime();
+    }
+
+    public void finish(String status){
+        addLog("Task Ended");
+        this.status = status;
+        totalCost = System.currentTimeMillis() - getStartTime();
+    }
 }

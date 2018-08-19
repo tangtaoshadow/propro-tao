@@ -57,6 +57,22 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public ResultDO update(TaskDO taskDO) {
+        if (taskDO.getId() == null || taskDO.getId().isEmpty()) {
+            return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
+        }
+
+        try {
+            taskDO.setLastModifiedDate(new Date());
+            taskDAO.update(taskDO);
+            return ResultDO.build(taskDO);
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
+        }
+    }
+
+    @Override
     public ResultDO delete(String id) {
         if (id == null || id.isEmpty()) {
             return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);

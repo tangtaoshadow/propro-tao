@@ -2,15 +2,12 @@ package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
+import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
-import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
-import com.westlake.air.pecs.domain.db.ExperimentDO;
-import com.westlake.air.pecs.domain.db.LibraryDO;
-import com.westlake.air.pecs.domain.db.ScanIndexDO;
+import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.MzMLParser;
@@ -98,6 +95,7 @@ public class ExperimentController extends BaseController {
         model.addAttribute("libraryId", libraryId);
         model.addAttribute("iRtLibraryId", iRtLibraryId);
 
+        //Check Params Start
         if (fileLocation == null || fileLocation.isEmpty()) {
             model.addAttribute(ERROR_MSG, ResultCode.FILE_LOCATION_CANNOT_BE_EMPTY.getMessage());
             return "experiment/create";
@@ -132,40 +130,13 @@ public class ExperimentController extends BaseController {
         if (result.isFailed()) {
             model.addAttribute(ERROR_MSG, result.getMsgInfo());
             return "experiment/create";
-        }
+        }//Check Params End
 
-        try {
-            long start = System.currentTimeMillis();
-            //建立索引
-            logger.info("开始构建索引");
-            List<ScanIndexDO> indexList = null;
-            //传入不同的文件类型会调用不同的解析层
-            if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZXML)) {
-                indexList = mzXMLParser.index(file, experimentDO.getId());
-            } else if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZML)) {
-                indexList = mzMLParser.index(file, experimentDO.getId());
-            }
+        TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_EXPERIMENT_FILE, experimentDO.getName());
+        taskService.insert(taskDO);
 
-            logger.info("索引构建完毕,开始存储索引");
-            ResultDO resultDO = scanIndexService.insertAll(indexList, true);
-            logger.info("索引存储完毕");
-
-            if (resultDO.isFailed()) {
-                logger.info("索引存储失败" + result.getMsgInfo());
-                experimentService.delete(experimentDO.getId());
-                model.addAttribute(ERROR_MSG, result.getMsgInfo());
-                return "experiment/create";
-            } else {
-                redirectAttributes.addAttribute(SUCCESS_MSG, SuccessMsg.CREATE_EXPERIMENT_AND_INDEX_SUCCESS + ",耗时:" + (System.currentTimeMillis() - start) + "毫秒");
-                return "redirect:/experiment/list";
-            }
-
-        } catch (Exception e) {
-            logger.info("索引存储失败", e.getMessage());
-            e.printStackTrace();
-            redirectAttributes.addFlashAttribute(ERROR_MSG, e.getMessage());
-            return "redirect:/experiment/list";
-        }
+        experimentTask.saveExperimentTask(experimentDO, file, taskDO);
+        return "redirect:/task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/edit/{id}")
@@ -264,40 +235,45 @@ public class ExperimentController extends BaseController {
 
     }
 
-    @RequestMapping(value = "/extract")
-    String extract(Model model,
-                   @RequestParam(value = "id", required = true) String id,
-                   @RequestParam(value = "buildType", required = true) int buildType,
-                   @RequestParam(value = "creator", required = false) String creator,
-                   @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
-                   @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
-                   RedirectAttributes redirectAttributes) {
+    @RequestMapping(value = "/extractor/{id}")
+    String extractor(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+        ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
+        if (resultDO.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OBJECT_NOT_EXISTED);
+            return "redirect:/experiment/list";
+        }
+        model.addAttribute("libraries", getLibraryList(0));
+        model.addAttribute("iRtLibraries", getLibraryList(1));
+        model.addAttribute("experiment", resultDO.getModel());
+        return "/experiment/extractor";
+    }
+
+    @RequestMapping(value = "/doextract")
+    String doExtract(Model model,
+                     @RequestParam(value = "id", required = true) String id,
+                     @RequestParam(value = "buildType", required = true) int buildType,
+                     @RequestParam(value = "creator", required = false) String creator,
+                     @RequestParam(value = "libraryId", required = true) String libraryId,
+                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
+                     @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
+                     RedirectAttributes redirectAttributes) {
         if (rtExtractWindow == null) {
             rtExtractWindow = 600f;
         }
         if (mzExtractWindow == null) {
             mzExtractWindow = 0.05f;
         }
-        redirectAttributes.addFlashAttribute("rtExtractWindow", rtExtractWindow);
-        redirectAttributes.addFlashAttribute("mzExtractWindow", mzExtractWindow);
-        redirectAttributes.addFlashAttribute("buildType", buildType);
-        redirectAttributes.addFlashAttribute("creator", creator);
 
-        try {
-            long start = System.currentTimeMillis();
-            ResultDO resultDO = experimentService.extract(id, creator, rtExtractWindow, mzExtractWindow, buildType);
-            if (resultDO.isFailed()) {
-                redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-                return "redirect:/experiment/detail/" + id;
-            }
-            logger.info("全部卷积完成,总共耗时:" + (System.currentTimeMillis() - start));
-        } catch (IOException e) {
-            logger.error("卷积报错了:", e);
-            e.printStackTrace();
+        ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
+        if (resultDO.isFailed()) {
+            return "redirect:/extractor/" + id;
         }
 
-        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.EXTRACT_DATA_SUCCESS);
-        return "redirect:/analyse/overview/list?expId=" + id;
+        TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_CONVOLUTION, resultDO.getModel().getName());
+        taskService.insert(taskDO);
+        experimentTask.extract(resultDO.getModel(), libraryId, creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
+
+        return "redirect:/task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/getWindows")

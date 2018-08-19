@@ -27,6 +27,7 @@ public enum ResultCode implements Serializable {
     OBJECT_NOT_EXISTED("OBJECT_NOT_EXISTED", "对象不存在"),
     QUERY_ERROR("QUERY_ERROR", "获取数据失败"),
     INSERT_ERROR("INSERT_ERROR", "插入数据失败"),
+    DUPLICATE_KEY_ERROR("DUPLICATE_KEY_ERROR", "插入数据失败,已有同名项存在"),
     SAVE_ERROR("SAVE_ERROR", "保存数据失败"),
     UPDATE_ERROR("UPDATE_ERROR", "更新数据失败"),
     DELETE_ERROR("UPDATE_ERROR", "删除数据失败"),
@@ -81,6 +82,13 @@ public enum ResultCode implements Serializable {
      * *******
      */
     NOT_ENOUGH_IRT_PEPTIDES("NOT_ENOUGH_IRT_PEPTIDES","There are less than 2 iRT peptides, not enough for an RT correction"),
+
+    /**
+     * ******
+     * TASK
+     * *******
+     */
+    TASK_TEMPLATE_NOT_EXISTED("TASK_TEMPLATE_NOT_EXISTED","任务模板不存在"),
     ;
 
     private String code = "";

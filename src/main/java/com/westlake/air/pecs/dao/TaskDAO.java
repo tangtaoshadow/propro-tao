@@ -3,7 +3,9 @@ package com.westlake.air.pecs.dao;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.TaskQuery;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -62,7 +64,9 @@ public class TaskDAO {
         query.skip((targetQuery.getPageNo() - 1) * targetQuery.getPageSize());
         query.limit(targetQuery.getPageSize());
         //默认没有排序功能(排序会带来极大的性能开销)
-//        query.with(new Sort(transitionQuery.getOrderBy(), transitionQuery.getSortColumn()));
+        if(!StringUtils.isEmpty(targetQuery.getSortColumn())){
+            query.with(new Sort(targetQuery.getOrderBy(), targetQuery.getSortColumn()));
+        }
         return query;
     }
 

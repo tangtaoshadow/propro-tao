@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.domain.query;
 
 import lombok.Data;
+import org.springframework.data.domain.Sort;
 
 /**
  * Created by James Lu MiaoShan
@@ -17,7 +18,7 @@ public class AnalyseOverviewQuery extends PageQuery {
 
     public AnalyseOverviewQuery(){}
 
-    public AnalyseOverviewQuery(int pageNo,int pageSize){
-        super(pageNo, pageSize);
+    public AnalyseOverviewQuery(int pageNo, int pageSize, Sort.Direction direction, String sortColumn){
+        super(pageNo, pageSize, direction, sortColumn);
     }
 }

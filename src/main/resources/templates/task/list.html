@@ -17,21 +17,21 @@
     <div class="m-portlet__body">
         <!--begin: Search Form -->
         <div class="clearfix">
-            <form id="searchForm" method="post" role="form" class="form-inline" action="/experiment/list">
+            <form id="searchForm" method="post" role="form" class="form-inline" action="/task/list">
                 <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                 <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
 
-                <div class="form-group m-form__group">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="searchName" name="searchName" placeholder="实验名称"
-                               th:value="${searchName}">
-                        <div class="input-group-append">
-                            <button class="btn btn-primary" type="submit">
-                                查找
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <!--<div class="form-group m-form__group">-->
+                    <!--<div class="input-group">-->
+                        <!--<input type="text" class="form-control" id="searchName" name="searchName" placeholder=""-->
+                               <!--th:value="${searchName}">-->
+                        <!--<div class="input-group-append">-->
+                            <!--<button class="btn btn-primary" type="submit">-->
+                                <!--查找-->
+                            <!--</button>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</div>-->
             </form>
         </div>
         <!--end: Search Form -->
@@ -40,20 +40,17 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="10%">
-                        实验名称
+                    <th width="20%">
+                        任务名称
                     </th>
                     <th width="10%">
-                        关联的标准库名称
+                        任务模板类型
                     </th>
                     <th width="10%">
-                        关联的校准库名称
+                        任务状态
                     </th>
                     <th width="15%">
-                        文件位置
-                    </th>
-                    <th width="5%">
-                        文件类型
+                        总计耗时
                     </th>
                     <th width="15%">
                         创建时间
@@ -61,35 +58,22 @@
                     <th width="15%">
                         最后修改时间
                     </th>
-                    <th width="30%">
+                    <th width="15%">
                         操作
                     </th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="experiment:${experiments}">
-                    <td th:text="${experiment.name}"></td>
-                    <td th:text="${experiment.libraryName}"></td>
-                    <td th:text="${experiment.iRtLibraryName}"></td>
-                    <td th:text="${experiment.fileLocation}"></td>
-                    <td th:text="${experiment.fileType}"></td>
-                    <td th:text="${#dates.format(experiment.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
-                    <td th:text="${#dates.format(experiment.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
+                <tr th:each="task:${tasks}">
+                    <td th:text="${task.name}"></td>
+                    <td th:text="${task.taskTemplate}"></td>
+                    <td th:text="${task.status}"></td>
+                    <td th:text="|${task.totalCost}毫秒|"></td>
+                    <td th:text="${#dates.format(task.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
+                    <td th:text="${#dates.format(task.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
-                        <a th:href="|/experiment/edit/${experiment.id}|"
-                           class="btn btn-primary btn-sm">编辑
-                        </a>
-                        <a th:href="|/experiment/detail/${experiment.id}|"
+                        <a th:href="|/task/detail/${task.id}|"
                            class="btn btn-success btn-sm">详情
-                        </a>
-                        <a th:href="|/experiment/extractor/${experiment.id}|"
-                           class="btn btn-brand btn-sm">开始卷积
-                        </a>
-                        <a th:href="|/scanindex/list?experimentId=${experiment.id}|"
-                           class="btn btn-info btn-sm">原始索引
-                        </a>
-                        <a th:href="|/analyse/overview/list?expId=${experiment.id}|"
-                           class="btn btn-warning btn-sm">查看卷积实验
                         </a>
                     </td>
                 </tr>
