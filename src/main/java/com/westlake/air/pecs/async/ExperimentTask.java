@@ -319,6 +319,7 @@ public class ExperimentTask {
             dataDO.setCutInfo(ms.getCutInfo());
             dataDO.setPeptideRef(ms.getPeptideRef());
             dataDO.setProteinName(ms.getProteinName());
+            dataDO.setIsDecoy(ms.getIsDecoy());
             dataList.add(dataDO);
 
             //每隔1000条数据落库一次,以减少对内存的依赖
