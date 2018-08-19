@@ -24,7 +24,7 @@
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
                             <h3 class="m-portlet__head-text"
-                                th:text="|任务详情  :  ${task?.taskTemplate}--${task?.status}|"></h3>
+                                th:text="|任务详情  :  ${task?.taskTemplate}|"></h3>
                             <h5 class="m-portlet__head-text" th:if="${task?.totalCost}"
                                 th:text="|任务耗时  :  ${task?.totalCost/1000}秒|"></h5>
                         </div>
@@ -34,6 +34,7 @@
                 <!--begin: Portlet Body-->
                 <div class="m-portlet__body m-portlet__body--no-padding">
                     <div class="m-demo">
+                        <div class="alert alert-success" role="alert" th:text="|任务状态:${task?.status}|"></div>
                         <div class="m-demo__preview">
                             <div class="m-list-timeline">
                                 <div class="m-list-timeline__items">
