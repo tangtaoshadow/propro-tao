@@ -168,7 +168,11 @@ public class TransitionTsvParser extends BaseTransitionParser {
         }
         transitionDO.setAnnotations(annotations);
         transitionDO.setFullName(row[columnMap.get(FullUniModPeptideName)]);
-        transitionDO.setPrecursorCharge(Integer.parseInt(row[columnMap.get(PrecursorCharge)]));
+        try{
+            transitionDO.setPrecursorCharge(Integer.parseInt(row[columnMap.get(PrecursorCharge)]));
+        }catch (Exception e){
+            logger.error(e.getMessage());
+        }
         transitionDO.setPeptideRef(transitionDO.getFullName() + "_" + transitionDO.getPrecursorCharge());
         try {
             ResultDO<Annotation> annotationResult = parseAnnotation(transitionDO.getAnnotations());

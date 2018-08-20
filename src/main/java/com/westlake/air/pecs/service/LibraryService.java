@@ -22,7 +22,7 @@ public interface LibraryService {
 
     List<LibraryDO> getSimpleAll(Integer type);
 
-    ResultDO save(LibraryDO libraryDO);
+    ResultDO insert(LibraryDO libraryDO);
 
     ResultDO update(LibraryDO libraryDO);
 
@@ -34,7 +34,7 @@ public interface LibraryService {
 
     String getNameById(String id);
 
-    ResultDO parseAndInsertTsv(LibraryDO library, InputStream in, String fileName, boolean justReal, TaskDO taskDO);
+    ResultDO parseAndInsert(LibraryDO library, InputStream in, String fileName, boolean justReal, TaskDO taskDO);
 
     void countAndUpdateForLibrary(LibraryDO library);
 

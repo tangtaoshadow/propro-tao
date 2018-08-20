@@ -4,7 +4,6 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.analyse.LibraryCoordinate;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.LibraryQuery;
@@ -108,7 +107,7 @@ public class LibraryController extends BaseController {
         library.setInstrument(instrument);
         library.setDescription(description);
         library.setType(type);
-        ResultDO resultDO = libraryService.save(library);
+        ResultDO resultDO = libraryService.insert(library);
         if (resultDO.isFailed()) {
             logger.warn(resultDO.getMsgInfo());
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());

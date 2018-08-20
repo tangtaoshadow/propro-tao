@@ -91,31 +91,40 @@ public class TransitionTraMLParser extends BaseTransitionParser{
         }
         // parse transition userparam
         List<UserParam> listUserParams = transition.getUserParams();
-        for (UserParam userParam : listUserParams) {
-            if (userParam.getName().equals("annotation")) {
-                transitionDO.setAnnotations(userParam.getValue());
+        if(listUserParams != null){
+            for (UserParam userParam : listUserParams) {
+                if (userParam.getName().equals("annotation")) {
+                    transitionDO.setAnnotations(userParam.getValue());
+                }
             }
         }
+
         // parse precursor
         listCvParams = transition.getPrecursor().getCvParams();
-        for (CvParam cvParam : listCvParams) {
-            if (cvParam.getName().equals("isolation window target m/z")) {
-                transitionDO.setPrecursorMz(Double.valueOf(cvParam.getValue()));
-            }
-            if (cvParam.getName().equals("charge state")) {
-                transitionDO.setPrecursorCharge(Integer.valueOf(cvParam.getValue()));
+        if(listCvParams != null){
+            for (CvParam cvParam : listCvParams) {
+                if (cvParam.getName().equals("isolation window target m/z")) {
+                    transitionDO.setPrecursorMz(Double.valueOf(cvParam.getValue()));
+                }
+                if (cvParam.getName().equals("charge state")) {
+                    transitionDO.setPrecursorCharge(Integer.valueOf(cvParam.getValue()));
+                }
             }
         }
+
         // parse product cvParams
         listCvParams = transition.getProduct().getCvParams();
-        for (CvParam cvParam : listCvParams) {
-            if (cvParam.getName().equals("isolation window target m/z")) {
-                transitionDO.setProductMz(Double.valueOf(cvParam.getValue()));
-            }
-            if (cvParam.getName().equals("charge state")) {
-                transitionDO.setProductCharge(Integer.valueOf(cvParam.getValue()));
+        if(listCvParams != null){
+            for (CvParam cvParam : listCvParams) {
+                if (cvParam.getName().equals("isolation window target m/z")) {
+                    transitionDO.setProductMz(Double.valueOf(cvParam.getValue()));
+                }
+                if (cvParam.getName().equals("charge state")) {
+                    transitionDO.setProductCharge(Integer.valueOf(cvParam.getValue()));
+                }
             }
         }
+
         // parse product interpretation
             // ToDO: transition.getProduct().getInterpretationList()
 

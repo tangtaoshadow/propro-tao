@@ -16,9 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
@@ -67,7 +65,7 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public ResultDO save(LibraryDO libraryDO) {
+    public ResultDO insert(LibraryDO libraryDO) {
         if (libraryDO.getName() == null || libraryDO.getName().isEmpty()) {
             return ResultDO.buildError(ResultCode.LIBRARY_NAME_CANNOT_BE_EMPTY);
         }
@@ -167,7 +165,7 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public ResultDO parseAndInsertTsv(LibraryDO library, InputStream in, String fileName, boolean justReal, TaskDO taskDO) {
+    public ResultDO parseAndInsert(LibraryDO library, InputStream in, String fileName, boolean justReal, TaskDO taskDO) {
 
         ResultDO resultDO;
 
@@ -205,7 +203,7 @@ public class LibraryServiceImpl implements LibraryService {
     @Override
     public void uploadFile(LibraryDO library, InputStream in, String fileName, Boolean justReal, TaskDO taskDO) {
         //先Parse文件,再作数据库的操作
-        ResultDO result = parseAndInsertTsv(library, in, fileName, justReal, taskDO);
+        ResultDO result = parseAndInsert(library, in, fileName, justReal, taskDO);
         if (result.getErrorList() != null) {
             if (result.getErrorList().size() > errorListNumberLimit) {
                 taskDO.addLog("解析错误,错误的条数过多,这边只显示" + errorListNumberLimit + "条错误信息");
