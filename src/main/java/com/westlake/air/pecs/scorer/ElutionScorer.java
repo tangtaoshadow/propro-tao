@@ -4,10 +4,11 @@ import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.score.EmgModelParams;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
-import com.westlake.air.pecs.domain.bean.score.PecsScores;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.utils.MathUtil;
 import net.finmath.optimizer.LevenbergMarquardt;
 import net.finmath.optimizer.SolverException;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -17,9 +18,10 @@ import java.util.List;
  * Created by Nico Wang Ruimin
  * Time: 2018-08-19 21:00
  */
+@Component("elutionScorer")
 public class ElutionScorer {
 
-    public void calculateElutionModelScore(List<ExperimentFeature> experimentFeatures, PecsScores scores){
+    public void calculateElutionModelScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores){
         float avgScore = 0.0f;
         for(ExperimentFeature feature: experimentFeatures){
             RtIntensityPairs preparedHullPoints = prepareElutionFit(feature);

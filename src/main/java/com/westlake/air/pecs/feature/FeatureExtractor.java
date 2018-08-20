@@ -73,6 +73,7 @@ public class FeatureExtractor {
         int count = 0;
 
         //对每一个chromatogram进行运算，dataDO中不含有ms1
+        List<float[]> noise1000List = new ArrayList<>();
         for (AnalyseDataDO dataDO : group.getDataMap().values()) {
 
             //如果没有卷积到信号，dataDO为null
@@ -104,6 +105,7 @@ public class FeatureExtractor {
             maxRtIntensityPairsList.add(maxPeakPairs);
             intensityRtLeftRtRightPairsList.add(intensityRtLeftRtRightPairs);
             libraryIntensityList.add(libraryIntensityListAll.get(count));
+            noise1000List.add(noises1000);
             count++;
         }
         if (rtIntensityPairsOriginList.size() == 0) {
@@ -116,6 +118,7 @@ public class FeatureExtractor {
         featureResult.setExperimentFeatures(experimentFeatures);
         featureResult.setLibraryIntensityList(libraryIntensityList);
         featureResult.setRtIntensityPairsOriginList(rtIntensityPairsOriginList);
+        featureResult.setNoise1000List(noise1000List);
 
         return featureResult;
     }

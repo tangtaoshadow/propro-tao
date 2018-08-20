@@ -2,16 +2,16 @@ package com.westlake.air.pecs.async;
 
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.score.FeatureByPep;
-import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
-import com.westlake.air.pecs.domain.query.PageQuery;
 import com.westlake.air.pecs.feature.FeatureExtractor;
 import com.westlake.air.pecs.rtnormalizer.ChromatogramFilter;
+import com.westlake.air.pecs.scorer.*;
 import com.westlake.air.pecs.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,6 +45,16 @@ public class ScoreTask {
     TransitionService transitionService;
     @Autowired
     ChromatogramFilter chromatogramFilter;
+    @Autowired
+    ChromatographicScorer chromatographicScorer;
+    @Autowired
+    DIAScorer diaScorer;
+    @Autowired
+    ElutionScorer elutionScorer;
+    @Autowired
+    LibraryScorer libraryScorer;
+    @Autowired
+    SwathLDAScorer swathLDAScorer;
 
     @Async
     public void score(String overviewId, Float sigma, Float spacing, TaskDO taskDO) {
@@ -68,6 +79,7 @@ public class ScoreTask {
         taskDO.addLog("IRT计算完毕," + resultDO.getModel().toString());
         taskService.update(taskDO);
 
+
         ResultDO<List<TransitionGroup>> dataListResult = analyseDataService.getTransitionGroup(overviewId, analyseOverviewDO.getLibraryId(), null);
         if(dataListResult.isFailed()){
             taskDO.addLog("获取TransitionGroup失败:" + dataListResult.getMsgInfo());
@@ -76,12 +88,45 @@ public class ScoreTask {
             return;
         }
 
+        List<PecsScore> pecsScoreList = new ArrayList<>();
         for (TransitionGroup group : dataListResult.getModel()) {
+            List<FeatureScores> featureScoresList = new ArrayList<>();
             List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(analyseOverviewDO.getLibraryId());
             FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, resultDOIRT.getModel(), sigma, spacing);
-            if(featureByPep.isFeatureFound()){
+            if(!featureByPep.isFeatureFound()){
+                continue;
+            }
+            List<List<ExperimentFeature>> experimentFeatures = featureByPep.getExperimentFeatures();
+            List<RtIntensityPairs> chromatogramList = featureByPep.getRtIntensityPairsOriginList();
+            List<Float> libraryIntensityList = featureByPep.getLibraryIntensityList();
+            List<float[]> noise1000List = featureByPep.getNoise1000List();
+            List<Float> productMzList = new ArrayList<>();
+            //List<Integer> productCharge = new ArrayList<>();
+            for (AnalyseDataDO dataDO : group.getDataMap().values()){
+                productMzList.add(dataDO.getMz());
 
             }
+
+            for(List<ExperimentFeature> experimentFeatureList : experimentFeatures) {
+                FeatureScores featureScores = new FeatureScores();
+                chromatographicScorer.calculateChromatographicScores(chromatogramList, experimentFeatureList, libraryIntensityList, noise1000List, featureScores);
+                chromatographicScorer.calculateIntensityScore(experimentFeatureList, featureScores);
+//                diaScorer.calculateDiaMassDiffScore(productMzList, spectrumMzArray, spectrumIntArray, libraryIntensityList, featureScores);
+//                diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productCharge, featureScores);
+//                //TODO @Nico charge from transition?
+//                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, annotation, unimodHashMap, sequence, 1, featureScores);
+                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
+                libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
+                libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, resultDOIRT.getModel(), group.getRt().floatValue(), featureScores);
+                swathLDAScorer.calculateSwathLdaPrescore(featureScores);
+
+                featureScoresList.add(featureScores);
+            }
+            PecsScore pecsScore = new PecsScore();
+            pecsScore.setPeptideRef(group.getPeptideRef());
+            pecsScore.setFeatureScoresList(featureScoresList);
+            pecsScoreList.add(pecsScore);
         }
+        //have pecsScoreList
     }
 }

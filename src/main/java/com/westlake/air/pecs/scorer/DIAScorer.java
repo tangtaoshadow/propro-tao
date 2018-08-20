@@ -7,13 +7,14 @@ import com.westlake.air.pecs.dao.UnimodDAO;
 import com.westlake.air.pecs.domain.bean.score.BYSeries;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.IntegrateWindowMzIntensity;
-import com.westlake.air.pecs.domain.bean.score.PecsScores;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.transition.Annotation;
 import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
 import com.westlake.air.pecs.parser.model.chemistry.Element;
 import com.westlake.air.pecs.parser.model.chemistry.Unimod;
 import com.westlake.air.pecs.utils.MathUtil;
 import com.westlake.air.pecs.utils.ScoreUtil;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
@@ -30,6 +31,7 @@ import java.util.*;
  * scores.bseries_score
  * scores.yseries_score
  */
+@Component("diaScorer")
 public class DIAScorer {
 
     /**
@@ -42,18 +44,18 @@ public class DIAScorer {
      * @param libraryIntensity unNormalized library intensity(in transition)
      * @param scores score for JProphet
      */
-    public void calculateDiaMassDiffScore(Float[] productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Float> libraryIntensity, PecsScores scores){
+    public void calculateDiaMassDiffScore(List<Float> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Float> libraryIntensity, FeatureScores scores){
 
         float ppmScore = 0.0f;
         float ppmScoreWeighted = 0.0f;
-        for(int i=0; i< productMzArray.length; i++){
-            float left = productMzArray[i] - Constants.DIA_EXTRACT_WINDOW / 2f;
-            float right = productMzArray[i] + Constants.DIA_EXTRACT_WINDOW/ 2f;
+        for(int i=0; i< productMzArray.size(); i++){
+            float left = productMzArray.get(i) - Constants.DIA_EXTRACT_WINDOW / 2f;
+            float right = productMzArray.get(i) + Constants.DIA_EXTRACT_WINDOW/ 2f;
 
             //integrate window
             IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left, right);
             if(mzIntensity.isSignalFound()){
-                float diffPpm = Math.abs(mzIntensity.getMz() - productMzArray[i]) * 1000000f / productMzArray[i];
+                float diffPpm = Math.abs(mzIntensity.getMz() - productMzArray.get(i)) * 1000000f / productMzArray.get(i);
                 ppmScore += diffPpm;
                 ppmScoreWeighted += diffPpm * libraryIntensity.get(i);
             }
@@ -74,7 +76,7 @@ public class DIAScorer {
      * @param productCharge charge in transition
      * @param scores score for JProphet
      */
-    public void calculateDiaIsotopeScores(List<ExperimentFeature> experimentFeatures, List<Float> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Integer> productCharge, PecsScores scores){
+    public void calculateDiaIsotopeScores(List<ExperimentFeature> experimentFeatures, List<Float> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Integer> productCharge, FeatureScores scores){
         float isotopeCorr = 0f;
         float isotopeOverlap = 0f;
 
@@ -243,7 +245,7 @@ public class DIAScorer {
      * @param charge
      * @param scores
      */
-    public void calculateBYIonScore(List<Float> spectrumMzArray, List<Float> spectrumIntArray, Annotation annotation, HashMap<Integer, String> unimodHashMap, String sequence, int charge, PecsScores scores){
+    public void calculateBYIonScore(List<Float> spectrumMzArray, List<Float> spectrumIntArray, Annotation annotation, HashMap<Integer, String> unimodHashMap, String sequence, int charge, FeatureScores scores){
         BYSeries bySeries = getBYSeries(annotation, unimodHashMap, sequence, charge);
         List<Double> bSeriesList = bySeries.getBSeries();
         int bSeriesScore = getSeriesScore(bSeriesList, spectrumMzArray, spectrumIntArray);

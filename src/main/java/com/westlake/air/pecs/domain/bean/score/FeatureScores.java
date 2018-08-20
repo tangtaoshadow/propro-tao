@@ -7,7 +7,7 @@ import lombok.Data;
  * Time: 2018-08-05 22:42
  */
 @Data
-public class PecsScores {
+public class FeatureScores {
     /**
      *       return scores.library_corr                     * -0.34664267 + 2
      *              scores.library_norm_manhattan           *  2.98700722 + 2
@@ -40,6 +40,8 @@ public class PecsScores {
     float varMassdevScoreWeighted;
     float varBseriesScore;
     float varYseriesScore;
+
+    float mainVarXxSwathPrelimScore;
 
 
 

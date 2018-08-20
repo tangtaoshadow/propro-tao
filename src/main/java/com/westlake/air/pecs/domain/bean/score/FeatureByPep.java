@@ -18,4 +18,6 @@ public class FeatureByPep {
     List<List<ExperimentFeature>> experimentFeatures;
 
     List<Float> libraryIntensityList;
+
+    List<float[]> noise1000List;
 }

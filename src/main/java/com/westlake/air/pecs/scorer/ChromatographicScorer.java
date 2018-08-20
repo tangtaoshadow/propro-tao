@@ -5,9 +5,10 @@ import com.google.common.collect.Table;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
-import com.westlake.air.pecs.domain.bean.score.PecsScores;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.utils.MathUtil;
 import com.westlake.air.pecs.utils.ScoreUtil;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,14 +25,15 @@ import java.util.List;
  *
  * scores.var_intensity_score
  */
-public class ChromatograpicScorer {
+@Component("chromatographicScorer")
+public class ChromatographicScorer {
 
     /**
      * @param chromatograms chromatogram list of transition group
      * @param experimentFeatures list of features in selected mrmfeature
      * @param signalToNoiseList signal to noise list of chromatogram list
      */
-    public void calculateChromatographicScores(List<RtIntensityPairs> chromatograms, List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, List<float[]> signalToNoiseList, PecsScores scores){
+    public void calculateChromatographicScores(List<RtIntensityPairs> chromatograms, List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, List<float[]> signalToNoiseList, FeatureScores scores){
         Table<Integer, Integer, Float[]> xcorrMatrix = initializeXCorrMatrix(experimentFeatures);
 
         //xcorrCoelutionScore
@@ -107,7 +109,7 @@ public class ChromatograpicScorer {
     }
 
 
-    public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, PecsScores scores){
+    public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores){
         float intensitySum = 0.0f;
         for(ExperimentFeature feature: experimentFeatures){
             intensitySum += feature.getIntensity();

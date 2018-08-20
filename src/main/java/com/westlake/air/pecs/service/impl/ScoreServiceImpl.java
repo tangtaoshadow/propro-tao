@@ -74,8 +74,11 @@ public class ScoreServiceImpl implements ScoreService {
         for(TransitionGroup group : groupsResult.getModel()){
             SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
             FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, slopeIntercept, sigma, spacing);
+            if(!featureByPep.isFeatureFound()){
+                continue;
+            }
             float groupRt = group.getRt().floatValue();
-            List<ScoreRtPair> scoreRtPairs = RTNormalizerScorer.score(featureByPep.getRtIntensityPairsOriginList(), featureByPep.getExperimentFeatures(), featureByPep.getLibraryIntensityList(), slopeIntercept, groupRt, 1000, 30);
+            List<ScoreRtPair> scoreRtPairs = RTNormalizerScorer.score(featureByPep.getRtIntensityPairsOriginList(), featureByPep.getExperimentFeatures(), featureByPep.getLibraryIntensityList(), featureByPep.getNoise1000List(), slopeIntercept, groupRt);
             scoresList.add(scoreRtPairs);
             compoundRt.add(group.getRt().floatValue());
         }

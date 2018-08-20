@@ -3,7 +3,7 @@ package com.westlake.air.pecs.rtnormalizer;
 import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.feature.SignalToNoiseEstimator;
-import com.westlake.air.pecs.scorer.ChromatograpicScorer;
+import com.westlake.air.pecs.scorer.ChromatographicScorer;
 import com.westlake.air.pecs.scorer.LibraryScorer;
 import org.springframework.stereotype.Component;
 
@@ -38,19 +38,13 @@ public class RTNormalizerScorer {
      * @param libraryIntensity intensity in transitionList in transitionGroup
      * @return List of overallQuality
      */
-    public List<ScoreRtPair> score(List<RtIntensityPairs> chromatograms, List<List<ExperimentFeature>> experimentFeatures, List<Float> libraryIntensity, SlopeIntercept slopeIntercept, float groupRt, float windowLength, int binCount){
+    public List<ScoreRtPair> score(List<RtIntensityPairs> chromatograms, List<List<ExperimentFeature>> experimentFeatures, List<Float> libraryIntensity, List<float[]> noise1000List, SlopeIntercept slopeIntercept, float groupRt){
 
-        //get signal to noise list
-        List<float[]> signalToNoiseList = new ArrayList<>();
-        for(RtIntensityPairs chromatogram: chromatograms) {
-            float[] signalToNoise = new SignalToNoiseEstimator().computeSTN(chromatogram, windowLength, binCount);
-            signalToNoiseList.add(signalToNoise);
-        }
 
         List<ScoreRtPair> finalScores = new ArrayList<>();
         for(List<ExperimentFeature> features: experimentFeatures){
-            PecsScores scores = new PecsScores();
-            new ChromatograpicScorer().calculateChromatographicScores(chromatograms, features, libraryIntensity, signalToNoiseList, scores);
+            FeatureScores scores = new FeatureScores();
+            new ChromatographicScorer().calculateChromatographicScores(chromatograms, features, libraryIntensity, noise1000List, scores);
             new LibraryScorer().calculateLibraryScores(features,libraryIntensity, scores, slopeIntercept, groupRt);
             float ldaScore = calculateLdaPrescore(scores);
             ScoreRtPair scoreRtPair = new ScoreRtPair();
@@ -68,7 +62,7 @@ public class RTNormalizerScorer {
      * @param scores pre-calculated
      * @return final score
      */
-    private float calculateLdaPrescore(PecsScores scores){
+    private float calculateLdaPrescore(FeatureScores scores){
         return  scores.getVarLibraryCorr()              * -0.34664267f +
                 scores.getVarLibraryRsmd()              *  2.98700722f +
                 scores.getVarXcorrCoelution()           *  0.09445371f +
