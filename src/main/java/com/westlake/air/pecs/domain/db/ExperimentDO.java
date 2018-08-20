@@ -27,14 +27,6 @@ public class ExperimentDO extends BaseDO {
     //目前只支持MzML和MzXML
     String fileType;
 
-    String libraryId;
-
-    String libraryName;
-
-    String iRtLibraryId;
-
-    String iRtLibraryName;
-
     String description;
 
     String creator = "Admin";

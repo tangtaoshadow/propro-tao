@@ -83,8 +83,6 @@ public class ExperimentController extends BaseController {
                @RequestParam(value = "name", required = true) String name,
                @RequestParam(value = "fileLocation", required = true) String fileLocation,
                @RequestParam(value = "description", required = false) String description,
-               @RequestParam(value = "libraryId", required = false) String libraryId,
-               @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
                RedirectAttributes redirectAttributes) {
 
         model.addAttribute("libraries", getLibraryList(0));
@@ -92,8 +90,6 @@ public class ExperimentController extends BaseController {
 
         model.addAttribute("name", name);
         model.addAttribute("description", description);
-        model.addAttribute("libraryId", libraryId);
-        model.addAttribute("iRtLibraryId", iRtLibraryId);
 
         //Check Params Start
         if (fileLocation == null || fileLocation.isEmpty()) {
@@ -113,18 +109,6 @@ public class ExperimentController extends BaseController {
         experimentDO.setFileType(fileLocation.substring(fileLocation.lastIndexOf(".") + 1).trim().toLowerCase());
         experimentDO.setDescription(description);
         experimentDO.setFileLocation(fileLocation);
-
-        ResultDO<LibraryDO> resultIRtLib = libraryService.getById(libraryId);
-        if (resultIRtLib.isSuccess()) {
-            experimentDO.setLibraryId(libraryId);
-            experimentDO.setIRtLibraryName(resultIRtLib.getModel().getName());
-        }
-
-        ResultDO<LibraryDO> resultVLib = libraryService.getById(iRtLibraryId);
-        if (resultVLib.isSuccess()) {
-            experimentDO.setIRtLibraryName(iRtLibraryId);
-            experimentDO.setIRtLibraryName(resultVLib.getModel().getName());
-        }
 
         ResultDO result = experimentService.insert(experimentDO);
         if (result.isFailed()) {
@@ -182,8 +166,6 @@ public class ExperimentController extends BaseController {
                   @RequestParam(value = "fileType") String fileType,
                   @RequestParam(value = "fileLocation") String fileLocation,
                   @RequestParam(value = "description") String description,
-                  @RequestParam(value = "libraryId", required = false) String libraryId,
-                  @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
                   RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
@@ -192,18 +174,6 @@ public class ExperimentController extends BaseController {
             return "redirect:/experiment/list";
         }
         ExperimentDO experimentDO = resultDO.getModel();
-
-        ResultDO<LibraryDO> resultLib = libraryService.getById(libraryId);
-        if (resultLib.isSuccess()) {
-            experimentDO.setLibraryId(libraryId);
-            experimentDO.setLibraryName(resultLib.getModel().getName());
-        }
-
-        ResultDO<LibraryDO> resultIRtLib = libraryService.getById(iRtLibraryId);
-        if (resultIRtLib.isSuccess()) {
-            experimentDO.setIRtLibraryId(iRtLibraryId);
-            experimentDO.setIRtLibraryName(resultIRtLib.getModel().getName());
-        }
 
         experimentDO.setName(name);
         experimentDO.setFileType(fileType);
@@ -235,15 +205,20 @@ public class ExperimentController extends BaseController {
 
     }
 
-    @RequestMapping(value = "/extractor/{id}")
-    String extractor(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+    @RequestMapping(value = "/extractor")
+    String extractor(Model model,
+                     @RequestParam(value = "id", required = true) String id,
+                     @RequestParam(value = "libraryId", required = false) String libraryId,
+                     RedirectAttributes redirectAttributes) {
+        model.addAttribute("libraryId",libraryId);
+
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OBJECT_NOT_EXISTED);
             return "redirect:/experiment/list";
         }
+
         model.addAttribute("libraries", getLibraryList(0));
-        model.addAttribute("iRtLibraries", getLibraryList(1));
         model.addAttribute("experiment", resultDO.getModel());
         return "/experiment/extractor";
     }
