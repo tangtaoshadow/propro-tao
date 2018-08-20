@@ -7,7 +7,7 @@ import com.westlake.air.pecs.dao.UnimodDAO;
 import com.westlake.air.pecs.domain.bean.score.BYSeries;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.IntegrateWindowMzIntensity;
-import com.westlake.air.pecs.domain.bean.score.RTNormalizationScores;
+import com.westlake.air.pecs.domain.bean.score.PecsScores;
 import com.westlake.air.pecs.domain.bean.transition.Annotation;
 import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
 import com.westlake.air.pecs.parser.model.chemistry.Element;
@@ -39,7 +39,7 @@ public class DIAScorer {
      * @param libraryIntensity unNormalized library intensity(in transition)
      * @param scores score for JProphet
      */
-    public void calculateDiaMassDiffScore(Float[] productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Float> libraryIntensity, RTNormalizationScores scores){
+    public void calculateDiaMassDiffScore(Float[] productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Float> libraryIntensity, PecsScores scores){
 
         float ppmScore = 0.0f;
         float ppmScoreWeighted = 0.0f;
@@ -71,7 +71,7 @@ public class DIAScorer {
      * @param productCharge charge in transition
      * @param scores score for JProphet
      */
-    public void calculateDiaIsotopeScores(List<ExperimentFeature> experimentFeatures, List<Float> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Integer> productCharge, RTNormalizationScores scores){
+    public void calculateDiaIsotopeScores(List<ExperimentFeature> experimentFeatures, List<Float> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Integer> productCharge, PecsScores scores){
         float isotopeCorr = 0f;
         float isotopeOverlap = 0f;
 
@@ -228,7 +228,7 @@ public class DIAScorer {
         scores.setVarIsotopeOverlapScore(isotopeOverlap);
     }
 
-    public  void calculateBYIonScore(List<Float> spectrumMzArray, List<Float> spectrumIntArray, Annotation annotation, HashMap<Integer, String> unimodHashMap, String sequence, int charge, RTNormalizationScores scores){
+    public void calculateBYIonScore(List<Float> spectrumMzArray, List<Float> spectrumIntArray, Annotation annotation, HashMap<Integer, String> unimodHashMap, String sequence, int charge, PecsScores scores){
         BYSeries bySeries = getBYSeries(annotation, unimodHashMap, sequence, charge);
         List<Double> bSeriesList = bySeries.getBSeries();
         int bSeriesScore = getSeriesScore(bSeriesList, spectrumMzArray, spectrumIntArray);

@@ -193,6 +193,14 @@ public class MathUtil {
         }
     }
 
+    public static float getAverage(Float[] valueArray){
+        float sum = 0.0f;
+        for(float value: valueArray){
+            sum += value;
+        }
+        return sum / valueArray.length;
+    }
+
 
 
 }
