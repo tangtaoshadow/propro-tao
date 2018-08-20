@@ -168,7 +168,9 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     public ResultDO<List<TransitionGroup>> getTransitionGroup(String overviewId, String libraryId, PageQuery pageQuery) {
         LibraryDO libraryDO = libraryDAO.getById(libraryId);
 
+        long start = System.currentTimeMillis();
         List<Peptide> peptides = transitionDAO.getPeptideList(libraryId);
+        logger.info("Cost:"+(System.currentTimeMillis() - start));
         List<TransitionGroup> groups = new ArrayList<>();
 
         AnalyseDataQuery query = new AnalyseDataQuery();
@@ -181,7 +183,6 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             query.setPeptideRef(peptide.getPeptideRef());
             query.setMsLevel(2);
             List<AnalyseDataDO> dataList = analyseDataDAO.getAll(query);
-
             //开始比对结果,组成最终的HashMap
             HashMap<String, AnalyseDataDO> dataMap = new HashMap<>();
             for (String cutInfo : cutInfos) {

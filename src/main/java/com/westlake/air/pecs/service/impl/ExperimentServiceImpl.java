@@ -242,6 +242,9 @@ public class ExperimentServiceImpl implements ExperimentService {
 
         ResultDO checkResult = ConvolutionUtil.checkExperiment(experimentDO);
         if (checkResult.isFailed()) {
+            taskDO.addLog("条件检查失败:"+checkResult.getMsgInfo());
+            taskDO.finish(TaskDO.STATUS_FAILED);
+            taskService.update(taskDO);
             return checkResult;
         }
 
@@ -404,7 +407,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             ArrayList<Float> rtList = new ArrayList<>();
             ArrayList<Float> intList = new ArrayList<>();
 
-            boolean isHit = false;
+//            boolean isHit = false;
             for (Float rt : rtMap.keySet()) {
                 if (rtExtractWindow != -1 && rt > ms.getRtEnd()) {
                     break;
@@ -415,16 +418,16 @@ public class ExperimentServiceImpl implements ExperimentService {
                     Float[] pairIntensityArray = pairs.getIntensityArray();
                     rtList.add(rt);
                     Float acc = ConvolutionUtil.accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd);
-                    if (acc != 0) {
-                        isHit = true;
-                    }
+//                    if (acc != 0) {
+//                        isHit = true;
+//                    }
                     intList.add(acc);
                 }
             }
-
-            if (!isHit) {
-                continue;
-            }
+//
+//            if (!isHit) {
+//                continue;
+//            }
 
             AnalyseDataDO dataDO = new AnalyseDataDO();
             dataDO.setTransitionId(ms.getId());

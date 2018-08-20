@@ -38,8 +38,8 @@ public class ExperimentTask {
      * @return
      */
     @Async
-    public ResultDO extract(ExperimentDO experimentDO, String libraryId, String creator, float rtExtractWindow, float mzExtractWindow, int buildType, TaskDO taskDO) {
-        return experimentService.extract(experimentDO, libraryId, creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
+    public void extract(ExperimentDO experimentDO, String libraryId, String creator, float rtExtractWindow, float mzExtractWindow, int buildType, TaskDO taskDO) {
+        experimentService.extract(experimentDO, libraryId, creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
     }
 
 
