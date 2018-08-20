@@ -17,15 +17,7 @@ import java.util.List;
 @Component("chromatogramFilter")
 public class ChromatogramFilter {
 
-    public List<RtIntensityPairs> pickChromatogramListByRt(List<RtIntensityPairs> chromatogramList, float pepRefRt, SlopeIntercept slopeIntercept){
-        List<RtIntensityPairs> pickedChromatogramList = new ArrayList<>();
-        for(RtIntensityPairs rtIntensityPairs: chromatogramList){
-            pickedChromatogramList.add(pickChromatogramByRt(rtIntensityPairs, pepRefRt, slopeIntercept));
-        }
-        return pickedChromatogramList;
-    }
-
-    private RtIntensityPairs pickChromatogramByRt(RtIntensityPairs chromatogram, float pepRefRt, SlopeIntercept slopeIntercept){
+    public RtIntensityPairs pickChromatogramByRt(RtIntensityPairs chromatogram, float pepRefRt, SlopeIntercept slopeIntercept){
         SlopeIntercept invertedSlopeIntercept = ScoreUtil.trafoInverter(slopeIntercept);
         float normalizedExperimentRt = ScoreUtil.trafoApplier(invertedSlopeIntercept, pepRefRt);
         float rtMax = normalizedExperimentRt + Constants.RT_EXTRACTION_WINDOW;

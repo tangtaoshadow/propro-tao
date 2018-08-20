@@ -1,16 +1,14 @@
 package com.westlake.air.pecs.service.impl;
 
+import com.westlake.air.pecs.feature.*;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.score.*;
-import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
-import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.rtnormalizer.*;
 import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.MathUtil;
@@ -51,15 +49,12 @@ public class ScoreServiceImpl implements ScoreService {
     TaskService taskService;
     @Autowired
     ChromatogramFilter chromatogramFilter;
+    @Autowired
+    FeatureExtractor featureExtractor;
 
     @Override
     public ResultDO<SlopeIntercept> computeIRt(String overviewId, Float sigma, Float spacing, TaskDO taskDO) {
-        if(sigma == null){
-            sigma = 30f;
-        }
-        if(spacing == null){
-            spacing = 0.01f;
-        }
+
         ResultDO<AnalyseOverviewDO> overviewDOResult = analyseOverviewService.getById(overviewId);
         if(overviewDOResult.isFailed()){
             return ResultDO.buildError(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
@@ -82,63 +77,10 @@ public class ScoreServiceImpl implements ScoreService {
         List<Float> compoundRt = new ArrayList<>();
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
         for(TransitionGroup group : groupsResult.getModel()){
-            if(group.getDataMap() == null || group.getDataMap().size() == 0){
-                continue;
-            }
-
-            String peptideRef = group.getPeptideRef();
-            compoundRt.add(group.getRt().floatValue());
-            List<RtIntensityPairs> rtIntensityPairsOriginList = new ArrayList<>();
-            List<RtIntensityPairs> maxRtIntensityPairsList = new ArrayList<>();
-            List<IntensityRtLeftRtRightPairs> intensityRtLeftRtRightPairsList = new ArrayList<>();
-
-            //得到peptideRef对应的intensityList
-            List<Float> libraryIntensityList = new ArrayList<>();
-            IntensityGroup intensityGroupByPep = getIntensityGroupByPep(intensityGroupList, peptideRef);
-            assert intensityGroupByPep != null;
-            List<Float> libraryIntensityListAll = intensityGroupByPep.getIntensityList();
-            assert libraryIntensityListAll.size() != 0;
-            int count = 0;
-
-            //对每一个chromatogram进行运算，dataDO中不含有ms1
-            for(AnalyseDataDO dataDO : group.getDataMap().values()){
-
-                //如果没有卷积到信号，dataDO为null
-                if(dataDO == null){
-                    count ++;
-                    continue;
-                }
-
-                //得到卷积后的chromatogram的RT、Intensity对
-                RtIntensityPairs rtIntensityPairsOrigin = new RtIntensityPairs(dataDO.getRtArray(), dataDO.getIntensityArray());
-
-                //进行高斯平滑，得到平滑后的chromatogram
-                RtIntensityPairs rtIntensityPairsAfterSmooth = gaussFilter.filter(rtIntensityPairsOrigin, sigma, spacing);
-
-                //计算两个信噪比
-                //@Nico parameter configured
-                float[] noises200 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 200, 30);
-                float[] noises1000 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 1000, 30);
-
-                //根据信噪比和峰值形状选择最高峰
-                RtIntensityPairs maxPeakPairs = peakPicker.pickMaxPeak(rtIntensityPairsAfterSmooth, noises200);
-
-                //根据信噪比和最高峰选择谱图
-                IntensityRtLeftRtRightPairs intensityRtLeftRtRightPairs = chromatogramPicker.pickChromatogram(rtIntensityPairsOrigin, rtIntensityPairsAfterSmooth, noises1000, maxPeakPairs);
-                rtIntensityPairsOriginList.add(rtIntensityPairsOrigin);
-                maxRtIntensityPairsList.add(maxPeakPairs);
-                intensityRtLeftRtRightPairsList.add(intensityRtLeftRtRightPairs);
-                libraryIntensityList.add(libraryIntensityListAll.get(count));
-                count ++;
-            }
-            if(rtIntensityPairsOriginList.size() == 0){
-                continue;
-            }
-            List<List<ExperimentFeature>> experimentFeatures = featureFinder.findFeatures(rtIntensityPairsOriginList, maxRtIntensityPairsList, intensityRtLeftRtRightPairsList);
-
             SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
+            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, slopeIntercept, sigma, spacing);
             float groupRt = group.getRt().floatValue();
-            List<ScoreRtPair> scoreRtPairs = RTNormalizerScorer.score(rtIntensityPairsOriginList, experimentFeatures, libraryIntensityList, slopeIntercept, groupRt, 1000, 30);
+            List<ScoreRtPair> scoreRtPairs = RTNormalizerScorer.score(featureByPep.getRtIntensityPairsOriginList(), featureByPep.getExperimentFeatures(), featureByPep.getLibraryIntensityList(), slopeIntercept, groupRt, 1000, 30);
             scoresList.add(scoreRtPairs);
             compoundRt.add(group.getRt().floatValue());
         }
@@ -289,19 +231,5 @@ public class ScoreServiceImpl implements ScoreService {
         return slopeIntercept;
     }
 
-    /**
-     * get intensityGroup corresponding to peptideRef
-     * @param intensityGroupList intensity group of all peptides
-     * @param peptideRef chosen peptide
-     * @return intensity group of peptideRef
-     */
-    private IntensityGroup getIntensityGroupByPep(List<IntensityGroup> intensityGroupList, String peptideRef){
-        for(IntensityGroup intensityGroup: intensityGroupList){
-            if(intensityGroup.getPeptideRef().equals(peptideRef)){
-                return intensityGroup;
-            }
-        }
-        System.out.println("GetIntensityGroupByPep Error.");
-        return null;
-    }
+
 }

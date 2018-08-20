@@ -1,10 +1,9 @@
 package com.westlake.air.pecs.test.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
-import com.westlake.air.pecs.rtnormalizer.PeakSpline;
+import com.westlake.air.pecs.feature.PeakSpline;
 import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Created by Song Jian

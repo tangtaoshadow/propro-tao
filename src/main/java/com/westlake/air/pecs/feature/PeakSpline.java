@@ -1,4 +1,4 @@
-package com.westlake.air.pecs.rtnormalizer;
+package com.westlake.air.pecs.feature;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.utils.MathUtil;

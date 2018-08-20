@@ -2,7 +2,7 @@ package com.westlake.air.pecs.test.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.test.BaseTest;
-import com.westlake.air.pecs.rtnormalizer.GaussFilter;
+import com.westlake.air.pecs.feature.GaussFilter;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
