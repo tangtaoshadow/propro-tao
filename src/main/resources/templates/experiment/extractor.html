@@ -60,7 +60,7 @@
                                 <select class="form-control m-input" id="library" name="libraryId">
                                     <option th:each="library:${libraries}" th:value="${library.id}"
                                             th:text="|${library.name}(${library.id})|"
-                                            th:selected="${experiment.libraryId}==${library.id}?true:false"></option>
+                                            th:selected="${libraryId}==${library.id}?true:false"></option>
                                 </select>
                             </div>
 

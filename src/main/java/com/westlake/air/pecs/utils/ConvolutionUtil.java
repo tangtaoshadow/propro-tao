@@ -38,9 +38,6 @@ public class ConvolutionUtil {
         if (experimentDO.getFileLocation() == null || experimentDO.getFileLocation().isEmpty()) {
             return ResultDO.buildError(ResultCode.FILE_NOT_SET);
         }
-        if (experimentDO.getLibraryId() == null || experimentDO.getLibraryName().isEmpty()) {
-            return ResultDO.buildError(ResultCode.LIBRARY_NAME_CANNOT_BE_EMPTY);
-        }
         File file = new File(experimentDO.getFileLocation());
         if (!file.exists()) {
             return ResultDO.buildError(ResultCode.FILE_NOT_EXISTED);

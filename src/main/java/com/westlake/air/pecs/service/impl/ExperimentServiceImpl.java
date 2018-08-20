@@ -251,7 +251,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         //创建实验初始化概览数据
         AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
         overviewDO.setExpId(experimentDO.getId());
-        overviewDO.setName(experimentDO.getName() + "-" + experimentDO.getLibraryName() + "-" + experimentDO.getIRtLibraryName() + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
+        overviewDO.setName(experimentDO.getName() + "-lib:" + libraryId + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
         overviewDO.setExpName(experimentDO.getName());
         overviewDO.setLibraryId(libraryId);
         overviewDO.setLibraryName(libraryService.getNameById(libraryId));

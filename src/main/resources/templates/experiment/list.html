@@ -40,16 +40,10 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="10%">
+                    <th width="15%">
                         实验名称
                     </th>
-                    <th width="10%">
-                        关联的标准库名称
-                    </th>
-                    <th width="10%">
-                        关联的校准库名称
-                    </th>
-                    <th width="15%">
+                    <th width="25%">
                         文件位置
                     </th>
                     <th width="5%">
@@ -69,8 +63,6 @@
                 <tbody>
                 <tr th:each="experiment:${experiments}">
                     <td th:text="${experiment.name}"></td>
-                    <td th:text="${experiment.libraryName}"></td>
-                    <td th:text="${experiment.iRtLibraryName}"></td>
                     <td th:text="${experiment.fileLocation}"></td>
                     <td th:text="${experiment.fileType}"></td>
                     <td th:text="${#dates.format(experiment.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
@@ -82,7 +74,7 @@
                         <a th:href="|/experiment/detail/${experiment.id}|"
                            class="btn btn-success btn-sm">详情
                         </a>
-                        <a th:href="|/experiment/extractor/${experiment.id}|"
+                        <a th:href="|/experiment/extractor?id=${experiment.id}|"
                            class="btn btn-brand btn-sm">开始卷积
                         </a>
                         <a th:href="|/scanindex/list?experimentId=${experiment.id}|"
