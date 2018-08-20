@@ -26,6 +26,9 @@ import java.util.*;
  *
  * scores.isotope_correlation
  * scores.isotope_overlap
+ *
+ * scores.bseries_score
+ * scores.yseries_score
  */
 public class DIAScorer {
 
@@ -228,6 +231,18 @@ public class DIAScorer {
         scores.setVarIsotopeOverlapScore(isotopeOverlap);
     }
 
+    /**
+     * scores.bseries_score
+     * scores.yseries_score
+     *
+     * @param spectrumMzArray
+     * @param spectrumIntArray
+     * @param annotation
+     * @param unimodHashMap
+     * @param sequence
+     * @param charge
+     * @param scores
+     */
     public void calculateBYIonScore(List<Float> spectrumMzArray, List<Float> spectrumIntArray, Annotation annotation, HashMap<Integer, String> unimodHashMap, String sequence, int charge, PecsScores scores){
         BYSeries bySeries = getBYSeries(annotation, unimodHashMap, sequence, charge);
         List<Double> bSeriesList = bySeries.getBSeries();

@@ -22,7 +22,7 @@ import java.util.List;
  * scores.weighted_xcorr_shape
  * scores.log_sn_score
  *
- * var_intensity_score
+ * scores.var_intensity_score
  */
 public class ChromatograpicScorer {
 

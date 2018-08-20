@@ -9,6 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * scores.library_corr
+ * scores.library_norm_manhattan
+ *
+ * scores.var_intensity_score
+ *
  * Created by Nico Wang Ruimin
  * Time: 2018-08-15 16:06
  */
@@ -16,6 +21,7 @@ public class LibraryScorer {
     /**
      * scores.library_corr
      * scores.library_norm_manhattan
+     *
      * @param experimentFeatures get experimentIntensity: from features extracted
      * @param libraryIntensity get libraryIntensity: from transitions
      * @param scores library_corr, library_norm_manhattan
@@ -68,7 +74,7 @@ public class LibraryScorer {
     }
 
     /**
-     *
+     * scores.var_intensity_score
      * sum of intensitySum:
      * totalXic
      */

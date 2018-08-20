@@ -12,6 +12,8 @@ import net.finmath.optimizer.SolverException;
 import java.util.List;
 
 /**
+ * scores.var_elution_model_fit_score
+ *
  * Created by Nico Wang Ruimin
  * Time: 2018-08-19 21:00
  */
