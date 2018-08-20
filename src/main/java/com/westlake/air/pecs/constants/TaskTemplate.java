@@ -12,9 +12,11 @@ public enum TaskTemplate {
 
     SWATH_CONVOLUTION("SWATH_CONVOLUTION", "/experiment/extractor"),
 
-    SWATH_WORKFLOW("SWATH_WORKFLOW", "/task/swathworkflow"),
+    SWATH_WORKFLOW("SWATH_WORKFLOW", ""),
 
-    SCORE("SCORE", "/analyse/overview/"),
+    SCORE("SCORE", ""),
+
+    COMMON("COMMON", ""),
 
     MZXML_COMPRESSOR("MZXML_COMPRESSOR", "/task/mzxmlcompressor"),
 

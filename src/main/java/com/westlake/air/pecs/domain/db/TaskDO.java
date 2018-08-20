@@ -44,9 +44,10 @@ public class TaskDO extends BaseDO {
 
     Long totalCost;
 
-    public TaskDO(){}
+    public TaskDO() {
+    }
 
-    public TaskDO(TaskTemplate taskTemplate, String taskSuffixName){
+    public TaskDO(TaskTemplate taskTemplate, String taskSuffixName) {
         this.taskTemplate = taskTemplate.getTemplateName();
         this.status = STATUS_RUNNING;
         this.name = TaskTemplate.UPLOAD_EXPERIMENT_FILE.getTemplateName() + "-" + taskSuffixName;
@@ -55,6 +56,11 @@ public class TaskDO extends BaseDO {
 
     public void addLog(String content) {
         if (logs == null) {
+            if (status == null || taskTemplate == null) {
+                this.taskTemplate = TaskTemplate.COMMON.getTemplateName();
+                this.status = STATUS_RUNNING;
+                this.name = TaskTemplate.COMMON.getTemplateName() + "-COMMON";
+            }
             logs = new ArrayList<>();
             logs.add(new TaskLog("Task Started"));
         }
@@ -68,28 +74,28 @@ public class TaskDO extends BaseDO {
             logs = new ArrayList<>();
             logs.add(new TaskLog("Task Started"));
         }
-        for(String content : contents){
+        for (String content : contents) {
             TaskLog taskLog = new TaskLog(content);
             logs.add(taskLog);
         }
     }
 
-    public void start(){
-        if(logs == null || logs.size() == 0){
+    public void start() {
+        if (logs == null || logs.size() == 0) {
             logs = new ArrayList<>();
             logs.add(new TaskLog("Task Started"));
         }
     }
 
-    public Long getStartTime(){
-        if(logs == null || logs.size() == 0){
+    public Long getStartTime() {
+        if (logs == null || logs.size() == 0) {
             return null;
         }
         TaskLog taskLog = logs.get(0);
         return taskLog.getTime().getTime();
     }
 
-    public void finish(String status){
+    public void finish(String status) {
         addLog("Task Ended");
         this.status = status;
         totalCost = System.currentTimeMillis() - getStartTime();

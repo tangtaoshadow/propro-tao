@@ -17,11 +17,16 @@ public class ExperimentDO extends BaseDO {
 
     private static final long serialVersionUID = -3258829839160856625L;
 
+    public static String FILE_TYPE_MZXML = "mzxml";
+    public static String FILE_TYPE_MZML = "mzml";
+
     @Id
     String id;
 
+    //必填
     String name;
 
+    //必填
     String fileLocation;
 
     //目前只支持MzML和MzXML
