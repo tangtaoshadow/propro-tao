@@ -53,23 +53,18 @@ public class ScoreServiceImpl implements ScoreService {
     FeatureExtractor featureExtractor;
 
     @Override
-    public ResultDO<SlopeIntercept> computeIRt(String overviewId, Float sigma, Float spacing, TaskDO taskDO) {
-
-        ResultDO<AnalyseOverviewDO> overviewDOResult = analyseOverviewService.getById(overviewId);
-        if(overviewDOResult.isFailed()){
-            return ResultDO.buildError(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
-        }
+    public ResultDO<SlopeIntercept> computeIRt(String overviewId, String libraryId,  Float sigma, Float spacing, TaskDO taskDO) {
 
         taskDO.addLog("开始获取肽段分组信息和强度信息");
         taskService.update(taskDO);
-        ResultDO<List<TransitionGroup>> groupsResult = analyseDataService.getTransitionGroup(overviewId, overviewDOResult.getModel().getIRtLibraryId(), null);
+        ResultDO<List<TransitionGroup>> groupsResult = analyseDataService.getTransitionGroup(overviewId, libraryId, null);
         if(groupsResult.isFailed()){
             ResultDO resultDO = new ResultDO(false);
             resultDO.setErrorResult(groupsResult.getMsgCode(), groupsResult.getMsgInfo());
             return resultDO;
         }
 
-        List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(overviewDOResult.getModel().getIRtLibraryId());
+        List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(libraryId);
 
         taskDO.addLog("分组信息获取完毕,开始处理数据");
         taskService.update(taskDO);
