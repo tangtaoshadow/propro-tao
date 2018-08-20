@@ -18,11 +18,35 @@ import java.util.List;
 @Component("featureFinder")
 public class FeatureFinder {
 
+    /**
+     * 1）找出pickedChrom下的最高峰，得到对应rt和rtLeft、rtRight
+     * 2）将pickedChrom最高峰intensity设为0
+     * 3）将最高峰对应的chromatogram设为masterChromatogram
+     * 4）对每个chromatogram映射到masterChromatogram，得到usedChromatogram
+     * 5）对usedChromatogram求feature
+     * 6）同时累计所有chromatogram（isDetecting）的intensity为totalXIC
+     * @param chromatograms origin chromatogram
+     * @param pickedChroms maxPeaks picked and recalculated
+     * @param intensityLeftRight left right borders
+     * @return list of mrmFeature (mrmFeature is list of chromatogram feature)
+     */
     public List<List<ExperimentFeature>> findFeatures(List<RtIntensityPairs> chromatograms, List<RtIntensityPairs> pickedChroms, List<IntensityRtLeftRtRightPairs> intensityLeftRight){
 
         int[] chrPeakIndex;
 
         List<List<ExperimentFeature>> experimentFeatures = new ArrayList<>();
+
+        //totalXIC
+        float totalXic = 0.0f;
+        RtIntensityPairs chromatogram;
+        for (int i = 0; i < chromatograms.size(); i++) {
+            chromatogram = chromatograms.get(i);
+            for (float intensity : chromatogram.getIntensityArray()) {
+                totalXic += intensity;
+            }
+        }
+
+        //mrmFeature loop
         while (true) {
             chrPeakIndex = findLargestPeak(pickedChroms);
             if (chrPeakIndex[0] == -1 || chrPeakIndex[1] == -1) {
@@ -40,17 +64,11 @@ public class FeatureFinder {
             pickedChroms.set(chrPeakIndex[0], rtInt);
 
 
-            RtIntensityPairs chromatogram;
             RtIntensityPairs masterChromatogram = new RtIntensityPairs(chromatograms.get(chrPeakIndex[0]));
-
-            float totalXic = 0.0f;
 
             List<ExperimentFeature> mrmFeature = new ArrayList<>();
             for (int i = 0; i < chromatograms.size(); i++) {
                 chromatogram = chromatograms.get(i);
-                for (float intensity : chromatogram.getIntensityArray()) {
-                    totalXic += intensity;
-                }
                 RtIntensityPairs usedChromatogram = raster(chromatogram, masterChromatogram, bestLeft, bestRight);
                 ExperimentFeature feature = calculatePeakApexInt(usedChromatogram, bestLeft, bestRight, peakApex);
                 mrmFeature.add(feature);
@@ -72,6 +90,11 @@ public class FeatureFinder {
         return experimentFeatures;
     }
 
+    /**
+     * 从maxPeak list中选取最大peak对应的index
+     * @param pickedChroms maxPeaks
+     * @return list index, pairs index
+     */
     private int[] findLargestPeak(List<RtIntensityPairs> pickedChroms){
         float largest = 0.0f;
         int[] chrPeakIndex = new int[2];
@@ -91,7 +114,7 @@ public class FeatureFinder {
 
     /**
      * resampleChromatogram
-     * 从chromatogram中得到intensity存进masterChromatogram
+     * 将chromatogram中的intensity按照masterChromatogram的rt进行分布
      * @param chromatogram normal chromatogram
      * @param masterChromatogram chromatogram with max peak
      * @param leftBoundary bestLeft rt of max peak
@@ -219,6 +242,10 @@ public class FeatureFinder {
         return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
     }
 
+    /**
+     * 从feature中移除rt覆盖重复的feature
+     * @param experimentFeatures all mrmFeatures
+     */
     private void checkOverlappingFeatures(List<List<ExperimentFeature>> experimentFeatures){
         boolean skip;
         int i = 0;
