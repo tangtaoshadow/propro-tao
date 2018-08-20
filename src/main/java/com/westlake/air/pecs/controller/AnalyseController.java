@@ -159,7 +159,7 @@ public class AnalyseController extends BaseController {
             model.addAttribute("overview", overviewResult.getModel());
         }
 
-        ResultDO<List<TransitionGroup>> resultDO = analyseDataService.getTransitionGroup(overviewId, overviewResult.getModel().getIRtLibraryId(), null);
+        ResultDO<List<TransitionGroup>> resultDO = analyseDataService.getTransitionGroup(overviewId, overviewResult.getModel().getLibraryId(), null);
         List<TransitionGroup> groups = resultDO.getModel();
         model.addAttribute("groups", groups);
         model.addAttribute("totalPage", resultDO.getTotalPage());

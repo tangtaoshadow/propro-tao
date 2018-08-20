@@ -193,7 +193,7 @@ public class TransitionServiceImpl implements TransitionService {
     public List<TargetTransition> buildMS1Coordinates(String libraryId, float rtExtractionWindows, TaskDO taskDO) {
         long start = System.currentTimeMillis();
         TransitionQuery query = new TransitionQuery(libraryId);
-        query.setIsDecoy(false);
+//        query.setIsDecoy(false);
         List<TargetTransition> targetList = transitionDAO.getTTAll(query);
 
         long readDB = System.currentTimeMillis() - start;
@@ -213,7 +213,7 @@ public class TransitionServiceImpl implements TransitionService {
 
         long start = System.currentTimeMillis();
         TransitionQuery query = new TransitionQuery(libraryId);
-        query.setIsDecoy(false);
+//        query.setIsDecoy(false);
         query.setPrecursorMzStart((double) precursorMzStart);
         query.setPrecursorMzEnd((double) precursorMzEnd);
 
