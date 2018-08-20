@@ -45,6 +45,9 @@ public class ExperimentTest extends BaseTest {
         ScanIndexQuery query = new ScanIndexQuery();
         query.setExperimentId(experimentDO.getId());
         assert 59 == scanIndexService.count(query);
+
+        scanIndexService.deleteAllByExperimentId(experimentDO.getId());
+        experimentService.delete(experimentDO.getId());
     }
 
     @Test
@@ -76,6 +79,18 @@ public class ExperimentTest extends BaseTest {
         String filePath = getClass().getClassLoader().getResource("ChromatogramExtractor_input.tsv").getPath();
         File file = new File(filePath);
         libraryService.parseAndInsert(libraryDO, new FileInputStream(file), filePath, true, new TaskDO());
+
+        String filePathMZXML = getClass().getClassLoader().getResource("ChromatogramExtractor_input.mzXML").getPath();
+        ExperimentDO experimentDO = new ExperimentDO();
+        experimentDO.setName("测试用实验");
+        experimentDO.setFileLocation(filePath);
+        experimentDO.setFileType(ExperimentDO.FILE_TYPE_MZXML);
+        experimentService.insert(experimentDO);
+
+        File fileMZXML = new File(filePathMZXML);
+        experimentService.uploadFile(experimentDO, fileMZXML, new TaskDO());
+
+        experimentService.extract(experimentDO, libraryDO.getId(), "admin", -1f, 0.05f, 1, new TaskDO());
 
     }
 

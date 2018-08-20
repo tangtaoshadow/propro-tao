@@ -226,7 +226,7 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/doextract")
     String doExtract(Model model,
                      @RequestParam(value = "id", required = true) String id,
-                     @RequestParam(value = "buildType", required = true) int buildType,
+                     @RequestParam(value = "buildType", required = true) Integer buildType,
                      @RequestParam(value = "creator", required = false) String creator,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
                      @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
