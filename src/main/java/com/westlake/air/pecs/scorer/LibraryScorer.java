@@ -67,6 +67,11 @@ public class LibraryScorer {
         }
     }
 
+    /**
+     *
+     * sum of intensitySum:
+     * totalXic
+     */
     public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, PecsScores scores){
         float intensitySum = 0.0f;
         for(ExperimentFeature feature: experimentFeatures){

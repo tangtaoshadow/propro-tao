@@ -14,6 +14,16 @@ import org.springframework.stereotype.Component;
 @Component("chromatogramPicker")
 public class ChromatogramPicker {
 
+    /**
+     * 1）根据pickPicker选出的maxPeak的rt在smooth后的rtIntensity pairs中找到最接近的index
+     * 2）选取出左右边界
+     * 3）根据origin chromatogram 和左右边界对intensity求和
+     * @param rtIntensityPairs origin rtIntensity pair
+     * @param smoothedRtIntensityPairs rtIntensity pair after smooth
+     * @param signalToNoise window length = 1000
+     * @param maxPeakPairs picked max peak
+     * @return 左右边界rt, chromatogram边界内intensity求和
+     */
     public IntensityRtLeftRtRightPairs pickChromatogram(RtIntensityPairs rtIntensityPairs, RtIntensityPairs smoothedRtIntensityPairs, float[] signalToNoise, RtIntensityPairs maxPeakPairs) {
         int maxPeakSize = maxPeakPairs.getRtArray().length;
         int[][] leftRight = new int[maxPeakSize][2];
@@ -68,7 +78,7 @@ public class ChromatogramPicker {
     }
 
     private Float[] integratePeaks(RtIntensityPairs rtIntensityPairs, int[][] leftRight){
-        int leftIndex, rightIndex, size;
+        int leftIndex, rightIndex;
         Float[] intensity = new Float[leftRight.length];
         for(int i = 0; i< leftRight.length; i++){
             intensity[i] = 0f;

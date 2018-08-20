@@ -13,7 +13,7 @@ import java.util.*;
  * Time: 2018-08-05 17:18
  */
 @Component("peakScorer")
-public class PeakScorer {
+public class RTNormalizerScorer {
 
 //    private float windowLength = 1000;
 //    private int binCount = 30;

@@ -14,6 +14,16 @@ import java.util.List;
 @Component("peakPicker")
 public class PeakPicker {
 
+    /**
+     * 1）选取最高峰
+     * 2）对最高峰进行样条插值
+     * 3）根据插值判断maxPeak的rt位置
+     * 4）用插值与rt计算intensity
+     *
+     * @param rtIntensityPairs smoothed rtIntensityPairs
+     * @param signalToNoise window width = 200
+     * @return maxPeaks
+     */
     public RtIntensityPairs pickMaxPeak(RtIntensityPairs rtIntensityPairs, float[] signalToNoise){
         if(rtIntensityPairs.getRtArray().length < 5) {
             return null;

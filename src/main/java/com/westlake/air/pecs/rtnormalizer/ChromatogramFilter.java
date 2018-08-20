@@ -38,8 +38,8 @@ public class ChromatogramFilter {
                 intListPicked.add(intArray[i]);
             }
         }
-        Float[] rtArrayPicked = rtListPicked.toArray(new Float[rtListPicked.size()]);
-        Float[] intArrayPicked = intListPicked.toArray(new Float[intListPicked.size()]);
+        Float[] rtArrayPicked = rtListPicked.toArray(new Float[0]);
+        Float[] intArrayPicked = intListPicked.toArray(new Float[0]);
 
         chromatogram.setRtArray(rtArrayPicked);
         chromatogram.setIntensityArray(intArrayPicked);

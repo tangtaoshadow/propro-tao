@@ -47,7 +47,7 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
     @Autowired
     FeatureFinder featureFinder;
     @Autowired
-    PeakScorer peakScorer;
+    RTNormalizerScorer RTNormalizerScorer;
 
     @Override
     public ResultDO compute(String overviewId, Float sigma, Float spacing) {
@@ -84,26 +84,38 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
             List<RtIntensityPairs> rtIntensityPairsOriginList = new ArrayList<>();
             List<RtIntensityPairs> maxRtIntensityPairsList = new ArrayList<>();
             List<IntensityRtLeftRtRightPairs> intensityRtLeftRtRightPairsList = new ArrayList<>();
+
+            //得到peptideRef对应的intensityList
             List<Float> libraryIntensityList = new ArrayList<>();
-            List<Float> libraryIntensityListAll = getIntensityGroupByPep(intensityGroupList, peptideRef).getIntensityList();
+            IntensityGroup intensityGroupByPep = getIntensityGroupByPep(intensityGroupList, peptideRef);
+            assert intensityGroupByPep != null;
+            List<Float> libraryIntensityListAll = intensityGroupByPep.getIntensityList();
             assert libraryIntensityListAll.size() != 0;
             int count = 0;
+
+            //对每一个chromatogram进行运算，dataDO中不含有ms1
             for(AnalyseDataDO dataDO : group.getDataMap().values()){
-                //TODO @王瑞敏 判空指针
-                //
+
+                //如果没有卷积到信号，dataDO为null
                 if(dataDO == null){
                     count ++;
                     continue;
                 }
 
+                //得到卷积后的chromatogram的RT、Intensity对
                 RtIntensityPairs rtIntensityPairsOrigin = new RtIntensityPairs(dataDO.getRtArray(), dataDO.getIntensityArray());
+
+                //进行高斯平滑，得到平滑后的chromatogram
                 RtIntensityPairs rtIntensityPairsAfterSmooth = gaussFilter.filter(rtIntensityPairsOrigin, sigma, spacing);
-                //TODO 需要排插一下这两个入参的情况,此处的入参直接写为30,2000
+
                 //计算两个信噪比
+                //@Nico parameter configured
                 float[] noises200 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 200, 30);
                 float[] noises1000 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 1000, 30);
+
                 //根据信噪比和峰值形状选择最高峰
                 RtIntensityPairs maxPeakPairs = peakPicker.pickMaxPeak(rtIntensityPairsAfterSmooth, noises200);
+
                 //根据信噪比和最高峰选择谱图
                 IntensityRtLeftRtRightPairs intensityRtLeftRtRightPairs = chromatogramPicker.pickChromatogram(rtIntensityPairsOrigin, rtIntensityPairsAfterSmooth, noises1000, maxPeakPairs);
                 rtIntensityPairsOriginList.add(rtIntensityPairsOrigin);
@@ -116,10 +128,10 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
                 continue;
             }
             List<List<ExperimentFeature>> experimentFeatures = featureFinder.findFeatures(rtIntensityPairsOriginList, maxRtIntensityPairsList, intensityRtLeftRtRightPairsList);
-            //list of library intensity List(Double)
+
             SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
             float groupRt = group.getRt().floatValue();
-            List<ScoreRtPair> scoreRtPairs = peakScorer.score(rtIntensityPairsOriginList, experimentFeatures, libraryIntensityList, slopeIntercept, groupRt, 1000, 30);
+            List<ScoreRtPair> scoreRtPairs = RTNormalizerScorer.score(rtIntensityPairsOriginList, experimentFeatures, libraryIntensityList, slopeIntercept, groupRt, 1000, 30);
             scoresList.add(scoreRtPairs);
             compoundRt.add(group.getRt().floatValue());
         }
@@ -267,6 +279,12 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
         return slopeIntercept;
     }
 
+    /**
+     * get intensityGroup corresponding to peptideRef
+     * @param intensityGroupList intensity group of all peptides
+     * @param peptideRef chosen peptide
+     * @return intensity group of peptideRef
+     */
     private IntensityGroup getIntensityGroupByPep(List<IntensityGroup> intensityGroupList, String peptideRef){
         for(IntensityGroup intensityGroup: intensityGroupList){
             if(intensityGroup.getPeptideRef().equals(peptideRef)){

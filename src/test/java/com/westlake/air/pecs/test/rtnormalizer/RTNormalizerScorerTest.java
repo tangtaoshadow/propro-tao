@@ -1,7 +1,7 @@
 package com.westlake.air.pecs.test.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.score.ScoreRtPair;
-import com.westlake.air.pecs.rtnormalizer.PeakScorer;
+import com.westlake.air.pecs.rtnormalizer.RTNormalizerScorer;
 import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +12,9 @@ import java.util.List;
  * @Author: An Shaowei
  * @Time: 2018/8/15 9:50
  */
-public class PeakScorerTest extends BaseTest {
+public class RTNormalizerScorerTest extends BaseTest {
     @Autowired
-    PeakScorer peakScorer;
+    RTNormalizerScorer RTNormalizerScorer;
 
     @Test
     public void scoreTest(){
