@@ -7,6 +7,12 @@ import com.westlake.air.pecs.domain.bean.score.PecsScores;
  * Time: 2018-08-19 21:05
  */
 public class SwathLDAScorer {
+
+    /**
+     * -scores.calculate_swath_lda_prescore
+     * @param scores
+     * @return
+     */
     public double calculateSwathLdaPrescore(PecsScores scores){
         return scores.getVarLibraryCorr()               * -0.19011762 +
                 scores.getVarLibraryRsmd()              *  2.47298914 +
