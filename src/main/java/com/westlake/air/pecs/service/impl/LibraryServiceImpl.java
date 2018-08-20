@@ -10,6 +10,7 @@ import com.westlake.air.pecs.domain.query.TransitionQuery;
 import com.westlake.air.pecs.parser.TransitionTraMLParser;
 import com.westlake.air.pecs.parser.TransitionTsvParser;
 import com.westlake.air.pecs.service.LibraryService;
+import com.westlake.air.pecs.service.TaskService;
 import com.westlake.air.pecs.service.TransitionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,8 @@ public class LibraryServiceImpl implements LibraryService {
 
     public final Logger logger = LoggerFactory.getLogger(LibraryServiceImpl.class);
 
+    int errorListNumberLimit = 10;
+
     @Autowired
     LibraryDAO libraryDAO;
     @Autowired
@@ -39,6 +42,8 @@ public class LibraryServiceImpl implements LibraryService {
     TransitionTsvParser tsvParser;
     @Autowired
     TransitionTraMLParser traMLParser;
+    @Autowired
+    TaskService taskService;
 
     @Override
     public List<LibraryDO> getAll() {
@@ -195,5 +200,35 @@ public class LibraryServiceImpl implements LibraryService {
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
+    }
+
+    @Override
+    public void uploadFile(LibraryDO library, InputStream in, String fileName, Boolean justReal, TaskDO taskDO) {
+        //先Parse文件,再作数据库的操作
+        ResultDO result = parseAndInsertTsv(library, in, fileName, justReal, taskDO);
+        if (result.getErrorList() != null) {
+            if (result.getErrorList().size() > errorListNumberLimit) {
+                taskDO.addLog("解析错误,错误的条数过多,这边只显示" + errorListNumberLimit + "条错误信息");
+                taskDO.addLog(result.getErrorList().subList(0, errorListNumberLimit));
+            } else {
+                taskDO.addLog(result.getErrorList());
+            }
+        }
+
+        if (result.isFailed()) {
+            taskDO.addLog(result.getMsgInfo());
+            taskDO.finish(TaskDO.STATUS_FAILED);
+        }
+
+        /**
+         * 如果全部存储成功,开始统计蛋白质数目,肽段数目和Transition数目
+         */
+        taskDO.addLog("开始统计蛋白质数目,肽段数目和Transition数目");
+        taskService.update(taskDO);
+        countAndUpdateForLibrary(library);
+
+        taskDO.addLog("统计完毕");
+        taskDO.finish(TaskDO.STATUS_SUCCESS);
+        taskService.update(taskDO);
     }
 }

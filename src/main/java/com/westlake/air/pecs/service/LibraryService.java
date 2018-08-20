@@ -37,4 +37,6 @@ public interface LibraryService {
     ResultDO parseAndInsertTsv(LibraryDO library, InputStream in, String fileName, boolean justReal, TaskDO taskDO);
 
     void countAndUpdateForLibrary(LibraryDO library);
+
+    void uploadFile(LibraryDO library, InputStream in, String fileName, Boolean justReal, TaskDO taskDO);
 }
