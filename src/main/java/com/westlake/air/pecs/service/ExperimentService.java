@@ -3,6 +3,7 @@ package com.westlake.air.pecs.service;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
+import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 
 import java.io.File;
@@ -38,5 +39,7 @@ public interface ExperimentService {
      */
     List<WindowRang> getWindows(String expId);
 
+    void uploadFile(ExperimentDO experimentDO, File file, TaskDO taskDO);
 
+    ResultDO extract(ExperimentDO experimentDO, String libraryId, String creator, float rtExtractWindow, float mzExtractWindow, int buildType, TaskDO taskDO);
 }
