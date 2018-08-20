@@ -51,7 +51,24 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
     public ResultDO insert(AnalyseOverviewDO overviewDO) {
         try {
             overviewDO.setCreateDate(new Date());
+            overviewDO.setLastModifiedDate(new Date());
             analyseOverviewDAO.insert(overviewDO);
+            return ResultDO.build(overviewDO);
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO update(AnalyseOverviewDO overviewDO) {
+        if (overviewDO.getId() == null || overviewDO.getId().isEmpty()) {
+            return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
+        }
+
+        try {
+            overviewDO.setLastModifiedDate(new Date());
+            analyseOverviewDAO.update(overviewDO);
             return ResultDO.build(overviewDO);
         } catch (Exception e) {
             logger.warn(e.getMessage());

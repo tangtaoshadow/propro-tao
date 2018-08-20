@@ -14,6 +14,8 @@ public enum TaskTemplate {
 
     SWATH_WORKFLOW("SWATH_WORKFLOW", "/task/swathworkflow"),
 
+    SCORE("SCORE", "/analyse/overview/"),
+
     MZXML_COMPRESSOR("MZXML_COMPRESSOR", "/task/mzxmlcompressor"),
 
     ;

@@ -1,10 +1,11 @@
 package com.westlake.air.pecs.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.westlake.air.pecs.async.ScoreTask;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
+import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
@@ -41,7 +42,7 @@ public class AnalyseController extends BaseController {
     @Autowired
     ExperimentService experimentService;
     @Autowired
-    RTNormalizerService rtNormalizerService;
+    ScoreTask scoreTask;
 
     @RequestMapping(value = "/overview/list")
     String overviewList(Model model,
@@ -84,11 +85,11 @@ public class AnalyseController extends BaseController {
             model.addAttribute("overview", resultDO.getModel());
             Long count = analyseDataService.count(new AnalyseDataQuery(id, 2));
             ResultDO<LibraryDO> resLib = libraryService.getById(resultDO.getModel().getLibraryId());
-            if(resLib.isFailed()){
+            if (resLib.isFailed()) {
                 redirectAttributes.addFlashAttribute(ERROR_MSG, resLib.getMsgInfo());
                 return "redirect:/analyse/overview/list";
             }
-            model.addAttribute("rate",count+"/"+resLib.getModel().getTotalTargetCount());
+            model.addAttribute("rate", count + "/" + resLib.getModel().getTotalTargetCount());
             return "/analyse/overview/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
@@ -168,31 +169,70 @@ public class AnalyseController extends BaseController {
         return "/analyse/data/group";
     }
 
-    @RequestMapping(value = "/data/compute")
-    @ResponseBody
-    String compute(Model model,
+    @RequestMapping(value = "/overview/score")
+    String score(Model model,
+                 @RequestParam(value = "overviewId", required = true) String overviewId,
+                 @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
+                 @RequestParam(value = "sigma", required = false) Float sigma,
+                 @RequestParam(value = "spacing", required = false) Float spacing,
+                 RedirectAttributes redirectAttributes) {
+
+        model.addAttribute("sigma", sigma);
+        model.addAttribute("spacing", spacing);
+        model.addAttribute("iRtLibraryId", iRtLibraryId);
+
+        ResultDO<AnalyseOverviewDO> resultDO = analyseOverviewService.getById(overviewId);
+        if (resultDO.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
+            return "redirect:/analyse/overview/list";
+        }
+
+        model.addAttribute("iRtLibraries", getLibraryList(1));
+        model.addAttribute("overview", resultDO.getModel());
+
+        return "/analyse/overview/score";
+    }
+
+    @RequestMapping(value = "/overview/doscore")
+    String doscore(Model model,
                    @RequestParam(value = "overviewId", required = true) String overviewId,
+                   @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
                    @RequestParam(value = "sigma", required = false) Float sigma,
                    @RequestParam(value = "spacing", required = false) Float spacing,
                    RedirectAttributes redirectAttributes) {
 
         model.addAttribute("overviewId", overviewId);
+        model.addAttribute("iRtLibraryId", iRtLibraryId);
+        model.addAttribute("sigma", sigma);
+        model.addAttribute("spacing", spacing);
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
-        if (overviewResult.isSuccess()) {
-            model.addAttribute("overview", overviewResult.getModel());
+        if (overviewResult.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
+            return "redirect:/analyse/overview/list";
+        }
+        ResultDO<LibraryDO> iRtLibRes = libraryService.getById(iRtLibraryId);
+        if (iRtLibRes.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED.getMessage());
+            return "redirect:/analyse/overview/list";
         }
 
-        AnalyseDataQuery query = new AnalyseDataQuery();
-        query.setLibraryId(overviewResult.getModel().getIRtLibraryId());
-        long start = System.currentTimeMillis();
-        ResultDO rtResult = rtNormalizerService.compute(overviewId, sigma, spacing);
-        System.out.println("Cost:" + (System.currentTimeMillis() - start));
-        return JSONArray.toJSONString(rtResult);
+        AnalyseOverviewDO overviewDO = overviewResult.getModel();
+        overviewDO.setIRtLibraryId(iRtLibRes.getModel().getId());
+        overviewDO.setIRtLibraryName(iRtLibRes.getModel().getName());
+        analyseOverviewService.update(overviewDO);
+        model.addAttribute("overview", overviewDO);
+
+        TaskDO taskDO = new TaskDO(TaskTemplate.SCORE, overviewDO.getName());
+        taskService.insert(taskDO);
+
+        scoreTask.score(overviewId, sigma, spacing, taskDO);
+
+        return "redirect:/task/detail/" + taskDO.getId();
     }
 
-    @RequestMapping(value = "/data/vliblist")
-    String vlibList(Model model,
+    @RequestMapping(value = "/data/irtliblist")
+    String iRtLibList(Model model,
                     @RequestParam(value = "overviewId", required = false) String overviewId,
                     @RequestParam(value = "expId", required = false) String expId,
                     RedirectAttributes redirectAttributes) {

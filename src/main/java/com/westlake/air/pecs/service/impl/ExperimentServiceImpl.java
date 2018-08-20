@@ -248,10 +248,14 @@ public class ExperimentServiceImpl implements ExperimentService {
         File file = (File) checkResult.getModel();
         RandomAccessFile raf = null;
 
+        ResultDO<LibraryDO> libRes = libraryService.getById(libraryId);
+        if(libRes.isFailed()){
+            return ResultDO.buildError(ResultCode.LIBRARY_NOT_EXISTED);
+        }
         //创建实验初始化概览数据
         AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
         overviewDO.setExpId(experimentDO.getId());
-        overviewDO.setName(experimentDO.getName() + "-lib:" + libraryId + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
+        overviewDO.setName(experimentDO.getName() + "-" + libRes.getModel().getName() + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
         overviewDO.setExpName(experimentDO.getName());
         overviewDO.setLibraryId(libraryId);
         overviewDO.setLibraryName(libraryService.getNameById(libraryId));

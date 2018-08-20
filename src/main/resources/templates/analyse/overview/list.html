@@ -56,6 +56,7 @@
                     <td th:text="${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
                         <a th:href="|/analyse/overview/detail/${overview.id}|" class="btn btn-success btn-sm">详情</a>
+                        <a th:href="|/analyse/overview/score?overviewId=${overview.id}|" class="btn btn-brand btn-sm">开始打分</a>
                         <!--<a th:href="|/analyse/data/bigview?overviewId=${overview.id}|" class="btn btn-warning btn-sm">查看3D大图</a>-->
                     </td>
                 </tr>

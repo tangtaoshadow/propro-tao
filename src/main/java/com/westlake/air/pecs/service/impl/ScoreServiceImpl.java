@@ -7,13 +7,12 @@ import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
+import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
+import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.rtnormalizer.*;
-import com.westlake.air.pecs.service.AnalyseDataService;
-import com.westlake.air.pecs.service.AnalyseOverviewService;
-import com.westlake.air.pecs.service.RTNormalizerService;
-import com.westlake.air.pecs.service.TransitionService;
+import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
@@ -25,10 +24,10 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service("rtNormalizerService")
-public class RtNormalizerServiceImpl implements RTNormalizerService {
+@Service("scoreService")
+public class ScoreServiceImpl implements ScoreService {
 
-    public final Logger logger = LoggerFactory.getLogger(RtNormalizerServiceImpl.class);
+    public final Logger logger = LoggerFactory.getLogger(ScoreServiceImpl.class);
 
     @Autowired
     AnalyseDataService analyseDataService;
@@ -48,9 +47,13 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
     FeatureFinder featureFinder;
     @Autowired
     RTNormalizerScorer RTNormalizerScorer;
+    @Autowired
+    TaskService taskService;
+    @Autowired
+    ChromatogramFilter chromatogramFilter;
 
     @Override
-    public ResultDO compute(String overviewId, Float sigma, Float spacing) {
+    public ResultDO<SlopeIntercept> computeIRt(String overviewId, Float sigma, Float spacing, TaskDO taskDO) {
         if(sigma == null){
             sigma = 30f;
         }
@@ -62,6 +65,8 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
             return ResultDO.buildError(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
         }
 
+        taskDO.addLog("开始获取肽段分组信息和强度信息");
+        taskService.update(taskDO);
         ResultDO<List<TransitionGroup>> groupsResult = analyseDataService.getTransitionGroup(overviewId, overviewDOResult.getModel().getIRtLibraryId(), null);
         if(groupsResult.isFailed()){
             ResultDO resultDO = new ResultDO(false);
@@ -71,9 +76,11 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
 
         List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(overviewDOResult.getModel().getIRtLibraryId());
 
+        taskDO.addLog("分组信息获取完毕,开始处理数据");
+        taskService.update(taskDO);
         List<List<ScoreRtPair>> scoresList = new ArrayList<>();
         List<Float> compoundRt = new ArrayList<>();
-        ResultDO<SlopeIntercept> slopeInterceptResultDO = new ResultDO<>();
+        ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
         for(TransitionGroup group : groupsResult.getModel()){
             if(group.getDataMap() == null || group.getDataMap().size() == 0){
                 continue;
@@ -135,6 +142,8 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
             scoresList.add(scoreRtPairs);
             compoundRt.add(group.getRt().floatValue());
         }
+        taskDO.addLog("开始搜索最优特征");
+        taskService.update(taskDO);
         List<RtPair> pairs = simpleFindBestFeature(scoresList, compoundRt);
         List<RtPair> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE);
 //        if(!computeBinnedCoverage( , pairsCorrected, Constants.RT_BINS, Constants.MIN_PEPTIDES_PER_BIN, Constants.MIN_BINS_FILLED)){
@@ -142,16 +151,17 @@ public class RtNormalizerServiceImpl implements RTNormalizerService {
 //        }
         if(pairsCorrected == null || pairsCorrected.size() < 2){
             logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
-            slopeInterceptResultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
-            return slopeInterceptResultDO;
+            resultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
+            return resultDO;
         }
-
+        taskDO.addLog("最小二乘法线性拟合RTPairs");
+        taskService.update(taskDO);
         SlopeIntercept slopeIntercept = fitRTPairs(pairsCorrected);
-        slopeInterceptResultDO.setSuccess(true);
-        slopeInterceptResultDO.setModel(slopeIntercept);
+        resultDO.setSuccess(true);
+        resultDO.setModel(slopeIntercept);
         //TODO: dealing with RTNormalizer results(not knowing the accuracy of final result)
 
-        return slopeInterceptResultDO;
+        return resultDO;
     }
 
     /**

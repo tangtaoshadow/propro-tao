@@ -12,4 +12,9 @@ public class SlopeIntercept {
     float slope;
 
     float intercept;
+
+    @Override
+    public String toString() {
+        return "slope:" + slope + ";intercept:" + intercept;
+    }
 }

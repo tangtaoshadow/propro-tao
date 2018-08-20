@@ -5,6 +5,7 @@ import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.utils.MathUtil;
 import com.westlake.air.pecs.utils.ScoreUtil;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
  * Created by Nico Wang Ruimin
  * Time: 2018-08-12 07:04
  */
+@Component("chromatogramFilter")
 public class ChromatogramFilter {
 
     public List<RtIntensityPairs> pickChromatogramListByRt(List<RtIntensityPairs> chromatogramList, float pepRefRt, SlopeIntercept slopeIntercept){

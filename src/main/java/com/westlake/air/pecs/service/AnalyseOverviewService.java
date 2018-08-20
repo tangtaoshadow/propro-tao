@@ -20,6 +20,8 @@ public interface AnalyseOverviewService {
 
     ResultDO insert(AnalyseOverviewDO overviewDO);
 
+    ResultDO update(AnalyseOverviewDO overviewDO);
+
     ResultDO delete(String id);
 
     ResultDO deleteAllByExpId(String expId);
