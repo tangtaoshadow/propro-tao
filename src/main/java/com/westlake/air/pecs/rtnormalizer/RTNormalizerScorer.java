@@ -45,7 +45,7 @@ public class RTNormalizerScorer {
         for(List<ExperimentFeature> features: experimentFeatures){
             FeatureScores scores = new FeatureScores();
             new ChromatographicScorer().calculateChromatographicScores(chromatograms, features, libraryIntensity, noise1000List, scores);
-            new LibraryScorer().calculateLibraryScores(features,libraryIntensity, scores, slopeIntercept, groupRt);
+            new LibraryScorer().calculateLibraryScores(features,libraryIntensity, slopeIntercept, groupRt, scores);
             float ldaScore = calculateLdaPrescore(scores);
             ScoreRtPair scoreRtPair = new ScoreRtPair();
             scoreRtPair.setRt(features.get(0).getRt());
