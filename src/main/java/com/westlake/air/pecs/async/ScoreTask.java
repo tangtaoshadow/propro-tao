@@ -101,7 +101,7 @@ public class ScoreTask {
             List<Float> libraryIntensityList = featureByPep.getLibraryIntensityList();
             List<float[]> noise1000List = featureByPep.getNoise1000List();
             List<Float> productMzList = new ArrayList<>();
-            //List<Integer> productCharge = new ArrayList<>();
+            List<Integer> productChargeList = new ArrayList<>();
             for (AnalyseDataDO dataDO : group.getDataMap().values()){
                 productMzList.add(dataDO.getMz());
 
@@ -111,8 +111,9 @@ public class ScoreTask {
                 FeatureScores featureScores = new FeatureScores();
                 chromatographicScorer.calculateChromatographicScores(chromatogramList, experimentFeatureList, libraryIntensityList, noise1000List, featureScores);
                 chromatographicScorer.calculateIntensityScore(experimentFeatureList, featureScores);
+
 //                diaScorer.calculateDiaMassDiffScore(productMzList, spectrumMzArray, spectrumIntArray, libraryIntensityList, featureScores);
-//                diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productCharge, featureScores);
+//                diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
 //                //TODO @Nico charge from transition?
 //                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, annotation, unimodHashMap, sequence, 1, featureScores);
                 elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
