@@ -113,8 +113,8 @@ public class ScoreTask {
                 chromatographicScorer.calculateIntensityScore(experimentFeatureList, featureScores);
 //                diaScorer.calculateDiaMassDiffScore(productMzList, spectrumMzArray, spectrumIntArray, libraryIntensityList, featureScores);
 //                diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productCharge, featureScores);
-//                //TODO @Nico charge from transition?
-//                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, annotation, unimodHashMap, sequence, 1, featureScores);
+////                //TODO @Nico charge from transition?
+//                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
                 elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, resultDOIRT.getModel(), group.getRt().floatValue(), featureScores);
