@@ -20,6 +20,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -101,20 +102,31 @@ public class ScoreTask {
             List<Float> libraryIntensityList = featureByPep.getLibraryIntensityList();
             List<float[]> noise1000List = featureByPep.getNoise1000List();
             List<Float> productMzList = new ArrayList<>();
-            //List<Integer> productCharge = new ArrayList<>();
             for (AnalyseDataDO dataDO : group.getDataMap().values()){
                 productMzList.add(dataDO.getMz());
 
             }
 
+            //TODO  mrmFeature - peptideRef - ...
+            //数据格式见下面的new
+            //spectrum: get by peptideRef RT(nearest)
+            //productChargeList: product charge of found transition, list int
+            //unimodHashMap: unimod HashMap of peptide(get by peptideRef)
+            //sequence: sequence of peptide(get by peptideRef)
+            List<Float> spectrumMzArray = new ArrayList<>();
+            List<Float> spectrumIntArray = new ArrayList<>();
+            List<Integer> productChargeList = new ArrayList<>();
+            HashMap<Integer, String> unimodHashMap = new HashMap<>();
+            String sequence = "";
+            //for each mrmFeature, calculate scores
             for(List<ExperimentFeature> experimentFeatureList : experimentFeatures) {
                 FeatureScores featureScores = new FeatureScores();
                 chromatographicScorer.calculateChromatographicScores(chromatogramList, experimentFeatureList, libraryIntensityList, noise1000List, featureScores);
                 chromatographicScorer.calculateIntensityScore(experimentFeatureList, featureScores);
-//                diaScorer.calculateDiaMassDiffScore(productMzList, spectrumMzArray, spectrumIntArray, libraryIntensityList, featureScores);
-//                diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productCharge, featureScores);
+                diaScorer.calculateDiaMassDiffScore(productMzList, spectrumMzArray, spectrumIntArray, libraryIntensityList, featureScores);
+                diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
 ////                //TODO @Nico charge from transition?
-//                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
+                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
                 elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, resultDOIRT.getModel(), group.getRt().floatValue(), featureScores);
