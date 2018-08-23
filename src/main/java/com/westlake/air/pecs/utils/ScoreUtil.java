@@ -11,6 +11,11 @@ import java.util.List;
  */
 public class ScoreUtil {
 
+    /**
+     * invert y = kx + b to x = 1/k y + -b/k;
+     * @param slopeIntercept k & b input
+     * @return 1/k -b/k
+     */
     public static SlopeIntercept trafoInverter(SlopeIntercept slopeIntercept){
         float slope = slopeIntercept.getSlope();
         float intercept = slopeIntercept.getIntercept();
@@ -25,10 +30,22 @@ public class ScoreUtil {
         return slopeInterceptInvert;
     }
 
-    public static float trafoApplier(SlopeIntercept slopeInterceptInvert, float value){
-        return value * slopeInterceptInvert.getSlope() + slopeInterceptInvert.getIntercept();
+    /**
+     * apply kx + b
+     * @param slopeIntercept k & b (may be inverted)
+     * @param value x
+     * @return y
+     */
+    public static float trafoApplier(SlopeIntercept slopeIntercept, float value){
+        return value * slopeIntercept.getSlope() + slopeIntercept.getIntercept();
     }
 
+    /**
+     * 1) get sum of list
+     * 2) divide elements in list by sum
+     * @param libraryIntensity input intensity list
+     * @return output normalized intensity list
+     */
     public static float[] normalizeSum(List libraryIntensity){
         float[] normalizedLibraryIntensity = new float[libraryIntensity.size()];
         float sum = 0f;
@@ -46,6 +63,16 @@ public class ScoreUtil {
         return normalizedLibraryIntensity;
     }
 
+    /**
+     * 1) get left and right index corresponding to spectrum
+     * 2) get interval intensity sum to intensity
+     * 3) get interval average mz by intensity(as weight)
+     * @param spectrumMzArray spectrum
+     * @param spectrumIntArray spectrum
+     * @param left left mz
+     * @param right right mz
+     * @return float mz,intensity boolean signalFound
+     */
     public static IntegrateWindowMzIntensity integrateWindow(List<Float> spectrumMzArray, List<Float> spectrumIntArray, double left, double right){
         IntegrateWindowMzIntensity mzIntensity = new IntegrateWindowMzIntensity();
 
