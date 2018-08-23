@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.service.impl;
 
+import com.westlake.air.pecs.domain.query.PageQuery;
 import com.westlake.air.pecs.feature.*;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
@@ -53,25 +54,20 @@ public class ScoreServiceImpl implements ScoreService {
     FeatureExtractor featureExtractor;
 
     @Override
-    public ResultDO<SlopeIntercept> computeIRt(String overviewId, String libraryId,  Float sigma, Float spacing, TaskDO taskDO) {
+    public ResultDO<SlopeIntercept> computeIRt(String overviewId, String iRtLibraryId,  Float sigma, Float spacing, TaskDO taskDO) {
 
         taskDO.addLog("开始获取肽段分组信息和强度信息");
         taskService.update(taskDO);
-        ResultDO<List<TransitionGroup>> groupsResult = analyseDataService.getTransitionGroup(overviewId, libraryId, null);
-        if(groupsResult.isFailed()){
-            ResultDO resultDO = new ResultDO(false);
-            resultDO.setErrorResult(groupsResult.getMsgCode(), groupsResult.getMsgInfo());
-            return resultDO;
-        }
 
-        List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(libraryId);
+        List<TransitionGroup> groups = analyseDataService.getIrtTransitionGroup(overviewId, iRtLibraryId);
+        List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(iRtLibraryId);
 
         taskDO.addLog("分组信息获取完毕,开始处理数据");
         taskService.update(taskDO);
         List<List<ScoreRtPair>> scoresList = new ArrayList<>();
         List<Float> compoundRt = new ArrayList<>();
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
-        for(TransitionGroup group : groupsResult.getModel()){
+        for(TransitionGroup group : groups){
             SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
             FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, slopeIntercept, sigma, spacing);
             if(!featureByPep.isFeatureFound()){

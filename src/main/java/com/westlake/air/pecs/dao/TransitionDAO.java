@@ -114,6 +114,7 @@ public class TransitionDAO {
         mongoTemplate.remove(query, TransitionDO.class, CollectionName);
     }
 
+    //TODO 本接口后续可以通过使用缓存进行优化
     public List<Protein> getProteinList(TransitionQuery query) {
         AggregationResults<Protein> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(

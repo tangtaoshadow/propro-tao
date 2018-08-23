@@ -68,8 +68,8 @@ public class ScoreTask {
             return;
         }
 
-        AnalyseOverviewDO analyseOverviewDO = resultDO.getModel();
-        ResultDO<SlopeIntercept> resultDOIRT = scoreService.computeIRt(overviewId, analyseOverviewDO.getIRtLibraryId(), sigma, spacing, taskDO);
+        AnalyseOverviewDO overviewDO = resultDO.getModel();
+        ResultDO<SlopeIntercept> resultDOIRT = scoreService.computeIRt(overviewId, overviewDO.getIRtLibraryId(), sigma, spacing, taskDO);
         if (resultDO.isFailed()) {
             taskDO.addLog("打分执行失败:" + resultDO.getMsgInfo());
             taskDO.finish(TaskDO.STATUS_FAILED);
@@ -81,7 +81,7 @@ public class ScoreTask {
         taskService.update(taskDO);
 
 
-        ResultDO<List<TransitionGroup>> dataListResult = analyseDataService.getTransitionGroup(overviewId, analyseOverviewDO.getLibraryId(), null);
+        ResultDO<List<TransitionGroup>> dataListResult = analyseDataService.getTransitionGroup(overviewDO, null);
         if(dataListResult.isFailed()){
             taskDO.addLog("获取TransitionGroup失败:" + dataListResult.getMsgInfo());
             taskDO.finish(TaskDO.STATUS_FAILED);
@@ -92,7 +92,7 @@ public class ScoreTask {
         List<PecsScore> pecsScoreList = new ArrayList<>();
         for (TransitionGroup group : dataListResult.getModel()) {
             List<FeatureScores> featureScoresList = new ArrayList<>();
-            List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(analyseOverviewDO.getLibraryId());
+            List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(overviewDO.getLibraryId());
             FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, resultDOIRT.getModel(), sigma, spacing);
             if(!featureByPep.isFeatureFound()){
                 continue;

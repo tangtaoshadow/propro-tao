@@ -11,6 +11,7 @@ import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
+import com.westlake.air.pecs.domain.query.PageQuery;
 import com.westlake.air.pecs.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,20 +148,32 @@ public class AnalyseController extends BaseController {
     @RequestMapping(value = "/data/group")
     String dataGroup(Model model,
                      @RequestParam(value = "overviewId", required = true) String overviewId,
+                     @RequestParam(value = "libraryId", required = true) String libraryId,
+                     @RequestParam(value = "isIrt", required = true) Boolean isIrt,
                      @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                      @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
                      RedirectAttributes redirectAttributes) {
 
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("overviewId", overviewId);
+        model.addAttribute("libraryId", libraryId);
+        model.addAttribute("isIrt", isIrt);
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         if (overviewResult.isSuccess()) {
             model.addAttribute("overview", overviewResult.getModel());
         }
 
-        ResultDO<List<TransitionGroup>> resultDO = analyseDataService.getTransitionGroup(overviewId, overviewResult.getModel().getLibraryId(), null);
-        List<TransitionGroup> groups = resultDO.getModel();
+        List<TransitionGroup> groups = null;
+        ResultDO<List<TransitionGroup>> resultDO = null;
+        if(isIrt){
+            groups = analyseDataService.getIrtTransitionGroup(overviewId,libraryId);
+        }else{
+            PageQuery query = new PageQuery(currentPage, pageSize);
+            resultDO = analyseDataService.getTransitionGroup(overviewResult.getModel(), query);
+            groups = resultDO.getModel();
+        }
+
         model.addAttribute("groups", groups);
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
