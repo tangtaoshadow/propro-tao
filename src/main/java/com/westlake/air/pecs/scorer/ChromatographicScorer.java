@@ -109,6 +109,11 @@ public class ChromatographicScorer {
     }
 
 
+    /**
+     *
+     * @param experimentFeatures
+     * @param scores
+     */
     public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores){
         float intensitySum = 0.0f;
         for(ExperimentFeature feature: experimentFeatures){
@@ -120,7 +125,9 @@ public class ChromatographicScorer {
 
     /**
      * Get the XCorrMatrix with experiment Features
+     * 对于一个 mrmFeature，算其中 chromatogramFeature 的 xcorrMatrix
      * @param experimentFeatures features in mrmFeature
+     * HullInt: redistributed chromatogram in range of (peptideRef constant) leftRt and rightRt
      * @return Table<Integer, Integer, Float[]> xcorrMatrix
      */
     private Table<Integer, Integer, Float[]> initializeXCorrMatrix(List<ExperimentFeature> experimentFeatures){
@@ -137,6 +144,12 @@ public class ChromatographicScorer {
         return xcorrMatrix;
     }
 
+    /**
+     * xcorrMatrix的意义：
+     * @param data1 chromatogram feature
+     * @param data2 the same length as data1
+     * @return value of xcorrMatrix element
+     */
     private Float[] calculateCrossCorrelation(float[] data1, float[] data2){
         int maxDelay = data1.length;
         Float[] output = new Float[maxDelay * 2 + 1];

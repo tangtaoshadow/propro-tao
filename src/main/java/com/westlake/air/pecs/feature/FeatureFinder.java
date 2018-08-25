@@ -28,6 +28,9 @@ public class FeatureFinder {
      * @param chromatograms origin chromatogram
      * @param pickedChroms maxPeaks picked and recalculated
      * @param intensityLeftRight left right borders
+     * totalXic : intensity sum of all chromatogram of peptideRef(not rastered and all interval)
+     * HullPoints : rt intensity pairs of rastered chromatogram between rtLeft, rtRight;
+     * ExperimentFeature::intensity: intensity sum of hullPoints' intensity
      * @return list of mrmFeature (mrmFeature is list of chromatogram feature)
      */
     public List<List<ExperimentFeature>> findFeatures(List<RtIntensityPairs> chromatograms, List<RtIntensityPairs> pickedChroms, List<IntensityRtLeftRtRightPairs> intensityLeftRight){
@@ -69,6 +72,7 @@ public class FeatureFinder {
             List<ExperimentFeature> mrmFeature = new ArrayList<>();
             for (int i = 0; i < chromatograms.size(); i++) {
                 chromatogram = chromatograms.get(i);
+                //best left and right is a constant value to a peptideRef
                 RtIntensityPairs usedChromatogram = raster(chromatogram, masterChromatogram, bestLeft, bestRight);
                 ExperimentFeature feature = calculatePeakApexInt(usedChromatogram, bestLeft, bestRight, peakApex);
                 mrmFeature.add(feature);
@@ -117,8 +121,8 @@ public class FeatureFinder {
      * 将chromatogram中的intensity按照masterChromatogram的rt进行分布
      * @param chromatogram normal chromatogram
      * @param masterChromatogram chromatogram with max peak
-     * @param leftBoundary bestLeft rt of max peak
-     * @param rightBoundary bestRight rt of max peak
+     * @param leftBoundary bestLeft rt of max peak(constant to peptideRef)
+     * @param rightBoundary bestRight rt of max peak(constant to peptideRef)
      * @return masterChromatogram with both rt and intensity
      */
     private RtIntensityPairs raster(RtIntensityPairs chromatogram, RtIntensityPairs masterChromatogram, float leftBoundary, float rightBoundary){
