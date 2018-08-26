@@ -21,8 +21,8 @@ import java.util.List;
 @Component("libraryScorer")
 public class LibraryScorer {
     /**
-     * scores.library_corr
-     * scores.library_norm_manhattan
+     * scores.library_corr //对experiment和library intensity算Pearson相关系数
+     * scores.library_norm_manhattan // 对experiment intensity 算平均占比差距
      *
      * @param experimentFeatures get experimentIntensity: from features extracted
      * @param libraryIntensity get libraryIntensity: from transitions
@@ -36,6 +36,7 @@ public class LibraryScorer {
         assert experimentIntensity.size() == libraryIntensity.size();
 
         //library_norm_manhattan
+        //平均占比差距
         float sum = 0.0f;
         float[] x = ScoreUtil.normalizeSum(libraryIntensity);
         float[] y = ScoreUtil.normalizeSum(experimentIntensity);
@@ -45,16 +46,17 @@ public class LibraryScorer {
         scores.setVarLibraryRsmd(sum / x.length);
 
         //library_corr
+        //pearson 相关系数
         float corr = 0.0f, m1 = 0.0f, m2 = 0.0f, s1 = 0.0f, s2 = 0.0f;
         for(int i=0;i<libraryIntensity.size(); i++){
-            corr += experimentIntensity.get(i) * libraryIntensity.get(i);
-            m1 += experimentIntensity.get(i);
-            m2 += libraryIntensity.get(i);
-            s1 += experimentIntensity.get(i) * experimentIntensity.get(i);
-            s2 += libraryIntensity.get(i) * libraryIntensity.get(i);
+            corr += experimentIntensity.get(i) * libraryIntensity.get(i); //corr
+            m1 += experimentIntensity.get(i); //sum of experiment
+            m2 += libraryIntensity.get(i); //sum of library
+            s1 += experimentIntensity.get(i) * experimentIntensity.get(i);// experiment ^2
+            s2 += libraryIntensity.get(i) * libraryIntensity.get(i); // library ^2
         }
-        m1 /= libraryIntensity.size();
-        m2 /= libraryIntensity.size();
+        m1 /= experimentIntensity.size(); //mean experiment intensity
+        m2 /= libraryIntensity.size(); //mean library intensity
         s1 -= m1 * m1 * libraryIntensity.size();
         s2 -= m2 * m2 * libraryIntensity.size();
         if(s1 < Math.pow(1,-12) || s2 < Math.pow(1,-12)){

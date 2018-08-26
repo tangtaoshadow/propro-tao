@@ -64,7 +64,7 @@ public class ScoreServiceImpl implements ScoreService {
 
         taskDO.addLog("分组信息获取完毕,开始处理数据");
         taskService.update(taskDO);
-        List<List<ScoreRtPair>> scoresList = new ArrayList<>();
+        List<List<ScoreRtPair>> scoreRtList = new ArrayList<>();
         List<Float> compoundRt = new ArrayList<>();
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
         for(TransitionGroup group : groups){
@@ -75,12 +75,12 @@ public class ScoreServiceImpl implements ScoreService {
             }
             float groupRt = group.getRt().floatValue();
             List<ScoreRtPair> scoreRtPairs = RTNormalizerScorer.score(featureByPep.getRtIntensityPairsOriginList(), featureByPep.getExperimentFeatures(), featureByPep.getLibraryIntensityList(), featureByPep.getNoise1000List(), slopeIntercept, groupRt);
-            scoresList.add(scoreRtPairs);
+            scoreRtList.add(scoreRtPairs);
             compoundRt.add(group.getRt().floatValue());
         }
         taskDO.addLog("开始搜索最优特征");
         taskService.update(taskDO);
-        List<RtPair> pairs = simpleFindBestFeature(scoresList, compoundRt);
+        List<RtPair> pairs = simpleFindBestFeature(scoreRtList, compoundRt);
         List<RtPair> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE);
 //        if(!computeBinnedCoverage( , pairsCorrected, Constants.RT_BINS, Constants.MIN_PEPTIDES_PER_BIN, Constants.MIN_BINS_FILLED)){
 //            System.out.println("There were not enough bins with the minimal number of peptides.");

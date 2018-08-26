@@ -198,7 +198,7 @@ public class FeatureFinder {
         float peakApexInt = 0.0f;
         List<Float> hullRt = new ArrayList<>();
         List<Float> hullInt = new ArrayList<>();
-        float rtSum = 0.0f, intSum = 0.0f;
+        float intSum = 0.0f;
         for(int i = 0; i<chromatogram.getRtArray().length; i++){
             if(rtArray[i] > bestLeft && rtArray[i] < bestRight){
 //                if(peakNum == 0 && i != 0){
@@ -216,7 +216,6 @@ public class FeatureFinder {
                     peakApexDist = Math.abs(rtArray[i] - peakApexRt);
                     peakApexInt = intArray[i];
                 }
-                rtSum += rtArray[i];
                 intSum += intArray[i];
 
                 peakNum ++;
