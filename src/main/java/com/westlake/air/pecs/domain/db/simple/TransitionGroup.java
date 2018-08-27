@@ -19,6 +19,19 @@ public class TransitionGroup {
 
     Double rt;
 
+    //key为cutinfo,例如b3^2,y7等等
     HashMap<String, AnalyseDataDO> dataMap;
 
+    public TransitionGroup(){}
+
+    public TransitionGroup(String peptideRef){
+        this.peptideRef = peptideRef;
+    }
+
+    public void addData(AnalyseDataDO dataDO){
+        if (dataMap == null){
+            dataMap = new HashMap<>();
+        }
+        dataMap.put(dataDO.getCutInfo(), dataDO);
+    }
 }

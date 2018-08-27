@@ -239,14 +239,13 @@ public class DIAScorer {
      *
      * @param spectrumMzArray
      * @param spectrumIntArray
-     * @param annotation
      * @param unimodHashMap
      * @param sequence
      * @param charge
      * @param scores
      */
-    public void calculateBYIonScore(List<Float> spectrumMzArray, List<Float> spectrumIntArray, Annotation annotation, HashMap<Integer, String> unimodHashMap, String sequence, int charge, FeatureScores scores){
-        BYSeries bySeries = getBYSeries(annotation, unimodHashMap, sequence, charge);
+    public void calculateBYIonScore(List<Float> spectrumMzArray, List<Float> spectrumIntArray, HashMap<Integer, String> unimodHashMap, String sequence, int charge, FeatureScores scores){
+        BYSeries bySeries = getBYSeries(unimodHashMap, sequence, charge);
         List<Double> bSeriesList = bySeries.getBSeries();
         int bSeriesScore = getSeriesScore(bSeriesList, spectrumMzArray, spectrumIntArray);
 
@@ -320,7 +319,7 @@ public class DIAScorer {
         }
         return result;
     }
-    private BYSeries getBYSeries(Annotation annotation, HashMap<Integer, String> unimodHashMap, String sequence, int charge){
+    private BYSeries getBYSeries(HashMap<Integer, String> unimodHashMap, String sequence, int charge){
 
         BYSeries bySeries = new BYSeries();
 

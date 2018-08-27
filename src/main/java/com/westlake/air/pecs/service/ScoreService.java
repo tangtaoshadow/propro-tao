@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface ScoreService {
 
-    ResultDO<SlopeIntercept> computeIRt(String overviewId, String libraryId, Float sigma, Float space, TaskDO taskDO);
+    ResultDO<SlopeIntercept> computeIRt(String overviewId, String iRtLibraryId, Float sigma, Float space, TaskDO taskDO);
 }

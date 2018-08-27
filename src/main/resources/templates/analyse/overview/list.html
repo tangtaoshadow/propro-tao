@@ -22,14 +22,11 @@
                     <th width="15%">
                         卷积代号
                     </th>
-                    <th width="10%">
-                        原始实验名称
-                    </th>
                     <th width="8%">
                         标准库名称
                     </th>
                     <th width="8%">
-                        校准库名称
+                        iRT库名称
                     </th>
                     <th width="7%">
                         创建人
@@ -40,7 +37,7 @@
                     <th width="12%">
                         创建时间
                     </th>
-                    <th width="20%">
+                    <th width="30%">
                         操作
                     </th>
                 </tr>
@@ -48,7 +45,6 @@
                 <tbody>
                 <tr th:each="overview:${overviews}">
                     <td th:text="${overview.name}"></td>
-                    <td th:text="${experiment?.name}"></td>
                     <td th:text="${overview.libraryName}"></td>
                     <td th:text="${overview.iRtLibraryName}"></td>
                     <td th:text="${overview.creator}"></td>
@@ -58,9 +54,8 @@
                         <a th:href="|/analyse/overview/detail/${overview.id}|" class="btn btn-success btn-sm">详情</a>
                         <a th:href="|/analyse/data/list?overviewId=${overview.id}|" class="btn btn-info btn-sm">查看卷积数据</a>
                         <a th:href="|/analyse/overview/score?overviewId=${overview.id}|" class="btn btn-brand btn-sm">开始打分</a>
-                        <a th:href="|/analyse/data/group?overviewId=${overview.id}|" class="btn btn-warning btn-sm">查看iRT卷积组</a>
-
-                        <!--<a th:href="|/analyse/data/bigview?overviewId=${overview.id}|" class="btn btn-warning btn-sm">查看3D大图</a>-->
+                        <a th:if="${overview.iRtLibraryId}" th:href="|/analyse/data/group?overviewId=${overview.id}&&libraryId=${overview.iRtLibraryId}&&isIrt=true|" class="btn btn-warning btn-sm">查看iRT卷积组</a>
+                        <a th:if="${overview.libraryId}" th:href="|/analyse/data/group?overviewId=${overview.id}&&libraryId=${overview.libraryId}&&isIrt=false|" class="btn btn-info btn-sm">查看完整卷积组</a>
                     </td>
                 </tr>
                 </tbody>

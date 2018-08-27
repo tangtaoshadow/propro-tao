@@ -50,15 +50,15 @@ public class ChromatographicScorer {
         for(int i = 0; i<experimentFeatures.size(); i++){
             value = xcorrMatrix.get(i, i);
             max = MathUtil.findMaxIndex(value);
-            deltasWeighted.add(Math.abs(max - (value.length -1)/2) * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[i]);
+            deltasWeighted.add(Math.abs(max - (value.length + 1)/2) * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[i]);
             intensitiesWeighted.add(value[max] * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[i]);
             for (int j = i; j<experimentFeatures.size(); j++){
                 value = xcorrMatrix.get(i, j);
                 max = MathUtil.findMaxIndex(value);
-                deltas.add(Math.abs(max - (value.length -1)/2)); //first: maxdelay
-                intensities.add(value[max]);
+                deltas.add(Math.abs(max - (value.length + 1)/2)); //first: maxdelay //delta: 偏移量
+                intensities.add(value[max]);//value[max] 吻合系数
                 if(j !=i){
-                    deltasWeighted.add(Math.abs(max - (value.length -1)/2) * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[j] * 2f);
+                    deltasWeighted.add(Math.abs(max - (value.length + 1)/2) * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[j] * 2f);
                     intensitiesWeighted.add(value[max] * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[j] * 2f);
                 }
             }
@@ -77,12 +77,13 @@ public class ChromatographicScorer {
             sumDelta += (delta - meanDelta) * (delta - meanDelta);
         }
         float stdDelta = (float) Math.sqrt(sumDelta / (deltas.size()-1));
-        scores.setVarXcorrCoelution(meanDelta + stdDelta);
+        scores.setVarXcorrCoelution(meanDelta + stdDelta); //时间偏差
         scores.setVarXcorrCoelutionWeighted(sumDeltaWeighted);
-        scores.setVarXcorrShape(meanIntensity);
+        scores.setVarXcorrShape(meanIntensity); // 平均的吻合程度--> 新的吻合系数
         scores.setVarXcorrShapeWeighted(sumIntensityWeighted);
 
         //logSnScore
+        // log(mean of Apex sn s)
         float rt;
         int leftIndex, rightIndex;
         float snScore = 0.0f;
@@ -90,7 +91,7 @@ public class ChromatographicScorer {
             snScore = 0.0f;
         }
         for(int k = 0; k<signalToNoiseList.size();k++){
-            rt = experimentFeatures.get(0).getRt();
+            rt = experimentFeatures.get(0).getRt(); //max peak rt
             BisectionLowHigh bisectionLowHigh = MathUtil.bisection(chromatograms.get(k), rt);
             leftIndex = bisectionLowHigh.getLow();
             rightIndex = bisectionLowHigh.getHigh();
@@ -109,6 +110,11 @@ public class ChromatographicScorer {
     }
 
 
+    /**
+     *
+     * @param experimentFeatures
+     * @param scores
+     */
     public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores){
         float intensitySum = 0.0f;
         for(ExperimentFeature feature: experimentFeatures){
@@ -120,7 +126,9 @@ public class ChromatographicScorer {
 
     /**
      * Get the XCorrMatrix with experiment Features
+     * 对于一个 mrmFeature，算其中 chromatogramFeature 的 xcorrMatrix
      * @param experimentFeatures features in mrmFeature
+     * HullInt: redistributed chromatogram in range of (peptideRef constant) leftRt and rightRt
      * @return Table<Integer, Integer, Float[]> xcorrMatrix
      */
     private Table<Integer, Integer, Float[]> initializeXCorrMatrix(List<ExperimentFeature> experimentFeatures){
@@ -137,12 +145,22 @@ public class ChromatographicScorer {
         return xcorrMatrix;
     }
 
+    /**
+     * xcorrMatrix的意义：sum(反斜向的元素)/data.length(3)
+     *       0   1   2
+     *  0   |0  |1  |2
+     *  1   |-1 |0  |1
+     *  2   |-2 |-1 |0
+     * @param data1 chromatogram feature
+     * @param data2 the same length as data1
+     * @return value of xcorrMatrix element
+     */
     private Float[] calculateCrossCorrelation(float[] data1, float[] data2){
         int maxDelay = data1.length;
-        Float[] output = new Float[maxDelay * 2 + 1];
+        Float[] output = new Float[maxDelay * 2 - 1];
         double sxy;
         int j;
-        for(int delay = - maxDelay; delay <= maxDelay; delay ++){
+        for(int delay = - maxDelay + 1; delay < maxDelay; delay ++){
             sxy = 0;
             for(int i = 0; i < maxDelay; i++){
                 j = i + delay;
@@ -151,7 +169,7 @@ public class ChromatographicScorer {
                 }
                 sxy += (data1[i] * data2[j]);
             }
-            output[delay + maxDelay] = (float) sxy / maxDelay;
+            output[delay + maxDelay - 1] = (float) sxy / maxDelay;
         }
         return output;
     }

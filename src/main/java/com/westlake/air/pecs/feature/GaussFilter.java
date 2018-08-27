@@ -147,7 +147,6 @@ public class GaussFilter {
     private float[] getCoeffs(float sigma, float spacing, int coeffSize) {
         float[] coeffs = new float[coeffSize];
         for (int i = 0; i < coeffSize; i++) {
-            //coeffs_[i] = 1.0 / (sigma_ * sqrt(2.0 * Constants::PI)) * exp(-((i * spacing_) * (i * spacing_)) / (2 * sigma_ * sigma_));
             coeffs[i] = (float) (1.0 / (sigma * Math.sqrt(2.0 * Math.PI)) * Math.exp(-((i * spacing) * (i * spacing)) / (2 * sigma * sigma)));
         }
         return coeffs;

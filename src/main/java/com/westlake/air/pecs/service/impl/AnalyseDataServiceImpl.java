@@ -6,12 +6,14 @@ import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
 import com.westlake.air.pecs.dao.LibraryDAO;
 import com.westlake.air.pecs.dao.TransitionDAO;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.simple.Peptide;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.PageQuery;
+import com.westlake.air.pecs.domain.query.TransitionQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -165,19 +168,42 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     @Override
-    public ResultDO<List<TransitionGroup>> getTransitionGroup(String overviewId, String libraryId, PageQuery pageQuery) {
-        LibraryDO libraryDO = libraryDAO.getById(libraryId);
+    public ResultDO<List<TransitionGroup>> getTransitionGroup(AnalyseOverviewDO overviewDO, PageQuery pageQuery) {
+        LibraryDO libraryDO = libraryDAO.getById(overviewDO.getLibraryId());
+        List<Peptide> peptides = transitionDAO.getPeptideList(overviewDO.getLibraryId());
 
-        long start = System.currentTimeMillis();
-        List<Peptide> peptides = transitionDAO.getPeptideList(libraryId);
-        logger.info("Cost:"+(System.currentTimeMillis() - start));
+        HashMap<String, TransitionGroup> groupMap = new HashMap<>();
+        for(Peptide peptide : peptides){
+            groupMap.put(peptide.getPeptideRef(), new TransitionGroup(peptide.getPeptideRef()));
+        }
+        //根据标准库ID和PeptideRef获取实际卷积所得的对象列表
+        AnalyseDataQuery query = new AnalyseDataQuery();
+        query.setLibraryId(overviewDO.getLibraryId());
+        query.setMsLevel(2);
+        List<AnalyseDataDO> dataList = analyseDataDAO.getAll(query);
+        for(AnalyseDataDO data : dataList){
+            TransitionGroup  group = groupMap.get(data.getPeptideRef());
+            if(group != null){
+                group.addData(data);
+            }else{
+                logger.error("PeptideRef not found in Library");
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public List<TransitionGroup> getIrtTransitionGroup(String overviewId, String iRtlibraryId) {
+
+        List<Peptide> peptides = transitionDAO.getPeptideList(iRtlibraryId);
         List<TransitionGroup> groups = new ArrayList<>();
 
         AnalyseDataQuery query = new AnalyseDataQuery();
         query.setOverviewId(overviewId);
         for (Peptide peptide : peptides) {
             //获取改组的目标卷积对象列表
-            List<String> cutInfos = transitionDAO.getTransitionCutInfos(libraryId, peptide.getPeptideRef());
+            List<String> cutInfos = transitionDAO.getTransitionCutInfos(iRtlibraryId, peptide.getPeptideRef());
 
             //根据标准库ID和PeptideRef获取实际卷积所得的对象列表
             query.setPeptideRef(peptide.getPeptideRef());
@@ -203,10 +229,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             group.setDataMap(dataMap);
             groups.add(group);
         }
-        ResultDO<List<TransitionGroup>> resultDO = new ResultDO<>(true);
-        resultDO.setModel(groups);
-        resultDO.setTotalNum(libraryDO.getPeptideCount());
-        resultDO.setPageSize(query.getPageSize());
-        return resultDO;
+
+        return groups;
     }
 }

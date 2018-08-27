@@ -13,6 +13,7 @@ public class SignalToNoiseEstimator {
 
     /**
      * 计算信噪比
+     * 按位取窗口，窗口由小到大排序取中位数
      *
      * @param rtIntensity
      * @param windowLength
