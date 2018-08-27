@@ -95,7 +95,7 @@ public class MzMLParser extends BaseExpParser{
     private void parseAttributes(RandomAccessFile rf, String experimentId, List<ScanIndexDO> list) throws IOException {
         int len = list.size();
         int level = 0, parentNum = 0;
-        Float rt, precursorMz, precursorMzStart, precursorMzEnd, offset;
+        Float rt, precursorMz, precursorMzStart, precursorMzEnd, offset = 0F;
         String line, dataBlock;
         String[] datas;
         Long pos;
@@ -134,23 +134,24 @@ public class MzMLParser extends BaseExpParser{
                     rt = searchValue(line);
                     scanIndexDO.setRt(rt);
                     scanIndexDO.setRtStr(String.format("%.3f", rt));
-                } else if (level == 2 && line.contains("isolation window target m/z")) {
+                } else if (level == 2 && line.contains("selected ion m/z")) {
                     precursorMz = searchValue(line);
                     scanIndexDO.setPrecursorMz(precursorMz);
-                } else if (level == 2 && line.contains("isolation window lower offset")) {
-                    offset = searchValue(line);
                     precursorMzStart = scanIndexDO.getPrecursorMz() - offset;
                     precursorMzEnd = scanIndexDO.getPrecursorMz() + offset;
                     scanIndexDO.setPrecursorMzStart(precursorMzStart);
                     scanIndexDO.setPrecursorMzEnd(precursorMzEnd);
                     scanIndexDO.setWindowWideness(2*offset);
                     break;
+                } else if (level == 2 && line.contains("isolation window lower offset")) {
+                    offset = searchValue(line);
                 }
             }
-            if (i % 10000 == 0) {
+            if (i % 10000 == 0 && i != 0) {
                 logger.info(String.format("已扫描索引: %.2f%%，平均每个光谱用时：%.2f ms", (double)i/len*100, (double)(System.currentTimeMillis() - start)/i));
             }
         }
+        logger.info(String.format("已扫描索引: %.2f%%，平均每个光谱用时：%.2f ms", (double)len/len*100, (double)(System.currentTimeMillis() - start)/len));
         // 结尾情况特殊处理：由于存在spetrum后续是chromatogram情况，前向搜索spetrum的结束位置
         pos = list.get(len-1).getStart();
         rf.seek(pos);
