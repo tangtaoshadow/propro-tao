@@ -1,5 +1,7 @@
 package com.westlake.air.pecs.service.impl;
 
+import com.westlake.air.pecs.domain.db.AnalyseDataDO;
+import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.query.PageQuery;
 import com.westlake.air.pecs.feature.*;
 import com.westlake.air.pecs.constants.Constants;
@@ -52,6 +54,10 @@ public class ScoreServiceImpl implements ScoreService {
     ChromatogramFilter chromatogramFilter;
     @Autowired
     FeatureExtractor featureExtractor;
+    @Autowired
+    ExperimentService experimentService;
+    @Autowired
+    ScoreService scoreService;
 
     @Override
     public ResultDO<SlopeIntercept> computeIRt(String overviewId, String iRtLibraryId,  Float sigma, Float spacing, TaskDO taskDO) {
@@ -96,6 +102,43 @@ public class ScoreServiceImpl implements ScoreService {
         resultDO.setSuccess(true);
         resultDO.setModel(slopeIntercept);
         //TODO: dealing with RTNormalizer results(not knowing the accuracy of final result)
+
+        return resultDO;
+    }
+
+    @Override
+    public ResultDO<SlopeIntercept> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, Float sigma, Float space) {
+
+        List<TransitionGroup> groups = analyseDataService.getIrtTransitionGroup(dataList, iRtLibraryId);
+        List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(iRtLibraryId);
+
+        List<List<ScoreRtPair>> scoreRtList = new ArrayList<>();
+        List<Float> compoundRt = new ArrayList<>();
+        ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
+        for(TransitionGroup group : groups){
+            SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
+            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, slopeIntercept, sigma, space);
+            if(!featureByPep.isFeatureFound()){
+                continue;
+            }
+            float groupRt = group.getRt().floatValue();
+            List<ScoreRtPair> scoreRtPairs = RTNormalizerScorer.score(featureByPep.getRtIntensityPairsOriginList(), featureByPep.getExperimentFeatures(), featureByPep.getLibraryIntensityList(), featureByPep.getNoise1000List(), slopeIntercept, groupRt);
+            scoreRtList.add(scoreRtPairs);
+            compoundRt.add(group.getRt().floatValue());
+        }
+
+        List<RtPair> pairs = simpleFindBestFeature(scoreRtList, compoundRt);
+        List<RtPair> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE);
+
+        if(pairsCorrected == null || pairsCorrected.size() < 2){
+            logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
+            resultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
+            return resultDO;
+        }
+
+        SlopeIntercept slopeIntercept = fitRTPairs(pairsCorrected);
+        resultDO.setSuccess(true);
+        resultDO.setModel(slopeIntercept);
 
         return resultDO;
     }

@@ -50,6 +50,9 @@ public class ConvolutionUtil {
 
     // 找到从小到大排序的第一个大于目标值的索引
     private static int findIndex(Float[] array, Float target) {
+        if(array == null){
+            return 0;
+        }
         int pStart = 0, pEnd = array.length - 1;
         while (pStart <= pEnd) {
             int tmp = (pStart + pEnd) / 2;

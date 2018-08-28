@@ -80,7 +80,6 @@ public class ScoreTask {
         taskDO.addLog("IRT计算完毕," + resultDO.getModel().toString());
         taskService.update(taskDO);
 
-
         ResultDO<List<TransitionGroup>> dataListResult = analyseDataService.getTransitionGroup(overviewDO, null);
         if(dataListResult.isFailed()){
             taskDO.addLog("获取TransitionGroup失败:" + dataListResult.getMsgInfo());
@@ -89,10 +88,10 @@ public class ScoreTask {
             return;
         }
 
+        List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(overviewDO.getLibraryId());
         List<PecsScore> pecsScoreList = new ArrayList<>();
         for (TransitionGroup group : dataListResult.getModel()) {
             List<FeatureScores> featureScoresList = new ArrayList<>();
-            List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(overviewDO.getLibraryId());
             FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, resultDOIRT.getModel(), sigma, spacing);
             if(!featureByPep.isFeatureFound()){
                 continue;

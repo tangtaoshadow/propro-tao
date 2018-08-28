@@ -66,4 +66,8 @@ public interface AnalyseDataService {
      * @return
      */
     List<TransitionGroup> getIrtTransitionGroup(String overviewId, String iRtlibraryId);
+
+    List<TransitionGroup> getIrtTransitionGroup(List<AnalyseDataDO> dataList, String iRtlibraryId);
+
+
 }

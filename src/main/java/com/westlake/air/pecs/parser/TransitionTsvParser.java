@@ -107,7 +107,8 @@ public class TransitionTsvParser extends BaseTransitionParser {
             }
             transitionService.insertAll(transitions, false);
             count += transitions.size();
-            logger.info(count + "条数据插入成功");
+            taskDO.addLog(count + "条数据插入成功");
+            taskService.update(taskDO);
         } catch (Exception e) {
             e.printStackTrace();
         }

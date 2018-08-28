@@ -24,8 +24,10 @@ public class TransitionGroup {
 
     public TransitionGroup(){}
 
-    public TransitionGroup(String peptideRef){
+    public TransitionGroup(String proteinName, String peptideRef, Double rt){
+        this.proteinName = proteinName;
         this.peptideRef = peptideRef;
+        this.rt = rt;
     }
 
     public void addData(AnalyseDataDO dataDO){

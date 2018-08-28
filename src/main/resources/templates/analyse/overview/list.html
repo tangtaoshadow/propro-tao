@@ -55,7 +55,7 @@
                         <a th:href="|/analyse/data/list?overviewId=${overview.id}|" class="btn btn-info btn-sm">查看卷积数据</a>
                         <a th:href="|/analyse/overview/score?overviewId=${overview.id}|" class="btn btn-brand btn-sm">开始打分</a>
                         <a th:if="${overview.iRtLibraryId}" th:href="|/analyse/data/group?overviewId=${overview.id}&&libraryId=${overview.iRtLibraryId}&&isIrt=true|" class="btn btn-warning btn-sm">查看iRT卷积组</a>
-                        <a th:if="${overview.libraryId}" th:href="|/analyse/data/group?overviewId=${overview.id}&&libraryId=${overview.libraryId}&&isIrt=false|" class="btn btn-info btn-sm">查看完整卷积组</a>
+                        <a th:if="${overview.libraryId}" th:href="|/analyse/data/group?overviewId=${overview.id}&&libraryId=${overview.libraryId}&&isIrt=false|" class="btn btn-info btn-sm">查看完整卷积组(Debug用)</a>
                     </td>
                 </tr>
                 </tbody>

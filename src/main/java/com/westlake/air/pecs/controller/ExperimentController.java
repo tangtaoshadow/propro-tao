@@ -233,7 +233,7 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
                      RedirectAttributes redirectAttributes) {
         if (rtExtractWindow == null) {
-            rtExtractWindow = 600f;
+            rtExtractWindow = 1200f;
         }
         if (mzExtractWindow == null) {
             mzExtractWindow = 0.05f;
@@ -279,6 +279,7 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/compressor")
     String compressor(Model model) {
+
 
         return "experiment/compressor";
     }

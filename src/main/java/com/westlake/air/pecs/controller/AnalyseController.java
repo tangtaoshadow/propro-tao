@@ -171,7 +171,7 @@ public class AnalyseController extends BaseController {
         }else{
             PageQuery query = new PageQuery(currentPage, pageSize);
             resultDO = analyseDataService.getTransitionGroup(overviewResult.getModel(), query);
-            groups = resultDO.getModel();
+            groups = resultDO.getModel().subList(0,100);
         }
 
         model.addAttribute("groups", groups);

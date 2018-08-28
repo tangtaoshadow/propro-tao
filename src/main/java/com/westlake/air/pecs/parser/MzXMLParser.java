@@ -1,6 +1,8 @@
 package com.westlake.air.pecs.parser;
 
+import com.google.common.collect.Ordering;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
+import com.westlake.air.pecs.domain.bean.transition.Fragment;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.parser.model.mzxml.*;
@@ -120,7 +122,7 @@ public class MzXMLParser extends BaseExpParser {
             MzIntensityPairs pairs = getPeakMap(new Base64().decode(value), Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType));
             return pairs;
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            e.printStackTrace();
         }
 
         return null;
@@ -129,9 +131,8 @@ public class MzXMLParser extends BaseExpParser {
     //For MzXML
     @Override
     public MzIntensityPairs getPeakMap(byte[] value, int precision, boolean isZlibCompression) {
-
+        MzIntensityPairs pairs = new MzIntensityPairs();
         Float[] values = getValues(value, precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
-
         TreeMap<Float, Float> map = new TreeMap<>();
         for (int peakIndex = 0; peakIndex < values.length - 1; peakIndex += 2) {
             Float mz = values[peakIndex];
@@ -148,10 +149,8 @@ public class MzXMLParser extends BaseExpParser {
             i++;
         }
 
-        MzIntensityPairs pairs = new MzIntensityPairs();
         pairs.setMzArray(mzArray);
         pairs.setIntensityArray(intensityArray);
-
         return pairs;
     }
 

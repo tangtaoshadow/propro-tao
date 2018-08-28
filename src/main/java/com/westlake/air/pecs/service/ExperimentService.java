@@ -2,6 +2,8 @@ package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
+import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
+import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
@@ -42,4 +44,17 @@ public interface ExperimentService {
     void uploadFile(ExperimentDO experimentDO, File file, TaskDO taskDO);
 
     ResultDO extract(ExperimentDO experimentDO, String libraryId, String creator, float rtExtractWindow, float mzExtractWindow, int buildType, TaskDO taskDO);
+
+    List<AnalyseDataDO> extractIrt(ExperimentDO experimentDO, String libraryId, float mzExtractWindow);
+
+    /**
+     * 卷积并且求出iRT
+     * @param experimentDO
+     * @param iRtLibraryId
+     * @param mzExtractWindow
+     * @param sigma
+     * @param space
+     * @return
+     */
+    ResultDO<SlopeIntercept> convAndComputeIrt(ExperimentDO experimentDO, String iRtLibraryId, Float mzExtractWindow, Float sigma, Float space);
 }

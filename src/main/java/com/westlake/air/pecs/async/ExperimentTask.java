@@ -1,9 +1,12 @@
 package com.westlake.air.pecs.async;
 
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
+import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.ExperimentService;
+import com.westlake.air.pecs.service.ScoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -23,6 +27,8 @@ public class ExperimentTask {
 
     @Autowired
     ExperimentService experimentService;
+    @Autowired
+    ScoreService scoreService;
 
     @Async
     public void saveExperimentTask(ExperimentDO experimentDO, File file, TaskDO taskDO) {
@@ -41,6 +47,4 @@ public class ExperimentTask {
     public void extract(ExperimentDO experimentDO, String libraryId, String creator, float rtExtractWindow, float mzExtractWindow, int buildType, TaskDO taskDO) {
         experimentService.extract(experimentDO, libraryId, creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
     }
-
-
 }

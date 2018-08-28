@@ -5,14 +5,13 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.LibraryDAO;
 import com.westlake.air.pecs.dao.TransitionDAO;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.analyse.LibraryCoordinate;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
+import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.Peptide;
 import com.westlake.air.pecs.domain.db.simple.Protein;
 import com.westlake.air.pecs.domain.db.simple.TargetTransition;
-import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
 import com.westlake.air.pecs.service.TaskService;
 import com.westlake.air.pecs.service.TransitionService;
@@ -213,19 +212,29 @@ public class TransitionServiceImpl implements TransitionService {
 
         long start = System.currentTimeMillis();
         TransitionQuery query = new TransitionQuery(libraryId);
-//        query.setIsDecoy(false);
         query.setPrecursorMzStart((double) precursorMzStart);
         query.setPrecursorMzEnd((double) precursorMzEnd);
 
         List<TargetTransition> targetList = transitionDAO.getTTAll(query);
         long readDB = System.currentTimeMillis() - start;
-        for (TargetTransition targetTransition : targetList) {
-            targetTransition.setRtStart(targetTransition.getRt() - rtExtractionWindows / 2.0f);
-            targetTransition.setRtEnd(targetTransition.getRt() + rtExtractionWindows / 2.0f);
+        if(rtExtractionWindows != -1){
+            for (TargetTransition targetTransition : targetList) {
+                targetTransition.setRtStart(targetTransition.getRt() - rtExtractionWindows / 2.0f);
+                targetTransition.setRtEnd(targetTransition.getRt() + rtExtractionWindows / 2.0f);
+            }
+        }else{
+            for (TargetTransition targetTransition : targetList) {
+                targetTransition.setRtStart(-1);
+                targetTransition.setRtEnd(99999);
+            }
         }
+
         List<TargetTransition> list = sortMS2Coordinates(targetList);
-        taskDO.addLog("构建卷积MS2坐标,读取数据库耗时:" + readDB + "构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
-        taskService.update(taskDO);
+        if(taskDO != null){
+            taskDO.addLog("构建卷积MS2坐标,读取数据库耗时:" + readDB + "构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
+            taskService.update(taskDO);
+        }
+
         return list;
     }
 
