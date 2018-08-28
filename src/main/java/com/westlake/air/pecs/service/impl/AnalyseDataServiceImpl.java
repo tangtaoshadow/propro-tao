@@ -244,7 +244,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     @Override
     public List<TransitionGroup> getIrtTransitionGroup(List<AnalyseDataDO> dataList, String iRtlibraryId) {
         List<Peptide> peptides = transitionDAO.getPeptideList(iRtlibraryId);
-        List<TransitionGroup> groups = new ArrayList<>();
+
         HashMap<String, TransitionGroup> groupMap = new HashMap<>();
         for (Peptide peptide : peptides) {
             groupMap.put(peptide.getPeptideRef(), new TransitionGroup(peptide.getProteinName(), peptide.getPeptideRef(), peptide.getRt()));
@@ -259,6 +259,6 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             }
         }
 
-        return groups;
+        return new ArrayList<>(groupMap.values());
     }
 }
