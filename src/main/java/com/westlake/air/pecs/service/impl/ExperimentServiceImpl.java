@@ -554,6 +554,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         long start = System.currentTimeMillis();
 //        List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
         List<AnalyseDataDO> dataList = new ArrayList<>();
+        //这边先读取本地已经卷积好的iRT数据
         try {
             String content = FileUtil.readFile("data/conv.json");
             dataList = JSONArray.parseArray(content, AnalyseDataDO.class);
@@ -590,23 +591,31 @@ public class ExperimentServiceImpl implements ExperimentService {
                 MzIntensityPairs pairs = rtMap.get(rt);
                 Float[] pairMzArray = pairs.getMzArray();
                 Float[] pairIntensityArray = pairs.getIntensityArray();
-                rtList.add(rt);
-                Float acc = ConvolutionUtil.accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd);
 
-                if (acc != 0) {
-                    //如果本次的统计数据不为0,首先确认总信号是命中状态
+                Float acc = ConvolutionUtil.accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd);
+                if (acc != 0){
                     isHit = true;
-                    intList.add(acc);
-                    isLastDataZero = false;
-                } else {
-                    //如果本次的统计数据是0,并且上一次的统计信号不是0,那么这一次的数据加入到数据列表中,并且将上一次信号位标记为True
-                    if (!isLastDataZero) {
-                        intList.add(acc);
-                        isLastDataZero = true;
-                    } else {
-                        //如果本次统计是0,上一次统计也是0,那么什么都不干,这边加一个else增加代码可读性
-                    }
                 }
+                rtList.add(rt);
+                intList.add(acc);
+
+//                if (acc != 0) {
+//                    //如果本次的统计数据不为0,首先确认总信号是命中状态
+//                    isHit = true;
+//                    rtList.add(rt);
+//                    intList.add(acc);
+//                    isLastDataZero = false;
+//                } else {
+//                    //如果本次的统计数据是0,并且上一次的统计信号不是0,那么这一次的数据加入到数据列表中,并且将上一次信号位标记为True
+//                    if (!isLastDataZero) {
+//                        rtList.add(rt);
+//                        intList.add(acc);
+//                        isLastDataZero = true;
+//                    } else {
+//                        //如果本次统计是0,上一次统计也是0,那么什么都不干,这边加一个else增加代码可读性
+//                    }
+//                }
+
             }
 
             AnalyseDataDO dataDO = new AnalyseDataDO();

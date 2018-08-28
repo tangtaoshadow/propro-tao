@@ -77,7 +77,7 @@ public class FeatureExtractor {
         for (AnalyseDataDO dataDO : group.getDataMap().values()) {
 
             //如果没有卷积到信号，dataDO为null
-            if (dataDO == null) {
+            if (dataDO == null || !dataDO.getIsHit()) {
                 count++;
                 continue;
             }
