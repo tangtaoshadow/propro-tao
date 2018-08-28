@@ -84,7 +84,7 @@ public class FeatureExtractor {
 
             //得到卷积后的chromatogram的RT、Intensity对
             RtIntensityPairs rtIntensityPairsOrigin = new RtIntensityPairs(dataDO.getRtArray(), dataDO.getIntensityArray());
-            if(!(slopeIntercept.getIntercept() == 0f && slopeIntercept.getSlope() == 0f)) {
+            if(!(slopeIntercept.getSlope() == 0f && slopeIntercept.getIntercept() == 0f)) {
                 rtIntensityPairsOrigin = chromatogramFilter.pickChromatogramByRt(rtIntensityPairsOrigin, group.getRt().floatValue(), slopeIntercept);
             }
 

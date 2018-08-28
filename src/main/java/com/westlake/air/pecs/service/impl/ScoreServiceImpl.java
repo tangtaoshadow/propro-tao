@@ -128,15 +128,15 @@ public class ScoreServiceImpl implements ScoreService {
         }
 
         List<RtPair> pairs = simpleFindBestFeature(scoreRtList, compoundRt);
-        List<RtPair> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE);
+//        List<RtPair> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE);
+//
+//        if(pairsCorrected == null || pairsCorrected.size() < 2){
+//            logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
+//            resultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
+//            return resultDO;
+//        }
 
-        if(pairsCorrected == null || pairsCorrected.size() < 2){
-            logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
-            resultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
-            return resultDO;
-        }
-
-        SlopeIntercept slopeIntercept = fitRTPairs(pairsCorrected);
+        SlopeIntercept slopeIntercept = fitRTPairs(pairs);
         resultDO.setSuccess(true);
         resultDO.setModel(slopeIntercept);
 
@@ -150,11 +150,13 @@ public class ScoreServiceImpl implements ScoreService {
      * @return rt pairs
      */
     private List<RtPair> simpleFindBestFeature(List<List<ScoreRtPair>> scoresList, List<Float> rt){
-        float max = Float.MIN_VALUE;
+
         List<RtPair> pairs = new ArrayList<>();
-        RtPair rtPair = new RtPair();
+
         for(int i=0; i<scoresList.size(); i++){
             List<ScoreRtPair> scores = scoresList.get(i);
+            float max = Float.MIN_VALUE;
+            RtPair rtPair = new RtPair();
             //find max score's rt
             for(int j=0; j<scores.size(); j++){
                 if(scores.get(j).getScore() > max){

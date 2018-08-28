@@ -105,7 +105,7 @@ public class FeatureFinder {
         chrPeakIndex[0] = -1;
         chrPeakIndex[1] = -1;
         for(int i = 0; i < pickedChroms.size(); i++){
-            for(int j = 0; j < pickedChroms.get(0).getRtArray().length; j++){
+            for(int j = 0; j < pickedChroms.get(i).getRtArray().length; j++){
                 if(pickedChroms.get(i).getIntensityArray()[j] > largest){
                     largest = pickedChroms.get(i).getIntensityArray()[j];
                     chrPeakIndex[0] = i;
