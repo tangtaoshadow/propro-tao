@@ -26,6 +26,6 @@ public class TestController {
     String test(Model model, RedirectAttributes redirectAttributes) {
 
         ExperimentDO experimentDO = experimentService.getById("5b738f19e63cc81c44325169").getModel();
-        return JSON.toJSONString(experimentService.convAndComputeIrt(experimentDO, "5b67136d2ada5f15749a0140", 0.05f, 30f, 0.01f));
+        return JSON.toJSONString(experimentService.convAndComputeIrt(experimentDO, "5b67136d2ada5f15749a0140", 0.05f, 6.25f, 0.01f));
     }
 }

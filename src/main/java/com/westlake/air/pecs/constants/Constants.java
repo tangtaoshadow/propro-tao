@@ -21,6 +21,8 @@ public class Constants {
     public static final float STOP_AFTER_INTENSITY_RATIO = 0.0001f;
     public static final float MIN_RSQ = 0.95f;
     public static final float MIN_COVERAGE = 0.6f;
+    public static final String CHROMATOGRAM_PICKER_METHOD = "legacy";
+    public static final float PEAK_WIDTH = 40.0f;
     public static final int RT_BINS = 10;
     public static final int MIN_PEPTIDES_PER_BIN = 1;
     public static final int MIN_BINS_FILLED = 8;

@@ -31,30 +31,40 @@ public class ChromatogramPicker {
         Float[] rightRt = new Float[maxPeakSize];
         int leftIndex, rightIndex;
 
+        RtIntensityPairs chromatogram;
+        if(Constants.CHROMATOGRAM_PICKER_METHOD == "legacy"){
+            chromatogram = rtIntensityPairs;
+        }else {
+            chromatogram = smoothedRtIntensityPairs;
+        }
+
         int closestPeakIndex;
         for (int i = 0; i < maxPeakSize; i++) {
-            closestPeakIndex = findClosestPeak(smoothedRtIntensityPairs, maxPeakPairs.getRtArray()[i]);
+            float centralPeakRt = maxPeakPairs.getRtArray()[i];
+            closestPeakIndex = findClosestPeak(chromatogram, maxPeakPairs.getRtArray()[i]);
 
             //to the left
-            leftIndex = closestPeakIndex;
+            leftIndex = closestPeakIndex - 1;
             while(leftIndex > 0 &&
-                    smoothedRtIntensityPairs.getIntensityArray()[leftIndex - 1] < smoothedRtIntensityPairs.getIntensityArray()[leftIndex] &&
-                    signalToNoise[leftIndex] >= Constants.SIGNAL_TO_NOISE_LIMIT){
+                    chromatogram.getIntensityArray()[leftIndex - 1] < chromatogram.getIntensityArray()[leftIndex] &&
+                    centralPeakRt - chromatogram.getRtArray()[leftIndex - 1] < Constants.PEAK_WIDTH &&
+                    signalToNoise[leftIndex - 1] >= Constants.SIGNAL_TO_NOISE_LIMIT){
                 leftIndex--;
             }
 
             //to the right
-            rightIndex = closestPeakIndex;
-            while(rightIndex <smoothedRtIntensityPairs.getIntensityArray().length - 1 &&
-                    smoothedRtIntensityPairs.getIntensityArray()[rightIndex + 1] < smoothedRtIntensityPairs.getIntensityArray()[rightIndex] &&
-                    signalToNoise[rightIndex] >= Constants.SIGNAL_TO_NOISE_LIMIT){
+            rightIndex = closestPeakIndex + 1;
+            while(rightIndex <chromatogram.getIntensityArray().length - 1 &&
+                    chromatogram.getIntensityArray()[rightIndex + 1] < chromatogram.getIntensityArray()[rightIndex] &&
+                    chromatogram.getRtArray()[rightIndex + 1] - centralPeakRt < Constants.PEAK_WIDTH &&
+                    signalToNoise[rightIndex + 1] >= Constants.SIGNAL_TO_NOISE_LIMIT){
                 rightIndex++;
             }
 
             leftRight[i][0] = leftIndex;
             leftRight[i][1] = rightIndex;
-            leftRt[i] = smoothedRtIntensityPairs.getRtArray()[leftIndex];
-            rightRt[i] = smoothedRtIntensityPairs.getRtArray()[rightIndex];
+            leftRt[i] = chromatogram.getRtArray()[leftIndex];
+            rightRt[i] = chromatogram.getRtArray()[rightIndex];
 
         }
 

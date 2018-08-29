@@ -128,7 +128,7 @@ public class ScoreServiceImpl implements ScoreService {
         }
 
         List<RtPair> pairs = simpleFindBestFeature(scoreRtList, compoundRt);
-//        List<RtPair> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE);
+        List<RtPair> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE);
 //
 //        if(pairsCorrected == null || pairsCorrected.size() < 2){
 //            logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
@@ -183,6 +183,8 @@ public class ScoreServiceImpl implements ScoreService {
         if( pairsSize < 3){
             return null;
         }
+        //TODO: @Nico
+        minRsq = 0.85f;
 
         //获取斜率和截距
         float rsq = 0;

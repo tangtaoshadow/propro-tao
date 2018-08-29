@@ -145,8 +145,12 @@ public class MathUtil {
 
         //get standardized data
         float[] standardizedData = new float[dataLength];
-        for(int i = 0; i< dataLength; i++){
-            standardizedData[i] = (data.get(i) - mean)/ std;
+        for(int i = 0; i< dataLength; i++) {
+            if (std == 0) {
+                standardizedData[i] = 0;
+            } else {
+                standardizedData[i] = (data.get(i) - mean) / std;
+            }
         }
         return standardizedData;
     }
