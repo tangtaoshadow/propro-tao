@@ -5,6 +5,7 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.LibraryDAO;
 import com.westlake.air.pecs.dao.TransitionDAO;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
@@ -189,7 +190,7 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
-    public List<TargetTransition> buildMS1Coordinates(String libraryId, float rtExtractionWindows, TaskDO taskDO) {
+    public List<TargetTransition> buildMS1Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, TaskDO taskDO) {
         long start = System.currentTimeMillis();
         TransitionQuery query = new TransitionQuery(libraryId);
 //        query.setIsDecoy(false);
@@ -197,8 +198,8 @@ public class TransitionServiceImpl implements TransitionService {
 
         long readDB = System.currentTimeMillis() - start;
         for (TargetTransition targetTransition : targetList) {
-            targetTransition.setRtStart(targetTransition.getRt() - rtExtractionWindows / 2.0f);
-            targetTransition.setRtEnd(targetTransition.getRt() + rtExtractionWindows / 2.0f);
+            targetTransition.setRtStart((targetTransition.getRt() - slopeIntercept.getIntercept())/slopeIntercept.getSlope() - rtExtractionWindows / 2.0f);
+            targetTransition.setRtEnd((targetTransition.getRt() - slopeIntercept.getIntercept())/slopeIntercept.getSlope() + rtExtractionWindows / 2.0f);
         }
         List<TargetTransition> list = sortMS1Coordinates(targetList);
 
@@ -208,7 +209,7 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
-    public List<TargetTransition> buildMS2Coordinates(String libraryId, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd, TaskDO taskDO) {
+    public List<TargetTransition> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd, TaskDO taskDO) {
 
         long start = System.currentTimeMillis();
         TransitionQuery query = new TransitionQuery(libraryId);
@@ -219,8 +220,8 @@ public class TransitionServiceImpl implements TransitionService {
         long readDB = System.currentTimeMillis() - start;
         if(rtExtractionWindows != -1){
             for (TargetTransition targetTransition : targetList) {
-                targetTransition.setRtStart(targetTransition.getRt() - rtExtractionWindows / 2.0f);
-                targetTransition.setRtEnd(targetTransition.getRt() + rtExtractionWindows / 2.0f);
+                targetTransition.setRtStart((targetTransition.getRt() - slopeIntercept.getIntercept())/slopeIntercept.getSlope() - rtExtractionWindows / 2.0f);
+                targetTransition.setRtEnd((targetTransition.getRt() - slopeIntercept.getIntercept())/slopeIntercept.getSlope() + rtExtractionWindows / 2.0f);
             }
         }else{
             for (TargetTransition targetTransition : targetList) {

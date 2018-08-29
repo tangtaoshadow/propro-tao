@@ -1,8 +1,6 @@
 package com.westlake.air.pecs.async;
 
-import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
-import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.ExperimentService;
@@ -14,7 +12,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -37,6 +34,8 @@ public class ExperimentTask {
 
     /**
      * @param experimentDO
+     * @param libraryId
+     * @param slopeIntercept
      * @param creator
      * @param rtExtractWindow
      * @param mzExtractWindow
@@ -44,7 +43,11 @@ public class ExperimentTask {
      * @return
      */
     @Async
-    public void extract(ExperimentDO experimentDO, String libraryId, String creator, float rtExtractWindow, float mzExtractWindow, int buildType, TaskDO taskDO) {
-        experimentService.extract(experimentDO, libraryId, creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
+    public void extract(ExperimentDO experimentDO, String libraryId, SlopeIntercept slopeIntercept, String creator, float rtExtractWindow, float mzExtractWindow, int buildType, TaskDO taskDO) {
+        experimentService.extract(experimentDO, libraryId, slopeIntercept, creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
+    }
+
+    public void swath(ExperimentDO experimentDO, String libraryId, String creator, float rtExtractWindow, float mzExtractWindow, int buildType){
+
     }
 }

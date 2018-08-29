@@ -18,6 +18,8 @@ public enum TaskTemplate {
 
     COMMON("COMMON", ""),
 
+    TEST("TEST", ""),
+
     MZXML_COMPRESSOR("MZXML_COMPRESSOR", "/task/mzxmlcompressor"),
 
     ;

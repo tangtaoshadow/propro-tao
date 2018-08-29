@@ -9,9 +9,9 @@ import lombok.Data;
 @Data
 public class SlopeIntercept {
 
-    float slope;
+    float slope = 1f;
 
-    float intercept;
+    float intercept = 0;
 
     @Override
     public String toString() {

@@ -2,6 +2,7 @@ package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.LibraryCoordinate;
+import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.Peptide;
@@ -71,7 +72,7 @@ public interface TransitionService {
      * @param rtExtractionWindows
      * @return
      */
-    List<TargetTransition> buildMS1Coordinates(String libraryId, float rtExtractionWindows, TaskDO taskDO);
+    List<TargetTransition> buildMS1Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, TaskDO taskDO);
 
     /**
      * 创建MS2的坐标系
@@ -82,7 +83,7 @@ public interface TransitionService {
      * @param precursorMzEnd
      * @return
      */
-    List<TargetTransition> buildMS2Coordinates(String libraryId, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd, TaskDO taskDO);
+    List<TargetTransition> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd, TaskDO taskDO);
 
     /**
      * 根据LibraryId获取按照PeptideRef进行分组的Intensity列表
