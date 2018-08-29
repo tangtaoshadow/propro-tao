@@ -5,7 +5,10 @@ import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
+import com.westlake.air.pecs.service.impl.ExperimentServiceImpl;
 import com.westlake.air.pecs.utils.MathUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -17,6 +20,8 @@ import java.util.List;
  */
 @Component("featureFinder")
 public class FeatureFinder {
+
+    public final Logger logger = LoggerFactory.getLogger(FeatureFinder.class);
 
     /**
      * 1）找出pickedChrom下的最高峰，得到对应rt和rtLeft、rtRight

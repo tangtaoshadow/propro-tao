@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.test.experiment;
 
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
@@ -90,8 +91,13 @@ public class ExperimentTest extends BaseTest {
         File fileMZXML = new File(filePathMZXML);
         experimentService.uploadFile(experimentDO, fileMZXML, new TaskDO());
 
-        experimentService.extract(experimentDO, libraryDO.getId(), "admin", -1f, 0.05f, 1, new TaskDO());
+        experimentService.extract(experimentDO, libraryDO.getId(),new SlopeIntercept(), "admin", -1f, 0.05f, 1, new TaskDO());
 
     }
+
+//    @Test
+//    public void extractor_test() throws FileNotFoundException {
+//
+//    }
 
 }

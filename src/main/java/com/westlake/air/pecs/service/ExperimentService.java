@@ -43,9 +43,28 @@ public interface ExperimentService {
 
     void uploadFile(ExperimentDO experimentDO, File file, TaskDO taskDO);
 
-    ResultDO extract(ExperimentDO experimentDO, String libraryId, String creator, float rtExtractWindow, float mzExtractWindow, int buildType, TaskDO taskDO);
+    /**
+     *
+     * @param experimentDO
+     * @param libraryId
+     * @param slopeIntercept iRT求得的斜率和截距
+     * @param creator
+     * @param rtExtractWindow
+     * @param mzExtractWindow
+     * @param buildType 0代表同时卷积MS1和MS2,1代表卷积MS1,2代表卷积MS2
+     * @param taskDO
+     * @return
+     */
+    ResultDO extract(ExperimentDO experimentDO, String libraryId, SlopeIntercept slopeIntercept, String creator, float rtExtractWindow, float mzExtractWindow, int buildType, TaskDO taskDO);
 
-    List<AnalyseDataDO> extractIrt(ExperimentDO experimentDO, String libraryId, float mzExtractWindow);
+    /**
+     * 卷积iRT校准库的数据
+     * @param experimentDO
+     * @param iRtLibraryId
+     * @param mzExtractWindow
+     * @return
+     */
+    List<AnalyseDataDO> extractIrt(ExperimentDO experimentDO, String iRtLibraryId, float mzExtractWindow);
 
     /**
      * 卷积并且求出iRT

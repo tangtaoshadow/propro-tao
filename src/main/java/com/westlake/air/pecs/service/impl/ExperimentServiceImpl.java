@@ -241,7 +241,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     @Override
-    public ResultDO extract(ExperimentDO experimentDO, String libraryId, String creator, float rtExtractWindow, float mzExtractWindow, int buildType, TaskDO taskDO) {
+    public ResultDO extract(ExperimentDO experimentDO, String libraryId, SlopeIntercept slopeIntercept, String creator, float rtExtractWindow, float mzExtractWindow, int buildType, TaskDO taskDO) {
         ResultDO resultDO = new ResultDO(true);
         //基本条件检查
         taskDO.addLog("基本条件检查开始");
@@ -279,12 +279,12 @@ public class ExperimentServiceImpl implements ExperimentService {
             raf = new RandomAccessFile(file, "r");
 
             if (buildType == 0) {
-                extractMS1(raf, experimentDO, overviewDO.getId(), libraryId, rtExtractWindow, mzExtractWindow, taskDO);
-                extractMS2(file, experimentDO, overviewDO.getId(), libraryId, rtExtractWindow, mzExtractWindow, taskDO);
+                extractMS1(raf, experimentDO, overviewDO.getId(), libraryId, slopeIntercept, rtExtractWindow, mzExtractWindow, taskDO);
+                extractMS2(raf, experimentDO, overviewDO.getId(), libraryId, slopeIntercept, rtExtractWindow, mzExtractWindow, taskDO);
             } else if (buildType == 1) {
-                extractMS1(raf, experimentDO, overviewDO.getId(), libraryId, rtExtractWindow, mzExtractWindow, taskDO);
+                extractMS1(raf, experimentDO, overviewDO.getId(), libraryId, slopeIntercept, rtExtractWindow, mzExtractWindow, taskDO);
             } else if (buildType == 2) {
-                extractMS2(file, experimentDO, overviewDO.getId(), libraryId, rtExtractWindow, mzExtractWindow, taskDO);
+                extractMS2(raf, experimentDO, overviewDO.getId(), libraryId, slopeIntercept, rtExtractWindow, mzExtractWindow, taskDO);
             }
 
         } catch (Exception e) {
@@ -322,7 +322,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                 List<TargetTransition> coordinates;
                 TreeMap<Float, MzIntensityPairs> rtMap;
                 //Step2.获取标准库的目标肽段片段的坐标
-                coordinates = transitionService.buildMS2Coordinates(iRtLibraryId, -1, rang.getMzStart(), rang.getMzEnd(), null);
+                coordinates = transitionService.buildMS2Coordinates(iRtLibraryId,new SlopeIntercept(), -1, rang.getMzStart(), rang.getMzEnd(), null);
                 if (coordinates.size() == 0) {
                     logger.warn("No Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
                     continue;
@@ -352,12 +352,12 @@ public class ExperimentServiceImpl implements ExperimentService {
         return dataList;
     }
 
-    private void extractMS1(RandomAccessFile raf, ExperimentDO exp, String overviewId, String libraryId, float rtExtractWindow, float mzExtractWindow, TaskDO taskDO) {
+    private void extractMS1(RandomAccessFile raf, ExperimentDO exp, String overviewId, String libraryId, SlopeIntercept slopeIntercept, float rtExtractWindow, float mzExtractWindow, TaskDO taskDO) {
 
         //Step1.获取标准库目标卷积片段
         taskDO.addLog("构建MS1卷积坐标");
         taskService.update(taskDO);
-        List<TargetTransition> coordinates = transitionService.buildMS1Coordinates(libraryId, rtExtractWindow, taskDO);
+        List<TargetTransition> coordinates = transitionService.buildMS1Coordinates(libraryId, slopeIntercept, rtExtractWindow, taskDO);
         if (coordinates == null || coordinates.size() == 0) {
             taskDO.addLog("标准库目标为空");
             taskDO.finish(TaskDO.STATUS_FAILED);
@@ -381,7 +381,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         convoluteAndInsert(coordinates, rtMap, overviewId, rtExtractWindow, mzExtractWindow, true, taskDO);
     }
 
-    private void extractMS2(File file, ExperimentDO exp, String overviewId, String libraryId, float rtExtractWindow, float mzExtractWindow, TaskDO taskDO) {
+    private void extractMS2(RandomAccessFile raf, ExperimentDO exp, String overviewId, String libraryId, SlopeIntercept slopeIntercept, float rtExtractWindow, float mzExtractWindow, TaskDO taskDO) {
 
         //Step1.获取窗口信息.
         taskDO.addLog("获取Swath窗口信息");
@@ -392,17 +392,15 @@ public class ExperimentServiceImpl implements ExperimentService {
         taskDO.addLog("总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
         taskService.update(taskDO);
 
-        RandomAccessFile raf = null;
         int count = 1;
         try {
-            raf = new RandomAccessFile(file, "r");
             for (WindowRang rang : rangs) {
 
                 long start = System.currentTimeMillis();
                 List<TargetTransition> coordinates;
                 TreeMap<Float, MzIntensityPairs> rtMap;
                 //Step2.获取标准库的目标肽段片段的坐标
-                coordinates = transitionService.buildMS2Coordinates(libraryId, rtExtractWindow, rang.getMzStart(), rang.getMzEnd(), taskDO);
+                coordinates = transitionService.buildMS2Coordinates(libraryId, slopeIntercept, rtExtractWindow, rang.getMzStart(), rang.getMzEnd(), taskDO);
                 if (coordinates.isEmpty()) {
                     logger.warn("No Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
                     continue;
@@ -477,8 +475,6 @@ public class ExperimentServiceImpl implements ExperimentService {
 
             //本参数用于检测是否在全谱图上检测到信号
             boolean isHit = false;
-            //标记上一个信号量是不是0
-            boolean isLastDataZero = false;
             for (Float rt : rtMap.keySet()) {
                 if (rtExtractWindow != -1 && rt > ms.getRtEnd()) {
                     break;
@@ -487,23 +483,14 @@ public class ExperimentServiceImpl implements ExperimentService {
                     MzIntensityPairs pairs = rtMap.get(rt);
                     Float[] pairMzArray = pairs.getMzArray();
                     Float[] pairIntensityArray = pairs.getIntensityArray();
-                    rtList.add(rt);
                     Float acc = ConvolutionUtil.accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd);
-
                     if (acc != 0) {
                         //如果本次的统计数据不为0,首先确认总信号是命中状态
                         isHit = true;
-                        intList.add(acc);
-                        isLastDataZero = false;
-                    } else {
-                        //如果本次的统计数据是0,并且上一次的统计信号不是0,那么这一次的数据加入到数据列表中,并且将上一次信号位标记为True
-                        if (!isLastDataZero) {
-                            intList.add(acc);
-                            isLastDataZero = true;
-                        } else {
-                            //如果本次统计是0,上一次统计也是0,那么什么都不干,这边加一个else增加代码可读性
-                        }
+
                     }
+                    rtList.add(rt);
+                    intList.add(acc);
                 }
             }
 
@@ -552,15 +539,15 @@ public class ExperimentServiceImpl implements ExperimentService {
     public ResultDO<SlopeIntercept> convAndComputeIrt(ExperimentDO experimentDO, String iRtLibraryId, Float mzExtractWindow, Float sigma, Float space) {
         logger.info("开始卷积数据");
         long start = System.currentTimeMillis();
-//        List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
-        List<AnalyseDataDO> dataList = new ArrayList<>();
-        //这边先读取本地已经卷积好的iRT数据
-        try {
-            String content = FileUtil.readFile("data/conv.json");
-            dataList = JSONArray.parseArray(content, AnalyseDataDO.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+      List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
+//        List<AnalyseDataDO> dataList = new ArrayList<>();
+//        //这边先读取本地已经卷积好的iRT数据
+//        try {
+//            String content = FileUtil.readFile("data/conv.json");
+//            dataList = JSONArray.parseArray(content, AnalyseDataDO.class);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
         start = System.currentTimeMillis();
         ResultDO resultDO = scoreService.computeIRt(dataList, iRtLibraryId, sigma, space);
@@ -585,37 +572,17 @@ public class ExperimentServiceImpl implements ExperimentService {
 
             //本参数用于检测是否在全谱图上检测到信号
             boolean isHit = false;
-            //标记上一个信号量是不是0
-            boolean isLastDataZero = false;
             for (Float rt : rtMap.keySet()) {
                 MzIntensityPairs pairs = rtMap.get(rt);
                 Float[] pairMzArray = pairs.getMzArray();
                 Float[] pairIntensityArray = pairs.getIntensityArray();
 
                 Float acc = ConvolutionUtil.accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd);
-                if (acc != 0){
+                if (acc != 0) {
                     isHit = true;
                 }
                 rtList.add(rt);
                 intList.add(acc);
-
-//                if (acc != 0) {
-//                    //如果本次的统计数据不为0,首先确认总信号是命中状态
-//                    isHit = true;
-//                    rtList.add(rt);
-//                    intList.add(acc);
-//                    isLastDataZero = false;
-//                } else {
-//                    //如果本次的统计数据是0,并且上一次的统计信号不是0,那么这一次的数据加入到数据列表中,并且将上一次信号位标记为True
-//                    if (!isLastDataZero) {
-//                        rtList.add(rt);
-//                        intList.add(acc);
-//                        isLastDataZero = true;
-//                    } else {
-//                        //如果本次统计是0,上一次统计也是0,那么什么都不干,这边加一个else增加代码可读性
-//                    }
-//                }
-
             }
 
             AnalyseDataDO dataDO = new AnalyseDataDO();

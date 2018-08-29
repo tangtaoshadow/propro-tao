@@ -47,10 +47,14 @@ public class TaskDO extends BaseDO {
     public TaskDO() {
     }
 
+    public static TaskDO create(TaskTemplate taskTemplate, String taskSuffixName){
+        return new TaskDO(taskTemplate, taskSuffixName);
+    }
+
     public TaskDO(TaskTemplate taskTemplate, String taskSuffixName) {
         this.taskTemplate = taskTemplate.getTemplateName();
         this.status = STATUS_RUNNING;
-        this.name = TaskTemplate.UPLOAD_EXPERIMENT_FILE.getTemplateName() + "-" + taskSuffixName;
+        this.name = taskTemplate.getTemplateName() + "-" + taskSuffixName;
         start();
     }
 

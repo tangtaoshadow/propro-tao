@@ -7,6 +7,7 @@ import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
+import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
@@ -246,7 +247,7 @@ public class ExperimentController extends BaseController {
 
         TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_CONVOLUTION, resultDO.getModel().getName());
         taskService.insert(taskDO);
-        experimentTask.extract(resultDO.getModel(), libraryId, creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
+        experimentTask.extract(resultDO.getModel(), libraryId, new SlopeIntercept(), creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }
@@ -279,8 +280,6 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/compressor")
     String compressor(Model model) {
-
-
         return "experiment/compressor";
     }
 }
