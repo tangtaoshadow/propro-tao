@@ -190,7 +190,7 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
-    public List<TargetTransition> buildMS1Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, TaskDO taskDO) {
+    public List<TargetTransition> buildMS1Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows) {
         long start = System.currentTimeMillis();
         TransitionQuery query = new TransitionQuery(libraryId);
 //        query.setIsDecoy(false);
@@ -198,18 +198,17 @@ public class TransitionServiceImpl implements TransitionService {
 
         long readDB = System.currentTimeMillis() - start;
         for (TargetTransition targetTransition : targetList) {
-            targetTransition.setRtStart((targetTransition.getRt() - slopeIntercept.getIntercept())/slopeIntercept.getSlope() - rtExtractionWindows / 2.0f);
-            targetTransition.setRtEnd((targetTransition.getRt() - slopeIntercept.getIntercept())/slopeIntercept.getSlope() + rtExtractionWindows / 2.0f);
+            targetTransition.setRtStart((targetTransition.getRt() - slopeIntercept.getIntercept()) / slopeIntercept.getSlope() - rtExtractionWindows / 2.0f);
+            targetTransition.setRtEnd((targetTransition.getRt() - slopeIntercept.getIntercept()) / slopeIntercept.getSlope() + rtExtractionWindows / 2.0f);
         }
         List<TargetTransition> list = sortMS1Coordinates(targetList);
 
-        taskDO.addLog("读取数据库耗时:" + readDB + "构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
-        taskService.update(taskDO);
+        logger.info("读取数据库耗时:" + readDB + "构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
         return list;
     }
 
     @Override
-    public List<TargetTransition> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd, TaskDO taskDO) {
+    public List<TargetTransition> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd) {
 
         long start = System.currentTimeMillis();
         TransitionQuery query = new TransitionQuery(libraryId);
@@ -218,12 +217,12 @@ public class TransitionServiceImpl implements TransitionService {
 
         List<TargetTransition> targetList = transitionDAO.getTTAll(query);
         long readDB = System.currentTimeMillis() - start;
-        if(rtExtractionWindows != -1){
+        if (rtExtractionWindows != -1) {
             for (TargetTransition targetTransition : targetList) {
-                targetTransition.setRtStart((targetTransition.getRt() - slopeIntercept.getIntercept())/slopeIntercept.getSlope() - rtExtractionWindows / 2.0f);
-                targetTransition.setRtEnd((targetTransition.getRt() - slopeIntercept.getIntercept())/slopeIntercept.getSlope() + rtExtractionWindows / 2.0f);
+                targetTransition.setRtStart((targetTransition.getRt() - slopeIntercept.getIntercept()) / slopeIntercept.getSlope() - rtExtractionWindows / 2.0f);
+                targetTransition.setRtEnd((targetTransition.getRt() - slopeIntercept.getIntercept()) / slopeIntercept.getSlope() + rtExtractionWindows / 2.0f);
             }
-        }else{
+        } else {
             for (TargetTransition targetTransition : targetList) {
                 targetTransition.setRtStart(-1);
                 targetTransition.setRtEnd(99999);
@@ -231,11 +230,7 @@ public class TransitionServiceImpl implements TransitionService {
         }
 
         List<TargetTransition> list = sortMS2Coordinates(targetList);
-        if(taskDO != null){
-            taskDO.addLog("构建卷积MS2坐标,读取数据库耗时:" + readDB + "构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
-            taskService.update(taskDO);
-        }
-
+        logger.info("构建卷积MS2坐标,读取数据库耗时:" + readDB + "构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
         return list;
     }
 

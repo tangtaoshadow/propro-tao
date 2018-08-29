@@ -3,6 +3,7 @@ package com.westlake.air.pecs.controller;
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
@@ -24,34 +25,45 @@ import java.util.Date;
  */
 @Controller
 @RequestMapping("test")
-public class TestController {
+public class TestController extends BaseController{
 
     @Autowired
     ExperimentService experimentService;
     @Autowired
     TaskService taskService;
 
+    public static float MZ_EXTRACT_WINDOW = 0.05f;
+    public static float RT_EXTRACT_WINDOW = 1200f;
+    public static float SIGMA = 6.25f;
+    public static float SPACING = 0.01f;
+
     @RequestMapping("test")
     @ResponseBody
     String test(Model model, RedirectAttributes redirectAttributes) {
-
         ExperimentDO experimentDO = experimentService.getById("5b738f19e63cc81c44325169").getModel();
-        return JSON.toJSONString(experimentService.convAndComputeIrt(experimentDO, "5b67136d2ada5f15749a0140", 0.05f, 50f, 0.01f));
+        return JSON.toJSONString(experimentService.convAndComputeIrt(experimentDO, "5b67136d2ada5f15749a0140", MZ_EXTRACT_WINDOW, SIGMA, SPACING));
     }
 
     @RequestMapping("test2")
     @ResponseBody
     String test2(Model model, RedirectAttributes redirectAttributes) {
-
         ExperimentDO experimentDO = experimentService.getById("5b738f19e63cc81c44325169").getModel();
-        ResultDO<SlopeIntercept> resultDO = experimentService.convAndComputeIrt(experimentDO, "5b67136d2ada5f15749a0140", 0.05f, 50f, 0.01f);
-        if(resultDO.isFailed()){
+        ResultDO<SlopeIntercept> resultDO = experimentService.convAndComputeIrt(experimentDO, "5b67136d2ada5f15749a0140", MZ_EXTRACT_WINDOW, SIGMA, SPACING);
+        if (resultDO.isFailed()) {
             return JSON.toJSONString(resultDO);
         }
         SlopeIntercept slopeIntercept = resultDO.getModel();
-        TaskDO taskDO = TaskDO.create(TaskTemplate.TEST, "LMS-Temp");
-        taskService.insert(taskDO);
-        ResultDO finalRes = experimentService.extract(experimentDO, "5b84bc9c58487f1060fa0c23", slopeIntercept, "陆妙善", 1200f, 0.05f, 2, taskDO);
+        long start = System.currentTimeMillis();
+        SwathInput input = new SwathInput();
+        input.setExperimentDO(experimentDO);
+        input.setLibraryId("5b84bc9c58487f1060fa0c23");
+        input.setSlopeIntercept(slopeIntercept);
+        input.setCreator("陆妙善");
+        input.setRtExtractWindow(RT_EXTRACT_WINDOW);
+        input.setMzExtractWindow(MZ_EXTRACT_WINDOW);
+        input.setBuildType(2);
+        ResultDO finalRes = experimentService.extract(input);
+        logger.info("卷积耗时总计:"+(System.currentTimeMillis() - start));
         return JSON.toJSONString(finalRes);
     }
 }

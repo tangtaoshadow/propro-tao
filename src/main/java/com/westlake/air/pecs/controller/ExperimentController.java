@@ -247,7 +247,7 @@ public class ExperimentController extends BaseController {
 
         TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_CONVOLUTION, resultDO.getModel().getName());
         taskService.insert(taskDO);
-        experimentTask.extract(resultDO.getModel(), libraryId, new SlopeIntercept(), creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
+        experimentTask.extract(resultDO.getModel(), libraryId, SlopeIntercept.create(), creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }

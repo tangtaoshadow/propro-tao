@@ -1,8 +1,12 @@
 package com.westlake.air.pecs.utils;
 
+import com.alibaba.fastjson.JSONArray;
+import com.westlake.air.pecs.domain.db.AnalyseDataDO;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -17,5 +21,11 @@ public class FileUtil {
         byte[] bytes = new byte[fileLength];
         fis.read(bytes);
         return new String(bytes, 0, fileLength);
+    }
+
+    public static List<AnalyseDataDO> getAnalyseDataList(String filePath) throws IOException {
+        String content = readFile(filePath);
+        List<AnalyseDataDO> dataList = JSONArray.parseArray(content, AnalyseDataDO.class);
+        return dataList;
     }
 }

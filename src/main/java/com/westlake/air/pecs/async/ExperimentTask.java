@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.async;
 
+import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
@@ -44,7 +45,15 @@ public class ExperimentTask {
      */
     @Async
     public void extract(ExperimentDO experimentDO, String libraryId, SlopeIntercept slopeIntercept, String creator, float rtExtractWindow, float mzExtractWindow, int buildType, TaskDO taskDO) {
-        experimentService.extract(experimentDO, libraryId, slopeIntercept, creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
+        SwathInput input = new SwathInput();
+        input.setExperimentDO(experimentDO);
+        input.setLibraryId(libraryId);
+        input.setSlopeIntercept(slopeIntercept);
+        input.setCreator(creator);
+        input.setRtExtractWindow(rtExtractWindow);
+        input.setMzExtractWindow(mzExtractWindow);
+        input.setBuildType(buildType);
+        experimentService.extract(input);
     }
 
     public void swath(ExperimentDO experimentDO, String libraryId, String creator, float rtExtractWindow, float mzExtractWindow, int buildType){

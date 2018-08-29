@@ -1,6 +1,5 @@
 package com.westlake.air.pecs.service.impl;
 
-import com.alibaba.fastjson.JSONArray;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
@@ -8,6 +7,7 @@ import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
 import com.westlake.air.pecs.dao.ExperimentDAO;
 import com.westlake.air.pecs.dao.ScanIndexDAO;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
@@ -241,50 +241,38 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     @Override
-    public ResultDO extract(ExperimentDO experimentDO, String libraryId, SlopeIntercept slopeIntercept, String creator, float rtExtractWindow, float mzExtractWindow, int buildType, TaskDO taskDO) {
+    public ResultDO extract(SwathInput swathInput) {
         ResultDO resultDO = new ResultDO(true);
         //基本条件检查
-        taskDO.addLog("基本条件检查开始");
-        taskService.update(taskDO);
+        logger.info("基本条件检查开始");
 
-        ResultDO checkResult = ConvolutionUtil.checkExperiment(experimentDO);
+        ResultDO checkResult = ConvolutionUtil.checkExperiment(swathInput.getExperimentDO());
         if (checkResult.isFailed()) {
-            taskDO.addLog("条件检查失败:" + checkResult.getMsgInfo());
-            taskDO.finish(TaskDO.STATUS_FAILED);
-            taskService.update(taskDO);
+            logger.info("条件检查失败:" + checkResult.getMsgInfo());
             return checkResult;
         }
 
         File file = (File) checkResult.getModel();
         RandomAccessFile raf = null;
 
-        ResultDO<LibraryDO> libRes = libraryService.getById(libraryId);
+        ResultDO<LibraryDO> libRes = libraryService.getById(swathInput.getLibraryId());
         if (libRes.isFailed()) {
             return ResultDO.buildError(ResultCode.LIBRARY_NOT_EXISTED);
         }
         //创建实验初始化概览数据
-        AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
-        overviewDO.setExpId(experimentDO.getId());
-        overviewDO.setName(experimentDO.getName() + "-" + libRes.getModel().getName() + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
-        overviewDO.setExpName(experimentDO.getName());
-        overviewDO.setLibraryId(libraryId);
-        overviewDO.setLibraryName(libraryService.getNameById(libraryId));
-        overviewDO.setCreator(creator);
-        overviewDO.setCreateDate(new Date());
-        overviewDO.setRtExtractWindow(rtExtractWindow);
-        overviewDO.setMzExtractWindow(mzExtractWindow);
+        AnalyseOverviewDO overviewDO = createOverview(swathInput);
         analyseOverviewDAO.insert(overviewDO);
 
         try {
             raf = new RandomAccessFile(file, "r");
 
-            if (buildType == 0) {
-                extractMS1(raf, experimentDO, overviewDO.getId(), libraryId, slopeIntercept, rtExtractWindow, mzExtractWindow, taskDO);
-                extractMS2(raf, experimentDO, overviewDO.getId(), libraryId, slopeIntercept, rtExtractWindow, mzExtractWindow, taskDO);
-            } else if (buildType == 1) {
-                extractMS1(raf, experimentDO, overviewDO.getId(), libraryId, slopeIntercept, rtExtractWindow, mzExtractWindow, taskDO);
-            } else if (buildType == 2) {
-                extractMS2(raf, experimentDO, overviewDO.getId(), libraryId, slopeIntercept, rtExtractWindow, mzExtractWindow, taskDO);
+            if (swathInput.getBuildType() == 0) {
+                extractMS1(raf, overviewDO.getId(), swathInput);
+                extractMS2(raf, overviewDO.getId(), swathInput);
+            } else if (swathInput.getBuildType() == 1) {
+                extractMS1(raf, overviewDO.getId(), swathInput);
+            } else if (swathInput.getBuildType() == 2) {
+                extractMS2(raf, overviewDO.getId(), swathInput);
             }
 
         } catch (Exception e) {
@@ -299,6 +287,53 @@ public class ExperimentServiceImpl implements ExperimentService {
         }
 
         return resultDO;
+    }
+
+    @Override
+    public ResultDO<List<AnalyseDataDO>> extractWithList(SwathInput swathInput) {
+        ResultDO resultDO = new ResultDO(true);
+
+        ExperimentDO exp = swathInput.getExperimentDO();
+        ResultDO checkResult = ConvolutionUtil.checkExperiment(exp);
+        if (checkResult.isFailed()) {
+            logger.error("条件检查失败:" + checkResult.getMsgInfo());
+            return checkResult;
+        }
+
+        File file = (File) checkResult.getModel();
+        RandomAccessFile raf = null;
+        ResultDO<LibraryDO> libRes = libraryService.getById(swathInput.getLibraryId());
+        if (libRes.isFailed()) {
+            return ResultDO.buildError(ResultCode.LIBRARY_NOT_EXISTED);
+        }
+
+        AnalyseOverviewDO overviewDO = createOverview(swathInput);
+        analyseOverviewDAO.insert(overviewDO);
+
+        try {
+            raf = new RandomAccessFile(file, "r");
+
+            if (swathInput.getBuildType() == 0) {
+                extractMS1(raf, overviewDO.getId(), swathInput);
+                extractMS2(raf, overviewDO.getId(), swathInput);
+            } else if (swathInput.getBuildType() == 1) {
+                extractMS1(raf, overviewDO.getId(), swathInput);
+            } else if (swathInput.getBuildType() == 2) {
+                extractMS2(raf, overviewDO.getId(), swathInput);
+            }
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            if (raf != null) {
+                try {
+                    raf.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -322,7 +357,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                 List<TargetTransition> coordinates;
                 TreeMap<Float, MzIntensityPairs> rtMap;
                 //Step2.获取标准库的目标肽段片段的坐标
-                coordinates = transitionService.buildMS2Coordinates(iRtLibraryId,new SlopeIntercept(), -1, rang.getMzStart(), rang.getMzEnd(), null);
+                coordinates = transitionService.buildMS2Coordinates(iRtLibraryId, SlopeIntercept.create(), -1, rang.getMzStart(), rang.getMzEnd());
                 if (coordinates.size() == 0) {
                     logger.warn("No Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
                     continue;
@@ -333,7 +368,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                 query.setPrecursorMzEnd(rang.getMzEnd());
                 List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
                 //Step4.提取指定原始谱图
-                rtMap = parseSpectrum(raf, indexes, getParser(exp.getFileType()), null);
+                rtMap = parseSpectrum(raf, indexes, getParser(exp.getFileType()));
                 //Step5.卷积并且存储数据
                 List<AnalyseDataDO> tmpList = convoluteForIrt(coordinates, rtMap, mzExtractWindow);
                 dataList.addAll(tmpList);
@@ -352,46 +387,29 @@ public class ExperimentServiceImpl implements ExperimentService {
         return dataList;
     }
 
-    private void extractMS1(RandomAccessFile raf, ExperimentDO exp, String overviewId, String libraryId, SlopeIntercept slopeIntercept, float rtExtractWindow, float mzExtractWindow, TaskDO taskDO) {
+    private void extractMS1(RandomAccessFile raf, String overviewId, SwathInput swathInput) {
 
         //Step1.获取标准库目标卷积片段
-        taskDO.addLog("构建MS1卷积坐标");
-        taskService.update(taskDO);
-        List<TargetTransition> coordinates = transitionService.buildMS1Coordinates(libraryId, slopeIntercept, rtExtractWindow, taskDO);
+        List<TargetTransition> coordinates = transitionService.buildMS1Coordinates(swathInput.getLibraryId(), swathInput.getSlopeIntercept(), swathInput.getRtExtractWindow());
         if (coordinates == null || coordinates.size() == 0) {
-            taskDO.addLog("标准库目标为空");
-            taskDO.finish(TaskDO.STATUS_FAILED);
-            taskService.update(taskDO);
             return;
         }
-
         //Step2.获取指定索引列表
-        taskDO.addLog("获取全部MS1谱图索引列表");
-        taskService.update(taskDO);
-        List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(new ScanIndexQuery(exp.getId(), 1));
-
+        List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(new ScanIndexQuery(swathInput.getExperimentDO().getId(), 1));
         //Step4.提取指定原始谱图
-        taskDO.addLog("解析MS1指定谱图");
-        taskService.update(taskDO);
-        TreeMap<Float, MzIntensityPairs> rtMap = parseSpectrum(raf, indexes, getParser(exp.getFileType()), taskDO);
-
+        TreeMap<Float, MzIntensityPairs> rtMap = parseSpectrum(raf, indexes, getParser(swathInput.getExperimentDO().getFileType()));
         //Step5.卷积并且存储数据
-        taskDO.addLog("开始卷积MS1数据");
-        taskService.update(taskDO);
-        convoluteAndInsert(coordinates, rtMap, overviewId, rtExtractWindow, mzExtractWindow, true, taskDO);
+        convoluteAndInsert(coordinates, rtMap, overviewId, swathInput.getRtExtractWindow(), swathInput.getMzExtractWindow(), true);
     }
 
-    private void extractMS2(RandomAccessFile raf, ExperimentDO exp, String overviewId, String libraryId, SlopeIntercept slopeIntercept, float rtExtractWindow, float mzExtractWindow, TaskDO taskDO) {
+    private void extractMS2(RandomAccessFile raf, String overviewId, SwathInput swathInput) {
 
         //Step1.获取窗口信息.
-        taskDO.addLog("获取Swath窗口信息");
-        taskService.update(taskDO);
-        List<WindowRang> rangs = getWindows(exp.getId());
+        logger.info("获取Swath窗口信息");
+        List<WindowRang> rangs = getWindows(swathInput.getExperimentDO().getId());
 
         //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
-        taskDO.addLog("总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
-        taskService.update(taskDO);
-
+        logger.info("总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
         int count = 1;
         try {
             for (WindowRang rang : rangs) {
@@ -400,27 +418,24 @@ public class ExperimentServiceImpl implements ExperimentService {
                 List<TargetTransition> coordinates;
                 TreeMap<Float, MzIntensityPairs> rtMap;
                 //Step2.获取标准库的目标肽段片段的坐标
-                coordinates = transitionService.buildMS2Coordinates(libraryId, slopeIntercept, rtExtractWindow, rang.getMzStart(), rang.getMzEnd(), taskDO);
+                coordinates = transitionService.buildMS2Coordinates(swathInput.getLibraryId(), swathInput.getSlopeIntercept(), swathInput.getRtExtractWindow(), rang.getMzStart(), rang.getMzEnd());
                 if (coordinates.isEmpty()) {
                     logger.warn("No Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
                     continue;
                 }
                 //Step3.获取指定索引列表
-                ScanIndexQuery query = new ScanIndexQuery(exp.getId(), 2);
+                ScanIndexQuery query = new ScanIndexQuery(swathInput.getExperimentDO().getId(), 2);
                 query.setPrecursorMzStart(rang.getMzStart());
                 query.setPrecursorMzEnd(rang.getMzEnd());
                 List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
                 //Step4.提取指定原始谱图
-                rtMap = parseSpectrum(raf, indexes, getParser(exp.getFileType()), taskDO);
+                rtMap = parseSpectrum(raf, indexes, getParser(swathInput.getExperimentDO().getFileType()));
                 //Step5.卷积并且存储数据
-                convoluteAndInsert(coordinates, rtMap, overviewId, rtExtractWindow, mzExtractWindow, false, taskDO);
+                convoluteAndInsert(coordinates, rtMap, overviewId, swathInput.getRtExtractWindow(), swathInput.getMzExtractWindow(), false);
 
-                taskDO.addLog("第" + count + "轮数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
-                taskService.update(taskDO);
+                logger.info("第" + count + "轮数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
                 count++;
             }
-            taskDO.finish(TaskDO.STATUS_SUCCESS);
-            taskService.update(taskDO);
 
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -434,7 +449,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         }
     }
 
-    private TreeMap<Float, MzIntensityPairs> parseSpectrum(RandomAccessFile raf, List<SimpleScanIndex> indexes, BaseExpParser baseExpParser, TaskDO taskDO) {
+    private TreeMap<Float, MzIntensityPairs> parseSpectrum(RandomAccessFile raf, List<SimpleScanIndex> indexes, BaseExpParser baseExpParser) {
         long start = System.currentTimeMillis();
 
         TreeMap<Float, MzIntensityPairs> rtMap = new TreeMap<>();
@@ -444,15 +459,11 @@ public class ExperimentServiceImpl implements ExperimentService {
             rtMap.put(index.getRt(), mzIntensityPairs);
         }
         logger.info("解析" + indexes.size() + "条XML谱图文件总计耗时:" + (System.currentTimeMillis() - start));
-        if (taskDO != null) {
-            taskDO.addLog("解析" + indexes.size() + "条XML谱图文件总计耗时:" + (System.currentTimeMillis() - start));
-            taskService.update(taskDO);
-        }
 
         return rtMap;
     }
 
-    private void convoluteAndInsert(List<TargetTransition> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow, boolean isMS1, TaskDO taskDO) {
+    private void convoluteAndInsert(List<TargetTransition> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow, boolean isMS1) {
         int logCountForMSTarget = 0;
         Long start = System.currentTimeMillis();
         float mzStart = 0;
@@ -526,8 +537,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             //每隔1000条数据落库一次,以减少对内存的依赖
             logCountForMSTarget++;
             if (logCountForMSTarget % 10000 == 0) {
-                taskDO.addLog("已扫描MS目标:" + logCountForMSTarget + "条,累计耗时:" + (System.currentTimeMillis() - start));
-                taskService.update(taskDO);
+                logger.info("已扫描MS目标:" + logCountForMSTarget + "条,累计耗时:" + (System.currentTimeMillis() - start));
                 analyseDataDAO.insert(dataList);
                 dataList.clear();
             }
@@ -537,23 +547,20 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     @Override
     public ResultDO<SlopeIntercept> convAndComputeIrt(ExperimentDO experimentDO, String iRtLibraryId, Float mzExtractWindow, Float sigma, Float space) {
-        logger.info("开始卷积数据");
-        long start = System.currentTimeMillis();
-      List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
-//        List<AnalyseDataDO> dataList = new ArrayList<>();
-//        //这边先读取本地已经卷积好的iRT数据
-//        try {
-//            String content = FileUtil.readFile("data/conv.json");
-//            dataList = JSONArray.parseArray(content, AnalyseDataDO.class);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-        logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
-        start = System.currentTimeMillis();
-        ResultDO resultDO = scoreService.computeIRt(dataList, iRtLibraryId, sigma, space);
-        logger.info("计算完毕,耗时:" + (System.currentTimeMillis() - start));
+        try {
+            logger.info("开始卷积数据");
+            long start = System.currentTimeMillis();
+//      List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
+            List<AnalyseDataDO> dataList = FileUtil.getAnalyseDataList("data/conv.json");         //这边先读取本地已经卷积好的iRT数据
 
-        return resultDO;
+            logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
+            start = System.currentTimeMillis();
+            ResultDO resultDO = scoreService.computeIRt(dataList, iRtLibraryId, sigma, space);
+            logger.info("计算完毕,耗时:" + (System.currentTimeMillis() - start));
+            return resultDO;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private List<AnalyseDataDO> convoluteForIrt(List<TargetTransition> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, Float mzExtractWindow) {
@@ -622,5 +629,21 @@ public class ExperimentServiceImpl implements ExperimentService {
         } else {
             return mzMLParser;
         }
+    }
+
+    private AnalyseOverviewDO createOverview(SwathInput input) {
+        //创建实验初始化概览数据
+        AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
+        String name = libraryService.getNameById(input.getLibraryId());
+        overviewDO.setExpId(input.getExperimentDO().getId());
+        overviewDO.setName(input.getExperimentDO().getName() + "-" + name + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
+        overviewDO.setExpName(input.getExperimentDO().getName());
+        overviewDO.setLibraryId(input.getLibraryId());
+        overviewDO.setLibraryName(name);
+        overviewDO.setCreator(input.getCreator());
+        overviewDO.setCreateDate(new Date());
+        overviewDO.setRtExtractWindow(input.getRtExtractWindow());
+        overviewDO.setMzExtractWindow(input.getMzExtractWindow());
+        return overviewDO;
     }
 }

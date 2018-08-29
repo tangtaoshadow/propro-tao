@@ -10,6 +10,8 @@ public enum TaskTemplate {
 
     UPLOAD_LIBRARY_FILE("UPLOAD_LIBRARY_FILE", "/library/create"),
 
+    EXTRACT("EXTRACT", ""),
+
     SWATH_CONVOLUTION("SWATH_CONVOLUTION", "/experiment/extractor"),
 
     SWATH_WORKFLOW("SWATH_WORKFLOW", ""),

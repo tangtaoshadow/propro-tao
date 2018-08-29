@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
@@ -44,18 +45,18 @@ public interface ExperimentService {
     void uploadFile(ExperimentDO experimentDO, File file, TaskDO taskDO);
 
     /**
-     *
-     * @param experimentDO
-     * @param libraryId
-     * @param slopeIntercept iRT求得的斜率和截距
-     * @param creator
-     * @param rtExtractWindow
-     * @param mzExtractWindow
-     * @param buildType 0代表同时卷积MS1和MS2,1代表卷积MS1,2代表卷积MS2
-     * @param taskDO
+     * 卷积但是不返回卷积结果
+     * @param swathInput
      * @return
      */
-    ResultDO extract(ExperimentDO experimentDO, String libraryId, SlopeIntercept slopeIntercept, String creator, float rtExtractWindow, float mzExtractWindow, int buildType, TaskDO taskDO);
+    ResultDO extract(SwathInput swathInput);
+
+    /**
+     * 优化入参数目,卷积完毕后所有卷积结果加在到内存中并且返回
+     * @param swathInput
+     * @return
+     */
+    ResultDO<List<AnalyseDataDO>> extractWithList(SwathInput swathInput);
 
     /**
      * 卷积iRT校准库的数据
@@ -76,4 +77,6 @@ public interface ExperimentService {
      * @return
      */
     ResultDO<SlopeIntercept> convAndComputeIrt(ExperimentDO experimentDO, String iRtLibraryId, Float mzExtractWindow, Float sigma, Float space);
+
+
 }

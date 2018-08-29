@@ -72,7 +72,7 @@ public interface TransitionService {
      * @param rtExtractionWindows
      * @return
      */
-    List<TargetTransition> buildMS1Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, TaskDO taskDO);
+    List<TargetTransition> buildMS1Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows);
 
     /**
      * 创建MS2的坐标系
@@ -83,7 +83,7 @@ public interface TransitionService {
      * @param precursorMzEnd
      * @return
      */
-    List<TargetTransition> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd, TaskDO taskDO);
+    List<TargetTransition> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd);
 
     /**
      * 根据LibraryId获取按照PeptideRef进行分组的Intensity列表

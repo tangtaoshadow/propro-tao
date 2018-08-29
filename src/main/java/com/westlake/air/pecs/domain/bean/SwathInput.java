@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.domain.bean;
 
+import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import lombok.Data;
 
@@ -20,6 +21,10 @@ public class SwathInput {
 
     Float rtExtractWindow;
 
+    /**
+     * iRT求得的斜率和截距
+     */
+    SlopeIntercept slopeIntercept;
     /**
      * 默认为30
      */
