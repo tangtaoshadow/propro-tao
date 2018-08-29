@@ -18,7 +18,7 @@ public class SlopeIntercept {
     public static SlopeIntercept create(){
         SlopeIntercept si = new SlopeIntercept();
         si.setIntercept(0);
-        si.setSlope(1);
+        si.setSlope(0);
         return si;
     }
 

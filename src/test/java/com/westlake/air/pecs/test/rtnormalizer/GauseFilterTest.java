@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.test.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.test.BaseTest;
 import com.westlake.air.pecs.feature.GaussFilter;
 import org.junit.Test;
@@ -25,7 +26,7 @@ public class GauseFilterTest extends BaseTest {
         }
 
         RtIntensityPairs input = new RtIntensityPairs(rtArray, intensityArray);
-        RtIntensityPairs output = null;
+        RtIntensityPairsDouble output = null;
         output = gauseFilter.filter(input, 1.0f/8, 0.01f);
         for (int i = 0; i < 5; i++) {
             assert isSimilar(output.getIntensityArray()[0], 1.0F, 1e-5F);
@@ -50,7 +51,7 @@ public class GauseFilterTest extends BaseTest {
             }
         }
         RtIntensityPairs input = new RtIntensityPairs(rtArray, intensityArray);
-        RtIntensityPairs output = null;
+        RtIntensityPairsDouble output = null;
         output = gauseFilter.filter(input, 0.2f/8, 0.01f);
         assert isSimilar(output.getIntensityArray()[0], 0.000734827F, 0.01F);
         assert isSimilar(output.getIntensityArray()[1], 0.0543746F, 1e-2F);
@@ -63,7 +64,7 @@ public class GauseFilterTest extends BaseTest {
         assert isSimilar(output.getIntensityArray()[8], 0.000881793F, 1e-2F);
     }
 
-    private boolean isSimilar(Float a, Float b, Float tolerance ) {
+    private boolean isSimilar(Double a, Float b, Float tolerance ) {
         Float TOLERANCE = tolerance;
         if (Math.abs(a-b) < TOLERANCE) {
             return true;

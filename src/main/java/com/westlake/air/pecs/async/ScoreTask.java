@@ -99,7 +99,7 @@ public class ScoreTask {
             List<List<ExperimentFeature>> experimentFeatures = featureByPep.getExperimentFeatures();
             List<RtIntensityPairs> chromatogramList = featureByPep.getRtIntensityPairsOriginList();
             List<Float> libraryIntensityList = featureByPep.getLibraryIntensityList();
-            List<float[]> noise1000List = featureByPep.getNoise1000List();
+            List<double[]> noise1000List = featureByPep.getNoise1000List();
             List<Float> productMzList = new ArrayList<>();
             for (AnalyseDataDO dataDO : group.getDataMap().values()){
                 productMzList.add(dataDO.getMz());

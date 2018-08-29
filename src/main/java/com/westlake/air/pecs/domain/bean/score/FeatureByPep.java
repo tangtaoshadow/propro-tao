@@ -19,5 +19,5 @@ public class FeatureByPep {
 
     List<Float> libraryIntensityList;
 
-    List<float[]> noise1000List;
+    List<double[]> noise1000List;
 }

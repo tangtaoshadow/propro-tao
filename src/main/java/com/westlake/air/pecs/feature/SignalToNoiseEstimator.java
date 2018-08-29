@@ -2,6 +2,7 @@ package com.westlake.air.pecs.feature;
 
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,23 +21,23 @@ public class SignalToNoiseEstimator {
      * @param binCount
      * @return
      */
-    public float[] computeSTN(RtIntensityPairs rtIntensity, float windowLength, int binCount) {
+    public double[] computeSTN(RtIntensityPairsDouble rtIntensity, float windowLength, int binCount) {
 
         //final result
-        float[] stnResults = new float[rtIntensity.getRtArray().length];
+        double[] stnResults = new double[rtIntensity.getRtArray().length];
 
         //get mean and variance
-        float[] meanVariance = getMeanVariance(rtIntensity);
+        double[] meanVariance = getMeanVariance(rtIntensity);
 
         //get max intensity
-        float maxIntensity = meanVariance[0] + meanVariance[1] * Constants.AUTO_MAX_STDEV_FACTOR;
+        double maxIntensity = meanVariance[0] + meanVariance[1] * Constants.AUTO_MAX_STDEV_FACTOR;
 
         //bin params
         float windowHalfSize = windowLength / 2.0f;
-        float binSize = Math.max(1.0f, maxIntensity / binCount);
-        float[] binValue = new float[binCount];
+        double binSize = Math.max(1.0d, maxIntensity / binCount);
+        double[] binValue = new double[binCount];
         for (int bin = 0; bin < binCount; bin++) {
-            binValue[bin] = (bin + 0.5f) * binSize;
+            binValue[bin] = (bin + 0.5) * binSize;
         }
 
         //params
@@ -47,7 +48,7 @@ public class SignalToNoiseEstimator {
         int elementsInWindow = 0;// tracks elements in current window, which may vary because of unevenly spaced data
         int windowCount = 0;// number of windows
         int elementsInWindowHalf;// number of elements where we find the median
-        float noise;// noise value of a data point
+        double noise;// noise value of a data point
         int windowsOverall = rtIntensity.getRtArray().length - 1;// determine how many elements we need to estimate (for progress estimation)
         float sparseWindowPercent = 0;
 
@@ -88,7 +89,7 @@ public class SignalToNoiseEstimator {
                     ++medianBin;
                     elementIncCount += histogram[medianBin];
                 }
-                noise = Math.max(1.0f, binValue[medianBin]);
+                noise = Math.max(1.0, binValue[medianBin]);
             }
             stnResults[positionCenter] = rtIntensity.getIntensityArray()[positionCenter] / noise;
             positionCenter++;
@@ -110,22 +111,22 @@ public class SignalToNoiseEstimator {
      * @param rtIntensity k,v
      * @return 0:mean 1:variance
      */
-    private float[] getMeanVariance(RtIntensityPairs rtIntensity) {
+    private double[] getMeanVariance(RtIntensityPairsDouble rtIntensity) {
 
-        float[] meanVariance = new float[2];
-        Float[] intensity = rtIntensity.getIntensityArray();
+        double[] meanVariance = new double[2];
+        Double[] intensity = rtIntensity.getIntensityArray();
 
         //get mean
         float sum = 0;
         int count = 0;
-        for (float intens : intensity) {
+        for (double intens : intensity) {
             sum += intens;
             count++;
         }
         meanVariance[0] = sum / count;
 
         //get variance
-        for (float intens : intensity) {
+        for (double intens : intensity) {
             sum = 0;
             sum += Math.pow((meanVariance[0] - intens), 2);
         }

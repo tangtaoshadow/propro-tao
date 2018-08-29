@@ -184,7 +184,7 @@ public class ScoreServiceImpl implements ScoreService {
             return null;
         }
         //TODO: @Nico
-        minRsq = 0.85f;
+        minRsq = 0.866f;
 
         //获取斜率和截距
         float rsq = 0;

@@ -1,7 +1,12 @@
 package com.westlake.air.pecs.feature;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.utils.MathUtil;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -10,6 +15,11 @@ import com.westlake.air.pecs.utils.MathUtil;
  */
 public class PeakSpline {
     private double[] a, b, c, d, x;
+    private List<BigDecimal> xBD;
+    private List<BigDecimal> aBD;
+    private List<BigDecimal> bBD;
+    private List<BigDecimal> cBD;
+    private List<BigDecimal> dBD;
 
     // TODO: 暂时只有1阶导数
     public float derivatives(float value){
@@ -30,8 +40,9 @@ public class PeakSpline {
         return (float) (((d[i] * xx + c[i]) * xx + b[i]) * xx + a[i]);
     }
 
-    public void init(RtIntensityPairs rtIntensityPairs, int leftBoundary, int rightBoundary){
+    public void init(RtIntensityPairsDouble rtIntensityPairs, int leftBoundary, int rightBoundary){
         int maxIndex = rightBoundary - leftBoundary;
+
         x = new double[maxIndex + 1];
         a = new double[maxIndex + 1];
         b = new double[maxIndex];
@@ -96,6 +107,68 @@ public class PeakSpline {
             d[j] = (c[j + 1] - c[j]) / (3 * h[j]);
         }
     }
+    public void initBD(Float[] rt, Double[] intensity, int leftBoundary, int rightBoundary){
+        int maxIndex = rightBoundary - leftBoundary;
+        xBD = new ArrayList<>();
+        aBD = new ArrayList<>();
+        for(int i=leftBoundary; i<= rightBoundary; i++){
+            xBD.add(new BigDecimal(Float.toString(rt[i])));
+            aBD.add(new BigDecimal(Double.toString(intensity[i])));
+        }
 
+        bBD = new ArrayList<>();
+        cBD = new ArrayList<>();
+        dBD = new ArrayList<>();
+        List<BigDecimal> h = new ArrayList<>();
+        List<BigDecimal> mu = new ArrayList<>();
+        List<BigDecimal> z = new ArrayList<>();
+        BigDecimal l;
+        // do the 0'th element manually
+        h.add(xBD.get(1).subtract(xBD.get(0)));
+        mu.add(new BigDecimal("0"));
+        z.add(new BigDecimal("0"));
+
+        for(int i=1; i<maxIndex; i++){
+            h.add(xBD.get(i + 1).subtract(xBD.get(i)));
+            l = new BigDecimal("2").multiply(xBD.get(i + 1).subtract(xBD.get(i - 1))).subtract(h.get(i-1).multiply(mu.get(i-1)));
+            mu.add(h.get(i).divide(l,8,BigDecimal.ROUND_HALF_UP));
+            z.add((new BigDecimal("3").multiply(aBD.get(i+1).multiply(h.get(i-1)).subtract(aBD.get(i).multiply(xBD.get(i+1).subtract(xBD.get(i-1)))).add(aBD.get(i-1).multiply(h.get(i)))).divide(h.get(i-1).multiply(h.get(i)),8,BigDecimal.ROUND_HALF_UP).subtract(h.get(i-1).multiply(z.get(i-1)))).divide(l,8,BigDecimal.ROUND_HALF_UP));
+        }
+
+        for(int i=0; i<maxIndex; i++){
+            cBD.add(new BigDecimal("0"));
+            bBD.add(new BigDecimal("0"));
+            dBD.add(new BigDecimal("0"));
+        }
+        cBD.add(new BigDecimal("0"));
+        for(int j = maxIndex - 1; j>=0;j--){
+            cBD.set(j,(z.get(j).subtract(mu.get(j).multiply(cBD.get(j+1)))));
+            bBD.set(j,(aBD.get(j+1).subtract(aBD.get(j))).divide(h.get(j),8,BigDecimal.ROUND_HALF_UP).subtract(h.get(j).multiply(cBD.get(j+1).add(new BigDecimal("2").multiply(cBD.get(j)))).divide(new BigDecimal("3"),8,BigDecimal.ROUND_HALF_UP)));
+            dBD.set(j,(cBD.get(j+1).subtract(cBD.get(j))).divide(new BigDecimal("3").multiply(h.get(j)),8,BigDecimal.ROUND_HALF_UP));
+        }
+    }
+
+    public double evalBD(float value){
+        int i = MathUtil.bisection(xBD, value).getHigh();
+        BigDecimal valueBD = new BigDecimal(Float.toString(value));
+        if(xBD.get(i).compareTo(valueBD) > 0 || xBD.get(xBD.size()-1).compareTo(valueBD) == 0){
+            --i;
+        }
+        BigDecimal xxBD = valueBD.subtract(xBD.get(i));
+        BigDecimal result = ((dBD.get(i).multiply(xxBD).add(cBD.get(i))).multiply(xxBD).add(bBD.get(i))).multiply(xxBD).add(aBD.get(i));
+        return result.doubleValue();
+    }
+
+    public double derivativesBD(float value){
+        int i = MathUtil.bisection(xBD, value).getHigh();
+
+        BigDecimal valueBD = new BigDecimal(Float.toString(value));
+        if(xBD.get(i).compareTo(valueBD) > 0 || xBD.get(xBD.size()-1).compareTo(valueBD) == 0){
+            --i;
+        }
+        BigDecimal xxBD = valueBD.subtract(xBD.get(i));
+        BigDecimal result = bBD.get(i).add(new BigDecimal("2").multiply(cBD.get(i)).multiply(xxBD)).add(new BigDecimal("3").multiply(dBD.get(i)).multiply(xxBD).multiply(xxBD));
+        return result.doubleValue();
+    }
 
 }

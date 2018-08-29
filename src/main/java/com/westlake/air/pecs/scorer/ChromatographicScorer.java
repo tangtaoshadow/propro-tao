@@ -33,7 +33,7 @@ public class ChromatographicScorer {
      * @param experimentFeatures list of features in selected mrmfeature
      * @param signalToNoiseList signal to noise list of chromatogram list
      */
-    public void calculateChromatographicScores(List<RtIntensityPairs> chromatograms, List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, List<float[]> signalToNoiseList, FeatureScores scores){
+    public void calculateChromatographicScores(List<RtIntensityPairs> chromatograms, List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, List<double[]> signalToNoiseList, FeatureScores scores){
         Table<Integer, Integer, Float[]> xcorrMatrix = initializeXCorrMatrix(experimentFeatures);
 
         //xcorrCoelutionScore

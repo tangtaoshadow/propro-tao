@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.feature;
 
 import com.westlake.air.pecs.constants.Constants;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
@@ -38,7 +39,7 @@ public class FeatureFinder {
      * ExperimentFeature::intensity: intensity sum of hullPoints' intensity
      * @return list of mrmFeature (mrmFeature is list of chromatogram feature)
      */
-    public List<List<ExperimentFeature>> findFeatures(List<RtIntensityPairs> chromatograms, List<RtIntensityPairs> pickedChroms, List<IntensityRtLeftRtRightPairs> intensityLeftRight){
+    public List<List<ExperimentFeature>> findFeatures(List<RtIntensityPairs> chromatograms, List<RtIntensityPairsDouble> pickedChroms, List<IntensityRtLeftRtRightPairs> intensityLeftRight){
 
         int[] chrPeakIndex;
 
@@ -65,9 +66,9 @@ public class FeatureFinder {
             float bestRight = intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]];
             float peakApex = pickedChroms.get(chrPeakIndex[0]).getRtArray()[chrPeakIndex[1]];
 
-            RtIntensityPairs rtInt = pickedChroms.get(chrPeakIndex[0]);
-            Float[] intensityArray = rtInt.getIntensityArray();
-            intensityArray[chrPeakIndex[1]] = 0.0f;
+            RtIntensityPairsDouble rtInt = pickedChroms.get(chrPeakIndex[0]);
+            Double[] intensityArray = rtInt.getIntensityArray();
+            intensityArray[chrPeakIndex[1]] = 0.0d;
             rtInt.setIntensityArray(intensityArray);
             pickedChroms.set(chrPeakIndex[0], rtInt);
 
@@ -104,8 +105,8 @@ public class FeatureFinder {
      * @param pickedChroms maxPeaks
      * @return list index, pairs index
      */
-    private int[] findLargestPeak(List<RtIntensityPairs> pickedChroms){
-        float largest = 0.0f;
+    private int[] findLargestPeak(List<RtIntensityPairsDouble> pickedChroms){
+        double largest = 0.0d;
         int[] chrPeakIndex = new int[2];
         chrPeakIndex[0] = -1;
         chrPeakIndex[1] = -1;

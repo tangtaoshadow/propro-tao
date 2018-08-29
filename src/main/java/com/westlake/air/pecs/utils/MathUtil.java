@@ -5,6 +5,7 @@ import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.RtPair;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +60,54 @@ public class MathUtil {
             while (high - low != 1) {
                 mid = low + (high - low + 1) / 2;
                 if (x[mid] < value) {
+                    low = mid;
+                } else {
+                    high = mid;
+                }
+            }
+        }
+        bisectionLowHigh.setLow(low);
+        bisectionLowHigh.setHigh(high);
+        return bisectionLowHigh;
+    }
+    public static BisectionLowHigh bisection(Float[] x ,float value){
+        BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
+        int high = x.length -1;
+        int low = 0;
+        int mid;
+
+        if(value < x[0]){
+            high = 0;
+        }else if(value > x[x.length - 1]){
+            low = x.length - 1;
+        }else {
+            while (high - low != 1) {
+                mid = low + (high - low + 1) / 2;
+                if (x[mid] < value) {
+                    low = mid;
+                } else {
+                    high = mid;
+                }
+            }
+        }
+        bisectionLowHigh.setLow(low);
+        bisectionLowHigh.setHigh(high);
+        return bisectionLowHigh;
+    }
+    public static BisectionLowHigh bisection(List<BigDecimal> x , float value){
+        BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
+        int high = x.size() -1;
+        int low = 0;
+        int mid;
+
+        if(x.get(0).compareTo(new BigDecimal(Float.toString(value))) > 0){
+            high = 0;
+        }else if(x.get(x.size() - 1).compareTo(new BigDecimal(Float.toString(value))) < 0){
+            low = x.size() - 1;
+        }else {
+            while (high - low != 1) {
+                mid = low + (high - low + 1) / 2;
+                if (x.get(mid).compareTo(new BigDecimal(Float.toString(value))) < 0) {
                     low = mid;
                 } else {
                     high = mid;

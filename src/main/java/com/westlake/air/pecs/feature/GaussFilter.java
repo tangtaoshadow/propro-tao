@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.feature;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,10 +17,10 @@ public class GaussFilter {
      * @param spacing 一般默认为0.01
      * @return
      */
-    public RtIntensityPairs filter(RtIntensityPairs pairs, float sigma, float spacing) {
+    public RtIntensityPairsDouble filter(RtIntensityPairs pairs, float sigma, float spacing) {
 
         //coeffs: 以0为中心，sigma为标准差的正态分布参数
-        float[] coeffs = getCoeffs(sigma, spacing, getRightNum(sigma, spacing));
+        double[] coeffs = getCoeffs(sigma, spacing, getRightNum(sigma, spacing));
 
         //startPosition & endPosition
         int middle = getRightNum(sigma, spacing);
@@ -29,19 +30,19 @@ public class GaussFilter {
         float maxRt = pairs.getRtArray()[listSize - 1];
 
         //begin integrate
-        RtIntensityPairs pairsFiltered = new RtIntensityPairs();
+        RtIntensityPairsDouble pairsFiltered = new RtIntensityPairsDouble();
         Float[] rtArray = pairs.getRtArray();
         Float[] intArray = pairs.getIntensityArray();
         pairsFiltered.setRtArray(rtArray);
-        Float[] newIntArray = new Float[intArray.length];
+        Double[] newIntArray = new Double[intArray.length];
         float distanceInGaussian;
         int leftPosition;
         int rightPosition;
         float residualPercent;
-        float coeffRight;
-        float coeffLeft;
-        float norm = 0;
-        float v = 0;
+        double coeffRight;
+        double coeffLeft;
+        double norm = 0;
+        double v = 0;
 
         for (int i = 0; i < listSize; i++) {
 
@@ -130,7 +131,7 @@ public class GaussFilter {
             if (v > 0) {
                 newIntArray[i] = v / norm;
             } else {
-                newIntArray[i] = 0f;
+                newIntArray[i] = 0d;
             }
 
 
@@ -144,10 +145,10 @@ public class GaussFilter {
         return (int) Math.ceil(4 * sigma / spacing) + 1;
     }
 
-    private float[] getCoeffs(float sigma, float spacing, int coeffSize) {
-        float[] coeffs = new float[coeffSize];
+    private double[] getCoeffs(float sigma, float spacing, int coeffSize) {
+        double[] coeffs = new double[coeffSize];
         for (int i = 0; i < coeffSize; i++) {
-            coeffs[i] = (float) (1.0 / (sigma * Math.sqrt(2.0 * Math.PI)) * Math.exp(-((i * spacing) * (i * spacing)) / (2 * sigma * sigma)));
+            coeffs[i] = (1.0 / (sigma * Math.sqrt(2.0 * Math.PI)) * Math.exp(-((i * spacing) * (i * spacing)) / (2 * sigma * sigma)));
         }
         return coeffs;
     }

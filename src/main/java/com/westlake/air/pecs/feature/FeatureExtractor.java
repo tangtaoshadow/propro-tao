@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.feature;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureByPep;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
@@ -61,7 +62,7 @@ public class FeatureExtractor {
         }
         String peptideRef = group.getPeptideRef();
         List<RtIntensityPairs> rtIntensityPairsOriginList = new ArrayList<>();
-        List<RtIntensityPairs> maxRtIntensityPairsList = new ArrayList<>();
+        List<RtIntensityPairsDouble> maxRtIntensityPairsList = new ArrayList<>();
         List<IntensityRtLeftRtRightPairs> intensityRtLeftRtRightPairsList = new ArrayList<>();
 
         //得到peptideRef对应的intensityList
@@ -73,7 +74,7 @@ public class FeatureExtractor {
         int count = 0;
 
         //对每一个chromatogram进行运算，dataDO中不含有ms1
-        List<float[]> noise1000List = new ArrayList<>();
+        List<double[]> noise1000List = new ArrayList<>();
         for (AnalyseDataDO dataDO : group.getDataMap().values()) {
 
             //如果没有卷积到信号，dataDO为null
@@ -89,15 +90,15 @@ public class FeatureExtractor {
             }
 
             //进行高斯平滑，得到平滑后的chromatogram
-            RtIntensityPairs rtIntensityPairsAfterSmooth = gaussFilter.filter(rtIntensityPairsOrigin, sigma, spacing);
+            RtIntensityPairsDouble rtIntensityPairsAfterSmooth = gaussFilter.filter(rtIntensityPairsOrigin, sigma, spacing);
 
             //计算两个信噪比
             //@Nico parameter configured
-            float[] noises200 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 200, 30);
-            float[] noises1000 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 1000, 30);
+            double[] noises200 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 200, 30);
+            double[] noises1000 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 1000, 30);
 
             //根据信噪比和峰值形状选择最高峰
-            RtIntensityPairs maxPeakPairs = peakPicker.pickMaxPeak(rtIntensityPairsAfterSmooth, noises1000);
+            RtIntensityPairsDouble maxPeakPairs = peakPicker.pickMaxPeak(rtIntensityPairsAfterSmooth, noises1000);
 
             //根据信噪比和最高峰选择谱图
             IntensityRtLeftRtRightPairs intensityRtLeftRtRightPairs = chromatogramPicker.pickChromatogram(rtIntensityPairsOrigin, rtIntensityPairsAfterSmooth, noises1000, maxPeakPairs);

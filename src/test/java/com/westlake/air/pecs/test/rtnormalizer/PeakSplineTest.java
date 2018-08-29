@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.test.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.feature.PeakSpline;
 import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
@@ -13,11 +14,20 @@ public class PeakSplineTest extends BaseTest {
     @Test
     public void evalTest() {
         PeakSpline peakSpline1 = new PeakSpline();
+        PeakSpline peakSpline0 = new PeakSpline();
+        PeakSpline peakSplineBD = new PeakSpline();
         Float[] rt = {486.784F, 486.787F, 486.790F, 486.793F, 486.795F, 486.797F, 486.800F, 486.802F, 486.805F, 486.808F, 486.811F};
-        Float[] intensity = {0.0F, 154683.17F, 620386.5F, 1701390.12F, 2848879.25F, 3564045.5F, 2744585.7F, 1605583.0F, 1518984.0F, 1591352.21F, 1691345.1F};
-        RtIntensityPairs input = new RtIntensityPairs(rt, intensity);
+        Double[] rtDouble = {486.784, 486.787, 486.790, 486.793, 486.795, 486.797, 486.800, 486.802, 486.805, 486.808, 486.811};
+        Double[] intensity = {0.0, 154683.17, 620386.5, 1701390.12, 2848879.25, 3564045.5, 2744585.7, 1605583.0, 1518984.0, 1591352.21, 1691345.1};
+        RtIntensityPairsDouble input = new RtIntensityPairsDouble();
+        input.setRtArray(rt);
+        input.setIntensityArray(intensity);
         peakSpline1.init(input, 0, 10);
+        peakSpline0.init(rtDouble, intensity, 0 , 10);
+        peakSplineBD.initBD(rt, intensity, 0, 10);
         float tmp = peakSpline1.eval(486.785f);
+        float tmp0 = peakSpline0.eval(486.785f);
+        double tmpBD = peakSplineBD.evalBD(486.785f);
         assert isSimilar(tmp, 35173.1841778984f, 1.0f);
         assert isSimilar(peakSpline1.eval(486.7794f), 2271426.93316241f, 1.0f);
         assert isSimilar(peakSpline1.eval(486.784f), 0.0f, 1.0f);
@@ -34,7 +44,8 @@ public class PeakSplineTest extends BaseTest {
             x[i] = (x_min + i / 10.0F * (x_max - x_min));
             y[i] = Float.valueOf((float)Math.sin((x_min + i / 10.0F * (x_max - x_min))));
         }
-        RtIntensityPairs input2 = new RtIntensityPairs(x, y);
+        RtIntensityPairs input2Float = new RtIntensityPairs(x, y);
+        RtIntensityPairsDouble input2 = new RtIntensityPairsDouble(input2Float);
         peakSpline2.init(input2, 0, 10);
         for (int i = 0; i < 11; i++) {
             assert isSimilar(peakSpline2.eval(x[i]), y[i], 1.0f);
@@ -49,11 +60,15 @@ public class PeakSplineTest extends BaseTest {
     @Test
     public void derivativesTest() {
         PeakSpline peakSpline1 = new PeakSpline();
+        PeakSpline peakSplineBD = new PeakSpline();
         Float[] rt = {486.784F, 486.787F, 486.790F, 486.793F, 486.795F, 486.797F, 486.800F, 486.802F, 486.805F, 486.808F, 486.811F};
-        Float[] intensity = {0.0F, 154683.17F, 620386.5F, 1701390.12F, 2848879.25F, 3564045.5F, 2744585.7F, 1605583.0F, 1518984.0F, 1591352.21F, 1691345.1F};
-        RtIntensityPairs input = new RtIntensityPairs(rt, intensity);
-        peakSpline1.init(input, 0, 10);
+        Double[] rtDouble = {486.784, 486.787, 486.790, 486.793, 486.795, 486.797, 486.800, 486.802, 486.805, 486.808, 486.811};
+        Double[] intensity = {0.0, 154683.17, 620386.5, 1701390.12, 2848879.25, 3564045.5, 2744585.7, 1605583.0, 1518984.0, 1591352.21, 1691345.1};
+
+        peakSpline1.init(rtDouble, intensity, 0, 10);
+        peakSplineBD.initBD(rt, intensity, 0, 10);
         float tmp = peakSpline1.derivatives(486.785f);
+        double tmpBd = peakSplineBD.derivativesBD(486.785f);
         assert isSimilar(peakSpline1.derivatives(486.785f), 39270152.2996247f, 1.0f);
         assert isSimilar(peakSpline1.derivatives(486.794f), 594825947.154264f, 1.0f);
 
@@ -66,7 +81,8 @@ public class PeakSplineTest extends BaseTest {
             x[i] = (x_min + i / 10.0F * (x_max - x_min));
             y[i] = Float.valueOf((float)Math.sin((x_min + i / 10.0F * (x_max - x_min))));
         }
-        RtIntensityPairs input2 = new RtIntensityPairs(x, y);
+        RtIntensityPairs input2Float = new RtIntensityPairs(x, y);
+        RtIntensityPairsDouble input2 = new RtIntensityPairsDouble(input2Float);
         peakSpline2.init(input2, 0, 10);
         for (int i = 2; i < 9; i++) {
             assert isSimilar(peakSpline2.derivatives(x[i]), (float)Math.cos(x[i]), 1.0f);

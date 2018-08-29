@@ -2,6 +2,7 @@ package com.westlake.air.pecs.feature;
 
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -24,19 +25,21 @@ public class PeakPicker {
      * @param signalToNoise window width = 200
      * @return maxPeaks
      */
-    public RtIntensityPairs pickMaxPeak(RtIntensityPairs rtIntensityPairs, float[] signalToNoise){
+    public RtIntensityPairsDouble pickMaxPeak(RtIntensityPairsDouble rtIntensityPairs, double[] signalToNoise){
         if(rtIntensityPairs.getRtArray().length < 5) {
             return null;
         }
-        List<float[]> maxPeaks = new ArrayList<>();
+        List<double[]> maxPeaks = new ArrayList<>();
         float centralPeakRt, leftNeighborRt, rightNeighborRt;
-        float centralPeakInt, leftBoundaryInt, rightBoundaryInt;
-        float stnLeft, stnMiddle, stnRight;
+        double centralPeakInt, leftBoundaryInt, rightBoundaryInt;
+        double stnLeft, stnMiddle, stnRight;
         int leftBoundary, rightBoundary;
         int missing;
-        float maxPeakRt, maxPeakInt;
+        float maxPeakRt;
+        double maxPeakInt;
         float leftHand, rightHand;
-        float mid, midDerivVal;
+        float mid;
+        double midDerivVal;
 
 
         for(int i = 2; i<rtIntensityPairs.getRtArray().length - 2; i++){
@@ -122,7 +125,7 @@ public class PeakPicker {
                 }
 
                 PeakSpline peakSpline = new PeakSpline();
-                peakSpline.init(rtIntensityPairs, leftBoundary, rightBoundary);
+                peakSpline.initBD(rtIntensityPairs.getRtArray(), rtIntensityPairs.getIntensityArray(), leftBoundary, rightBoundary);
 //                maxPeakRt =  centralPeakRt;
 //                maxPeakInt = centralPeakInt;
                 leftHand = leftNeighborRt;
@@ -130,11 +133,11 @@ public class PeakPicker {
 
                 while (rightHand - leftHand > Constants.THRESHOLD){
                     mid = (leftHand + rightHand) / 2.0f;
-                    midDerivVal = peakSpline.derivatives(mid);
+                    midDerivVal = peakSpline.derivativesBD(mid);
                     if(Math.abs(midDerivVal) < 0.0001){
                         break;
                     }
-                    if(midDerivVal < 0.0f){
+                    if(midDerivVal < 0.0d){
                         rightHand = mid;
                     }else {
                         leftHand = mid;
@@ -142,9 +145,9 @@ public class PeakPicker {
                 }
 
                 maxPeakRt = (leftHand + rightHand) /2.0f;
-                maxPeakInt = peakSpline.eval(maxPeakRt);
+                maxPeakInt = peakSpline.evalBD(maxPeakRt);
 
-                float[] peak = new float[2];
+                double[] peak = new double[2];
                 peak[0] = maxPeakRt;
                 peak[1] = maxPeakInt;
                 maxPeaks.add(peak);
@@ -152,13 +155,13 @@ public class PeakPicker {
             }
         }
         Float[] rt = new Float[maxPeaks.size()];
-        Float[] intensity = new Float[maxPeaks.size()];
+        Double[] intensity = new Double[maxPeaks.size()];
 
         for(int i = 0; i< maxPeaks.size(); i++){
-            rt[i] = maxPeaks.get(i)[0];
+            rt[i] = (float) maxPeaks.get(i)[0];
             intensity[i] = maxPeaks.get(i)[1];
         }
-        return new RtIntensityPairs(rt, intensity);
+        return new RtIntensityPairsDouble(rt, intensity);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.feature;
 
 import com.westlake.air.pecs.constants.Constants;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
@@ -24,16 +25,16 @@ public class ChromatogramPicker {
      * @param maxPeakPairs picked max peak
      * @return 左右边界rt, chromatogram边界内intensity求和
      */
-    public IntensityRtLeftRtRightPairs pickChromatogram(RtIntensityPairs rtIntensityPairs, RtIntensityPairs smoothedRtIntensityPairs, float[] signalToNoise, RtIntensityPairs maxPeakPairs) {
+    public IntensityRtLeftRtRightPairs pickChromatogram(RtIntensityPairs rtIntensityPairs, RtIntensityPairsDouble smoothedRtIntensityPairs, double[] signalToNoise, RtIntensityPairsDouble maxPeakPairs) {
         int maxPeakSize = maxPeakPairs.getRtArray().length;
         int[][] leftRight = new int[maxPeakSize][2];
         Float[] leftRt = new Float[maxPeakSize];
         Float[] rightRt = new Float[maxPeakSize];
         int leftIndex, rightIndex;
 
-        RtIntensityPairs chromatogram;
+        RtIntensityPairsDouble chromatogram;
         if(Constants.CHROMATOGRAM_PICKER_METHOD == "legacy"){
-            chromatogram = rtIntensityPairs;
+            chromatogram = new RtIntensityPairsDouble(rtIntensityPairs);
         }else {
             chromatogram = smoothedRtIntensityPairs;
         }
@@ -73,10 +74,10 @@ public class ChromatogramPicker {
         return new IntensityRtLeftRtRightPairs(intensity, leftRt, rightRt);
     }
 
-    private int findClosestPeak(RtIntensityPairs rtIntensityPairs, float rt) {
+    private int findClosestPeak(RtIntensityPairsDouble rtIntensityPairs, float rt) {
 
         //bisection
-        BisectionLowHigh bisectionLowHigh = MathUtil.bisection(rtIntensityPairs, rt);
+        BisectionLowHigh bisectionLowHigh = MathUtil.bisection(rtIntensityPairs.getRtArray(), rt);
         int low = bisectionLowHigh.getLow();
         int high = bisectionLowHigh.getHigh();
 
