@@ -16,9 +16,7 @@ import java.io.InputStream;
  * Time: 2018-08-17 10:40
  */
 @Component("libraryTask")
-public class LibraryTask {
-
-    public final Logger logger = LoggerFactory.getLogger(LibraryTask.class);
+public class LibraryTask extends BaseTask{
 
     @Autowired
     LibraryService libraryService;

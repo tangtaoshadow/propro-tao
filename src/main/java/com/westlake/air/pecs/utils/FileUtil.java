@@ -1,14 +1,13 @@
 package com.westlake.air.pecs.utils;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+
 import java.util.ArrayList;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -50,5 +49,18 @@ public class FileUtil {
         }
         return new RtIntensityPairsDouble(rtArray, intArray);
 
+    }
+
+    public static void writeFile(String filePath, List list) throws IOException {
+        File file = new File(filePath);
+        if(!file.exists()){
+            file.createNewFile();
+        }
+        String content = JSONArray.toJSONString(list);
+        byte[] b = content.getBytes();
+        int l = b.length;
+        OutputStream os = new FileOutputStream(file);
+        os.write(b,0,l);
+        os.close();
     }
 }

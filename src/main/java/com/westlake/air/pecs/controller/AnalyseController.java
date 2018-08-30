@@ -91,6 +91,8 @@ public class AnalyseController extends BaseController {
                 return "redirect:/analyse/overview/list";
             }
             model.addAttribute("rate", count + "/" + resLib.getModel().getTotalTargetCount());
+
+            model.addAttribute("slopeIntercept", resultDO.getModel().getSlope() + "/" + resultDO.getModel().getIntercept());
             return "/analyse/overview/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());

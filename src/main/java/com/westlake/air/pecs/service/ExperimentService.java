@@ -53,6 +53,7 @@ public interface ExperimentService {
 
     /**
      * 优化入参数目,卷积完毕后所有卷积结果加在到内存中并且返回
+     * 目前先只支持MS2的卷积
      * @param swathInput
      * @return
      */

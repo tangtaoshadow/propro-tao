@@ -211,7 +211,7 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "id", required = true) String id,
                      @RequestParam(value = "libraryId", required = false) String libraryId,
                      RedirectAttributes redirectAttributes) {
-        model.addAttribute("libraryId",libraryId);
+        model.addAttribute("libraryId", libraryId);
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
@@ -230,24 +230,26 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "buildType", required = true) Integer buildType,
                      @RequestParam(value = "creator", required = false) String creator,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
-                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
+                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "1200") Float rtExtractWindow,
                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
+                     @RequestParam(value = "slope", required = false) Float slope,
+                     @RequestParam(value = "intercept", required = false) Float intercept,
                      RedirectAttributes redirectAttributes) {
-        if (rtExtractWindow == null) {
-            rtExtractWindow = 1200f;
-        }
-        if (mzExtractWindow == null) {
-            mzExtractWindow = 0.05f;
-        }
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
             return "redirect:/extractor/" + id;
         }
 
-        TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_CONVOLUTION, resultDO.getModel().getName());
+        TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_CONVOLUTION, resultDO.getModel().getName()+":"+libraryId);
         taskService.insert(taskDO);
-        experimentTask.extract(resultDO.getModel(), libraryId, SlopeIntercept.create(), creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
+        SlopeIntercept si = SlopeIntercept.create();
+        if (slope != null && intercept != null) {
+            si.setSlope(slope);
+            si.setIntercept(intercept);
+        }
+
+        experimentTask.extract(resultDO.getModel(), libraryId, si, creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }
