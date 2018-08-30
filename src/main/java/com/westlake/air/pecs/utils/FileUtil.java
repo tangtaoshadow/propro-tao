@@ -1,11 +1,14 @@
 package com.westlake.air.pecs.utils;
 
 import com.alibaba.fastjson.JSONArray;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,5 +30,25 @@ public class FileUtil {
         String content = readFile(filePath);
         List<AnalyseDataDO> dataList = JSONArray.parseArray(content, AnalyseDataDO.class);
         return dataList;
+    }
+
+    public static RtIntensityPairsDouble txtReader(BufferedReader reader,String divide, int column1, int column2) throws IOException {
+        String line = reader.readLine();
+        List<Float> rtList = new ArrayList<>();
+        List<Double> intensityList = new ArrayList<>();
+        while (line != null){
+            String[] item = line.split(divide);
+            rtList.add(Float.parseFloat(item[column1]));
+            intensityList.add(Double.parseDouble(item[column2]));
+            line = reader.readLine();
+        }
+        Float[] rtArray = new Float[rtList.size()];
+        Double[] intArray = new Double[intensityList.size()];
+        for(int i=0; i<rtArray.length; i++){
+            rtArray[i] = rtList.get(i);
+            intArray[i] = intensityList.get(i);
+        }
+        return new RtIntensityPairsDouble(rtArray, intArray);
+
     }
 }

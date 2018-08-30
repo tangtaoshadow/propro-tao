@@ -1,7 +1,6 @@
 package com.westlake.air.pecs.feature;
 
 import com.westlake.air.pecs.constants.Constants;
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +29,7 @@ public class SignalToNoiseEstimator {
         double[] meanVariance = getMeanVariance(rtIntensity);
 
         //get max intensity
-        double maxIntensity = meanVariance[0] + meanVariance[1] * Constants.AUTO_MAX_STDEV_FACTOR;
+        double maxIntensity = meanVariance[0] + Math.sqrt(meanVariance[1]) * Constants.AUTO_MAX_STDEV_FACTOR;
 
         //bin params
         float windowHalfSize = windowLength / 2.0f;
@@ -59,7 +58,7 @@ public class SignalToNoiseEstimator {
             //get left/right borders
             for (int left = positionCenter; left >= 0; left--) {
                 if (rtIntensity.getRtArray()[left] >= rtIntensity.getRtArray()[positionCenter] - windowHalfSize) {
-                    toBin = Math.max(Math.min((int) (rtIntensity.getRtArray()[left] / binSize), binCount - 1), 0);
+                    toBin = Math.max(Math.min((int) (rtIntensity.getIntensityArray()[left] / binSize), binCount - 1), 0);
                     histogram[toBin]++;
                     elementsInWindow++;
                 } else {
@@ -69,7 +68,7 @@ public class SignalToNoiseEstimator {
             }
             for (int right = positionCenter + 1; right <= windowsOverall; right++) {
                 if (rtIntensity.getRtArray()[right] <= rtIntensity.getRtArray()[positionCenter] + windowHalfSize) {
-                    toBin = Math.max(Math.min((int) (rtIntensity.getRtArray()[right] / binSize), binCount - 1), 0);
+                    toBin = Math.max(Math.min((int) (rtIntensity.getIntensityArray()[right] / binSize), binCount - 1), 0);
                     histogram[toBin]++;
                     elementsInWindow++;
                 } else {
@@ -117,7 +116,7 @@ public class SignalToNoiseEstimator {
         Double[] intensity = rtIntensity.getIntensityArray();
 
         //get mean
-        float sum = 0;
+        double sum = 0;
         int count = 0;
         for (double intens : intensity) {
             sum += intens;
@@ -126,8 +125,8 @@ public class SignalToNoiseEstimator {
         meanVariance[0] = sum / count;
 
         //get variance
+        sum = 0;
         for (double intens : intensity) {
-            sum = 0;
             sum += Math.pow((meanVariance[0] - intens), 2);
         }
         meanVariance[1] = sum / count;

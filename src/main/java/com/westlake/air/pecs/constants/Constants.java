@@ -17,7 +17,8 @@ public class Constants {
     public static final float THRESHOLD = 0.01f;
     public static final float AUTO_MAX_STDEV_FACTOR = 3.0f;
     public static final int MIN_REQUIRED_ELEMENTS = 10;
-    public static final float NOISE_FOR_EMPTY_WINDOW = (float) Math.pow(10.0,20);
+//    public static final float NOISE_FOR_EMPTY_WINDOW = (float) Math.pow(10.0,20);
+    public static final float NOISE_FOR_EMPTY_WINDOW = 2.0f;
     public static final float STOP_AFTER_INTENSITY_RATIO = 0.0001f;
     public static final float MIN_RSQ = 0.95f;
     public static final float MIN_COVERAGE = 0.6f;
