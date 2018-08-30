@@ -19,10 +19,7 @@ import java.io.File;
  * Time: 2018-08-17 10:40
  */
 @Component("experimentTask")
-public class ExperimentTask {
-
-    public final Logger logger = LoggerFactory.getLogger(ExperimentTask.class);
-
+public class ExperimentTask extends BaseTask{
     @Autowired
     ExperimentService experimentService;
     @Autowired
