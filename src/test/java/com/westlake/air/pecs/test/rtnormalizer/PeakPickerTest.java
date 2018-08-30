@@ -34,7 +34,7 @@ public class PeakPickerTest extends BaseTest {
         RtIntensityPairsDouble rtIntensityPairsDoubleResult = FileUtil.txtReader(readerResult,"\t", 1, 2);
         System.out.println("test Begin");
 
-        double[] signalToNoise200 = signalToNoiseEstimator.computeSTN(rtIntensityPairsDoubleTest, 1000, 30);
+        double[] signalToNoise200 = signalToNoiseEstimator.computeSTN(rtIntensityPairsDoubleTest, 200, 30);
 
         RtIntensityPairsDouble pickResult = peakPicker.pickMaxPeak(rtIntensityPairsDoubleTest, signalToNoise200);
 
