@@ -51,37 +51,43 @@
                                 ID
                             </label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="id" name="id" readonly th:value="${overview?.id}">
+                                <input type="text" class="form-control m-input" id="id" name="id" readonly
+                                       th:value="${overview?.id}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
                             <label for="id" class="col-2 col-form-label">原始实验ID</label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="expId" name="expId" readonly th:value="${overview?.expId}">
+                                <input type="text" class="form-control m-input" id="expId" name="expId" readonly
+                                       th:value="${overview?.expId}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
                             <label for="id" class="col-2 col-form-label">卷积代号</label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="name" name="name" readonly th:value="${overview?.name}">
+                                <input type="text" class="form-control m-input" id="name" name="name" readonly
+                                       th:value="${overview?.name}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
                             <label for="library" class="col-2 col-form-label">关联标准库</label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="library" readonly th:value="|${overview?.libraryName}(${overview?.libraryId})|">
+                                <input type="text" class="form-control m-input" id="library" readonly
+                                       th:value="|${overview?.libraryName}(${overview?.libraryId})|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
                             <label for="iRtLibrary" class="col-2 col-form-label">关联校准库</label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="iRtLibrary" readonly th:value="|${overview?.iRtLibraryName}(${overview?.iRtLibraryId})|">
+                                <input type="text" class="form-control m-input" id="iRtLibrary" readonly
+                                       th:value="|${overview?.iRtLibraryName}(${overview?.iRtLibraryId})|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
                             <label for="ExtractWindow" class="col-2 col-form-label">RT/MZ卷积窗口</label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="ExtractWindow" readonly th:value="|${overview?.rtExtractWindow}/${overview?.mzExtractWindow}|">
+                                <input type="text" class="form-control m-input" id="ExtractWindow" readonly
+                                       th:value="|${overview?.rtExtractWindow}/${overview?.mzExtractWindow}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -91,15 +97,25 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
+                            <label for="slopeIntercept" class="col-2 col-form-label">斜率/截距</label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="slopeIntercept" readonly
+                                       th:value="|${slopeIntercept}|">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
                             <label for="creator" class="col-2 col-form-label">创建人</label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="creator" readonly th:value="|${overview?.creator}|">
+                                <input type="text" class="form-control m-input" id="creator" readonly
+                                       th:value="|${overview?.creator}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
                             <label for="createDate" class="col-2 col-form-label">创建时间</label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="createDate" name="createDate" readonly th:value="${#dates.format(overview?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
+                                <input type="text" class="form-control m-input" id="createDate" name="createDate"
+                                       readonly
+                                       th:value="${#dates.format(overview?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
                             </div>
                         </div>
                     </div>
@@ -127,7 +143,8 @@
                 </div>
                 <div class="m-portlet__body">
                     <a th:href="|/analyse/data/list?overviewId=${overview.id}|" class="btn btn-info btn-sm">查看卷积数据</a>
-                    <a th:href="|/analyse/data/group?overviewId=${overview.id}|" class="btn btn-warning btn-sm">查看iRT卷积组</a>
+                    <a th:href="|/analyse/data/group?overviewId=${overview.id}|"
+                       class="btn btn-warning btn-sm">查看iRT卷积组</a>
                     <a th:href="|/analyse/data/irtliblist?overviewId=${overview.id}|" class="btn btn-info btn-sm">查看校准库卷积数据</a>
 
                     <form id="searchForm" method="post" role="form"

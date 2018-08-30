@@ -88,7 +88,8 @@ public class TaskController extends BaseController {
     }
 
     @RequestMapping(value = "/delete/{id}")
-    String delete(Model model) {
-        return "task/detail";
+    String delete(Model model, @PathVariable("id") String id) {
+        taskService.delete(id);
+        return "redirect:/task/list";
     }
 }

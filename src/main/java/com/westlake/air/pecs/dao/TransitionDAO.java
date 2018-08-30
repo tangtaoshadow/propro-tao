@@ -276,7 +276,7 @@ public class TransitionDAO {
             query.addCriteria(where("name").regex(transitionQuery.getName(), "i"));
         }
         if (transitionQuery.getPrecursorMzStart() != null) {
-            query.addCriteria(where("precursorMz").gte(transitionQuery.getPrecursorMzStart()).lte(transitionQuery.getPrecursorMzEnd()));
+            query.addCriteria(where("precursorMz").gte(transitionQuery.getPrecursorMzStart()).lt(transitionQuery.getPrecursorMzEnd()));
         }
         return query;
     }

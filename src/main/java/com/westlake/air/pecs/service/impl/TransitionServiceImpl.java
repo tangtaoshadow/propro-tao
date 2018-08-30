@@ -196,14 +196,11 @@ public class TransitionServiceImpl implements TransitionService {
 //        query.setIsDecoy(false);
         List<TargetTransition> targetList = transitionDAO.getTTAll(query);
 
-        long readDB = System.currentTimeMillis() - start;
         for (TargetTransition targetTransition : targetList) {
             targetTransition.setRtStart((targetTransition.getRt() - slopeIntercept.getIntercept()) / slopeIntercept.getSlope() - rtExtractionWindows / 2.0f);
             targetTransition.setRtEnd((targetTransition.getRt() - slopeIntercept.getIntercept()) / slopeIntercept.getSlope() + rtExtractionWindows / 2.0f);
         }
         List<TargetTransition> list = sortMS1Coordinates(targetList);
-
-        logger.info("读取数据库耗时:" + readDB + "构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
         return list;
     }
 
@@ -219,8 +216,9 @@ public class TransitionServiceImpl implements TransitionService {
         long readDB = System.currentTimeMillis() - start;
         if (rtExtractionWindows != -1) {
             for (TargetTransition targetTransition : targetList) {
-                targetTransition.setRtStart((targetTransition.getRt() - slopeIntercept.getIntercept()) / slopeIntercept.getSlope() - rtExtractionWindows / 2.0f);
-                targetTransition.setRtEnd((targetTransition.getRt() - slopeIntercept.getIntercept()) / slopeIntercept.getSlope() + rtExtractionWindows / 2.0f);
+                float iRt = (targetTransition.getRt() - slopeIntercept.getIntercept()) / slopeIntercept.getSlope();
+                targetTransition.setRtStart(iRt - rtExtractionWindows / 2.0f);
+                targetTransition.setRtEnd(iRt + rtExtractionWindows / 2.0f);
             }
         } else {
             for (TargetTransition targetTransition : targetList) {

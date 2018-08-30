@@ -5,6 +5,7 @@ import com.westlake.air.pecs.domain.BaseDO;
 import com.westlake.air.pecs.domain.bean.task.MachineInfo;
 import com.westlake.air.pecs.domain.bean.task.TaskLog;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class TaskDO extends BaseDO {
     public static String STATUS_FAILED = "FAILED";
     public static String STATUS_SUCCESS = "SUCCESS";
 
+    @Id
     String id;
 
     String name;

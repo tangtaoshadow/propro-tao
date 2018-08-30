@@ -72,9 +72,8 @@
                     <td th:text="${#dates.format(task.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(task.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
-                        <a th:href="|/task/detail/${task.id}|"
-                           class="btn btn-success btn-sm">详情
-                        </a>
+                        <a th:href="|/task/detail/${task.id}|" class="btn btn-success btn-sm">详情</a>
+                        <a th:href="|/task/delete/${task.id}|" class="btn btn-danger btn-sm">删除</a>
                     </td>
                 </tr>
                 </tbody>

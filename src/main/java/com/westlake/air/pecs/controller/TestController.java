@@ -5,8 +5,10 @@ import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
+import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
+import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.xml.crypto.Data;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -31,6 +35,8 @@ public class TestController extends BaseController{
     ExperimentService experimentService;
     @Autowired
     TaskService taskService;
+    @Autowired
+    AnalyseDataService analyseDataService;
 
     public static float MZ_EXTRACT_WINDOW = 0.05f;
     public static float RT_EXTRACT_WINDOW = 1200f;
@@ -65,5 +71,32 @@ public class TestController extends BaseController{
         ResultDO finalRes = experimentService.extract(input);
         logger.info("卷积耗时总计:"+(System.currentTimeMillis() - start));
         return JSON.toJSONString(finalRes);
+    }
+
+    @RequestMapping("test3")
+    @ResponseBody
+    String test3(Model model, RedirectAttributes redirectAttributes) {
+        ExperimentDO experimentDO = experimentService.getById("5b738f19e63cc81c44325169").getModel();
+
+        SwathInput input = new SwathInput();
+        input.setExperimentDO(experimentDO);
+        input.setIRtLibraryId("5b67136d2ada5f15749a0140");
+        input.setLibraryId("5b84bc9c58487f1060fa0c23");
+        input.setCreator("陆妙善");
+        input.setRtExtractWindow(RT_EXTRACT_WINDOW);
+        input.setMzExtractWindow(MZ_EXTRACT_WINDOW);
+        input.setBuildType(2);
+
+        TaskDO taskDO = new TaskDO(TaskTemplate.TEST, "LMS-TEMP2");
+        taskService.insert(taskDO);
+        experimentTask.swath(input, taskDO);
+        return "OK";
+    }
+
+    @RequestMapping("test4")
+    @ResponseBody
+    String test4(Model model, RedirectAttributes redirectAttributes) {
+//        List<AnalyseDataDO> dataList = analyseDataService.getAllByOverviewId()
+        return "OK";
     }
 }
