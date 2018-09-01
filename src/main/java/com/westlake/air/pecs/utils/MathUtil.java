@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.utils;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.RtPair;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
@@ -70,7 +71,7 @@ public class MathUtil {
         bisectionLowHigh.setHigh(high);
         return bisectionLowHigh;
     }
-    public static BisectionLowHigh bisection(Float[] x ,float value){
+    public static BisectionLowHigh bisection(Double[] x ,double value){
         BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
         int high = x.length -1;
         int low = 0;
@@ -94,20 +95,20 @@ public class MathUtil {
         bisectionLowHigh.setHigh(high);
         return bisectionLowHigh;
     }
-    public static BisectionLowHigh bisection(List<BigDecimal> x , float value){
+    public static BisectionLowHigh bisectionBD(List<BigDecimal> x , double value){
         BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
         int high = x.size() -1;
         int low = 0;
         int mid;
 
-        if(x.get(0).compareTo(new BigDecimal(Float.toString(value))) > 0){
+        if(x.get(0).compareTo(new BigDecimal(Double.toString(value))) > 0){
             high = 0;
-        }else if(x.get(x.size() - 1).compareTo(new BigDecimal(Float.toString(value))) < 0){
+        }else if(x.get(x.size() - 1).compareTo(new BigDecimal(Double.toString(value))) < 0){
             low = x.size() - 1;
         }else {
             while (high - low != 1) {
                 mid = low + (high - low + 1) / 2;
-                if (x.get(mid).compareTo(new BigDecimal(Float.toString(value))) < 0) {
+                if (x.get(mid).compareTo(new BigDecimal(Double.toString(value))) < 0) {
                     low = mid;
                 } else {
                     high = mid;
@@ -148,7 +149,7 @@ public class MathUtil {
         bisectionLowHigh.setHigh(high);
         return bisectionLowHigh;
     }
-    public static BisectionLowHigh bisection(RtIntensityPairs x , float value){
+    public static BisectionLowHigh bisection(RtIntensityPairsDouble x , double value){
         BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
         int high = x.getRtArray().length -1;
         int low = 0;
@@ -175,25 +176,25 @@ public class MathUtil {
     /**
      * (data - mean) / std
      */
-    public static float[] standardizeData(List<Float> data){
+    public static double[] standardizeData(List<Double> data){
         int dataLength = data.size();
 
         //get mean
-        float sum = 0f;
-        for(float value: data){
+        double sum = 0d;
+        for(double value: data){
             sum += value;
         }
-        float mean = sum / dataLength;
+        double mean = sum / dataLength;
 
         //get std
         sum = 0f;
-        for(float value: data){
+        for(double value: data){
             sum += (value - mean) * (value - mean);
         }
-        float std = (float) Math.sqrt(sum / dataLength);
+        double std = Math.sqrt(sum / dataLength);
 
         //get standardized data
-        float[] standardizedData = new float[dataLength];
+        double[] standardizedData = new double[dataLength];
         for(int i = 0; i< dataLength; i++) {
             if (std == 0) {
                 standardizedData[i] = 0;

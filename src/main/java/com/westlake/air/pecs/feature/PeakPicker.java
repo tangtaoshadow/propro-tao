@@ -30,15 +30,15 @@ public class PeakPicker {
             return null;
         }
         List<double[]> maxPeaks = new ArrayList<>();
-        float centralPeakRt, leftNeighborRt, rightNeighborRt;
+        double centralPeakRt, leftNeighborRt, rightNeighborRt;
         double centralPeakInt, leftBoundaryInt, rightBoundaryInt;
         double stnLeft, stnMiddle, stnRight;
         int leftBoundary, rightBoundary;
         int missing;
-        float maxPeakRt;
+        double maxPeakRt;
         double maxPeakInt;
-        float leftHand, rightHand;
-        float mid;
+        double leftHand, rightHand;
+        double mid;
         double midDerivVal;
 
 
@@ -54,6 +54,17 @@ public class PeakPicker {
             if(rightBoundaryInt < 0.000001) continue;
             if(leftBoundaryInt < 0.000001) continue;
 
+            double leftToCentral, centralToRight, minSpacing;
+            if(Constants.CHECK_SPACINGS){
+                leftToCentral = centralPeakRt - leftNeighborRt;
+                centralToRight = rightNeighborRt - centralPeakRt;
+                if(leftToCentral > centralToRight){
+                    minSpacing = centralToRight;
+                }else {
+                    minSpacing = leftToCentral;
+                }
+            }
+
             stnLeft = signalToNoise[i-1];
             stnMiddle = signalToNoise[i];
             stnRight = signalToNoise[i+1];
@@ -64,6 +75,7 @@ public class PeakPicker {
                     stnMiddle >= Constants.SIGNAL_TO_NOISE_LIMIT &&
                     stnRight >= Constants.SIGNAL_TO_NOISE_LIMIT){
 
+
                 // find left boundary
                 missing = 0;
                 leftBoundary = i - 1;
@@ -71,13 +83,10 @@ public class PeakPicker {
 
                     stnLeft = signalToNoise[i-left];
 
-                    //zeroLeft
-                    if(rtIntensityPairs.getIntensityArray()[i - left] == 0){
-                        break;
-                    }
-
-                    if(rtIntensityPairs.getIntensityArray()[i - left] < leftBoundaryInt){
-                        if(stnLeft >= Constants.SIGNAL_TO_NOISE_LIMIT){
+                    if(rtIntensityPairs.getIntensityArray()[i - left] < leftBoundaryInt &&
+                            (!Constants.CHECK_SPACINGS || (rtIntensityPairs.getRtArray()[leftBoundary] - rtIntensityPairs.getRtArray()[i - left] < Constants.SPACING_DIFFERENCE_GAP * minSpacing))){
+                        if(stnLeft >= Constants.SIGNAL_TO_NOISE_LIMIT &&
+                                (rtIntensityPairs.getRtArray()[leftBoundary] - rtIntensityPairs.getRtArray()[i - left] < Constants.SPACING_DIFFERENCE * minSpacing)){
                             leftBoundaryInt = rtIntensityPairs.getIntensityArray()[i - left];
                             leftBoundary = i - left;
                         }else {
@@ -86,10 +95,15 @@ public class PeakPicker {
                                 leftBoundaryInt = rtIntensityPairs.getIntensityArray()[i - left];
                                 leftBoundary = i - left;
                             }else {
+                                leftBoundary = i - left + 1;
                                 break;
                             }
                         }
                     }else {
+                        break;
+                    }
+                    //zeroLeft
+                    if(rtIntensityPairs.getIntensityArray()[i - left] == 0){
                         break;
                     }
                 }
@@ -101,13 +115,11 @@ public class PeakPicker {
 
                     stnRight = signalToNoise[i+right];
 
-                    //zeroLeft
-                    if(rtIntensityPairs.getIntensityArray()[i + right] == 0){
-                        break;
-                    }
 
-                    if(rtIntensityPairs.getIntensityArray()[i + right] < rightBoundaryInt){
-                        if(stnRight >= Constants.SIGNAL_TO_NOISE_LIMIT){
+                    if(rtIntensityPairs.getIntensityArray()[i + right] < rightBoundaryInt &&
+                            (!Constants.CHECK_SPACINGS || (rtIntensityPairs.getRtArray()[i + right] - rtIntensityPairs.getRtArray()[rightBoundary] < Constants.SPACING_DIFFERENCE_GAP * minSpacing))){
+                        if(stnRight >= Constants.SIGNAL_TO_NOISE_LIMIT &&
+                                (rtIntensityPairs.getRtArray()[i + right] - rtIntensityPairs.getRtArray()[rightBoundary] < Constants.SPACING_DIFFERENCE * minSpacing)){
                             rightBoundaryInt = rtIntensityPairs.getIntensityArray()[i + right];
                             rightBoundary = i + right;
                         }else {
@@ -116,25 +128,31 @@ public class PeakPicker {
                                 rightBoundaryInt = rtIntensityPairs.getIntensityArray()[i + right];
                                 rightBoundary = i + right;
                             }else {
+                                rightBoundary = i + right - 1;
                                 break;
                             }
                         }
                     }else {
                         break;
                     }
+
+                    //zeroLeft
+                    if(rtIntensityPairs.getIntensityArray()[i + right] == 0){
+                        break;
+                    }
                 }
 
                 PeakSpline peakSpline = new PeakSpline();
-                peakSpline.initBD(rtIntensityPairs.getRtArray(), rtIntensityPairs.getIntensityArray(), leftBoundary, rightBoundary);
+                peakSpline.init(rtIntensityPairs.getRtArray(), rtIntensityPairs.getIntensityArray(), leftBoundary, rightBoundary);
 //                maxPeakRt =  centralPeakRt;
 //                maxPeakInt = centralPeakInt;
                 leftHand = leftNeighborRt;
                 rightHand = rightNeighborRt;
 
                 while (rightHand - leftHand > Constants.THRESHOLD){
-                    mid = (leftHand + rightHand) / 2.0f;
-                    midDerivVal = peakSpline.derivativesBD(mid);
-                    if(Math.abs(midDerivVal) < 0.0001){
+                    mid = (leftHand + rightHand) / 2.0d;
+                    midDerivVal = peakSpline.derivatives(mid);
+                    if(Math.abs(midDerivVal) < 0.000001){
                         break;
                     }
                     if(midDerivVal < 0.0d){
@@ -144,21 +162,21 @@ public class PeakPicker {
                     }
                 }
 
-                maxPeakRt = (leftHand + rightHand) /2.0f;
-                maxPeakInt = peakSpline.evalBD(maxPeakRt);
+                maxPeakRt = (leftHand + rightHand) /2.0d;
+                maxPeakInt = peakSpline.eval(maxPeakRt);
 
                 double[] peak = new double[2];
                 peak[0] = maxPeakRt;
                 peak[1] = maxPeakInt;
                 maxPeaks.add(peak);
-                i = rightBoundary + 2;
+                i = rightBoundary;
             }
         }
-        Float[] rt = new Float[maxPeaks.size()];
+        Double[] rt = new Double[maxPeaks.size()];
         Double[] intensity = new Double[maxPeaks.size()];
 
         for(int i = 0; i< maxPeaks.size(); i++){
-            rt[i] = (float) maxPeaks.get(i)[0];
+            rt[i] = maxPeaks.get(i)[0];
             intensity[i] = maxPeaks.get(i)[1];
         }
         return new RtIntensityPairsDouble(rt, intensity);

@@ -28,8 +28,8 @@ public class LibraryScorer {
      * @param libraryIntensity get libraryIntensity: from transitions
      * @param scores library_corr, library_norm_manhattan
      */
-    public void calculateLibraryScores(List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, SlopeIntercept slopeIntercept, float groupRt, FeatureScores scores){
-        List<Float> experimentIntensity = new ArrayList<>();
+    public void calculateLibraryScores(List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, SlopeIntercept slopeIntercept, double groupRt, FeatureScores scores){
+        List<Double> experimentIntensity = new ArrayList<>();
         for(ExperimentFeature experimentFeature: experimentFeatures){
             experimentIntensity.add(experimentFeature.getIntensity());
         }
@@ -47,7 +47,7 @@ public class LibraryScorer {
 
         //library_corr
         //pearson 相关系数
-        float corr = 0.0f, m1 = 0.0f, m2 = 0.0f, s1 = 0.0f, s2 = 0.0f;
+        double corr = 0.0d, m1 = 0.0d, m2 = 0.0d, s1 = 0.0d, s2 = 0.0d;
         for(int i=0;i<libraryIntensity.size(); i++){
             corr += experimentIntensity.get(i) * libraryIntensity.get(i); //corr
             m1 += experimentIntensity.get(i); //sum of experiment
@@ -60,7 +60,7 @@ public class LibraryScorer {
         s1 -= m1 * m1 * libraryIntensity.size();
         s2 -= m2 * m2 * libraryIntensity.size();
         if(s1 < Math.pow(1,-12) || s2 < Math.pow(1,-12)){
-            scores.setVarLibraryCorr(0.0f);
+            scores.setVarLibraryCorr(0.0d);
         }else {
             corr -= m1 * m2 * libraryIntensity.size();
             corr /= Math.sqrt(s1 * s2);
@@ -68,9 +68,9 @@ public class LibraryScorer {
         }
 
         //varNormRtScore
-        float experimentalRt = experimentFeatures.get(0).getRt();
-        float normalizedExperimentalRt = ScoreUtil.trafoApplier(slopeIntercept, experimentalRt);
-        if(groupRt <= -1000f){
+        double experimentalRt = experimentFeatures.get(0).getRt();
+        double normalizedExperimentalRt = ScoreUtil.trafoApplier(slopeIntercept, experimentalRt);
+        if(groupRt <= -1000d){
             scores.setVarNormRtScore(0);
         }else {
             scores.setVarNormRtScore(Math.abs(normalizedExperimentalRt - groupRt));
@@ -83,11 +83,11 @@ public class LibraryScorer {
      * totalXic
      */
     public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores){
-        float intensitySum = 0.0f;
+        double intensitySum = 0.0d;
         for(ExperimentFeature feature: experimentFeatures){
             intensitySum += feature.getIntensity();
         }
-        float totalXic = experimentFeatures.get(0).getTotalXic();
-        scores.setVarIntensityScore(intensitySum / totalXic);
+        double totalXic = experimentFeatures.get(0).getTotalXic();
+        scores.setVarIntensityScore((intensitySum / totalXic));
     }
 }

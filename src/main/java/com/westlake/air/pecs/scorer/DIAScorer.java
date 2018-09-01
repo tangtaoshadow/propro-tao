@@ -88,7 +88,7 @@ public class DIAScorer {
         }
 
         for(int i=0; i<experimentFeatures.size()-1; i++){
-            relIntensity = experimentFeatures.get(i).getIntensity() / intensitySum;
+            relIntensity = (float) (experimentFeatures.get(i).getIntensity() / intensitySum);
             int putativeFragmentCharge = 1;
             if(productCharge.get(i) > 0){
                 putativeFragmentCharge = productCharge.get(i);

@@ -17,12 +17,12 @@ public class ScoreUtil {
      * @return 1/k -b/k
      */
     public static SlopeIntercept trafoInverter(SlopeIntercept slopeIntercept){
-        float slope = slopeIntercept.getSlope();
-        float intercept = slopeIntercept.getIntercept();
+        double slope = slopeIntercept.getSlope();
+        double intercept = slopeIntercept.getIntercept();
         SlopeIntercept slopeInterceptInvert = new SlopeIntercept();
 
-        if(slope == 0f){
-            slope = 0.000001f;
+        if(slope == 0d){
+            slope = 0.000001d;
         }
         slopeInterceptInvert.setSlope(1 / slope);
         slopeInterceptInvert.setIntercept(- intercept / slope);
@@ -36,7 +36,7 @@ public class ScoreUtil {
      * @param value x
      * @return y
      */
-    public static float trafoApplier(SlopeIntercept slopeIntercept, float value){
+    public static double trafoApplier(SlopeIntercept slopeIntercept, Double value){
         return value * slopeIntercept.getSlope() + slopeIntercept.getIntercept();
     }
 

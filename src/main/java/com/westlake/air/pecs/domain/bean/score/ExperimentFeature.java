@@ -11,18 +11,18 @@ import java.util.List;
 @Data
 public class ExperimentFeature {
 
-    float rt;
+    double rt;
 
-    float intensity;
+    double intensity;
 
-    float peakApexInt;
+    double peakApexInt;
 
-    float bestLeft;
+    double bestLeft;
 
-    float bestRight;
+    double bestRight;
 
-    float totalXic;
+    double totalXic;
 
-    List<Float> hullRt;
-    List<Float> hullInt;
+    List<Double> hullRt;
+    List<Double> hullInt;
 }

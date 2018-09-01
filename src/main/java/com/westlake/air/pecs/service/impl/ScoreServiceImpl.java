@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.service.impl;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.query.PageQuery;
@@ -84,7 +85,7 @@ public class ScoreServiceImpl implements ScoreService {
         taskDO.addLog("分组信息获取完毕,开始处理数据");
         taskService.update(taskDO);
         List<List<ScoreRtPair>> scoreRtList = new ArrayList<>();
-        List<Float> compoundRt = new ArrayList<>();
+        List<Double> compoundRt = new ArrayList<>();
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
         for(TransitionGroup group : groups){
             SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
@@ -92,10 +93,10 @@ public class ScoreServiceImpl implements ScoreService {
             if(!featureByPep.isFeatureFound()){
                 continue;
             }
-            float groupRt = group.getRt().floatValue();
+            double groupRt = group.getRt();
             List<ScoreRtPair> scoreRtPairs = RTNormalizerScorer.score(featureByPep.getRtIntensityPairsOriginList(), featureByPep.getExperimentFeatures(), featureByPep.getLibraryIntensityList(), featureByPep.getNoise1000List(), slopeIntercept, groupRt);
             scoreRtList.add(scoreRtPairs);
-            compoundRt.add(group.getRt().floatValue());
+            compoundRt.add(groupRt);
         }
         taskDO.addLog("开始搜索最优特征");
         taskService.update(taskDO);
@@ -126,7 +127,7 @@ public class ScoreServiceImpl implements ScoreService {
         List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(iRtLibraryId);
 
         List<List<ScoreRtPair>> scoreRtList = new ArrayList<>();
-        List<Float> compoundRt = new ArrayList<>();
+        List<Double> compoundRt = new ArrayList<>();
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
         for(TransitionGroup group : groups){
             SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
@@ -137,7 +138,7 @@ public class ScoreServiceImpl implements ScoreService {
             float groupRt = group.getRt().floatValue();
             List<ScoreRtPair> scoreRtPairs = RTNormalizerScorer.score(featureByPep.getRtIntensityPairsOriginList(), featureByPep.getExperimentFeatures(), featureByPep.getLibraryIntensityList(), featureByPep.getNoise1000List(), slopeIntercept, groupRt);
             scoreRtList.add(scoreRtPairs);
-            compoundRt.add(group.getRt().floatValue());
+            compoundRt.add(group.getRt());
         }
 
         List<RtPair> pairs = simpleFindBestFeature(scoreRtList, compoundRt);
@@ -195,7 +196,7 @@ public class ScoreServiceImpl implements ScoreService {
                 continue;
             }
             List<List<ExperimentFeature>> experimentFeatures = featureByPep.getExperimentFeatures();
-            List<RtIntensityPairs> chromatogramList = featureByPep.getRtIntensityPairsOriginList();
+            List<RtIntensityPairsDouble> chromatogramList = featureByPep.getRtIntensityPairsOriginList();
             List<Float> libraryIntensityList = featureByPep.getLibraryIntensityList();
             List<double[]> noise1000List = featureByPep.getNoise1000List();
             List<Float> productMzList = new ArrayList<>();
@@ -245,13 +246,13 @@ public class ScoreServiceImpl implements ScoreService {
      * @param rt get from groupsResult.getModel()
      * @return rt pairs
      */
-    private List<RtPair> simpleFindBestFeature(List<List<ScoreRtPair>> scoresList, List<Float> rt){
+    private List<RtPair> simpleFindBestFeature(List<List<ScoreRtPair>> scoresList, List<Double> rt){
 
         List<RtPair> pairs = new ArrayList<>();
 
         for(int i=0; i<scoresList.size(); i++){
             List<ScoreRtPair> scores = scoresList.get(i);
-            float max = Float.MIN_VALUE;
+            double max = Double.MIN_VALUE;
             RtPair rtPair = new RtPair();
             //find max score's rt
             for(int j=0; j<scores.size(); j++){
@@ -328,13 +329,13 @@ public class ScoreServiceImpl implements ScoreService {
      * @param minBinsFilled 需要满足↑条件的bin的数量
      * @return boolean 是否覆盖
      */
-    private boolean computeBinnedCoverage(float[] rtRange, List<RtPair> pairsCorrected, int rtBins, int minPeptidesPerBin, int minBinsFilled){
+    private boolean computeBinnedCoverage(double[] rtRange, List<RtPair> pairsCorrected, int rtBins, int minPeptidesPerBin, int minBinsFilled){
         int[] binCounter = new int[rtBins];
-        float rtDistance = rtRange[1] - rtRange[0];
+        double rtDistance = rtRange[1] - rtRange[0];
 
         //获得theorRt部分的分布
         for(RtPair pair: pairsCorrected){
-            float percent = (pair.getTheoRt() - rtRange[0])/rtDistance;
+            double percent = (pair.getTheoRt() - rtRange[0])/rtDistance;
             int bin = (int)(percent * rtBins);
             if(bin>=rtBins){
                 bin = rtBins -1;
@@ -364,7 +365,7 @@ public class ScoreServiceImpl implements ScoreService {
         double[] coeff = fitter.fit(obs.toList());
         SlopeIntercept slopeIntercept = new SlopeIntercept();
         slopeIntercept.setSlope((float)coeff[1]);
-        slopeIntercept.setIntercept((float)coeff[0]);
+        slopeIntercept.setIntercept((float) coeff[0]);
         return slopeIntercept;
     }
 

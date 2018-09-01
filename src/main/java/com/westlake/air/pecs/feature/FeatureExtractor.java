@@ -61,7 +61,7 @@ public class FeatureExtractor {
             spacing = 0.01f;
         }
         String peptideRef = group.getPeptideRef();
-        List<RtIntensityPairs> rtIntensityPairsOriginList = new ArrayList<>();
+        List<RtIntensityPairsDouble> rtIntensityPairsOriginList = new ArrayList<>();
         List<RtIntensityPairsDouble> maxRtIntensityPairsList = new ArrayList<>();
         List<IntensityRtLeftRtRightPairs> intensityRtLeftRtRightPairsList = new ArrayList<>();
 
@@ -84,9 +84,9 @@ public class FeatureExtractor {
             }
 
             //得到卷积后的chromatogram的RT、Intensity对
-            RtIntensityPairs rtIntensityPairsOrigin = new RtIntensityPairs(dataDO.getRtArray(), dataDO.getIntensityArray());
+            RtIntensityPairsDouble rtIntensityPairsOrigin = new RtIntensityPairsDouble(dataDO.getRtArray(), dataDO.getIntensityArray());
             if(!(slopeIntercept.getSlope() == 0f && slopeIntercept.getIntercept() == 0f)) {
-                rtIntensityPairsOrigin = chromatogramFilter.pickChromatogramByRt(rtIntensityPairsOrigin, group.getRt().floatValue(), slopeIntercept);
+                rtIntensityPairsOrigin = chromatogramFilter.pickChromatogramByRt(rtIntensityPairsOrigin, group.getRt(), slopeIntercept);
             }
 
             //进行高斯平滑，得到平滑后的chromatogram

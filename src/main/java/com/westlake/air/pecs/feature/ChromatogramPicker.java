@@ -25,23 +25,23 @@ public class ChromatogramPicker {
      * @param maxPeakPairs picked max peak
      * @return 左右边界rt, chromatogram边界内intensity求和
      */
-    public IntensityRtLeftRtRightPairs pickChromatogram(RtIntensityPairs rtIntensityPairs, RtIntensityPairsDouble smoothedRtIntensityPairs, double[] signalToNoise, RtIntensityPairsDouble maxPeakPairs) {
+    public IntensityRtLeftRtRightPairs pickChromatogram(RtIntensityPairsDouble rtIntensityPairs, RtIntensityPairsDouble smoothedRtIntensityPairs, double[] signalToNoise, RtIntensityPairsDouble maxPeakPairs) {
         int maxPeakSize = maxPeakPairs.getRtArray().length;
         int[][] leftRight = new int[maxPeakSize][2];
-        Float[] leftRt = new Float[maxPeakSize];
-        Float[] rightRt = new Float[maxPeakSize];
+        Double[] leftRt = new Double[maxPeakSize];
+        Double[] rightRt = new Double[maxPeakSize];
         int leftIndex, rightIndex;
 
         RtIntensityPairsDouble chromatogram;
         if(Constants.CHROMATOGRAM_PICKER_METHOD == "legacy"){
-            chromatogram = new RtIntensityPairsDouble(rtIntensityPairs);
+            chromatogram = rtIntensityPairs;
         }else {
             chromatogram = smoothedRtIntensityPairs;
         }
 
         int closestPeakIndex;
         for (int i = 0; i < maxPeakSize; i++) {
-            float centralPeakRt = maxPeakPairs.getRtArray()[i];
+            double centralPeakRt = maxPeakPairs.getRtArray()[i];
             closestPeakIndex = findClosestPeak(chromatogram, maxPeakPairs.getRtArray()[i]);
 
             //to the left
@@ -69,12 +69,12 @@ public class ChromatogramPicker {
 
         }
 
-        Float[] intensity = integratePeaks(rtIntensityPairs, leftRight);
+        Double[] intensity = integratePeaks(rtIntensityPairs, leftRight);
 
         return new IntensityRtLeftRtRightPairs(intensity, leftRt, rightRt);
     }
 
-    private int findClosestPeak(RtIntensityPairsDouble rtIntensityPairs, float rt) {
+    private int findClosestPeak(RtIntensityPairsDouble rtIntensityPairs, double rt) {
 
         //bisection
         BisectionLowHigh bisectionLowHigh = MathUtil.bisection(rtIntensityPairs.getRtArray(), rt);
@@ -88,11 +88,11 @@ public class ChromatogramPicker {
         }
     }
 
-    private Float[] integratePeaks(RtIntensityPairs rtIntensityPairs, int[][] leftRight){
+    private Double[] integratePeaks(RtIntensityPairsDouble rtIntensityPairs, int[][] leftRight){
         int leftIndex, rightIndex;
-        Float[] intensity = new Float[leftRight.length];
+        Double[] intensity = new Double[leftRight.length];
         for(int i = 0; i< leftRight.length; i++){
-            intensity[i] = 0f;
+            intensity[i] = 0d;
             leftIndex = leftRight[i][0];
             rightIndex = leftRight[i][1];
             for(int j=leftIndex; j<= rightIndex; j++){

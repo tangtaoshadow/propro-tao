@@ -9,8 +9,8 @@ import lombok.Data;
 @Data
 public class RtPair {
 
-    float expRt;
-    float theoRt;
+    double expRt;
+    double theoRt;
 
 
     float startRt;

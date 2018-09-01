@@ -39,18 +39,18 @@ public class FeatureFinder {
      * ExperimentFeature::intensity: intensity sum of hullPoints' intensity
      * @return list of mrmFeature (mrmFeature is list of chromatogram feature)
      */
-    public List<List<ExperimentFeature>> findFeatures(List<RtIntensityPairs> chromatograms, List<RtIntensityPairsDouble> pickedChroms, List<IntensityRtLeftRtRightPairs> intensityLeftRight){
+    public List<List<ExperimentFeature>> findFeatures(List<RtIntensityPairsDouble> chromatograms, List<RtIntensityPairsDouble> pickedChroms, List<IntensityRtLeftRtRightPairs> intensityLeftRight){
 
         int[] chrPeakIndex;
 
         List<List<ExperimentFeature>> experimentFeatures = new ArrayList<>();
 
         //totalXIC
-        float totalXic = 0.0f;
-        RtIntensityPairs chromatogram;
+        double totalXic = 0.0d;
+        RtIntensityPairsDouble chromatogram;
         for (int i = 0; i < chromatograms.size(); i++) {
             chromatogram = chromatograms.get(i);
-            for (float intensity : chromatogram.getIntensityArray()) {
+            for (double intensity : chromatogram.getIntensityArray()) {
                 totalXic += intensity;
             }
         }
@@ -62,9 +62,9 @@ public class FeatureFinder {
                 break;
             }
 
-            float bestLeft = intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]];
-            float bestRight = intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]];
-            float peakApex = pickedChroms.get(chrPeakIndex[0]).getRtArray()[chrPeakIndex[1]];
+            double bestLeft = intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]];
+            double bestRight = intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]];
+            double peakApex = pickedChroms.get(chrPeakIndex[0]).getRtArray()[chrPeakIndex[1]];
 
             RtIntensityPairsDouble rtInt = pickedChroms.get(chrPeakIndex[0]);
             Double[] intensityArray = rtInt.getIntensityArray();
@@ -73,17 +73,17 @@ public class FeatureFinder {
             pickedChroms.set(chrPeakIndex[0], rtInt);
 
 
-            RtIntensityPairs masterChromatogram = new RtIntensityPairs(chromatograms.get(chrPeakIndex[0]));
+            RtIntensityPairsDouble masterChromatogram = new RtIntensityPairsDouble(chromatograms.get(chrPeakIndex[0]));
 
             List<ExperimentFeature> mrmFeature = new ArrayList<>();
             for (int i = 0; i < chromatograms.size(); i++) {
                 chromatogram = chromatograms.get(i);
                 //best left and right is a constant value to a peptideRef
-                RtIntensityPairs usedChromatogram = raster(chromatogram, masterChromatogram, bestLeft, bestRight);
+                RtIntensityPairsDouble usedChromatogram = raster(chromatogram, masterChromatogram, bestLeft, bestRight);
                 ExperimentFeature feature = calculatePeakApexInt(usedChromatogram, bestLeft, bestRight, peakApex);
                 mrmFeature.add(feature);
             }
-            float sum = 0.0f;
+            double sum = 0.0d;
             for(ExperimentFeature feature: mrmFeature){
                 sum += feature.getIntensity();
                 feature.setTotalXic(totalXic);
@@ -131,7 +131,7 @@ public class FeatureFinder {
      * @param rightBoundary bestRight rt of max peak(constant to peptideRef)
      * @return masterChromatogram with both rt and intensity
      */
-    private RtIntensityPairs raster(RtIntensityPairs chromatogram, RtIntensityPairs masterChromatogram, float leftBoundary, float rightBoundary){
+    private RtIntensityPairsDouble raster(RtIntensityPairsDouble chromatogram, RtIntensityPairsDouble masterChromatogram, double leftBoundary, double rightBoundary){
         int chromatogramLeft, chromatogramRight;
         int masterChromLeft, masterChromRight;
         chromatogramLeft = MathUtil.bisection(chromatogram, leftBoundary).getLow();
@@ -140,18 +140,18 @@ public class FeatureFinder {
         masterChromRight = MathUtil.bisection(masterChromatogram, rightBoundary).getHigh();
         int masterChromLeftStatic = masterChromLeft;
 
-        Float[] rt = new Float[masterChromRight - masterChromLeft + 1];
-        Float[] intensity = new Float[masterChromRight - masterChromLeft + 1];
-        float distLeft, distRight;
+        Double[] rt = new Double[masterChromRight - masterChromLeft + 1];
+        Double[] intensity = new Double[masterChromRight - masterChromLeft + 1];
+        double distLeft, distRight;
 
         for(int i=0; i<rt.length; i++){
-            rt[i] = 0f;
-            intensity[i] = 0f;
+            rt[i] = 0d;
+            intensity[i] = 0d;
         }
 
         //set rt
         for(int i=masterChromLeft; i<=masterChromRight; i++){
-            rt[i - masterChromLeftStatic] = masterChromatogram.getRtArray()[i];
+            rt[i - masterChromLeftStatic] = (double)masterChromatogram.getRtArray()[i];
         }
 
         //set intensity
@@ -182,7 +182,7 @@ public class FeatureFinder {
             chromatogramLeft ++;
         }
 
-        return new RtIntensityPairs(rt, intensity);
+        return new RtIntensityPairsDouble(rt, intensity);
     }
 
     /**
@@ -193,18 +193,18 @@ public class FeatureFinder {
      * @param peakApexRt rt of max peak
      * @return
      */
-    private ExperimentFeature calculatePeakApexInt(RtIntensityPairs chromatogram, float bestLeft, float bestRight, float peakApexRt){
-        Float[] rtArray = chromatogram.getRtArray();
-        Float[] intArray = chromatogram.getIntensityArray();
+    private ExperimentFeature calculatePeakApexInt(RtIntensityPairsDouble chromatogram, double bestLeft, double bestRight, double peakApexRt){
+        Double[] rtArray = chromatogram.getRtArray();
+        Double[] intArray = chromatogram.getIntensityArray();
 
         int peakNum = 0;
         float deltaRt, interpolIntensity;
 //        float intensityIntegral = 0.0f;
-        float peakApexDist = Math.abs(rtArray[0] - peakApexRt);
-        float peakApexInt = 0.0f;
-        List<Float> hullRt = new ArrayList<>();
-        List<Float> hullInt = new ArrayList<>();
-        float intSum = 0.0f;
+        double peakApexDist = Math.abs(rtArray[0] - peakApexRt);
+        double peakApexInt = 0.0d;
+        List<Double> hullRt = new ArrayList<>();
+        List<Double> hullInt = new ArrayList<>();
+        double intSum = 0.0d;
         for(int i = 0; i<chromatogram.getRtArray().length; i++){
             if(rtArray[i] > bestLeft && rtArray[i] < bestRight){
 //                if(peakNum == 0 && i != 0){

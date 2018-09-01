@@ -17,31 +17,31 @@ public class FeatureScores {
      *              scores.log_sn_score                     * -0.72989582 + 1
      *              scores.elution_model_fit_score          *  1.88443209; //0
      */
-    float varLibraryCorr;
-    float varLibraryRsmd;
+    double varLibraryCorr;
+    double varLibraryRsmd;
 
-    float varXcorrCoelution;
-    float varXcorrCoelutionWeighted;
+    double varXcorrCoelution;
+    double varXcorrCoelutionWeighted;
 
-    float varXcorrShape;
-    float varXcorrShapeWeighted;
+    double varXcorrShape;
+    double varXcorrShapeWeighted;
 
-    float varNormRtScore;
+    double varNormRtScore;
 
-    float varIntensityScore;
+    double varIntensityScore;
 
-    float varLogSnScore;
+    double varLogSnScore;
 
-    float varElutionModelFitScore;
+    double varElutionModelFitScore;
 
-    float varIsotopeCorrelationScore;
-    float varIsotopeOverlapScore;
-    float varMassdevScore;
-    float varMassdevScoreWeighted;
-    float varBseriesScore;
-    float varYseriesScore;
+    double varIsotopeCorrelationScore;
+    double varIsotopeOverlapScore;
+    double varMassdevScore;
+    double varMassdevScoreWeighted;
+    double varBseriesScore;
+    double varYseriesScore;
 
-    float mainVarXxSwathPrelimScore;
+    double mainVarXxSwathPrelimScore;
 
 
 

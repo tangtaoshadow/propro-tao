@@ -86,15 +86,15 @@ public class ElutionScorer {
      * @return extended rtIntensity array
      */
     private RtIntensityPairs prepareElutionFit(ExperimentFeature feature){
-        List<Float> rtArray = feature.getHullRt();
-        List<Float> intArray = feature.getHullInt();
+        List<Double> rtArray = feature.getHullRt();
+        List<Double> intArray = feature.getHullInt();
 
 
         //get rt distance average
-        float sum = rtArray.get(rtArray.size()-1) - rtArray.get(0);
-        float rtDistanceAverage = sum / (rtArray.size() - 1);
-        float rightSideRt = rtArray.get(rtArray.size()-1) + rtDistanceAverage;
-        float leftSideRt = rtArray.get(0) - rtDistanceAverage;
+        double sum = rtArray.get(rtArray.size()-1) - rtArray.get(0);
+        double rtDistanceAverage = sum / (rtArray.size() - 1);
+        double rightSideRt = rtArray.get(rtArray.size()-1) + rtDistanceAverage;
+        double leftSideRt = rtArray.get(0) - rtDistanceAverage;
 
         //get new List
         Float[] newRtArray = new Float[rtArray.size() + 6];
@@ -103,14 +103,14 @@ public class ElutionScorer {
 
         for(int i=0; i<newRtArray.length; i++){
             if(i<3){
-                newRtArray[i] = leftSideRt - (2 - i) * rtDistanceAverage;
+                newRtArray[i] = (float)(leftSideRt - (2 - i) * rtDistanceAverage);
                 newIntArray[i] = 0.0f;
             } else if(i>newRtArray.length - 4){
-                newRtArray[i] = rightSideRt + (i - newRtArray.length - 3) * rtDistanceAverage;
+                newRtArray[i] = (float)(rightSideRt + (i - newRtArray.length - 3) * rtDistanceAverage);
                 newIntArray[i] = 0.0f;
             } else {
-                newRtArray[i] = rtArray.get(i - 3);
-                newIntArray[i] = intArray.get(i - 3);
+                newRtArray[i] = (rtArray.get(i - 3)).floatValue();
+                newIntArray[i] = intArray.get(i - 3).floatValue();
             }
         }
 

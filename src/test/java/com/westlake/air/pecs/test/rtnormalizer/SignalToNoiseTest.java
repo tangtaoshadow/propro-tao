@@ -31,10 +31,6 @@ public class SignalToNoiseTest extends BaseTest {
         BufferedReader readerResult = new BufferedReader(new FileReader(fileResult));
         RtIntensityPairsDouble rtIntensityPairsDoubleResult = FileUtil.txtReader(readerResult, " ",0,1);
 
-        Double[] inten = {0d, 100d, 200d,300d,400d,500d,250d,125d,75d,0d};
-        Float[] rt =     {300f,301f,302f,303f,304f,305f,306f,307f,308f,309f};
-        RtIntensityPairsDouble test = new RtIntensityPairsDouble(rt,inten);
-
         double[] result = signalToNoiseEstimator.computeSTN(rtIntensityPairsDoubleTest, 40, 30);
 
         System.out.println("computeSTN finished.");

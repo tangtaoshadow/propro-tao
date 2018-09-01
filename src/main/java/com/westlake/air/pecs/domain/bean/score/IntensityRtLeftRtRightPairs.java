@@ -9,15 +9,15 @@ import lombok.Data;
 @Data
 public class IntensityRtLeftRtRightPairs {
 
-    Float[] rtLeftArray;
+    Double[] rtLeftArray;
 
-    Float[] rtRightArray;
+    Double[] rtRightArray;
 
-    Float[] intensityArray;
+    Double[] intensityArray;
 
     public IntensityRtLeftRtRightPairs(){}
 
-    public IntensityRtLeftRtRightPairs(Float[] intensityArray, Float[] rtLeftArray, Float[] rtRightArray){
+    public IntensityRtLeftRtRightPairs(Double[] intensityArray, Double[] rtLeftArray, Double[] rtRightArray){
         this.rtLeftArray = rtLeftArray;
         this.rtRightArray = rtRightArray;
         this.intensityArray = intensityArray;

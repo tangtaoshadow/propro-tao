@@ -654,8 +654,8 @@ public class ExperimentServiceImpl implements ExperimentService {
         overviewDO.setRtExtractWindow(input.getRtExtractWindow());
         overviewDO.setMzExtractWindow(input.getMzExtractWindow());
         if(input.getSlopeIntercept() != null){
-            overviewDO.setSlope(input.getSlopeIntercept().getSlope());
-            overviewDO.setIntercept(input.getSlopeIntercept().getIntercept());
+            overviewDO.setSlope((float)input.getSlopeIntercept().getSlope());
+            overviewDO.setIntercept((float)input.getSlopeIntercept().getIntercept());
         }
 
         return overviewDO;

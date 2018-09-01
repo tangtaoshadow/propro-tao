@@ -29,6 +29,15 @@ public class PeakPickerTest extends BaseTest {
         BufferedReader readerTest = new BufferedReader(new FileReader(fileTest));
         RtIntensityPairsDouble rtIntensityPairsDoubleTest = FileUtil.txtReader(readerTest,"\t", 1,2);
 
+        //原算法的测试用例输入精度有误，需要通过强转的方式修正
+        Double[] rtArray = rtIntensityPairsDoubleTest.getRtArray();
+        Double[] intArray = rtIntensityPairsDoubleTest.getIntensityArray();
+        for(int i=0; i<rtArray.length; i++){
+            rtArray[i] =(double) rtArray[i].floatValue();
+            intArray[i] = (double) intArray[i].floatValue();
+        }
+
+
         File fileResult = new File(PeakPickerTest.class.getClassLoader().getResource("data/peakPickerOutput.txt").getPath());
         BufferedReader readerResult = new BufferedReader(new FileReader(fileResult));
         RtIntensityPairsDouble rtIntensityPairsDoubleResult = FileUtil.txtReader(readerResult,"\t", 1, 2);

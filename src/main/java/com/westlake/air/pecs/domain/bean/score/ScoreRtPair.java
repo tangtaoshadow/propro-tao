@@ -8,6 +8,6 @@ import lombok.Data;
  */
 @Data
 public class ScoreRtPair {
-    float score;
-    float rt;
+    double score;
+    double rt;
 }

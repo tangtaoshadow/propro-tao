@@ -25,7 +25,7 @@ public class GauseFilterTest extends BaseTest {
              rtArray[i]= 500.0F + 0.2F * i;
         }
 
-        RtIntensityPairs input = new RtIntensityPairs(rtArray, intensityArray);
+        RtIntensityPairsDouble input = new RtIntensityPairsDouble(rtArray, intensityArray);
         RtIntensityPairsDouble output = null;
         output = gauseFilter.filter(input, 1.0f/8, 0.01f);
         for (int i = 0; i < 5; i++) {
@@ -50,7 +50,7 @@ public class GauseFilterTest extends BaseTest {
                 intensityArray[i] = 1.2F;
             }
         }
-        RtIntensityPairs input = new RtIntensityPairs(rtArray, intensityArray);
+        RtIntensityPairsDouble input = new RtIntensityPairsDouble(rtArray, intensityArray);
         RtIntensityPairsDouble output = null;
         output = gauseFilter.filter(input, 0.2f/8, 0.01f);
         assert isSimilar(output.getIntensityArray()[0], 0.000734827F, 0.01F);

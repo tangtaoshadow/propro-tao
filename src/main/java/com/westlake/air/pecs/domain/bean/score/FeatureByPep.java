@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.domain.bean.score;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import lombok.Data;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
 public class FeatureByPep {
     boolean featureFound;
 
-    List<RtIntensityPairs> rtIntensityPairsOriginList;
+    List<RtIntensityPairsDouble> rtIntensityPairsOriginList;
 
     List<List<ExperimentFeature>> experimentFeatures;
 

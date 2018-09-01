@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.rtnormalizer;
 
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.feature.SignalToNoiseEstimator;
@@ -38,7 +39,7 @@ public class RTNormalizerScorer {
      * @param libraryIntensity intensity in transitionList in transitionGroup
      * @return List of overallQuality
      */
-    public List<ScoreRtPair> score(List<RtIntensityPairs> chromatograms, List<List<ExperimentFeature>> experimentFeatures, List<Float> libraryIntensity, List<double[]> noise1000List, SlopeIntercept slopeIntercept, float groupRt){
+    public List<ScoreRtPair> score(List<RtIntensityPairsDouble> chromatograms, List<List<ExperimentFeature>> experimentFeatures, List<Float> libraryIntensity, List<double[]> noise1000List, SlopeIntercept slopeIntercept, double groupRt){
 
 
         List<ScoreRtPair> finalScores = new ArrayList<>();
@@ -46,7 +47,7 @@ public class RTNormalizerScorer {
             FeatureScores scores = new FeatureScores();
             new ChromatographicScorer().calculateChromatographicScores(chromatograms, features, libraryIntensity, noise1000List, scores);
             new LibraryScorer().calculateLibraryScores(features,libraryIntensity, slopeIntercept, groupRt, scores);
-            float ldaScore = -1f * calculateLdaPrescore(scores);
+            double ldaScore = -1d * calculateLdaPrescore(scores);
             ScoreRtPair scoreRtPair = new ScoreRtPair();
             scoreRtPair.setRt(features.get(0).getRt());
             scoreRtPair.setScore(ldaScore);
@@ -62,12 +63,12 @@ public class RTNormalizerScorer {
      * @param scores pre-calculated
      * @return final score
      */
-    private float calculateLdaPrescore(FeatureScores scores){
-        return  scores.getVarLibraryCorr()              * -0.34664267f +
-                scores.getVarLibraryRsmd()              *  2.98700722f +
-                scores.getVarXcorrCoelution()           *  0.09445371f +
-                scores.getVarXcorrShape()               * -5.71823862f +
-                scores.getVarLogSnScore()               * -0.72989582f;
+    private double calculateLdaPrescore(FeatureScores scores){
+        return  scores.getVarLibraryCorr()              * -0.34664267d +
+                scores.getVarLibraryRsmd()              *  2.98700722d +
+                scores.getVarXcorrCoelution()           *  0.09445371d +
+                scores.getVarXcorrShape()               * -5.71823862d +
+                scores.getVarLogSnScore()               * -0.72989582d;
     }
 
 

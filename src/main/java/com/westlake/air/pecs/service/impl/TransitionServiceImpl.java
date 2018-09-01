@@ -197,8 +197,8 @@ public class TransitionServiceImpl implements TransitionService {
         List<TargetTransition> targetList = transitionDAO.getTTAll(query);
 
         for (TargetTransition targetTransition : targetList) {
-            targetTransition.setRtStart((targetTransition.getRt() - slopeIntercept.getIntercept()) / slopeIntercept.getSlope() - rtExtractionWindows / 2.0f);
-            targetTransition.setRtEnd((targetTransition.getRt() - slopeIntercept.getIntercept()) / slopeIntercept.getSlope() + rtExtractionWindows / 2.0f);
+            targetTransition.setRtStart((targetTransition.getRt() - (float) slopeIntercept.getIntercept()) / (float) slopeIntercept.getSlope() - rtExtractionWindows / 2.0f);
+            targetTransition.setRtEnd((targetTransition.getRt() - (float) slopeIntercept.getIntercept()) / (float) slopeIntercept.getSlope() + rtExtractionWindows / 2.0f);
         }
         List<TargetTransition> list = sortMS1Coordinates(targetList);
         return list;
@@ -216,7 +216,7 @@ public class TransitionServiceImpl implements TransitionService {
         long readDB = System.currentTimeMillis() - start;
         if (rtExtractionWindows != -1) {
             for (TargetTransition targetTransition : targetList) {
-                float iRt = (targetTransition.getRt() - slopeIntercept.getIntercept()) / slopeIntercept.getSlope();
+                float iRt = (targetTransition.getRt() - (float) slopeIntercept.getIntercept()) / (float) slopeIntercept.getSlope();
                 targetTransition.setRtStart(iRt - rtExtractionWindows / 2.0f);
                 targetTransition.setRtEnd(iRt + rtExtractionWindows / 2.0f);
             }

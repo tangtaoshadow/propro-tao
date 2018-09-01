@@ -9,9 +9,9 @@ import lombok.Data;
 @Data
 public class SlopeIntercept {
 
-    float slope;
+    double slope;
 
-    float intercept;
+    double intercept;
 
     public SlopeIntercept(){}
 

@@ -22,22 +22,22 @@ public class PeakSpline {
     private List<BigDecimal> dBD;
 
     // TODO: 暂时只有1阶导数
-    public float derivatives(float value){
+    public double derivatives(double value){
         int i = MathUtil.bisection(x, value).getHigh();
         if(x[i] > value || x[x.length-1] == value){
             --i;
         }
         double xx = value - x[i];
-        return (float)(b[i] + 2 * c[i] * xx + 3 * d[i] * xx * xx);
+        return (b[i] + 2 * c[i] * xx + 3 * d[i] * xx * xx);
     }
 
-    public float eval(float value){
+    public double eval(double value){
         int i = MathUtil.bisection(x, value).getHigh();
         if(x[i] > value || x[x.length-1] == value){
             --i;
         }
         double xx = value - x[i];
-        return (float) (((d[i] * xx + c[i]) * xx + b[i]) * xx + a[i]);
+        return(((d[i] * xx + c[i]) * xx + b[i]) * xx + a[i]);
     }
 
     public void init(RtIntensityPairsDouble rtIntensityPairs, int leftBoundary, int rightBoundary){
@@ -107,13 +107,13 @@ public class PeakSpline {
             d[j] = (c[j + 1] - c[j]) / (3 * h[j]);
         }
     }
-    public void initBD(Float[] rt, Double[] intensity, int leftBoundary, int rightBoundary){
+    public void initBD(Float[] rt, Float[] intensity, int leftBoundary, int rightBoundary){
         int maxIndex = rightBoundary - leftBoundary;
         xBD = new ArrayList<>();
         aBD = new ArrayList<>();
         for(int i=leftBoundary; i<= rightBoundary; i++){
             xBD.add(new BigDecimal(Float.toString(rt[i])));
-            aBD.add(new BigDecimal(Double.toString(intensity[i])));
+            aBD.add(new BigDecimal(Float.toString(intensity[i])));
         }
 
         bBD = new ArrayList<>();
@@ -148,9 +148,9 @@ public class PeakSpline {
         }
     }
 
-    public double evalBD(float value){
-        int i = MathUtil.bisection(xBD, value).getHigh();
-        BigDecimal valueBD = new BigDecimal(Float.toString(value));
+    public double evalBD(double value){
+        int i = MathUtil.bisectionBD(xBD, value).getHigh();
+        BigDecimal valueBD = new BigDecimal(Double.toString(value));
         if(xBD.get(i).compareTo(valueBD) > 0 || xBD.get(xBD.size()-1).compareTo(valueBD) == 0){
             --i;
         }
@@ -159,10 +159,10 @@ public class PeakSpline {
         return result.doubleValue();
     }
 
-    public double derivativesBD(float value){
-        int i = MathUtil.bisection(xBD, value).getHigh();
+    public double derivativesBD(double value){
+        int i = MathUtil.bisectionBD(xBD, value).getHigh();
 
-        BigDecimal valueBD = new BigDecimal(Float.toString(value));
+        BigDecimal valueBD = new BigDecimal(Double.toString(value));
         if(xBD.get(i).compareTo(valueBD) > 0 || xBD.get(xBD.size()-1).compareTo(valueBD) == 0){
             --i;
         }

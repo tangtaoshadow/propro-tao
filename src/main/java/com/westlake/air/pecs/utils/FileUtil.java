@@ -33,15 +33,15 @@ public class FileUtil {
 
     public static RtIntensityPairsDouble txtReader(BufferedReader reader,String divide, int column1, int column2) throws IOException {
         String line = reader.readLine();
-        List<Float> rtList = new ArrayList<>();
+        List<Double> rtList = new ArrayList<>();
         List<Double> intensityList = new ArrayList<>();
         while (line != null){
             String[] item = line.split(divide);
-            rtList.add(Float.parseFloat(item[column1]));
+            rtList.add(Double.parseDouble(item[column1]));
             intensityList.add(Double.parseDouble(item[column2]));
             line = reader.readLine();
         }
-        Float[] rtArray = new Float[rtList.size()];
+        Double[] rtArray = new Double[rtList.size()];
         Double[] intArray = new Double[intensityList.size()];
         for(int i=0; i<rtArray.length; i++){
             rtArray[i] = rtList.get(i);

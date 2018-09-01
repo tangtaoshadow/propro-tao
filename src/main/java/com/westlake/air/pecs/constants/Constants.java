@@ -12,13 +12,16 @@ public class Constants {
     public static final int MAX_INSERT_RECORD_FOR_TRANSITION = 100000;
 
     //RT Normalizer
-    public static final float SIGNAL_TO_NOISE_LIMIT = 1.0f;
+    public static final boolean CHECK_SPACINGS = true;
+    public static final double SPACING_DIFFERENCE = 1.5d;
+    public static final double SPACING_DIFFERENCE_GAP = 4d;
+    public static final double SIGNAL_TO_NOISE_LIMIT = 1.0d;
     public static final int MISSING_LIMIT = 1;
-    public static final float THRESHOLD = 0.01f;
-    public static final float AUTO_MAX_STDEV_FACTOR = 3.0f;
+    public static final double THRESHOLD = 0.000001d;
+    public static final double AUTO_MAX_STDEV_FACTOR = 3.0d;
     public static final int MIN_REQUIRED_ELEMENTS = 10;
 //    public static final float NOISE_FOR_EMPTY_WINDOW = (float) Math.pow(10.0,20);
-    public static final float NOISE_FOR_EMPTY_WINDOW = 2.0f;
+    public static final double NOISE_FOR_EMPTY_WINDOW = 2.0d;
     public static final float STOP_AFTER_INTENSITY_RATIO = 0.0001f;
     public static final float MIN_RSQ = 0.95f;
     public static final float MIN_COVERAGE = 0.6f;
@@ -30,7 +33,7 @@ public class Constants {
 
     //Extractor
     public static final String TRAFO_INVERT_MODEL = "LINEAR";
-    public static final float RT_EXTRACTION_WINDOW = 600.0f;
+    public static final double RT_EXTRACTION_WINDOW = 600.0d;
     public static final float MZ_EXTRACTION_WINDOW = 0.05f;
     public static final float EXTRA_RT_EXTRACTION_WINDOW = 0.0f;
 

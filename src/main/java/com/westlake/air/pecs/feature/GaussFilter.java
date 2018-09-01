@@ -13,32 +13,34 @@ public class GaussFilter {
 
     /**
      * @param pairs
-     * @param sigma 一般默认为 30/8
-     * @param spacing 一般默认为0.01
+     * @param sigmaFloat 一般默认为 30/8
+     * @param spacingFloat 一般默认为0.01
      * @return
      */
-    public RtIntensityPairsDouble filter(RtIntensityPairs pairs, float sigma, float spacing) {
+    public RtIntensityPairsDouble filter(RtIntensityPairsDouble pairs, Float sigmaFloat, Float spacingFloat) {
 
+        Double sigma = Double.parseDouble(sigmaFloat.toString());
+        Double spacing = Double.parseDouble(spacingFloat.toString());
         //coeffs: 以0为中心，sigma为标准差的正态分布参数
         double[] coeffs = getCoeffs(sigma, spacing, getRightNum(sigma, spacing));
 
         //startPosition & endPosition
         int middle = getRightNum(sigma, spacing);
         int listSize = pairs.getRtArray().length;
-        float startPosition, endPosition;
-        float minRt = pairs.getRtArray()[0];
-        float maxRt = pairs.getRtArray()[listSize - 1];
+        double startPosition, endPosition;
+        double minRt = pairs.getRtArray()[0];
+        double maxRt = pairs.getRtArray()[listSize - 1];
 
         //begin integrate
-        RtIntensityPairsDouble pairsFiltered = new RtIntensityPairsDouble();
-        Float[] rtArray = pairs.getRtArray();
-        Float[] intArray = pairs.getIntensityArray();
-        pairsFiltered.setRtArray(rtArray);
+        RtIntensityPairsDouble pairsFiltered = new RtIntensityPairsDouble(pairs);
+        Double[] rtArray = pairsFiltered.getRtArray();
+        Double[] intArray = pairsFiltered.getIntensityArray();
         Double[] newIntArray = new Double[intArray.length];
-        float distanceInGaussian;
+        Float distanceInGaussianFloat;
+        Double distanceInGaussian;
         int leftPosition;
         int rightPosition;
-        float residualPercent;
+        double residualPercent;
         double coeffRight;
         double coeffLeft;
         double norm = 0;
@@ -69,7 +71,8 @@ public class GaussFilter {
             while (j > 0 && rtArray[j-1] > startPosition) {
 
 //                distanceInGaussian = Math.abs(rtArray[i] - rtArray[j]);
-                distanceInGaussian = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j]) * 10000)) / 10000;
+                distanceInGaussianFloat = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j]) * 10000)) / 10000;
+                distanceInGaussian = Double.parseDouble(distanceInGaussianFloat.toString());
                 leftPosition = (int) (distanceInGaussian / spacing);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing) - distanceInGaussian) / spacing;
@@ -79,7 +82,8 @@ public class GaussFilter {
                     coeffRight = coeffs[leftPosition];
                 }
 
-                distanceInGaussian = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j-1]) * 10000)) / 10000;
+                distanceInGaussianFloat = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j-1]) * 10000)) / 10000;
+                distanceInGaussian = Double.parseDouble(distanceInGaussianFloat.toString());
                 leftPosition = (int) (distanceInGaussian / spacing);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing - distanceInGaussian)) / spacing;
@@ -100,7 +104,8 @@ public class GaussFilter {
 
             // right side of i
             while (j < listSize - 1 && rtArray[j + 1] < endPosition) {
-                distanceInGaussian = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j]) * 10000)) / 10000;
+                distanceInGaussianFloat = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j]) * 10000)) / 10000;
+                distanceInGaussian = Double.parseDouble(distanceInGaussianFloat.toString());
                 leftPosition = (int) (distanceInGaussian / spacing);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing) - distanceInGaussian) / spacing;
@@ -111,7 +116,8 @@ public class GaussFilter {
                 }
 
                 //(float)(Math.round(a*100))/100
-                distanceInGaussian = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j+1]) * 10000)) / 10000;
+                distanceInGaussianFloat = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j+1]) * 10000)) / 10000;
+                distanceInGaussian = Double.parseDouble(distanceInGaussianFloat.toString());
                 leftPosition = (int) (distanceInGaussian / spacing);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing - distanceInGaussian)) / spacing;
@@ -141,11 +147,11 @@ public class GaussFilter {
     }
 
 
-    private int getRightNum(float sigma, float spacing) {
+    private int getRightNum(double sigma, double spacing) {
         return (int) Math.ceil(4 * sigma / spacing) + 1;
     }
 
-    private double[] getCoeffs(float sigma, float spacing, int coeffSize) {
+    private double[] getCoeffs(double sigma, double spacing, int coeffSize) {
         double[] coeffs = new double[coeffSize];
         for (int i = 0; i < coeffSize; i++) {
             coeffs[i] = (1.0 / (sigma * Math.sqrt(2.0 * Math.PI)) * Math.exp(-((i * spacing) * (i * spacing)) / (2 * sigma * sigma)));

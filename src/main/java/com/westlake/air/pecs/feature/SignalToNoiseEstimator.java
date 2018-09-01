@@ -20,7 +20,7 @@ public class SignalToNoiseEstimator {
      * @param binCount
      * @return
      */
-    public double[] computeSTN(RtIntensityPairsDouble rtIntensity, float windowLength, int binCount) {
+    public double[] computeSTN(RtIntensityPairsDouble rtIntensity, double windowLength, int binCount) {
 
         //final result
         double[] stnResults = new double[rtIntensity.getRtArray().length];
@@ -32,11 +32,11 @@ public class SignalToNoiseEstimator {
         double maxIntensity = meanVariance[0] + Math.sqrt(meanVariance[1]) * Constants.AUTO_MAX_STDEV_FACTOR;
 
         //bin params
-        float windowHalfSize = windowLength / 2.0f;
+        double windowHalfSize = windowLength / 2.0d;
         double binSize = Math.max(1.0d, maxIntensity / binCount);
         double[] binValue = new double[binCount];
         for (int bin = 0; bin < binCount; bin++) {
-            binValue[bin] = (bin + 0.5) * binSize;
+            binValue[bin] = (bin + 0.5d) * binSize;
         }
 
         //params
@@ -88,7 +88,7 @@ public class SignalToNoiseEstimator {
                     ++medianBin;
                     elementIncCount += histogram[medianBin];
                 }
-                noise = Math.max(1.0, binValue[medianBin]);
+                noise = Math.max(1.0d, binValue[medianBin]);
             }
             stnResults[positionCenter] = rtIntensity.getIntensityArray()[positionCenter] / noise;
             positionCenter++;
@@ -127,7 +127,7 @@ public class SignalToNoiseEstimator {
         //get variance
         sum = 0;
         for (double intens : intensity) {
-            sum += Math.pow((meanVariance[0] - intens), 2);
+            sum += (meanVariance[0] - intens)*(meanVariance[0] - intens);
         }
         meanVariance[1] = sum / count;
 

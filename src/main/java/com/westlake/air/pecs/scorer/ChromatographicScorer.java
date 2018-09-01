@@ -3,6 +3,7 @@ package com.westlake.air.pecs.scorer;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
@@ -33,7 +34,7 @@ public class ChromatographicScorer {
      * @param experimentFeatures list of features in selected mrmfeature
      * @param signalToNoiseList signal to noise list of chromatogram list
      */
-    public void calculateChromatographicScores(List<RtIntensityPairs> chromatograms, List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, List<double[]> signalToNoiseList, FeatureScores scores){
+    public void calculateChromatographicScores(List<RtIntensityPairsDouble> chromatograms, List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, List<double[]> signalToNoiseList, FeatureScores scores){
         Table<Integer, Integer, Float[]> xcorrMatrix = initializeXCorrMatrix(experimentFeatures);
 
         //xcorrCoelutionScore
@@ -91,7 +92,7 @@ public class ChromatographicScorer {
             snScore = 0.0f;
         }
         for(int k = 0; k<signalToNoiseList.size();k++){
-            rt = experimentFeatures.get(0).getRt(); //max peak rt
+            rt = (float) experimentFeatures.get(0).getRt(); //max peak rt
             BisectionLowHigh bisectionLowHigh = MathUtil.bisection(chromatograms.get(k), rt);
             leftIndex = bisectionLowHigh.getLow();
             rightIndex = bisectionLowHigh.getHigh();
@@ -116,12 +117,12 @@ public class ChromatographicScorer {
      * @param scores
      */
     public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores){
-        float intensitySum = 0.0f;
+        double intensitySum = 0.0f;
         for(ExperimentFeature feature: experimentFeatures){
             intensitySum += feature.getIntensity();
         }
-        float totalXic = experimentFeatures.get(0).getTotalXic();
-        scores.setVarIntensityScore(intensitySum / totalXic);
+        double totalXic = experimentFeatures.get(0).getTotalXic();
+        scores.setVarIntensityScore((float) (intensitySum / totalXic));
     }
 
     /**
@@ -134,7 +135,7 @@ public class ChromatographicScorer {
     private Table<Integer, Integer, Float[]> initializeXCorrMatrix(List<ExperimentFeature> experimentFeatures){
         int listLength = experimentFeatures.size();
         Table<Integer, Integer, Float[]> xcorrMatrix = HashBasedTable.create();
-        float[] intensityi, intensityj;
+        double[] intensityi, intensityj;
         for(int i=0; i<listLength;i++){
             for(int j=i; j<listLength;j++){
                 intensityi = MathUtil.standardizeData(experimentFeatures.get(i).getHullInt());
@@ -155,7 +156,7 @@ public class ChromatographicScorer {
      * @param data2 the same length as data1
      * @return value of xcorrMatrix element
      */
-    private Float[] calculateCrossCorrelation(float[] data1, float[] data2){
+    private Float[] calculateCrossCorrelation(double[] data1, double[] data2){
         int maxDelay = data1.length;
         Float[] output = new Float[maxDelay * 2 - 1];
         double sxy;
