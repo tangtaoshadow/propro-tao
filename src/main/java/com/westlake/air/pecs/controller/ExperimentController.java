@@ -84,11 +84,10 @@ public class ExperimentController extends BaseController {
                @RequestParam(value = "name", required = true) String name,
                @RequestParam(value = "fileLocation", required = true) String fileLocation,
                @RequestParam(value = "description", required = false) String description,
+               @RequestParam(value = "overlap", required = false) Float overlap,
                RedirectAttributes redirectAttributes) {
 
-        model.addAttribute("libraries", getLibraryList(0));
-        model.addAttribute("iRtLibraries", getLibraryList(1));
-
+        model.addAttribute("overlap", overlap);
         model.addAttribute("name", name);
         model.addAttribute("description", description);
 
@@ -109,6 +108,7 @@ public class ExperimentController extends BaseController {
         experimentDO.setName(name);
         experimentDO.setFileType(fileLocation.substring(fileLocation.lastIndexOf(".") + 1).trim().toLowerCase());
         experimentDO.setDescription(description);
+        experimentDO.setOverlap(overlap);
         experimentDO.setFileLocation(fileLocation);
 
         ResultDO result = experimentService.insert(experimentDO);
@@ -127,8 +127,6 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/edit/{id}")
     String edit(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
 
-        model.addAttribute("libraries", getLibraryList(0));
-        model.addAttribute("iRtLibraries", getLibraryList(1));
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());

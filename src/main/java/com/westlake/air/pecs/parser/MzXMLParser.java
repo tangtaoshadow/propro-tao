@@ -49,7 +49,7 @@ public class MzXMLParser extends BaseExpParser {
     }
 
     @Override
-    public List<ScanIndexDO> index(File file, String experimentId, TaskDO taskDO) {
+    public List<ScanIndexDO> index(File file, String experimentId,Float overlap, TaskDO taskDO) {
         RandomAccessFile raf = null;
         List<ScanIndexDO> list = null;
         try {
@@ -59,7 +59,7 @@ public class MzXMLParser extends BaseExpParser {
 
             ScanIndexDO currentMS1 = null;
             for (ScanIndexDO scanIndex : list) {
-                parseAttribute(raf, scanIndex);
+                parseAttribute(raf, overlap, scanIndex);
                 scanIndex.setExperimentId(experimentId);
 
                 if (scanIndex.getMsLevel() == 1) {
@@ -404,7 +404,7 @@ public class MzXMLParser extends BaseExpParser {
     }
 
     //解析Scan标签的Attributes
-    private void parseAttribute(RandomAccessFile raf, ScanIndexDO scanIndexDO) throws IOException {
+    private void parseAttribute(RandomAccessFile raf, Float overlap, ScanIndexDO scanIndexDO) throws IOException {
 
         //仅关注两个attribute msLevel和retentionTime.因此如果扫描到这两个属性以后就可以跳出循环以节省时间开销
         int focusAttributeCount = 2;
@@ -426,6 +426,9 @@ public class MzXMLParser extends BaseExpParser {
                 tmpStr = tmpStr.trim();
                 if (tmpStr.startsWith("windowWideness")) {
                     scanIndexDO.setWindowWideness(Float.parseFloat(tmpStr.split("=")[1].replace("\"", "")));
+                    if(overlap != null){
+                        scanIndexDO.setWindowWideness(scanIndexDO.getWindowWideness() - overlap);
+                    }
                     break;
                 }
             }

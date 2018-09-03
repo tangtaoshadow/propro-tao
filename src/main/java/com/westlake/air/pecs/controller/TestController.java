@@ -1,7 +1,10 @@
 package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.mongodb.BasicDBObject;
 import com.westlake.air.pecs.constants.TaskTemplate;
+import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
@@ -11,6 +14,8 @@ import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.TaskService;
+import com.westlake.air.pecs.utils.FileUtil;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,8 +24,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.xml.crypto.Data;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -37,7 +44,8 @@ public class TestController extends BaseController{
     TaskService taskService;
     @Autowired
     AnalyseDataService analyseDataService;
-
+    @Autowired
+    AnalyseDataDAO analyseDataDAO;
     public static float MZ_EXTRACT_WINDOW = 0.05f;
     public static float RT_EXTRACT_WINDOW = 1200f;
     public static float SIGMA = 6.25f;
@@ -95,8 +103,44 @@ public class TestController extends BaseController{
 
     @RequestMapping("test4")
     @ResponseBody
-    String test4(Model model, RedirectAttributes redirectAttributes) {
-//        List<AnalyseDataDO> dataList = analyseDataService.getAllByOverviewId()
-        return "OK";
+    String test4(Model model, RedirectAttributes redirectAttributes) throws IOException {
+//        List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("data/convStandard.json");
+        String content = FileUtil.readFile("data/conv.json");
+        List<AnalyseDataDO> dataList = JSONArray.parseArray(content, AnalyseDataDO.class);
+        HashMap<String, Integer> countMap = new HashMap<>();
+        for(AnalyseDataDO data : dataList){
+            if(countMap.get(data.getPeptideRef()) != null){
+                countMap.put(data.getPeptideRef(), countMap.get(data.getPeptideRef())+1);
+            }else{
+                countMap.put(data.getPeptideRef(), 1);
+            }
+        }
+        logger.info(countMap.size()+"");
+        for(String key : countMap.keySet()){
+            logger.info(key+":"+countMap.get(key));
+
+            if(countMap.get(key) > 6){
+                logger.info(key);
+            }
+        }
+
+
+//        analyseDataService.getTransitionGroup();
+        return dataList.size() + "";
+    }
+
+    @RequestMapping("test5")
+    @ResponseBody
+    String test5(Model model, RedirectAttributes redirectAttributes) throws IOException {
+//        List<BasicDBObject> result = analyseDataDAO.countSamePeptideRef("5b88d5bb58487f0b4437480d");
+//        List<String> finalList = new ArrayList<>();
+//        for(Object object : result){
+//            Document doc = (Document) object;
+//            if(doc.getInteger("count") > 6){
+//                finalList.add(doc.getString("peptideRef"));
+//            }
+//        }
+//        return JSON.toJSONString(finalList);
+        return null;
     }
 }

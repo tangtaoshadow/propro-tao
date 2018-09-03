@@ -38,7 +38,7 @@ public abstract class BaseExpParser {
     private static byte[] prefix = "<scanList>".getBytes();
     private static byte[] suffix = "</scanList>".getBytes();
 
-    public abstract List<ScanIndexDO> index(File file, String experimentId, TaskDO taskDO);
+    public abstract List<ScanIndexDO> index(File file, String experimentId, Float overlap, TaskDO taskDO);
 
     public abstract MzIntensityPairs parseOne(RandomAccessFile raf, long start, long end);
 

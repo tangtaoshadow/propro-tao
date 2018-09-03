@@ -25,6 +25,20 @@ public class FileUtil {
         return new String(bytes, 0, fileLength);
     }
 
+    public static List<AnalyseDataDO> readAnalyseDataFromJsonFile(String filePath) throws IOException {
+        File file = new File(FileUtil.class.getClassLoader().getResource(filePath).getPath());
+        FileInputStream fis = new FileInputStream(file);
+        BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+        String line = br.readLine();
+        List<AnalyseDataDO> dataList = new ArrayList<>();
+        while (line != null) {
+            dataList.addAll(JSONArray.parseArray(line, AnalyseDataDO.class));
+            line = br.readLine();
+        }
+        br.close();
+        return dataList;
+    }
+
     public static List<AnalyseDataDO> getAnalyseDataList(String filePath) throws IOException {
         String content = readFile(filePath);
         List<AnalyseDataDO> dataList = JSONArray.parseArray(content, AnalyseDataDO.class);

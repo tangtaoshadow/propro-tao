@@ -23,6 +23,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -98,6 +102,37 @@ public class AnalyseController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/analyse/overview/list";
         }
+    }
+
+    @RequestMapping(value = "/overview/export/{id}")
+    String overviewExport(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) throws IOException {
+
+        int pageSize = 1;
+        AnalyseDataQuery query = new AnalyseDataQuery(id, 2);
+        int count = analyseDataService.count(query).intValue();
+        int totalPage = count % pageSize == 0 ? count / pageSize : (count / pageSize + 1);
+        File file = new File("D://test.json");
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        OutputStream os = new FileOutputStream(file);
+
+        byte[] changeLine = "\n".getBytes();
+        for (int i = 1; i <= totalPage; i++) {
+            query.setPageSize(pageSize);
+            query.setPageNo(i);
+            ResultDO<List<AnalyseDataDO>> dataListRes = analyseDataService.getList(query);
+
+            String content = JSONArray.toJSONString(dataListRes.getModel());
+            byte[] b = content.getBytes();
+            int l = b.length;
+
+            os.write(b, 0, l);
+            os.write(changeLine,0,changeLine.length);
+        }
+        os.close();
+        return "redirect:/analyse/overview/list";
+
     }
 
     @RequestMapping(value = "/overview/delete/{id}")

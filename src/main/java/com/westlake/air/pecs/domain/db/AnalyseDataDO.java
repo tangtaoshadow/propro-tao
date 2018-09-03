@@ -26,6 +26,8 @@ public class AnalyseDataDO extends BaseDO {
     @Indexed
     String peptideRef;
 
+    Double rt;
+
     String transitionId;
 
     String annotations;

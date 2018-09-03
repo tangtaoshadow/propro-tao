@@ -45,13 +45,13 @@ public class MzMLParser extends BaseExpParser{
      * @return List<ScanIndexDO>
      */
     @Override
-    public List<ScanIndexDO> index(File file, String experimentId, TaskDO taskDO) {
+    public List<ScanIndexDO> index(File file, String experimentId,Float overlap, TaskDO taskDO) {
         RandomAccessFile raf = null;
         List<ScanIndexDO> list = new ArrayList<>();
         try {
             raf = new RandomAccessFile(file, "r");
             parseOffsetLists(raf, list); // 循环一次，有多少offset就有多少list元素，每个元素暂时填进去start和num
-            parseAttributes(raf, experimentId, list);
+            parseAttributes(raf, experimentId,overlap, list);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -92,7 +92,7 @@ public class MzMLParser extends BaseExpParser{
     }
 
     // 一个循环，解决每个数据块的end，experiment id, parentNum, precurserMz, precurserMzStrart, precurserMzEnd, precurserWindow, ms level, rt,
-    private void parseAttributes(RandomAccessFile rf, String experimentId, List<ScanIndexDO> list) throws IOException {
+    private void parseAttributes(RandomAccessFile rf, String experimentId,Float overlap, List<ScanIndexDO> list) throws IOException {
         int len = list.size();
         int level = 0, parentNum = 0;
         Float rt, precursorMz, precursorMzStart, precursorMzEnd, offset = 0F;
@@ -145,6 +145,9 @@ public class MzMLParser extends BaseExpParser{
                     break;
                 } else if (level == 2 && line.contains("isolation window lower offset")) {
                     offset = searchValue(line);
+                    if(overlap != null){
+                        offset = offset - overlap/2;
+                    }
                 }
             }
             if (i % 10000 == 0 && i != 0) {
