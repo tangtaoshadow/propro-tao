@@ -39,7 +39,7 @@ public class LibraryScorer {
         //平均占比差距
         float sum = 0.0f;
         float[] x = ScoreUtil.normalizeSum(libraryIntensity);
-        float[] y = ScoreUtil.normalizeSum(experimentIntensity);
+        float[] y = ScoreUtil.normalizeSumDouble(experimentIntensity);
         for(int i=0; i<x.length; i++){
             sum += Math.abs(x[i] - y[i]);
         }

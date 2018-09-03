@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.feature;
 
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import org.springframework.stereotype.Component;
@@ -52,14 +53,14 @@ public class GaussFilter {
             v = 0;
             //startPosition
             if ((rtArray[i] - middle * spacing) > minRt) {
-                startPosition = rtArray[i] - middle * spacing;
+                startPosition = Math.round((rtArray[i] - middle * spacing) * Constants.MATH_ROUND_PRECISION) / Constants.MATH_ROUND_PRECISION;
             } else {
                 startPosition = minRt;
             }
 
             //endPostion
             if ((rtArray[i] + middle * spacing) < maxRt) {
-                endPosition = rtArray[i] + middle * spacing;
+                endPosition = Math.round((rtArray[i] + middle * spacing) * Constants.MATH_ROUND_PRECISION) / Constants.MATH_ROUND_PRECISION;
             } else {
                 endPosition = maxRt;
             }
@@ -71,8 +72,8 @@ public class GaussFilter {
             while (j > 0 && rtArray[j-1] > startPosition) {
 
 //                distanceInGaussian = Math.abs(rtArray[i] - rtArray[j]);
-                distanceInGaussian = Math.round((rtArray[i] - rtArray[j]) * 1000000d)/1000000d;
-                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * 1000000d)/1000000d);
+                distanceInGaussian = Math.round((rtArray[i] - rtArray[j]) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION;
+                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing) - distanceInGaussian) / spacing;
                 if (rightPosition < middle) {
@@ -82,8 +83,8 @@ public class GaussFilter {
                 }
 
 
-                distanceInGaussian = Math.round((rtArray[i] - rtArray[j-1]) * 1000000d)/1000000d;
-                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * 1000000d)/1000000d);
+                distanceInGaussian = Math.round((rtArray[i] - rtArray[j-1]) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION;
+                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing - distanceInGaussian)) / spacing;
                 if (rightPosition < middle) {
@@ -105,8 +106,8 @@ public class GaussFilter {
             while (j < listSize - 1 && rtArray[j + 1] < endPosition) {
 //                distanceInGaussianFloat = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j]) * 10000)) / 10000;
 //                distanceInGaussian = Double.parseDouble(distanceInGaussianFloat.toString());
-                distanceInGaussian = Math.round((rtArray[j] - rtArray[i]) * 1000000d)/1000000d;
-                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * 1000000d)/1000000d);
+                distanceInGaussian = Math.round((rtArray[j] - rtArray[i]) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION;
+                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing) - distanceInGaussian) / spacing;
                 if (rightPosition < middle) {
@@ -118,9 +119,13 @@ public class GaussFilter {
                 //(float)(Math.round(a*100))/100
 //                distanceInGaussianFloat = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j+1]) * 10000)) / 10000;
 //                distanceInGaussian = Double.parseDouble(distanceInGaussianFloat.toString());
-                distanceInGaussian = Math.round((rtArray[j+1] - rtArray[i]) * 1000000d)/1000000d;
-                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * 1000000d)/1000000d);
+                distanceInGaussian = Math.round((rtArray[j+1] - rtArray[i]) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION;
+                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION);
                 rightPosition = leftPosition + 1;
+
+                if(leftPosition >= middle){
+                    System.out.println("error.");
+                }
                 residualPercent = (Math.abs(leftPosition * spacing - distanceInGaussian)) / spacing;
                 if (rightPosition < middle) {
                     coeffRight = (1 - residualPercent) * coeffs[leftPosition] + residualPercent * coeffs[rightPosition];
