@@ -107,7 +107,7 @@ public class AnalyseController extends BaseController {
     @RequestMapping(value = "/overview/export/{id}")
     String overviewExport(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) throws IOException {
 
-        int pageSize = 1;
+        int pageSize = 100;
         AnalyseDataQuery query = new AnalyseDataQuery(id, 2);
         int count = analyseDataService.count(query).intValue();
         int totalPage = count % pageSize == 0 ? count / pageSize : (count / pageSize + 1);
@@ -118,8 +118,9 @@ public class AnalyseController extends BaseController {
         OutputStream os = new FileOutputStream(file);
 
         byte[] changeLine = "\n".getBytes();
+        query.setPageSize(pageSize);
+        query.setOverviewId(id);
         for (int i = 1; i <= totalPage; i++) {
-            query.setPageSize(pageSize);
             query.setPageNo(i);
             ResultDO<List<AnalyseDataDO>> dataListRes = analyseDataService.getList(query);
 
@@ -128,6 +129,7 @@ public class AnalyseController extends BaseController {
             int l = b.length;
 
             os.write(b, 0, l);
+            logger.info("打印第"+i+"/"+totalPage+"行,本行长度:"+l+";");
             os.write(changeLine,0,changeLine.length);
         }
         os.close();

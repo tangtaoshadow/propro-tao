@@ -381,7 +381,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         try {
             logger.info("开始卷积数据");
             long start = System.currentTimeMillis();
-//      List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
+//            List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
             List<AnalyseDataDO> dataList = FileUtil.getAnalyseDataList("data/conv.json");         //这边先读取本地已经卷积好的iRT数据
 
             logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
@@ -390,6 +390,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             logger.info("计算完毕,耗时:" + (System.currentTimeMillis() - start));
             return resultDO;
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -492,7 +493,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                 //Step4.提取指定原始谱图
                 rtMap = parseSpectrum(raf, indexes, getParser(swathInput.getExperimentDO().getFileType()));
                 //Step5.卷积并且存储数据
-                convolute(totalList, coordinates, rtMap, overviewId, swathInput.getMzExtractWindow(), swathInput.getRtExtractWindow(),  false);
+                convolute(totalList, coordinates, rtMap, overviewId, swathInput.getMzExtractWindow(), swathInput.getRtExtractWindow(), false);
                 logger.info("第" + count + "轮数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
                 count++;
             }
@@ -641,9 +642,9 @@ public class ExperimentServiceImpl implements ExperimentService {
         overviewDO.setCreateDate(new Date());
         overviewDO.setRtExtractWindow(input.getRtExtractWindow());
         overviewDO.setMzExtractWindow(input.getMzExtractWindow());
-        if(input.getSlopeIntercept() != null){
-            overviewDO.setSlope((float)input.getSlopeIntercept().getSlope());
-            overviewDO.setIntercept((float)input.getSlopeIntercept().getIntercept());
+        if (input.getSlopeIntercept() != null) {
+            overviewDO.setSlope((float) input.getSlopeIntercept().getSlope());
+            overviewDO.setIntercept((float) input.getSlopeIntercept().getIntercept());
         }
 
         return overviewDO;

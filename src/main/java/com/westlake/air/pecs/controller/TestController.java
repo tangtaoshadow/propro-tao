@@ -54,15 +54,15 @@ public class TestController extends BaseController{
     @RequestMapping("test")
     @ResponseBody
     String test(Model model, RedirectAttributes redirectAttributes) {
-        ExperimentDO experimentDO = experimentService.getById("5b738f19e63cc81c44325169").getModel();
-        return JSON.toJSONString(experimentService.convAndComputeIrt(experimentDO, "5b67136d2ada5f15749a0140", MZ_EXTRACT_WINDOW, SIGMA, SPACING));
+        ExperimentDO experimentDO = experimentService.getById("5b89029258487f0e14a62b75").getModel();
+        return JSON.toJSONString(experimentService.convAndComputeIrt(experimentDO, "5b88fece58487f13f0609019", MZ_EXTRACT_WINDOW, SIGMA, SPACING));
     }
 
     @RequestMapping("test2")
     @ResponseBody
     String test2(Model model, RedirectAttributes redirectAttributes) {
-        ExperimentDO experimentDO = experimentService.getById("5b738f19e63cc81c44325169").getModel();
-        ResultDO<SlopeIntercept> resultDO = experimentService.convAndComputeIrt(experimentDO, "5b67136d2ada5f15749a0140", MZ_EXTRACT_WINDOW, SIGMA, SPACING);
+        ExperimentDO experimentDO = experimentService.getById("5b89029258487f0e14a62b75").getModel();
+        ResultDO<SlopeIntercept> resultDO = experimentService.convAndComputeIrt(experimentDO, "5b88fece58487f13f0609019", MZ_EXTRACT_WINDOW, SIGMA, SPACING);
         if (resultDO.isFailed()) {
             return JSON.toJSONString(resultDO);
         }
@@ -70,7 +70,7 @@ public class TestController extends BaseController{
         long start = System.currentTimeMillis();
         SwathInput input = new SwathInput();
         input.setExperimentDO(experimentDO);
-        input.setLibraryId("5b84bc9c58487f1060fa0c23");
+        input.setLibraryId("5b88feb758487f13f05f7083");
         input.setSlopeIntercept(slopeIntercept);
         input.setCreator("陆妙善");
         input.setRtExtractWindow(RT_EXTRACT_WINDOW);
