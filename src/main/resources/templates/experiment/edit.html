@@ -41,6 +41,15 @@
                             </label>
                             <input type="text" class="form-control m-input" id="name" name="name" th:value="${experiment?.name}">
                         </div>
+                        <div class="form-group m-form__group row">
+                            <label for="overlap" class="col-2 col-form-label">
+                                自定义Swath重叠区域
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="overlap" readonly
+                                       placeholder="" name="overlap" th:value="${experiment?.overlap}">
+                            </div>
+                        </div>
                         <div class="form-group m-form__group">
                             <label for="fileLocation">
                                 文件位置

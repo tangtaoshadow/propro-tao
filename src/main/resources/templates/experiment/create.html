@@ -55,7 +55,16 @@
                                 <span class="m-form__help">文件在服务器上的绝对路径</span>
                             </div>
                         </div>
-
+                        <div class="form-group m-form__group row">
+                            <label for="overlap" class="col-2 col-form-label">
+                                自定义Swath重叠区域
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="overlap"
+                                       placeholder="" name="overlap" th:value="${overlap}">
+                                <span class="m-form__help">自定义Swath窗口重叠区域,如果窗口间没有重叠可以不填</span>
+                            </div>
+                        </div>
                         <div class="form-group m-form__group row">
                             <label for="description" class="col-2 col-form-label">
                                 详细描述

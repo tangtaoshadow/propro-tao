@@ -211,9 +211,9 @@ public class ExperimentServiceImpl implements ExperimentService {
             List<ScanIndexDO> indexList = null;
             //传入不同的文件类型会调用不同的解析层
             if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZXML)) {
-                indexList = mzXMLParser.index(file, experimentDO.getId(), taskDO);
+                indexList = mzXMLParser.index(file, experimentDO.getId(), experimentDO.getOverlap(), taskDO);
             } else if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZML)) {
-                indexList = mzMLParser.index(file, experimentDO.getId(), taskDO);
+                indexList = mzMLParser.index(file, experimentDO.getId(), experimentDO.getOverlap(), taskDO);
             }
 
             taskDO.addLog("索引构建完毕,开始存储索引");
@@ -492,7 +492,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                 //Step4.提取指定原始谱图
                 rtMap = parseSpectrum(raf, indexes, getParser(swathInput.getExperimentDO().getFileType()));
                 //Step5.卷积并且存储数据
-                convolute(totalList, coordinates, rtMap, overviewId, swathInput.getRtExtractWindow(), swathInput.getMzExtractWindow(), false);
+                convolute(totalList, coordinates, rtMap, overviewId, swathInput.getMzExtractWindow(), swathInput.getRtExtractWindow(),  false);
                 logger.info("第" + count + "轮数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
                 count++;
             }
@@ -525,22 +525,10 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     private void convoluteAndInsert(List<TargetTransition> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow, boolean isMS1) {
-        int logCountForMSTarget = 0;
-        long start = System.currentTimeMillis();
         List<AnalyseDataDO> dataList = new ArrayList<>();
-
         for (TargetTransition ms : coordinates) {
-
             AnalyseDataDO dataDO = convForOne(isMS1, ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
             dataList.add(dataDO);
-
-            //每隔1000条数据落库一次,以减少对内存的依赖
-            logCountForMSTarget++;
-            if (logCountForMSTarget % 10000 == 0) {
-                logger.info("已扫描MS目标:" + logCountForMSTarget + "条,累计耗时:" + (System.currentTimeMillis() - start));
-                analyseDataDAO.insert(dataList);
-                dataList.clear();
-            }
         }
         analyseDataDAO.insert(dataList);
     }
@@ -559,7 +547,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     private void convolute(List<AnalyseDataDO> finalList, List<TargetTransition> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float mzExtractWindow, Float rtExtractWindow, boolean isMS1) {
         for (TargetTransition ms : coordinates) {
             AnalyseDataDO dataDO = convForOne(isMS1, ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
-//            finalList.add(dataDO);
+            finalList.add(dataDO);
         }
     }
 

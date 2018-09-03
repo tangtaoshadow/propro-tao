@@ -166,6 +166,19 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     @Override
+    public ResultDO<List<TransitionGroup>> getTransitionGroup(List<AnalyseDataDO> dataList) {
+        List<TransitionGroup> groups = new ArrayList<>();
+        HashMap<String, TransitionGroup> groupMap = new HashMap<>();
+
+        for(AnalyseDataDO data : dataList){
+            if(groupMap.get(data.getPeptideRef()) == null){
+                groupMap.put(data.getPeptideRef(), new TransitionGroup(data.getProteinName(), data.getPeptideRef(), data.getRt()));
+            }
+        }
+        return null;
+    }
+
+    @Override
     public ResultDO<List<TransitionGroup>> getTransitionGroup(AnalyseOverviewDO overviewDO, PageQuery pageQuery) {
         int pageSize = 1000;
         List<Peptide> peptides = transitionDAO.getPeptideList(overviewDO.getLibraryId());

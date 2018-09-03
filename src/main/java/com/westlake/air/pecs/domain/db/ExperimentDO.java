@@ -40,4 +40,5 @@ public class ExperimentDO extends BaseDO {
 
     Date lastModifiedDate;
 
+    Float overlap;
 }
