@@ -71,9 +71,8 @@ public class GaussFilter {
             while (j > 0 && rtArray[j-1] > startPosition) {
 
 //                distanceInGaussian = Math.abs(rtArray[i] - rtArray[j]);
-                distanceInGaussianFloat = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j]) * 10000)) / 10000;
-                distanceInGaussian = Double.parseDouble(distanceInGaussianFloat.toString());
-                leftPosition = (int) (distanceInGaussian / spacing);
+                distanceInGaussian = Math.round((rtArray[i] - rtArray[j]) * 1000000d)/1000000d;
+                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * 1000000d)/1000000d);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing) - distanceInGaussian) / spacing;
                 if (rightPosition < middle) {
@@ -82,9 +81,9 @@ public class GaussFilter {
                     coeffRight = coeffs[leftPosition];
                 }
 
-                distanceInGaussianFloat = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j-1]) * 10000)) / 10000;
-                distanceInGaussian = Double.parseDouble(distanceInGaussianFloat.toString());
-                leftPosition = (int) (distanceInGaussian / spacing);
+
+                distanceInGaussian = Math.round((rtArray[i] - rtArray[j-1]) * 1000000d)/1000000d;
+                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * 1000000d)/1000000d);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing - distanceInGaussian)) / spacing;
                 if (rightPosition < middle) {
@@ -104,9 +103,10 @@ public class GaussFilter {
 
             // right side of i
             while (j < listSize - 1 && rtArray[j + 1] < endPosition) {
-                distanceInGaussianFloat = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j]) * 10000)) / 10000;
-                distanceInGaussian = Double.parseDouble(distanceInGaussianFloat.toString());
-                leftPosition = (int) (distanceInGaussian / spacing);
+//                distanceInGaussianFloat = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j]) * 10000)) / 10000;
+//                distanceInGaussian = Double.parseDouble(distanceInGaussianFloat.toString());
+                distanceInGaussian = Math.round((rtArray[j] - rtArray[i]) * 1000000d)/1000000d;
+                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * 1000000d)/1000000d);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing) - distanceInGaussian) / spacing;
                 if (rightPosition < middle) {
@@ -116,9 +116,10 @@ public class GaussFilter {
                 }
 
                 //(float)(Math.round(a*100))/100
-                distanceInGaussianFloat = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j+1]) * 10000)) / 10000;
-                distanceInGaussian = Double.parseDouble(distanceInGaussianFloat.toString());
-                leftPosition = (int) (distanceInGaussian / spacing);
+//                distanceInGaussianFloat = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j+1]) * 10000)) / 10000;
+//                distanceInGaussian = Double.parseDouble(distanceInGaussianFloat.toString());
+                distanceInGaussian = Math.round((rtArray[j+1] - rtArray[i]) * 1000000d)/1000000d;
+                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * 1000000d)/1000000d);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing - distanceInGaussian)) / spacing;
                 if (rightPosition < middle) {
@@ -127,7 +128,7 @@ public class GaussFilter {
                     coeffRight = coeffs[leftPosition];
                 }
 
-                norm += Math.abs(rtArray[j+1] - rtArray[j] ) * (coeffLeft + coeffRight) / 2.0;
+                norm += Math.abs(rtArray[j+1] - rtArray[j]) * (coeffLeft + coeffRight) / 2.0;
                 v += Math.abs(rtArray[j+1] - rtArray[j] ) * (intArray[j] * coeffLeft + intArray[j+1] * coeffRight) / 2.0;
 
                 j++;

@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.test.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
+import com.westlake.air.pecs.feature.GaussFilter;
 import com.westlake.air.pecs.feature.PeakPicker;
 import com.westlake.air.pecs.feature.SignalToNoiseEstimator;
 import com.westlake.air.pecs.test.BaseTest;
