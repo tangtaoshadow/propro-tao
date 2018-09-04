@@ -166,20 +166,25 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     @Override
-    public ResultDO<List<TransitionGroup>> getTransitionGroup(List<AnalyseDataDO> dataList) {
+    public List<TransitionGroup> getTransitionGroup(List<AnalyseDataDO> dataList) {
         List<TransitionGroup> groups = new ArrayList<>();
         HashMap<String, TransitionGroup> groupMap = new HashMap<>();
 
         for(AnalyseDataDO data : dataList){
             if(groupMap.get(data.getPeptideRef()) == null){
-                groupMap.put(data.getPeptideRef(), new TransitionGroup(data.getProteinName(), data.getPeptideRef(), data.getRt()));
+                TransitionGroup group = new TransitionGroup(data.getProteinName(), data.getPeptideRef(), data.getRt());
+                group.addData(data);
+                groupMap.put(data.getPeptideRef(), group);
+            }else{
+                TransitionGroup group = groupMap.get(data.getPeptideRef());
+                group.addData(data);
             }
         }
-        return null;
+        return new ArrayList<>(groupMap.values());
     }
 
     @Override
-    public ResultDO<List<TransitionGroup>> getTransitionGroup(AnalyseOverviewDO overviewDO, PageQuery pageQuery) {
+    public List<TransitionGroup> getTransitionGroup(AnalyseOverviewDO overviewDO) {
         int pageSize = 1000;
         List<Peptide> peptides = transitionDAO.getPeptideList(overviewDO.getLibraryId());
         HashMap<String, TransitionGroup> groupMap = new HashMap<>();
@@ -209,9 +214,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             logger.info("第" + i + "批数据处理完毕,一共有" + totalPage + "批数据");
         }
 
-        ResultDO<List<TransitionGroup>> resultDO = new ResultDO<List<TransitionGroup>>(true);
-        resultDO.setModel(new ArrayList<TransitionGroup>(groupMap.values()));
-        return resultDO;
+        return new ArrayList<TransitionGroup>(groupMap.values());
     }
 
     @Override

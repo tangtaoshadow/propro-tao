@@ -1,13 +1,13 @@
 package com.westlake.air.pecs.utils;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-
-import java.util.ArrayList;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,6 +15,8 @@ import java.util.List;
  * Time: 2018-08-28 21:45
  */
 public class FileUtil {
+
+    public final Logger logger = LoggerFactory.getLogger(getClass());
 
     public static String readFile(String filePath) throws IOException {
         File file = new File(FileUtil.class.getClassLoader().getResource(filePath).getPath());
@@ -26,12 +28,13 @@ public class FileUtil {
     }
 
     public static List<AnalyseDataDO> readAnalyseDataFromJsonFile(String filePath) throws IOException {
-        File file = new File(FileUtil.class.getClassLoader().getResource(filePath).getPath());
+        File file = new File(filePath);
         FileInputStream fis = new FileInputStream(file);
         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
         String line = br.readLine();
         List<AnalyseDataDO> dataList = new ArrayList<>();
         while (line != null) {
+
             dataList.addAll(JSONArray.parseArray(line, AnalyseDataDO.class));
             line = br.readLine();
         }

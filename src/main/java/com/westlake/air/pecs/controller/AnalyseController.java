@@ -189,11 +189,8 @@ public class AnalyseController extends BaseController {
                      @RequestParam(value = "overviewId", required = true) String overviewId,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
                      @RequestParam(value = "isIrt", required = true) Boolean isIrt,
-                     @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                     @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
                      RedirectAttributes redirectAttributes) {
 
-        model.addAttribute("pageSize", pageSize);
         model.addAttribute("overviewId", overviewId);
         model.addAttribute("libraryId", libraryId);
         model.addAttribute("isIrt", isIrt);
@@ -204,19 +201,14 @@ public class AnalyseController extends BaseController {
         }
 
         List<TransitionGroup> groups = null;
-        ResultDO<List<TransitionGroup>> resultDO = null;
         if(isIrt){
             groups = analyseDataService.getIrtTransitionGroup(overviewId,libraryId);
         }else{
-            PageQuery query = new PageQuery(currentPage, pageSize);
-            resultDO = analyseDataService.getTransitionGroup(overviewResult.getModel(), query);
-            groups = resultDO.getModel().subList(0,100);
+            groups = analyseDataService.getTransitionGroup(overviewResult.getModel());
+            groups = groups.subList(0,100);
         }
 
         model.addAttribute("groups", groups);
-        model.addAttribute("totalPage", resultDO.getTotalPage());
-        model.addAttribute("currentPage", currentPage);
-        model.addAttribute("totalNum", resultDO.getTotalNum());
 
         return "/analyse/data/group";
     }

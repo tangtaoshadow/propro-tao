@@ -179,17 +179,11 @@ public class ScoreServiceImpl implements ScoreService {
         taskDO.addLog("IRT计算完毕," + resultDO.getModel().toString());
         taskService.update(taskDO);
 
-        ResultDO<List<TransitionGroup>> dataListResult = analyseDataService.getTransitionGroup(overviewDO, null);
-        if(dataListResult.isFailed()){
-            taskDO.addLog("获取TransitionGroup失败:" + dataListResult.getMsgInfo());
-            taskDO.finish(TaskDO.STATUS_FAILED);
-            taskService.update(taskDO);
-            return;
-        }
+        List<TransitionGroup> dataList = analyseDataService.getTransitionGroup(overviewDO);
 
         List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(overviewDO.getLibraryId());
         List<PecsScore> pecsScoreList = new ArrayList<>();
-        for (TransitionGroup group : dataListResult.getModel()) {
+        for (TransitionGroup group : dataList) {
             List<FeatureScores> featureScoresList = new ArrayList<>();
             FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, resultDOIRT.getModel(), sigma, spacing);
             if(!featureByPep.isFeatureFound()){

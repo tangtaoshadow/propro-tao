@@ -5,6 +5,7 @@ import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.service.LibraryService;
 import com.westlake.air.pecs.service.TaskService;
 import com.westlake.air.pecs.async.LibraryTask;
+import com.westlake.air.pecs.service.impl.AnalyseOverviewServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
