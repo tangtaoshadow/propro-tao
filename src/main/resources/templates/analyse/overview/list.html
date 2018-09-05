@@ -22,19 +22,22 @@
                     <th width="15%">
                         卷积代号
                     </th>
-                    <th width="8%">
+                    <th width="7%">
                         标准库名称
                     </th>
-                    <th width="8%">
+                    <th width="7%">
                         iRT库名称
                     </th>
-                    <th width="7%">
+                    <th width="8%">
+                        iRT参数
+                    </th>
+                    <th width="5%">
                         创建人
                     </th>
-                    <th width="10%">
+                    <th width="8%">
                         RT/MZ卷积窗口
                     </th>
-                    <th width="12%">
+                    <th width="10%">
                         创建时间
                     </th>
                     <th width="30%">
@@ -47,6 +50,7 @@
                     <td th:text="${overview.name}"></td>
                     <td th:text="${overview.libraryName}"></td>
                     <td th:text="${overview.iRtLibraryName}"></td>
+                    <td th:text="|${overview.slope}/${overview.intercept}|"></td>
                     <td th:text="${overview.creator}"></td>
                     <td th:text="|${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></td>
                     <td th:text="${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
