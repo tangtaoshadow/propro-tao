@@ -7,6 +7,7 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
@@ -88,13 +89,17 @@ public class AnalyseController extends BaseController {
 
         if (resultDO.isSuccess()) {
             model.addAttribute("overview", resultDO.getModel());
-            Long count = analyseDataService.count(new AnalyseDataQuery(id, 2));
+            AnalyseDataQuery query = new AnalyseDataQuery(id, 2);
+            query.setIsDecoy(true);
+            Long decoyCount = analyseDataService.count(query);
+            query.setIsDecoy(false);
+            Long realCount = analyseDataService.count(query);
             ResultDO<LibraryDO> resLib = libraryService.getById(resultDO.getModel().getLibraryId());
             if (resLib.isFailed()) {
                 redirectAttributes.addFlashAttribute(ERROR_MSG, resLib.getMsgInfo());
                 return "redirect:/analyse/overview/list";
             }
-            model.addAttribute("rate", count + "/" + resLib.getModel().getTotalTargetCount());
+            model.addAttribute("rate", decoyCount + "/" + realCount + "/" + resLib.getModel().getTotalTargetCount());
 
             model.addAttribute("slopeIntercept", resultDO.getModel().getSlope() + "/" + resultDO.getModel().getIntercept());
             return "/analyse/overview/detail";
@@ -129,8 +134,8 @@ public class AnalyseController extends BaseController {
             int l = b.length;
 
             os.write(b, 0, l);
-            logger.info("打印第"+i+"/"+totalPage+"行,本行长度:"+l+";");
-            os.write(changeLine,0,changeLine.length);
+            logger.info("打印第" + i + "/" + totalPage + "行,本行长度:" + l + ";");
+            os.write(changeLine, 0, changeLine.length);
         }
         os.close();
         return "redirect:/analyse/overview/list";
@@ -189,11 +194,8 @@ public class AnalyseController extends BaseController {
                      @RequestParam(value = "overviewId", required = true) String overviewId,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
                      @RequestParam(value = "isIrt", required = true) Boolean isIrt,
-                     @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                     @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
                      RedirectAttributes redirectAttributes) {
 
-        model.addAttribute("pageSize", pageSize);
         model.addAttribute("overviewId", overviewId);
         model.addAttribute("libraryId", libraryId);
         model.addAttribute("isIrt", isIrt);
@@ -204,19 +206,14 @@ public class AnalyseController extends BaseController {
         }
 
         List<TransitionGroup> groups = null;
-        ResultDO<List<TransitionGroup>> resultDO = null;
-        if(isIrt){
-            groups = analyseDataService.getIrtTransitionGroup(overviewId,libraryId);
-        }else{
-            PageQuery query = new PageQuery(currentPage, pageSize);
-            resultDO = analyseDataService.getTransitionGroup(overviewResult.getModel(), query);
-            groups = resultDO.getModel().subList(0,100);
+        if (isIrt) {
+            groups = analyseDataService.getIrtTransitionGroup(overviewId, libraryId);
+        } else {
+            groups = analyseDataService.getTransitionGroup(overviewResult.getModel());
+            groups = groups.subList(0, 100);
         }
 
         model.addAttribute("groups", groups);
-        model.addAttribute("totalPage", resultDO.getTotalPage());
-        model.addAttribute("currentPage", currentPage);
-        model.addAttribute("totalNum", resultDO.getTotalNum());
 
         return "/analyse/data/group";
     }
@@ -224,14 +221,16 @@ public class AnalyseController extends BaseController {
     @RequestMapping(value = "/overview/score")
     String score(Model model,
                  @RequestParam(value = "overviewId", required = true) String overviewId,
-                 @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
+                 @RequestParam(value = "slope", required = false) Float slope,
+                 @RequestParam(value = "intercept", required = false) Float intercept,
                  @RequestParam(value = "sigma", required = false) Float sigma,
-                 @RequestParam(value = "spacing", required = false) Float spacing,
+                 @RequestParam(value = "space", required = false) Float space,
                  RedirectAttributes redirectAttributes) {
 
         model.addAttribute("sigma", sigma);
-        model.addAttribute("spacing", spacing);
-        model.addAttribute("iRtLibraryId", iRtLibraryId);
+        model.addAttribute("space", space);
+        model.addAttribute("slope", slope);
+        model.addAttribute("intercept", intercept);
 
         ResultDO<AnalyseOverviewDO> resultDO = analyseOverviewService.getById(overviewId);
         if (resultDO.isFailed()) {
@@ -239,7 +238,6 @@ public class AnalyseController extends BaseController {
             return "redirect:/analyse/overview/list";
         }
 
-        model.addAttribute("iRtLibraries", getLibraryList(1));
         model.addAttribute("overview", resultDO.getModel());
 
         return "/analyse/overview/score";
@@ -248,46 +246,39 @@ public class AnalyseController extends BaseController {
     @RequestMapping(value = "/overview/doscore")
     String doscore(Model model,
                    @RequestParam(value = "overviewId", required = true) String overviewId,
-                   @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
+                   @RequestParam(value = "slope", required = false) Float slope,
+                   @RequestParam(value = "intercept", required = false) Float intercept,
                    @RequestParam(value = "sigma", required = false) Float sigma,
-                   @RequestParam(value = "spacing", required = false) Float spacing,
+                   @RequestParam(value = "space", required = false) Float space,
                    RedirectAttributes redirectAttributes) {
 
         model.addAttribute("overviewId", overviewId);
-        model.addAttribute("iRtLibraryId", iRtLibraryId);
         model.addAttribute("sigma", sigma);
-        model.addAttribute("spacing", spacing);
+        model.addAttribute("space", space);
+        model.addAttribute("slope", slope);
+        model.addAttribute("intercept", intercept);
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         if (overviewResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
             return "redirect:/analyse/overview/list";
         }
-        ResultDO<LibraryDO> iRtLibRes = libraryService.getById(iRtLibraryId);
-        if (iRtLibRes.isFailed()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED.getMessage());
-            return "redirect:/analyse/overview/list";
-        }
 
         AnalyseOverviewDO overviewDO = overviewResult.getModel();
-        overviewDO.setIRtLibraryId(iRtLibRes.getModel().getId());
-        overviewDO.setIRtLibraryName(iRtLibRes.getModel().getName());
-        analyseOverviewService.update(overviewDO);
         model.addAttribute("overview", overviewDO);
 
         TaskDO taskDO = new TaskDO(TaskTemplate.SCORE, overviewDO.getName());
         taskService.insert(taskDO);
 
-        scoreTask.score(overviewId, sigma, spacing, taskDO);
-
+        scoreTask.score(overviewId, new SlopeIntercept(slope, intercept), overviewDO.getLibraryId(), sigma, space, taskDO);
         return "redirect:/task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/data/irtliblist")
     String iRtLibList(Model model,
-                    @RequestParam(value = "overviewId", required = false) String overviewId,
-                    @RequestParam(value = "expId", required = false) String expId,
-                    RedirectAttributes redirectAttributes) {
+                      @RequestParam(value = "overviewId", required = false) String overviewId,
+                      @RequestParam(value = "expId", required = false) String expId,
+                      RedirectAttributes redirectAttributes) {
 
         model.addAttribute("overviewId", overviewId);
 

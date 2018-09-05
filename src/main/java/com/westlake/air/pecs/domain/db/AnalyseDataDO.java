@@ -6,6 +6,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.HashMap;
+
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-07-19 15:48
@@ -26,7 +28,7 @@ public class AnalyseDataDO extends BaseDO {
     @Indexed
     String peptideRef;
 
-    Double rt;
+    Float rt;
 
     String transitionId;
 
@@ -48,4 +50,6 @@ public class AnalyseDataDO extends BaseDO {
 
     //一一映射rt的intensity数据
     Float[] intensityArray;
+
+    HashMap<Integer, String> unimodMap;
 }

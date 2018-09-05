@@ -5,6 +5,8 @@ import com.westlake.air.pecs.domain.BaseDO;
 import com.westlake.air.pecs.domain.bean.task.MachineInfo;
 import com.westlake.air.pecs.domain.bean.task.TaskLog;
 import lombok.Data;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 

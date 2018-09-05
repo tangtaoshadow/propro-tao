@@ -73,26 +73,32 @@ public class ExperimentTask extends BaseTask {
     public void swath(SwathInput input, TaskDO taskDO) {
         taskDO.addLog("开始卷积IRT校准库并且计算iRT值");
         taskService.update(taskDO);
+
+
         ResultDO<SlopeIntercept> resultDO = experimentService.convAndComputeIrt(input.getExperimentDO(), input.getIRtLibraryId(), input.getMzExtractWindow(), input.getSigma(), input.getSpace());
         SlopeIntercept slopeIntercept = resultDO.getModel();
-        input.setSlopeIntercept(slopeIntercept);
+
 
         taskDO.addLog("iRT计算完毕,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept() + "开始卷积原始数据");
         taskService.update(taskDO);
+
+
         long start = System.currentTimeMillis();
-        ResultDO<List<AnalyseDataDO>> finalRes = experimentService.extractWithList(input);
-        logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
+        //将irt的计算结果加入到下一个步骤的入参中
+        input.setSlopeIntercept(slopeIntercept);
+        ResultDO<List<AnalyseDataDO>> originDataListResult = experimentService.extractWithList(input);
+
+
         taskDO.addLog("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
         taskService.update(taskDO);
-        logger.info(finalRes.getModel().size()+"条");
-        start = System.currentTimeMillis();
-        try {
-            FileUtil.writeFile("D://finalList.json", finalRes.getModel());
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        if(originDataListResult.isFailed()){
+            taskDO.addLog("卷积失败:"+originDataListResult.getMsgInfo());
+            taskDO.finish(TaskDO.STATUS_FAILED);
+            taskService.update(taskDO);
         }
-        taskDO.addLog("写入文件时间为:" + (System.currentTimeMillis() - start));
-        taskService.update(taskDO);
+
+        scoreService.score(originDataListResult.getModel(),slopeIntercept,input.getLibraryId(),input.getSigma(), input.getSpace());
 
         taskDO.finish(TaskDO.STATUS_SUCCESS);
         taskService.update(taskDO);

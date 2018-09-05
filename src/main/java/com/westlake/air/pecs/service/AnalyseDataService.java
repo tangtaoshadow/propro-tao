@@ -50,7 +50,7 @@ public interface AnalyseDataService {
      */
     ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String peptideRef, String cutInfo);
 
-    ResultDO<List<TransitionGroup>> getTransitionGroup(List<AnalyseDataDO> dataList);
+    List<TransitionGroup> getTransitionGroup(List<AnalyseDataDO> dataList);
 
     /**
      * 分页获取TransitonGroup,本函数只针对卷积实验对应的标准库,如果要使用校准库进行操作,
@@ -59,7 +59,7 @@ public interface AnalyseDataService {
      * @param overviewDO
      * @return
      */
-    ResultDO<List<TransitionGroup>> getTransitionGroup(AnalyseOverviewDO overviewDO, PageQuery pageQuery);
+    List<TransitionGroup> getTransitionGroup(AnalyseOverviewDO overviewDO);
 
     /**
      * 获取iRT的TransitionGroup,由于数据量比较小,因此算法采用一次性获取的方式从数据库中读取列表,本函数可以保证所有的库文件中的transition都会出现在

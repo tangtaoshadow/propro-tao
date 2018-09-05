@@ -27,7 +27,7 @@ public interface ScoreService {
      *
      * @param dataList
      * @param iRtLibraryId
-     * @param sigma        通常为30
+     * @param sigma        通常为6.25
      * @param space        通常为0.01
      * @return
      */
@@ -35,11 +35,12 @@ public interface ScoreService {
 
     /**
      * 打分
-     * @param overviewId
-     * @param sigma
-     * @param spacing
-     * @param taskDO
+     * @param dataList 卷积后的数据
+     * @param slopeIntercept iRT计算出的斜率和截距
+     * @param libraryId 标准库ID
+     * @param sigma     通常为6.25
+     * @param space   通常为0.01
      */
-    void score(String overviewId, Float sigma, Float spacing, TaskDO taskDO);
+    void score(List<AnalyseDataDO> dataList, SlopeIntercept slopeIntercept, String libraryId, Float sigma, Float space);
 
 }

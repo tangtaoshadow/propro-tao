@@ -381,8 +381,8 @@ public class ExperimentServiceImpl implements ExperimentService {
         try {
             logger.info("开始卷积数据");
             long start = System.currentTimeMillis();
-//            List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
-            List<AnalyseDataDO> dataList = FileUtil.getAnalyseDataList("data/conv.json");         //这边先读取本地已经卷积好的iRT数据
+            List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
+//            List<AnalyseDataDO> dataList = FileUtil.getAnalyseDataList("data/conv.json");         //这边先读取本地已经卷积好的iRT数据
 
             logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
             start = System.currentTimeMillis();
@@ -492,8 +492,10 @@ public class ExperimentServiceImpl implements ExperimentService {
                 List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
                 //Step4.提取指定原始谱图
                 rtMap = parseSpectrum(raf, indexes, getParser(swathInput.getExperimentDO().getFileType()));
-                //Step5.卷积并且存储数据
+                //Step5.卷积数据
                 convolute(totalList, coordinates, rtMap, overviewId, swathInput.getMzExtractWindow(), swathInput.getRtExtractWindow(), false);
+                //Step6.存储数据
+                analyseDataDAO.insert(totalList);
                 logger.info("第" + count + "轮数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
                 count++;
             }
@@ -625,7 +627,8 @@ public class ExperimentServiceImpl implements ExperimentService {
         dataDO.setPeptideRef(ms.getPeptideRef());
         dataDO.setProteinName(ms.getProteinName());
         dataDO.setIsDecoy(ms.getIsDecoy());
-
+        dataDO.setRt(ms.getRt());
+        dataDO.setUnimodMap(ms.getUnimodMap());
         return dataDO;
     }
 

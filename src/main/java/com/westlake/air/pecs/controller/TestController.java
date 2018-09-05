@@ -11,8 +11,10 @@ import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
+import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.ExperimentService;
+import com.westlake.air.pecs.service.ScoreService;
 import com.westlake.air.pecs.service.TaskService;
 import com.westlake.air.pecs.utils.FileUtil;
 import org.bson.Document;
@@ -36,7 +38,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("test")
-public class TestController extends BaseController{
+public class TestController extends BaseController {
 
     @Autowired
     ExperimentService experimentService;
@@ -46,6 +48,9 @@ public class TestController extends BaseController{
     AnalyseDataService analyseDataService;
     @Autowired
     AnalyseDataDAO analyseDataDAO;
+    @Autowired
+    ScoreService scoreService;
+
     public static float MZ_EXTRACT_WINDOW = 0.05f;
     public static float RT_EXTRACT_WINDOW = 1200f;
     public static float SIGMA = 6.25f;
@@ -58,6 +63,7 @@ public class TestController extends BaseController{
         return JSON.toJSONString(experimentService.convAndComputeIrt(experimentDO, "5b88fece58487f13f0609019", MZ_EXTRACT_WINDOW, SIGMA, SPACING));
     }
 
+    //计算iRT
     @RequestMapping("test2")
     @ResponseBody
     String test2(Model model, RedirectAttributes redirectAttributes) {
@@ -77,7 +83,7 @@ public class TestController extends BaseController{
         input.setMzExtractWindow(MZ_EXTRACT_WINDOW);
         input.setBuildType(2);
         ResultDO finalRes = experimentService.extract(input);
-        logger.info("卷积耗时总计:"+(System.currentTimeMillis() - start));
+        logger.info("卷积耗时总计:" + (System.currentTimeMillis() - start));
         return JSON.toJSONString(finalRes);
     }
 
@@ -104,43 +110,19 @@ public class TestController extends BaseController{
     @RequestMapping("test4")
     @ResponseBody
     String test4(Model model, RedirectAttributes redirectAttributes) throws IOException {
-//        List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("data/convStandard.json");
-        String content = FileUtil.readFile("data/conv.json");
-        List<AnalyseDataDO> dataList = JSONArray.parseArray(content, AnalyseDataDO.class);
-        HashMap<String, Integer> countMap = new HashMap<>();
-        for(AnalyseDataDO data : dataList){
-            if(countMap.get(data.getPeptideRef()) != null){
-                countMap.put(data.getPeptideRef(), countMap.get(data.getPeptideRef())+1);
-            }else{
-                countMap.put(data.getPeptideRef(), 1);
-            }
-        }
-        logger.info(countMap.size()+"");
-        for(String key : countMap.keySet()){
-            logger.info(key+":"+countMap.get(key));
-
-            if(countMap.get(key) > 6){
-                logger.info(key);
-            }
-        }
-
-
-//        analyseDataService.getTransitionGroup();
+        List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("D://convAll.json");
+        scoreService.score(dataList, new SlopeIntercept(0.06627026200294495d,-71.99659729003906d), "5b88feb758487f13f05f7083", 6.25f, 0.01f);
         return dataList.size() + "";
     }
 
     @RequestMapping("test5")
     @ResponseBody
     String test5(Model model, RedirectAttributes redirectAttributes) throws IOException {
-//        List<BasicDBObject> result = analyseDataDAO.countSamePeptideRef("5b88d5bb58487f0b4437480d");
-//        List<String> finalList = new ArrayList<>();
-//        for(Object object : result){
-//            Document doc = (Document) object;
-//            if(doc.getInteger("count") > 6){
-//                finalList.add(doc.getString("peptideRef"));
-//            }
-//        }
-//        return JSON.toJSONString(finalList);
-        return null;
+        List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("D://convAll.json");
+        logger.info("卷积数据大小:" + dataList.size());
+        long start = System.currentTimeMillis();
+        List<TransitionGroup> groups = analyseDataService.getTransitionGroup(dataList);
+        logger.info("获取Group耗时:" + (System.currentTimeMillis() - start));
+        return "卷积数据Group大小:" + groups.size();
     }
 }

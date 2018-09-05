@@ -42,8 +42,4 @@ public class FeatureScores {
     double varYseriesScore;
 
     double mainVarXxSwathPrelimScore;
-
-
-
-
 }

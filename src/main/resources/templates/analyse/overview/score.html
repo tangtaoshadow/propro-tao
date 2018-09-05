@@ -93,32 +93,32 @@
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="sigma" name="sigma"
                                        th:value="${sigma}">
-                                <span class="m-form__help">默认为30</span>
+                                <span class="m-form__help">默认为6.25</span>
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="spacing" class="col-2 col-form-label">
-                                请设定Spacing
+                            <label for="space" class="col-2 col-form-label">
+                                请设定space
                             </label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="spacing" name="spacing"
-                                       th:value="${spacing}">
+                                <input type="text" class="form-control m-input" id="space" name="space"
+                                       th:value="${space}">
                                 <span class="m-form__help">默认为0.01</span>
                             </div>
                         </div>
-                        <div class="form-group m-form__group row">
-                            <label for="iRtLibraryId" class="col-2 col-form-label">
-                                请选择关联iRT校准库
-                            </label>
-                            <div class="col-10">
-                                <select class="form-control m-input" id="iRtLibraryId" name="iRtLibraryId">
-                                    <option th:each="library:${iRtLibraries}" th:value="${library.id}"
-                                            th:text="|${library.name}(${library.id})|"
-                                            th:selected="${iRtLibraryId}==${library.id}?true:false"></option>
-                                </select>
-                            </div>
+                        <!--<div class="form-group m-form__group row">-->
+                            <!--<label for="iRtLibraryId" class="col-2 col-form-label">-->
+                                <!--请选择关联iRT校准库-->
+                            <!--</label>-->
+                            <!--<div class="col-10">-->
+                                <!--<select class="form-control m-input" id="iRtLibraryId" name="iRtLibraryId">-->
+                                    <!--<option th:each="library:${iRtLibraries}" th:value="${library.id}"-->
+                                            <!--th:text="|${library.name}(${library.id})|"-->
+                                            <!--th:selected="${iRtLibraryId}==${library.id}?true:false"></option>-->
+                                <!--</select>-->
+                            <!--</div>-->
 
-                        </div>
+                        <!--</div>-->
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
