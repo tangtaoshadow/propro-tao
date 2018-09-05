@@ -1,8 +1,8 @@
 package com.westlake.air.pecs.feature;
 
 import com.westlake.air.pecs.constants.Constants;
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
+import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,19 +14,17 @@ public class GaussFilter {
 
     /**
      * @param pairs
-     * @param sigmaFloat 一般默认为 30/8
-     * @param spacingFloat 一般默认为0.01
+     * @param sigmaSpacing
      * @return
      */
-    public RtIntensityPairsDouble filter(RtIntensityPairsDouble pairs, Float sigmaFloat, Float spacingFloat) {
+    public RtIntensityPairsDouble filter(RtIntensityPairsDouble pairs, SigmaSpacing sigmaSpacing) {
 
-        Double sigma = Double.parseDouble(sigmaFloat.toString());
-        Double spacing = Double.parseDouble(spacingFloat.toString());
+        Double spacing = sigmaSpacing.getSpacingDouble();
         //coeffs: 以0为中心，sigma为标准差的正态分布参数
-        double[] coeffs = getCoeffs(sigma, spacing, getRightNum(sigma, spacing));
+        double[] coeffs = sigmaSpacing.getCoeffs();
 
         //startPosition & endPosition
-        int middle = getRightNum(sigma, spacing);
+        int middle = sigmaSpacing.getRightNum();
         int listSize = pairs.getRtArray().length;
         double startPosition, endPosition;
         double minRt = pairs.getRtArray()[0];
@@ -148,18 +146,4 @@ public class GaussFilter {
         pairsFiltered.setIntensityArray(newIntArray);
         return pairsFiltered;
     }
-
-
-    private int getRightNum(double sigma, double spacing) {
-        return (int) Math.ceil(4 * sigma / spacing) + 1;
-    }
-
-    private double[] getCoeffs(double sigma, double spacing, int coeffSize) {
-        double[] coeffs = new double[coeffSize];
-        for (int i = 0; i < coeffSize; i++) {
-            coeffs[i] = (1.0 / (sigma * Math.sqrt(2.0 * Math.PI)) * Math.exp(-((i * spacing) * (i * spacing)) / (2 * sigma * sigma)));
-        }
-        return coeffs;
-    }
-
 }

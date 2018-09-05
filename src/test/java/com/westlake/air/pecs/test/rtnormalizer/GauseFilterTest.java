@@ -2,6 +2,7 @@ package com.westlake.air.pecs.test.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
+import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.test.BaseTest;
 import com.westlake.air.pecs.feature.GaussFilter;
 import org.junit.Test;
@@ -27,7 +28,7 @@ public class GauseFilterTest extends BaseTest {
 
         RtIntensityPairsDouble input = new RtIntensityPairsDouble(rtArray, intensityArray);
         RtIntensityPairsDouble output = null;
-        output = gauseFilter.filter(input, 1.0f/8, 0.01f);
+        output = gauseFilter.filter(input, new SigmaSpacing(1.0f/8, 0.01f));
         for (int i = 0; i < 5; i++) {
             assert isSimilar(output.getIntensityArray()[0], 1.0F, 1e-5F);
         }
@@ -52,7 +53,7 @@ public class GauseFilterTest extends BaseTest {
         }
         RtIntensityPairsDouble input = new RtIntensityPairsDouble(rtArray, intensityArray);
         RtIntensityPairsDouble output = null;
-        output = gauseFilter.filter(input, 0.2f/8, 0.01f);
+        output = gauseFilter.filter(input, new SigmaSpacing(0.2f/8, 0.01f));
         assert isSimilar(output.getIntensityArray()[0], 0.000734827F, 0.01F);
         assert isSimilar(output.getIntensityArray()[1], 0.0543746F, 1e-2F);
         assert isSimilar(output.getIntensityArray()[2], 0.298025F, 1e-2F);

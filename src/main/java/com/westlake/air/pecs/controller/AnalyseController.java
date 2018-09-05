@@ -7,6 +7,7 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
@@ -224,11 +225,11 @@ public class AnalyseController extends BaseController {
                  @RequestParam(value = "slope", required = false) Float slope,
                  @RequestParam(value = "intercept", required = false) Float intercept,
                  @RequestParam(value = "sigma", required = false) Float sigma,
-                 @RequestParam(value = "space", required = false) Float space,
+                 @RequestParam(value = "spacing", required = false) Float spacing,
                  RedirectAttributes redirectAttributes) {
 
         model.addAttribute("sigma", sigma);
-        model.addAttribute("space", space);
+        model.addAttribute("spacing", spacing);
         model.addAttribute("slope", slope);
         model.addAttribute("intercept", intercept);
 
@@ -249,12 +250,12 @@ public class AnalyseController extends BaseController {
                    @RequestParam(value = "slope", required = false) Float slope,
                    @RequestParam(value = "intercept", required = false) Float intercept,
                    @RequestParam(value = "sigma", required = false) Float sigma,
-                   @RequestParam(value = "space", required = false) Float space,
+                   @RequestParam(value = "spacing", required = false) Float spacing,
                    RedirectAttributes redirectAttributes) {
 
         model.addAttribute("overviewId", overviewId);
         model.addAttribute("sigma", sigma);
-        model.addAttribute("space", space);
+        model.addAttribute("spacing", spacing);
         model.addAttribute("slope", slope);
         model.addAttribute("intercept", intercept);
 
@@ -270,7 +271,7 @@ public class AnalyseController extends BaseController {
         TaskDO taskDO = new TaskDO(TaskTemplate.SCORE, overviewDO.getName());
         taskService.insert(taskDO);
 
-        scoreTask.score(overviewId, new SlopeIntercept(slope, intercept), overviewDO.getLibraryId(), sigma, space, taskDO);
+        scoreTask.score(overviewId, new SlopeIntercept(slope, intercept), overviewDO.getLibraryId(), new SigmaSpacing(sigma,spacing), taskDO);
         return "redirect:/task/detail/" + taskDO.getId();
     }
 

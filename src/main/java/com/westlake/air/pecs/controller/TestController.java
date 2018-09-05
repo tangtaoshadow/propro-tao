@@ -7,6 +7,7 @@ import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
+import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
@@ -60,7 +61,7 @@ public class TestController extends BaseController {
     @ResponseBody
     String test(Model model, RedirectAttributes redirectAttributes) {
         ExperimentDO experimentDO = experimentService.getById("5b89029258487f0e14a62b75").getModel();
-        return JSON.toJSONString(experimentService.convAndComputeIrt(experimentDO, "5b88fece58487f13f0609019", MZ_EXTRACT_WINDOW, SIGMA, SPACING));
+        return JSON.toJSONString(experimentService.convAndComputeIrt(experimentDO, "5b88fece58487f13f0609019", MZ_EXTRACT_WINDOW, SigmaSpacing.create()));
     }
 
     //计算iRT
@@ -68,7 +69,7 @@ public class TestController extends BaseController {
     @ResponseBody
     String test2(Model model, RedirectAttributes redirectAttributes) {
         ExperimentDO experimentDO = experimentService.getById("5b89029258487f0e14a62b75").getModel();
-        ResultDO<SlopeIntercept> resultDO = experimentService.convAndComputeIrt(experimentDO, "5b88fece58487f13f0609019", MZ_EXTRACT_WINDOW, SIGMA, SPACING);
+        ResultDO<SlopeIntercept> resultDO = experimentService.convAndComputeIrt(experimentDO, "5b88fece58487f13f0609019", MZ_EXTRACT_WINDOW, SigmaSpacing.create());
         if (resultDO.isFailed()) {
             return JSON.toJSONString(resultDO);
         }
@@ -111,7 +112,7 @@ public class TestController extends BaseController {
     @ResponseBody
     String test4(Model model, RedirectAttributes redirectAttributes) throws IOException {
         List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("D://convAll.json");
-        scoreService.score(dataList, new SlopeIntercept(0.06627026200294495d,-71.99659729003906d), "5b88feb758487f13f05f7083", 6.25f, 0.01f);
+        scoreService.score(dataList, new SlopeIntercept(0.0633584d,-64.7064d), "5b88feb758487f13f05f7083", SigmaSpacing.create());
         return dataList.size() + "";
     }
 

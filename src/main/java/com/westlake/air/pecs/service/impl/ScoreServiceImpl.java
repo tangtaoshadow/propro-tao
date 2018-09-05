@@ -2,6 +2,7 @@ package com.westlake.air.pecs.service.impl;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
+import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.query.PageQuery;
@@ -74,7 +75,7 @@ public class ScoreServiceImpl implements ScoreService {
     SwathLDAScorer swathLDAScorer;
 
     @Override
-    public ResultDO<SlopeIntercept> computeIRt(String overviewId, String iRtLibraryId,  Float sigma, Float spacing, TaskDO taskDO) {
+    public ResultDO<SlopeIntercept> computeIRt(String overviewId, String iRtLibraryId, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
 
         taskDO.addLog("开始获取肽段分组信息和强度信息");
         taskService.update(taskDO);
@@ -88,13 +89,12 @@ public class ScoreServiceImpl implements ScoreService {
         List<Double> compoundRt = new ArrayList<>();
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
         for(TransitionGroup group : groups){
-            SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
-            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, slopeIntercept, sigma, spacing);
+            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, sigmaSpacing);
             if(!featureByPep.isFeatureFound()){
                 continue;
             }
             double groupRt = group.getRt();
-            List<ScoreRtPair> scoreRtPairs = RTNormalizerScorer.score(featureByPep.getRtIntensityPairsOriginList(), featureByPep.getExperimentFeatures(), featureByPep.getLibraryIntensityList(), featureByPep.getNoise1000List(), slopeIntercept, groupRt);
+            List<ScoreRtPair> scoreRtPairs = RTNormalizerScorer.score(featureByPep.getRtIntensityPairsOriginList(), featureByPep.getExperimentFeatures(), featureByPep.getLibraryIntensityList(), featureByPep.getNoise1000List(), new SlopeIntercept(), groupRt);
             scoreRtList.add(scoreRtPairs);
             compoundRt.add(groupRt);
         }
@@ -121,7 +121,7 @@ public class ScoreServiceImpl implements ScoreService {
     }
 
     @Override
-    public ResultDO<SlopeIntercept> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, Float sigma, Float space) {
+    public ResultDO<SlopeIntercept> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing) {
 
         List<TransitionGroup> groups = analyseDataService.getIrtTransitionGroup(dataList, iRtLibraryId);
         List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(iRtLibraryId);
@@ -131,7 +131,7 @@ public class ScoreServiceImpl implements ScoreService {
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
         for(TransitionGroup group : groups){
             SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
-            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, slopeIntercept, sigma, space);
+            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, sigmaSpacing);
             if(!featureByPep.isFeatureFound()){
                 continue;
             }
@@ -158,15 +158,17 @@ public class ScoreServiceImpl implements ScoreService {
     }
 
     @Override
-    public void score(List<AnalyseDataDO> dataList, SlopeIntercept slopeIntercept, String libraryId, Float sigma, Float space) {
+    public void score(List<AnalyseDataDO> dataList, SlopeIntercept slopeIntercept, String libraryId, SigmaSpacing sigmaSpacing) {
 
         List<TransitionGroup> groups = analyseDataService.getTransitionGroup(dataList);
 
         List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(libraryId);
         List<PecsScore> pecsScoreList = new ArrayList<>();
+
         for (TransitionGroup group : groups) {
             List<FeatureScores> featureScoresList = new ArrayList<>();
-            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, slopeIntercept, sigma, space);
+            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, sigmaSpacing);
+
             if(!featureByPep.isFeatureFound()){
                 continue;
             }
@@ -192,7 +194,7 @@ public class ScoreServiceImpl implements ScoreService {
             for(AnalyseDataDO data : group.getDataMap().values()){
                 String cutInfo = data.getCutInfo();
                 if(cutInfo.contains("^")){
-                    productChargeList.add(Integer.parseInt(cutInfo.split("^")[1]));
+                    productChargeList.add(Integer.parseInt(cutInfo.split("\\^")[1]));
                 }else{
                     productChargeList.add(1);
                 }
@@ -202,7 +204,9 @@ public class ScoreServiceImpl implements ScoreService {
 
             String sequence = "";
             //for each mrmFeature, calculate scores
+
             for(List<ExperimentFeature> experimentFeatureList : experimentFeatures) {
+
                 FeatureScores featureScores = new FeatureScores();
                 chromatographicScorer.calculateChromatographicScores(chromatogramList, experimentFeatureList, libraryIntensityList, noise1000List, featureScores);
                 chromatographicScorer.calculateIntensityScore(experimentFeatureList, featureScores);
@@ -210,13 +214,14 @@ public class ScoreServiceImpl implements ScoreService {
 //                diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
 ////                //TODO @Nico charge from transition?
 //                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
-                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
+//                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, slopeIntercept, group.getRt().floatValue(), featureScores);
                 swathLDAScorer.calculateSwathLdaPrescore(featureScores);
 
                 featureScoresList.add(featureScores);
             }
+
             PecsScore pecsScore = new PecsScore();
             pecsScore.setPeptideRef(group.getPeptideRef());
             pecsScore.setFeatureScoresList(featureScoresList);

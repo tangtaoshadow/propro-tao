@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.domain.bean;
 
+import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import lombok.Data;
@@ -25,15 +26,8 @@ public class SwathInput {
      * iRT求得的斜率和截距
      */
     SlopeIntercept slopeIntercept;
-    /**
-     * 默认为30
-     */
-    Float sigma;
 
-    /**
-     * 默认为
-     */
-    Float space;
+    SigmaSpacing sigmaSpacing = SigmaSpacing.create();
 
     /**
      * 流程的创建人

@@ -1,19 +1,21 @@
 package com.westlake.air.pecs.feature;
 
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
+import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureByPep;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
-import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
-import com.westlake.air.pecs.rtnormalizer.*;
+import com.westlake.air.pecs.rtnormalizer.ChromatogramFilter;
+import com.westlake.air.pecs.rtnormalizer.RTNormalizerScorer;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.TaskService;
 import com.westlake.air.pecs.service.TransitionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +28,9 @@ import java.util.List;
  */
 @Component("featureExtractor")
 public class FeatureExtractor {
+
+    public final Logger logger = LoggerFactory.getLogger(FeatureExtractor.class);
+
     @Autowired
     AnalyseDataService analyseDataService;
     @Autowired
@@ -49,17 +54,12 @@ public class FeatureExtractor {
     @Autowired
     ChromatogramFilter chromatogramFilter;
 
-    public FeatureByPep getExperimentFeature(TransitionGroup group, List<IntensityGroup> intensityGroupList, SlopeIntercept slopeIntercept, Float sigma, Float space) {
+    public FeatureByPep getExperimentFeature(TransitionGroup group, List<IntensityGroup> intensityGroupList, SigmaSpacing sigmaSpacing) {
         boolean featureFound = true;
         if (group.getDataMap() == null || group.getDataMap().size() == 0) {
             featureFound = false;
         }
-        if(sigma == null){
-            sigma = 6.25f;
-        }
-        if(space == null){
-            space = 0.01f;
-        }
+
         String peptideRef = group.getPeptideRef();
         List<RtIntensityPairsDouble> rtIntensityPairsOriginList = new ArrayList<>();
         List<RtIntensityPairsDouble> maxRtIntensityPairsList = new ArrayList<>();
@@ -68,42 +68,48 @@ public class FeatureExtractor {
         //得到peptideRef对应的intensityList
         List<Float> libraryIntensityList = new ArrayList<>();
         IntensityGroup intensityGroupByPep = getIntensityGroupByPep(intensityGroupList, peptideRef);
-        assert intensityGroupByPep != null;
         List<Float> libraryIntensityListAll = intensityGroupByPep.getIntensityList();
-        assert libraryIntensityListAll.size() != 0;
         int count = 0;
 
-        //对每一个chromatogram进行运算，dataDO中不含有ms1
+        int count1=0,count2=0,count3=0,count4=0,count5=0,count6=0;
+        //对每一个chromatogram进行运算,dataDO中不含有ms1
         List<double[]> noise1000List = new ArrayList<>();
         for (AnalyseDataDO dataDO : group.getDataMap().values()) {
 
-            //如果没有卷积到信号，dataDO为null
-            if (dataDO == null || !dataDO.getIsHit()) {
+            //如果没有卷积到信号,dataDO为null
+            if (!dataDO.getIsHit()) {
                 count++;
                 continue;
             }
 
-            //得到卷积后的chromatogram的RT、Intensity对
+            //得到卷积后的chromatogram的RT,Intensity对
             RtIntensityPairsDouble rtIntensityPairsOrigin = new RtIntensityPairsDouble(dataDO.getRtArray(), dataDO.getIntensityArray());
-            if(!(slopeIntercept.getSlope() == 0f && slopeIntercept.getIntercept() == 0f)) {
-                rtIntensityPairsOrigin = chromatogramFilter.pickChromatogramByRt(rtIntensityPairsOrigin, group.getRt(), slopeIntercept);
-            }
 
-            //进行高斯平滑，得到平滑后的chromatogram
-            RtIntensityPairsDouble rtIntensityPairsAfterSmooth = gaussFilter.filter(rtIntensityPairsOrigin, sigma, space);
-
+            //进行高斯平滑,得到平滑后的chromatogram
+            long start = System.currentTimeMillis();
+            RtIntensityPairsDouble rtIntensityPairsAfterSmooth = gaussFilter.filter(rtIntensityPairsOrigin, sigmaSpacing);
+            count1 += (System.currentTimeMillis() - start);
             //计算两个信噪比
             //@Nico parameter configured
             //TODO legacy or corrected noise1000 is not the same
+            start = System.currentTimeMillis();
             double[] noises200 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 200, 30);
+            count2 += (System.currentTimeMillis() - start);
+            start = System.currentTimeMillis();
             double[] noises1000 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 1000, 30);
+            count3 += (System.currentTimeMillis() - start);
+            start = System.currentTimeMillis();
             double[] noisesOri1000 = signalToNoiseEstimator.computeSTN(rtIntensityPairsOrigin, 1000, 30);
-
+            count4 += (System.currentTimeMillis() - start);
+            start = System.currentTimeMillis();
             //根据信噪比和峰值形状选择最高峰
             RtIntensityPairsDouble maxPeakPairs = peakPicker.pickMaxPeak(rtIntensityPairsAfterSmooth, noises200);
+            count5 += (System.currentTimeMillis() - start);
+            start = System.currentTimeMillis();
 
             //根据信噪比和最高峰选择谱图
             IntensityRtLeftRtRightPairs intensityRtLeftRtRightPairs = chromatogramPicker.pickChromatogram(rtIntensityPairsOrigin, rtIntensityPairsAfterSmooth, noises1000, maxPeakPairs);
+            count6 += (System.currentTimeMillis() - start);
             rtIntensityPairsOriginList.add(rtIntensityPairsOrigin);
             maxRtIntensityPairsList.add(maxPeakPairs);
             intensityRtLeftRtRightPairsList.add(intensityRtLeftRtRightPairs);
@@ -111,6 +117,7 @@ public class FeatureExtractor {
             noise1000List.add(noisesOri1000);
             count++;
         }
+        logger.info("耗时:"+count1+"/"+count2+"/"+count3+"/"+count4+"/"+count5+"/"+count6);
         if (rtIntensityPairsOriginList.size() == 0) {
             featureFound = false;
         }

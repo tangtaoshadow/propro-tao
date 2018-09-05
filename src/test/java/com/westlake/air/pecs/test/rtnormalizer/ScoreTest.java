@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.test.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
+import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.feature.*;
 import com.westlake.air.pecs.rtnormalizer.RTNormalizerScorer;
@@ -59,7 +60,7 @@ public class ScoreTest extends BaseTest {
 
         List<double[]> stn1000List = new ArrayList<>();
         for(int i=0; i<rtIntensityPairsDoubleList.size(); i++){
-            RtIntensityPairsDouble gaussFilterResult = gaussFilter.filter(rtIntensityPairsDoubleList.get(i), 6.25f, 0.01f);
+            RtIntensityPairsDouble gaussFilterResult = gaussFilter.filter(rtIntensityPairsDoubleList.get(i), new SigmaSpacing(6.25f, 0.01f));
 
             double[] stn200 = signalToNoiseEstimator.computeSTN(gaussFilterResult, 200, 30);
             double[] stn1000 = signalToNoiseEstimator.computeSTN(gaussFilterResult, 1000, 30);

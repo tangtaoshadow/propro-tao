@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.test.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
+import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.feature.ChromatogramPicker;
 import com.westlake.air.pecs.feature.GaussFilter;
@@ -35,7 +36,7 @@ public class ChromatogramPickerTest extends BaseTest {
 
         RtIntensityPairsDouble rtIntensityPairsDouble = new RtIntensityPairsDouble(rtData1, intData1);
 
-        RtIntensityPairsDouble gaussFilterResult = gaussFilter.filter(rtIntensityPairsDouble, 6.25f, 0.01f);
+        RtIntensityPairsDouble gaussFilterResult = gaussFilter.filter(rtIntensityPairsDouble, new SigmaSpacing(6.25f, 0.01f));
 
         double[] stn200 = signalToNoiseEstimator.computeSTN(gaussFilterResult, 200, 30);
         double[] stnOrigin = signalToNoiseEstimator.computeSTN(rtIntensityPairsDouble, 1000, 30);

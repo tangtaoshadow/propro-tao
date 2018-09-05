@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.test.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
+import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.feature.*;
@@ -54,7 +55,7 @@ public class FeatureFinderTest extends BaseTest {
         List<IntensityRtLeftRtRightPairs> chromatogramPickerList = new ArrayList<>();
 
         for(int i=0; i<rtIntensityPairsDoubleList.size(); i++){
-            RtIntensityPairsDouble gaussFilterResult = gaussFilter.filter(rtIntensityPairsDoubleList.get(i), 6.25f, 0.01f);
+            RtIntensityPairsDouble gaussFilterResult = gaussFilter.filter(rtIntensityPairsDoubleList.get(i), new SigmaSpacing(6.25f, 0.01f));
 
             double[] stn200 = signalToNoiseEstimator.computeSTN(gaussFilterResult, 200, 30);
             double[] stnOrigin = signalToNoiseEstimator.computeSTN(rtIntensityPairsDoubleList.get(i), 1000, 30);

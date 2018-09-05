@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.async;
 
+import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
@@ -24,7 +25,7 @@ public class ScoreTask extends BaseTask {
     AnalyseDataService analyseDataService;
 
     @Async
-    public void score(String overviewId, SlopeIntercept slopeIntercept, String libraryId, Float sigma, Float space, TaskDO taskDO) {
+    public void score(String overviewId, SlopeIntercept slopeIntercept, String libraryId, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
         long start = System.currentTimeMillis();
         taskDO.addLog("开始查询所有卷积结果");
         taskService.update(taskDO);
@@ -34,7 +35,7 @@ public class ScoreTask extends BaseTask {
         taskService.update(taskDO);
 
         start = System.currentTimeMillis();
-        scoreService.score(dataList, slopeIntercept, libraryId, sigma, space);
+        scoreService.score(dataList, slopeIntercept, libraryId, sigmaSpacing);
         taskDO.addLog("打分完毕,耗时:" + (System.currentTimeMillis() - start));
         taskDO.finish(TaskDO.STATUS_SUCCESS);
         taskService.update(taskDO);

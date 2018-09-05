@@ -42,7 +42,7 @@
                 <!--begin::Form-->
                 <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/analyse/overview/doscore}">
                     <div class="m-portlet__body">
-                        <input type="text" name="id" hidden="hidden" th:value="${overview?.id}">
+                        <input type="text" name="overviewId" hidden="hidden" th:value="${overview?.id}">
                         <div class="form-group m-form__group row">
                             <label for="expId" class="col-2 col-form-label">
                                 实验数据
@@ -97,12 +97,12 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="space" class="col-2 col-form-label">
-                                请设定space
+                            <label for="spacing" class="col-2 col-form-label">
+                                请设定spacing
                             </label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="space" name="space"
-                                       th:value="${space}">
+                                <input type="text" class="form-control m-input" id="spacing" name="spacing"
+                                       th:value="${spacing}">
                                 <span class="m-form__help">默认为0.01</span>
                             </div>
                         </div>
