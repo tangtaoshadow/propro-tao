@@ -18,20 +18,21 @@ public class ArrayUtils {
     /**
      * Return reverse of given array[].
      */
-    public static double[] reverse(double[] array){
+    public static double[] reverse(double[] array) {
         int length = array.length;
         double[] result = new double[length];
-        for(int i =0;i<length;i++){
-            result[i] = array[length-1-i];
+        for (int i = 0; i < length; i++) {
+            result[i] = array[length - 1 - i];
         }
         return result;
 
     }
-    public static int[] reverse(int[] array){
+
+    public static int[] reverse(int[] array) {
         int length = array.length;
         int[] result = new int[length];
-        for(int i =0;i<length;i++){
-            result[i] = array[length-1-i];
+        for (int i = 0; i < length; i++) {
+            result[i] = array[length - 1 - i];
         }
         return result;
 
@@ -53,12 +54,12 @@ public class ArrayUtils {
     public static ResultDO<Double[][]> concat3d(Double[][] arrayA, Double[][] arrayB) {
         ResultDO<Double[][]> resultDO = new ResultDO<Double[][]>();
         if (arrayA[0].length == arrayB[0].length) {
-            Double[][] c = new Double[arrayA.length+arrayB.length][arrayA[0].length];
+            Double[][] c = new Double[arrayA.length + arrayB.length][arrayA[0].length];
             for (int i = 0; i < arrayA.length; i++) {
                 System.arraycopy(arrayA[i], 0, c[i], 0, arrayA[0].length);
             }
-            for (int i = 0; i < arrayB.length;i++){
-                System.arraycopy(arrayB[i], 0, c[i+arrayA.length], 0, arrayB[0].length);
+            for (int i = 0; i < arrayB.length; i++) {
+                System.arraycopy(arrayB[i], 0, c[i + arrayA.length], 0, arrayB[0].length);
             }
             resultDO.setModel(c);
             resultDO.setSuccess(true);
@@ -68,15 +69,16 @@ public class ArrayUtils {
             return resultDO;
         }
     }
+
     public static ResultDO<double[][]> concat3d(double[][] arrayA, double[][] arrayB) {
         ResultDO<double[][]> resultDO = new ResultDO<double[][]>();
         if (arrayA[0].length == arrayB[0].length) {
-            double[][] c = new double[arrayA.length+arrayB.length][arrayA[0].length];
+            double[][] c = new double[arrayA.length + arrayB.length][arrayA[0].length];
             for (int i = 0; i < arrayA.length; i++) {
                 System.arraycopy(arrayA[i], 0, c[i], 0, arrayA[0].length);
             }
-            for (int i = 0; i < arrayB.length;i++){
-                System.arraycopy(arrayB[i], 0, c[i+arrayA.length], 0, arrayB[0].length);
+            for (int i = 0; i < arrayB.length; i++) {
+                System.arraycopy(arrayB[i], 0, c[i + arrayA.length], 0, arrayB[0].length);
             }
             resultDO.setModel(c);
             resultDO.setSuccess(true);
@@ -104,13 +106,13 @@ public class ArrayUtils {
         }
     }
 
-    public static ResultDO<Double[]> extractRow(Double[] array, Integer[] row){
+    public static ResultDO<Double[]> extractRow(Double[] array, Integer[] row) {
         ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
         Double[] result = new Double[row.length];
-        for(int i=0;i<row.length;i++){
-            if(row[i]>-1 && row[i]<array.length){
+        for (int i = 0; i < row.length; i++) {
+            if (row[i] > -1 && row[i] < array.length) {
                 result[i] = array[row[i]];
-            }else {
+            } else {
                 resultDO.setMsgInfo("ExtractRow Error.\n");
                 return resultDO;
             }
@@ -119,13 +121,14 @@ public class ArrayUtils {
         resultDO.setSuccess(true);
         return resultDO;
     }
-    public static ResultDO<double[]> extractRow(double[] array, Integer[] row){
+
+    public static ResultDO<double[]> extractRow(double[] array, Integer[] row) {
         ResultDO<double[]> resultDO = new ResultDO<double[]>();
         double[] result = new double[row.length];
-        for(int i=0;i<row.length;i++){
-            if(row[i]>-1 && row[i]<array.length){
+        for (int i = 0; i < row.length; i++) {
+            if (row[i] > -1 && row[i] < array.length) {
                 result[i] = array[row[i]];
-            }else {
+            } else {
                 resultDO.setMsgInfo("ExtractRow Error.\n");
                 return resultDO;
             }
@@ -134,13 +137,14 @@ public class ArrayUtils {
         resultDO.setSuccess(true);
         return resultDO;
     }
-    public static ResultDO<String[]> extractRow(String[] array, Integer[] row){
+
+    public static ResultDO<String[]> extractRow(String[] array, Integer[] row) {
         ResultDO<String[]> resultDO = new ResultDO<String[]>();
         String[] result = new String[row.length];
-        for(int i=0;i<row.length;i++){
-            if(row[i]>-1 && row[i]<array.length){
+        for (int i = 0; i < row.length; i++) {
+            if (row[i] > -1 && row[i] < array.length) {
                 result[i] = array[row[i]];
-            }else {
+            } else {
                 resultDO.setMsgInfo("ExtractRow Error.\n");
                 return resultDO;
             }
@@ -149,6 +153,7 @@ public class ArrayUtils {
         resultDO.setSuccess(true);
         return resultDO;
     }
+
     public static ResultDO<Double[][]> extract3dColumn(Double[][] array, Integer begin, Integer end) {
         ResultDO<Double[][]> resultDO = new ResultDO<Double[][]>();
         if (begin <= end && end < array[0].length) {
@@ -164,22 +169,24 @@ public class ArrayUtils {
             return resultDO;
         }
     }
+
     public static ResultDO<Double[][]> extract3dColumn(Double[][] array, Integer begin) {
-        return extract3dColumn(array, begin, array[0].length-1);
+        return extract3dColumn(array, begin, array[0].length - 1);
     }
+
     public static ResultDO<Double[][]> extract3dRow(Double[][] array, Boolean[] isDecoy) {
         ResultDO<Double[][]> resultDO = new ResultDO<Double[][]>();
         if (array.length == isDecoy.length) {
             int sum = 0;
             for (Boolean i : isDecoy) {
-                if(i) sum++;
+                if (i) sum++;
             }
             Double[][] extractedRow = new Double[sum][array[0].length];
             int j = 0;
             for (int i = 0; i < array.length; i++) {
                 if (isDecoy[i]) {
-                    for(int k=0;k<array[0].length;k++)
-                    extractedRow[j][k] = array[i][k];
+                    for (int k = 0; k < array[0].length; k++)
+                        extractedRow[j][k] = array[i][k];
                     j++;
                 }
             }
@@ -200,17 +207,17 @@ public class ArrayUtils {
         return arrayC;
     }
 
-    public static ResultDO<Double[]> extractColumn(Double[][] array, int column){
+    public static ResultDO<Double[]> extractColumn(Double[][] array, int column) {
         ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
         Double[] result = new Double[array.length];
-        if(column>-1 && column<array[0].length){
-            for(int i=0;i<array.length;i++){
+        if (column > -1 && column < array[0].length) {
+            for (int i = 0; i < array.length; i++) {
                 result[i] = array[i][column];
             }
             resultDO.setModel(result);
             resultDO.setSuccess(true);
             return resultDO;
-        }else {
+        } else {
             resultDO.setMsgInfo("ExtractColumn Error.\n");
             return resultDO;
         }
@@ -228,9 +235,9 @@ public class ArrayUtils {
             Integer[] testIdRow = new Integer[array.length];
             Boolean[] trainIsDecoy = new Boolean[array.length];
             Boolean[] testIsDecoy = new Boolean[array.length];
-            for (int i=0;i<id.length;i++) {
+            for (int i = 0; i < id.length; i++) {
                 symbol = k;
-                for(int j : index) {
+                for (int j : index) {
                     if (id[i].equals(j)) {
                         k++;
                         trainIdRow[k] = id[i];
@@ -238,26 +245,26 @@ public class ArrayUtils {
                         trainIsDecoy[k] = isDecoy[i];
                     }
                 }
-                if(k==symbol){
+                if (k == symbol) {
                     l++;
                     testIdRow[l] = id[i];
                     testRow[l] = array[i];
                     testIsDecoy[l] = isDecoy[i];
                 }
             }
-            Double[][] extractedTrainRow = new Double[k+1][array[0].length];
-            Double[][] extractedTestRow = new Double[l+1][array[0].length];
-            Integer[] extractedTrainIdRow = new Integer[k+1];
-            Integer[] extractedTestIdRow = new Integer[l+1];
-            Boolean[] extractedTrainIsDecoyRow = new Boolean[k+1];
-            Boolean[] extractedTestIsDecoyRow = new Boolean[l+1];
-            for(int i =0;i<=k;i++){
+            Double[][] extractedTrainRow = new Double[k + 1][array[0].length];
+            Double[][] extractedTestRow = new Double[l + 1][array[0].length];
+            Integer[] extractedTrainIdRow = new Integer[k + 1];
+            Integer[] extractedTestIdRow = new Integer[l + 1];
+            Boolean[] extractedTrainIsDecoyRow = new Boolean[k + 1];
+            Boolean[] extractedTestIsDecoyRow = new Boolean[l + 1];
+            for (int i = 0; i <= k; i++) {
                 extractedTrainRow[i] = trainRow[i];
                 extractedTrainIdRow[i] = trainIdRow[i];
                 extractedTrainIsDecoyRow[i] = trainIsDecoy[i];
 
             }
-            for(int i =0;i<=l;i++){
+            for (int i = 0; i <= l; i++) {
                 extractedTestRow[i] = testRow[i];
                 extractedTestIdRow[i] = testIdRow[i];
                 extractedTestIsDecoyRow[i] = testIsDecoy[i];
@@ -278,12 +285,15 @@ public class ArrayUtils {
         }
 
     }
+
     public static ResultDO<Double[]> extract3dRow(Double[] array, Boolean[] isDecoy) {
         ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
         if (array.length == isDecoy.length) {
             int sum = 0;
             for (boolean i : isDecoy) {
-                if(i) sum++;
+                if (i) {
+                    sum++;
+                }
             }
             Double[] extractedRow = new Double[sum];
             int j = 0;
@@ -302,12 +312,15 @@ public class ArrayUtils {
         }
 
     }
+
     public static ResultDO<Integer[]> extract3dRow(Integer[] array, Boolean[] isDecoy) {
         ResultDO<Integer[]> resultDO = new ResultDO<Integer[]>();
         if (array.length == isDecoy.length) {
             int sum = 0;
             for (boolean i : isDecoy) {
-                if(i) sum++;
+                if (i) {
+                    sum++;
+                }
             }
             Integer[] extractedRow = new Integer[sum];
             int j = 0;
@@ -362,14 +375,14 @@ public class ArrayUtils {
             double b = array[0];
             for (int i = 0; i < groupNumId.length; i++) {
 
-                if (groupNumId[i]!=null && groupNumId[i] == id) {
+                if (groupNumId[i] != null && groupNumId[i] == id) {
                     if (array[i] > b) {
                         b = array[i];
                         tempIndex = i;
                         //index[i]=1;
                     }
 
-                } else if(array[i]!=null && groupNumId[i]!=null){
+                } else if (array[i] != null && groupNumId[i] != null) {
                     index[tempIndex] = true;
                     b = array[i];
                     id = groupNumId[i];
@@ -377,8 +390,8 @@ public class ArrayUtils {
                 }
             }
             index[tempIndex] = true;
-            for(int i = 0; i < groupNumId.length; i++){
-                if(index[i] == null){
+            for (int i = 0; i < groupNumId.length; i++) {
+                if (index[i] == null) {
                     index[i] = false;
                 }
             }
@@ -400,6 +413,7 @@ public class ArrayUtils {
             return decoyPeaks;
         }
     }
+
     public static ResultDO<Double[]> getDecoyPeaks(Double[] array, Boolean[] isDecoy) {
         ResultDO<Double[]> decoyPeaks = new ResultDO<Double[]>();
         if (array.length == isDecoy.length) {
@@ -409,6 +423,7 @@ public class ArrayUtils {
             return decoyPeaks;
         }
     }
+
     public static ResultDO<Integer[]> getDecoyPeaks(Integer[] array, Boolean[] isDecoy) {
         ResultDO<Integer[]> decoyPeaks = new ResultDO<Integer[]>();
         if (array.length == isDecoy.length) {
@@ -418,6 +433,7 @@ public class ArrayUtils {
             return decoyPeaks;
         }
     }
+
     public static ResultDO<Double[]> getTargetPeaks(Double[] array, Boolean[] isDecoy) {
         ResultDO<Double[]> targetPeaks = new ResultDO<Double[]>();
         if (array.length == isDecoy.length) {
@@ -428,6 +444,7 @@ public class ArrayUtils {
             return targetPeaks;
         }
     }
+
     public static ResultDO<Integer[]> getTargetPeaks(Integer[] array, Boolean[] isDecoy) {
         ResultDO<Integer[]> targetPeaks = new ResultDO<Integer[]>();
         if (array.length == isDecoy.length) {
@@ -441,7 +458,7 @@ public class ArrayUtils {
 
     public static ResultDO<Double[][]> getTopTargetPeaks(Double[][] array, Boolean[] isDecoy, Boolean[] index) {
         ResultDO<Double[][]> resultDO = new ResultDO<Double[][]>();
-        Boolean[] isTopTarget = getIsTopTarget(isDecoy,index).getModel();
+        Boolean[] isTopTarget = getIsTopTarget(isDecoy, index).getModel();
         if (isTopTarget != null && array.length == isTopTarget.length) {
             resultDO = ArrayUtils.getDecoyPeaks(array, isTopTarget);
             return resultDO;
@@ -450,9 +467,10 @@ public class ArrayUtils {
             return resultDO;
         }
     }
+
     public static ResultDO<Double[]> getTopTargetPeaks(Double[] array, Boolean[] isDecoy, Boolean[] index) {
         ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
-        Boolean[] isTopTarget = getIsTopTarget(isDecoy,index).getModel();
+        Boolean[] isTopTarget = getIsTopTarget(isDecoy, index).getModel();
         if (isTopTarget != null && array.length == isTopTarget.length) {
             resultDO = ArrayUtils.getDecoyPeaks(array, isTopTarget);
             return resultDO;
@@ -464,7 +482,7 @@ public class ArrayUtils {
 
     public static ResultDO<Double[][]> getTopDecoyPeaks(Double[][] array, Boolean[] isDecoy, Boolean[] index) {
         ResultDO<Double[][]> resultDO = new ResultDO<Double[][]>();
-        Boolean[] isTopDecoy = getIsTopDecoy(isDecoy,index).getModel();
+        Boolean[] isTopDecoy = getIsTopDecoy(isDecoy, index).getModel();
         if (isTopDecoy != null && array.length == isTopDecoy.length) {
             resultDO = ArrayUtils.getDecoyPeaks(array, isTopDecoy);
             return resultDO;
@@ -473,9 +491,10 @@ public class ArrayUtils {
             return resultDO;
         }
     }
+
     public static ResultDO<Double[]> getTopDecoyPeaks(Double[] array, Boolean[] isDecoy, Boolean[] index) {
         ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
-        Boolean[] isTopDecoy = getIsTopDecoy(isDecoy,index).getModel();
+        Boolean[] isTopDecoy = getIsTopDecoy(isDecoy, index).getModel();
         if (isTopDecoy != null && array.length == isTopDecoy.length) {
             resultDO = ArrayUtils.getDecoyPeaks(array, isTopDecoy);
             return resultDO;
@@ -503,56 +522,57 @@ public class ArrayUtils {
         }
     }
 
-    public static Double[][] peaksFilter(Double[][] ttPeaks, Double[] ttScores, double cutOff){
+    public static Double[][] peaksFilter(Double[][] ttPeaks, Double[] ttScores, double cutOff) {
         int count = 0;
-        for(double i : ttScores){
-            if(i>=cutOff) count++;
+        for (double i : ttScores) {
+            if (i >= cutOff) count++;
         }
         Double[][] targetPeaks = new Double[count][ttPeaks[0].length];
-        int j =0;
-        for(int i=0;i<ttScores.length;i++){
-            if(ttScores[i] >= cutOff){
+        int j = 0;
+        for (int i = 0; i < ttScores.length; i++) {
+            if (ttScores[i] >= cutOff) {
                 targetPeaks[j] = ttPeaks[i];
                 j++;
             }
         }
         return targetPeaks;
     }
-    public static ResultDO<Double[]> dot(Double[][] array, Double[] w){
+
+    public static ResultDO<Double[]> dot(Double[][] array, Double[] w) {
         ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
         int aLength = array.length;
         int wLength = w.length;
-        if(array[0].length == wLength){
+        if (array[0].length == wLength) {
             Double[] result = new Double[aLength];
-            for(int i=0;i<aLength;i++){
-                result[i] =0.0;
-                for(int j=0;j<wLength;j++){
+            for (int i = 0; i < aLength; i++) {
+                result[i] = 0.0;
+                for (int j = 0; j < wLength; j++) {
                     result[i] += array[i][j] * w[j];
                 }
             }
             resultDO.setModel(result);
             resultDO.setSuccess(true);
             return resultDO;
-        }else {
+        } else {
             resultDO.setMsgInfo("Dot Error.\n");
             return resultDO;
         }
     }
 
-    private static Integer[] getPartOfArray(Integer[] array, int cutoff){
+    private static Integer[] getPartOfArray(Integer[] array, int cutoff) {
         Integer[] result = new Integer[cutoff];
-        System.arraycopy(array,0,result,0,cutoff);
+        System.arraycopy(array, 0, result, 0, cutoff);
         return result;
     }
 
-    public static TrainAndTest splitForXval(Double[][] data, Integer[] groupNumId, Boolean[] isDecoy, double fraction, boolean isTest){
+    public static TrainAndTest splitForXval(Double[][] data, Integer[] groupNumId, Boolean[] isDecoy, double fraction, boolean isTest) {
         Integer[] decoyIds = getDecoyPeaks(groupNumId, isDecoy).getModel();
         Integer[] targetIds = getTargetPeaks(groupNumId, isDecoy).getModel();
         AirusUtils.sort(decoyIds);
         AirusUtils.sort(targetIds);
         decoyIds = AirusUtils.sortedUnique(decoyIds);
         targetIds = AirusUtils.sortedUnique(targetIds);
-        if(!isTest){
+        if (!isTest) {
             List<Integer> decoyIdShuffle = Arrays.asList(decoyIds);
             List<Integer> targetIdShuffle = Arrays.asList(targetIds);
             Collections.shuffle(decoyIdShuffle);
@@ -560,9 +580,9 @@ public class ArrayUtils {
             decoyIdShuffle.toArray(decoyIds);
             targetIdShuffle.toArray(targetIds);
         }
-        int decoyLength = (int)(decoyIds.length * fraction) + 1;
-        int targetLength = (int)(targetIds.length * fraction) + 1;
-        Integer[] learnIds = ArrayUtils.concat2d(getPartOfArray(decoyIds, decoyLength),getPartOfArray(targetIds, targetLength));
+        int decoyLength = (int) (decoyIds.length * fraction) + 1;
+        int targetLength = (int) (targetIds.length * fraction) + 1;
+        Integer[] learnIds = ArrayUtils.concat2d(getPartOfArray(decoyIds, decoyLength), getPartOfArray(targetIds, targetLength));
         AirusUtils.sort(learnIds);
         learnIds = AirusUtils.sortedUnique(learnIds);
         return extract3dRow(data, groupNumId, isDecoy, learnIds).getModel();
@@ -573,26 +593,26 @@ public class ArrayUtils {
      * "10_run0">"109_run0"
      * same sort as pyprophet
      */
-    public static ScoreData fakeSortTgId(ScoreData scoreData){
+    public static ScoreData fakeSortTgId(ScoreData scoreData) {
         String[] groupId = scoreData.getGroupId();
         Integer[] groupNumId = scoreData.getGroupNumId();
 //        AirusUtils.sort(groupNumId);
 //        Integer[] test1 = AirusUtils.sortedUnique(groupNumId);
         int groupIdLength = groupId.length;
         Double[] tgIdNum = new Double[groupIdLength];
-        for(int i=0;i<groupIdLength;i++){
+        for (int i = 0; i < groupIdLength; i++) {
             String[] groupIdSplit = groupId[i].split("_");
-            if(groupIdSplit[0].equals("DECOY")){
+            if (groupIdSplit[0].equals("DECOY")) {
                 tgIdNum[i] = Double.parseDouble(groupIdSplit[1]);
 //                groupId[i] = groupIdSplit[1] + "_" + groupIdSplit[2];
-            }else{
+            } else {
                 tgIdNum[i] = Double.parseDouble(groupIdSplit[0]);
 //                groupId[i] = groupIdSplit[0] + "_" + groupIdSplit[1];
             }
-            if(tgIdNum[i]<10){
-                tgIdNum[i]=tgIdNum[i]*100+99.5;
-            }else if(tgIdNum[i]<100){
-                tgIdNum[i]= tgIdNum[i]*10+9.5;
+            if (tgIdNum[i] < 10) {
+                tgIdNum[i] = tgIdNum[i] * 100 + 99.5;
+            } else if (tgIdNum[i] < 100) {
+                tgIdNum[i] = tgIdNum[i] * 10 + 9.5;
             }
 
         }
@@ -613,7 +633,7 @@ public class ArrayUtils {
 //            }
 //        }
 
-        for(int i=0;i<groupIdLength;i++){
+        for (int i = 0; i < groupIdLength; i++) {
             int j = index[i];
             newGroupId[i] = groupId[j];
             newIsDecoy[i] = isDecoy[j];
@@ -635,7 +655,7 @@ public class ArrayUtils {
         return scoreData;
     }
 
-    private static Boolean[] getIsTarget(Boolean[] isDecoy){
+    private static Boolean[] getIsTarget(Boolean[] isDecoy) {
         Boolean[] isTarget = new Boolean[isDecoy.length];
         for (int i = 0; i < isDecoy.length; i++) {
             isTarget[i] = !isDecoy[i];
@@ -643,7 +663,7 @@ public class ArrayUtils {
         return isTarget;
     }
 
-    private static ResultDO<Boolean[]> getIsTopDecoy(Boolean[] isDecoy, Boolean[] index){
+    private static ResultDO<Boolean[]> getIsTopDecoy(Boolean[] isDecoy, Boolean[] index) {
         ResultDO<Boolean[]> resultDO = new ResultDO<Boolean[]>();
         if (isDecoy.length == index.length) {
             Boolean[] isTopDecoy = new Boolean[isDecoy.length];
@@ -653,12 +673,13 @@ public class ArrayUtils {
             resultDO.setModel(isTopDecoy);
             resultDO.setSuccess(true);
             return resultDO;
-        }else{
+        } else {
             resultDO.setMsgInfo("GetIsTopDecoy Error.\n");
             return resultDO;
         }
     }
-    private static ResultDO<Boolean[]> getIsTopTarget(Boolean[] isDecoy, Boolean[] index){
+
+    private static ResultDO<Boolean[]> getIsTopTarget(Boolean[] isDecoy, Boolean[] index) {
         ResultDO<Boolean[]> resultDO = new ResultDO<Boolean[]>();
         if (isDecoy.length == index.length) {
             Boolean[] isTopTarget = new Boolean[isDecoy.length];
@@ -668,7 +689,7 @@ public class ArrayUtils {
             resultDO.setModel(isTopTarget);
             resultDO.setSuccess(true);
             return resultDO;
-        }else{
+        } else {
             resultDO.setMsgInfo("GetIsTopTarget Error.\n");
             return resultDO;
         }
