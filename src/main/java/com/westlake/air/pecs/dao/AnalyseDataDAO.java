@@ -114,7 +114,9 @@ public class AnalyseDataDAO {
         if (analyseDataQuery.getIsHit() != null) {
             query.addCriteria(where("isHit").is(analyseDataQuery.getIsHit()));
         }
-
+        if (analyseDataQuery.getIsDecoy() != null) {
+            query.addCriteria(where("isDecoy").is(analyseDataQuery.getIsDecoy()));
+        }
         return query;
     }
 

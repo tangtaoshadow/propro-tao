@@ -89,13 +89,17 @@ public class AnalyseController extends BaseController {
 
         if (resultDO.isSuccess()) {
             model.addAttribute("overview", resultDO.getModel());
-            Long count = analyseDataService.count(new AnalyseDataQuery(id, 2));
+            AnalyseDataQuery query = new AnalyseDataQuery(id, 2);
+            query.setIsDecoy(true);
+            Long decoyCount = analyseDataService.count(query);
+            query.setIsDecoy(false);
+            Long realCount = analyseDataService.count(query);
             ResultDO<LibraryDO> resLib = libraryService.getById(resultDO.getModel().getLibraryId());
             if (resLib.isFailed()) {
                 redirectAttributes.addFlashAttribute(ERROR_MSG, resLib.getMsgInfo());
                 return "redirect:/analyse/overview/list";
             }
-            model.addAttribute("rate", count + "/" + resLib.getModel().getTotalTargetCount());
+            model.addAttribute("rate", decoyCount + "/" + realCount + "/" + resLib.getModel().getTotalTargetCount());
 
             model.addAttribute("slopeIntercept", resultDO.getModel().getSlope() + "/" + resultDO.getModel().getIntercept());
             return "/analyse/overview/detail";

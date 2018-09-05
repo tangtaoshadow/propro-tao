@@ -57,8 +57,18 @@ public class DecoyController extends BaseController {
 
     @RequestMapping(value = "/manager")
     String manager(Model model) {
-        model.addAttribute("libraries",getLibraryList(LibraryDO.TYPE_STANDARD));
+        model.addAttribute("libraries", getLibraryList(LibraryDO.TYPE_STANDARD));
         return "/decoy/manager";
+    }
+
+    @RequestMapping(value = "/delete")
+    String delete(Model model,
+                        @RequestParam(value = "id", required = true) String id) {
+        transitionService.deleteAllDecoyByLibraryId(id);
+        ResultDO<LibraryDO> resultDO = libraryService.getById(id);
+        LibraryDO library = resultDO.getModel();
+        libraryService.countAndUpdateForLibrary(library);
+        return "redirect:/library/detail/" + id;
     }
 
     @RequestMapping(value = "/generate")
@@ -88,6 +98,10 @@ public class DecoyController extends BaseController {
             }
         }
 
-        return "redirect:/transition/list?libraryId="+id+"&isDecoy=true";
+        ResultDO<LibraryDO> resultDO = libraryService.getById(id);
+        LibraryDO library = resultDO.getModel();
+        libraryService.countAndUpdateForLibrary(library);
+
+        return "redirect:/library/detail/" + id;
     }
 }
