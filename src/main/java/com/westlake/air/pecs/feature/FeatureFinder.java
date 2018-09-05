@@ -151,7 +151,7 @@ public class FeatureFinder {
 
         //set rt
         for(int i=masterChromLeft; i<=masterChromRight; i++){
-            rt[i - masterChromLeftStatic] = (double)masterChromatogram.getRtArray()[i];
+            rt[i - masterChromLeftStatic] = masterChromatogram.getRtArray()[i];
         }
 
         //set intensity
@@ -178,7 +178,7 @@ public class FeatureFinder {
             chromatogramLeft ++;
         }
         while (chromatogramLeft <= chromatogramRight){
-            intensity[masterChromLeft - masterChromLeftStatic + 1] += chromatogram.getIntensityArray()[chromatogramLeft];
+            intensity[masterChromLeft - masterChromLeftStatic] += chromatogram.getIntensityArray()[chromatogramLeft];
             chromatogramLeft ++;
         }
 
@@ -206,6 +206,7 @@ public class FeatureFinder {
         List<Double> hullInt = new ArrayList<>();
         double intSum = 0.0d;
         for(int i = 0; i<chromatogram.getRtArray().length; i++){
+            //TODO error in original code
             if(rtArray[i] > bestLeft && rtArray[i] < bestRight){
 //                if(peakNum == 0 && i != 0){
 //                    deltaRt = rtArray[i] - bestLeft;

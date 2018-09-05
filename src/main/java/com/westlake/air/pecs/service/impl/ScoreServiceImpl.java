@@ -274,17 +274,15 @@ public class ScoreServiceImpl implements ScoreService {
      * @param minCoverage limit of picking
      * @return pairsCorrected
      */
-    private List<RtPair> removeOutlierIterative(List<RtPair> pairs, float minRsq, float minCoverage){
+    private List<RtPair> removeOutlierIterative(List<RtPair> pairs, double minRsq, float minCoverage){
 
         int pairsSize = pairs.size();
         if( pairsSize < 3){
             return null;
         }
-        //TODO: @Nico
-        minRsq = 0.85f;
 
         //获取斜率和截距
-        float rsq = 0;
+        double rsq = 0;
         double[] coEff;
 
         WeightedObservedPoints obs = new WeightedObservedPoints();
@@ -296,7 +294,7 @@ public class ScoreServiceImpl implements ScoreService {
             PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
             coEff = fitter.fit(obs.toList());
 
-            rsq = MathUtil.getRsq(pairs);
+            rsq =  MathUtil.getRsq(pairs);
             if (rsq < minRsq) {
                 // calculate residual and get max index
                 float res, max = 0;

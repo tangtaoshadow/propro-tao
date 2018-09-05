@@ -16,35 +16,60 @@ import java.util.List;
  */
 public class MathUtil {
 
-    public static float getRsq(List<RtPair> pairs){
-        //step1 compute mean
-        float sumX = 0, sumY = 0;
-        int length = pairs.size();
-        for(RtPair pair : pairs){
-            sumX += pair.getExpRt();
-            sumY += pair.getTheoRt();
-        }
-        float meanX = sumX / length;
-        float meanY = sumY / length;
+//    public static float getRsq(List<RtPair> pairs){
+//        //step1 compute mean
+//        double sumX = 0, sumY = 0;
+//        int length = pairs.size();
+//        for(RtPair pair : pairs){
+//            sumX += pair.getExpRt();
+//            sumY += pair.getTheoRt();
+//        }
+//        double meanX = sumX / length;
+//        double meanY = sumY / length;
+//
+//        //step2 compute variance
+//        sumX = 0; sumY = 0;
+//        for(RtPair pair : pairs){
+//            sumX += Math.pow(pair.getExpRt() - meanX, 2);
+//            sumY += Math.pow(pair.getTheoRt() - meanY, 2);
+//        }
+//        double varX = sumX / (length - 1);
+//        double varY = sumY / (length - 1);
+//
+//        //step3 compute covariance
+//        double sum = 0;
+//        for(RtPair pair: pairs){
+//            sum += (pair.getExpRt() - meanX) * (pair.getTheoRt() - meanY);
+//        }
+//        double covXY = sum / length;
+//
+//        //step4 calculate R^2
+//        return (float) ((covXY * covXY) / (varX * varY));
+//    }
 
-        //step2 compute variance
-        sumX = 0; sumY = 0;
-        for(RtPair pair : pairs){
-            sumX += Math.pow(pair.getExpRt() - meanX, 2);
-            sumY += Math.pow(pair.getTheoRt() - meanY, 2);
+    public static double getRsq(List<RtPair> pairs){
+        double sigmaX = 0d;
+        double sigmaY = 0d;
+        double sigmaXSquare = 0d;
+        double sigmaYSquare = 0d;
+        double sigmaXY = 0d;
+        double x,y;
+        int n = pairs.size();
+        for(int i=0; i<n; i++){
+            x = pairs.get(i).getExpRt();
+            y = pairs.get(i).getTheoRt();
+            sigmaX += x;
+            sigmaY += y;
+            sigmaXY += x * y;
+            sigmaXSquare += x * x;
+            sigmaYSquare += y * y;
         }
-        float varX = sumX / (length - 1);
-        float varY = sumY / (length - 1);
 
-        //step3 compute covariance
-        float sum = 0;
-        for(RtPair pair: pairs){
-            sum += (pair.getExpRt() - meanX) * (pair.getTheoRt() - meanY);
-        }
-        float covXY = sum / length;
 
-        //step4 calculate R^2
-        return (covXY * covXY) / (varX * varY);
+        double r = (n * sigmaXY - sigmaX * sigmaY) / Math.sqrt((n * sigmaXSquare - sigmaX * sigmaX) * (n * sigmaYSquare - sigmaY * sigmaY));
+
+        return r * r;
+
     }
 
     public static BisectionLowHigh bisection(double[] x ,double value){
@@ -205,8 +230,8 @@ public class MathUtil {
         return standardizedData;
     }
 
-    public static int findMaxIndex(Float[] data){
-        float max = data[0];
+    public static int findMaxIndex(Double[] data){
+        double max = data[0];
         int index = 0;
         for(int i = 0; i < data.length; i++){
             if(data[i] > max){

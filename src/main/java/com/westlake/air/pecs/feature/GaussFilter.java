@@ -123,9 +123,6 @@ public class GaussFilter {
                 leftPosition = (int)(Math.round((distanceInGaussian / spacing) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION);
                 rightPosition = leftPosition + 1;
 
-                if(leftPosition >= middle){
-                    System.out.println("error.");
-                }
                 residualPercent = (Math.abs(leftPosition * spacing - distanceInGaussian)) / spacing;
                 if (rightPosition < middle) {
                     coeffRight = (1 - residualPercent) * coeffs[leftPosition] + residualPercent * coeffs[rightPosition];

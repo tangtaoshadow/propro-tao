@@ -5,6 +5,7 @@ import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.feature.SignalToNoiseEstimator;
 import com.westlake.air.pecs.scorer.ChromatographicScorer;
+import com.westlake.air.pecs.scorer.ElutionScorer;
 import com.westlake.air.pecs.scorer.LibraryScorer;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +48,7 @@ public class RTNormalizerScorer {
             FeatureScores scores = new FeatureScores();
             new ChromatographicScorer().calculateChromatographicScores(chromatograms, features, libraryIntensity, noise1000List, scores);
             new LibraryScorer().calculateLibraryScores(features,libraryIntensity, slopeIntercept, groupRt, scores);
+//            new ElutionScorer().calculateElutionModelScore(features,scores);
             double ldaScore = -1d * calculateLdaPrescore(scores);
             ScoreRtPair scoreRtPair = new ScoreRtPair();
             scoreRtPair.setRt(features.get(0).getRt());

@@ -2,6 +2,7 @@ package com.westlake.air.pecs.utils;
 
 import com.westlake.air.pecs.domain.bean.score.IntegrateWindowMzIntensity;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
+import com.westlake.air.pecs.feature.FeatureFinder;
 
 import java.util.List;
 
@@ -46,24 +47,24 @@ public class ScoreUtil {
      * @param libraryIntensity input intensity list
      * @return output normalized intensity list
      */
-    public static float[] normalizeSum(List<Float> libraryIntensity){
-        float[] normalizedLibraryIntensity = new float[libraryIntensity.size()];
-        float sum = 0f;
+    public static double[] normalizeSum(List<Float> libraryIntensity){
+        double[] normalizedLibraryIntensity = new double[libraryIntensity.size()];
+        double sum = 0d;
         for(Float intensity: libraryIntensity){
-            sum +=intensity;
+            sum += Double.parseDouble(Float.toString(intensity));
         }
 
-        if(sum == 0f){
+        if(sum == 0d){
             sum += 0.000001;
         }
 
         for(int i = 0; i<libraryIntensity.size(); i++){
-            normalizedLibraryIntensity[i] = (float)libraryIntensity.get(i) / sum;
+            normalizedLibraryIntensity[i] = libraryIntensity.get(i) / sum;
         }
         return normalizedLibraryIntensity;
     }
-    public static float[] normalizeSumDouble(List<Double> libraryIntensity){
-        float[] normalizedLibraryIntensity = new float[libraryIntensity.size()];
+    public static double[] normalizeSumDouble(List<Double> libraryIntensity){
+        double[] normalizedLibraryIntensity = new double[libraryIntensity.size()];
         double sum = 0d;
         for(Double intensity: libraryIntensity){
             sum += intensity;
@@ -74,7 +75,7 @@ public class ScoreUtil {
         }
 
         for(int i = 0; i<libraryIntensity.size(); i++){
-            normalizedLibraryIntensity[i] = (float)(libraryIntensity.get(i) / sum);
+            normalizedLibraryIntensity[i] = (libraryIntensity.get(i) / sum);
         }
         return normalizedLibraryIntensity;
     }

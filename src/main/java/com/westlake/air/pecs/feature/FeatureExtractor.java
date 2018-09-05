@@ -94,11 +94,13 @@ public class FeatureExtractor {
 
             //计算两个信噪比
             //@Nico parameter configured
+            //TODO legacy or corrected noise1000 is not the same
             double[] noises200 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 200, 30);
             double[] noises1000 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 1000, 30);
+            double[] noisesOri1000 = signalToNoiseEstimator.computeSTN(rtIntensityPairsOrigin, 1000, 30);
 
             //根据信噪比和峰值形状选择最高峰
-            RtIntensityPairsDouble maxPeakPairs = peakPicker.pickMaxPeak(rtIntensityPairsAfterSmooth, noises1000);
+            RtIntensityPairsDouble maxPeakPairs = peakPicker.pickMaxPeak(rtIntensityPairsAfterSmooth, noises200);
 
             //根据信噪比和最高峰选择谱图
             IntensityRtLeftRtRightPairs intensityRtLeftRtRightPairs = chromatogramPicker.pickChromatogram(rtIntensityPairsOrigin, rtIntensityPairsAfterSmooth, noises1000, maxPeakPairs);
@@ -106,7 +108,7 @@ public class FeatureExtractor {
             maxRtIntensityPairsList.add(maxPeakPairs);
             intensityRtLeftRtRightPairsList.add(intensityRtLeftRtRightPairs);
             libraryIntensityList.add(libraryIntensityListAll.get(count));
-            noise1000List.add(noises1000);
+            noise1000List.add(noisesOri1000);
             count++;
         }
         if (rtIntensityPairsOriginList.size() == 0) {

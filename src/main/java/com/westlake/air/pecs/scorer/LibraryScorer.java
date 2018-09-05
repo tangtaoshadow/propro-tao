@@ -37,9 +37,9 @@ public class LibraryScorer {
 
         //library_norm_manhattan
         //平均占比差距
-        float sum = 0.0f;
-        float[] x = ScoreUtil.normalizeSum(libraryIntensity);
-        float[] y = ScoreUtil.normalizeSumDouble(experimentIntensity);
+        double sum = 0.0d;
+        double[] x = ScoreUtil.normalizeSum(libraryIntensity);
+        double[] y = ScoreUtil.normalizeSumDouble(experimentIntensity);
         for(int i=0; i<x.length; i++){
             sum += Math.abs(x[i] - y[i]);
         }
@@ -59,7 +59,7 @@ public class LibraryScorer {
         m2 /= libraryIntensity.size(); //mean library intensity
         s1 -= m1 * m1 * libraryIntensity.size();
         s2 -= m2 * m2 * libraryIntensity.size();
-        if(s1 < Math.pow(1,-12) || s2 < Math.pow(1,-12)){
+        if(s1 < Math.pow(10,-12) || s2 < Math.pow(10,-12)){
             scores.setVarLibraryCorr(0.0d);
         }else {
             corr -= m1 * m2 * libraryIntensity.size();

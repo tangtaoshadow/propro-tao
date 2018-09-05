@@ -47,8 +47,8 @@ public class ChromatogramPicker {
             //to the left
             leftIndex = closestPeakIndex - 1;
             while(leftIndex > 0 &&
-                    chromatogram.getIntensityArray()[leftIndex - 1] < chromatogram.getIntensityArray()[leftIndex] &&
-                    centralPeakRt - chromatogram.getRtArray()[leftIndex - 1] < Constants.PEAK_WIDTH &&
+                    (chromatogram.getIntensityArray()[leftIndex - 1] < chromatogram.getIntensityArray()[leftIndex] ||
+                    centralPeakRt - chromatogram.getRtArray()[leftIndex - 1] < Constants.PEAK_WIDTH) &&
                     signalToNoise[leftIndex - 1] >= Constants.SIGNAL_TO_NOISE_LIMIT){
                 leftIndex--;
             }
@@ -56,8 +56,8 @@ public class ChromatogramPicker {
             //to the right
             rightIndex = closestPeakIndex + 1;
             while(rightIndex <chromatogram.getIntensityArray().length - 1 &&
-                    chromatogram.getIntensityArray()[rightIndex + 1] < chromatogram.getIntensityArray()[rightIndex] &&
-                    chromatogram.getRtArray()[rightIndex + 1] - centralPeakRt < Constants.PEAK_WIDTH &&
+                    (chromatogram.getIntensityArray()[rightIndex + 1] < chromatogram.getIntensityArray()[rightIndex] ||
+                    chromatogram.getRtArray()[rightIndex + 1] - centralPeakRt < Constants.PEAK_WIDTH) &&
                     signalToNoise[rightIndex + 1] >= Constants.SIGNAL_TO_NOISE_LIMIT){
                 rightIndex++;
             }

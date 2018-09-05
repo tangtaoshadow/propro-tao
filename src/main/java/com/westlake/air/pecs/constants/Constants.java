@@ -13,7 +13,8 @@ public class Constants {
     public static final double MATH_ROUND_PRECISION = 1000000d;
 
     //RT Normalizer
-    public static final boolean CHECK_SPACINGS = true;
+    //not static final
+    public static final boolean CHECK_SPACINGS = true;//////////////
     public static final double SPACING_DIFFERENCE = 1.5d;
     public static final double SPACING_DIFFERENCE_GAP = 4d;
     public static final double SIGNAL_TO_NOISE_LIMIT = 1.0d;
@@ -21,13 +22,18 @@ public class Constants {
     public static final double THRESHOLD = 0.000001d;
     public static final double AUTO_MAX_STDEV_FACTOR = 3.0d;
     public static final int MIN_REQUIRED_ELEMENTS = 10;
-//    public static final float NOISE_FOR_EMPTY_WINDOW = (float) Math.pow(10.0,20);
+
+    //not static final
+//    public static final double NOISE_FOR_EMPTY_WINDOW = Math.pow(10.0,20);
     public static final double NOISE_FOR_EMPTY_WINDOW = 2.0d;
     public static final float STOP_AFTER_INTENSITY_RATIO = 0.0001f;
-    public static final float MIN_RSQ = 0.95f;
+    public static final double MIN_RSQ = 0.95d;
     public static final float MIN_COVERAGE = 0.6f;
-    public static final String CHROMATOGRAM_PICKER_METHOD = "legacy";
-    public static final float PEAK_WIDTH = 40.0f;
+
+    //not static final
+    public static final String CHROMATOGRAM_PICKER_METHOD = "corrected";
+
+    public static final double PEAK_WIDTH = 40.0d;
     public static final int RT_BINS = 10;
     public static final int MIN_PEPTIDES_PER_BIN = 1;
     public static final int MIN_BINS_FILLED = 8;
@@ -52,7 +58,7 @@ public class Constants {
     public static final float O = 1.4773f;
     public static final float S = 0.0417f;
     public static final float P = 0f;
-    public static final double PROTON_MASS_U = 1.0072764667710f;
+    public static final double PROTON_MASS_U = 1.0072764667710d;
 
 
     public static final double EMG_CONST = 2.4055;

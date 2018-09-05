@@ -54,7 +54,7 @@ public class PeakPicker {
             if(rightBoundaryInt < 0.000001) continue;
             if(leftBoundaryInt < 0.000001) continue;
 
-            double leftToCentral, centralToRight, minSpacing;
+            double leftToCentral, centralToRight, minSpacing = 0d;
             if(Constants.CHECK_SPACINGS){
                 leftToCentral = centralPeakRt - leftNeighborRt;
                 centralToRight = rightNeighborRt - centralPeakRt;
@@ -86,7 +86,7 @@ public class PeakPicker {
                     if(rtIntensityPairs.getIntensityArray()[i - left] < leftBoundaryInt &&
                             (!Constants.CHECK_SPACINGS || (rtIntensityPairs.getRtArray()[leftBoundary] - rtIntensityPairs.getRtArray()[i - left] < Constants.SPACING_DIFFERENCE_GAP * minSpacing))){
                         if(stnLeft >= Constants.SIGNAL_TO_NOISE_LIMIT &&
-                                (rtIntensityPairs.getRtArray()[leftBoundary] - rtIntensityPairs.getRtArray()[i - left] < Constants.SPACING_DIFFERENCE * minSpacing)){
+                                (!Constants.CHECK_SPACINGS || rtIntensityPairs.getRtArray()[leftBoundary] - rtIntensityPairs.getRtArray()[i - left] < Constants.SPACING_DIFFERENCE * minSpacing)){
                             leftBoundaryInt = rtIntensityPairs.getIntensityArray()[i - left];
                             leftBoundary = i - left;
                         }else {
@@ -119,7 +119,7 @@ public class PeakPicker {
                     if(rtIntensityPairs.getIntensityArray()[i + right] < rightBoundaryInt &&
                             (!Constants.CHECK_SPACINGS || (rtIntensityPairs.getRtArray()[i + right] - rtIntensityPairs.getRtArray()[rightBoundary] < Constants.SPACING_DIFFERENCE_GAP * minSpacing))){
                         if(stnRight >= Constants.SIGNAL_TO_NOISE_LIMIT &&
-                                (rtIntensityPairs.getRtArray()[i + right] - rtIntensityPairs.getRtArray()[rightBoundary] < Constants.SPACING_DIFFERENCE * minSpacing)){
+                                (!Constants.CHECK_SPACINGS || rtIntensityPairs.getRtArray()[i + right] - rtIntensityPairs.getRtArray()[rightBoundary] < Constants.SPACING_DIFFERENCE * minSpacing)){
                             rightBoundaryInt = rtIntensityPairs.getIntensityArray()[i + right];
                             rightBoundary = i + right;
                         }else {

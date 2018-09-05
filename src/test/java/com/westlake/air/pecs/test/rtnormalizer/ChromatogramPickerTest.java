@@ -33,16 +33,16 @@ public class ChromatogramPickerTest extends BaseTest {
         Double[] rtData1 = {1473.55, 1476.31,  1479.08, 1481.84, 1484.61, 1487.39, 1490.15, 1492.92, 1495.69, 1498.45, 1501.23, 1504d   , 1506.76, 1509.53, 1512.29, 1515.07, 1517.84, 1520.62};
         Double[] intData1 = {3.44054, 2142.31, 3.58763, 3076.97, 6663.55, 45681d ,  157694d , 122844d , 86034.7, 85391.1, 15992.8, 2293.94, 6934.85, 2735.18, 459.413, 3.93863, 3.36564, 3.44005};
 
-        RtIntensityPairsDouble rtIntensityPairsDouble = new RtIntensityPairsDouble(rtData0, intData0);
+        RtIntensityPairsDouble rtIntensityPairsDouble = new RtIntensityPairsDouble(rtData1, intData1);
 
         RtIntensityPairsDouble gaussFilterResult = gaussFilter.filter(rtIntensityPairsDouble, 6.25f, 0.01f);
 
         double[] stn200 = signalToNoiseEstimator.computeSTN(gaussFilterResult, 200, 30);
-        double[] stn1000 = signalToNoiseEstimator.computeSTN(gaussFilterResult, 1000, 30);
+        double[] stnOrigin = signalToNoiseEstimator.computeSTN(rtIntensityPairsDouble, 1000, 30);
 
         RtIntensityPairsDouble peakPickerResult = peakPicker.pickMaxPeak(gaussFilterResult, stn200);
 
-        IntensityRtLeftRtRightPairs chromatogramPickerResult = chromatogramPicker.pickChromatogram(rtIntensityPairsDouble, rtIntensityPairsDouble, stn200, peakPickerResult);
+        IntensityRtLeftRtRightPairs chromatogramPickerResult = chromatogramPicker.pickChromatogram(rtIntensityPairsDouble, rtIntensityPairsDouble, stnOrigin, peakPickerResult);
 
         System.out.printf("Chromatogram Picker Test finished.");
 
