@@ -41,16 +41,16 @@ public class TransitionDAO {
 
     public List<String> getTransitionCutInfos(String libraryId, String peptideRef) {
         Document queryDoc = new Document();
-        queryDoc.put("libraryId",libraryId);
-        queryDoc.put("peptideRef",peptideRef);
+        queryDoc.put("libraryId", libraryId);
+        queryDoc.put("peptideRef", peptideRef);
 
         Document fieldsDoc = new Document();
 //        fieldsDoc.put("id",true);
-        fieldsDoc.put("cutInfo",true);
+        fieldsDoc.put("cutInfo", true);
         Query query = new BasicQuery(queryDoc, fieldsDoc);
         List<TransitionDO> trans = mongoTemplate.find(query, TransitionDO.class, CollectionName);
         List<String> cutInfos = new ArrayList<>();
-        for(TransitionDO tran : trans){
+        for (TransitionDO tran : trans) {
             cutInfos.add(tran.getCutInfo());
         }
         return cutInfos;
@@ -174,7 +174,7 @@ public class TransitionDAO {
         return a.getMappedResults();
     }
 
-    public List<IntensityGroup> getIntensityGroup(String libraryId) {
+    public HashMap<String, IntensityGroup> getIntensityGroupMap(String libraryId) {
 
         Document queryDoc = new Document();
         if (libraryId != null) {
@@ -190,21 +190,19 @@ public class TransitionDAO {
 
         List<TransitionDO> list = mongoTemplate.find(query, TransitionDO.class, CollectionName);
         HashMap<String, IntensityGroup> hashMap = new HashMap<>();
-        List<IntensityGroup> intensityGroups = new ArrayList<>();
         for (TransitionDO transition : list) {
             IntensityGroup group = hashMap.get(transition.getPeptideRef());
             if (group == null) {
                 group = new IntensityGroup();
                 group.setPeptideRef(transition.getPeptideRef());
                 group.setProteinName(transition.getProteinName());
-                intensityGroups.add(group);
                 hashMap.put(transition.getPeptideRef(), group);
             }
 
             group.getIntensityList().add(Float.parseFloat(transition.getIntensity().toString()));
         }
 
-        return intensityGroups;
+        return hashMap;
     }
 
     public long countByProteinName(String libraryId) {

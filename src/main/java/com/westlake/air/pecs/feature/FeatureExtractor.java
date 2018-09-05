@@ -54,20 +54,18 @@ public class FeatureExtractor {
     @Autowired
     ChromatogramFilter chromatogramFilter;
 
-    public FeatureByPep getExperimentFeature(TransitionGroup group, List<IntensityGroup> intensityGroupList, SigmaSpacing sigmaSpacing) {
+    public FeatureByPep getExperimentFeature(TransitionGroup group, IntensityGroup intensityGroupByPep, SigmaSpacing sigmaSpacing) {
         boolean featureFound = true;
         if (group.getDataMap() == null || group.getDataMap().size() == 0) {
             featureFound = false;
         }
 
-        String peptideRef = group.getPeptideRef();
         List<RtIntensityPairsDouble> rtIntensityPairsOriginList = new ArrayList<>();
         List<RtIntensityPairsDouble> maxRtIntensityPairsList = new ArrayList<>();
         List<IntensityRtLeftRtRightPairs> intensityRtLeftRtRightPairsList = new ArrayList<>();
 
         //得到peptideRef对应的intensityList
         List<Float> libraryIntensityList = new ArrayList<>();
-        IntensityGroup intensityGroupByPep = getIntensityGroupByPep(intensityGroupList, peptideRef);
         List<Float> libraryIntensityListAll = intensityGroupByPep.getIntensityList();
         int count = 0;
 

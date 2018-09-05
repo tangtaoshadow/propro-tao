@@ -81,7 +81,7 @@ public class ScoreServiceImpl implements ScoreService {
         taskService.update(taskDO);
 
         List<TransitionGroup> groups = analyseDataService.getIrtTransitionGroup(overviewId, iRtLibraryId);
-        List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(iRtLibraryId);
+        HashMap<String, IntensityGroup> intensityGroupMap = transitionService.getIntensityGroupMap(iRtLibraryId);
 
         taskDO.addLog("分组信息获取完毕,开始处理数据");
         taskService.update(taskDO);
@@ -89,7 +89,7 @@ public class ScoreServiceImpl implements ScoreService {
         List<Double> compoundRt = new ArrayList<>();
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
         for(TransitionGroup group : groups){
-            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, sigmaSpacing);
+            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupMap.get(group.getPeptideRef()), sigmaSpacing);
             if(!featureByPep.isFeatureFound()){
                 continue;
             }
@@ -124,14 +124,14 @@ public class ScoreServiceImpl implements ScoreService {
     public ResultDO<SlopeIntercept> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing) {
 
         List<TransitionGroup> groups = analyseDataService.getIrtTransitionGroup(dataList, iRtLibraryId);
-        List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(iRtLibraryId);
+        HashMap<String, IntensityGroup> intensityGroupMap = transitionService.getIntensityGroupMap(iRtLibraryId);
 
         List<List<ScoreRtPair>> scoreRtList = new ArrayList<>();
         List<Double> compoundRt = new ArrayList<>();
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
         for(TransitionGroup group : groups){
             SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
-            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, sigmaSpacing);
+            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupMap.get(group.getPeptideRef()), sigmaSpacing);
             if(!featureByPep.isFeatureFound()){
                 continue;
             }
@@ -162,12 +162,12 @@ public class ScoreServiceImpl implements ScoreService {
 
         List<TransitionGroup> groups = analyseDataService.getTransitionGroup(dataList);
 
-        List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(libraryId);
+        HashMap<String, IntensityGroup> intensityGroupMap = transitionService.getIntensityGroupMap(libraryId);
         List<PecsScore> pecsScoreList = new ArrayList<>();
 
         for (TransitionGroup group : groups) {
             List<FeatureScores> featureScoresList = new ArrayList<>();
-            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, sigmaSpacing);
+            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupMap.get(group.getPeptideRef()), sigmaSpacing);
 
             if(!featureByPep.isFeatureFound()){
                 continue;

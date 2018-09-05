@@ -23,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -233,8 +234,8 @@ public class TransitionServiceImpl implements TransitionService {
     }
 
     @Override
-    public List<IntensityGroup> getIntensityGroup(String libraryId) {
-        return transitionDAO.getIntensityGroup(libraryId);
+    public HashMap<String, IntensityGroup> getIntensityGroupMap(String libraryId) {
+        return transitionDAO.getIntensityGroupMap(libraryId);
     }
 
     private List<TargetTransition> sortMS1Coordinates(List<TargetTransition> targetList) {

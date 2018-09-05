@@ -11,6 +11,7 @@ import com.westlake.air.pecs.domain.db.simple.TargetTransition;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.TransitionQuery;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -86,11 +87,11 @@ public interface TransitionService {
     List<TargetTransition> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd);
 
     /**
-     * 根据LibraryId获取按照PeptideRef进行分组的Intensity列表
+     * 根据LibraryId获取按照PeptideRef进行分组的Intensity Map
      *
      * @param libraryId
      * @return
      */
-    List<IntensityGroup> getIntensityGroup(String libraryId);
+    HashMap<String, IntensityGroup> getIntensityGroupMap(String libraryId);
 }
 
