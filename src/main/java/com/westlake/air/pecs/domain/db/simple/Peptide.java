@@ -2,6 +2,8 @@ package com.westlake.air.pecs.domain.db.simple;
 
 import lombok.Data;
 
+import java.util.HashMap;
+
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-08-06 10:48
@@ -24,4 +26,6 @@ public class Peptide {
     Double rt;
 
     Boolean isDecoy;
+
+    HashMap<Integer, String> unimodMap;
 }

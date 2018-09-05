@@ -14,6 +14,7 @@ import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.ExperimentService;
+import com.westlake.air.pecs.service.ScoreService;
 import com.westlake.air.pecs.service.TaskService;
 import com.westlake.air.pecs.utils.FileUtil;
 import org.bson.Document;
@@ -47,6 +48,9 @@ public class TestController extends BaseController {
     AnalyseDataService analyseDataService;
     @Autowired
     AnalyseDataDAO analyseDataDAO;
+    @Autowired
+    ScoreService scoreService;
+
     public static float MZ_EXTRACT_WINDOW = 0.05f;
     public static float RT_EXTRACT_WINDOW = 1200f;
     public static float SIGMA = 6.25f;
@@ -59,6 +63,7 @@ public class TestController extends BaseController {
         return JSON.toJSONString(experimentService.convAndComputeIrt(experimentDO, "5b88fece58487f13f0609019", MZ_EXTRACT_WINDOW, SIGMA, SPACING));
     }
 
+    //计算iRT
     @RequestMapping("test2")
     @ResponseBody
     String test2(Model model, RedirectAttributes redirectAttributes) {
@@ -105,28 +110,8 @@ public class TestController extends BaseController {
     @RequestMapping("test4")
     @ResponseBody
     String test4(Model model, RedirectAttributes redirectAttributes) throws IOException {
-//        List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("data/convStandard.json");
-        String content = FileUtil.readFile("data/conv.json");
-        List<AnalyseDataDO> dataList = JSONArray.parseArray(content, AnalyseDataDO.class);
-        HashMap<String, Integer> countMap = new HashMap<>();
-        for (AnalyseDataDO data : dataList) {
-            if (countMap.get(data.getPeptideRef()) != null) {
-                countMap.put(data.getPeptideRef(), countMap.get(data.getPeptideRef()) + 1);
-            } else {
-                countMap.put(data.getPeptideRef(), 1);
-            }
-        }
-        logger.info(countMap.size() + "");
-        for (String key : countMap.keySet()) {
-            logger.info(key + ":" + countMap.get(key));
-
-            if (countMap.get(key) > 6) {
-                logger.info(key);
-            }
-        }
-
-
-//        analyseDataService.getTransitionGroup();
+        List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("D://convAll.json");
+        scoreService.score(dataList, new SlopeIntercept(0.06627026200294495d,-71.99659729003906d), "5b88feb758487f13f05f7083", 6.25f, 0.01f);
         return dataList.size() + "";
     }
 

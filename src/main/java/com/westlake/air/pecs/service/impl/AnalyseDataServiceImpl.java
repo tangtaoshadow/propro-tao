@@ -167,15 +167,14 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
 
     @Override
     public List<TransitionGroup> getTransitionGroup(List<AnalyseDataDO> dataList) {
-        List<TransitionGroup> groups = new ArrayList<>();
         HashMap<String, TransitionGroup> groupMap = new HashMap<>();
 
-        for(AnalyseDataDO data : dataList){
-            if(groupMap.get(data.getPeptideRef()) == null){
-                TransitionGroup group = new TransitionGroup(data.getProteinName(), data.getPeptideRef(), data.getRt());
+        for (AnalyseDataDO data : dataList) {
+            if (groupMap.get(data.getPeptideRef()) == null) {
+                TransitionGroup group = new TransitionGroup(data.getProteinName(), data.getPeptideRef(), Double.parseDouble(data.getRt().toString()), data.getUnimodMap());
                 group.addData(data);
                 groupMap.put(data.getPeptideRef(), group);
-            }else{
+            } else {
                 TransitionGroup group = groupMap.get(data.getPeptideRef());
                 group.addData(data);
             }
@@ -189,7 +188,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
         List<Peptide> peptides = transitionDAO.getPeptideList(overviewDO.getLibraryId());
         HashMap<String, TransitionGroup> groupMap = new HashMap<>();
         for (Peptide peptide : peptides) {
-            groupMap.put(peptide.getPeptideRef(), new TransitionGroup(peptide.getProteinName(), peptide.getPeptideRef(), peptide.getRt()));
+            groupMap.put(peptide.getPeptideRef(), new TransitionGroup(peptide.getProteinName(), peptide.getPeptideRef(), peptide.getRt(), peptide.getUnimodMap()));
         }
 
         AnalyseDataQuery query = new AnalyseDataQuery();
@@ -251,6 +250,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             group.setProteinName(peptide.getProteinName());
             group.setRt(peptide.getRt());
             group.setDataMap(dataMap);
+            group.setUnimodMap(peptide.getUnimodMap());
             groups.add(group);
         }
 
@@ -263,7 +263,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
 
         HashMap<String, TransitionGroup> groupMap = new HashMap<>();
         for (Peptide peptide : peptides) {
-            groupMap.put(peptide.getPeptideRef(), new TransitionGroup(peptide.getProteinName(), peptide.getPeptideRef(), peptide.getRt()));
+            groupMap.put(peptide.getPeptideRef(), new TransitionGroup(peptide.getProteinName(), peptide.getPeptideRef(), peptide.getRt(), peptide.getUnimodMap()));
         }
 
         for (AnalyseDataDO data : dataList) {

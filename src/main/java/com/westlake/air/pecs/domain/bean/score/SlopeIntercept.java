@@ -15,6 +15,11 @@ public class SlopeIntercept {
 
     public SlopeIntercept(){}
 
+    public SlopeIntercept(double slope, double intercept){
+        this.slope = slope;
+        this.intercept = intercept;
+    }
+
     public static SlopeIntercept create(){
         SlopeIntercept si = new SlopeIntercept();
         si.setIntercept(0);

@@ -19,15 +19,18 @@ public class TransitionGroup {
 
     Double rt;
 
+    HashMap<Integer, String> unimodMap;
+
     //key为cutinfo,例如b3^2,y7等等
     HashMap<String, AnalyseDataDO> dataMap;
 
     public TransitionGroup(){}
 
-    public TransitionGroup(String proteinName, String peptideRef, Double rt){
+    public TransitionGroup(String proteinName, String peptideRef, Double rt, HashMap<Integer, String> unimodMap){
         this.proteinName = proteinName;
         this.peptideRef = peptideRef;
         this.rt = rt;
+        this.unimodMap = unimodMap;
     }
 
     public void addData(AnalyseDataDO dataDO){

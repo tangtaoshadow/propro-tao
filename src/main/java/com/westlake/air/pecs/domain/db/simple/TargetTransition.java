@@ -2,6 +2,8 @@ package com.westlake.air.pecs.domain.db.simple;
 
 import lombok.Data;
 
+import java.util.HashMap;
+
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-07-17 10:16
@@ -33,6 +35,12 @@ public class TargetTransition {
     float rtStart;
 
     float rtEnd;
+
+    /**
+     * 如果是伪肽段,则本字段代表的是伪肽段中unimod的位置
+     * key为unimod在肽段中的位置,位置从0开始计数,value为unimod的Id(参见unimod.obo文件)
+     */
+    HashMap<Integer, String> unimodMap;
 
     @Override
     public boolean equals(Object obj) {

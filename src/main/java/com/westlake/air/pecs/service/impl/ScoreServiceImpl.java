@@ -158,34 +158,15 @@ public class ScoreServiceImpl implements ScoreService {
     }
 
     @Override
-    public void score(String overviewId, Float sigma, Float spacing, TaskDO taskDO) {
-        ResultDO<AnalyseOverviewDO> resultDO = analyseOverviewService.getById(overviewId);
-        if (resultDO.isFailed()) {
-            taskDO.addLog(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-            taskDO.finish(TaskDO.STATUS_FAILED);
-            taskService.update(taskDO);
-            return;
-        }
+    public void score(List<AnalyseDataDO> dataList, SlopeIntercept slopeIntercept, String libraryId, Float sigma, Float space) {
 
-        AnalyseOverviewDO overviewDO = resultDO.getModel();
-        ResultDO<SlopeIntercept> resultDOIRT = scoreService.computeIRt(overviewId, overviewDO.getIRtLibraryId(), sigma, spacing, taskDO);
-        if (resultDO.isFailed()) {
-            taskDO.addLog("打分执行失败:" + resultDO.getMsgInfo());
-            taskDO.finish(TaskDO.STATUS_FAILED);
-            taskService.update(taskDO);
-            return;
-        }
+        List<TransitionGroup> groups = analyseDataService.getTransitionGroup(dataList);
 
-        taskDO.addLog("IRT计算完毕," + resultDO.getModel().toString());
-        taskService.update(taskDO);
-
-        List<TransitionGroup> dataList = analyseDataService.getTransitionGroup(overviewDO);
-
-        List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(overviewDO.getLibraryId());
+        List<IntensityGroup> intensityGroupList = transitionService.getIntensityGroup(libraryId);
         List<PecsScore> pecsScoreList = new ArrayList<>();
-        for (TransitionGroup group : dataList) {
+        for (TransitionGroup group : groups) {
             List<FeatureScores> featureScoresList = new ArrayList<>();
-            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, resultDOIRT.getModel(), sigma, spacing);
+            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupList, slopeIntercept, sigma, space);
             if(!featureByPep.isFeatureFound()){
                 continue;
             }
@@ -196,7 +177,6 @@ public class ScoreServiceImpl implements ScoreService {
             List<Float> productMzList = new ArrayList<>();
             for (AnalyseDataDO dataDO : group.getDataMap().values()){
                 productMzList.add(dataDO.getMz());
-
             }
 
             //TODO  mrmFeature - peptideRef - ...
@@ -207,21 +187,32 @@ public class ScoreServiceImpl implements ScoreService {
             //sequence: sequence of peptide(get by peptideRef)
             List<Float> spectrumMzArray = new ArrayList<>();
             List<Float> spectrumIntArray = new ArrayList<>();
+
             List<Integer> productChargeList = new ArrayList<>();
-            HashMap<Integer, String> unimodHashMap = new HashMap<>();
+            for(AnalyseDataDO data : group.getDataMap().values()){
+                String cutInfo = data.getCutInfo();
+                if(cutInfo.contains("^")){
+                    productChargeList.add(Integer.parseInt(cutInfo.split("^")[1]));
+                }else{
+                    productChargeList.add(1);
+                }
+            }
+
+            HashMap<Integer, String> unimodHashMap = group.getUnimodMap();
+
             String sequence = "";
             //for each mrmFeature, calculate scores
             for(List<ExperimentFeature> experimentFeatureList : experimentFeatures) {
                 FeatureScores featureScores = new FeatureScores();
                 chromatographicScorer.calculateChromatographicScores(chromatogramList, experimentFeatureList, libraryIntensityList, noise1000List, featureScores);
                 chromatographicScorer.calculateIntensityScore(experimentFeatureList, featureScores);
-                diaScorer.calculateDiaMassDiffScore(productMzList, spectrumMzArray, spectrumIntArray, libraryIntensityList, featureScores);
-                diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
+//                diaScorer.calculateDiaMassDiffScore(productMzList, spectrumMzArray, spectrumIntArray, libraryIntensityList, featureScores);
+//                diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
 ////                //TODO @Nico charge from transition?
-                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
+//                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
                 elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
-                libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, resultDOIRT.getModel(), group.getRt().floatValue(), featureScores);
+                libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, slopeIntercept, group.getRt().floatValue(), featureScores);
                 swathLDAScorer.calculateSwathLdaPrescore(featureScores);
 
                 featureScoresList.add(featureScores);

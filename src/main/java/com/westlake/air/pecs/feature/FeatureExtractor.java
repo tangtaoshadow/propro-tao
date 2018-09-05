@@ -49,16 +49,16 @@ public class FeatureExtractor {
     @Autowired
     ChromatogramFilter chromatogramFilter;
 
-    public FeatureByPep getExperimentFeature(TransitionGroup group, List<IntensityGroup> intensityGroupList, SlopeIntercept slopeIntercept, Float sigma, Float spacing) {
+    public FeatureByPep getExperimentFeature(TransitionGroup group, List<IntensityGroup> intensityGroupList, SlopeIntercept slopeIntercept, Float sigma, Float space) {
         boolean featureFound = true;
         if (group.getDataMap() == null || group.getDataMap().size() == 0) {
             featureFound = false;
         }
         if(sigma == null){
-            sigma = 30f;
+            sigma = 6.25f;
         }
-        if(spacing == null){
-            spacing = 0.01f;
+        if(space == null){
+            space = 0.01f;
         }
         String peptideRef = group.getPeptideRef();
         List<RtIntensityPairsDouble> rtIntensityPairsOriginList = new ArrayList<>();
@@ -90,7 +90,7 @@ public class FeatureExtractor {
             }
 
             //进行高斯平滑，得到平滑后的chromatogram
-            RtIntensityPairsDouble rtIntensityPairsAfterSmooth = gaussFilter.filter(rtIntensityPairsOrigin, sigma, spacing);
+            RtIntensityPairsDouble rtIntensityPairsAfterSmooth = gaussFilter.filter(rtIntensityPairsOrigin, sigma, space);
 
             //计算两个信噪比
             //@Nico parameter configured

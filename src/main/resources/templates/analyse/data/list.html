@@ -70,16 +70,17 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-9">
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="30%">蛋白名称</th>
+                    <th width="26%">蛋白名称</th>
                     <th width="25%">肽段全称</th>
                     <th width="15%">标记</th>
                     <th width="5%">切分标记</th>
                     <th width="5%">MS等级</th>
-                    <th width="10%">MZ</th>
+                    <th width="7%">MZ</th>
+                    <th width="7%">RT</th>
                     <th width="10%">操作</th>
                 </tr>
                 </thead>
@@ -91,6 +92,7 @@
                     <td th:text="${data.cutInfo}"></td>
                     <td th:text="${data.msLevel}"></td>
                     <td th:text="${data.mz}"></td>
+                    <td th:text="${data.rt}"></td>
                     <td>
                         <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
                                 data-target="#m_modal_target"
@@ -103,7 +105,7 @@
             </table>
             <p id="pagination"></p>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <!--begin::Portlet-->
             <div class="m-portlet m-portlet--tab">
                 <div class="m-portlet__head">

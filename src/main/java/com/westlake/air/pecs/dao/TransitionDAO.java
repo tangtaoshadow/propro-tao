@@ -144,6 +144,7 @@ public class TransitionDAO {
                                 first("libraryName").as("libraryName").
                                 first("id").as("transitionId").
                                 first("rt").as("rt").
+                                first("unimodMap").as("unimodMap").
                                 first("isDecoy").as("isDecoy")
                 ).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
                 Peptide.class);
