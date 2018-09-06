@@ -1,6 +1,5 @@
 package com.westlake.air.pecs.async;
 
-import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
@@ -8,16 +7,12 @@ import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.ExperimentService;
-import com.westlake.air.pecs.service.ScoreService;
-import com.westlake.air.pecs.utils.FileUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.westlake.air.pecs.service.ScoresService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -29,7 +24,7 @@ public class ExperimentTask extends BaseTask {
     @Autowired
     ExperimentService experimentService;
     @Autowired
-    ScoreService scoreService;
+    ScoresService scoresService;
 
     @Async
     public void saveExperimentTask(ExperimentDO experimentDO, File file, TaskDO taskDO) {
@@ -88,14 +83,15 @@ public class ExperimentTask extends BaseTask {
         taskDO.addLog("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
         taskService.update(taskDO);
 
-        if(originDataListResult.isFailed()){
+        if(originDataListResult.isFailed() || originDataListResult.getModel() == null || originDataListResult.getModel().size() == 0){
             taskDO.addLog("卷积失败:"+originDataListResult.getMsgInfo());
             taskDO.finish(TaskDO.STATUS_FAILED);
             taskService.update(taskDO);
         }
 
+        List<AnalyseDataDO> dataList = originDataListResult.getModel();
 
-        scoreService.score(originDataListResult.getModel(), input);
+        scoresService.score(dataList, input);
 
         taskDO.finish(TaskDO.STATUS_SUCCESS);
         taskService.update(taskDO);

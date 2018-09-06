@@ -5,12 +5,31 @@ import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
-import com.westlake.air.pecs.domain.db.ExperimentDO;
+import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
+import com.westlake.air.pecs.domain.query.ScoresQuery;
 
 import java.util.List;
 
-public interface ScoreService {
+/**
+ * Created by James Lu MiaoShan
+ * Time: 2018-08-15 10:05
+ */
+public interface ScoresService {
+
+    Long count(ScoresQuery query);
+
+    ResultDO<List<ScoresDO>> getList(ScoresQuery targetQuery);
+
+    ResultDO insert(ScoresDO scoresDO);
+
+    ResultDO update(ScoresDO scoresDO);
+
+    ResultDO delete(String id);
+
+    ResultDO<ScoresDO> getById(String id);
+
+    ResultDO<ScoresDO> getByPeptideRef(String peptideRef);
 
     /**
      * 从一个已经卷积完毕的数据集中求出iRT
@@ -36,11 +55,11 @@ public interface ScoreService {
     /**
      * 打分
      * @param dataList 卷积后的数据
-     * @param input 入参,包括
+     * @param input 入参,必填参数包括
      *   slopeIntercept iRT计算出的斜率和截距
      *   libraryId 标准库ID
      *   sigmaSpacing Sigma通常为30/8 = 6.25/Spacing通常为0.01
+     *   overviewId
      */
     void score(List<AnalyseDataDO> dataList, SwathInput input);
-
 }

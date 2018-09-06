@@ -69,7 +69,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     @Autowired
     LibraryService libraryService;
     @Autowired
-    ScoreService scoreService;
+    ScoresService scoresService;
 
     @Override
     public List<ExperimentDO> getAll() {
@@ -387,7 +387,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
             logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
             start = System.currentTimeMillis();
-            ResultDO resultDO = scoreService.computeIRt(dataList, iRtLibraryId, sigmaSpacing);
+            ResultDO resultDO = scoresService.computeIRt(dataList, iRtLibraryId, sigmaSpacing);
             logger.info("计算完毕,耗时:" + (System.currentTimeMillis() - start));
             return resultDO;
         } catch (Exception e) {

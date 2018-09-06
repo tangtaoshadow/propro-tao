@@ -6,7 +6,7 @@ import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.AnalyseDataService;
-import com.westlake.air.pecs.service.ScoreService;
+import com.westlake.air.pecs.service.ScoresService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ import java.util.List;
 public class ScoreTask extends BaseTask {
 
     @Autowired
-    ScoreService scoreService;
+    ScoresService scoresService;
     @Autowired
     AnalyseDataService analyseDataService;
 
@@ -40,7 +40,8 @@ public class ScoreTask extends BaseTask {
         input.setLibraryId(libraryId);
         input.setSigmaSpacing(sigmaSpacing);
         input.setSlopeIntercept(slopeIntercept);
-        scoreService.score(dataList, input);
+        input.setOverviewId(overviewId);
+        scoresService.score(dataList, input);
         taskDO.addLog("打分完毕,耗时:" + (System.currentTimeMillis() - start));
         taskDO.finish(TaskDO.STATUS_SUCCESS);
         taskService.update(taskDO);

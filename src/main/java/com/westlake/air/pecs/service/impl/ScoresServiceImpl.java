@@ -1,17 +1,25 @@
 package com.westlake.air.pecs.service.impl;
 
+import com.westlake.air.pecs.constants.Constants;
+import com.westlake.air.pecs.constants.ResultCode;
+import com.westlake.air.pecs.constants.TaskTemplate;
+import com.westlake.air.pecs.dao.ScoresDAO;
+import com.westlake.air.pecs.dao.TaskDAO;
+import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.pecs.domain.db.*;
-import com.westlake.air.pecs.feature.*;
-import com.westlake.air.pecs.constants.Constants;
-import com.westlake.air.pecs.constants.ResultCode;
-import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.score.*;
+import com.westlake.air.pecs.domain.db.AnalyseDataDO;
+import com.westlake.air.pecs.domain.db.ScoresDO;
+import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
-import com.westlake.air.pecs.rtnormalizer.*;
+import com.westlake.air.pecs.domain.query.ScoresQuery;
+import com.westlake.air.pecs.domain.query.TaskQuery;
+import com.westlake.air.pecs.feature.*;
+import com.westlake.air.pecs.rtnormalizer.ChromatogramFilter;
+import com.westlake.air.pecs.rtnormalizer.RTNormalizerScorer;
 import com.westlake.air.pecs.scorer.*;
 import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.MathUtil;
@@ -23,14 +31,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-@Service("scoreService")
-public class ScoreServiceImpl implements ScoreService {
+/**
+ * Created by James Lu MiaoShan
+ * Time: 2018-08-15 10:05
+ */
+@Service("scoresService")
+public class ScoresServiceImpl implements ScoresService {
 
-    public final Logger logger = LoggerFactory.getLogger(ScoreServiceImpl.class);
+    public final Logger logger = LoggerFactory.getLogger(ScoresServiceImpl.class);
 
+    @Autowired
+    ScoresDAO scoresDAO;
     @Autowired
     AnalyseDataService analyseDataService;
     @Autowired
@@ -48,7 +63,7 @@ public class ScoreServiceImpl implements ScoreService {
     @Autowired
     FeatureFinder featureFinder;
     @Autowired
-    RTNormalizerScorer RTNormalizerScorer;
+    com.westlake.air.pecs.rtnormalizer.RTNormalizerScorer RTNormalizerScorer;
     @Autowired
     TaskService taskService;
     @Autowired
@@ -57,8 +72,6 @@ public class ScoreServiceImpl implements ScoreService {
     FeatureExtractor featureExtractor;
     @Autowired
     ExperimentService experimentService;
-    @Autowired
-    ScoreService scoreService;
     @Autowired
     ChromatographicScorer chromatographicScorer;
     @Autowired
@@ -69,6 +82,93 @@ public class ScoreServiceImpl implements ScoreService {
     LibraryScorer libraryScorer;
     @Autowired
     SwathLDAScorer swathLDAScorer;
+
+    @Override
+    public Long count(ScoresQuery query) {
+        return scoresDAO.count(query);
+    }
+
+    @Override
+    public ResultDO<List<ScoresDO>> getList(ScoresQuery targetQuery) {
+        List<ScoresDO> scoresList = scoresDAO.getList(targetQuery);
+        long totalCount = scoresDAO.count(targetQuery);
+        ResultDO<List<ScoresDO>> resultDO = new ResultDO<>(true);
+        resultDO.setModel(scoresList);
+        resultDO.setTotalNum(totalCount);
+        resultDO.setPageSize(targetQuery.getPageSize());
+
+        return resultDO;
+    }
+
+    @Override
+    public ResultDO insert(ScoresDO scoresDO) {
+        try {
+            scoresDO.setCreateDate(new Date());
+            scoresDAO.insert(scoresDO);
+            return ResultDO.build(scoresDO);
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO update(ScoresDO scoresDO) {
+        if (scoresDO.getId() == null || scoresDO.getId().isEmpty()) {
+            return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
+        }
+
+        try {
+            scoresDO.setLastModifiedDate(new Date());
+            scoresDAO.update(scoresDO);
+            return ResultDO.build(scoresDO);
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            return ResultDO.buildError(ResultCode.UPDATE_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO delete(String id) {
+        if (id == null || id.isEmpty()) {
+            return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
+        }
+        try {
+            scoresDAO.delete(id);
+            return new ResultDO(true);
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            return ResultDO.buildError(ResultCode.DELETE_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO<ScoresDO> getById(String id) {
+        try {
+            ScoresDO scoresDO = scoresDAO.getById(id);
+            if (scoresDO == null) {
+                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
+            } else {
+                return ResultDO.build(scoresDO);
+            }
+        } catch (Exception e) {
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO<ScoresDO> getByPeptideRef(String peptideRef) {
+        try {
+            ScoresDO scoresDO = scoresDAO.getByPeptideRef(peptideRef);
+            if (scoresDO == null) {
+                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
+            } else {
+                return ResultDO.build(scoresDO);
+            }
+        } catch (Exception e) {
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
+        }
+    }
 
     @Override
     public ResultDO<SlopeIntercept> computeIRt(String overviewId, String iRtLibraryId, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
@@ -156,6 +256,10 @@ public class ScoreServiceImpl implements ScoreService {
     @Override
     public void score(List<AnalyseDataDO> dataList, SwathInput input) {
 
+        if(dataList == null || dataList.size() == 0){
+            return;
+        }
+        input.setOverviewId(dataList.get(0).getOverviewId());//取一个AnalyseDataDO的OverviewId
         List<TransitionGroup> groups = analyseDataService.getTransitionGroup(dataList);
 
         HashMap<String, IntensityGroup> intensityGroupMap = transitionService.getIntensityGroupMap(input.getLibraryId());
@@ -219,7 +323,7 @@ public class ScoreServiceImpl implements ScoreService {
             }
 
             ScoresDO pecsScore = new ScoresDO();
-//            pecsScore.setOverviewId();
+            pecsScore.setOverviewId(input.getOverviewId());
             pecsScore.setPeptideRef(group.getPeptideRef());
             pecsScore.setFeatureScoresList(featureScoresList);
             pecsScoreList.add(pecsScore);
@@ -357,6 +461,4 @@ public class ScoreServiceImpl implements ScoreService {
         slopeIntercept.setIntercept((float) coeff[0]);
         return slopeIntercept;
     }
-
-
 }

@@ -13,10 +13,7 @@ import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
-import com.westlake.air.pecs.service.AnalyseDataService;
-import com.westlake.air.pecs.service.ExperimentService;
-import com.westlake.air.pecs.service.ScoreService;
-import com.westlake.air.pecs.service.TaskService;
+import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.FileUtil;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +47,7 @@ public class TestController extends BaseController {
     @Autowired
     AnalyseDataDAO analyseDataDAO;
     @Autowired
-    ScoreService scoreService;
+    ScoresService scoresService;
 
     public static float MZ_EXTRACT_WINDOW = 0.05f;
     public static float RT_EXTRACT_WINDOW = 1200f;
@@ -115,10 +112,10 @@ public class TestController extends BaseController {
         long start = System.currentTimeMillis();
         SwathInput input = new SwathInput();
         input.setLibraryId("5b88feb758487f13f05f7083");
-        input.setSlopeIntercept(new SlopeIntercept(0.0633584d,-64.7064d));
+        input.setSlopeIntercept(new SlopeIntercept(0.0633584d, -64.7064d));
         input.setSigmaSpacing(SigmaSpacing.create());
-        scoreService.score(dataList, input);
-        logger.info("耗时:"+(System.currentTimeMillis() - start));
+        scoresService.score(dataList, input);
+        logger.info("耗时:" + (System.currentTimeMillis() - start));
         return dataList.size() + "";
     }
 
