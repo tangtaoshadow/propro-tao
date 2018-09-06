@@ -1,18 +1,14 @@
 package com.westlake.air.pecs.service.impl;
 
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.pecs.domain.db.AnalyseDataDO;
-import com.westlake.air.pecs.domain.db.ExperimentDO;
-import com.westlake.air.pecs.domain.query.PageQuery;
+import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.feature.*;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.score.*;
-import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
-import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.rtnormalizer.*;
@@ -158,16 +154,17 @@ public class ScoreServiceImpl implements ScoreService {
     }
 
     @Override
-    public void score(List<AnalyseDataDO> dataList, SlopeIntercept slopeIntercept, String libraryId, SigmaSpacing sigmaSpacing) {
+    public void score(List<AnalyseDataDO> dataList, SwathInput input) {
 
         List<TransitionGroup> groups = analyseDataService.getTransitionGroup(dataList);
 
-        HashMap<String, IntensityGroup> intensityGroupMap = transitionService.getIntensityGroupMap(libraryId);
-        List<PecsScore> pecsScoreList = new ArrayList<>();
+        HashMap<String, IntensityGroup> intensityGroupMap = transitionService.getIntensityGroupMap(input.getLibraryId());
+        List<ScoresDO> pecsScoreList = new ArrayList<>();
 
+        int count = 0;
         for (TransitionGroup group : groups) {
             List<FeatureScores> featureScoresList = new ArrayList<>();
-            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupMap.get(group.getPeptideRef()), sigmaSpacing);
+            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupMap.get(group.getPeptideRef()), input.getSigmaSpacing());
 
             if(!featureByPep.isFeatureFound()){
                 continue;
@@ -201,7 +198,6 @@ public class ScoreServiceImpl implements ScoreService {
             }
 
             HashMap<Integer, String> unimodHashMap = group.getUnimodMap();
-
             String sequence = "";
             //for each mrmFeature, calculate scores
 
@@ -216,16 +212,21 @@ public class ScoreServiceImpl implements ScoreService {
 //                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
 //                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
-                libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, slopeIntercept, group.getRt().floatValue(), featureScores);
+                libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, input.getSlopeIntercept(), group.getRt().floatValue(), featureScores);
                 swathLDAScorer.calculateSwathLdaPrescore(featureScores);
 
                 featureScoresList.add(featureScores);
             }
 
-            PecsScore pecsScore = new PecsScore();
+            ScoresDO pecsScore = new ScoresDO();
+//            pecsScore.setOverviewId();
             pecsScore.setPeptideRef(group.getPeptideRef());
             pecsScore.setFeatureScoresList(featureScoresList);
             pecsScoreList.add(pecsScore);
+            count++;
+            if(count % 1000 == 0){
+                logger.info(count+"个Group已经打分完毕,总共有"+groups.size()+"个Group");
+            }
         }
         //have pecsScoreList
     }

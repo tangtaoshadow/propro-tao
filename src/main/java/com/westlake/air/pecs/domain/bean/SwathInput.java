@@ -14,6 +14,8 @@ public class SwathInput {
 
     ExperimentDO experimentDO;
 
+    String overviewId;
+
     String iRtLibraryId;
 
     String libraryId;

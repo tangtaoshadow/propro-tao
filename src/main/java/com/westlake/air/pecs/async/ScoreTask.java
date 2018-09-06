@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.async;
 
+import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
@@ -35,7 +36,11 @@ public class ScoreTask extends BaseTask {
         taskService.update(taskDO);
 
         start = System.currentTimeMillis();
-        scoreService.score(dataList, slopeIntercept, libraryId, sigmaSpacing);
+        SwathInput input = new SwathInput();
+        input.setLibraryId(libraryId);
+        input.setSigmaSpacing(sigmaSpacing);
+        input.setSlopeIntercept(slopeIntercept);
+        scoreService.score(dataList, input);
         taskDO.addLog("打分完毕,耗时:" + (System.currentTimeMillis() - start));
         taskDO.finish(TaskDO.STATUS_SUCCESS);
         taskService.update(taskDO);

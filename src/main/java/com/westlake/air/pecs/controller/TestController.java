@@ -112,7 +112,13 @@ public class TestController extends BaseController {
     @ResponseBody
     String test4(Model model, RedirectAttributes redirectAttributes) throws IOException {
         List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("D://convAll.json");
-        scoreService.score(dataList, new SlopeIntercept(0.0633584d,-64.7064d), "5b88feb758487f13f05f7083", SigmaSpacing.create());
+        long start = System.currentTimeMillis();
+        SwathInput input = new SwathInput();
+        input.setLibraryId("5b88feb758487f13f05f7083");
+        input.setSlopeIntercept(new SlopeIntercept(0.0633584d,-64.7064d));
+        input.setSigmaSpacing(SigmaSpacing.create());
+        scoreService.score(dataList, input);
+        logger.info("耗时:"+(System.currentTimeMillis() - start));
         return dataList.size() + "";
     }
 

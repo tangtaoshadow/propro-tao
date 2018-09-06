@@ -94,7 +94,8 @@ public class ExperimentTask extends BaseTask {
             taskService.update(taskDO);
         }
 
-        scoreService.score(originDataListResult.getModel(),slopeIntercept,input.getLibraryId(),input.getSigmaSpacing());
+
+        scoreService.score(originDataListResult.getModel(), input);
 
         taskDO.finish(TaskDO.STATUS_SUCCESS);
         taskService.update(taskDO);
