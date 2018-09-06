@@ -19,6 +19,8 @@ public class TransitionGroup {
 
     Double rt;
 
+    Boolean isDecoy;
+
     HashMap<Integer, String> unimodMap;
 
     //key为cutinfo,例如b3^2,y7等等
@@ -26,11 +28,12 @@ public class TransitionGroup {
 
     public TransitionGroup(){}
 
-    public TransitionGroup(String proteinName, String peptideRef, Double rt, HashMap<Integer, String> unimodMap){
+    public TransitionGroup(String proteinName, String peptideRef, Double rt,Boolean isDecoy, HashMap<Integer, String> unimodMap){
         this.proteinName = proteinName;
         this.peptideRef = peptideRef;
         this.rt = rt;
         this.unimodMap = unimodMap;
+        this.isDecoy = isDecoy;
     }
 
     public void addData(AnalyseDataDO dataDO){

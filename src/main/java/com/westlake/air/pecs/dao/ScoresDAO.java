@@ -47,23 +47,28 @@ public class ScoresDAO {
         return mongoTemplate.find(buildQuery(query), ScoresDO.class, CollectionName);
     }
 
-    public ScoresDO insert(ScoresDO taskDO) {
-        mongoTemplate.insert(taskDO, CollectionName);
-        return taskDO;
+    public ScoresDO insert(ScoresDO scoresDO) {
+        mongoTemplate.insert(scoresDO, CollectionName);
+        return scoresDO;
     }
 
-    public List<ScoresDO> insert(List<ScoresDO> taskList) {
-        mongoTemplate.insert(taskList, CollectionName);
-        return taskList;
+    public List<ScoresDO> insert(List<ScoresDO> scoresList) {
+        mongoTemplate.insert(scoresList, CollectionName);
+        return scoresList;
     }
 
-    public ScoresDO update(ScoresDO taskDO) {
-        mongoTemplate.save(taskDO, CollectionName);
-        return taskDO;
+    public ScoresDO update(ScoresDO scoresDO) {
+        mongoTemplate.save(scoresDO, CollectionName);
+        return scoresDO;
     }
 
     public void delete(String id) {
         Query query = new Query(where("id").is(id));
+        mongoTemplate.remove(query, ScoresDO.class, CollectionName);
+    }
+
+    public void deleteAllByOverviewId(String overviewId) {
+        Query query = new Query(where("overviewId").is(overviewId));
         mongoTemplate.remove(query, ScoresDO.class, CollectionName);
     }
 

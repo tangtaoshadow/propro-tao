@@ -26,7 +26,6 @@ public class Airus {
         int neval = params.getSsNumIter();
         Double[][] ws = new Double[neval][scores[0].length];
         for(int i=0;i<neval;i++){
-
             LDALearn ldaLearn = semiSupervised.learnRandomized(scores, groupNumId, isDecoy);
             ws[i] = ldaLearn.getParams();
         }

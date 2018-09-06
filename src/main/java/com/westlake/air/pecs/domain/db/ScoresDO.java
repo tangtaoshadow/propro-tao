@@ -26,6 +26,8 @@ public class ScoresDO {
     @Indexed
     String peptideRef;
 
+    Boolean isDecoy;
+
     List<FeatureScores> featureScoresList;
 
     Date createDate;

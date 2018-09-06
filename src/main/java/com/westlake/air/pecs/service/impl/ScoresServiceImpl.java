@@ -63,7 +63,7 @@ public class ScoresServiceImpl implements ScoresService {
     @Autowired
     FeatureFinder featureFinder;
     @Autowired
-    com.westlake.air.pecs.rtnormalizer.RTNormalizerScorer RTNormalizerScorer;
+    RTNormalizerScorer RTNormalizerScorer;
     @Autowired
     TaskService taskService;
     @Autowired
@@ -135,6 +135,20 @@ public class ScoresServiceImpl implements ScoresService {
         }
         try {
             scoresDAO.delete(id);
+            return new ResultDO(true);
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            return ResultDO.buildError(ResultCode.DELETE_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO deleteAllByOverviewId(String overviewId) {
+        if (overviewId == null || overviewId.isEmpty()) {
+            return ResultDO.buildError(ResultCode.ANALYSE_OVERVIEW_ID_CAN_NOT_BE_EMPTY);
+        }
+        try {
+            scoresDAO.deleteAllByOverviewId(overviewId);
             return new ResultDO(true);
         } catch (Exception e) {
             logger.warn(e.getMessage());
@@ -254,12 +268,16 @@ public class ScoresServiceImpl implements ScoresService {
     }
 
     @Override
-    public void score(List<AnalyseDataDO> dataList, SwathInput input) {
+    public List<ScoresDO> score(List<AnalyseDataDO> dataList, SwathInput input) {
 
         if(dataList == null || dataList.size() == 0){
-            return;
+            return null;
         }
         input.setOverviewId(dataList.get(0).getOverviewId());//取一个AnalyseDataDO的OverviewId
+
+        //开始打分前先删除原有的打分数据
+        scoresDAO.deleteAllByOverviewId(input.getOverviewId());
+        logger.info("原有打分数据删除完毕");
         List<TransitionGroup> groups = analyseDataService.getTransitionGroup(dataList);
 
         HashMap<String, IntensityGroup> intensityGroupMap = transitionService.getIntensityGroupMap(input.getLibraryId());
@@ -326,13 +344,18 @@ public class ScoresServiceImpl implements ScoresService {
             pecsScore.setOverviewId(input.getOverviewId());
             pecsScore.setPeptideRef(group.getPeptideRef());
             pecsScore.setFeatureScoresList(featureScoresList);
+            pecsScore.setCreateDate(new Date());
+            pecsScore.setLastModifiedDate(new Date());
             pecsScoreList.add(pecsScore);
+
             count++;
             if(count % 1000 == 0){
                 logger.info(count+"个Group已经打分完毕,总共有"+groups.size()+"个Group");
             }
         }
-        //have pecsScoreList
+        scoresDAO.insert(pecsScoreList);
+        logger.info("打分插入完毕");
+        return pecsScoreList;
     }
 
     /**

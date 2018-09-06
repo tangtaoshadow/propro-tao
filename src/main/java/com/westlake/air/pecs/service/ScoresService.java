@@ -27,6 +27,8 @@ public interface ScoresService {
 
     ResultDO delete(String id);
 
+    ResultDO deleteAllByOverviewId(String overviewId);
+
     ResultDO<ScoresDO> getById(String id);
 
     ResultDO<ScoresDO> getByPeptideRef(String peptideRef);
@@ -61,5 +63,7 @@ public interface ScoresService {
      *   sigmaSpacing Sigma通常为30/8 = 6.25/Spacing通常为0.01
      *   overviewId
      */
-    void score(List<AnalyseDataDO> dataList, SwathInput input);
+    List<ScoresDO> score(List<AnalyseDataDO> dataList, SwathInput input);
+
+
 }
