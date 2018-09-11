@@ -1,12 +1,14 @@
 package com.westlake.air.pecs.algorithm;
 
+import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.LDALearn;
 import com.westlake.air.pecs.domain.bean.airus.Params;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
 import com.westlake.air.pecs.domain.bean.airus.TrainPeaks;
 import com.westlake.air.pecs.utils.AirusUtils;
-import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.utils.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,13 +19,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class SemiSupervised {
 
+    public final Logger logger = LoggerFactory.getLogger(SemiSupervised.class);
+
     @Autowired
     Stats stats;
     @Autowired
     LDALearner ldaLearner;
 
     private TrainPeaks selectTrainPeaks(Double[][] trainData, Double[] scores, Boolean[] trainIsDecoy, Boolean[] isTopPeak, double cutOffFdr) {
-        Params params = new Params();
+
         Double[][] topTargetPeaks = ArrayUtils.getTopTargetPeaks(trainData, trainIsDecoy, isTopPeak).getModel();
         Double[] topTargetScores = ArrayUtils.getTopTargetPeaks(scores, trainIsDecoy, isTopPeak).getModel();
         Double[][] topDecoyPeaks = ArrayUtils.getTopDecoyPeaks(trainData, trainIsDecoy, isTopPeak).getModel();

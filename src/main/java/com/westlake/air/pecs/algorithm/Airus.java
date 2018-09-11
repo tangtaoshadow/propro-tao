@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -76,7 +77,6 @@ public class Airus {
 
         int neval = params.getSsNumIter();
         Double[][] ws = new Double[neval][scores[0].length];
-        logger.info("开始学习");
         for (int i = 0; i < neval; i++) {
             LDALearn ldaLearn = semiSupervised.learnRandomized(scores, groupNumId, isDecoy);
             ws[i] = ldaLearn.getParams();
@@ -93,7 +93,7 @@ public class Airus {
         StatMetrics statMetrics = errorStat.getStatMetrics();
         Double[] cutOffs = errorStat.getCutoff();
         Double[] cutOffsSort = cutOffs.clone();
-        AirusUtils.sort(cutOffsSort);
+        Arrays.sort(cutOffsSort);
         double minCutOff = cutOffsSort[0];
         double maxCutOff = cutOffsSort[cutOffs.length - 1];
         double margin = (maxCutOff - minCutOff) * 0.05;

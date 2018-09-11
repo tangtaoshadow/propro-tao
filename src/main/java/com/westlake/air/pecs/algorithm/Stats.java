@@ -85,7 +85,8 @@ public class Stats {
         int numOfLambda = 1;
         if (lambda != null) {
             numOfLambda = lambda.length;
-            AirusUtils.sort(lambda);
+            Arrays.sort(lambda);
+
         }
         Double[] meanPL = new Double[numOfPvalue];
         Double[] pi0Lambda = new Double[numOfLambda];
@@ -128,7 +129,7 @@ public class Stats {
             pi0 = Math.min(pi0Smooth[numOfLambda - 1], (double) 1);
         } else if (pi0Method.equals("bootstrap")) {
             Double[] sortedPvalue = pvalues.clone();
-            AirusUtils.sort(sortedPvalue);
+            Arrays.sort(sortedPvalue);
             int w;
             double[] mse = new double[numOfLambda];
             for (int i = 0; i < numOfLambda; i++) {
@@ -284,8 +285,8 @@ public class Stats {
         Double[] targetScores = targetScoresOriginal.clone();
         Double[] decoyScores = decoyScoresOriginal.clone();
         Double[] targetPvalues;
-        AirusUtils.sort(targetScores);
-        AirusUtils.sort(decoyScores);
+        Arrays.sort(targetScores);
+        Arrays.sort(decoyScores);
 
         /*
         compute p-values using decoy scores;

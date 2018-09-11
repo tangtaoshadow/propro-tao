@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.utils;
 
 import com.alibaba.fastjson.JSONArray;
+import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import org.slf4j.Logger;
@@ -19,6 +20,15 @@ public class FileUtil {
     public final Logger logger = LoggerFactory.getLogger(getClass());
 
     public static String readFile(String filePath) throws IOException {
+        File file = new File(filePath);
+        FileInputStream fis = new FileInputStream(file);
+        int fileLength = fis.available();
+        byte[] bytes = new byte[fileLength];
+        fis.read(bytes);
+        return new String(bytes, 0, fileLength);
+    }
+
+    public static String readFileFromSource(String filePath) throws IOException {
         File file = new File(FileUtil.class.getClassLoader().getResource(filePath).getPath());
         FileInputStream fis = new FileInputStream(file);
         int fileLength = fis.available();
@@ -34,7 +44,6 @@ public class FileUtil {
         String line = br.readLine();
         List<AnalyseDataDO> dataList = new ArrayList<>();
         while (line != null) {
-
             dataList.addAll(JSONArray.parseArray(line, AnalyseDataDO.class));
             line = br.readLine();
         }
@@ -66,6 +75,18 @@ public class FileUtil {
         }
         return new RtIntensityPairsDouble(rtArray, intArray);
 
+    }
+
+    public static void writeFile(String filePath, String content) throws IOException {
+        File file = new File(filePath);
+        if(!file.exists()){
+            file.createNewFile();
+        }
+        byte[] b = content.getBytes();
+        int l = b.length;
+        OutputStream os = new FileOutputStream(file);
+        os.write(b,0,l);
+        os.close();
     }
 
     public static void writeFile(String filePath, List list) throws IOException {
