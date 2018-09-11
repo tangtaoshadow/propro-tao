@@ -115,7 +115,7 @@ public class SemiSupervised {
             return ldaLearn;
         }catch (Exception e){
             e.printStackTrace();
-            System.out.println("Fail.\n");
+            System.out.println("learnRandomized Fail.\n");
             return null;
         }
 

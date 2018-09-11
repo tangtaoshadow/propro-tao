@@ -77,6 +77,7 @@ public class Airus {
 
         int neval = params.getSsNumIter();
         Double[][] ws = new Double[neval][scores[0].length];
+        long start = System.currentTimeMillis();
         for (int i = 0; i < neval; i++) {
             LDALearn ldaLearn = semiSupervised.learnRandomized(scores, groupNumId, isDecoy);
             ws[i] = ldaLearn.getParams();
@@ -162,7 +163,7 @@ public class Airus {
         if (params.isTest()) {
             scoreData = ArrayUtils.fakeSortTgId(scoreData);
         }
-        String[] uniqueGroupId = ArrayUtils.extractRow(scoreData.getGroupId(), AirusUtils.sortedUniqueIndex(scoreData.getGroupNumId())).getModel();
+//        String[] uniqueGroupId = ArrayUtils.extractRow(scoreData.getGroupId(), AirusUtils.sortedUniqueIndex(scoreData.getGroupNumId())).getModel();
         Double[] weights = learn(scoreData.getScoreData(), scoreData.getGroupNumId(), scoreData.getIsDecoy());
         Double[] dscore = calculateDscore(weights, scoreData);
         Double[] topTargetDscores = ArrayUtils.getTopTargetPeaks(dscore, scoreData.getIsDecoy(), ArrayUtils.findTopIndex(dscore, scoreData.getGroupNumId()).getModel()).getModel();

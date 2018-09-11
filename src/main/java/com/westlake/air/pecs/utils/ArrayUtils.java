@@ -1,13 +1,11 @@
 package com.westlake.air.pecs.utils;
 
-import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -23,6 +21,7 @@ public class ArrayUtils {
      * Return reverse of given array[].
      */
     public static double[] reverse(double[] array) {
+
         int length = array.length;
         double[] result = new double[length];
         for (int i = 0; i < length; i++) {
@@ -639,8 +638,8 @@ public class ArrayUtils {
             }
 
         }
-        int[] index = AirusUtils.argSort(tgIdNum);
-//        Integer[] indexTest = AirusUtils.argSort(tgIdNum);
+        Integer[] index = AirusUtils.indexBeforeSort(tgIdNum);
+//        Integer[] indexTest = AirusUtils.indexBeforeSort(tgIdNum);
 
 //        AirusUtils.sort(indexTest);
 //        Integer[] testNum = AirusUtils.sortedUnique(indexTest);

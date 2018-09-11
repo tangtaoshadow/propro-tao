@@ -2,10 +2,7 @@ package com.westlake.air.pecs.utils;
 
 import com.westlake.air.pecs.domain.ResultDO;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Nico Wang Ruimin
@@ -16,7 +13,7 @@ public class AirusUtils {
     /**
      * Get ascend sort index of array[].
      */
-    public static int[] argSort(Double[] array) {
+    public static Integer[] indexBeforeSort(Double[] array) {
         HashMap<Double, Integer> arrayMap = new HashMap<>();
         for (int i = 0; i < array.length; i++) {
             arrayMap.put(array[i], i);
@@ -25,7 +22,7 @@ public class AirusUtils {
         Double[] temp = array.clone();
         Arrays.sort(temp);
         int n = temp.length;
-        int[] result = new int[n];
+        Integer[] result = new Integer[n];
 
         for (int i = 0; i < n; i++) {
             result[i] = arrayMap.get(temp[i]);
@@ -36,48 +33,11 @@ public class AirusUtils {
     /**
      * Get descend sort index of array[].
      */
-    public static Integer[] argSortReversed(Double[] array) {
-        int n = array.length;
-        Integer[] result = new Integer[n];
-        for (int i = 0; i < n; i++) {
-            result[i] = i;
-        }
-        for (int i = 0; i < n; i++) {
-            int max = i;
-            for (int j = i + 1; j < n; j++) {
-                if (array[j].compareTo(array[max]) > 0) {
-                    max = j;
-                }
-            }
-            exch(array, i, max);
-            exch(result, i, max);
-        }
-        return result;
-    }
-
-    /**
-     * Get unique array of array[].
-     */
-    public static Integer[] sortedUnique(Integer[] array) {
-        if (array == null || array.length == 0) {
-            return new Integer[0];
-        }
-        int j = 1;
-        int value = array[0];
-        List<Integer> index = new ArrayList<Integer>();
-        index.add(0);
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] != value) {
-                j++;
-                value = array[i];
-                index.add(i);
-            }
-        }
-        Integer[] result = new Integer[j];
-        for (int i = 0; i < j; i++) {
-            result[i] = array[index.get(i)];
-        }
-        return result;
+    public static Integer[] indexBeforeReversedSort(Double[] array) {
+        Integer[] result = indexBeforeSort(array);
+        List<Integer> list = Arrays.asList(result);
+        Collections.reverse(list);
+        return list.toArray(result);
     }
 
     /**

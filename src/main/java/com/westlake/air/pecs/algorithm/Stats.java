@@ -7,7 +7,6 @@ import com.westlake.air.pecs.utils.ArrayUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 /**
  * Created by Nico Wang Ruimin
@@ -16,7 +15,7 @@ import java.util.Collections;
 @Component
 public class Stats {
 
-    private Double[] pnorm(Double[] targetScores, Double[] decoyScores) {
+    private Double[] pNormalizer(Double[] targetScores, Double[] decoyScores) {
         double mean = AirusUtils.mean(decoyScores);
         double std = AirusUtils.std(decoyScores);
         int targetScoresLength = targetScores.length;
@@ -29,8 +28,13 @@ public class Stats {
         return results;
     }
 
-
-    private Double[] pemp(Double[] targetScores, Double[] decoyScores) {
+    /**
+     * 经验概率计算
+     * @param targetScores
+     * @param decoyScores
+     * @return
+     */
+    private Double[] pEmpirical(Double[] targetScores, Double[] decoyScores) {
         int targetScoreLength = targetScores.length;
         int decoyScoreLength = decoyScores.length;
         int targetDecoyScoreLength = targetScoreLength + decoyScoreLength;
@@ -39,7 +43,7 @@ public class Stats {
         boolean[] vmid = new boolean[targetDecoyScoreLength];
         boolean[] v = new boolean[targetDecoyScoreLength];
         int[] u = new int[targetScoreLength];
-        Integer[] perm = AirusUtils.argSortReversed(targetDecoyScores);
+        Integer[] perm = AirusUtils.indexBeforeReversedSort(targetDecoyScores);
         for (int i = 0; i < targetScoreLength; i++) {
             vmid[i] = true;
         }
@@ -59,6 +63,7 @@ public class Stats {
         for (int i = 0; i < targetScoreLength; i++) {
             p[i] = (u[i] - i) / (double) decoyScoreLength;
         }
+
         int ranks;
         double[] rankDataReversed = AirusUtils.rankDataReversed(targetScores);
         Double[] pFinal = new Double[targetScoreLength];
@@ -194,7 +199,7 @@ public class Stats {
      */
     private Double[] qvalue(Double[] pvalues, double pi0, boolean pfdr) {
         int pvalueLength = pvalues.length;
-        int[] u = AirusUtils.argSort(pvalues);
+        Integer[] u = AirusUtils.indexBeforeSort(pvalues);
         double[] v = AirusUtils.rankDataMax(pvalues);
         Double[] qvalues = new Double[pvalueLength];
         for (int i = 0; i < pvalueLength; i++) {
@@ -292,9 +297,9 @@ public class Stats {
         compute p-values using decoy scores;
          */
         if (params.isParametric()) {
-            targetPvalues = pnorm(targetScores, decoyScores);
+            targetPvalues = pNormalizer(targetScores, decoyScores);
         } else {
-            targetPvalues = pemp(targetScores, decoyScores);
+            targetPvalues = pEmpirical(targetScores, decoyScores);
         }
 
         /*
