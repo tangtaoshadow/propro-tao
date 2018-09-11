@@ -192,8 +192,13 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             }
 
         }
+
+        logger.info("真实肽段组大小:"+groupMap.size());
+        logger.info("伪肽段组大小:"+groupMapDecoy.size());
         List<TransitionGroup> groups = new ArrayList<>(groupMap.values());
         groups.addAll(groupMapDecoy.values());
+        logger.info("最终数组大小:"+groups.size());
+
         return groups;
     }
 

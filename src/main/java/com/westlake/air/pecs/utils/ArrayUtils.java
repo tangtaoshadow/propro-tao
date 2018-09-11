@@ -1,12 +1,15 @@
 package com.westlake.air.pecs.utils;
 
+import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
-import com.westlake.air.pecs.domain.ResultDO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.TreeSet;
 
 /**
  * Created by Nico Wang Ruimin
@@ -14,6 +17,8 @@ import java.util.List;
  */
 
 public class ArrayUtils {
+
+    public static final Logger logger = LoggerFactory.getLogger(ArrayUtils.class);
 
     /**
      * Return reverse of given array[].
@@ -341,11 +346,11 @@ public class ArrayUtils {
     }
 
     /**
+     * 去重函数,获取GroupId中不同的id
      * getGroupId({"100_run0","100_run0","DECOY_100_run0"})
      * -> {0, 0, 1}
      */
-    public static ResultDO<Integer[]> getGroupNumId(String[] groupId) {
-        ResultDO<Integer[]> resultDO = new ResultDO<Integer[]>();
+    public static Integer[] getGroupNumId(String[] groupId) {
         if (groupId[0] != null) {
             Integer[] b = new Integer[groupId.length];
             String s = groupId[0];
@@ -357,12 +362,11 @@ public class ArrayUtils {
                 }
                 b[i] = groupNumId;
             }
-            resultDO.setModel(b);
-            resultDO.setSuccess(true);
-            return resultDO;
+            return b;
         } else {
-            resultDO.setMsgInfo("GetgroupNumId Error.\n");
-            return resultDO;
+
+            logger.error("GetgroupNumId Error.\n");
+            return null;
         }
     }
 
@@ -568,8 +572,16 @@ public class ArrayUtils {
     public static TrainAndTest splitForXval(Double[][] data, Integer[] groupNumId, Boolean[] isDecoy, double fraction, boolean isTest) {
         Integer[] decoyIds = getDecoyPeaks(groupNumId, isDecoy).getModel();
         Integer[] targetIds = getTargetPeaks(groupNumId, isDecoy).getModel();
-        AirusUtils.sort(decoyIds);
-        AirusUtils.sort(targetIds);
+
+        logger.info("开始排序");
+//        Arrays.sort(decoyIds);
+//        Arrays.sort(targetIds);
+
+        logger.info("decoyIds数组大小:"+decoyIds.length);
+        TreeSet<Integer> decoyIdSet = new TreeSet<Integer>(Arrays.asList(decoyIds));
+        decoyIds = decoyIdSet.toArray(decoyIds);
+        logger.info("decoyIdSet数组大小:"+decoyIdSet.size());
+
         decoyIds = AirusUtils.sortedUnique(decoyIds);
         targetIds = AirusUtils.sortedUnique(targetIds);
         if (!isTest) {
@@ -640,7 +652,7 @@ public class ArrayUtils {
             newScores[i] = scores[j];
 //            newGroupNumId[i] = groupNumId[j];
         }
-        Integer[] newGroupNumId = ArrayUtils.getGroupNumId(newGroupId).getModel();
+        Integer[] newGroupNumId = ArrayUtils.getGroupNumId(newGroupId);
 //        Integer[] testGD = ArrayUtils.getGroupNumId(newGroupNumId).getFeedBack();
 //        int hehe = testGD[9164];
 //        AirusUtils.sort(groupNumId);

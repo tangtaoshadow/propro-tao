@@ -73,6 +73,9 @@ public class AirusUtils {
      * Get unique array of array[].
      */
     public static Integer[] sortedUnique(Integer[] array){
+        if(array == null || array.length == 0){
+            return new Integer[0];
+        }
         int j =1;
         int value = array[0];
         List<Integer> index = new ArrayList<Integer>();

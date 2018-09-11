@@ -271,7 +271,14 @@ public class AnalyseController extends BaseController {
         TaskDO taskDO = new TaskDO(TaskTemplate.SCORE, overviewDO.getName());
         taskService.insert(taskDO);
 
-        scoreTask.score(overviewId, new SlopeIntercept(slope, intercept), overviewDO.getLibraryId(), new SigmaSpacing(sigma,spacing), taskDO);
+        SlopeIntercept si = new SlopeIntercept();
+        if(slope == null || intercept == null){
+            si = SlopeIntercept.create();
+        }else{
+            si.setSlope(slope);
+            si.setIntercept(intercept);
+        }
+        scoreTask.score(overviewId, si, overviewDO.getLibraryId(), new SigmaSpacing(sigma,spacing), taskDO);
         return "redirect:/task/detail/" + taskDO.getId();
     }
 

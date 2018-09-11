@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.TaskTemplate;
@@ -98,6 +99,11 @@ public class ScoresServiceImpl implements ScoresService {
         resultDO.setPageSize(targetQuery.getPageSize());
 
         return resultDO;
+    }
+
+    @Override
+    public List<ScoresDO> getAllByOverviewId(String overviewId) {
+        return scoresDAO.getAllByOverviewId(overviewId);
     }
 
     @Override
@@ -312,11 +318,17 @@ public class ScoresServiceImpl implements ScoresService {
             List<Integer> productChargeList = new ArrayList<>();
             for(AnalyseDataDO data : group.getDataMap().values()){
                 String cutInfo = data.getCutInfo();
-                if(cutInfo.contains("^")){
-                    productChargeList.add(Integer.parseInt(cutInfo.split("\\^")[1]));
-                }else{
-                    productChargeList.add(1);
+                try{
+                    if(cutInfo.contains("^")){
+                        productChargeList.add(Integer.parseInt(cutInfo.split("\\^")[1]));
+                    }else{
+                        productChargeList.add(1);
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                    logger.info("cutinfo:"+ cutInfo+";data:"+ JSON.toJSONString(data));
                 }
+
             }
 
             HashMap<Integer, String> unimodHashMap = group.getUnimodMap();
@@ -343,13 +355,14 @@ public class ScoresServiceImpl implements ScoresService {
             ScoresDO pecsScore = new ScoresDO();
             pecsScore.setOverviewId(input.getOverviewId());
             pecsScore.setPeptideRef(group.getPeptideRef());
+            pecsScore.setIsDecoy(group.getIsDecoy());
             pecsScore.setFeatureScoresList(featureScoresList);
             pecsScore.setCreateDate(new Date());
             pecsScore.setLastModifiedDate(new Date());
             pecsScoreList.add(pecsScore);
 
             count++;
-            if(count % 1000 == 0){
+            if(count % 100 == 0){
                 logger.info(count+"个Group已经打分完毕,总共有"+groups.size()+"个Group");
             }
         }

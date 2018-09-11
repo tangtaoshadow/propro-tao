@@ -6,6 +6,9 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.utils.ArrayUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 /**
  * Created by Nico Wang Ruimin
  * Time: 2018-06-13 16:55
@@ -258,6 +261,7 @@ public class Stats {
             if (fnr[i] < 0.0) fnr[i] = 0.0;
             if (fnr[i] > 1.0) fnr[i] = 1.0;
         }
+
         svalues = ArrayUtils.reverse(AirusUtils.cumMax(ArrayUtils.reverse(sens)));
         results.setTp(tp);
         results.setFp(fp);

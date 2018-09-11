@@ -2,6 +2,8 @@ package com.westlake.air.pecs.domain.bean.score;
 
 import lombok.Data;
 
+import java.util.HashMap;
+
 /**
  * Created by Nico Wang Ruimin
  * Time: 2018-08-05 22:42
@@ -17,6 +19,8 @@ public class FeatureScores {
      *              scores.log_sn_score                     * -0.72989582 + 1
      *              scores.elution_model_fit_score          *  1.88443209; //0
      */
+    public static final int SCORES_COUNT = 17;
+
     double varLibraryCorr;
     double varLibraryRsmd;
 
@@ -42,4 +46,27 @@ public class FeatureScores {
     double varYseriesScore;
 
     double mainVarXxSwathPrelimScore;
+
+    public HashMap<String, Double> buildScoreMap(){
+        HashMap<String, Double> map = new HashMap<>();
+        map.put("varLibraryCorr",varLibraryCorr);
+        map.put("varLibraryRsmd",varLibraryRsmd);
+        map.put("varXcorrCoelution",varXcorrCoelution);
+        map.put("varXcorrCoelutionWeighted",varXcorrCoelutionWeighted);
+        map.put("varXcorrShape",varXcorrShape);
+        map.put("varXcorrShapeWeighted",varXcorrShapeWeighted);
+        map.put("varNormRtScore",varNormRtScore);
+        map.put("varIntensityScore",varIntensityScore);
+        map.put("varLogSnScore",varLogSnScore);
+        map.put("varElutionModelFitScore",varElutionModelFitScore);
+        map.put("varIsotopeCorrelationScore",varIsotopeCorrelationScore);
+        map.put("varIsotopeOverlapScore",varIsotopeOverlapScore);
+        map.put("varMassdevScore",varMassdevScore);
+        map.put("varMassdevScoreWeighted",varMassdevScoreWeighted);
+        map.put("varBseriesScore",varBseriesScore);
+        map.put("varYseriesScore",varYseriesScore);
+        map.put("mainVarXxSwathPrelimScore",mainVarXxSwathPrelimScore);
+
+        return map;
+    }
 }

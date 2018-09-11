@@ -21,6 +21,8 @@ public interface ScoresService {
 
     ResultDO<List<ScoresDO>> getList(ScoresQuery targetQuery);
 
+    List<ScoresDO> getAllByOverviewId(String overviewId);
+
     ResultDO insert(ScoresDO scoresDO);
 
     ResultDO update(ScoresDO scoresDO);

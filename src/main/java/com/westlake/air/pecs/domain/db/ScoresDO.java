@@ -26,7 +26,7 @@ public class ScoresDO {
     @Indexed
     String peptideRef;
 
-    Boolean isDecoy;
+    Boolean isDecoy = false;
 
     List<FeatureScores> featureScoresList;
 
