@@ -1,8 +1,12 @@
 package com.westlake.air.pecs.utils;
 
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.airus.IndexValue;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Nico Wang Ruimin
@@ -14,18 +18,15 @@ public class AirusUtils {
      * Get ascend sort index of array[].
      */
     public static Integer[] indexBeforeSort(Double[] array) {
-        HashMap<Double, Integer> arrayMap = new HashMap<>();
-        for (int i = 0; i < array.length; i++) {
-            arrayMap.put(array[i], i);
-        }
 
-        Double[] temp = array.clone();
-        Arrays.sort(temp);
-        int n = temp.length;
+        List<IndexValue> indexValues = IndexValue.buildList(array);
+        Collections.sort(indexValues);
+
+        int n = array.length;
         Integer[] result = new Integer[n];
 
         for (int i = 0; i < n; i++) {
-            result[i] = arrayMap.get(temp[i]);
+            result[i] = indexValues.get(i).getIndex();
         }
         return result;
     }
@@ -34,10 +35,16 @@ public class AirusUtils {
      * Get descend sort index of array[].
      */
     public static Integer[] indexBeforeReversedSort(Double[] array) {
-        Integer[] result = indexBeforeSort(array);
-        List<Integer> list = Arrays.asList(result);
-        Collections.reverse(list);
-        return list.toArray(result);
+        List<IndexValue> indexValues = IndexValue.buildList(array);
+        Collections.sort(indexValues);
+        Collections.reverse(indexValues);
+        int n = array.length;
+        Integer[] result = new Integer[n];
+
+        for (int i = 0; i < n; i++) {
+            result[i] = indexValues.get(i).getIndex();
+        }
+        return result;
     }
 
     /**
@@ -474,5 +481,4 @@ public class AirusUtils {
             return -1;
         }
     }
-
 }
