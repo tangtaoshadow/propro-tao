@@ -168,18 +168,38 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     @Override
     public List<TransitionGroup> getTransitionGroup(List<AnalyseDataDO> dataList) {
         HashMap<String, TransitionGroup> groupMap = new HashMap<>();
+        HashMap<String, TransitionGroup> groupMapDecoy = new HashMap<>();
 
         for (AnalyseDataDO data : dataList) {
-            if (groupMap.get(data.getPeptideRef()) == null) {
-                TransitionGroup group = new TransitionGroup(data.getProteinName(), data.getPeptideRef(), Double.parseDouble(data.getRt().toString()), data.getUnimodMap());
-                group.addData(data);
-                groupMap.put(data.getPeptideRef(), group);
-            } else {
-                TransitionGroup group = groupMap.get(data.getPeptideRef());
-                group.addData(data);
+            if(data.getIsDecoy()){
+                if (groupMapDecoy.get(data.getPeptideRef()) == null) {
+                    TransitionGroup group = new TransitionGroup(data.getProteinName(), data.getPeptideRef(), Double.parseDouble(data.getRt().toString()), data.getIsDecoy(), data.getUnimodMap());
+                    group.addData(data);
+                    groupMapDecoy.put(data.getPeptideRef(), group);
+                } else {
+                    TransitionGroup group = groupMapDecoy.get(data.getPeptideRef());
+                    group.addData(data);
+                }
+            }else{
+                if (groupMap.get(data.getPeptideRef()) == null) {
+                    TransitionGroup group = new TransitionGroup(data.getProteinName(), data.getPeptideRef(), Double.parseDouble(data.getRt().toString()), data.getIsDecoy(), data.getUnimodMap());
+                    group.addData(data);
+                    groupMap.put(data.getPeptideRef(), group);
+                } else {
+                    TransitionGroup group = groupMap.get(data.getPeptideRef());
+                    group.addData(data);
+                }
             }
+
         }
-        return new ArrayList<>(groupMap.values());
+
+        logger.info("真实肽段组大小:"+groupMap.size());
+        logger.info("伪肽段组大小:"+groupMapDecoy.size());
+        List<TransitionGroup> groups = new ArrayList<>(groupMap.values());
+        groups.addAll(groupMapDecoy.values());
+        logger.info("最终数组大小:"+groups.size());
+
+        return groups;
     }
 
     @Override
@@ -187,8 +207,13 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
         int pageSize = 1000;
         List<Peptide> peptides = transitionDAO.getPeptideList(overviewDO.getLibraryId());
         HashMap<String, TransitionGroup> groupMap = new HashMap<>();
+        HashMap<String, TransitionGroup> groupMapDecoy = new HashMap<>();
         for (Peptide peptide : peptides) {
-            groupMap.put(peptide.getPeptideRef(), new TransitionGroup(peptide.getProteinName(), peptide.getPeptideRef(), peptide.getRt(), peptide.getUnimodMap()));
+            if(peptide.getIsDecoy()){
+                groupMapDecoy.put(peptide.getPeptideRef(), new TransitionGroup(peptide.getProteinName(), peptide.getPeptideRef(), peptide.getRt(), peptide.getIsDecoy(), peptide.getUnimodMap()));
+            }else{
+                groupMap.put(peptide.getPeptideRef(), new TransitionGroup(peptide.getProteinName(), peptide.getPeptideRef(), peptide.getRt(), peptide.getIsDecoy(), peptide.getUnimodMap()));
+            }
         }
 
         AnalyseDataQuery query = new AnalyseDataQuery();
@@ -203,7 +228,13 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             List<AnalyseDataDO> dataList = analyseDataDAO.getList(query);
             logger.info("获取1000个卷积结果耗时:" + (System.currentTimeMillis() - start1));
             for (AnalyseDataDO data : dataList) {
-                TransitionGroup group = groupMap.get(data.getPeptideRef());
+                TransitionGroup group = null;
+                if(data.getIsDecoy()){
+                    group = groupMapDecoy.get(data.getPeptideRef());
+                }else{
+                    group = groupMap.get(data.getPeptideRef());
+                }
+
                 if (group != null) {
                     group.addData(data);
                 } else {
@@ -212,8 +243,9 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             }
             logger.info("第" + i + "批数据处理完毕,一共有" + totalPage + "批数据");
         }
-
-        return new ArrayList<TransitionGroup>(groupMap.values());
+        List<TransitionGroup> groups = new ArrayList<>(groupMap.values());
+        groups.addAll(groupMapDecoy.values());
+        return groups;
     }
 
     @Override
@@ -262,8 +294,9 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
         List<Peptide> peptides = transitionDAO.getPeptideList(iRtlibraryId);
 
         HashMap<String, TransitionGroup> groupMap = new HashMap<>();
+        //由于校准库中没有伪肽段,所以不需要像getTransitionGroup接口一样对伪肽段做单独的处理
         for (Peptide peptide : peptides) {
-            groupMap.put(peptide.getPeptideRef(), new TransitionGroup(peptide.getProteinName(), peptide.getPeptideRef(), peptide.getRt(), peptide.getUnimodMap()));
+            groupMap.put(peptide.getPeptideRef(), new TransitionGroup(peptide.getProteinName(), peptide.getPeptideRef(), peptide.getRt(), peptide.getIsDecoy(), peptide.getUnimodMap()));
         }
 
         for (AnalyseDataDO data : dataList) {

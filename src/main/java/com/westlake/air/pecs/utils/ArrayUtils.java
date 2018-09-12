@@ -1,12 +1,12 @@
 package com.westlake.air.pecs.utils;
 
+import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
-import com.westlake.air.pecs.domain.ResultDO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Nico Wang Ruimin
@@ -15,10 +15,13 @@ import java.util.List;
 
 public class ArrayUtils {
 
+    public static final Logger logger = LoggerFactory.getLogger(ArrayUtils.class);
+
     /**
      * Return reverse of given array[].
      */
     public static double[] reverse(double[] array) {
+
         int length = array.length;
         double[] result = new double[length];
         for (int i = 0; i < length; i++) {
@@ -223,10 +226,17 @@ public class ArrayUtils {
         }
     }
 
-    private static ResultDO<TrainAndTest> extract3dRow(Double[][] array, Integer[] id, Boolean[] isDecoy, Integer[] index) {
-        ResultDO<TrainAndTest> resultDO = new ResultDO<TrainAndTest>();
+    /**
+     * @param array
+     * @param groupNumId
+     * @param isDecoy
+     * @param indexSet 去重集合
+     * @return
+     */
+    private static TrainAndTest extract3dRow(Double[][] array, Integer[] groupNumId, Boolean[] isDecoy, HashSet<Integer> indexSet) {
         TrainAndTest trainAndTest = new TrainAndTest();
-        if (array.length == id.length) {
+
+        if (array.length == groupNumId.length) {
             int k = -1, l = -1;
             int symbol;
             Double[][] trainRow = new Double[array.length][array[0].length];
@@ -235,19 +245,18 @@ public class ArrayUtils {
             Integer[] testIdRow = new Integer[array.length];
             Boolean[] trainIsDecoy = new Boolean[array.length];
             Boolean[] testIsDecoy = new Boolean[array.length];
-            for (int i = 0; i < id.length; i++) {
+
+            for (int i = 0; i < groupNumId.length; i++) {
                 symbol = k;
-                for (int j : index) {
-                    if (id[i].equals(j)) {
-                        k++;
-                        trainIdRow[k] = id[i];
-                        trainRow[k] = array[i];
-                        trainIsDecoy[k] = isDecoy[i];
-                    }
+                if(indexSet.contains(groupNumId[i])){
+                    k++;
+                    trainIdRow[k] = groupNumId[i];
+                    trainRow[k] = array[i];
+                    trainIsDecoy[k] = isDecoy[i];
                 }
                 if (k == symbol) {
                     l++;
-                    testIdRow[l] = id[i];
+                    testIdRow[l] = groupNumId[i];
                     testRow[l] = array[i];
                     testIsDecoy[l] = isDecoy[i];
                 }
@@ -276,12 +285,10 @@ public class ArrayUtils {
             trainAndTest.setTestId(extractedTestIdRow);
             trainAndTest.setTestIsDecoy(extractedTestIsDecoyRow);
 
-            resultDO.setModel(trainAndTest);
-            resultDO.setSuccess(true);
-            return resultDO;
+            return trainAndTest;
         } else {
-            resultDO.setMsgInfo("Extract3dRow Error.\n");
-            return resultDO;
+            logger.error("Extract3dRow Error: array.length must be equal with id.length");
+            return null;
         }
 
     }
@@ -341,11 +348,11 @@ public class ArrayUtils {
     }
 
     /**
+     * 将GroupId简化为Integer数组
      * getGroupId({"100_run0","100_run0","DECOY_100_run0"})
      * -> {0, 0, 1}
      */
-    public static ResultDO<Integer[]> getGroupNumId(String[] groupId) {
-        ResultDO<Integer[]> resultDO = new ResultDO<Integer[]>();
+    public static Integer[] getGroupNumId(String[] groupId) {
         if (groupId[0] != null) {
             Integer[] b = new Integer[groupId.length];
             String s = groupId[0];
@@ -357,12 +364,10 @@ public class ArrayUtils {
                 }
                 b[i] = groupNumId;
             }
-            resultDO.setModel(b);
-            resultDO.setSuccess(true);
-            return resultDO;
+            return b;
         } else {
-            resultDO.setMsgInfo("GetgroupNumId Error.\n");
-            return resultDO;
+            logger.error("GetgroupNumId Error.\n");
+            return null;
         }
     }
 
@@ -565,13 +570,21 @@ public class ArrayUtils {
         return result;
     }
 
+
+    /**
+     * 划分测试集与训练集,保证每一次对于同一份原始数据划分出的测试集都是同一份
+     *
+     * @param data
+     * @param groupNumId
+     * @param isDecoy
+     * @param fraction   目前写死0.5
+     * @param isTest
+     * @return
+     */
     public static TrainAndTest splitForXval(Double[][] data, Integer[] groupNumId, Boolean[] isDecoy, double fraction, boolean isTest) {
         Integer[] decoyIds = getDecoyPeaks(groupNumId, isDecoy).getModel();
         Integer[] targetIds = getTargetPeaks(groupNumId, isDecoy).getModel();
-        AirusUtils.sort(decoyIds);
-        AirusUtils.sort(targetIds);
-        decoyIds = AirusUtils.sortedUnique(decoyIds);
-        targetIds = AirusUtils.sortedUnique(targetIds);
+
         if (!isTest) {
             List<Integer> decoyIdShuffle = Arrays.asList(decoyIds);
             List<Integer> targetIdShuffle = Arrays.asList(targetIds);
@@ -579,13 +592,22 @@ public class ArrayUtils {
             Collections.shuffle(targetIdShuffle);
             decoyIdShuffle.toArray(decoyIds);
             targetIdShuffle.toArray(targetIds);
+        } else {
+            TreeSet<Integer> decoyIdSet = new TreeSet<Integer>(Arrays.asList(decoyIds));
+            TreeSet<Integer> targetIdSet = new TreeSet<Integer>(Arrays.asList(targetIds));
+
+            decoyIds = new Integer[decoyIdSet.size()];
+            decoyIdSet.toArray(decoyIds);
+            targetIds = new Integer[targetIdSet.size()];
+            targetIdSet.toArray(targetIds);
         }
+
         int decoyLength = (int) (decoyIds.length * fraction) + 1;
         int targetLength = (int) (targetIds.length * fraction) + 1;
         Integer[] learnIds = ArrayUtils.concat2d(getPartOfArray(decoyIds, decoyLength), getPartOfArray(targetIds, targetLength));
-        AirusUtils.sort(learnIds);
-        learnIds = AirusUtils.sortedUnique(learnIds);
-        return extract3dRow(data, groupNumId, isDecoy, learnIds).getModel();
+
+        HashSet<Integer> learnIdSet = new HashSet<Integer>(Arrays.asList(learnIds));
+        return extract3dRow(data, groupNumId, isDecoy, learnIdSet);
     }
 
     /**
@@ -616,8 +638,8 @@ public class ArrayUtils {
             }
 
         }
-        int[] index = AirusUtils.argSort(tgIdNum);
-//        Integer[] indexTest = AirusUtils.argSort(tgIdNum);
+        Integer[] index = AirusUtils.indexBeforeSort(tgIdNum);
+//        Integer[] indexTest = AirusUtils.indexBeforeSort(tgIdNum);
 
 //        AirusUtils.sort(indexTest);
 //        Integer[] testNum = AirusUtils.sortedUnique(indexTest);
@@ -640,7 +662,7 @@ public class ArrayUtils {
             newScores[i] = scores[j];
 //            newGroupNumId[i] = groupNumId[j];
         }
-        Integer[] newGroupNumId = ArrayUtils.getGroupNumId(newGroupId).getModel();
+        Integer[] newGroupNumId = ArrayUtils.getGroupNumId(newGroupId);
 //        Integer[] testGD = ArrayUtils.getGroupNumId(newGroupNumId).getFeedBack();
 //        int hehe = testGD[9164];
 //        AirusUtils.sort(groupNumId);

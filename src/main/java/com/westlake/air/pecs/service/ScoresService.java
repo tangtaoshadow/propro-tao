@@ -21,11 +21,15 @@ public interface ScoresService {
 
     ResultDO<List<ScoresDO>> getList(ScoresQuery targetQuery);
 
+    List<ScoresDO> getAllByOverviewId(String overviewId);
+
     ResultDO insert(ScoresDO scoresDO);
 
     ResultDO update(ScoresDO scoresDO);
 
     ResultDO delete(String id);
+
+    ResultDO deleteAllByOverviewId(String overviewId);
 
     ResultDO<ScoresDO> getById(String id);
 
@@ -61,5 +65,7 @@ public interface ScoresService {
      *   sigmaSpacing Sigma通常为30/8 = 6.25/Spacing通常为0.01
      *   overviewId
      */
-    void score(List<AnalyseDataDO> dataList, SwathInput input);
+    List<ScoresDO> score(List<AnalyseDataDO> dataList, SwathInput input);
+
+
 }

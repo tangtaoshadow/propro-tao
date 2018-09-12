@@ -14,5 +14,4 @@ public class TrainAndTest {
     Double[][] testData;
     Integer[] testId;
     Boolean[] testIsDecoy;
-
 }

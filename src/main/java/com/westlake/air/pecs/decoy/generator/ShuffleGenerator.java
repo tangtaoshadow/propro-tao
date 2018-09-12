@@ -107,6 +107,7 @@ public class ShuffleGenerator extends BaseGenerator {
         TransitionDO decoy = TransitionUtil.cloneForDecoy(transitionDO);
         decoy.setSequence(TransitionUtil.toSequence(bestDecoy, false));
         decoy.setUnimodMap(newUnimodMap);
+
         Annotation oneAnno = decoy.getAnnotation();
 
         List<String> unimodIds = new ArrayList<>();
@@ -129,6 +130,8 @@ public class ShuffleGenerator extends BaseGenerator {
 
         decoy.setFeatures("计算的肽段:"+TransitionUtil.toSequence(acids, false));
         decoy.setProductMz(productMz);
+        decoy.setPeptideRef(decoy.getFullName()+"_"+decoy.getPrecursorCharge());
+        decoy.setCutInfo(transitionDO.getCutInfo());
         return decoy;
     }
 }

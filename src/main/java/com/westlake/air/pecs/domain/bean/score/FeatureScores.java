@@ -2,6 +2,8 @@ package com.westlake.air.pecs.domain.bean.score;
 
 import lombok.Data;
 
+import java.util.HashMap;
+
 /**
  * Created by Nico Wang Ruimin
  * Time: 2018-08-05 22:42
@@ -33,6 +35,8 @@ public class FeatureScores {
      * scores.massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比之和
      * scores.weighted_massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比按libraryIntensity加权之和
      */
+    public static final int SCORES_COUNT = 17;
+
 
     //对experiment和library intensity算Pearson相关系数
     double varLibraryCorr;
@@ -82,4 +86,27 @@ public class FeatureScores {
 
     //Swath主打分
     double mainVarXxSwathPrelimScore;
+
+    public HashMap<String, Double> buildScoreMap(){
+        HashMap<String, Double> map = new HashMap<>();
+        map.put("varLibraryCorr",varLibraryCorr);
+        map.put("varLibraryRsmd",varLibraryRsmd);
+        map.put("varXcorrCoelution",varXcorrCoelution);
+        map.put("varXcorrCoelutionWeighted",varXcorrCoelutionWeighted);
+        map.put("varXcorrShape",varXcorrShape);
+        map.put("varXcorrShapeWeighted",varXcorrShapeWeighted);
+        map.put("varNormRtScore",varNormRtScore);
+        map.put("varIntensityScore",varIntensityScore);
+        map.put("varLogSnScore",varLogSnScore);
+        map.put("varElutionModelFitScore",varElutionModelFitScore);
+        map.put("varIsotopeCorrelationScore",varIsotopeCorrelationScore);
+        map.put("varIsotopeOverlapScore",varIsotopeOverlapScore);
+        map.put("varMassdevScore",varMassdevScore);
+        map.put("varMassdevScoreWeighted",varMassdevScoreWeighted);
+        map.put("varBseriesScore",varBseriesScore);
+        map.put("varYseriesScore",varYseriesScore);
+        map.put("mainVarXxSwathPrelimScore",mainVarXxSwathPrelimScore);
+
+        return map;
+    }
 }

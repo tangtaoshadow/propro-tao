@@ -3,14 +3,17 @@ package com.westlake.air.pecs.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.mongodb.BasicDBObject;
+import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
+import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
+import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.service.*;
@@ -48,6 +51,8 @@ public class TestController extends BaseController {
     AnalyseDataDAO analyseDataDAO;
     @Autowired
     ScoresService scoresService;
+    @Autowired
+    Airus airus;
 
     public static float MZ_EXTRACT_WINDOW = 0.05f;
     public static float RT_EXTRACT_WINDOW = 1200f;
@@ -108,7 +113,7 @@ public class TestController extends BaseController {
     @RequestMapping("test4")
     @ResponseBody
     String test4(Model model, RedirectAttributes redirectAttributes) throws IOException {
-        List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("D://convAll.json");
+        List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("D://convWithDecoy.json");
         long start = System.currentTimeMillis();
         SwathInput input = new SwathInput();
         input.setLibraryId("5b88feb758487f13f05f7083");
@@ -122,11 +127,37 @@ public class TestController extends BaseController {
     @RequestMapping("test5")
     @ResponseBody
     String test5(Model model, RedirectAttributes redirectAttributes) throws IOException {
-        List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("D://convAll.json");
+        List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("D://convWithDecoy.json");
+        for(AnalyseDataDO data : dataList){
+            if(data.getCutInfo() == null){
+                logger.error("卷积数据异常:"+data.getPeptideRef());
+            }
+        }
         logger.info("卷积数据大小:" + dataList.size());
         long start = System.currentTimeMillis();
         List<TransitionGroup> groups = analyseDataService.getTransitionGroup(dataList);
         logger.info("获取Group耗时:" + (System.currentTimeMillis() - start));
         return "卷积数据Group大小:" + groups.size();
+    }
+
+    @RequestMapping("test6")
+    @ResponseBody
+    String test6(Model model, RedirectAttributes redirectAttributes) throws IOException {
+        logger.info("开始获取打分数据");
+        List<ScoresDO> scores = scoresService.getAllByOverviewId("5b967e5fcbaa7e2940fc6537");
+        logger.info("打分数据获取完毕");
+        long start = System.currentTimeMillis();
+        Double[] resultArray = airus.learn(scores);
+        logger.info("打分耗时:"+(System.currentTimeMillis() - start));
+        return JSONArray.toJSONString(resultArray);
+    }
+
+    @RequestMapping("test7")
+    @ResponseBody
+    String test7(Model model, RedirectAttributes redirectAttributes) throws IOException {
+        String trainAndTestContent = FileUtil.readFile("D://trainAndTest.json");
+        long start = System.currentTimeMillis();
+        TrainAndTest tt = JSON.parseObject(trainAndTestContent, TrainAndTest.class);
+        return tt.getTestData().length+"/"+tt.getTrainData().length+"/"+tt.getTestId().length+"/"+tt.getTrainId().length;
     }
 }

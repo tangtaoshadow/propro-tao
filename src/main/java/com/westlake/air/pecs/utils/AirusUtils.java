@@ -1,8 +1,11 @@
 package com.westlake.air.pecs.utils;
 
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.airus.IndexValue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -12,37 +15,18 @@ import java.util.List;
 public class AirusUtils {
 
     /**
-     * Sort array[] as ascend order.
-     */
-    public static void sort(Comparable[] array) {
-            int n = array.length;
-            for (int i = 0; i < n; i++) {
-                int min = i;
-                for (int j = i + 1; j < n; j++) {
-                    if (array[j].compareTo(array[min]) < 0) {
-                        min = j;
-                    }
-                }
-                exch(array, i, min);
-            }
-    }
-
-    /**
      * Get ascend sort index of array[].
      */
-    public static int[] argSort(Double[] array) {
-        Double[] temp = array.clone();
-        int n = temp.length;
-        int[] result = new int[n];
+    public static Integer[] indexBeforeSort(Double[] array) {
+
+        List<IndexValue> indexValues = IndexValue.buildList(array);
+        Collections.sort(indexValues);
+
+        int n = array.length;
+        Integer[] result = new Integer[n];
+
         for (int i = 0; i < n; i++) {
-            int min = 0;
-            for (int j = 0; j < n; j++) {
-                if (temp[j].compareTo(temp[min]) < 0) {
-                    min = j;
-                }
-            }
-            temp[min]= Double.MAX_VALUE;
-            result[i] = min;
+            result[i] = indexValues.get(i).getIndex();
         }
         return result;
     }
@@ -50,43 +34,15 @@ public class AirusUtils {
     /**
      * Get descend sort index of array[].
      */
-    public static Integer[] argSortReversed(Double[] array) {
+    public static Integer[] indexBeforeReversedSort(Double[] array) {
+        List<IndexValue> indexValues = IndexValue.buildList(array);
+        Collections.sort(indexValues);
+        Collections.reverse(indexValues);
         int n = array.length;
         Integer[] result = new Integer[n];
-        for(int i=0;i<n;i++){
-            result[i]=i;
-        }
-        for (int i = 0; i < n; i++) {
-            int max = i;
-            for (int j = i + 1; j < n; j++) {
-                if (array[j].compareTo(array[max]) > 0) {
-                    max = j;
-                }
-            }
-            exch(array, i, max);
-            exch(result,i,max);
-        }
-        return result;
-    }
 
-    /**
-     * Get unique array of array[].
-     */
-    public static Integer[] sortedUnique(Integer[] array){
-        int j =1;
-        int value = array[0];
-        List<Integer> index = new ArrayList<Integer>();
-        index.add(0);
-        for(int i=0;i<array.length;i++){
-            if(array[i] != value){
-                j++;
-                value = array[i];
-                index.add(i);
-            }
-        }
-        Integer[] result = new Integer[j];
-        for(int i =0;i<j;i++){
-            result[i] = array[index.get(i)];
+        for (int i = 0; i < n; i++) {
+            result[i] = indexValues.get(i).getIndex();
         }
         return result;
     }
@@ -94,20 +50,20 @@ public class AirusUtils {
     /**
      * Get unique array index of array[].
      */
-    public static Integer[] sortedUniqueIndex (Integer[] array){
-        int j =1;
+    public static Integer[] sortedUniqueIndex(Integer[] array) {
+        int j = 1;
         int value = array[0];
         List<Integer> index = new ArrayList<Integer>();
         index.add(0);
-        for(int i=0;i<array.length;i++){
-            if(array[i] != value){
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] != value) {
                 j++;
                 value = array[i];
                 index.add(i);
             }
         }
         Integer[] result = new Integer[j];
-        for(int i =0;i<j;i++){
+        for (int i = 0; i < j; i++) {
             result[i] = index.get(i);
         }
         return result;
@@ -117,17 +73,17 @@ public class AirusUtils {
      * rankDataMax([1,2,2,3,3,3,4])
      * -> [1, 3, 3, 6, 6, 6, 7]
      */
-    public static double[] rankDataMax(Double[] array){
+    public static double[] rankDataMax(Double[] array) {
         int n = array.length;
         double[] result = new double[n];
         int[] countSort = ArrayUtils.reverse(countSort(array));
         int count = 0;
         int index = array.length;
-        for(int j:countSort){
-            for(int i=0;i<j;i++){
-                result[count +i] = index- count;
+        for (int j : countSort) {
+            for (int i = 0; i < j; i++) {
+                result[count + i] = index - count;
             }
-            count = count+j;
+            count = count + j;
         }
         return result;
     }
@@ -136,18 +92,18 @@ public class AirusUtils {
      * rankDataMax([1,2,2,3,3,3,4])
      * -> [7, 5.5, 5.5, 3, 3, 3, 1]
      */
-    public static double[] rankDataReversed(Double[] array){
+    public static double[] rankDataReversed(Double[] array) {
         int n = array.length;
         double[] result = new double[n];
         int[] countSortReversed = ArrayUtils.reverse(countSort(array));
         int count = 0;
         int index = array.length;
-        for(int j:countSortReversed){
-            for(int i=0;i<j;i++){
-                result[index-j+i] = count + (j+1)/(double)2;
+        for (int j : countSortReversed) {
+            for (int i = 0; i < j; i++) {
+                result[index - j + i] = count + (j + 1) / (double) 2;
             }
-            index = index -j;
-            count = count+j;
+            index = index - j;
+            count = count + j;
         }
         return result;
     }
@@ -168,18 +124,18 @@ public class AirusUtils {
         for (double i : array) {
             error += Math.pow(i - mean, 2);
         }
-        error /= (double) length-1;
+        error /= (double) length - 1;
         return Math.sqrt(error);
     }
 
     /**
      * Normalize a with a's mean and std.
      */
-    public static Double[] normalize(Double[] array){
+    public static Double[] normalize(Double[] array) {
         double mean = mean(array);
         Double[] result = array.clone();
-        for(int i=0;i<array.length;i++){
-            result[i] =(result[i] - mean) / std(array);
+        for (int i = 0; i < array.length; i++) {
+            result[i] = (result[i] - mean) / std(array);
         }
         return result;
     }
@@ -187,12 +143,12 @@ public class AirusUtils {
     /**
      * Normalize a with b's mean and std.
      */
-    public static Double[] normalize(Double[] arrayA, Double[] arrayB){
+    public static Double[] normalize(Double[] arrayA, Double[] arrayB) {
         double mean = mean(arrayB);
         double std = std(arrayB);
         Double[] result = arrayA.clone();
-        for(int i=0;i<arrayA.length;i++){
-            result[i] =(result[i] - mean) / std;
+        for (int i = 0; i < arrayA.length; i++) {
+            result[i] = (result[i] - mean) / std;
         }
         return result;
     }
@@ -266,7 +222,6 @@ public class AirusUtils {
         }
         return n;
     }
-
 
 
     /**
@@ -393,10 +348,10 @@ public class AirusUtils {
     /**
      * Get numCutOffs points equally picked from [a,b).
      */
-    public static Double[] linspace(Double a, Double b, int numCutOffs){
+    public static Double[] linspace(Double a, Double b, int numCutOffs) {
         Double[] result = new Double[numCutOffs];
-        double inc = Math.abs(b-a)/(numCutOffs-1);
-        for(int i=0;i<numCutOffs;i++){
+        double inc = Math.abs(b - a) / (numCutOffs - 1);
+        for (int i = 0; i < numCutOffs; i++) {
             result[i] = a + inc * i;
         }
         return result;
@@ -405,40 +360,40 @@ public class AirusUtils {
     /**
      * Get the row-mean of rows in array[].
      */
-    public static Double[] getRowMean(Double[][] array){
+    public static Double[] getRowMean(Double[][] array) {
         int arrayLength = array.length;
         int arrayWidth = array[0].length;
         Double[] rowMean = new Double[arrayWidth];
-        double sumRowElement =0;
-        for(int i=0;i<arrayWidth;i++){
-            for(int j=0;j<arrayLength;j++){
+        double sumRowElement = 0;
+        for (int i = 0; i < arrayWidth; i++) {
+            for (int j = 0; j < arrayLength; j++) {
                 sumRowElement += array[j][i];
             }
             rowMean[i] = sumRowElement / arrayLength;
-            sumRowElement =0;
+            sumRowElement = 0;
         }
         return rowMean;
     }
 
-    public static ResultDO<Double[]> lagrangeInterpolation(Double[] x, Double[] y){
+    public static ResultDO<Double[]> lagrangeInterpolation(Double[] x, Double[] y) {
         int n = x.length;
         ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
         Double[] results = new Double[n];
-        if(n == y.length){
+        if (n == y.length) {
             Double result;
-            for(int i=0;i<n;i++){
-                result = (double)0;
-                for(int j=0;j<n-2;j++){
-                    result+= (x[i]-x[j+1])*(x[i]-x[j+2])/((x[j]-x[j+1])*(x[j]-x[j+2]));
+            for (int i = 0; i < n; i++) {
+                result = (double) 0;
+                for (int j = 0; j < n - 2; j++) {
+                    result += (x[i] - x[j + 1]) * (x[i] - x[j + 2]) / ((x[j] - x[j + 1]) * (x[j] - x[j + 2]));
                 }
-                result+=(x[i]-x[n-3])*(x[i]-x[n-1])/((x[n-2]-x[n-3])*(x[n-2]-x[n-1]));
-                result+=(x[i]-x[n-3])*(x[i]-x[n-2])/((x[n-1]-x[n-3])*(x[n-1]-x[n-2]));
-                results[i]=result;
+                result += (x[i] - x[n - 3]) * (x[i] - x[n - 1]) / ((x[n - 2] - x[n - 3]) * (x[n - 2] - x[n - 1]));
+                result += (x[i] - x[n - 3]) * (x[i] - x[n - 2]) / ((x[n - 1] - x[n - 3]) * (x[n - 1] - x[n - 2]));
+                results[i] = result;
             }
             resultDO.setSuccess(true);
             resultDO.setModel(results);
             return resultDO;
-        }else{
+        } else {
             resultDO.setMsgInfo("Interpolation Error.\n");
             return resultDO;
         }
@@ -456,11 +411,11 @@ public class AirusUtils {
     /**
      * Count number of different values in a **sorted** array.
      */
-    private static int numOfUnique(Double[] array){
-        int j =1;
+    private static int numOfUnique(Double[] array) {
+        int j = 1;
         double value = array[0];
-        for(double i : array){
-            if(i != value){
+        for (double i : array) {
+            if (i != value) {
                 j++;
                 value = i;
             }
@@ -471,19 +426,19 @@ public class AirusUtils {
     /**
      * count number of times corresponding to unique sorted array.
      */
-    private static int[] countSort(Double[] array){
+    private static int[] countSort(Double[] array) {
         Double[] aSort = array.clone();
-        sort(aSort);
-        int j=0,k =0;
+        Arrays.sort(aSort);
+        int j = 0, k = 0;
         int[] result = new int[numOfUnique(aSort)];
-        double value =aSort[0];
-        for(int i=0;i<aSort.length;i++){
-            if(aSort[i]==value){
+        double value = aSort[0];
+        for (int i = 0; i < aSort.length; i++) {
+            if (aSort[i] == value) {
                 j++;
-            }else {
+            } else {
                 result[k] = j;
                 k++;
-                j=1;
+                j = 1;
                 value = aSort[i];
             }
 
@@ -494,8 +449,8 @@ public class AirusUtils {
 
     /**
      * Find order of array.
-     *  0: unsorted
-     *  1: ascending
+     * 0: unsorted
+     * 1: ascending
      * -1: descending
      */
     private static int findSortOrder(Double[] array) {
@@ -526,5 +481,4 @@ public class AirusUtils {
             return -1;
         }
     }
-
 }

@@ -6,6 +6,8 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.utils.ArrayUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+
 /**
  * Created by Nico Wang Ruimin
  * Time: 2018-06-13 16:55
@@ -13,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class Stats {
 
-    private Double[] pnorm(Double[] targetScores, Double[] decoyScores) {
+    private Double[] pNormalizer(Double[] targetScores, Double[] decoyScores) {
         double mean = AirusUtils.mean(decoyScores);
         double std = AirusUtils.std(decoyScores);
         int targetScoresLength = targetScores.length;
@@ -26,8 +28,13 @@ public class Stats {
         return results;
     }
 
-
-    private Double[] pemp(Double[] targetScores, Double[] decoyScores) {
+    /**
+     * 经验概率计算
+     * @param targetScores
+     * @param decoyScores
+     * @return
+     */
+    private Double[] pEmpirical(Double[] targetScores, Double[] decoyScores) {
         int targetScoreLength = targetScores.length;
         int decoyScoreLength = decoyScores.length;
         int targetDecoyScoreLength = targetScoreLength + decoyScoreLength;
@@ -36,7 +43,7 @@ public class Stats {
         boolean[] vmid = new boolean[targetDecoyScoreLength];
         boolean[] v = new boolean[targetDecoyScoreLength];
         int[] u = new int[targetScoreLength];
-        Integer[] perm = AirusUtils.argSortReversed(targetDecoyScores);
+        Integer[] perm = AirusUtils.indexBeforeReversedSort(targetDecoyScores);
         for (int i = 0; i < targetScoreLength; i++) {
             vmid[i] = true;
         }
@@ -56,6 +63,7 @@ public class Stats {
         for (int i = 0; i < targetScoreLength; i++) {
             p[i] = (u[i] - i) / (double) decoyScoreLength;
         }
+
         int ranks;
         double[] rankDataReversed = AirusUtils.rankDataReversed(targetScores);
         Double[] pFinal = new Double[targetScoreLength];
@@ -82,7 +90,8 @@ public class Stats {
         int numOfLambda = 1;
         if (lambda != null) {
             numOfLambda = lambda.length;
-            AirusUtils.sort(lambda);
+            Arrays.sort(lambda);
+
         }
         Double[] meanPL = new Double[numOfPvalue];
         Double[] pi0Lambda = new Double[numOfLambda];
@@ -125,7 +134,7 @@ public class Stats {
             pi0 = Math.min(pi0Smooth[numOfLambda - 1], (double) 1);
         } else if (pi0Method.equals("bootstrap")) {
             Double[] sortedPvalue = pvalues.clone();
-            AirusUtils.sort(sortedPvalue);
+            Arrays.sort(sortedPvalue);
             int w;
             double[] mse = new double[numOfLambda];
             for (int i = 0; i < numOfLambda; i++) {
@@ -190,7 +199,7 @@ public class Stats {
      */
     private Double[] qvalue(Double[] pvalues, double pi0, boolean pfdr) {
         int pvalueLength = pvalues.length;
-        int[] u = AirusUtils.argSort(pvalues);
+        Integer[] u = AirusUtils.indexBeforeSort(pvalues);
         double[] v = AirusUtils.rankDataMax(pvalues);
         Double[] qvalues = new Double[pvalueLength];
         for (int i = 0; i < pvalueLength; i++) {
@@ -258,6 +267,7 @@ public class Stats {
             if (fnr[i] < 0.0) fnr[i] = 0.0;
             if (fnr[i] > 1.0) fnr[i] = 1.0;
         }
+
         svalues = ArrayUtils.reverse(AirusUtils.cumMax(ArrayUtils.reverse(sens)));
         results.setTp(tp);
         results.setFp(fp);
@@ -280,16 +290,16 @@ public class Stats {
         Double[] targetScores = targetScoresOriginal.clone();
         Double[] decoyScores = decoyScoresOriginal.clone();
         Double[] targetPvalues;
-        AirusUtils.sort(targetScores);
-        AirusUtils.sort(decoyScores);
+        Arrays.sort(targetScores);
+        Arrays.sort(decoyScores);
 
         /*
         compute p-values using decoy scores;
          */
         if (params.isParametric()) {
-            targetPvalues = pnorm(targetScores, decoyScores);
+            targetPvalues = pNormalizer(targetScores, decoyScores);
         } else {
-            targetPvalues = pemp(targetScores, decoyScores);
+            targetPvalues = pEmpirical(targetScores, decoyScores);
         }
 
         /*

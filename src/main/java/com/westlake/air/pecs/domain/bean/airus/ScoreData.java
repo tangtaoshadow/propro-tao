@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.domain.bean.airus;
 
 import lombok.Data;
+
 @Data
 public class ScoreData {
 
