@@ -59,7 +59,7 @@ public class ScoreUtil {
         }
 
         for(int i = 0; i<libraryIntensity.size(); i++){
-            normalizedLibraryIntensity[i] = libraryIntensity.get(i) / sum;
+            normalizedLibraryIntensity[i] = Double.parseDouble(Float.toString(libraryIntensity.get(i)))/ sum;
         }
         return normalizedLibraryIntensity;
     }
@@ -93,7 +93,7 @@ public class ScoreUtil {
     public static IntegrateWindowMzIntensity integrateWindow(List<Float> spectrumMzArray, List<Float> spectrumIntArray, double left, double right){
         IntegrateWindowMzIntensity mzIntensity = new IntegrateWindowMzIntensity();
 
-        float mz = 0f, intensity = 0f;
+        double mz = 0d, intensity = 0d;
         int leftIndex = MathUtil.bisection(spectrumMzArray, left).getHigh();
         int rightIndex = MathUtil.bisection(spectrumMzArray, right).getLow();
 

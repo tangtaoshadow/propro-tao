@@ -70,5 +70,6 @@ public class FeatureFinderTest extends BaseTest {
         List<List<ExperimentFeature>> experimentFeature = featureFinder.findFeatures(rtIntensityPairsDoubleList, peakPickerList, chromatogramPickerList);
 
         System.out.println("finish");
+        //passed
     }
 }

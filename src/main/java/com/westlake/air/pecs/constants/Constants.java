@@ -14,7 +14,7 @@ public class Constants {
 
     //RT Normalizer
     //not static final
-    public static final boolean CHECK_SPACINGS = true;//////////////
+    public static final boolean CHECK_SPACINGS = false;//////////////
     public static final double SPACING_DIFFERENCE = 1.5d;
     public static final double SPACING_DIFFERENCE_GAP = 4d;
     public static final double SIGNAL_TO_NOISE_LIMIT = 1.0d;
@@ -24,14 +24,14 @@ public class Constants {
     public static final int MIN_REQUIRED_ELEMENTS = 10;
 
     //not static final
-//    public static final double NOISE_FOR_EMPTY_WINDOW = Math.pow(10.0,20);
-    public static final double NOISE_FOR_EMPTY_WINDOW = 2.0d;
+    public static final double NOISE_FOR_EMPTY_WINDOW = Math.pow(10.0,20);
+//    public static final double NOISE_FOR_EMPTY_WINDOW = 2.0d;
     public static final float STOP_AFTER_INTENSITY_RATIO = 0.0001f;
     public static final double MIN_RSQ = 0.95d;
     public static final float MIN_COVERAGE = 0.6f;
 
     //not static final
-    public static final String CHROMATOGRAM_PICKER_METHOD = "corrected";
+    public static final String CHROMATOGRAM_PICKER_METHOD = "legacy";
 
     public static final double PEAK_WIDTH = 40.0d;
     public static final int RT_BINS = 10;
@@ -44,20 +44,20 @@ public class Constants {
     public static final float MZ_EXTRACTION_WINDOW = 0.05f;
     public static final float EXTRA_RT_EXTRACTION_WINDOW = 0.0f;
 
-    public static final float DIA_EXTRACT_WINDOW = 0.05f;
+    public static final double DIA_EXTRACT_WINDOW = 0.05d;
     public static final int DIA_NR_ISOTOPES = 4;
     public static final int DIA_NR_CHARGES = 4;
-    public static final float C13C12_MASSDIFF_U = 1.0033548f;
-    public static final float PEAK_BEFORE_MONO_MAX_PPM_DIFF = 20.0f;
+    public static final double C13C12_MASSDIFF_U = 1.0033548d;
+    public static final double PEAK_BEFORE_MONO_MAX_PPM_DIFF = 20.0d;
     public static final float DIA_BYSERIES_PPM_DIFF = 10.0f;
     public static final float DIA_BYSERIES_INTENSITY_MIN = 300.0f;
 
-    public static final float C = 4.9384f;
-    public static final float H = 7.7583f;
-    public static final float N = 1.3577f;
-    public static final float O = 1.4773f;
-    public static final float S = 0.0417f;
-    public static final float P = 0f;
+    public static final double C = 4.9384d;
+    public static final double H = 7.7583d;
+    public static final double N = 1.3577d;
+    public static final double O = 1.4773d;
+    public static final double S = 0.0417d;
+    public static final double P = 0d;
     public static final double PROTON_MASS_U = 1.0072764667710d;
 
 

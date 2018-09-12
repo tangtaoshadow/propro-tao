@@ -23,12 +23,12 @@ public class LibraryScorer {
     /**
      * scores.library_corr //对experiment和library intensity算Pearson相关系数
      * scores.library_norm_manhattan // 对experiment intensity 算平均占比差距
-     *
+     * scores.norm_rt_score //normalizedExperimentalRt与groupRt之差
      * @param experimentFeatures get experimentIntensity: from features extracted
      * @param libraryIntensity get libraryIntensity: from transitions
      * @param scores library_corr, library_norm_manhattan
      */
-    public void calculateLibraryScores(List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, SlopeIntercept slopeIntercept, double groupRt, FeatureScores scores){
+    public void calculateLibraryScores(List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, FeatureScores scores){
         List<Double> experimentIntensity = new ArrayList<>();
         for(ExperimentFeature experimentFeature: experimentFeatures){
             experimentIntensity.add(experimentFeature.getIntensity());
@@ -36,7 +36,7 @@ public class LibraryScorer {
         assert experimentIntensity.size() == libraryIntensity.size();
 
         //library_norm_manhattan
-        //平均占比差距
+        //占比差距平均
         double sum = 0.0d;
         double[] x = ScoreUtil.normalizeSum(libraryIntensity);
         double[] y = ScoreUtil.normalizeSumDouble(experimentIntensity);
@@ -67,6 +67,9 @@ public class LibraryScorer {
             scores.setVarLibraryCorr(corr);
         }
 
+    }
+
+    public void calculateNormRtScore(List<ExperimentFeature> experimentFeatures, SlopeIntercept slopeIntercept, double groupRt, FeatureScores scores){
         //varNormRtScore
         double experimentalRt = experimentFeatures.get(0).getRt();
         double normalizedExperimentalRt = ScoreUtil.trafoApplier(slopeIntercept, experimentalRt);

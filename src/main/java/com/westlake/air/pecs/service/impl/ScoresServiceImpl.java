@@ -231,22 +231,22 @@ public class ScoresServiceImpl implements ScoresService {
             if(!featureByPep.isFeatureFound()){
                 continue;
             }
-            float groupRt = group.getRt().floatValue();
+            double groupRt = group.getRt();
             List<ScoreRtPair> scoreRtPairs = RTNormalizerScorer.score(featureByPep.getRtIntensityPairsOriginList(), featureByPep.getExperimentFeatures(), featureByPep.getLibraryIntensityList(), featureByPep.getNoise1000List(), slopeIntercept, groupRt);
             scoreRtList.add(scoreRtPairs);
-            compoundRt.add(group.getRt());
+            compoundRt.add(groupRt);
         }
 
         List<RtPair> pairs = simpleFindBestFeature(scoreRtList, compoundRt);
         List<RtPair> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE);
-//
-//        if(pairsCorrected == null || pairsCorrected.size() < 2){
-//            logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
-//            resultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
-//            return resultDO;
-//        }
 
-        SlopeIntercept slopeIntercept = fitRTPairs(pairs);
+        if(pairsCorrected == null || pairsCorrected.size() < 2){
+            logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
+            resultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
+            return resultDO;
+        }
+
+        SlopeIntercept slopeIntercept = fitRTPairs(pairsCorrected);
         resultDO.setSuccess(true);
         resultDO.setModel(slopeIntercept);
 
@@ -277,9 +277,9 @@ public class ScoresServiceImpl implements ScoresService {
             List<RtIntensityPairsDouble> chromatogramList = featureByPep.getRtIntensityPairsOriginList();
             List<Float> libraryIntensityList = featureByPep.getLibraryIntensityList();
             List<double[]> noise1000List = featureByPep.getNoise1000List();
-            List<Float> productMzList = new ArrayList<>();
+            List<Double> productMzList = new ArrayList<>();
             for (AnalyseDataDO dataDO : group.getDataMap().values()){
-                productMzList.add(dataDO.getMz());
+                productMzList.add(Double.parseDouble(Float.toString(dataDO.getMz())));
             }
 
             //TODO  mrmFeature - peptideRef - ...
@@ -308,15 +308,16 @@ public class ScoresServiceImpl implements ScoresService {
             for(List<ExperimentFeature> experimentFeatureList : experimentFeatures) {
 
                 FeatureScores featureScores = new FeatureScores();
-                chromatographicScorer.calculateChromatographicScores(chromatogramList, experimentFeatureList, libraryIntensityList, noise1000List, featureScores);
-                chromatographicScorer.calculateIntensityScore(experimentFeatureList, featureScores);
+                chromatographicScorer.calculateChromatographicScores(experimentFeatureList, libraryIntensityList, featureScores);
+                chromatographicScorer.calculateLogSnScore(chromatogramList, experimentFeatureList, noise1000List, featureScores);
 //                diaScorer.calculateDiaMassDiffScore(productMzList, spectrumMzArray, spectrumIntArray, libraryIntensityList, featureScores);
 //                diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
 ////                //TODO @Nico charge from transition?
 //                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
 //                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
-                libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, input.getSlopeIntercept(), group.getRt().floatValue(), featureScores);
+                libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, featureScores);
+                libraryScorer.calculateNormRtScore(experimentFeatureList, input.getSlopeIntercept(), group.getRt(), featureScores);
                 swathLDAScorer.calculateSwathLdaPrescore(featureScores);
 
                 featureScoresList.add(featureScores);
@@ -392,10 +393,10 @@ public class ScoresServiceImpl implements ScoresService {
             rsq =  MathUtil.getRsq(pairs);
             if (rsq < minRsq) {
                 // calculate residual and get max index
-                float res, max = 0;
+                double res, max = 0;
                 int maxIndex = 0;
                 for (int i = 0; i < pairs.size(); i++) {
-                    res = (float) (Math.abs(pairs.get(i).getTheoRt() - (coEff[0] + coEff[1] * pairs.get(i).getExpRt())));
+                    res = (Math.abs(pairs.get(i).getTheoRt() - (coEff[0] + coEff[1] * pairs.get(i).getExpRt())));
                     if (res > max) {
                         max = res;
                         maxIndex = i;
@@ -407,7 +408,7 @@ public class ScoresServiceImpl implements ScoresService {
         }
         if(rsq < minRsq){
             System.out.println("RTNormalizer: unable to perform outlier detection.");
-            return null; //TODO: RTNormalizer: unable to perform outlier detection
+            return null;
         }else {
             return pairs;
         }

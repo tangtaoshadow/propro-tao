@@ -18,23 +18,21 @@ import java.util.List;
  * Created by Nico Wang Ruimin
  * Time: 2018-08-15 16:06
  *
- * scores.xcorr_coelution_score
- * scores.weighted_coelution_score
- * scores.xcorr_shape_score
- * scores.weighted_xcorr_shape
- * scores.log_sn_score
+ * scores.xcorr_coelution_score 互相关偏移的mean + std
+ * scores.weighted_coelution_score 带权重的相关偏移sum
+ * scores.xcorr_shape_score 互相关序列最大值的平均值
+ * scores.weighted_xcorr_shape 带权重的互相关序列最大值的平均值
+ * scores.log_sn_score log(距离ApexRt最近点的stn值之和)
  *
- * scores.var_intensity_score
+ * scores.var_intensity_score 同一个peptideRef下, 所有HullPoints的intensity之和 除以 所有intensity之和
  */
 @Component("chromatographicScorer")
 public class ChromatographicScorer {
 
     /**
-     * @param chromatograms chromatogram list of transition group
      * @param experimentFeatures list of features in selected mrmfeature
-     * @param signalToNoiseList signal to noise list of chromatogram list
      */
-    public void calculateChromatographicScores(List<RtIntensityPairsDouble> chromatograms, List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, List<double[]> signalToNoiseList, FeatureScores scores){
+    public void calculateChromatographicScores(List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, FeatureScores scores){
         Table<Integer, Integer, Double[]> xcorrMatrix = initializeXCorrMatrix(experimentFeatures);
 
         //xcorrCoelutionScore
@@ -59,8 +57,8 @@ public class ChromatographicScorer {
                 deltas.add(Math.abs(max - (value.length - 1)/2)); //first: maxdelay //delta: 偏移量
                 intensities.add(value[max]);//value[max] 吻合系数
                 if(j !=i){
-                    deltasWeighted.add(Math.abs(max - (value.length + 1)/2) * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[j] * 2f);
-                    intensitiesWeighted.add(value[max] * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[j] * 2f);
+                    deltasWeighted.add(Math.abs(max - (value.length - 1)/2) * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[j] * 2d);
+                    intensitiesWeighted.add(value[max] * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[j] * 2d);
                 }
             }
         }
@@ -83,6 +81,10 @@ public class ChromatographicScorer {
         scores.setVarXcorrShape(meanIntensity); // 平均的吻合程度--> 新的吻合系数
         scores.setVarXcorrShapeWeighted(sumIntensityWeighted);
 
+
+    }
+
+    public void calculateLogSnScore(List<RtIntensityPairsDouble> chromatograms, List<ExperimentFeature> experimentFeatures, List<double[]> signalToNoiseList, FeatureScores scores){
         //logSnScore
         // log(mean of Apex sn s)
         double rt;
@@ -116,14 +118,14 @@ public class ChromatographicScorer {
      * @param experimentFeatures
      * @param scores
      */
-    public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores){
-        double intensitySum = 0.0d;
-        for(ExperimentFeature feature: experimentFeatures){
-            intensitySum += feature.getIntensity();
-        }
-        double totalXic = experimentFeatures.get(0).getTotalXic();
-        scores.setVarIntensityScore((intensitySum / totalXic));
-    }
+//    public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores){
+//        double intensitySum = 0.0d;
+//        for(ExperimentFeature feature: experimentFeatures){
+//            intensitySum += feature.getIntensity();
+//        }
+//        double totalXic = experimentFeatures.get(0).getTotalXic();
+//        scores.setVarIntensityScore((intensitySum / totalXic));
+//    }
 
     /**
      * Get the XCorrMatrix with experiment Features

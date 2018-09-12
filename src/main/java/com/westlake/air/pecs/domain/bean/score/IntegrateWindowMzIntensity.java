@@ -5,9 +5,9 @@ import lombok.Data;
 @Data
 public class IntegrateWindowMzIntensity {
 
-    float mz;
+    double mz;
 
-    float intensity;
+    double intensity;
 
     boolean signalFound;
 }

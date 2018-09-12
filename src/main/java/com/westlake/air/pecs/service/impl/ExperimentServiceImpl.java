@@ -382,8 +382,8 @@ public class ExperimentServiceImpl implements ExperimentService {
         try {
             logger.info("开始卷积数据");
             long start = System.currentTimeMillis();
-            List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
-//            List<AnalyseDataDO> dataList = FileUtil.getAnalyseDataList("data/conv.json");         //这边先读取本地已经卷积好的iRT数据
+//            List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
+            List<AnalyseDataDO> dataList = FileUtil.getAnalyseDataList("data/conv.json");         //这边先读取本地已经卷积好的iRT数据
 
             logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
             start = System.currentTimeMillis();

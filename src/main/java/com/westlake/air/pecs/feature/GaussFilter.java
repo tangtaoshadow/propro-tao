@@ -35,7 +35,6 @@ public class GaussFilter {
         Double[] rtArray = pairsFiltered.getRtArray();
         Double[] intArray = pairsFiltered.getIntensityArray();
         Double[] newIntArray = new Double[intArray.length];
-        Float distanceInGaussianFloat;
         Double distanceInGaussian;
         int leftPosition;
         int rightPosition;

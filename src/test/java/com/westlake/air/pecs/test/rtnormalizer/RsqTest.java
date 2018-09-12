@@ -1,8 +1,11 @@
 package com.westlake.air.pecs.test.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.score.RtPair;
+import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.test.BaseTest;
 import com.westlake.air.pecs.utils.MathUtil;
+import org.apache.commons.math3.fitting.PolynomialCurveFitter;
+import org.apache.commons.math3.fitting.WeightedObservedPoints;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -37,9 +40,27 @@ public class RsqTest extends BaseTest {
 //        float result = MathUtil.getRsq(pairs);
 
         double resultNew = MathUtil.getRsq(pairs);
+
+        SlopeIntercept slopeIntercept = fitRTPairs(pairs);
+
         System.out.println("Rsq test finished.");
 
 
 
+
+
+    }
+
+    private SlopeIntercept fitRTPairs(List<RtPair> rtPairs){
+        WeightedObservedPoints obs = new WeightedObservedPoints();
+        for(RtPair rtPair:rtPairs){
+            obs.add(rtPair.getExpRt(),rtPair.getTheoRt());
+        }
+        PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
+        double[] coeff = fitter.fit(obs.toList());
+        SlopeIntercept slopeIntercept = new SlopeIntercept();
+        slopeIntercept.setSlope((float)coeff[1]);
+        slopeIntercept.setIntercept((float) coeff[0]);
+        return slopeIntercept;
     }
 }
