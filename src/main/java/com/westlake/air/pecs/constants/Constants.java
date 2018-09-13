@@ -49,8 +49,8 @@ public class Constants {
     public static final int DIA_NR_CHARGES = 4;
     public static final double C13C12_MASSDIFF_U = 1.0033548d;
     public static final double PEAK_BEFORE_MONO_MAX_PPM_DIFF = 20.0d;
-    public static final float DIA_BYSERIES_PPM_DIFF = 10.0f;
-    public static final float DIA_BYSERIES_INTENSITY_MIN = 300.0f;
+    public static final double DIA_BYSERIES_PPM_DIFF = 10.0d;
+    public static final double DIA_BYSERIES_INTENSITY_MIN = 300.0d;
 
     public static final double C = 4.9384d;
     public static final double H = 7.7583d;
@@ -58,7 +58,7 @@ public class Constants {
     public static final double O = 1.4773d;
     public static final double S = 0.0417d;
     public static final double P = 0d;
-    public static final double PROTON_MASS_U = 1.0072764667710d;
+    public static final double PROTON_MASS_U = 1.007276466771d;
 
 
     public static final double EMG_CONST = 2.4055;

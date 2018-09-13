@@ -124,12 +124,12 @@ public class DIAScorer {
             List<Double> isotopeDistList;
             double averageWeight = Math.abs(productMzArray.get(i) * putativeFragmentCharge);
             //TODO @Nico no need to get each loop
-            double averageWeightC = new ElementsDAO().getElementBySymbol(Element.C).getAverageWeight();
-            double averageWeightH = new ElementsDAO().getElementBySymbol(Element.H).getAverageWeight();
-            double averageWeightN = new ElementsDAO().getElementBySymbol(Element.N).getAverageWeight();
-            double averageWeightO = new ElementsDAO().getElementBySymbol(Element.O).getAverageWeight();
-            double averageWeightS = new ElementsDAO().getElementBySymbol(Element.S).getAverageWeight();
-            double averageWeightP = new ElementsDAO().getElementBySymbol(Element.P).getAverageWeight();
+            double averageWeightC = elementsDAO.getElementBySymbol(Element.C).getAverageWeight();
+            double averageWeightH = elementsDAO.getElementBySymbol(Element.H).getAverageWeight();
+            double averageWeightN = elementsDAO.getElementBySymbol(Element.N).getAverageWeight();
+            double averageWeightO = elementsDAO.getElementBySymbol(Element.O).getAverageWeight();
+            double averageWeightS = elementsDAO.getElementBySymbol(Element.S).getAverageWeight();
+            double averageWeightP = elementsDAO.getElementBySymbol(Element.P).getAverageWeight();
             double avgTotal = Constants.C * averageWeightC +
                     Constants.H * averageWeightH +
                     Constants.N * averageWeightN +
@@ -152,12 +152,12 @@ public class DIAScorer {
             double remainingMass = averageWeight - getAverageWeight;
             formula.put("H", Math.round(remainingMass / averageWeightH));//residual添加H
 
-            List<String> isotopeC = new ElementsDAO().getElementBySymbol(Element.C).getIsotopes();
-            List<String> isotopeH = new ElementsDAO().getElementBySymbol(Element.H).getIsotopes();
-            List<String> isotopeN = new ElementsDAO().getElementBySymbol(Element.N).getIsotopes();
-            List<String> isotopeO = new ElementsDAO().getElementBySymbol(Element.O).getIsotopes();
-            List<String> isotopeS = new ElementsDAO().getElementBySymbol(Element.S).getIsotopes();
-            List<String> isotopeP = new ElementsDAO().getElementBySymbol(Element.P).getIsotopes();
+            List<String> isotopeC = elementsDAO.getElementBySymbol(Element.C).getIsotopes();
+            List<String> isotopeH = elementsDAO.getElementBySymbol(Element.H).getIsotopes();
+            List<String> isotopeN = elementsDAO.getElementBySymbol(Element.N).getIsotopes();
+            List<String> isotopeO = elementsDAO.getElementBySymbol(Element.O).getIsotopes();
+            List<String> isotopeS = elementsDAO.getElementBySymbol(Element.S).getIsotopes();
+            List<String> isotopeP = elementsDAO.getElementBySymbol(Element.P).getIsotopes();
 
             List<Double> isotopeDistributionC = getIsotopePercent(isotopeC);// percent
             List<Double> isotopeDistributionH = getIsotopePercent(isotopeH);
@@ -167,6 +167,7 @@ public class DIAScorer {
             List<Double> isotopeDistributionP = getIsotopePercent(isotopeP);
 
             List<Double> distributionResult = new ArrayList<>();
+            distributionResult.add(1d);
             int maxIsotope = Constants.DIA_NR_ISOTOPES + 1;
             List<Double> isotopeDistributionConvolvedC = convolvePow(isotopeDistributionC, formula.get("C").intValue());
             List<Double> isotopeDistributionConvolvedH = convolvePow(isotopeDistributionH, formula.get("H").intValue());
@@ -255,6 +256,7 @@ public class DIAScorer {
      * @param scores
      */
     public void calculateBYIonScore(List<Float> spectrumMzArray, List<Float> spectrumIntArray, HashMap<Integer, String> unimodHashMap, String sequence, int charge, FeatureScores scores){
+
         BYSeries bySeries = getBYSeries(unimodHashMap, sequence, charge);
         List<Double> bSeriesList = bySeries.getBSeries();
         int bSeriesScore = getSeriesScore(bSeriesList, spectrumMzArray, spectrumIntArray);
@@ -291,11 +293,18 @@ public class DIAScorer {
         int maxIsotope = Constants.DIA_NR_ISOTOPES + 1;
 
         int log2n = MathUtil.getLog2n(factor);//>
+
+        List<Double> distributionResult = new ArrayList<>();
+        if((factor & 1) == 1){
+            distributionResult = distribution;
+        }else {
+            distributionResult.add(1.0d);
+        }
+
         Double[] convolveSquared = convolveSquare(distribution, maxIsotope);
         List<Double> convolveSquaredList = Arrays.asList(convolveSquared);
-        if((log2n & 1) != 0){
             for(int i=1;; i++){
-                if((log2n & 1<<i) != 0){
+                if((factor & 1<<i) == 1){
                     Double[] result = convolve(distribution, convolveSquaredList, maxIsotope);
                     distribution = Arrays.asList(result);
                 }
@@ -304,7 +313,6 @@ public class DIAScorer {
                 }
                 convolveSquaredList = Arrays.asList(convolveSquare(convolveSquaredList, maxIsotope));
             }
-        }
         return distribution;
     }
 
@@ -315,11 +323,15 @@ public class DIAScorer {
      * @return
      */
     private Double[] convolveSquare(List<Double> isotopeDistribution, int maxIsotope){
+
         int rMax = 2 * isotopeDistribution.size() - 1;//3,5
         if(maxIsotope != 0 && maxIsotope + 1< rMax){
             rMax = maxIsotope + 1;
         }
         Double[] result = new Double[rMax];//5
+        for(int i=0; i<rMax; i++){
+            result[i] = 0d;
+        }
         for(int i = isotopeDistribution.size() - 1; i>=0; i--){//each percent
             for(int j=Math.min(rMax - i, isotopeDistribution.size())-1; j>=0; j--){
                 result[i+j] += isotopeDistribution.get(i) * isotopeDistribution.get(j);
@@ -334,6 +346,9 @@ public class DIAScorer {
             rMax = maxIsotope;
         }
         Double[] result = new Double[rMax];
+        for(int i=0; i<rMax; i++){
+            result[i] = 0d;
+        }
         for(int i = leftDistribution.size() - 1; i >= 0; i--){
             for(int j = Math.min(rMax - i, rightFormerResult.size()) - 1; j >= 0; j--){
                 result[i + j] += leftDistribution.get(i) * rightFormerResult.get(j);
@@ -347,7 +362,7 @@ public class DIAScorer {
 
         BYSeries bySeries = new BYSeries();
 
-        //bSeries
+        //bSeries 若要提高精度，提高json的精度
         List<Double> bSeries = new ArrayList<>();
         double monoWeight = Constants.PROTON_MASS_U * charge;
         if(unimodHashMap.containsKey(0)){
@@ -388,8 +403,7 @@ public class DIAScorer {
                 continue;
             }
             monoWeight += aa.getMonoIsotopicMass();
-            monoWeight += h2oWeight;
-            ySeries.add(monoWeight);
+            ySeries.add(monoWeight + h2oWeight);
         }
 
         bySeries.setBSeries(bSeries);
