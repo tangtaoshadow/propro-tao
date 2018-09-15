@@ -176,7 +176,7 @@ public class DIAScorer {
             List<Double> isotopeDistributionConvolvedO = convolvePow(isotopeDistributionO, formula.get("O").intValue());
             List<Double> isotopeDistributionConvolvedS = convolvePow(isotopeDistributionS, formula.get("S").intValue());
             List<Double> isotopeDistributionConvolvedP = convolvePow(isotopeDistributionP, formula.get("P").intValue());
-            //TODO position of S and P
+
             distributionResult = Arrays.asList(convolve(distributionResult, isotopeDistributionConvolvedH, maxIsotope));
             distributionResult = Arrays.asList(convolve(distributionResult, isotopeDistributionConvolvedN, maxIsotope));
             distributionResult = Arrays.asList(convolve(distributionResult, isotopeDistributionConvolvedP, maxIsotope));
