@@ -14,6 +14,7 @@ import com.westlake.air.pecs.parser.model.chemistry.Element;
 import com.westlake.air.pecs.parser.model.chemistry.Unimod;
 import com.westlake.air.pecs.utils.MathUtil;
 import com.westlake.air.pecs.utils.ScoreUtil;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -98,7 +99,7 @@ public class DIAScorer {
             intensitySum += feature.getIntensity();
         }
 
-        for(int i=0; i<experimentFeatures.size()-1; i++){
+        for(int i=0; i<experimentFeatures.size(); i++){
             relIntensity = (experimentFeatures.get(i).getIntensity() / intensitySum);
             int putativeFragmentCharge = 1;
             if(productCharge.get(i) > 1){
@@ -175,12 +176,13 @@ public class DIAScorer {
             List<Double> isotopeDistributionConvolvedO = convolvePow(isotopeDistributionO, formula.get("O").intValue());
             List<Double> isotopeDistributionConvolvedS = convolvePow(isotopeDistributionS, formula.get("S").intValue());
             List<Double> isotopeDistributionConvolvedP = convolvePow(isotopeDistributionP, formula.get("P").intValue());
-            distributionResult = Arrays.asList(convolve(distributionResult, isotopeDistributionConvolvedC, maxIsotope));
+            //TODO position of S and P
             distributionResult = Arrays.asList(convolve(distributionResult, isotopeDistributionConvolvedH, maxIsotope));
             distributionResult = Arrays.asList(convolve(distributionResult, isotopeDistributionConvolvedN, maxIsotope));
-            distributionResult = Arrays.asList(convolve(distributionResult, isotopeDistributionConvolvedO, maxIsotope));
-            distributionResult = Arrays.asList(convolve(distributionResult, isotopeDistributionConvolvedS, maxIsotope));
             distributionResult = Arrays.asList(convolve(distributionResult, isotopeDistributionConvolvedP, maxIsotope));
+            distributionResult = Arrays.asList(convolve(distributionResult, isotopeDistributionConvolvedS, maxIsotope));
+            distributionResult = Arrays.asList(convolve(distributionResult, isotopeDistributionConvolvedO, maxIsotope));
+            distributionResult = Arrays.asList(convolve(distributionResult, isotopeDistributionConvolvedC, maxIsotope));
 
             MathUtil.renormalize(distributionResult);
             double maxValueOfDistribution = distributionResult.get(MathUtil.findMaxIndex(distributionResult));
@@ -275,7 +277,8 @@ public class DIAScorer {
         for(String isotope : isotopeLog){
             isotopePercentList.add(Double.parseDouble(isotope.split(":")[0]) / 100d);
         }
-        Collections.sort(isotopePercentList);
+//        Collections.sort(isotopePercentList);
+//        Collections.reverse(isotopePercentList);
         return isotopePercentList;
     }
 
@@ -304,16 +307,16 @@ public class DIAScorer {
         Double[] convolveSquared = convolveSquare(distribution, maxIsotope);
         List<Double> convolveSquaredList = Arrays.asList(convolveSquared);
             for(int i=1;; i++){
-                if((factor & 1<<i) == 1){
-                    Double[] result = convolve(distribution, convolveSquaredList, maxIsotope);
-                    distribution = Arrays.asList(result);
+                if((factor & (1<<i)) == 1<<i){
+                    Double[] result = convolve(distributionResult, convolveSquaredList, maxIsotope);
+                    distributionResult = Arrays.asList(result);
                 }
                 if(i >= log2n){
                     break;
                 }
                 convolveSquaredList = Arrays.asList(convolveSquare(convolveSquaredList, maxIsotope));
             }
-        return distribution;
+        return distributionResult;
     }
 
     /**
@@ -342,6 +345,10 @@ public class DIAScorer {
 
     private Double[] convolve(List<Double> leftDistribution, List<Double> rightFormerResult, int maxIsotope){
         int rMax = leftDistribution.size() + rightFormerResult.size() - 1;
+//        Collections.sort(leftDistribution);
+//        Collections.reverse(leftDistribution);
+//        Collections.sort(rightFormerResult);
+//        Collections.reverse(rightFormerResult);
         if(maxIsotope != 0 && rMax > maxIsotope){
             rMax = maxIsotope;
         }

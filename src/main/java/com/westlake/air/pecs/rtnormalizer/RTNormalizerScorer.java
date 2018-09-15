@@ -7,6 +7,7 @@ import com.westlake.air.pecs.feature.SignalToNoiseEstimator;
 import com.westlake.air.pecs.scorer.ChromatographicScorer;
 import com.westlake.air.pecs.scorer.ElutionScorer;
 import com.westlake.air.pecs.scorer.LibraryScorer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -17,6 +18,12 @@ import java.util.*;
  */
 @Component("peakScorer")
 public class RTNormalizerScorer {
+
+    @Autowired
+    ChromatographicScorer chromatographicScorer;
+    @Autowired
+    LibraryScorer libraryScorer;
+
 
 //    private float windowLength = 1000;
 //    private int binCount = 30;
@@ -46,8 +53,9 @@ public class RTNormalizerScorer {
         List<ScoreRtPair> finalScores = new ArrayList<>();
         for(List<ExperimentFeature> features: experimentFeatures){
             FeatureScores scores = new FeatureScores();
-            new ChromatographicScorer().calculateChromatographicScores(chromatograms, features, libraryIntensity, noise1000List, scores);
-            new LibraryScorer().calculateLibraryScores(features,libraryIntensity, slopeIntercept, groupRt, scores);
+            chromatographicScorer.calculateChromatographicScores(features, libraryIntensity, scores);
+            chromatographicScorer.calculateLogSnScore(chromatograms, features, noise1000List, scores);
+            libraryScorer.calculateLibraryScores(features,libraryIntensity, scores);
 //            new ElutionScorer().calculateElutionModelScore(features,scores);
             double ldaScore = -1d * calculateLdaPrescore(scores);
             ScoreRtPair scoreRtPair = new ScoreRtPair();

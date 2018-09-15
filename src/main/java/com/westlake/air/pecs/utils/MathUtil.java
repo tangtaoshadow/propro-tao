@@ -179,17 +179,20 @@ public class MathUtil {
         int high = x.getRtArray().length -1;
         int low = 0;
         int mid;
-        if(x.getRtArray()[0]>value){
-            high = 0;
-        }else if(x.getRtArray()[x.getRtArray().length-1]<value){
-            low = x.getRtArray().length - 1;
-        }else {
-            while (high - low != 1) {
-                mid = low + (high - low + 1) / 2;
-                if (x.getRtArray()[mid] < value) {
-                    low = mid;
-                } else {
-                    high = mid;
+
+        if(high != 0) {
+            if (x.getRtArray()[0] > value) {
+                high = 0;
+            } else if (x.getRtArray()[x.getRtArray().length - 1] < value) {
+                low = x.getRtArray().length - 1;
+            } else {
+                while (high - low != 1) {
+                    mid = low + (high - low + 1) / 2;
+                    if (x.getRtArray()[mid] < value) {
+                        low = mid;
+                    } else {
+                        high = mid;
+                    }
                 }
             }
         }
@@ -241,8 +244,8 @@ public class MathUtil {
         }
         return index;
     }
-    public static int findMaxIndex(List<Float> data){
-        float max = data.get(0);
+    public static int findMaxIndex(List<Double> data){
+        double max = data.get(0);
         int index = 0;
         for(int i = 0; i < data.size(); i++){
             if(data.get(i) > max){
@@ -262,13 +265,13 @@ public class MathUtil {
         return log2n;
     }
 
-    public static void renormalize(List<Float> floatList){
-        float sum = 0.0f;
-        for(float value: floatList){
+    public static void renormalize(List<Double> doubleList){
+        double sum = 0.0d;
+        for(double value: doubleList){
             sum += value;
         }
-        for(int i=0; i<floatList.size(); i++) {
-            floatList.set(i, floatList.get(i) / sum);
+        for(int i=0; i<doubleList.size(); i++) {
+            doubleList.set(i, doubleList.get(i) / sum);
         }
     }
 
