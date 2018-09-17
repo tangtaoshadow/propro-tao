@@ -1,21 +1,19 @@
 package com.westlake.air.pecs.test.scorer;
 
-import com.westlake.air.pecs.constants.Constants;
+
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.scorer.ChromatographicScorer;
 import com.westlake.air.pecs.scorer.DIAScorer;
+import com.westlake.air.pecs.scorer.ElutionScorer;
 import com.westlake.air.pecs.scorer.LibraryScorer;
 import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Intensity Score has no TEST CASE
@@ -30,6 +28,8 @@ public class ScorerTest extends BaseTest {
     LibraryScorer libraryScorer;
     @Autowired
     DIAScorer diaScorer;
+    @Autowired
+    ElutionScorer elutionScorer;
 
     @Test
     public void calcChromatogramScoreTest(){
@@ -174,6 +174,14 @@ public class ScorerTest extends BaseTest {
 
     }
 
+    @Test
+    public void calcElutionScore(){
+        List<ExperimentFeature> experimentFeatures = prepareElutionScoreTestFeature();
+        FeatureScores scores = new FeatureScores();
+        elutionScorer.calculateElutionModelScore(experimentFeatures, scores);
+        assert isSimilar(scores.getVarElutionModelFitScore(), 0.924365639, Math.pow(10, -6));
+    }
+
 
     private List<ExperimentFeature> prepareChromatogramTestFeature(){
         Double[] arr1 = {
@@ -299,6 +307,42 @@ public class ScorerTest extends BaseTest {
         spectrum.add(spectrumMz);
         spectrum.add(spectrumInt);
         return spectrum;
+    }
+
+    private List<ExperimentFeature> prepareElutionScoreTestFeature(){
+        ExperimentFeature experimentFeature1 = new ExperimentFeature();
+        Double[] rt1 =        { 3103.13, 3106.56, 3109.98, 3113.41, 3116.84, 3120.26, 3123.69, 3127.11, 3130.54, 3133.97, 3137.4 };
+        Double[] intensity1 = { 5.97544, 4.27492, 3.33018, 4.08597, 5.50307, 5.24327, 8.40812, 2.8342 , 6.94379, 7.69957, 4.08597};
+        experimentFeature1.setHullRt(Arrays.asList(rt1));
+        experimentFeature1.setHullInt(Arrays.asList(intensity1));
+        experimentFeature1.setIntensity(58.38450);
+        experimentFeature1.setRt(3120d);
+        experimentFeature1.setIntensitySum(973.122);
+
+        ExperimentFeature experimentFeature2 = new ExperimentFeature();
+        Double[] rt2 =          { 3103.13, 3106.56, 3109.98, 3113.41, 3116.84, 3120.26, 3123.69, 3127.11, 3130.54, 3133.97, 3137.4 };
+        Double[] intensity2 =   { 15.8951, 41.5446, 76.0746, 109.069, 111.904, 169.792, 121.044, 63.0137, 44.615 , 21.4927, 7.93576};
+        experimentFeature2.setHullRt(Arrays.asList(rt2));
+        experimentFeature2.setHullInt(Arrays.asList(intensity2));
+        experimentFeature2.setIntensity(782.38073);
+        experimentFeature2.setRt(3120d);
+        experimentFeature2.setIntensitySum(973.122);
+
+        ExperimentFeature experimentFeature3 = new ExperimentFeature();
+        Double[] rt3 =          { 3103.13, 3106.56, 3109.98, 3113.41, 3116.84, 3120.26, 3123.69, 3127.11, 3130.54, 3133.97, 3137.4};
+        Double[] intensity3 =   { 5.73925, 6.7076 , 2.85782, 5.0307 , 8.95135, 14.4544, 20.9731, 24.3033, 20.6897, 13.7459, 8.90411};
+        experimentFeature3.setHullRt(Arrays.asList(rt3));
+        experimentFeature3.setHullInt(Arrays.asList(intensity3));
+        experimentFeature3.setIntensity(58.38450);
+        experimentFeature3.setRt(3120d);
+        experimentFeature3.setIntensitySum(973.122);
+
+        List<ExperimentFeature> experimentFeatures = new ArrayList<>();
+        experimentFeatures.add(experimentFeature1);
+        experimentFeatures.add(experimentFeature2);
+        experimentFeatures.add(experimentFeature3);
+
+        return experimentFeatures;
     }
 
     private boolean isSimilar(Double a, Double b, Double tolerance ) {

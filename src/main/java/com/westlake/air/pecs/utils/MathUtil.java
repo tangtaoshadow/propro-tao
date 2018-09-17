@@ -275,9 +275,9 @@ public class MathUtil {
         }
     }
 
-    public static float getAverage(Float[] valueArray){
-        float sum = 0.0f;
-        for(float value: valueArray){
+    public static double getAverage(Double[] valueArray){
+        double sum = 0.0d;
+        for(double value: valueArray){
             sum += value;
         }
         return sum / valueArray.length;

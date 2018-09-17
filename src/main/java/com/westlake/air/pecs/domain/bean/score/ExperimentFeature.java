@@ -15,6 +15,8 @@ public class ExperimentFeature {
 
     double intensity;
 
+    double intensitySum;
+
     double peakApexInt;
 
     double bestLeft;

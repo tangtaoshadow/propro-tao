@@ -2,15 +2,21 @@ package com.westlake.air.pecs.scorer;
 
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.EmgModelParams;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.utils.MathUtil;
-import net.finmath.optimizer.LevenbergMarquardt;
 import net.finmath.optimizer.SolverException;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Vector;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 /**
  * scores.var_elution_model_fit_score
@@ -22,21 +28,21 @@ import java.util.List;
 public class ElutionScorer {
 
     public void calculateElutionModelScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores) {
-        float avgScore = 0.0f;
+        double avgScore = 0.0d;
         for (ExperimentFeature feature : experimentFeatures) {
-            RtIntensityPairs preparedHullPoints = prepareElutionFit(feature);
-            float sum = 0.0f;
-            Float[] intArray = preparedHullPoints.getIntensityArray();
-            Float[] rtArray = preparedHullPoints.getRtArray();
-            for (float intens : intArray) {
+            RtIntensityPairsDouble preparedHullPoints = prepareElutionFit(feature);
+            double sum = 0.0d;
+            Double[] intArray = preparedHullPoints.getIntensityArray();
+            Double[] rtArray = preparedHullPoints.getRtArray();
+            for (double intens : intArray) {
                 sum += intens;
             }
 
             int medianIndex = 0;
-            float count = 0f;
+            double count = 0d;
             for (int i = 0; i < intArray.length; i++) {
                 count += intArray[i];
-                if (count > sum / 2f) {
+                if (count > sum / 2d) {
                     medianIndex = i - 1;
                     break;
                 }
@@ -45,7 +51,7 @@ public class ElutionScorer {
             xInit[0] = intArray[medianIndex];
             xInit[3] = rtArray[medianIndex];
             boolean symmetric = false;
-            float symmetry;
+            double symmetry;
             if (rtArray[medianIndex] - rtArray[0] == 0f) {
                 symmetric = true;
                 symmetry = 10;
@@ -67,13 +73,12 @@ public class ElutionScorer {
             emgModelParams = getEmgParams(preparedHullPoints, xInitOptimized, emgModelParams);
             double[] dataArray = getEmgSample(emgModelParams);
 
-            Float[] modelData = new Float[rtArray.length];
+            Double[] modelData = new Double[rtArray.length];
             for (int i = 0; i < rtArray.length; i++) {
-                double value = getValue(dataArray, rtArray[i], emgModelParams);
-                modelData[i] = (float) value;
+                modelData[i] = getValue(dataArray, rtArray[i], emgModelParams);
             }
 
-            float fScore = pearsonCorrelationCoefficient(intArray, modelData);
+            double fScore = pearsonCorrelationCoefficient(intArray, modelData);
             avgScore += fScore;
         }
         avgScore /= experimentFeatures.size();
@@ -86,7 +91,7 @@ public class ElutionScorer {
      * @param feature chromatogram level feature
      * @return extended rtIntensity array
      */
-    private RtIntensityPairs prepareElutionFit(ExperimentFeature feature) {
+    private RtIntensityPairsDouble prepareElutionFit(ExperimentFeature feature) {
         List<Double> rtArray = feature.getHullRt();
         List<Double> intArray = feature.getHullInt();
 
@@ -94,39 +99,37 @@ public class ElutionScorer {
         //get rt distance average
         double sum = rtArray.get(rtArray.size() - 1) - rtArray.get(0);
         double rtDistanceAverage = sum / (rtArray.size() - 1);
-        double rightSideRt = rtArray.get(rtArray.size() - 1) + rtDistanceAverage;
-        double leftSideRt = rtArray.get(0) - rtDistanceAverage;
 
         //get new List
-        Float[] newRtArray = new Float[rtArray.size() + 6];
-        Float[] newIntArray = new Float[intArray.size() + 6];
+        Double[] newRtArray = new Double[rtArray.size() + 6];
+        Double[] newIntArray = new Double[intArray.size() + 6];
         assert intArray.size() == rtArray.size();
 
         for (int i = 0; i < newRtArray.length; i++) {
             if (i < 3) {
-                newRtArray[i] = (float) (leftSideRt - (2 - i) * rtDistanceAverage);
-                newIntArray[i] = 0.0f;
+                newRtArray[i] = (rtArray.get(0) - (3 - i) * rtDistanceAverage);
+                newIntArray[i] = 0.0;
             } else if (i > newRtArray.length - 4) {
-                newRtArray[i] = (float) (rightSideRt + (i - newRtArray.length - 3) * rtDistanceAverage);
-                newIntArray[i] = 0.0f;
+                newRtArray[i] = (rtArray.get(rtArray.size() - 1) + (i - rtArray.size() - 2) * rtDistanceAverage);
+                newIntArray[i] = 0.0;
             } else {
-                newRtArray[i] = (rtArray.get(i - 3)).floatValue();
-                newIntArray[i] = intArray.get(i - 3).floatValue();
+                newRtArray[i] = rtArray.get(i - 3);
+                newIntArray[i] = intArray.get(i - 3);
             }
         }
 
-        RtIntensityPairs rtIntensityPairs = new RtIntensityPairs();
+        RtIntensityPairsDouble rtIntensityPairs = new RtIntensityPairsDouble();
         rtIntensityPairs.setRtArray(newRtArray);
         rtIntensityPairs.setIntensityArray(newIntArray);
 
         return rtIntensityPairs;
     }
 
-    private EmgModelParams getEmgParams(RtIntensityPairs featurePrepared, double[] xInitOptimized, EmgModelParams emgModelParams) {
-        Float[] rtArray = featurePrepared.getRtArray();
-        float minBound = rtArray[0];
-        float maxBound = rtArray[rtArray.length - 1];
-        float stdev = (float) Math.sqrt(emgModelParams.getVariance()) * emgModelParams.getToleranceStdevBox();
+    private EmgModelParams getEmgParams(RtIntensityPairsDouble featurePrepared, double[] xInitOptimized, EmgModelParams emgModelParams) {
+        Double[] rtArray = featurePrepared.getRtArray();
+        double minBound = rtArray[0];
+        double maxBound = rtArray[rtArray.length - 1];
+        double stdev = Math.sqrt(emgModelParams.getVariance()) * emgModelParams.getToleranceStdevBox();
         minBound -= stdev;
         maxBound += stdev;
         emgModelParams.setBoundingBoxMax(maxBound);
@@ -139,8 +142,8 @@ public class ElutionScorer {
     }
 
     private double[] getEmgSample(EmgModelParams emgModelParams) {
-        float min = emgModelParams.getBoundingBoxMin();
-        float max = emgModelParams.getBoundingBoxMax();
+        double min = emgModelParams.getBoundingBoxMin();
+        double max = emgModelParams.getBoundingBoxMax();
         if (max == min) {
             return null;
         }
@@ -168,7 +171,7 @@ public class ElutionScorer {
         return data;
     }
 
-    private double getValue(double[] data, float rt, EmgModelParams emgModelParams) {
+    private double getValue(double[] data, double rt, EmgModelParams emgModelParams) {
         //key2index
         rt -= emgModelParams.getBoundingBoxMin();
         rt /= emgModelParams.getInterpolationStep();
@@ -193,12 +196,12 @@ public class ElutionScorer {
 
     }
 
-    private float pearsonCorrelationCoefficient(Float[] realData, Float[] modelData) {
+    private double pearsonCorrelationCoefficient(Double[] realData, Double[] modelData) {
         assert realData.length == modelData.length;
-        float realDataAverage = MathUtil.getAverage(realData);
-        float modelDataAverage = MathUtil.getAverage(modelData);
-        float numerator = 0.0f, realDenominator = 0.0f, modelDenominator = 0.0f;
-        float realTemp, modelTemp;
+        double realDataAverage = MathUtil.getAverage(realData);
+        double modelDataAverage = MathUtil.getAverage(modelData);
+        double numerator = 0.0d, realDenominator = 0.0d, modelDenominator = 0.0d;
+        double realTemp, modelTemp;
         for (int i = 0; i < realData.length; i++) {
             realTemp = realData[i] - realDataAverage;
             modelTemp = modelData[i] - modelDataAverage;
@@ -206,9 +209,9 @@ public class ElutionScorer {
             realDenominator += realTemp * realTemp;
             modelDenominator += modelTemp * modelTemp;
         }
-        float denominator = (float) Math.sqrt(realDenominator * modelDenominator);
+        double denominator = Math.sqrt(realDenominator * modelDenominator);
         if (denominator == 0) {
-            return -1.0f;
+            return -1.0d;
         } else {
             return numerator / denominator;
         }
@@ -218,13 +221,17 @@ public class ElutionScorer {
      * @param preparedPairs result of prepareElutionFit
      * @param xInit         xInit * 4
      */
-    private double[] getLevenbergMarquardtOptimizer(RtIntensityPairs preparedPairs, double[] xInit) {
+    private double[] getLevenbergMarquardtOptimizer(RtIntensityPairsDouble preparedPairs, double[] xInit) {
         double sqrt2Pi = Math.sqrt(2 * Math.PI);
         double sqrt2 = Math.sqrt(2);
+        double[] weight = new double[preparedPairs.getRtArray().length];
+        for (int i = 0; i < weight.length; i++) {
+            weight[i] = 1.0;
+        }
 
         LevenbergMarquardt optimizer = new LevenbergMarquardt() {
             @Override
-            public void setValues(double[] values, double[] parameters) {
+            public void setValues(double[] parameters, double[] values) {
                 double h = parameters[0];
                 double w = parameters[1];
                 double s = parameters[2];
@@ -235,12 +242,33 @@ public class ElutionScorer {
                     values[i] = (h * w / s) * sqrt2Pi * Math.exp((Math.pow(w, 2) / (2 * Math.pow(s, 2))) - ((t - z) / s)) / (1 + Math.exp((-Constants.EMG_CONST / sqrt2) * (((t - z) / w) - w / s))) - e;
                 }
             }
+//            @Override
+//            public void setDerivatives(double[] parameters, double[][] derivatives) {
+//
+//            }
         };
+        double[][] derivatives = new double[preparedPairs.getRtArray().length][4];
+        double h = xInit[0];
+        double w = xInit[1];
+        double s = xInit[2];
+        double z = xInit[3];
+        for (int i = 0; i < xInit.length; i++) {
+            double t = preparedPairs.getRtArray()[i];
+            double exp1 = Math.exp(((w * w) / (2 * s * s)) - ((t - z) / s));
+            double exp2 = (1 + Math.exp((-Constants.EMG_CONST / sqrt2) * (((t - z) / w) - w / s)));
+            double exp3 = Math.exp((-Constants.EMG_CONST / sqrt2) * (((t - z) / w) - w / s));
+            derivatives[i][0] = w / s * sqrt2Pi * exp1 / exp2;
+            derivatives[i][1] = h / s * sqrt2Pi * exp1 / exp2 + (h * w * w) / (s * s * s) * sqrt2Pi * exp1 / exp2 + (Constants.EMG_CONST * h * w) / s * sqrt2Pi * exp1 * (-(t - z) / (w * w) - 1 / s) * exp3 / ((exp2 * exp2) * sqrt2);
+            derivatives[i][2] = -h * w / (s * s) * sqrt2Pi * exp1 / exp2 + h * w / s * sqrt2Pi * (-(w * w) / (s * s * s) + (t - z) / (s * s)) * exp1 / exp2 + (Constants.EMG_CONST * h * w * w) / (s * s * s) * sqrt2Pi * exp1 * exp3 / ((exp2 * exp2) * sqrt2);
+            derivatives[i][3] = h * w / (s * s) * sqrt2Pi * exp1 / exp2 - (Constants.EMG_CONST * h) / s * sqrt2Pi * exp1 * exp3 / ((exp2 * exp2) * sqrt2);
+        }
+        optimizer.setDerivativeCurrent(derivatives);
         optimizer.setInitialParameters(xInit);
         optimizer.setMaxIteration(Constants.EMG_MAX_ITERATION);
         optimizer.setTargetValues(new double[preparedPairs.getRtArray().length]);
-        optimizer.setWeights(new double[]{1.0, 1.0, 1.0, 1.0});
+        optimizer.setWeights(weight);
         try {
+//            optimizer.setDerivatives(xInit, new double[preparedPairs.getRtArray().length][4]);
             optimizer.run();
             return optimizer.getBestFitParameters();
         } catch (SolverException exception) {

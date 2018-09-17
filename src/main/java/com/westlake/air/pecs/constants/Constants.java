@@ -62,7 +62,7 @@ public class Constants {
 
 
     public static final double EMG_CONST = 2.4055;
-    public static final int EMG_MAX_ITERATION = 10;
+    public static final int EMG_MAX_ITERATION = 500;
 
 
     public static String EXP_SUFFIX_MZXML = "mzxml";

@@ -8,13 +8,13 @@ import lombok.Data;
  */
 @Data
 public class EmgModelParams {
-    float boundingBoxMin;
+    double boundingBoxMin;
 
-    float boundingBoxMax;
+    double boundingBoxMax;
 
-    float mean = 1.0f;
+    double mean = 1.0d;
 
-    float variance = 1.0f;
+    double variance = 1.0d;
 
     double height;
 
@@ -24,7 +24,7 @@ public class EmgModelParams {
 
     double retention;
 
-    float toleranceStdevBox = 3.0f;
+    double toleranceStdevBox = 3.0d;
 
-    float interpolationStep = 0.2f;
+    double interpolationStep = 0.2d;
 }
