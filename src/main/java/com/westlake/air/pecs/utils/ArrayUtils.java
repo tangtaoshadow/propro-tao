@@ -182,14 +182,17 @@ public class ArrayUtils {
         if (array.length == isDecoy.length) {
             int sum = 0;
             for (Boolean i : isDecoy) {
-                if (i) sum++;
+                if (i) {
+                    sum++;
+                }
             }
             Double[][] extractedRow = new Double[sum][array[0].length];
             int j = 0;
             for (int i = 0; i < array.length; i++) {
                 if (isDecoy[i]) {
-                    for (int k = 0; k < array[0].length; k++)
+                    for (int k = 0; k < array[0].length; k++) {
                         extractedRow[j][k] = array[i][k];
+                    }
                     j++;
                 }
             }
@@ -230,7 +233,7 @@ public class ArrayUtils {
      * @param array
      * @param groupNumId
      * @param isDecoy
-     * @param indexSet 去重集合
+     * @param indexSet   去重集合
      * @return
      */
     private static TrainAndTest extract3dRow(Double[][] array, Integer[] groupNumId, Boolean[] isDecoy, HashSet<Integer> indexSet) {
@@ -248,7 +251,7 @@ public class ArrayUtils {
 
             for (int i = 0; i < groupNumId.length; i++) {
                 symbol = k;
-                if(indexSet.contains(groupNumId[i])){
+                if (indexSet.contains(groupNumId[i])) {
                     k++;
                     trainIdRow[k] = groupNumId[i];
                     trainRow[k] = array[i];

@@ -78,16 +78,12 @@ public class SemiSupervised {
             Double[] mainScore = ArrayUtils.extractColumn(trainScores, 0).getModel();
             Boolean[] isTopPeak = ArrayUtils.findTopIndex(mainScore, trainId).getModel();
 
-            logger.info("进度Show1");
+
             //Start the first time of training with mainScore as main score.
             TrainPeaks trainPeaks = selectTrainPeaks(trainScores, mainScore, trainIsDecoy, isTopPeak, params.getSsInitialFdr());
-            logger.info("进度Show2");
             Double[] w = ldaLearner.learn(trainPeaks.getTopDecoyPeaks(), trainPeaks.getBestTargetPeaks(), false);
-            logger.info("进度Show3");
             Double[] clfScores = ldaLearner.score(trainScores, w, false).getModel();
-            logger.info("进度Show4");
             clfScores = AirusUtils.normalize(clfScores);
-            logger.info("进度Show5");
             isTopPeak = ArrayUtils.findTopIndex(clfScores, trainId).getModel();
 
             //Begin "semi supervised learning" iteration.
@@ -95,19 +91,10 @@ public class SemiSupervised {
                 logger.info("开始第"+times+"轮机器学习");
 //                iterSemiSupervisedLearning(trainScores, clfScores, trainIsDecoy, isTopPeak);
                 TrainPeaks trainPeaksTemp = selectTrainPeaks(trainScores, clfScores, trainIsDecoy, isTopPeak, params.getSsIterationFdr());
-                logger.info("第"+times+"轮机器学习Show1");
-
                 w = ldaLearner.learn(trainPeaks.getTopDecoyPeaks(), trainPeaksTemp.getBestTargetPeaks(), true);
-                logger.info("第"+times+"轮机器学习Show2");
-
                 clfScores = ldaLearner.score(trainScores, w, true).getModel();
-                logger.info("第"+times+"轮机器学习Show3");
-
-
                 isTopPeak = ArrayUtils.findTopIndex(clfScores, trainId).getModel();
-                logger.info("第"+times+"轮机器学习完毕");
             }
-            logger.info("进度Show6");
             //After semi supervised iteration: calculate normalized clfScores of FULL data set.
             clfScores = score(scores, w).getModel();
             isTopPeak = ArrayUtils.findTopIndex(clfScores, groupNumId).getModel();

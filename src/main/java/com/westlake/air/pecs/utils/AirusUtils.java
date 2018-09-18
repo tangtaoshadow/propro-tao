@@ -116,7 +116,9 @@ public class AirusUtils {
         int n = array.length;
         double sum = 0;
         for (Double i : array) {
-            sum += i;
+            if(!i.isNaN()){
+                sum += i;
+            }
         }
         return sum / n;
     }
@@ -125,8 +127,10 @@ public class AirusUtils {
         double mean = mean(array);
         int length = array.length;
         double error = 0;
-        for (double i : array) {
-            error += Math.pow(i - mean, 2);
+        for (Double i : array) {
+            if(!i.isNaN()){
+                error += Math.pow(i - mean, 2);
+            }
         }
         error /= (double) length - 1;
         return Math.sqrt(error);
