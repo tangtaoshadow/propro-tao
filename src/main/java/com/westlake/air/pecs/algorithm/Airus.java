@@ -45,6 +45,11 @@ public class Airus {
                 isDecoyList.add(score.getIsDecoy());
                 peptideRefList.add(score.getPeptideRef());
                 scoreList.add(fs.buildScoreMap());
+                for(Double d : fs.buildScoreMap().values()){
+                    if(d.equals(Double.NaN)){
+                        logger.info("score:"+score.getPeptideRef()+"/"+score.getId());
+                    }
+                }
             }
         }
 

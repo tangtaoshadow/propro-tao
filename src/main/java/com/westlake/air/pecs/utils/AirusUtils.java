@@ -2,6 +2,8 @@ package com.westlake.air.pecs.utils;
 
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.IndexValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +15,8 @@ import java.util.List;
  * Time: 2018-06-13 22:08
  */
 public class AirusUtils {
+
+    public static final Logger logger = LoggerFactory.getLogger(AirusUtils.class);
 
     /**
      * Get ascend sort index of array[].
@@ -111,10 +115,10 @@ public class AirusUtils {
     public static double mean(Double[] array) {
         int n = array.length;
         double sum = 0;
-        for (double i : array) {
+        for (Double i : array) {
             sum += i;
         }
-        return sum / (double) n;
+        return sum / n;
     }
 
     public static double std(Double[] array) {
@@ -134,8 +138,9 @@ public class AirusUtils {
     public static Double[] normalize(Double[] array) {
         double mean = mean(array);
         Double[] result = array.clone();
+        double std = std(array);
         for (int i = 0; i < array.length; i++) {
-            result[i] = (result[i] - mean) / std(array);
+            result[i] = (result[i] - mean) / std;
         }
         return result;
     }
