@@ -154,7 +154,7 @@ public class ElutionScorer {
         double retention = emgModelParams.getRetention();
         double step = emgModelParams.getInterpolationStep();
 
-        double[] data = new double[(int) ((max - min) / step) + 1];
+        double[] data = new double[(int) ((max - min) / step) + 2];
 
         double sqrt2Pi = Math.sqrt(2 * Math.PI);
         double termSq2 = -Constants.EMG_CONST / Math.sqrt(2.0);
@@ -247,20 +247,20 @@ public class ElutionScorer {
 //
 //            }
         };
-        double[][] derivatives = new double[preparedPairs.getRtArray().length][4];
+        double[][] derivatives = new double[4][preparedPairs.getRtArray().length];
         double h = xInit[0];
         double w = xInit[1];
         double s = xInit[2];
         double z = xInit[3];
-        for (int i = 0; i < xInit.length; i++) {
+        for (int i = 0; i < derivatives[0].length; i++) {
             double t = preparedPairs.getRtArray()[i];
             double exp1 = Math.exp(((w * w) / (2 * s * s)) - ((t - z) / s));
             double exp2 = (1 + Math.exp((-Constants.EMG_CONST / sqrt2) * (((t - z) / w) - w / s)));
             double exp3 = Math.exp((-Constants.EMG_CONST / sqrt2) * (((t - z) / w) - w / s));
-            derivatives[i][0] = w / s * sqrt2Pi * exp1 / exp2;
-            derivatives[i][1] = h / s * sqrt2Pi * exp1 / exp2 + (h * w * w) / (s * s * s) * sqrt2Pi * exp1 / exp2 + (Constants.EMG_CONST * h * w) / s * sqrt2Pi * exp1 * (-(t - z) / (w * w) - 1 / s) * exp3 / ((exp2 * exp2) * sqrt2);
-            derivatives[i][2] = -h * w / (s * s) * sqrt2Pi * exp1 / exp2 + h * w / s * sqrt2Pi * (-(w * w) / (s * s * s) + (t - z) / (s * s)) * exp1 / exp2 + (Constants.EMG_CONST * h * w * w) / (s * s * s) * sqrt2Pi * exp1 * exp3 / ((exp2 * exp2) * sqrt2);
-            derivatives[i][3] = h * w / (s * s) * sqrt2Pi * exp1 / exp2 - (Constants.EMG_CONST * h) / s * sqrt2Pi * exp1 * exp3 / ((exp2 * exp2) * sqrt2);
+            derivatives[0][i] = w / s * sqrt2Pi * exp1 / exp2;
+            derivatives[1][i] = h / s * sqrt2Pi * exp1 / exp2 + (h * w * w) / (s * s * s) * sqrt2Pi * exp1 / exp2 + (Constants.EMG_CONST * h * w) / s * sqrt2Pi * exp1 * (-(t - z) / (w * w) - 1 / s) * exp3 / ((exp2 * exp2) * sqrt2);
+            derivatives[2][i] = -h * w / (s * s) * sqrt2Pi * exp1 / exp2 + h * w / s * sqrt2Pi * (-(w * w) / (s * s * s) + (t - z) / (s * s)) * exp1 / exp2 + (Constants.EMG_CONST * h * w * w) / (s * s * s) * sqrt2Pi * exp1 * exp3 / ((exp2 * exp2) * sqrt2);
+            derivatives[3][i] = h * w / (s * s) * sqrt2Pi * exp1 / exp2 - (Constants.EMG_CONST * h) / s * sqrt2Pi * exp1 * exp3 / ((exp2 * exp2) * sqrt2);
         }
         optimizer.setDerivativeCurrent(derivatives);
         optimizer.setInitialParameters(xInit);
@@ -268,7 +268,6 @@ public class ElutionScorer {
         optimizer.setTargetValues(new double[preparedPairs.getRtArray().length]);
         optimizer.setWeights(weight);
         try {
-//            optimizer.setDerivatives(xInit, new double[preparedPairs.getRtArray().length][4]);
             optimizer.run();
             return optimizer.getBestFitParameters();
         } catch (SolverException exception) {

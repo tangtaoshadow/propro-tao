@@ -463,7 +463,7 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
                     }
 
                     if (i == j) {
-                        if (this.regularizationMethod == net.finmath.optimizer.LevenbergMarquardt.RegularizationMethod.LEVENBERG) {
+                        if (this.regularizationMethod != net.finmath.optimizer.LevenbergMarquardt.RegularizationMethod.LEVENBERG) {
                             alphaElement += this.lambda;
                         } else if (alphaElement == 0.0D) {
                             alphaElement = this.lambda;
