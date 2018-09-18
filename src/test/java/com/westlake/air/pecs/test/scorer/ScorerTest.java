@@ -179,7 +179,7 @@ public class ScorerTest extends BaseTest {
         List<ExperimentFeature> experimentFeatures = prepareElutionScoreTestFeature();
         FeatureScores scores = new FeatureScores();
         elutionScorer.calculateElutionModelScore(experimentFeatures, scores);
-        assert isSimilar(scores.getVarElutionModelFitScore(), 0.924365639, Math.pow(10, -6));
+        assert isSimilar(scores.getVarElutionModelFitScore(), 0.92436583836873376, Math.pow(10, -5));
     }
 
 
