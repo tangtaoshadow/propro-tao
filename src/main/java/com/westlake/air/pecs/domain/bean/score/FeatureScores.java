@@ -10,6 +10,8 @@ import java.util.HashMap;
  */
 @Data
 public class FeatureScores {
+
+    static String[] columns;
     /**
      *       return scores.library_corr                     * -0.34664267 + 2
      *              scores.library_norm_manhattan           *  2.98700722 + 2
@@ -36,7 +38,6 @@ public class FeatureScores {
      * scores.weighted_massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比按libraryIntensity加权之和
      */
     public static final int SCORES_COUNT = 17;
-
 
     //对experiment和library intensity算Pearson相关系数
     double varLibraryCorr;
@@ -108,5 +109,31 @@ public class FeatureScores {
         map.put("mainVarXxSwathPrelimScore",mainVarXxSwathPrelimScore);
 
         return map;
+    }
+
+    public static String[] getScoresColumns(){
+
+        if(columns == null){
+            columns = new String[SCORES_COUNT];
+            columns[0] = "varLibraryCorr";
+            columns[1] = "varLibraryRsmd";
+            columns[2] = "varXcorrCoelution";
+            columns[3] = "varXcorrCoelutionWeighted";
+            columns[4] = "varXcorrShape";
+            columns[5] = "varXcorrShapeWeighted";
+            columns[6] = "varNormRtScore";
+            columns[7] = "varIntensityScore";
+            columns[8] = "varLogSnScore";
+            columns[9] = "varElutionModelFitScore";
+            columns[10] = "varIsotopeCorrelationScore";
+            columns[11] = "varIsotopeOverlapScore";
+            columns[12] = "varMassdevScore";
+            columns[13] = "varMassdevScoreWeighted";
+            columns[14] = "varBseriesScore";
+            columns[15] = "varYseriesScore";
+            columns[16] = "mainVarXxSwathPrelimScore";
+        }
+
+        return columns;
     }
 }

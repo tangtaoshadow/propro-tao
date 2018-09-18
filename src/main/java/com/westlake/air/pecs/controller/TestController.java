@@ -8,6 +8,7 @@ import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
+import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
@@ -143,13 +144,10 @@ public class TestController extends BaseController {
     @RequestMapping("test6")
     @ResponseBody
     String test6(Model model, RedirectAttributes redirectAttributes) throws IOException {
-        logger.info("开始获取打分数据");
-        List<ScoresDO> scores = scoresService.getAllByOverviewId("5b967e5fcbaa7e2940fc6537");
-        logger.info("打分数据获取完毕");
         long start = System.currentTimeMillis();
-        Double[] resultArray = airus.learn(scores);
+        FinalResult finalResult = airus.doAirus("5b967e5fcbaa7e2940fc6537");
         logger.info("打分耗时:"+(System.currentTimeMillis() - start));
-        return JSONArray.toJSONString(resultArray);
+        return JSON.toJSONString(finalResult);
     }
 
     @RequestMapping("test7")

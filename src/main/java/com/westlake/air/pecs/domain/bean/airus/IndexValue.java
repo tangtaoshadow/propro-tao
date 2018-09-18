@@ -31,11 +31,15 @@ public class IndexValue implements Comparable<IndexValue> {
 
     @Override
     public int compareTo(@NotNull IndexValue o) {
+
         if (value < o.value) {
             return -1;
         }
-        if (value >= o.value) {
+        if (value > o.value) {
             return 1;
+        }
+        if(value == o.value){
+            return 0;
         }
         return 0;
     }

@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.test.algorithm;
 
+import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
@@ -25,11 +26,8 @@ public class AirusTest extends BaseTest {
     public void airusTest(){
         ScoreData scoreDataMap = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("scores_data.tsv").getPath()));
         if(scoreDataMap != null) {
-            long startTime = System.currentTimeMillis();
             FinalResult finalResult = airus.buildResult(scoreDataMap);
-            System.out.println(finalResult.getSummaryErrorTable());
-            long endTime = System.currentTimeMillis();
-            System.out.println(endTime-startTime);
+            System.out.println(JSON.toJSONString(finalResult));
             assert true;
         }
     }

@@ -12,8 +12,10 @@ public class ScoreData {
 
     Integer[] groupNumId;
 
+    @Deprecated
     String[] scoreColumns;
 
+    @Deprecated
     Integer[] runId;
 
     /**

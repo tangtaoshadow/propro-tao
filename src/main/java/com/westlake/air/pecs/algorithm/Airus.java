@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.domain.bean.airus.*;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.db.ScoresDO;
+import com.westlake.air.pecs.service.ScoresService;
 import com.westlake.air.pecs.utils.AirusUtils;
 import com.westlake.air.pecs.utils.ArrayUtils;
 import org.slf4j.Logger;
@@ -31,8 +32,34 @@ public class Airus {
     SemiSupervised semiSupervised;
     @Autowired
     Stats stats;
+    @Autowired
+    ScoresService scoresService;
 
-    public Double[] learn(List<ScoresDO> scores) {
+    public FinalResult doAirus(String overviewId) {
+        logger.info("开始获取打分数据");
+        List<ScoresDO> scores = scoresService.getAllByOverviewId(overviewId);
+        logger.info("打分数据获取完毕");
+        ScoreData scoreData = trans(scores);
+        Double[] weights = learn(scoreData.getScoreData(), scoreData.getGroupNumId(), scoreData.getIsDecoy());
+        Double[] dscore = calculateDscore(weights, scoreData);
+        Double[] topTargetDscores = ArrayUtils.getTopTargetPeaks(dscore, scoreData.getIsDecoy(), ArrayUtils.findTopIndex(dscore, scoreData.getGroupNumId()).getModel()).getModel();
+        Double[] topDecoyDscores = ArrayUtils.getTopDecoyPeaks(dscore, scoreData.getIsDecoy(), ArrayUtils.findTopIndex(dscore, scoreData.getGroupNumId()).getModel()).getModel();
+        String[] scoreColumns = FeatureScores.getScoresColumns();
+
+        HashMap<String, Double> classifierTable = new HashMap<String, Double>();
+        for (int i = 0; i < weights.length; i++) {
+            classifierTable.put(scoreColumns[i], weights[i]);
+        }
+
+        FinalResult finalResult = new FinalResult();
+        finalResult.setClassifierTable(classifierTable);
+        finalResult.setFinalErrorTable(finalErrorTable(topTargetDscores, topDecoyDscores));
+        finalResult.setSummaryErrorTable(summaryErrorTable(topTargetDscores, topDecoyDscores));
+        return finalResult;
+    }
+
+    public ScoreData trans(List<ScoresDO> scores) {
+        ScoreData scoreData = new ScoreData();
         if (scores == null || scores.size() == 0) {
             return null;
         }
@@ -61,8 +88,11 @@ public class Airus {
             scoresArray[i] = jSeries;
         }
         logger.info("打分数据构造完毕,开始学习");
-
-        return learn(scoresArray, groupNumIds, isDecoyArray);
+        scoreData.setGroupId(groupIds);
+        scoreData.setGroupNumId(groupNumIds);
+        scoreData.setIsDecoy(isDecoyArray);
+        scoreData.setScoreData(scoresArray);
+        return scoreData;
     }
 
     /**
