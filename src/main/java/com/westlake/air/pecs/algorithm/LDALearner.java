@@ -19,7 +19,7 @@ public class LDALearner {
      */
     public ResultDO<Double[]> score(Double[][] peaks, Double[] params, boolean useMainScore) {
         ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
-        Double[][] featureMatrix = ArrayUtils.getFeatureMatrix(peaks, useMainScore).getModel();
+        Double[][] featureMatrix = AirusUtils.getFeatureMatrix(peaks, useMainScore).getModel();
         if (featureMatrix != null) {
             resultDO = ArrayUtils.dot(featureMatrix, params);
             return resultDO;
@@ -46,8 +46,8 @@ public class LDALearner {
     }
 
     public Double[] learn(Double[][] decoyPeaks, Double[][] targetPeaks, boolean useMainScore){
-        Double[][] x0 = ArrayUtils.getFeatureMatrix(decoyPeaks,useMainScore).getModel();
-        Double[][] x1 = ArrayUtils.getFeatureMatrix(targetPeaks,useMainScore).getModel();
+        Double[][] x0 = AirusUtils.getFeatureMatrix(decoyPeaks,useMainScore).getModel();
+        Double[][] x1 = AirusUtils.getFeatureMatrix(targetPeaks,useMainScore).getModel();
         Double[][] x = ArrayUtils.concat3d(x0,x1).getModel();
         Double[] y = new Double[x.length];
         Double[] w = new Double[x[0].length];
@@ -57,8 +57,8 @@ public class LDALearner {
         for(int i = x0.length;i<x0.length+x1.length;i++){
             y[i] = 1.0;
         }
-        Double[] mu0 = AirusUtils.getRowMean(x0);
-        Double[] mu1 = AirusUtils.getRowMean(x1);
+        Double[] mu0 = ArrayUtils.getRowMean(x0);
+        Double[] mu1 = ArrayUtils.getRowMean(x1);
         double[][] xLine0 = new double[x0.length][x[0].length];
         double[][] xLine1 = new double[x1.length][x[0].length];
         for(int i=0;i<x0.length;i++) {

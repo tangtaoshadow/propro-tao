@@ -1,6 +1,5 @@
 package com.westlake.air.pecs.algorithm;
 
-import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.domain.bean.airus.*;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.db.ScoresDO;
@@ -42,15 +41,25 @@ public class Airus {
         ScoreData scoreData = trans(scores);
         Double[] weights = learn(scoreData.getScoreData(), scoreData.getGroupNumId(), scoreData.getIsDecoy());
         Double[] dscore = calculateDscore(weights, scoreData);
-        Double[] topTargetDscores = ArrayUtils.getTopTargetPeaks(dscore, scoreData.getIsDecoy(), ArrayUtils.findTopIndex(dscore, scoreData.getGroupNumId()).getModel()).getModel();
-        Double[] topDecoyDscores = ArrayUtils.getTopDecoyPeaks(dscore, scoreData.getIsDecoy(), ArrayUtils.findTopIndex(dscore, scoreData.getGroupNumId()).getModel()).getModel();
+
+        Double[] topTargetDscores = AirusUtils.getTopTargetPeaks(dscore, scoreData.getIsDecoy(), AirusUtils.findTopIndex(dscore, scoreData.getGroupNumId()).getModel()).getModel();
+        Double[] topDecoyDscores = AirusUtils.getTopDecoyPeaks(dscore, scoreData.getIsDecoy(), AirusUtils.findTopIndex(dscore, scoreData.getGroupNumId()).getModel()).getModel();
         String[] scoreColumns = FeatureScores.getScoresColumns();
 
         HashMap<String, Double> classifierTable = new HashMap<String, Double>();
         for (int i = 0; i < weights.length; i++) {
             classifierTable.put(scoreColumns[i], weights[i]);
         }
-
+        for(Double d : topTargetDscores){
+            if(d == null || d.equals(Double.NaN)){
+                logger.info("T出现啦!"+d);
+            }
+        }
+        for(Double d : topDecoyDscores){
+            if(d == null || d.equals(Double.NaN)){
+                logger.info("D出现啦!"+d);
+            }
+        }
         FinalResult finalResult = new FinalResult();
         finalResult.setClassifierTable(classifierTable);
         finalResult.setFinalErrorTable(finalErrorTable(topTargetDscores, topDecoyDscores));
@@ -80,7 +89,7 @@ public class Airus {
         isDecoyList.toArray(isDecoyArray);
 
         String[] groupIds = new String[peptideRefList.size()];
-        Integer[] groupNumIds = ArrayUtils.getGroupNumId(peptideRefList.toArray(groupIds));
+        Integer[] groupNumIds = AirusUtils.getGroupNumId(peptideRefList.toArray(groupIds));
         Double[][] scoresArray = new Double[peptideRefList.size()][SCORES_COUNT];
         for (int i = 0; i < scoreList.size(); i++) {
             Double[] jSeries = new Double[SCORES_COUNT];
@@ -108,7 +117,6 @@ public class Airus {
 
         int neval = params.getSsNumIter();
         Double[][] ws = new Double[neval][scores[0].length];
-        long start = System.currentTimeMillis();
         for (int i = 0; i < neval; i++) {
             LDALearn ldaLearn = semiSupervised.learnRandomized(scores, groupNumId, isDecoy);
             ws[i] = ldaLearn.getParams();
@@ -129,8 +137,8 @@ public class Airus {
         double minCutOff = cutOffsSort[0];
         double maxCutOff = cutOffsSort[cutOffs.length - 1];
         double margin = (maxCutOff - minCutOff) * 0.05;
-        Double[] sampledCutoffs = AirusUtils.linspace(minCutOff - margin, maxCutOff - margin, params.getNumCutOffs());
-        Integer[] ix = AirusUtils.findNearestMatches(cutOffs, sampledCutoffs, params.getUseSortOrders());
+        Double[] sampledCutoffs = ArrayUtils.linspace(minCutOff - margin, maxCutOff - margin, params.getNumCutOffs());
+        Integer[] ix = ArrayUtils.findNearestMatches(cutOffs, sampledCutoffs, params.getUseSortOrders());
 
         ErrorStat sampleErrorStat = new ErrorStat();
         sampleErrorStat.setCutoff(sampledCutoffs);
@@ -157,7 +165,7 @@ public class Airus {
         ErrorStat errorStat = stats.errorStatistics(targetScores, decoyScores);
         StatMetrics statMetrics = errorStat.getStatMetrics();
         Double[] qvalues = params.getQvalues();
-        Integer[] ix = AirusUtils.findNearestMatches(errorStat.getQvalue(), qvalues, params.getUseSortOrders());
+        Integer[] ix = ArrayUtils.findNearestMatches(errorStat.getQvalue(), qvalues, params.getUseSortOrders());
 
         ErrorStat subErrorStat = new ErrorStat();
         subErrorStat.setCutoff(ArrayUtils.extractRow(errorStat.getCutoff(), ix).getModel());
@@ -183,22 +191,22 @@ public class Airus {
      * Dscore: Normalize clfScores with clfScores' TopDecoyPeaks.
      */
     private Double[] calculateDscore(Double[] weights, ScoreData scoreData) {
-        Double[][] scores = ArrayUtils.getFeatureMatrix(scoreData.getScoreData(), true).getModel();
+        Double[][] scores = AirusUtils.getFeatureMatrix(scoreData.getScoreData(), true).getModel();
         Double[] classifierScore = ArrayUtils.dot(scores, weights).getModel();
-        Double[] classifierTopDecoyPeaks = ArrayUtils.getTopDecoyPeaks(classifierScore, scoreData.getIsDecoy(), ArrayUtils.findTopIndex(classifierScore, ArrayUtils.getGroupNumId(scoreData.getGroupId())).getModel()).getModel();
-        return AirusUtils.normalize(classifierScore, classifierTopDecoyPeaks);
+        Double[] classifierTopDecoyPeaks = AirusUtils.getTopDecoyPeaks(classifierScore, scoreData.getIsDecoy(), AirusUtils.findTopIndex(classifierScore, AirusUtils.getGroupNumId(scoreData.getGroupId())).getModel()).getModel();
+        return ArrayUtils.normalize(classifierScore, classifierTopDecoyPeaks);
     }
 
     public FinalResult buildResult(ScoreData scoreData) {
         Params params = new Params();
         if (params.isTest()) {
-            scoreData = ArrayUtils.fakeSortTgId(scoreData);
+            scoreData = AirusUtils.fakeSortTgId(scoreData);
         }
 //        String[] uniqueGroupId = ArrayUtils.extractRow(scoreData.getGroupId(), AirusUtils.sortedUniqueIndex(scoreData.getGroupNumId())).getModel();
         Double[] weights = learn(scoreData.getScoreData(), scoreData.getGroupNumId(), scoreData.getIsDecoy());
         Double[] dscore = calculateDscore(weights, scoreData);
-        Double[] topTargetDscores = ArrayUtils.getTopTargetPeaks(dscore, scoreData.getIsDecoy(), ArrayUtils.findTopIndex(dscore, scoreData.getGroupNumId()).getModel()).getModel();
-        Double[] topDecoyDscores = ArrayUtils.getTopDecoyPeaks(dscore, scoreData.getIsDecoy(), ArrayUtils.findTopIndex(dscore, scoreData.getGroupNumId()).getModel()).getModel();
+        Double[] topTargetDscores = AirusUtils.getTopTargetPeaks(dscore, scoreData.getIsDecoy(), AirusUtils.findTopIndex(dscore, scoreData.getGroupNumId()).getModel()).getModel();
+        Double[] topDecoyDscores = AirusUtils.getTopDecoyPeaks(dscore, scoreData.getIsDecoy(), AirusUtils.findTopIndex(dscore, scoreData.getGroupNumId()).getModel()).getModel();
         String[] scoreColumns = scoreData.getScoreColumns();
 
         HashMap<String, Double> classifierTable = new HashMap<String, Double>();

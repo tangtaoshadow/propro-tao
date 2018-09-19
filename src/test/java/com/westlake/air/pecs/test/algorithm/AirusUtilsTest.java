@@ -1,10 +1,21 @@
 package com.westlake.air.pecs.test.algorithm;
 
+import com.alibaba.fastjson.JSONArray;
+import com.westlake.air.pecs.algorithm.Stats;
 import com.westlake.air.pecs.test.BaseTest;
 import com.westlake.air.pecs.utils.AirusUtils;
+import com.westlake.air.pecs.utils.ArrayUtils;
+import com.westlake.air.pecs.utils.FileUtil;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.IOException;
+import java.util.List;
 
 public class AirusUtilsTest extends BaseTest {
+
+    @Autowired
+    Stats stats;
 
     @Test
     public void argSortTest() {
@@ -16,7 +27,7 @@ public class AirusUtilsTest extends BaseTest {
         d[4] = 5.0d;
         d[5] = 4.0d;
 
-        Integer[] argSort = AirusUtils.indexBeforeSort(d);
+        Integer[] argSort = ArrayUtils.indexBeforeSort(d);
 
         assert argSort[0] == 0;
         assert argSort[1] == 2;
@@ -36,7 +47,7 @@ public class AirusUtilsTest extends BaseTest {
         d[4] = 5.0d;
         d[5] = 4.0d;
 
-        Integer[] argSort = AirusUtils.indexBeforeReversedSort(d);
+        Integer[] argSort = ArrayUtils.indexBeforeReversedSort(d);
 
         assert argSort[0] == 4;
         assert argSort[1] == 5;
@@ -44,5 +55,23 @@ public class AirusUtilsTest extends BaseTest {
         assert argSort[3] == 1;
         assert argSort[4] == 2;
         assert argSort[5] == 0;
+    }
+
+    @Test
+    public void pEmpiricalTest() throws IOException {
+
+        String content = FileUtil.readFileFromSource("data/targetScoresDecoyScores.json");
+        JSONArray object = JSONArray.parseArray(content);
+
+        String targetArrayStr = object.getString(0);
+        String decoyArrayStr = object.getString(1);
+        List<Double> targetList = JSONArray.parseArray(targetArrayStr, Double.class);
+        List<Double> decoyList = JSONArray.parseArray(decoyArrayStr, Double.class);
+        Double[] targetArray = new Double[targetList.size()];
+        Double[] decoyArray = new Double[decoyList.size()];
+        targetList.toArray(targetArray);
+        decoyList.toArray(decoyArray);
+        Double[] finalResult = stats.pEmpirical(targetArray,decoyArray);
+        System.out.println("");
     }
 }

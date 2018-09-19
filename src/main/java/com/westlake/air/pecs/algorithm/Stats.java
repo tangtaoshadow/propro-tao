@@ -1,9 +1,14 @@
 package com.westlake.air.pecs.algorithm;
 
-import com.westlake.air.pecs.domain.bean.airus.*;
-import com.westlake.air.pecs.utils.AirusUtils;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.airus.ErrorStat;
+import com.westlake.air.pecs.domain.bean.airus.Params;
+import com.westlake.air.pecs.domain.bean.airus.Pi0Est;
+import com.westlake.air.pecs.domain.bean.airus.StatMetrics;
+import com.westlake.air.pecs.utils.AirusUtils;
 import com.westlake.air.pecs.utils.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -15,15 +20,17 @@ import java.util.Arrays;
 @Component
 public class Stats {
 
+    public static final Logger logger = LoggerFactory.getLogger(Stats.class);
+
     private Double[] pNormalizer(Double[] targetScores, Double[] decoyScores) {
-        double mean = AirusUtils.mean(decoyScores);
-        double std = AirusUtils.std(decoyScores);
+        double mean = ArrayUtils.mean(decoyScores);
+        double std = ArrayUtils.std(decoyScores);
         int targetScoresLength = targetScores.length;
         Double[] results = new Double[targetScoresLength];
         double args;
         for (int i = 0; i < targetScoresLength; i++) {
             args = (targetScores[i] - mean) / std;
-            results[i] = 1 - (0.5 * (1.0 + AirusUtils.erf(args / Math.sqrt(2.0))));
+            results[i] = 1 - (0.5 * (1.0 + ArrayUtils.erf(args / Math.sqrt(2.0))));
         }
         return results;
     }
@@ -34,7 +41,7 @@ public class Stats {
      * @param decoyScores
      * @return
      */
-    private Double[] pEmpirical(Double[] targetScores, Double[] decoyScores) {
+    public Double[] pEmpirical(Double[] targetScores, Double[] decoyScores) {
         int targetScoreLength = targetScores.length;
         int decoyScoreLength = decoyScores.length;
         int targetDecoyScoreLength = targetScoreLength + decoyScoreLength;
@@ -43,7 +50,7 @@ public class Stats {
         boolean[] vmid = new boolean[targetDecoyScoreLength];
         boolean[] v = new boolean[targetDecoyScoreLength];
         int[] u = new int[targetScoreLength];
-        Integer[] perm = AirusUtils.indexBeforeReversedSort(targetDecoyScores);
+        Integer[] perm = ArrayUtils.indexBeforeReversedSort(targetDecoyScores);
         for (int i = 0; i < targetScoreLength; i++) {
             vmid[i] = true;
         }
@@ -65,7 +72,7 @@ public class Stats {
         }
 
         int ranks;
-        double[] rankDataReversed = AirusUtils.rankDataReversed(targetScores);
+        double[] rankDataReversed = ArrayUtils.rankDataReversed(targetScores);
         Double[] pFinal = new Double[targetScoreLength];
         for (int i = 0; i < targetScoreLength; i++) {
             ranks = (int) Math.floor(rankDataReversed[i]) - 1;
@@ -110,14 +117,14 @@ public class Stats {
                     meanPL[j] = (double) 1;
                 }
             }
-            pi0Lambda[i] = AirusUtils.mean(meanPL) / (1 - lambda[i]);
+            pi0Lambda[i] = ArrayUtils.mean(meanPL) / (1 - lambda[i]);
         }
         if (pi0Method.equals("smoother")) {
             if (smoothLogPi0) {
                     for (int i = 0; i < numOfLambda; i++) {
                         pi0s[i] = Math.log(pi0Lambda[i]);
                     }
-                ResultDO<Double[]> pi0SmoothResult = AirusUtils.lagrangeInterpolation(lambda, pi0s);
+                ResultDO<Double[]> pi0SmoothResult = ArrayUtils.lagrangeInterpolation(lambda, pi0s);
                 if (pi0SmoothResult.isSuccess()) {
                     pi0Smooth = pi0SmoothResult.getModel();
                 }
@@ -125,7 +132,7 @@ public class Stats {
                     pi0Smooth[i] = Math.exp(pi0Smooth[i]);
                 }
             } else {
-                ResultDO<Double[]> pi0SmoothResult = AirusUtils.lagrangeInterpolation(lambda, pi0s);
+                ResultDO<Double[]> pi0SmoothResult = ArrayUtils.lagrangeInterpolation(lambda, pi0s);
                 if (pi0SmoothResult.isSuccess()) {
                     pi0Smooth = pi0SmoothResult.getModel();
                 }
@@ -138,10 +145,10 @@ public class Stats {
             int w;
             double[] mse = new double[numOfLambda];
             for (int i = 0; i < numOfLambda; i++) {
-                w = AirusUtils.countOverThreshold(pvalues, lambda[i]);
+                w = ArrayUtils.countOverThreshold(pvalues, lambda[i]);
                 mse[i] = (w / (Math.pow(numOfPvalue, 2) * Math.pow((1 - lambda[i]), 2))) * (1 - w / numOfPvalue) + Math.pow((pi0Lambda[i] - sortedPvalue[0]), 2);
             }
-            pi0 = Math.min(pi0Lambda[AirusUtils.argmin(mse)], 1);
+            pi0 = Math.min(pi0Lambda[ArrayUtils.argmin(mse)], 1);
             pi0Smooth = null;
         } else {
             resultDO.setMsgInfo("Pi0Est Method Error.\n");
@@ -178,7 +185,7 @@ public class Stats {
                 meanPL[j] = (double) 1;
             }
         }
-        pi0Lambda = AirusUtils.mean(meanPL);
+        pi0Lambda = ArrayUtils.mean(meanPL);
 
         pi0 = Math.min(pi0Lambda, (double) 1);
         Double[] lamda = new Double[1];
@@ -199,8 +206,8 @@ public class Stats {
      */
     private Double[] qvalue(Double[] pvalues, double pi0, boolean pfdr) {
         int pvalueLength = pvalues.length;
-        Integer[] u = AirusUtils.indexBeforeSort(pvalues);
-        double[] v = AirusUtils.rankDataMax(pvalues);
+        Integer[] u = ArrayUtils.indexBeforeSort(pvalues);
+        double[] v = ArrayUtils.rankDataMax(pvalues);
         Double[] qvalues = new Double[pvalueLength];
         for (int i = 0; i < pvalueLength; i++) {
 
@@ -220,7 +227,7 @@ public class Stats {
     private StatMetrics statMetrics(Double[] pvalues, Double pi0, boolean pfdr) {
         StatMetrics results = new StatMetrics();
         int numOfPvalue = pvalues.length;
-        int[] numPositives = AirusUtils.countNumPositives(pvalues);
+        int[] numPositives = ArrayUtils.countNumPositives(pvalues);
         int[] numNegatives = new int[numOfPvalue];
         for (int i = 0; i < numOfPvalue; i++) {
             numNegatives[i] = numOfPvalue - numPositives[i];
@@ -268,7 +275,7 @@ public class Stats {
             if (fnr[i] > 1.0) fnr[i] = 1.0;
         }
 
-        svalues = ArrayUtils.reverse(AirusUtils.cumMax(ArrayUtils.reverse(sens)));
+        svalues = ArrayUtils.reverse(ArrayUtils.cumMax(ArrayUtils.reverse(sens)));
         results.setTp(tp);
         results.setFp(fp);
         results.setTn(tn);
@@ -337,7 +344,7 @@ public class Stats {
         for(int i=0;i<qvalues.length;i++){
             qvalue_CutoffAbs[i] = Math.abs(qvalues[i]-cutoffFdr);
         }
-        int i0 = AirusUtils.argmin(qvalue_CutoffAbs);
+        int i0 = ArrayUtils.argmin(qvalue_CutoffAbs);
         return errorStat.getCutoff()[i0];
     }
 }

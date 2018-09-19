@@ -1,14 +1,12 @@
 package com.westlake.air.pecs.utils;
 
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.airus.IndexValue;
+import com.westlake.air.pecs.domain.bean.airus.ScoreData;
+import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Nico Wang Ruimin
@@ -19,475 +17,344 @@ public class AirusUtils {
     public static final Logger logger = LoggerFactory.getLogger(AirusUtils.class);
 
     /**
-     * Get ascend sort index of array[].
+     * 将GroupId简化为Integer数组
+     * getGroupId({"100_run0","100_run0","DECOY_100_run0"})
+     * -> {0, 0, 1}
      */
-    public static Integer[] indexBeforeSort(Double[] array) {
-
-        List<IndexValue> indexValues = IndexValue.buildList(array);
-        Collections.sort(indexValues);
-
-        int n = array.length;
-        Integer[] result = new Integer[n];
-
-        for (int i = 0; i < n; i++) {
-            result[i] = indexValues.get(i).getIndex();
-        }
-        return result;
-    }
-
-    /**
-     * Get descend sort index of array[].
-     */
-    public static Integer[] indexBeforeReversedSort(Double[] array) {
-        List<IndexValue> indexValues = IndexValue.buildList(array);
-        Collections.sort(indexValues);
-        Collections.reverse(indexValues);
-        int n = array.length;
-        Integer[] result = new Integer[n];
-
-        for (int i = 0; i < n; i++) {
-            result[i] = indexValues.get(i).getIndex();
-        }
-        return result;
-    }
-
-    /**
-     * Get unique array index of array[].
-     */
-    public static Integer[] sortedUniqueIndex(Integer[] array) {
-        int j = 1;
-        int value = array[0];
-        List<Integer> index = new ArrayList<Integer>();
-        index.add(0);
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] != value) {
-                j++;
-                value = array[i];
-                index.add(i);
-            }
-        }
-        Integer[] result = new Integer[j];
-        for (int i = 0; i < j; i++) {
-            result[i] = index.get(i);
-        }
-        return result;
-    }
-
-    /**
-     * rankDataMax([1,2,2,3,3,3,4])
-     * -> [1, 3, 3, 6, 6, 6, 7]
-     */
-    public static double[] rankDataMax(Double[] array) {
-        int n = array.length;
-        double[] result = new double[n];
-        int[] countSort = ArrayUtils.reverse(countSort(array));
-        int count = 0;
-        int index = array.length;
-        for (int j : countSort) {
-            for (int i = 0; i < j; i++) {
-                result[count + i] = index - count;
-            }
-            count = count + j;
-        }
-        return result;
-    }
-
-    /**
-     * rankDataMax([1,2,2,3,3,3,4])
-     * -> [7, 5.5, 5.5, 3, 3, 3, 1]
-     */
-    public static double[] rankDataReversed(Double[] array) {
-        int n = array.length;
-        double[] result = new double[n];
-        int[] countSortReversed = ArrayUtils.reverse(countSort(array));
-        int count = 0;
-        int index = array.length;
-        for (int j : countSortReversed) {
-            for (int i = 0; i < j; i++) {
-                result[index - j + i] = count + (j + 1) / (double) 2;
-            }
-            index = index - j;
-            count = count + j;
-        }
-        return result;
-    }
-
-    public static double mean(Double[] array) {
-        int n = array.length;
-        double sum = 0;
-        for (Double i : array) {
-            if(!i.isNaN()){
-                sum += i;
-            }
-        }
-        return sum / n;
-    }
-
-    public static double std(Double[] array) {
-        double mean = mean(array);
-        int length = array.length;
-        double error = 0;
-        for (Double i : array) {
-            if(!i.isNaN()){
-                error += Math.pow(i - mean, 2);
-            }
-        }
-        error /= (double) length - 1;
-        return Math.sqrt(error);
-    }
-
-    /**
-     * Normalize a with a's mean and std.
-     */
-    public static Double[] normalize(Double[] array) {
-        double mean = mean(array);
-        Double[] result = array.clone();
-        double std = std(array);
-        for (int i = 0; i < array.length; i++) {
-            result[i] = (result[i] - mean) / std;
-        }
-        return result;
-    }
-
-    /**
-     * Normalize a with b's mean and std.
-     */
-    public static Double[] normalize(Double[] arrayA, Double[] arrayB) {
-        double mean = mean(arrayB);
-        double std = std(arrayB);
-        Double[] result = arrayA.clone();
-        for (int i = 0; i < arrayA.length; i++) {
-            result[i] = (result[i] - mean) / std;
-        }
-        return result;
-    }
-
-    /**
-     * Error function erf().
-     */
-    public static double erf(double t) {
-        double result = 0.0;
-        for (int i = 1; i < 101; i++) {
-            result += t * 2.0 * Math.exp(-Math.pow(i * t / 100, 2)) / Math.sqrt(Math.PI) / 100.0;
-        }
-        return result;
-    }
-
-    /**
-     * Count number of value in array[] <= present value.
-     */
-    public static int[] countNumPositives(Double[] array) {
-        int i0 = 0, i1 = 0;
-        int n = array.length;
-        int[] result = new int[n];
-        while (i0 < n) {
-            while (i1 < n && array[i0].equals(array[i1])) {
-                result[i1] = n - i0;
-                i1++;
-            }
-            i0++;
-        }
-        return result;
-    }
-
-    /**
-     * Get an array of Max in the rest.
-     */
-    public static double[] cumMax(double[] array) {
-        double max = array[0];
-        int length = array.length;
-        double[] result = new double[length];
-        for (int i = 0; i < length; i++) {
-            if (array[i] > max) {
-                max = array[i];
-            }
-            result[i] = max;
-        }
-        return result;
-    }
-
-    /**
-     * Find index of the min value.
-     */
-    public static int argmin(double[] array) {
-        double min = array[0];
-        int minIndex = 0;
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] < min) {
-                min = array[i];
-                minIndex = i;
-            }
-        }
-        return minIndex;
-    }
-
-    /**
-     * Count number of values bigger than threshold in array.
-     */
-    public static int countOverThreshold(Double[] array, double threshold) {
-        int n = 0;
-        for (double i : array) {
-            if (i >= threshold) n++;
-        }
-        return n;
-    }
-
-
-    /**
-     * Return index of nearest elements of samplePoints[] in array[].
-     */
-    public static Integer[] findNearestMatches(Double[] array, Double[] samplePoints, int useSortOrder) {
-
-        int numBasis = array.length;
-        int numSamples = samplePoints.length;
-        Integer[] results = new Integer[numSamples];
-        int i, bestJ;
-        int low, mid, high;
-        double spI, bestDist, dist;
-        int sortOrder;
-
-        if (useSortOrder != 1) {
-            for (i = 0; i < numSamples; i++) {
-                spI = samplePoints[i];
-                bestJ = 0;
-                bestDist = Math.abs(array[0] - spI);
-                for (int j = 1; j < numBasis; j++) {
-                    dist = Math.abs(array[j] - spI);
-                    if (dist < bestDist) {
-                        bestDist = dist;
-                        bestJ = j;
-                    }
+    public static Integer[] getGroupNumId(String[] groupId) {
+        if (groupId[0] != null) {
+            Integer[] b = new Integer[groupId.length];
+            String s = groupId[0];
+            int groupNumId = 0;
+            for (int i = 0; i < groupId.length; i++) {
+                if (!s.equals(groupId[i])) {
+                    s = groupId[i];
+                    groupNumId++;
                 }
-                results[i] = bestJ;
-
+                b[i] = groupNumId;
             }
-            return results;
+            return b;
+        } else {
+            logger.error("GetgroupNumId Error.\n");
+            return null;
         }
-        sortOrder = AirusUtils.findSortOrder(array);
-        for (i = 0; i < numSamples; i++) {
-            spI = samplePoints[i];
-            if (sortOrder == 0) {
-                bestJ = 0;
-                bestDist = Math.abs(array[0] - spI);
-                for (int j = 1; j < numBasis; j++) {
-                    dist = Math.abs(array[j] - spI);
-                    if (dist < bestDist) {
-                        bestDist = dist;
-                        bestJ = j;
+    }
+
+    public static ResultDO<Boolean[]> findTopIndex(Double[] array, Integer[] groupNumId) {
+        ResultDO<Boolean[]> resultDO = new ResultDO<Boolean[]>();
+        if (groupNumId.length == array.length) {
+            int id = groupNumId[0];
+            Boolean[] index = new Boolean[groupNumId.length];
+            int tempIndex = 0;
+            double b = array[0];
+            for (int i = 0; i < groupNumId.length; i++) {
+
+                if (groupNumId[i] != null && groupNumId[i] == id) {
+                    if (array[i] > b) {
+                        b = array[i];
+                        tempIndex = i;
+                        //index[i]=1;
                     }
-                }
-            } else if (sortOrder == 1) {
-                low = 0;
-                high = numBasis - 1;
-                bestJ = -1;
-                if (array[low] == spI) {
-                    bestJ = low;
-                } else if (array[high] == spI) {
-                    bestJ = high;
-                } else {
-                    while (low < high - 1) {
-                        mid = (low + high) / 2;
-                        if (array[mid] == spI) {
-                            bestJ = mid;
-                        }
-                        if (array[mid] < spI) {
-                            low = mid;
-                        } else {
-                            high = mid;
-                        }
-                    }
-                    if (bestJ == -1) {
-                        if (Math.abs(array[low] - spI) < Math.abs(array[high] - spI)) {
-                            bestJ = low;
-                        } else {
-                            bestJ = high;
-                        }
-                    }
-                }
-                while (bestJ > 0) {
-                    if (array[bestJ - 1].equals(array[bestJ])) {
-                        bestJ = bestJ - 1;
-                    } else {
-                        break;
-                    }
-                }
-            } else {
-                low = 0;
-                high = numBasis - 1;
-                bestJ = -1;
-                if (array[low] == spI) {
-                    bestJ = low;
-                } else if (array[high] == spI) {
-                    bestJ = high;
-                } else {
-                    while (low < high - 1) {
-                        mid = (low + high) / 2;
-                        if (array[mid] == spI) {
-                            bestJ = mid;
-                            break;
-                        }
-                        if (array[mid] > spI) {
-                            low = mid;
-                        } else {
-                            high = mid;
-                        }
-                    }
-                    if (bestJ == -1) {
-                        if (Math.abs(array[low] - spI) < Math.abs(array[high] - spI)) {
-                            bestJ = low;
-                        } else {
-                            bestJ = high;
-                        }
-                    }
-                }
-                while (bestJ > 0) {
-                    if (array[bestJ - 1].equals(array[bestJ])) {
-                        bestJ = bestJ - 1;
-                    } else {
-                        break;
-                    }
+
+                } else if (array[i] != null && groupNumId[i] != null) {
+                    index[tempIndex] = true;
+                    b = array[i];
+                    id = groupNumId[i];
+                    tempIndex = i;
                 }
             }
-            results[i] = bestJ;
-
-        }
-        return results;
-    }
-
-    /**
-     * Get numCutOffs points equally picked from [a,b).
-     */
-    public static Double[] linspace(Double a, Double b, int numCutOffs) {
-        Double[] result = new Double[numCutOffs];
-        double inc = Math.abs(b - a) / (numCutOffs - 1);
-        for (int i = 0; i < numCutOffs; i++) {
-            result[i] = a + inc * i;
-        }
-        return result;
-    }
-
-    /**
-     * Get the row-mean of rows in array[].
-     */
-    public static Double[] getRowMean(Double[][] array) {
-        int arrayLength = array.length;
-        int arrayWidth = array[0].length;
-        Double[] rowMean = new Double[arrayWidth];
-        double sumRowElement = 0;
-        for (int i = 0; i < arrayWidth; i++) {
-            for (int j = 0; j < arrayLength; j++) {
-                sumRowElement += array[j][i];
-            }
-            rowMean[i] = sumRowElement / arrayLength;
-            sumRowElement = 0;
-        }
-        return rowMean;
-    }
-
-    public static ResultDO<Double[]> lagrangeInterpolation(Double[] x, Double[] y) {
-        int n = x.length;
-        ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
-        Double[] results = new Double[n];
-        if (n == y.length) {
-            Double result;
-            for (int i = 0; i < n; i++) {
-                result = (double) 0;
-                for (int j = 0; j < n - 2; j++) {
-                    result += (x[i] - x[j + 1]) * (x[i] - x[j + 2]) / ((x[j] - x[j + 1]) * (x[j] - x[j + 2]));
+            index[tempIndex] = true;
+            for (int i = 0; i < groupNumId.length; i++) {
+                if (index[i] == null) {
+                    index[i] = false;
                 }
-                result += (x[i] - x[n - 3]) * (x[i] - x[n - 1]) / ((x[n - 2] - x[n - 3]) * (x[n - 2] - x[n - 1]));
-                result += (x[i] - x[n - 3]) * (x[i] - x[n - 2]) / ((x[n - 1] - x[n - 3]) * (x[n - 1] - x[n - 2]));
-                results[i] = result;
             }
+            resultDO.setModel(index);
             resultDO.setSuccess(true);
-            resultDO.setModel(results);
             return resultDO;
         } else {
-            resultDO.setMsgInfo("Interpolation Error.\n");
+            resultDO.setMsgInfo("FindTopIndex Error.\n");
+            return resultDO;
+        }
+    }
+
+    public static ResultDO<Double[][]> getDecoyPeaks(Double[][] array, Boolean[] isDecoy) {
+        ResultDO<Double[][]> decoyPeaks = new ResultDO<Double[][]>();
+        if (array.length == isDecoy.length) {
+            return ArrayUtils.extract3dRow(array, isDecoy);
+        } else {
+            decoyPeaks.setMsgInfo("GetDecoyPeaks Error.\n");
+            return decoyPeaks;
+        }
+    }
+
+    public static ResultDO<Double[]> getDecoyPeaks(Double[] array, Boolean[] isDecoy) {
+        ResultDO<Double[]> decoyPeaks = new ResultDO<Double[]>();
+        if (array.length == isDecoy.length) {
+            return ArrayUtils.extract3dRow(array, isDecoy);
+        } else {
+            decoyPeaks.setMsgInfo("GetDecoyPeaks Error.\n");
+            return decoyPeaks;
+        }
+    }
+
+    public static ResultDO<Integer[]> getDecoyPeaks(Integer[] array, Boolean[] isDecoy) {
+        ResultDO<Integer[]> decoyPeaks = new ResultDO<Integer[]>();
+        if (array.length == isDecoy.length) {
+            return ArrayUtils.extract3dRow(array, isDecoy);
+        } else {
+            decoyPeaks.setMsgInfo("GetDecoyPeaks Error.\n");
+            return decoyPeaks;
+        }
+    }
+
+    public static ResultDO<Double[]> getTargetPeaks(Double[] array, Boolean[] isDecoy) {
+        ResultDO<Double[]> targetPeaks = new ResultDO<Double[]>();
+        if (array.length == isDecoy.length) {
+            Boolean[] isTarget = getIsTarget(isDecoy);
+            return ArrayUtils.extract3dRow(array, isTarget);
+        } else {
+            targetPeaks.setMsgInfo("GetDecoyPeaks Error.\n");
+            return targetPeaks;
+        }
+    }
+
+    public static ResultDO<Integer[]> getTargetPeaks(Integer[] array, Boolean[] isDecoy) {
+        ResultDO<Integer[]> targetPeaks = new ResultDO<Integer[]>();
+        if (array.length == isDecoy.length) {
+            Boolean[] isTarget = getIsTarget(isDecoy);
+            return ArrayUtils.extract3dRow(array, isTarget);
+        } else {
+            targetPeaks.setMsgInfo("GetDecoyPeaks Error.\n");
+            return targetPeaks;
+        }
+    }
+
+    public static ResultDO<Double[][]> getTopTargetPeaks(Double[][] array, Boolean[] isDecoy, Boolean[] index) {
+        ResultDO<Double[][]> resultDO = new ResultDO<Double[][]>();
+        Boolean[] isTopTarget = getIsTopTarget(isDecoy, index).getModel();
+        if (isTopTarget != null && array.length == isTopTarget.length) {
+            resultDO = getDecoyPeaks(array, isTopTarget);
+            return resultDO;
+        } else {
+            resultDO.setMsgInfo("GetTopTargetPeaks Error.\n");
+            return resultDO;
+        }
+    }
+
+    public static ResultDO<Double[]> getTopTargetPeaks(Double[] array, Boolean[] isDecoy, Boolean[] index) {
+        ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
+        Boolean[] isTopTarget = getIsTopTarget(isDecoy, index).getModel();
+        if (isTopTarget != null && array.length == isTopTarget.length) {
+            resultDO = getDecoyPeaks(array, isTopTarget);
+            return resultDO;
+        } else {
+            resultDO.setMsgInfo("GetTopTargetPeaks Error.\n");
+            return resultDO;
+        }
+    }
+
+    public static ResultDO<Double[][]> getTopDecoyPeaks(Double[][] array, Boolean[] isDecoy, Boolean[] index) {
+        ResultDO<Double[][]> resultDO = new ResultDO<Double[][]>();
+        Boolean[] isTopDecoy = getIsTopDecoy(isDecoy, index).getModel();
+        if (isTopDecoy != null && array.length == isTopDecoy.length) {
+            resultDO = getDecoyPeaks(array, isTopDecoy);
+            return resultDO;
+        } else {
+            resultDO.setMsgInfo("GetTopDecoyPeaks Error.\n");
+            return resultDO;
+        }
+    }
+
+    public static ResultDO<Double[]> getTopDecoyPeaks(Double[] array, Boolean[] isDecoy, Boolean[] index) {
+        ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
+        Boolean[] isTopDecoy = getIsTopDecoy(isDecoy, index).getModel();
+        if (isTopDecoy != null && array.length == isTopDecoy.length) {
+            resultDO = getDecoyPeaks(array, isTopDecoy);
+            return resultDO;
+        } else {
+            resultDO.setMsgInfo("GetTopDecoyPeaks Error.\n");
             return resultDO;
         }
     }
 
     /**
-     * Exchange position of element i,j in array[].
+     * Get feature Matrix of useMainScore or not.
      */
-    private static void exch(Comparable[] array, int i, int j) {
-        Comparable t = array[i];
-        array[i] = array[j];
-        array[j] = t;
-    }
-
-    /**
-     * Count number of different values in a **sorted** array.
-     */
-    private static int numOfUnique(Double[] array) {
-        int j = 1;
-        double value = array[0];
-        for (double i : array) {
-            if (i != value) {
-                j++;
-                value = i;
-            }
-        }
-        return j;
-    }
-
-    /**
-     * count number of times corresponding to unique sorted array.
-     */
-    private static int[] countSort(Double[] array) {
-        Double[] aSort = array.clone();
-        Arrays.sort(aSort);
-        int j = 0, k = 0;
-        int[] result = new int[numOfUnique(aSort)];
-        double value = aSort[0];
-        for (int i = 0; i < aSort.length; i++) {
-            if (aSort[i] == value) {
-                j++;
+    public static ResultDO<Double[][]> getFeatureMatrix(Double[][] array, Boolean useMainScore) {
+        ResultDO<Double[][]> resultDO = new ResultDO<Double[][]>();
+        if (array != null) {
+            if (useMainScore) {
+                resultDO = ArrayUtils.extract3dColumn(array, 0);
             } else {
-                result[k] = j;
-                k++;
-                j = 1;
-                value = aSort[i];
+                resultDO = ArrayUtils.extract3dColumn(array, 1);
             }
-
+            return resultDO;
+        } else {
+            resultDO.setMsgInfo("GetFeatureMatrix Error.\n");
+            return resultDO;
         }
-        result[k] = j;
-        return result;
+    }
+
+    public static Double[][] peaksFilter(Double[][] ttPeaks, Double[] ttScores, double cutOff) {
+        int count = 0;
+        for (double i : ttScores) {
+            if (i >= cutOff) count++;
+        }
+        Double[][] targetPeaks = new Double[count][ttPeaks[0].length];
+        int j = 0;
+        for (int i = 0; i < ttScores.length; i++) {
+            if (ttScores[i] >= cutOff) {
+                targetPeaks[j] = ttPeaks[i];
+                j++;
+            }
+        }
+        return targetPeaks;
     }
 
     /**
-     * Find order of array.
-     * 0: unsorted
-     * 1: ascending
-     * -1: descending
+     * 划分测试集与训练集,保证每一次对于同一份原始数据划分出的测试集都是同一份
+     *
+     * @param data
+     * @param groupNumId
+     * @param isDecoy
+     * @param fraction   目前写死0.5
+     * @param isTest
+     * @return
      */
-    private static int findSortOrder(Double[] array) {
-        int i = 0;
-        int n = array.length;
-        if (n <= 1) {
-            return 0;
-        }
-        while (i < n - 1 && array[i] == array[i + 1]) {
-            i++;
-        }
-        if (i == n - 1) {
-            return 1;
-        }
-        if (array[i] < array[i + 1]) {
-            for (; i < n - 1; i++) {
-                if (array[i] > array[i + 1]) {
-                    return 0;
-                }
-            }
-            return 1;
+    public static TrainAndTest splitForXval(Double[][] data, Integer[] groupNumId, Boolean[] isDecoy, double fraction, boolean isTest) {
+        Integer[] decoyIds = getDecoyPeaks(groupNumId, isDecoy).getModel();
+        Integer[] targetIds = getTargetPeaks(groupNumId, isDecoy).getModel();
+
+        if (!isTest) {
+            List<Integer> decoyIdShuffle = Arrays.asList(decoyIds);
+            List<Integer> targetIdShuffle = Arrays.asList(targetIds);
+            Collections.shuffle(decoyIdShuffle);
+            Collections.shuffle(targetIdShuffle);
+            decoyIdShuffle.toArray(decoyIds);
+            targetIdShuffle.toArray(targetIds);
         } else {
-            for (; i < n - 1; i++) {
-                if (array[i] < array[i + 1]) {
-                    return 0;
-                }
+            TreeSet<Integer> decoyIdSet = new TreeSet<Integer>(Arrays.asList(decoyIds));
+            TreeSet<Integer> targetIdSet = new TreeSet<Integer>(Arrays.asList(targetIds));
+
+            decoyIds = new Integer[decoyIdSet.size()];
+            decoyIdSet.toArray(decoyIds);
+            targetIds = new Integer[targetIdSet.size()];
+            targetIdSet.toArray(targetIds);
+        }
+
+        int decoyLength = (int) (decoyIds.length * fraction) + 1;
+        int targetLength = (int) (targetIds.length * fraction) + 1;
+        Integer[] learnIds = ArrayUtils.concat2d(ArrayUtils.getPartOfArray(decoyIds, decoyLength), ArrayUtils.getPartOfArray(targetIds, targetLength));
+
+        HashSet<Integer> learnIdSet = new HashSet<Integer>(Arrays.asList(learnIds));
+        return ArrayUtils.extract3dRow(data, groupNumId, isDecoy, learnIdSet);
+    }
+
+    /**
+     * "1_run0">"19_run0"
+     * "10_run0">"109_run0"
+     * same sort as pyprophet
+     */
+    public static ScoreData fakeSortTgId(ScoreData scoreData) {
+        String[] groupId = scoreData.getGroupId();
+        Integer[] groupNumId = scoreData.getGroupNumId();
+//        AirusUtils.sort(groupNumId);
+//        Integer[] test1 = AirusUtils.sortedUnique(groupNumId);
+        int groupIdLength = groupId.length;
+        Double[] tgIdNum = new Double[groupIdLength];
+        for (int i = 0; i < groupIdLength; i++) {
+            String[] groupIdSplit = groupId[i].split("_");
+            if (groupIdSplit[0].equals("DECOY")) {
+                tgIdNum[i] = Double.parseDouble(groupIdSplit[1]);
+//                groupId[i] = groupIdSplit[1] + "_" + groupIdSplit[2];
+            } else {
+                tgIdNum[i] = Double.parseDouble(groupIdSplit[0]);
+//                groupId[i] = groupIdSplit[0] + "_" + groupIdSplit[1];
             }
-            return -1;
+            if (tgIdNum[i] < 10) {
+                tgIdNum[i] = tgIdNum[i] * 100 + 99.5;
+            } else if (tgIdNum[i] < 100) {
+                tgIdNum[i] = tgIdNum[i] * 10 + 9.5;
+            }
+
+        }
+        Integer[] index = ArrayUtils.indexBeforeSort(tgIdNum);
+//        Integer[] indexTest = AirusUtils.indexBeforeSort(tgIdNum);
+
+//        AirusUtils.sort(indexTest);
+//        Integer[] testNum = AirusUtils.sortedUnique(indexTest);
+        Boolean[] isDecoy = scoreData.getIsDecoy();
+        Double[][] scores = scoreData.getScoreData();
+        String[] newGroupId = new String[groupIdLength];
+        Boolean[] newIsDecoy = new Boolean[groupIdLength];
+        Double[][] newScores = new Double[groupIdLength][scores[0].length];
+//        int emmm=0;
+//        for(int i=0;i<groupIdLength;i++){
+//            if(indexTest[i] == 0){
+//                emmm++;
+//            }
+//        }
+
+        for (int i = 0; i < groupIdLength; i++) {
+            int j = index[i];
+            newGroupId[i] = groupId[j];
+            newIsDecoy[i] = isDecoy[j];
+            newScores[i] = scores[j];
+//            newGroupNumId[i] = groupNumId[j];
+        }
+        Integer[] newGroupNumId = AirusUtils.getGroupNumId(newGroupId);
+//        Integer[] testGD = ArrayUtils.getGroupNumId(newGroupNumId).getFeedBack();
+//        int hehe = testGD[9164];
+//        AirusUtils.sort(groupNumId);
+//        Integer[] test1 = AirusUtils.sortedUnique(groupNumId);
+//        AirusUtils.sort(newGroupNumId);
+//        Integer[] test = AirusUtils.sortedUnique(newGroupNumId);
+        scoreData.setGroupId(newGroupId);
+        scoreData.setIsDecoy(newIsDecoy);
+        scoreData.setScoreData(newScores);
+        scoreData.setGroupNumId(newGroupNumId);
+
+        return scoreData;
+    }
+
+    private static Boolean[] getIsTarget(Boolean[] isDecoy) {
+        Boolean[] isTarget = new Boolean[isDecoy.length];
+        for (int i = 0; i < isDecoy.length; i++) {
+            isTarget[i] = !isDecoy[i];
+        }
+        return isTarget;
+    }
+
+    private static ResultDO<Boolean[]> getIsTopDecoy(Boolean[] isDecoy, Boolean[] index) {
+        ResultDO<Boolean[]> resultDO = new ResultDO<Boolean[]>();
+        if (isDecoy.length == index.length) {
+            Boolean[] isTopDecoy = new Boolean[isDecoy.length];
+            for (int i = 0; i < isDecoy.length; i++) {
+                isTopDecoy[i] = isDecoy[i] && index[i];
+            }
+            resultDO.setModel(isTopDecoy);
+            resultDO.setSuccess(true);
+            return resultDO;
+        } else {
+            resultDO.setMsgInfo("GetIsTopDecoy Error.\n");
+            return resultDO;
+        }
+    }
+
+    private static ResultDO<Boolean[]> getIsTopTarget(Boolean[] isDecoy, Boolean[] index) {
+        ResultDO<Boolean[]> resultDO = new ResultDO<Boolean[]>();
+        if (isDecoy.length == index.length) {
+            Boolean[] isTopTarget = new Boolean[isDecoy.length];
+            for (int i = 0; i < isDecoy.length; i++) {
+                isTopTarget[i] = !isDecoy[i] && index[i];
+            }
+            resultDO.setModel(isTopTarget);
+            resultDO.setSuccess(true);
+            return resultDO;
+        } else {
+            resultDO.setMsgInfo("GetIsTopTarget Error.\n");
+            return resultDO;
         }
     }
 }
