@@ -302,7 +302,7 @@ public class ScoresServiceImpl implements ScoresService {
             List<Float> libraryIntensityList = featureByPep.getLibraryIntensityList();
             List<double[]> noise1000List = featureByPep.getNoise1000List();
             List<Double> productMzList = new ArrayList<>();
-            for (AnalyseDataDO dataDO : group.getDataMap().values()){
+            for (AnalyseDataDO dataDO : group.getDataMap().values()){// TODO @Nico 精度必要性
                 productMzList.add(Double.parseDouble(Float.toString(dataDO.getMz())));
             }
 
@@ -340,11 +340,11 @@ public class ScoresServiceImpl implements ScoresService {
                 FeatureScores featureScores = new FeatureScores();
                 chromatographicScorer.calculateChromatographicScores(experimentFeatureList, libraryIntensityList, featureScores);
                 chromatographicScorer.calculateLogSnScore(chromatogramList, experimentFeatureList, noise1000List, featureScores);
-//                diaScorer.calculateDiaMassDiffScore(productMzList, spectrumMzArray, spectrumIntArray, libraryIntensityList, featureScores);
-//                diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
-////                //TODO @Nico charge from transition?
-//                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
-//                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
+                diaScorer.calculateDiaMassDiffScore(productMzList, spectrumMzArray, spectrumIntArray, libraryIntensityList, featureScores);
+                diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
+                //TODO @Nico charge from transition?
+                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
+                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, featureScores);
                 libraryScorer.calculateNormRtScore(experimentFeatureList, input.getSlopeIntercept(), group.getRt(), featureScores);
@@ -406,7 +406,7 @@ public class ScoresServiceImpl implements ScoresService {
      * @param minCoverage limit of picking
      * @return pairsCorrected
      */
-    private List<RtPair> removeOutlierIterative(List<RtPair> pairs, double minRsq, float minCoverage){
+    private List<RtPair> removeOutlierIterative(List<RtPair> pairs, double minRsq, double minCoverage){
 
         int pairsSize = pairs.size();
         if( pairsSize < 3){

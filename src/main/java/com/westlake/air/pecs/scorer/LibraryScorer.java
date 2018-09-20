@@ -86,10 +86,7 @@ public class LibraryScorer {
      * totalXic
      */
     public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores){
-        double intensitySum = 0.0d;
-        for(ExperimentFeature feature: experimentFeatures){
-            intensitySum += feature.getIntensity();
-        }
+        double intensitySum = experimentFeatures.get(0).getIntensitySum();
         double totalXic = experimentFeatures.get(0).getTotalXic();
         scores.setVarIntensityScore((intensitySum / totalXic));
     }

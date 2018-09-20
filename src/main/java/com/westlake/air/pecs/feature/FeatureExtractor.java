@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -66,17 +67,14 @@ public class FeatureExtractor {
 
         //得到peptideRef对应的intensityList
         List<Float> libraryIntensityList = new ArrayList<>();
-        List<Float> libraryIntensityListAll = intensityGroupByPep.getIntensityMap();
-        int count = 0;
+        HashMap<String,Float> intensityMap = intensityGroupByPep.getIntensityMap();
 
-        int count1 = 0, count2 = 0, count3 = 0, count4 = 0, count5 = 0, count6 = 0;
         //对每一个chromatogram进行运算,dataDO中不含有ms1
         List<double[]> noise1000List = new ArrayList<>();
-        for (AnalyseDataDO dataDO : group.getDataMap().values()) {
-
+        for (String cutInfo: intensityMap.keySet()) {
+            AnalyseDataDO dataDO = group.getDataMap().get(cutInfo);
             //如果没有卷积到信号,dataDO为null
             if (!dataDO.getIsHit()) {
-                count++;
                 continue;
             }
 
@@ -84,27 +82,24 @@ public class FeatureExtractor {
             RtIntensityPairsDouble rtIntensityPairsOrigin = new RtIntensityPairsDouble(dataDO.getRtArray(), dataDO.getIntensityArray());
 
             //进行高斯平滑,得到平滑后的chromatogram
-            long start = System.currentTimeMillis();
             RtIntensityPairsDouble rtIntensityPairsAfterSmooth = gaussFilter.filter(rtIntensityPairsOrigin, sigmaSpacing);
-            count1 += (System.currentTimeMillis() - start);
             //计算两个信噪比
             //@Nico parameter configured
             //TODO legacy or corrected noise1000 is not the same
             double[] noises200 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 200, 30);
-//            double[] noises1000 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 1000, 30);
+            double[] noises1000 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 1000, 30);
             double[] noisesOri1000 = signalToNoiseEstimator.computeSTN(rtIntensityPairsOrigin, 1000, 30);
             //根据信噪比和峰值形状选择最高峰
             RtIntensityPairsDouble maxPeakPairs = peakPicker.pickMaxPeak(rtIntensityPairsAfterSmooth, noises200);
 
 
             //根据信噪比和最高峰选择谱图
-            IntensityRtLeftRtRightPairs intensityRtLeftRtRightPairs = chromatogramPicker.pickChromatogram(rtIntensityPairsOrigin, rtIntensityPairsAfterSmooth, noisesOri1000, maxPeakPairs);
+            IntensityRtLeftRtRightPairs intensityRtLeftRtRightPairs = chromatogramPicker.pickChromatogram(rtIntensityPairsOrigin, rtIntensityPairsAfterSmooth, noises1000, maxPeakPairs);
             rtIntensityPairsOriginList.add(rtIntensityPairsOrigin);
             maxRtIntensityPairsList.add(maxPeakPairs);
             intensityRtLeftRtRightPairsList.add(intensityRtLeftRtRightPairs);
-            libraryIntensityList.add(libraryIntensityListAll.get(count));
+            libraryIntensityList.add(intensityMap.get(cutInfo));
             noise1000List.add(noisesOri1000);
-            count++;
         }
         if (rtIntensityPairsOriginList.size() == 0) {
             featureFound = false;

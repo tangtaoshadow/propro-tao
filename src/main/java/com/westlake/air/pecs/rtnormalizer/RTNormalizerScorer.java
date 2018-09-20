@@ -55,12 +55,17 @@ public class RTNormalizerScorer {
             FeatureScores scores = new FeatureScores();
             chromatographicScorer.calculateChromatographicScores(features, libraryIntensity, scores);
             chromatographicScorer.calculateLogSnScore(chromatograms, features, noise1000List, scores);
+//            libraryScorer.calculateIntensityScore(features, scores);
             libraryScorer.calculateLibraryScores(features,libraryIntensity, scores);
+
 //            new ElutionScorer().calculateElutionModelScore(features,scores);
+//            libraryScorer.calculateNormRtScore(features, slopeIntercept, groupRt, scores);
             double ldaScore = -1d * calculateLdaPrescore(scores);
             ScoreRtPair scoreRtPair = new ScoreRtPair();
+            scoreRtPair.setGroupRt(groupRt);
             scoreRtPair.setRt(features.get(0).getRt());
             scoreRtPair.setScore(ldaScore);
+            scoreRtPair.setScores(scores);
             finalScores.add(scoreRtPair);
         }
 
@@ -78,7 +83,9 @@ public class RTNormalizerScorer {
                 scores.getVarLibraryRsmd()              *  2.98700722d +
                 scores.getVarXcorrCoelution()           *  0.09445371d +
                 scores.getVarXcorrShape()               * -5.71823862d +
-                scores.getVarLogSnScore()               * -0.72989582d;
+                scores.getVarLogSnScore()               * -0.72989582d +
+                scores.getVarNormRtScore()              *  7.05496384d +
+                scores.getVarElutionModelFitScore()     *  1.88443209d;
     }
 
 

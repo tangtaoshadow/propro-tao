@@ -37,8 +37,12 @@ public class ScoreUtil {
      * @param value x
      * @return y
      */
-    public static double trafoApplier(SlopeIntercept slopeIntercept, Double value){
-        return value * slopeIntercept.getSlope() + slopeIntercept.getIntercept();
+    public static double trafoApplier(SlopeIntercept slopeIntercept, Double value) {
+        if (slopeIntercept.getSlope() == 0) {
+            return value;
+        } else {
+            return value * slopeIntercept.getSlope() + slopeIntercept.getIntercept();
+        }
     }
 
     /**

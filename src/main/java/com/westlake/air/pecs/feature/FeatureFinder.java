@@ -79,17 +79,18 @@ public class FeatureFinder {
             RtIntensityPairsDouble masterChromatogram = new RtIntensityPairsDouble(chromatograms.get(chrPeakIndex[0]));
 
             List<ExperimentFeature> mrmFeature = new ArrayList<>();
+            double sum = 0.0d;
             for (int i = 0; i < chromatograms.size(); i++) {
                 chromatogram = chromatograms.get(i);
                 //best left and right is a constant value to a peptideRef
                 RtIntensityPairsDouble usedChromatogram = raster(chromatogram, masterChromatogram, bestLeft, bestRight);
                 ExperimentFeature feature = calculatePeakApexInt(usedChromatogram, bestLeft, bestRight, peakApex);
+                sum += feature.getIntensity();
                 mrmFeature.add(feature);
             }
-            double sum = 0.0d;
             for(ExperimentFeature feature: mrmFeature){
-                sum += feature.getIntensity();
                 feature.setTotalXic(totalXic);
+                feature.setIntensitySum(sum);
             }
             if(sum > 0){
                 experimentFeatures.add(mrmFeature);

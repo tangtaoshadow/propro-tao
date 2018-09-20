@@ -26,14 +26,14 @@ public class Constants {
     //not static final
     public static final double NOISE_FOR_EMPTY_WINDOW = Math.pow(10.0,20);
 //    public static final double NOISE_FOR_EMPTY_WINDOW = 2.0d;
-    public static final float STOP_AFTER_INTENSITY_RATIO = 0.0001f;
+    public static final double STOP_AFTER_INTENSITY_RATIO = 0.0001d;
     public static final double MIN_RSQ = 0.95d;
-    public static final float MIN_COVERAGE = 0.6f;
+    public static final double MIN_COVERAGE = 0.6d;
 
     //not static final
-    public static final String CHROMATOGRAM_PICKER_METHOD = "legacy";
+    public static final String CHROMATOGRAM_PICKER_METHOD = "corrected";
 
-    public static final double PEAK_WIDTH = 40.0d;
+    public static final double PEAK_WIDTH = 40d;///
     public static final int RT_BINS = 10;
     public static final int MIN_PEPTIDES_PER_BIN = 1;
     public static final int MIN_BINS_FILLED = 8;

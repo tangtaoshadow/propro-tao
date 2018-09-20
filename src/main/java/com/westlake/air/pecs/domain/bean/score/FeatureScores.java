@@ -48,23 +48,23 @@ public class FeatureScores {
     //互相关偏移的mean + std
     double varXcorrCoelution;
 
-    //带权重的相关偏移sum
-    double varXcorrCoelutionWeighted;
-
     //互相关序列最大值的平均值
     double varXcorrShape;
+
+    //log(距离ApexRt最近点的stn值之和)
+    double varLogSnScore;
+
+    //同一个peptideRef下, 所有HullPoints的intensity之和 除以 所有intensity之和
+    double varIntensityScore;
+
+    //带权重的相关偏移sum
+    double varXcorrCoelutionWeighted;
 
     //带权重的互相关序列最大值的平均值
     double varXcorrShapeWeighted;
 
     //normalizedExperimentalRt与groupRt之差
     double varNormRtScore;
-
-    //同一个peptideRef下, 所有HullPoints的intensity之和 除以 所有intensity之和
-    double varIntensityScore;
-
-    //log(距离ApexRt最近点的stn值之和)
-    double varLogSnScore;
 
     //
     double varElutionModelFitScore;

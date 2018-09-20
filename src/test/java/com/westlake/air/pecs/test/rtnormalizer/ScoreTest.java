@@ -85,7 +85,7 @@ public class ScoreTest extends BaseTest {
         featureResult.setNoise1000List(stn1000List);
 
         List<ScoreRtPair> scoreRtPairs = rtNormalizerScorer.score(featureResult.getRtIntensityPairsOriginList(), featureResult.getExperimentFeatures(), featureResult.getLibraryIntensityList(), featureResult.getNoise1000List(), new SlopeIntercept(), groupRt);
-
+        System.out.println("finished");
     }
 
 }

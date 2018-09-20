@@ -8,6 +8,8 @@ import lombok.Data;
  */
 @Data
 public class ScoreRtPair {
+    double groupRt;
     double score;
     double rt;
+    FeatureScores scores;
 }
