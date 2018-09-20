@@ -332,7 +332,7 @@ public class ScoresServiceImpl implements ScoresService {
             }
 
             HashMap<Integer, String> unimodHashMap = group.getUnimodMap();
-            String sequence = "";
+            String sequence = group.getPeptideRef().split("_")[0];
             //for each mrmFeature, calculate scores
 
             for(List<ExperimentFeature> experimentFeatureList : experimentFeatures) {

@@ -1,6 +1,5 @@
 package com.westlake.air.pecs.algorithm;
 
-import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.LDALearn;
 import com.westlake.air.pecs.domain.bean.airus.Params;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
