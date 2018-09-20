@@ -66,7 +66,7 @@ public class FeatureExtractor {
 
         //得到peptideRef对应的intensityList
         List<Float> libraryIntensityList = new ArrayList<>();
-        List<Float> libraryIntensityListAll = intensityGroupByPep.getIntensityList();
+        List<Float> libraryIntensityListAll = intensityGroupByPep.getIntensityMap();
         int count = 0;
 
         int count1 = 0, count2 = 0, count3 = 0, count4 = 0, count5 = 0, count6 = 0;

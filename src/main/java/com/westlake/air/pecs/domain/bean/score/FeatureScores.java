@@ -90,6 +90,7 @@ public class FeatureScores {
 
     public HashMap<String, Double> buildScoreMap(){
         HashMap<String, Double> map = new HashMap<>();
+        map.put("mainVarXxSwathPrelimScore",mainVarXxSwathPrelimScore);
         map.put("varLibraryCorr",varLibraryCorr);
         map.put("varLibraryRsmd",varLibraryRsmd);
         map.put("varXcorrCoelution",varXcorrCoelution);
@@ -106,7 +107,6 @@ public class FeatureScores {
         map.put("varMassdevScoreWeighted",varMassdevScoreWeighted);
         map.put("varBseriesScore",varBseriesScore);
         map.put("varYseriesScore",varYseriesScore);
-        map.put("mainVarXxSwathPrelimScore",mainVarXxSwathPrelimScore);
 
         return map;
     }
@@ -115,23 +115,23 @@ public class FeatureScores {
 
         if(columns == null){
             columns = new String[SCORES_COUNT];
-            columns[0] = "varLibraryCorr";
-            columns[1] = "varLibraryRsmd";
-            columns[2] = "varXcorrCoelution";
-            columns[3] = "varXcorrCoelutionWeighted";
-            columns[4] = "varXcorrShape";
-            columns[5] = "varXcorrShapeWeighted";
-            columns[6] = "varNormRtScore";
-            columns[7] = "varIntensityScore";
-            columns[8] = "varLogSnScore";
-            columns[9] = "varElutionModelFitScore";
-            columns[10] = "varIsotopeCorrelationScore";
-            columns[11] = "varIsotopeOverlapScore";
-            columns[12] = "varMassdevScore";
-            columns[13] = "varMassdevScoreWeighted";
-            columns[14] = "varBseriesScore";
-            columns[15] = "varYseriesScore";
-            columns[16] = "mainVarXxSwathPrelimScore";
+            columns[0] = "mainVarXxSwathPrelimScore";
+            columns[1] = "varLibraryCorr";
+            columns[2] = "varLibraryRsmd";
+            columns[3] = "varXcorrCoelution";
+            columns[4] = "varXcorrCoelutionWeighted";
+            columns[5] = "varXcorrShape";
+            columns[6] = "varXcorrShapeWeighted";
+            columns[7] = "varNormRtScore";
+            columns[8] = "varIntensityScore";
+            columns[9] = "varLogSnScore";
+            columns[10] = "varElutionModelFitScore";
+            columns[11] = "varIsotopeCorrelationScore";
+            columns[12] = "varIsotopeOverlapScore";
+            columns[13] = "varMassdevScore";
+            columns[14] = "varMassdevScoreWeighted";
+            columns[15] = "varBseriesScore";
+            columns[16] = "varYseriesScore";
         }
 
         return columns;

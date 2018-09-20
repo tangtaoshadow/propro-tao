@@ -3,6 +3,7 @@ package com.westlake.air.pecs.domain.db.simple;
 import lombok.Data;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -16,7 +17,8 @@ public class IntensityGroup {
 
     String peptideRef;
 
-    List<Float> intensityList = new ArrayList<>();
+    //key为cutinfo
+    HashMap<String, Float> intensityMap = new HashMap<>();
 
     @Override
     public boolean equals(Object obj) {

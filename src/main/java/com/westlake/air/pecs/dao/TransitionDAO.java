@@ -185,6 +185,7 @@ public class TransitionDAO {
         fieldsDoc.put("peptideRef", true);
         fieldsDoc.put("proteinName", true);
         fieldsDoc.put("intensity", true);
+        fieldsDoc.put("cutInfo", true);
 
         Query query = new BasicQuery(queryDoc, fieldsDoc);
 
@@ -199,7 +200,7 @@ public class TransitionDAO {
                 hashMap.put(transition.getPeptideRef(), group);
             }
 
-            group.getIntensityList().add(Float.parseFloat(transition.getIntensity().toString()));
+            group.getIntensityMap().put(transition.getCutInfo(), Float.parseFloat(transition.getIntensity().toString()));
         }
 
         return hashMap;
