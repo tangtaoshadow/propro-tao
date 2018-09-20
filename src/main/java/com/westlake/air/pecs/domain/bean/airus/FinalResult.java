@@ -18,4 +18,5 @@ public class FinalResult {
 
     ErrorStat summaryErrorTable;
 
+    ErrorStat allInfo;
 }

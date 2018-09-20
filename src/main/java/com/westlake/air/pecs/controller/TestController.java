@@ -9,6 +9,7 @@ import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
+import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
@@ -157,5 +158,14 @@ public class TestController extends BaseController {
         long start = System.currentTimeMillis();
         TrainAndTest tt = JSON.parseObject(trainAndTestContent, TrainAndTest.class);
         return tt.getTestData().length+"/"+tt.getTrainData().length+"/"+tt.getTestId().length+"/"+tt.getTrainId().length;
+    }
+
+    @RequestMapping("test8")
+    @ResponseBody
+    String test8(Model model, RedirectAttributes redirectAttributes) throws IOException {
+        long start = System.currentTimeMillis();
+        List<ScoresDO> scores = scoresService.getAllByOverviewId("5b967e5fcbaa7e2940fc6537");
+        ScoreData scoreData = airus.trans(scores);
+        return "HelloWorld";
     }
 }

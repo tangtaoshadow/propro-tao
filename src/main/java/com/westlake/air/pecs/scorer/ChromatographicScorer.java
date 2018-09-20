@@ -76,13 +76,14 @@ public class ChromatographicScorer {
             sumDelta += (delta - meanDelta) * (delta - meanDelta);
         }
         //TODO WRM 这里可能会出现deltas.size()==1的情况
-        double stdDelta = Math.sqrt(sumDelta / (deltas.size() - 1));
+        double stdDelta = 0d;
+        if(deltas.size() != 1){
+            stdDelta = Math.sqrt(sumDelta / (deltas.size() - 1));
+        }
         scores.setVarXcorrCoelution(meanDelta + stdDelta); //时间偏差
         scores.setVarXcorrCoelutionWeighted(sumDeltaWeighted);
         scores.setVarXcorrShape(meanIntensity); // 平均的吻合程度--> 新的吻合系数
         scores.setVarXcorrShapeWeighted(sumIntensityWeighted);
-
-
     }
 
     public void calculateLogSnScore(List<RtIntensityPairsDouble> chromatograms, List<ExperimentFeature> experimentFeatures, List<double[]> signalToNoiseList, FeatureScores scores) {

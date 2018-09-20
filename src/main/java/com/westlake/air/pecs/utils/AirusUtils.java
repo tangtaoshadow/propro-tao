@@ -40,8 +40,8 @@ public class AirusUtils {
         }
     }
 
-    public static ResultDO<Boolean[]> findTopIndex(Double[] array, Integer[] groupNumId) {
-        ResultDO<Boolean[]> resultDO = new ResultDO<Boolean[]>();
+    public static Boolean[] findTopIndex(Double[] array, Integer[] groupNumId) {
+
         if (groupNumId.length == array.length) {
             int id = groupNumId[0];
             Boolean[] index = new Boolean[groupNumId.length];
@@ -69,130 +69,115 @@ public class AirusUtils {
                     index[i] = false;
                 }
             }
-            resultDO.setModel(index);
-            resultDO.setSuccess(true);
-            return resultDO;
+            return index;
         } else {
-            resultDO.setMsgInfo("FindTopIndex Error.\n");
-            return resultDO;
+            logger.error("FindTopIndex Error.");
+            return null;
         }
     }
 
-    public static ResultDO<Double[][]> getDecoyPeaks(Double[][] array, Boolean[] isDecoy) {
-        ResultDO<Double[][]> decoyPeaks = new ResultDO<Double[][]>();
+    public static Double[][] getDecoyPeaks(Double[][] array, Boolean[] isDecoy) {
         if (array.length == isDecoy.length) {
             return ArrayUtils.extract3dRow(array, isDecoy);
         } else {
-            decoyPeaks.setMsgInfo("GetDecoyPeaks Error.\n");
-            return decoyPeaks;
+            logger.error("GetDecoyPeaks Error");
+            return null;
         }
     }
 
-    public static ResultDO<Double[]> getDecoyPeaks(Double[] array, Boolean[] isDecoy) {
-        ResultDO<Double[]> decoyPeaks = new ResultDO<Double[]>();
+    public static Double[] getDecoyPeaks(Double[] array, Boolean[] isDecoy) {
+
         if (array.length == isDecoy.length) {
             return ArrayUtils.extract3dRow(array, isDecoy);
         } else {
-            decoyPeaks.setMsgInfo("GetDecoyPeaks Error.\n");
-            return decoyPeaks;
+            logger.error("GetDecoyPeaks Error");
+            return null;
         }
     }
 
-    public static ResultDO<Integer[]> getDecoyPeaks(Integer[] array, Boolean[] isDecoy) {
+    public static Integer[] getDecoyPeaks(Integer[] array, Boolean[] isDecoy) {
         ResultDO<Integer[]> decoyPeaks = new ResultDO<Integer[]>();
         if (array.length == isDecoy.length) {
             return ArrayUtils.extract3dRow(array, isDecoy);
         } else {
-            decoyPeaks.setMsgInfo("GetDecoyPeaks Error.\n");
-            return decoyPeaks;
+            logger.error("GetDecoyPeaks Error");
+            return null;
         }
     }
 
-    public static ResultDO<Double[]> getTargetPeaks(Double[] array, Boolean[] isDecoy) {
-        ResultDO<Double[]> targetPeaks = new ResultDO<Double[]>();
+    public static Double[] getTargetPeaks(Double[] array, Boolean[] isDecoy) {
         if (array.length == isDecoy.length) {
             Boolean[] isTarget = getIsTarget(isDecoy);
             return ArrayUtils.extract3dRow(array, isTarget);
         } else {
-            targetPeaks.setMsgInfo("GetDecoyPeaks Error.\n");
-            return targetPeaks;
+            logger.error("GetDecoyPeaks Error");
+            return null;
         }
     }
 
-    public static ResultDO<Integer[]> getTargetPeaks(Integer[] array, Boolean[] isDecoy) {
-        ResultDO<Integer[]> targetPeaks = new ResultDO<Integer[]>();
+    public static Integer[] getTargetPeaks(Integer[] array, Boolean[] isDecoy) {
         if (array.length == isDecoy.length) {
             Boolean[] isTarget = getIsTarget(isDecoy);
             return ArrayUtils.extract3dRow(array, isTarget);
         } else {
-            targetPeaks.setMsgInfo("GetDecoyPeaks Error.\n");
-            return targetPeaks;
+            logger.error("GetDecoyPeaks Error");
+            return null;
         }
     }
 
-    public static ResultDO<Double[][]> getTopTargetPeaks(Double[][] array, Boolean[] isDecoy, Boolean[] index) {
-        ResultDO<Double[][]> resultDO = new ResultDO<Double[][]>();
+    public static Double[][] getTopTargetPeaks(Double[][] array, Boolean[] isDecoy, Boolean[] index) {
         Boolean[] isTopTarget = getIsTopTarget(isDecoy, index).getModel();
         if (isTopTarget != null && array.length == isTopTarget.length) {
-            resultDO = getDecoyPeaks(array, isTopTarget);
-            return resultDO;
+            return getDecoyPeaks(array, isTopTarget);
         } else {
-            resultDO.setMsgInfo("GetTopTargetPeaks Error.\n");
-            return resultDO;
+            logger.error("GetTopTargetPeaks Error");
+            return null;
         }
     }
 
-    public static ResultDO<Double[]> getTopTargetPeaks(Double[] array, Boolean[] isDecoy, Boolean[] index) {
-        ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
+    public static Double[] getTopTargetPeaks(Double[] array, Boolean[] isDecoy, Boolean[] index) {
         Boolean[] isTopTarget = getIsTopTarget(isDecoy, index).getModel();
         if (isTopTarget != null && array.length == isTopTarget.length) {
-            resultDO = getDecoyPeaks(array, isTopTarget);
-            return resultDO;
+            return getDecoyPeaks(array, isTopTarget);
         } else {
-            resultDO.setMsgInfo("GetTopTargetPeaks Error.\n");
-            return resultDO;
+            logger.error("GetTopTargetPeaks Error");
+            return null;
         }
     }
 
-    public static ResultDO<Double[][]> getTopDecoyPeaks(Double[][] array, Boolean[] isDecoy, Boolean[] index) {
-        ResultDO<Double[][]> resultDO = new ResultDO<Double[][]>();
+    public static Double[][] getTopDecoyPeaks(Double[][] array, Boolean[] isDecoy, Boolean[] index) {
         Boolean[] isTopDecoy = getIsTopDecoy(isDecoy, index).getModel();
         if (isTopDecoy != null && array.length == isTopDecoy.length) {
-            resultDO = getDecoyPeaks(array, isTopDecoy);
-            return resultDO;
+            return getDecoyPeaks(array, isTopDecoy);
         } else {
-            resultDO.setMsgInfo("GetTopDecoyPeaks Error.\n");
-            return resultDO;
+            logger.error("GetTopDecoyPeaks Error");
+            return null;
         }
     }
 
-    public static ResultDO<Double[]> getTopDecoyPeaks(Double[] array, Boolean[] isDecoy, Boolean[] index) {
-        ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
+    public static Double[] getTopDecoyPeaks(Double[] array, Boolean[] isDecoy, Boolean[] index) {
         Boolean[] isTopDecoy = getIsTopDecoy(isDecoy, index).getModel();
         if (isTopDecoy != null && array.length == isTopDecoy.length) {
-            resultDO = getDecoyPeaks(array, isTopDecoy);
-            return resultDO;
+            return getDecoyPeaks(array, isTopDecoy);
         } else {
-            resultDO.setMsgInfo("GetTopDecoyPeaks Error.\n");
-            return resultDO;
+            logger.error("GetTopDecoyPeaks Error");
+            return null;
         }
     }
 
     /**
      * Get feature Matrix of useMainScore or not.
      */
-    public static ResultDO<Double[][]> getFeatureMatrix(Double[][] array, Boolean useMainScore) {
-        ResultDO<Double[][]> resultDO = new ResultDO<Double[][]>();
+    public static Double[][] getFeatureMatrix(Double[][] array, Boolean useMainScore) {
         if (array != null) {
             if (useMainScore) {
-                resultDO = ArrayUtils.extract3dColumn(array, 0);
+                return ArrayUtils.extract3dColumn(array, 0);
             } else {
-                resultDO = ArrayUtils.extract3dColumn(array, 1);
+                return ArrayUtils.extract3dColumn(array, 1);
             }
-            return resultDO;
         } else {
-            resultDO.setMsgInfo("GetFeatureMatrix Error.\n");
-            return resultDO;
+            logger.error("GetFeatureMatrix Error");
+            return null;
         }
     }
 
@@ -223,8 +208,8 @@ public class AirusUtils {
      * @return
      */
     public static TrainAndTest splitForXval(Double[][] data, Integer[] groupNumId, Boolean[] isDecoy, double fraction, boolean isTest) {
-        Integer[] decoyIds = getDecoyPeaks(groupNumId, isDecoy).getModel();
-        Integer[] targetIds = getTargetPeaks(groupNumId, isDecoy).getModel();
+        Integer[] decoyIds = getDecoyPeaks(groupNumId, isDecoy);
+        Integer[] targetIds = getTargetPeaks(groupNumId, isDecoy);
 
         if (!isTest) {
             List<Integer> decoyIdShuffle = Arrays.asList(decoyIds);

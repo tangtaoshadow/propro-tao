@@ -22,14 +22,12 @@ public class ArrayUtils {
      * Return reverse of given array[].
      */
     public static double[] reverse(double[] array) {
-
         int length = array.length;
         double[] result = new double[length];
         for (int i = 0; i < length; i++) {
             result[i] = array[length - 1 - i];
         }
         return result;
-
     }
 
     public static int[] reverse(int[] array) {
@@ -39,7 +37,6 @@ public class ArrayUtils {
             result[i] = array[length - 1 - i];
         }
         return result;
-
     }
 
     /**
@@ -55,8 +52,7 @@ public class ArrayUtils {
     /**
      * Concatenate arrayA[] and arrayB[][] y dimension.
      */
-    public static ResultDO<Double[][]> concat3d(Double[][] arrayA, Double[][] arrayB) {
-        ResultDO<Double[][]> resultDO = new ResultDO<Double[][]>();
+    public static Double[][] concat3d(Double[][] arrayA, Double[][] arrayB) {
         if (arrayA[0].length == arrayB[0].length) {
             Double[][] c = new Double[arrayA.length + arrayB.length][arrayA[0].length];
             for (int i = 0; i < arrayA.length; i++) {
@@ -65,17 +61,14 @@ public class ArrayUtils {
             for (int i = 0; i < arrayB.length; i++) {
                 System.arraycopy(arrayB[i], 0, c[i + arrayA.length], 0, arrayB[0].length);
             }
-            resultDO.setModel(c);
-            resultDO.setSuccess(true);
-            return resultDO;
+            return c;
         } else {
-            resultDO.setMsgInfo("Concat3d Error.\n");
-            return resultDO;
+            logger.error("Concat3d Error");
+            return null;
         }
     }
 
-    public static ResultDO<double[][]> concat3d(double[][] arrayA, double[][] arrayB) {
-        ResultDO<double[][]> resultDO = new ResultDO<double[][]>();
+    public static double[][] concat3d(double[][] arrayA, double[][] arrayB) {
         if (arrayA[0].length == arrayB[0].length) {
             double[][] c = new double[arrayA.length + arrayB.length][arrayA[0].length];
             for (int i = 0; i < arrayA.length; i++) {
@@ -84,102 +77,86 @@ public class ArrayUtils {
             for (int i = 0; i < arrayB.length; i++) {
                 System.arraycopy(arrayB[i], 0, c[i + arrayA.length], 0, arrayB[0].length);
             }
-            resultDO.setModel(c);
-            resultDO.setSuccess(true);
-            return resultDO;
+            return c;
         } else {
-            resultDO.setMsgInfo("Concat3d Error.\n");
-            return resultDO;
+            logger.error("Concat3d Error");
+            return null;
         }
     }
 
     /**
      * Extract array from array.
      */
-    public static ResultDO<Double[]> extract2d(Double[] array, Integer begin, Integer end) {
-        ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
+    public static Double[] extract2d(Double[] array, Integer begin, Integer end) {
         if (begin <= end && end < array.length) {
             Double[] b = new Double[end - begin + 1];
             System.arraycopy(array, begin, b, 0, end - begin + 1);
-            resultDO.setModel(b);
-            resultDO.setSuccess(true);
-            return resultDO;
+            return b;
         } else {
-            resultDO.setMsgInfo("Extract2d Error.\n");
-            return resultDO;
+            logger.error("Extract2d Error");
+            return null;
         }
     }
 
-    public static ResultDO<Double[]> extractRow(Double[] array, Integer[] row) {
+    public static Double[] extractRow(Double[] array, Integer[] row) {
         ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
         Double[] result = new Double[row.length];
         for (int i = 0; i < row.length; i++) {
             if (row[i] > -1 && row[i] < array.length) {
                 result[i] = array[row[i]];
             } else {
-                resultDO.setMsgInfo("ExtractRow Error.\n");
-                return resultDO;
+                logger.error("ExtractRow Error");
+                return null;
             }
         }
-        resultDO.setModel(result);
-        resultDO.setSuccess(true);
-        return resultDO;
+        return result;
     }
 
-    public static ResultDO<double[]> extractRow(double[] array, Integer[] row) {
+    public static double[] extractRow(double[] array, Integer[] row) {
         ResultDO<double[]> resultDO = new ResultDO<double[]>();
         double[] result = new double[row.length];
         for (int i = 0; i < row.length; i++) {
             if (row[i] > -1 && row[i] < array.length) {
                 result[i] = array[row[i]];
             } else {
-                resultDO.setMsgInfo("ExtractRow Error.\n");
-                return resultDO;
+                logger.error("ExtractRow Error");
+                return null;
             }
         }
-        resultDO.setModel(result);
-        resultDO.setSuccess(true);
-        return resultDO;
+        return result;
     }
 
-    public static ResultDO<String[]> extractRow(String[] array, Integer[] row) {
-        ResultDO<String[]> resultDO = new ResultDO<String[]>();
+    public static String[] extractRow(String[] array, Integer[] row) {
         String[] result = new String[row.length];
         for (int i = 0; i < row.length; i++) {
             if (row[i] > -1 && row[i] < array.length) {
                 result[i] = array[row[i]];
             } else {
-                resultDO.setMsgInfo("ExtractRow Error.\n");
-                return resultDO;
+                logger.error("ExtractRow Error.");
+                return null;
             }
         }
-        resultDO.setModel(result);
-        resultDO.setSuccess(true);
-        return resultDO;
+        return result;
     }
 
-    public static ResultDO<Double[][]> extract3dColumn(Double[][] array, Integer begin, Integer end) {
-        ResultDO<Double[][]> resultDO = new ResultDO<Double[][]>();
+    public static Double[][] extract3dColumn(Double[][] array, Integer begin, Integer end) {
         if (begin <= end && end < array[0].length) {
             Double[][] b = new Double[array.length][end - begin + 1];
             for (int i = 0; i < array.length; i++) {
                 System.arraycopy(array[i], begin, b[i], 0, end - begin + 1);
             }
-            resultDO.setModel(b);
-            resultDO.setSuccess(true);
-            return resultDO;
+            return b;
         } else {
-            resultDO.setMsgInfo("Extract3dColumn Error.\n");
-            return resultDO;
+            logger.error("Extract3dColumn Error");
+            return null;
         }
     }
 
-    public static ResultDO<Double[][]> extract3dColumn(Double[][] array, Integer begin) {
+    public static Double[][] extract3dColumn(Double[][] array, Integer begin) {
         return extract3dColumn(array, begin, array[0].length - 1);
     }
 
-    public static ResultDO<Double[][]> extract3dRow(Double[][] array, Boolean[] isDecoy) {
-        ResultDO<Double[][]> resultDO = new ResultDO<Double[][]>();
+    public static Double[][] extract3dRow(Double[][] array, Boolean[] isDecoy) {
         if (array.length == isDecoy.length) {
             int sum = 0;
             for (Boolean i : isDecoy) {
@@ -197,12 +174,10 @@ public class ArrayUtils {
                     j++;
                 }
             }
-            resultDO.setModel(extractedRow);
-            resultDO.setSuccess(true);
-            return resultDO;
+            return extractedRow;
         } else {
-            resultDO.setMsgInfo("Extract3dRow Error.\n");
-            return resultDO;
+            logger.error("Extract3dRow Error");
+            return null;
         }
 
     }
@@ -214,19 +189,16 @@ public class ArrayUtils {
         return arrayC;
     }
 
-    public static ResultDO<Double[]> extractColumn(Double[][] array, int column) {
-        ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
+    public static Double[] extractColumn(Double[][] array, int column) {
         Double[] result = new Double[array.length];
         if (column > -1 && column < array[0].length) {
             for (int i = 0; i < array.length; i++) {
                 result[i] = array[i][column];
             }
-            resultDO.setModel(result);
-            resultDO.setSuccess(true);
-            return resultDO;
+            return result;
         } else {
-            resultDO.setMsgInfo("ExtractColumn Error.\n");
-            return resultDO;
+            logger.error("ExtractColumn Error.");
+            return null;
         }
     }
 
@@ -297,8 +269,7 @@ public class ArrayUtils {
 
     }
 
-    public static ResultDO<Double[]> extract3dRow(Double[] array, Boolean[] isDecoy) {
-        ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
+    public static Double[] extract3dRow(Double[] array, Boolean[] isDecoy) {
         if (array.length == isDecoy.length) {
             int sum = 0;
             for (boolean i : isDecoy) {
@@ -314,18 +285,15 @@ public class ArrayUtils {
                     j++;
                 }
             }
-            resultDO.setModel(extractedRow);
-            resultDO.setSuccess(true);
-            return resultDO;
+            return extractedRow;
         } else {
-            resultDO.setMsgInfo("Extract3dRow Error.\n");
-            return resultDO;
+            logger.error("Extract3dRow Error");
+            return null;
         }
 
     }
 
-    public static ResultDO<Integer[]> extract3dRow(Integer[] array, Boolean[] isDecoy) {
-        ResultDO<Integer[]> resultDO = new ResultDO<Integer[]>();
+    public static Integer[] extract3dRow(Integer[] array, Boolean[] isDecoy) {
         if (array.length == isDecoy.length) {
             int sum = 0;
             for (boolean i : isDecoy) {
@@ -341,20 +309,16 @@ public class ArrayUtils {
                     j++;
                 }
             }
-            resultDO.setModel(extractedRow);
-            resultDO.setSuccess(true);
-            return resultDO;
+            return extractedRow;
         } else {
-            resultDO.setMsgInfo("Extract3dRow Error.\n");
-            return resultDO;
+            logger.error("Extract3dRow Error");
+            return null;
         }
-
     }
 
 
 
-    public static ResultDO<Double[]> dot(Double[][] array, Double[] w) {
-        ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
+    public static Double[] dot(Double[][] array, Double[] w) {
         int aLength = array.length;
         int wLength = w.length;
         if (array[0].length == wLength) {
@@ -365,12 +329,10 @@ public class ArrayUtils {
                     result[i] += array[i][j] * w[j];
                 }
             }
-            resultDO.setModel(result);
-            resultDO.setSuccess(true);
-            return resultDO;
+            return result;
         } else {
-            resultDO.setMsgInfo("Dot Error.\n");
-            return resultDO;
+            logger.error("Dot Error");
+            return null;
         }
     }
 
@@ -862,5 +824,4 @@ public class ArrayUtils {
             }
         }
     }
-
 }

@@ -7,25 +7,27 @@ import cern.colt.matrix.impl.RCDoubleMatrix2D;
 import cern.colt.matrix.linalg.Algebra;
 import cern.colt.matrix.linalg.SingularValueDecomposition;
 import com.westlake.air.pecs.utils.AirusUtils;
-import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.utils.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class LDALearner {
 
+    public final Logger logger = LoggerFactory.getLogger(LDALearner.class);
+
     /**
      * Get clfScore with given confidence(params).
      */
-    public ResultDO<Double[]> score(Double[][] peaks, Double[] params, boolean useMainScore) {
-        ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
-        Double[][] featureMatrix = AirusUtils.getFeatureMatrix(peaks, useMainScore).getModel();
+    public Double[] score(Double[][] peaks, Double[] params, boolean useMainScore) {
+
+        Double[][] featureMatrix = AirusUtils.getFeatureMatrix(peaks, useMainScore);
         if (featureMatrix != null) {
-            resultDO = ArrayUtils.dot(featureMatrix, params);
-            return resultDO;
+            return ArrayUtils.dot(featureMatrix, params);
         } else {
-            resultDO.setMsgInfo("Score Error.\n");
-            return resultDO;
+            logger.error("Score Error");
+            return null;
         }
     }
 
@@ -46,9 +48,9 @@ public class LDALearner {
     }
 
     public Double[] learn(Double[][] decoyPeaks, Double[][] targetPeaks, boolean useMainScore){
-        Double[][] x0 = AirusUtils.getFeatureMatrix(decoyPeaks,useMainScore).getModel();
-        Double[][] x1 = AirusUtils.getFeatureMatrix(targetPeaks,useMainScore).getModel();
-        Double[][] x = ArrayUtils.concat3d(x0,x1).getModel();
+        Double[][] x0 = AirusUtils.getFeatureMatrix(decoyPeaks,useMainScore);
+        Double[][] x1 = AirusUtils.getFeatureMatrix(targetPeaks,useMainScore);
+        Double[][] x = ArrayUtils.concat3d(x0,x1);
         Double[] y = new Double[x.length];
         Double[] w = new Double[x[0].length];
         for(int i=0;i<x0.length;i++){
@@ -77,7 +79,7 @@ public class LDALearner {
          */
         // 1) Within (univariate) scaling by with classes std-dev
         DoubleMatrix2D Xc = new DenseDoubleMatrix2D(x.length,x[0].length);
-        Xc.assign(ArrayUtils.concat3d(xLine0,xLine1).getModel());
+        Xc.assign(ArrayUtils.concat3d(xLine0,xLine1));
         double[] std = new double[x[0].length];
         for(int j=0;j<x[0].length;j++){
             for(int i=0;i<x.length;i++){
@@ -152,7 +154,7 @@ public class LDALearner {
             means0[0][i] *= temp;
             means1[0][i] = -means0[0][i];
         }
-        double[][] means = ArrayUtils.concat3d(means0,means1).getModel();
+        double[][] means = ArrayUtils.concat3d(means0,means1);
         DoubleMatrix2D matMeans = new DenseDoubleMatrix2D(means.length,means[0].length);
         matMeans.assign(means);
         DoubleMatrix2D X = new DenseDoubleMatrix2D(matMeans.rows(),scalings.columns());
