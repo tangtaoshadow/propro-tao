@@ -42,13 +42,29 @@ public class PeakPickerTest extends BaseTest {
         File fileResult = new File(PeakPickerTest.class.getClassLoader().getResource("data/peakPickerOutput.txt").getPath());
         BufferedReader readerResult = new BufferedReader(new FileReader(fileResult));
         RtIntensityPairsDouble rtIntensityPairsDoubleResult = FileUtil.txtReader(readerResult,"\t", 1, 2);
-        System.out.println("test Begin");
 
         double[] signalToNoise200 = signalToNoiseEstimator.computeSTN(rtIntensityPairsDoubleTest, 200, 30);
 
         RtIntensityPairsDouble pickResult = peakPicker.pickMaxPeak(rtIntensityPairsDoubleTest, signalToNoise200);
+        for(int i=0; i<pickResult.getIntensityArray().length; i++){
+//            if(!isSimilar(pickResult.getRtArray()[i], rtIntensityPairsDoubleResult.getRtArray()[i], Math.pow(10, -4))){
+//                System.out.println(i + "\trt\t"+ pickResult.getRtArray()[i] +"\t" + rtIntensityPairsDoubleResult.getRtArray()[i]);
+//            }
+//            if(!isSimilar(pickResult.getIntensityArray()[i], rtIntensityPairsDoubleResult.getIntensityArray()[i], Math.pow(10, -4))){
+//                System.out.println(i + "\trt\t"+ pickResult.getIntensityArray()[i] +"\t" + rtIntensityPairsDoubleResult.getIntensityArray()[i]);
+//            }
+            assert isSimilar(pickResult.getRtArray()[i], rtIntensityPairsDoubleResult.getRtArray()[i], Math.pow(10, -2));
+            assert isSimilar(pickResult.getIntensityArray()[i], rtIntensityPairsDoubleResult.getIntensityArray()[i], Math.pow(10, -2));
+        }
 
         System.out.println("pick Finish");
+    }
+    private boolean isSimilar(Double a, Double b, Double tolerance ) {
+        if (Math.abs(a-b) < tolerance) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

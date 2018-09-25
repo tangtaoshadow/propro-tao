@@ -340,11 +340,11 @@ public class ScoresServiceImpl implements ScoresService {
                 FeatureScores featureScores = new FeatureScores();
                 chromatographicScorer.calculateChromatographicScores(experimentFeatureList, libraryIntensityList, featureScores);
                 chromatographicScorer.calculateLogSnScore(chromatogramList, experimentFeatureList, noise1000List, featureScores);
-                diaScorer.calculateDiaMassDiffScore(productMzList, spectrumMzArray, spectrumIntArray, libraryIntensityList, featureScores);
-                diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
+//                diaScorer.calculateDiaMassDiffScore(productMzList, spectrumMzArray, spectrumIntArray, libraryIntensityList, featureScores);
+//                diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
                 //TODO @Nico charge from transition?
-                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
-                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
+//                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
+//                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, featureScores);
                 libraryScorer.calculateNormRtScore(experimentFeatureList, input.getSlopeIntercept(), group.getRt(), featureScores);
@@ -392,6 +392,9 @@ public class ScoresServiceImpl implements ScoresService {
                     max = scores.get(j).getScore();
                     rtPair.setExpRt(scores.get(j).getRt());
                 }
+            }
+            if(Constants.ESTIMATE_BEST_PEPTIDES && max < Constants.OVERALL_QUALITY_CUTOFF){
+                continue;
             }
             rtPair.setTheoRt(rt.get(i));
             pairs.add(rtPair);

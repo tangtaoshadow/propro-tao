@@ -48,32 +48,27 @@ public class SignalToNoiseEstimator {
         int windowCount = 0;// number of windows
         int elementsInWindowHalf;// number of elements where we find the median
         double noise;// noise value of a data point
-        int windowsOverall = rtIntensity.getRtArray().length - 1;// determine how many elements we need to estimate (for progress estimation)
-        float sparseWindowPercent = 0;
+        int windowsOverall = rtIntensity.getRtArray().length;// determine how many elements we need to estimate (for progress estimation)
+        float sparseWindowPercent = 0, histogramOobPercent = 0;
 
         //Main loop
         int positionCenter = 0;
-        while (positionCenter <= windowsOverall) {
-
+        int left = positionCenter;
+        int right = positionCenter;
+        while (positionCenter < windowsOverall) {
+//            elementsInWindow = 0;
             //get left/right borders
-            for (int left = positionCenter; left >= 0; left--) {
-                if (rtIntensity.getRtArray()[left] >= rtIntensity.getRtArray()[positionCenter] - windowHalfSize) {
-                    toBin = Math.max(Math.min((int) (rtIntensity.getIntensityArray()[left] / binSize), binCount - 1), 0);
-                    histogram[toBin]++;
-                    elementsInWindow++;
-                } else {
-
-                    break;
-                }
+            while (rtIntensity.getRtArray()[left] < rtIntensity.getRtArray()[positionCenter] - windowHalfSize) {
+                toBin = Math.max(Math.min((int) (rtIntensity.getIntensityArray()[left] / binSize), binCount - 1), 0);
+                histogram[toBin]--;
+                elementsInWindow--;
+                left++;
             }
-            for (int right = positionCenter + 1; right <= windowsOverall; right++) {
-                if (rtIntensity.getRtArray()[right] <= rtIntensity.getRtArray()[positionCenter] + windowHalfSize) {
-                    toBin = Math.max(Math.min((int) (rtIntensity.getIntensityArray()[right] / binSize), binCount - 1), 0);
-                    histogram[toBin]++;
-                    elementsInWindow++;
-                } else {
-                    break;
-                }
+            while (right < windowsOverall && rtIntensity.getRtArray()[right] <= rtIntensity.getRtArray()[positionCenter] + windowHalfSize) {
+                toBin = Math.max(Math.min((int) (rtIntensity.getIntensityArray()[right] / binSize), binCount - 1), 0);
+                histogram[toBin]++;
+                elementsInWindow++;
+                right++;
             }
 
             //noise
@@ -88,6 +83,9 @@ public class SignalToNoiseEstimator {
                     ++medianBin;
                     elementIncCount += histogram[medianBin];
                 }
+                if (medianBin == binCount - 1) {
+                    histogramOobPercent++;
+                }
                 noise = Math.max(1.0d, binValue[medianBin]);
             }
             stnResults[positionCenter] = rtIntensity.getIntensityArray()[positionCenter] / noise;
@@ -96,12 +94,16 @@ public class SignalToNoiseEstimator {
         }
 
         sparseWindowPercent = sparseWindowPercent * 100 / windowCount;
+        histogramOobPercent = histogramOobPercent * 100 / windowCount;
         if (sparseWindowPercent > 20) {
             System.out.println("Warning in SignalToNoiseEstimator: " + sparseWindowPercent + "% of windows were sparse.\nIncreasing windowLength or decreasing minRequiredElements");
         }
+        if (histogramOobPercent != 0) {
+            System.out.println("WARNING in SignalToNoiseEstimatorMedian: " + histogramOobPercent + "% of all Signal-to-Noise estimates are too high, because the median was found in the rightmost histogram-bin. " +
+                    "You should consider increasing 'max_intensity' (and maybe 'bin_count' with it, to keep bin width reasonable)");
+        }
 
         return stnResults;
-
     }
 
     /**
@@ -127,10 +129,14 @@ public class SignalToNoiseEstimator {
         //get variance
         sum = 0;
         for (double intens : intensity) {
-            sum += (meanVariance[0] - intens)*(meanVariance[0] - intens);
+            sum += (meanVariance[0] - intens) * (meanVariance[0] - intens);
         }
         meanVariance[1] = sum / count;
 
         return meanVariance;
     }
+
+//    private RtIntensityPairsDouble gaussianEstimate(RtIntensityPairsDouble rtIntensity){
+//
+//    }
 }

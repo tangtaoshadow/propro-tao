@@ -33,6 +33,17 @@ public class SignalToNoiseTest extends BaseTest {
 
         double[] result = signalToNoiseEstimator.computeSTN(rtIntensityPairsDoubleTest, 40, 30);
 
+        for(int i=0; i<result.length; i++){
+            assert isSimilar(rtIntensityPairsDoubleResult.getIntensityArray()[i], result[i], Math.pow(10, -4));
+        }
         System.out.println("computeSTN finished.");
+    }
+
+    private boolean isSimilar(Double a, Double b, Double tolerance ) {
+        if (Math.abs(a-b) < tolerance) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

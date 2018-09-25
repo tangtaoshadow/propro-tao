@@ -14,7 +14,7 @@ public class Constants {
 
     //RT Normalizer
     //not static final
-    public static final boolean CHECK_SPACINGS = false;//////////////
+    public static final boolean CHECK_SPACINGS = true;//////////////
     public static final double SPACING_DIFFERENCE = 1.5d;
     public static final double SPACING_DIFFERENCE_GAP = 4d;
     public static final double SIGNAL_TO_NOISE_LIMIT = 1.0d;
@@ -24,16 +24,20 @@ public class Constants {
     public static final int MIN_REQUIRED_ELEMENTS = 10;
 
     //not static final
-    public static final double NOISE_FOR_EMPTY_WINDOW = Math.pow(10.0,20);
-//    public static final double NOISE_FOR_EMPTY_WINDOW = 2.0d;
+//    public static final double NOISE_FOR_EMPTY_WINDOW = Math.pow(10.0,20);
+    public static final double NOISE_FOR_EMPTY_WINDOW = 2.0d;
     public static final double STOP_AFTER_INTENSITY_RATIO = 0.0001d;
     public static final double MIN_RSQ = 0.95d;
     public static final double MIN_COVERAGE = 0.6d;
 
     //not static final
-    public static final String CHROMATOGRAM_PICKER_METHOD = "corrected";
+    public static final String CHROMATOGRAM_PICKER_METHOD = "legacy";
+//    public static final String CHROMATOGRAM_PICKER_METHOD = "corrected";
 
     public static final double PEAK_WIDTH = 40d;///
+    public static final boolean ESTIMATE_BEST_PEPTIDES = true;
+    public static final double INITIAL_QUALITY_CUTOFF = 0.5d;
+    public static final double OVERALL_QUALITY_CUTOFF = 5.5d;
     public static final int RT_BINS = 10;
     public static final int MIN_PEPTIDES_PER_BIN = 1;
     public static final int MIN_BINS_FILLED = 8;
