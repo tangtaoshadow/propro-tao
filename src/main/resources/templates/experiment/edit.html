@@ -46,11 +46,24 @@
                         </div>
                         <div class="form-group m-form__group">
                             <label for="overlap">
-                                自定义Swath重叠区域
+                                自定义Swath重叠区域(两个窗口交叉区域的绝对数值)
                             </label>
                             <input type="text" class="form-control m-input" id="overlap" readonly
                                    placeholder="" name="overlap" th:value="${experiment?.overlap}">
-
+                        </div>
+                        <div class="form-group m-form__group">
+                            <label for="fileType">
+                                iRT-slope
+                            </label>
+                            <input type="text" class="form-control m-input" id="slope" name="slope"
+                                   th:value="${experiment?.slope}">
+                        </div>
+                        <div class="form-group m-form__group">
+                            <label for="fileType">
+                                iRT-intercept
+                            </label>
+                            <input type="text" class="form-control m-input" id="intercept" name="intercept"
+                                   th:value="${experiment?.intercept}">
                         </div>
                         <div class="form-group m-form__group">
                             <label for="fileLocation">

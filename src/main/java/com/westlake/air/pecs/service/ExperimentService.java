@@ -77,7 +77,7 @@ public interface ExperimentService {
      * @param sigmaSpacing
      * @return
      */
-    ResultDO<SlopeIntercept> convAndComputeIrt(ExperimentDO experimentDO, String iRtLibraryId, Float mzExtractWindow, SigmaSpacing sigmaSpacing);
+    ResultDO<SlopeIntercept> convAndIrt(ExperimentDO experimentDO, String iRtLibraryId, Float mzExtractWindow, SigmaSpacing sigmaSpacing);
 
 
 }

@@ -1,8 +1,6 @@
 package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.mongodb.BasicDBObject;
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
@@ -20,7 +18,6 @@ import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.FileUtil;
-import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,11 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -65,7 +58,7 @@ public class TestController extends BaseController {
     @ResponseBody
     String test(Model model, RedirectAttributes redirectAttributes) {
         ExperimentDO experimentDO = experimentService.getById("5b89029258487f0e14a62b75").getModel();
-        return JSON.toJSONString(experimentService.convAndComputeIrt(experimentDO, "5b88fece58487f13f0609019", MZ_EXTRACT_WINDOW, SigmaSpacing.create()));
+        return JSON.toJSONString(experimentService.convAndIrt(experimentDO, "5b88fece58487f13f0609019", MZ_EXTRACT_WINDOW, SigmaSpacing.create()));
     }
 
     //计算iRT
@@ -73,7 +66,7 @@ public class TestController extends BaseController {
     @ResponseBody
     String test2(Model model, RedirectAttributes redirectAttributes) {
         ExperimentDO experimentDO = experimentService.getById("5b89029258487f0e14a62b75").getModel();
-        ResultDO<SlopeIntercept> resultDO = experimentService.convAndComputeIrt(experimentDO, "5b88fece58487f13f0609019", MZ_EXTRACT_WINDOW, SigmaSpacing.create());
+        ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(experimentDO, "5b88fece58487f13f0609019", MZ_EXTRACT_WINDOW, SigmaSpacing.create());
         if (resultDO.isFailed()) {
             return JSON.toJSONString(resultDO);
         }

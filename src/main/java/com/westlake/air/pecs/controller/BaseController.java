@@ -27,7 +27,7 @@ public class BaseController {
     @Autowired
     ExperimentTask experimentTask;
 
-    //0:标准库,1:校准库
+    //0:标准库,1:irt校准库
     public List<LibraryDO> getLibraryList(Integer type){
         return libraryService.getSimpleAll(type);
     }

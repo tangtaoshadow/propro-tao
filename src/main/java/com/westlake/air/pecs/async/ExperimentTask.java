@@ -2,6 +2,7 @@ package com.westlake.air.pecs.async;
 
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
+import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
@@ -65,11 +66,28 @@ public class ExperimentTask extends BaseTask {
     }
 
     @Async
+    public void convAndIrt(ExperimentDO experimentDO, String iRtLibraryId, Float mzExtractWindow, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
+        taskDO.addLog("开始卷积IRT校准库并且计算iRT值");
+        taskService.update(taskDO);
+
+        ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(experimentDO, iRtLibraryId, mzExtractWindow, sigmaSpacing);
+        SlopeIntercept slopeIntercept = resultDO.getModel();
+
+        experimentDO.setSlope(slopeIntercept.getSlope());
+        experimentDO.setIntercept(slopeIntercept.getIntercept());
+        experimentService.update(experimentDO);
+
+        taskDO.addLog("iRT计算完毕,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept() + "开始卷积原始数据");
+        taskDO.finish(TaskDO.STATUS_SUCCESS);
+        taskService.update(taskDO);
+    }
+
+    @Async
     public void swath(SwathInput input, TaskDO taskDO) {
         taskDO.addLog("开始卷积IRT校准库并且计算iRT值");
         taskService.update(taskDO);
 
-        ResultDO<SlopeIntercept> resultDO = experimentService.convAndComputeIrt(input.getExperimentDO(), input.getIRtLibraryId(), input.getMzExtractWindow(), input.getSigmaSpacing());
+        ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(input.getExperimentDO(), input.getIRtLibraryId(), input.getMzExtractWindow(), input.getSigmaSpacing());
         SlopeIntercept slopeIntercept = resultDO.getModel();
 
         taskDO.addLog("iRT计算完毕,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept() + "开始卷积原始数据");

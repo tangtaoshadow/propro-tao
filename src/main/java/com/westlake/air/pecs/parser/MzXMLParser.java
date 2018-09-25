@@ -432,7 +432,12 @@ public class MzXMLParser extends BaseExpParser {
                     break;
                 }
             }
-            scanIndexDO.setPrecursorMzStart(scanIndexDO.getPrecursorMz() - scanIndexDO.getWindowWideness() / 2);
+            //解决某些情况下在计算了Overlap以后窗口左区间大于400的情况,这个时候可以强制补齐到400
+            if(Math.abs(scanIndexDO.getPrecursorMz() - scanIndexDO.getWindowWideness() / 2 - 400) <= 1){
+                scanIndexDO.setPrecursorMzStart(400f);
+            }else{
+                scanIndexDO.setPrecursorMzStart(scanIndexDO.getPrecursorMz() - scanIndexDO.getWindowWideness() / 2);
+            }
             scanIndexDO.setPrecursorMzEnd(scanIndexDO.getPrecursorMz() + scanIndexDO.getWindowWideness() / 2);
         }
 
