@@ -21,54 +21,59 @@
                 <div class="m-portlet__head">
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
-							<span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
+                            <span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
                             <h3 class="m-portlet__head-text">更新实验数据</h3>
                         </div>
                     </div>
                 </div>
                 <!--begin::Form-->
-                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/experiment/update}" th:method="post" enctype="multipart/form-data">
+                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/experiment/update}"
+                      th:method="post" enctype="multipart/form-data">
                     <div class="m-portlet__body">
                         <div class="form-group m-form__group">
                             <label for="id">
                                 实验ID
                             </label>
-                            <input type="text" class="form-control m-input" name="id" id="id" readonly th:value="${experiment?.id}">
+                            <input type="text" class="form-control m-input" name="id" id="id" readonly
+                                   th:value="${experiment?.id}">
                         </div>
                         <div class="form-group m-form__group">
                             <label for="name">
                                 实验名称
                             </label>
-                            <input type="text" class="form-control m-input" id="name" name="name" th:value="${experiment?.name}">
+                            <input type="text" class="form-control m-input" id="name" name="name"
+                                   th:value="${experiment?.name}">
                         </div>
-                        <div class="form-group m-form__group row">
-                            <label for="overlap" class="col-2 col-form-label">
+                        <div class="form-group m-form__group">
+                            <label for="overlap">
                                 自定义Swath重叠区域
                             </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="overlap" readonly
-                                       placeholder="" name="overlap" th:value="${experiment?.overlap}">
-                            </div>
+                            <input type="text" class="form-control m-input" id="overlap" readonly
+                                   placeholder="" name="overlap" th:value="${experiment?.overlap}">
+
                         </div>
                         <div class="form-group m-form__group">
                             <label for="fileLocation">
                                 文件位置
                             </label>
-                            <input type="text" class="form-control m-input" id="fileLocation" name="fileLocation" th:value="${experiment?.fileLocation}">
+                            <input type="text" class="form-control m-input" id="fileLocation" name="fileLocation"
+                                   th:value="${experiment?.fileLocation}">
                             <span class="m-form__help">一般情况下不要乱改本字段</span>
                         </div>
                         <div class="form-group m-form__group">
                             <label for="fileType">
                                 文件类型
                             </label>
-                            <input type="text" class="form-control m-input" id="fileType" name="fileType" th:value="${experiment?.fileType}">
+                            <input type="text" class="form-control m-input" id="fileType" name="fileType"
+                                   th:value="${experiment?.fileType}">
                             <span class="m-form__help">目前只支持mzxml和mzml,全部小写</span>
                         </div>
                         <div class="form-group m-form__group">
                             <label for="description">
                                 详细描述
                             </label>
-                            <textarea class="form-control m-input" id="description" name="description" rows="3" th:text="${experiment?.description}"></textarea>
+                            <textarea class="form-control m-input" id="description" name="description" rows="3"
+                                      th:text="${experiment?.description}"></textarea>
 
                         </div>
                     </div>

@@ -69,11 +69,11 @@ public class SemiSupervised {
             //Get part of scores as train input.
             TrainAndTest trainAndTest = AirusUtils.splitForXval(scores, groupNumId, isDecoy, params.getXevalFraction(), params.isTest());
             Double[][] trainScores = trainAndTest.getTrainData();
-            Double[][] testScores = trainAndTest.getTestData();
+//            Double[][] testScores = trainAndTest.getTestData();
             Integer[] trainId = trainAndTest.getTrainId();
-            Integer[] testId = trainAndTest.getTestId();
+//            Integer[] testId = trainAndTest.getTestId();
             Boolean[] trainIsDecoy = trainAndTest.getTrainIsDecoy();
-            Boolean[] testIsDecoy = trainAndTest.getTestIsDecoy();
+//            Boolean[] testIsDecoy = trainAndTest.getTestIsDecoy();
             Double[] mainScore = ArrayUtils.extractColumn(trainScores, 0);
             Boolean[] isTopPeak = AirusUtils.findTopIndex(mainScore, trainId);
 
@@ -95,18 +95,17 @@ public class SemiSupervised {
                 isTopPeak = AirusUtils.findTopIndex(clfScores, trainId);
             }
             //After semi supervised iteration: calculate normalized clfScores of FULL data set.
-            clfScores = score(scores, w);
-            isTopPeak = AirusUtils.findTopIndex(clfScores, groupNumId);
-            Double[] topDecoyScores = AirusUtils.getTopDecoyPeaks(clfScores, isDecoy, isTopPeak);
-            ArrayUtils.normalize(clfScores, topDecoyScores);
-            clfScores = score(testScores, w);
-            Double[] topTestPeaks = AirusUtils.getDecoyPeaks(clfScores, AirusUtils.findTopIndex(clfScores, testId));
-            Double[] topTestTargetScores = AirusUtils.getTargetPeaks(topTestPeaks, testIsDecoy);
-            Double[] topTestDecoyScores = AirusUtils.getDecoyPeaks(topTestPeaks, testIsDecoy);
-
+//            clfScores = score(scores, w);
+//            isTopPeak = AirusUtils.findTopIndex(clfScores, groupNumId);
+//            Double[] topDecoyScores = AirusUtils.getTopDecoyPeaks(clfScores, isDecoy, isTopPeak);
+//            ArrayUtils.normalize(clfScores, topDecoyScores);
+//            clfScores = score(testScores, w);
+//            Double[] topTestPeaks = AirusUtils.getDecoyPeaks(clfScores, AirusUtils.findTopIndex(clfScores, testId));
+//            Double[] topTestTargetScores = AirusUtils.getTargetPeaks(topTestPeaks, testIsDecoy);
+//            Double[] topTestDecoyScores = AirusUtils.getDecoyPeaks(topTestPeaks, testIsDecoy);
+//            ldaLearn.setTopTestDecoyScores(topTestDecoyScores);
+//            ldaLearn.setTopTestTargetScores(topTestTargetScores);
             ldaLearn.setParams(w);
-            ldaLearn.setTopTestDecoyScores(topTestDecoyScores);
-            ldaLearn.setTopTestTargetScores(topTestTargetScores);
             return ldaLearn;
         }catch (Exception e){
             e.printStackTrace();
