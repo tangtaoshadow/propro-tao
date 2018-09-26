@@ -90,7 +90,7 @@ public class SemiSupervised {
                 logger.info("开始第"+times+"轮机器学习");
 //                iterSemiSupervisedLearning(trainScores, clfScores, trainIsDecoy, isTopPeak);
                 TrainPeaks trainPeaksTemp = selectTrainPeaks(trainScores, clfScores, trainIsDecoy, isTopPeak, params.getSsIterationFdr());
-                w = ldaLearner.learn(trainPeaks.getTopDecoyPeaks(), trainPeaksTemp.getBestTargetPeaks(), true);
+                w = ldaLearner.learn(trainPeaksTemp.getTopDecoyPeaks(), trainPeaksTemp.getBestTargetPeaks(), true);
                 clfScores = ldaLearner.score(trainScores, w, true);
                 isTopPeak = AirusUtils.findTopIndex(clfScores, trainId);
             }
