@@ -6,6 +6,7 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
@@ -163,6 +164,8 @@ public class ExperimentController extends BaseController {
                   @RequestParam(value = "id", required = true) String id,
                   @RequestParam(value = "name") String name,
                   @RequestParam(value = "fileType") String fileType,
+                  @RequestParam(value = "slope") Double slope,
+                  @RequestParam(value = "intercept") Double intercept,
                   @RequestParam(value = "fileLocation") String fileLocation,
                   @RequestParam(value = "description") String description,
                   RedirectAttributes redirectAttributes) {
@@ -178,6 +181,8 @@ public class ExperimentController extends BaseController {
         experimentDO.setFileType(fileType);
         experimentDO.setFileLocation(fileLocation);
         experimentDO.setDescription(description);
+        experimentDO.setSlope(slope);
+        experimentDO.setIntercept(intercept);
 
         ResultDO result = experimentService.update(experimentDO);
         if (result.isFailed()) {
@@ -236,7 +241,7 @@ public class ExperimentController extends BaseController {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
-            return "redirect:/extractor/" + id;
+            return "redirect:/extractor?id=" + id;
         }
 
         TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_CONVOLUTION, resultDO.getModel().getName()+":"+libraryId);
@@ -248,6 +253,47 @@ public class ExperimentController extends BaseController {
         }
 
         experimentTask.extract(resultDO.getModel(), libraryId, si, creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
+
+        return "redirect:/task/detail/" + taskDO.getId();
+    }
+
+    @RequestMapping(value = "/irt")
+    String irt(Model model,
+                     @RequestParam(value = "id", required = true) String id,
+                     @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
+                     RedirectAttributes redirectAttributes) {
+        model.addAttribute("iRtLibraryId", iRtLibraryId);
+
+        ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
+        if (resultDO.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OBJECT_NOT_EXISTED);
+            return "redirect:/experiment/list";
+        }
+
+        model.addAttribute("libraries", getLibraryList(1));
+        model.addAttribute("experiment", resultDO.getModel());
+        return "/experiment/irt";
+    }
+
+    @RequestMapping(value = "/doirt")
+    String doIrt(Model model,
+                     @RequestParam(value = "id", required = true) String id,
+                     @RequestParam(value = "iRtLibraryId", required = true) String iRtLibraryId,
+                     @RequestParam(value = "sigma", required = true, defaultValue = "3.75") Float sigma,
+                     @RequestParam(value = "spacing", required = true, defaultValue = "0.01") Float spacing,
+                     @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
+                     RedirectAttributes redirectAttributes) {
+
+        ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
+        if (resultDO.isFailed()) {
+            return "redirect:/irt/" + id;
+        }
+
+        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName()+":"+iRtLibraryId);
+        taskService.insert(taskDO);
+
+        SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);
+        experimentTask.convAndIrt(resultDO.getModel(), iRtLibraryId, mzExtractWindow, sigmaSpacing, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }

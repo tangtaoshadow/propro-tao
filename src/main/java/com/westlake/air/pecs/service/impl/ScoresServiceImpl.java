@@ -340,8 +340,10 @@ public class ScoresServiceImpl implements ScoresService {
                 FeatureScores featureScores = new FeatureScores();
                 chromatographicScorer.calculateChromatographicScores(experimentFeatureList, libraryIntensityList, featureScores);
                 chromatographicScorer.calculateLogSnScore(chromatogramList, experimentFeatureList, noise1000List, featureScores);
+
 //                diaScorer.calculateDiaMassDiffScore(productMzList, spectrumMzArray, spectrumIntArray, libraryIntensityList, featureScores);
 //                diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
+
                 //TODO @Nico charge from transition?
 //                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
 //                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);

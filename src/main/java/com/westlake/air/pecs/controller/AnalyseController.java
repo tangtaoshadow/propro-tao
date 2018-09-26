@@ -1,12 +1,15 @@
 package com.westlake.air.pecs.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.async.ScoreTask;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
@@ -16,6 +19,7 @@ import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
 import com.westlake.air.pecs.domain.query.PageQuery;
 import com.westlake.air.pecs.service.*;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,6 +54,8 @@ public class AnalyseController extends BaseController {
     ExperimentService experimentService;
     @Autowired
     ScoreTask scoreTask;
+    @Autowired
+    Airus airus;
 
     @RequestMapping(value = "/overview/list")
     String overviewList(Model model,
@@ -272,13 +278,13 @@ public class AnalyseController extends BaseController {
         taskService.insert(taskDO);
 
         SlopeIntercept si = new SlopeIntercept();
-        if(slope == null || intercept == null){
+        if (slope == null || intercept == null) {
             si = SlopeIntercept.create();
-        }else{
+        } else {
             si.setSlope(slope);
             si.setIntercept(intercept);
         }
-        scoreTask.score(overviewId, si, overviewDO.getLibraryId(), new SigmaSpacing(sigma,spacing), taskDO);
+        scoreTask.score(overviewId, si, overviewDO.getLibraryId(), new SigmaSpacing(sigma, spacing), taskDO);
         return "redirect:/task/detail/" + taskDO.getId();
     }
 
@@ -358,5 +364,23 @@ public class AnalyseController extends BaseController {
         res.put("intensity", intensityArray);
         resultDO.setModel(res);
         return resultDO;
+    }
+
+    @RequestMapping(value = "/overview/airus/{overviewId}")
+    @ResponseBody
+    String airus(Model model,
+                 @PathVariable("overviewId") String overviewId) {
+
+        long start = System.currentTimeMillis();
+        FinalResult finalResult = airus.doAirus(overviewId);
+        logger.info("打分耗时:" + (System.currentTimeMillis() - start));
+        int count = 0;
+        for (Double d : finalResult.getAllInfo().getStatMetrics().getFdr()) {
+            if (d <= 0.01) {
+                count++;
+            }
+        }
+        logger.info(JSON.toJSONString(finalResult.getAllInfo().getStatMetrics().getFdr()));
+        return "权重:"+JSON.toJSONString(finalResult.getClassifierTable())+"识别肽段数目"+count+"";
     }
 }

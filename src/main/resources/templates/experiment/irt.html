@@ -12,7 +12,7 @@
     <div class="d-flex align-items-center">
         <div class="mr-auto">
             <h3 class="m-subheader__title m-subheader__title--separator">
-                卷积实验
+                irt计算
             </h3>
         </div>
     </div>
@@ -35,12 +35,12 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">卷积操作</h3>
+                            <h3 class="m-portlet__head-text">irt计算</h3>
                         </div>
                     </div>
                 </div>
                 <!--begin::Form-->
-                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/experiment/doextract}">
+                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/experiment/doirt}">
                     <div class="m-portlet__body">
                         <input type="text" name="id" hidden="hidden" th:value="${experiment?.id}">
                         <div class="form-group m-form__group row">
@@ -53,26 +53,36 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="library" class="col-2 col-form-label">
-                                关联标准库名称及ID
+                            <label for="iRtLibraryId" class="col-2 col-form-label">
+                                关联irt校准库名称及ID
                             </label>
                             <div class="col-10">
-                                <select class="form-control m-input" id="library" name="libraryId">
+                                <select class="form-control m-input" id="iRtLibraryId" name="iRtLibraryId">
                                     <option th:each="library:${libraries}" th:value="${library.id}"
                                             th:text="|${library.name}(${library.id})|"
-                                            th:selected="${libraryId}==${library.id}?true:false"></option>
+                                            th:selected="${iRtLibraryId}==${library.id}?true:false"></option>
                                 </select>
                             </div>
-
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="rtExtractWindow" class="col-2 col-form-label">
-                                RT卷积窗口
+                            <label for="sigma" class="col-2 col-form-label">
+                                Sigma
                             </label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="rtExtractWindow"
-                                       name="rtExtractWindow" th:value="${rtExtractWindow}">
-                                <span class="m-form__help">默认为1200</span>
+                                <input type="text" class="form-control m-input" id="sigma"
+                                       name="rtExtractWindow" th:value="${sigma}">
+                                <span class="m-form__help">默认为3.75</span>
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="spacing" class="col-2 col-form-label">
+                                Spacing
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="spacing"
+                                       name="spacing"
+                                       th:value="${spacing}">
+                                <span class="m-form__help">默认为0.01</span>
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -86,51 +96,10 @@
                                 <span class="m-form__help">默认为0.05</span>
                             </div>
                         </div>
-                        <div class="form-group m-form__group row">
-                            <label for="slope" class="col-2 col-form-label">
-                                Slope斜率
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="slope" name="slope" th:value="${experiment?.slope}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="intercept" class="col-2 col-form-label">
-                                intercept截距
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="intercept" name="intercept" th:value="${experiment?.intercept}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="creator" class="col-2 col-form-label">
-                                操作人
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="creator" name="creator"
-                                       th:value="${creator}">
-                                <span class="m-form__help"></span>
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="buildType" class="col-2 col-form-label">
-                                卷积类型
-                            </label>
-                            <div class="col-10">
-                                <select class="form-control m-input" id="buildType" name="buildType">
-                                    <option th:if="${buildType}==2" th:selected="true" value="2">MS2</option>
-                                    <option th:unless="${buildType}==2" value="2">MS2</option>
-                                    <option th:if="${buildType}==0" th:selected="true" value="0">MS1和MS2</option>
-                                    <option th:unless="${buildType}==0" value="0">MS1和MS2</option>
-                                    <option th:if="${buildType}==1" th:selected="true" value="1">MS1</option>
-                                    <option th:unless="${buildType}==1" value="1">MS1</option>
-                                </select>
-                            </div>
-                        </div>
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <button type="submit" class="btn btn-primary">开始卷积</button>
+                            <button type="submit" class="btn btn-primary">开始计算iRT</button>
                         </div>
                     </div>
                 </form>

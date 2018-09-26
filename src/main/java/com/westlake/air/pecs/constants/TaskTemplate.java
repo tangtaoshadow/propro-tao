@@ -14,6 +14,8 @@ public enum TaskTemplate {
 
     SWATH_CONVOLUTION("SWATH_CONVOLUTION", "/experiment/extractor"),
 
+    IRT("IRT", "/experiment/irt"),
+
     SWATH_WORKFLOW("SWATH_WORKFLOW", ""),
 
     SCORE("SCORE", ""),
