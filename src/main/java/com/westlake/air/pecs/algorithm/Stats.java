@@ -90,15 +90,14 @@ public class Stats {
     /**
      * Calculate P relative scores.
      */
-    private ResultDO<Pi0Est> pi0Est(Double[] pvalues, Double[] lambda, String pi0Method, boolean smoothLogPi0) {
-        ResultDO<Pi0Est> resultDO = new ResultDO<Pi0Est>();
+    private Pi0Est pi0Est(Double[] pvalues, Double[] lambda, String pi0Method, boolean smoothLogPi0) {
+
         Pi0Est pi0EstResults = new Pi0Est();
         int numOfPvalue = pvalues.length;
         int numOfLambda = 1;
         if (lambda != null) {
             numOfLambda = lambda.length;
-            Arrays.sort(lambda);
-
+//            Arrays.sort(lambda);
         }
         Double[] meanPL = new Double[numOfPvalue];
         Double[] pi0Lambda = new Double[numOfLambda];
@@ -106,8 +105,8 @@ public class Stats {
         Double[] pi0Smooth = new Double[numOfLambda];
         Double[] pi0s = new Double[numOfLambda];
         if (numOfLambda < 4) {
-            resultDO.setMsgInfo("Pi0Est lambda Error.");
-            return resultDO;
+            logger.error("Pi0Est lambda Error, numOfLambda < 4");
+            return null;
         }
         for (int i = 0; i < numOfLambda; i++) {
             for (int j = 0; j < numOfPvalue; j++) {
@@ -151,20 +150,18 @@ public class Stats {
             pi0 = Math.min(pi0Lambda[ArrayUtils.argmin(mse)], 1);
             pi0Smooth = null;
         } else {
-            resultDO.setMsgInfo("Pi0Est Method Error.\n");
-            return resultDO;
+            logger.error("Pi0Est Method Error.No Method Called "+pi0Method);
+            return null;
         }
         if (pi0 <= 0) {
-            resultDO.setMsgInfo("Pi0Est Pi0 Error.\n");
-            return resultDO;
+            logger.error("Pi0Est Pi0 Error -- pi0<=0");
+            return null;
         }
         pi0EstResults.setPi0(pi0);
         pi0EstResults.setPi0Smooth(pi0Smooth);
         pi0EstResults.setLambda(lambda);
         pi0EstResults.setPi0Lambda(pi0Lambda);
-        resultDO.setSuccess(true);
-        resultDO.setModel(pi0EstResults);
-        return resultDO;
+        return pi0EstResults;
     }
 
     /**
@@ -241,7 +238,7 @@ public class Stats {
         double[] fdr = new double[numOfPvalue];
         double[] fnr = new double[numOfPvalue];
         double[] sens = new double[numOfPvalue];
-        double[] svalues = new double[numOfPvalue];
+        double[] svalues;
         for (int i = 0; i < numOfPvalue; i++) {
             tp[i] = (double) numPositives[i] - numNull * pvalues[i];
             fp[i] = numNull * pvalues[i];
@@ -312,7 +309,7 @@ public class Stats {
         /*
         estimate pi0;
          */
-        Pi0Est pi0Est = pi0Est(targetPvalues, params.getPi0Lambda(), params.getPi0Method(), params.isPi0SmoothLogPi0()).getModel();
+        Pi0Est pi0Est = pi0Est(targetPvalues, params.getPi0Lambda(), params.getPi0Method(), params.isPi0SmoothLogPi0());
 
         /*
         compute q-value;

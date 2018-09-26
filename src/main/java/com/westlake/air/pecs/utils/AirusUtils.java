@@ -126,7 +126,7 @@ public class AirusUtils {
     }
 
     public static Double[][] getTopTargetPeaks(Double[][] array, Boolean[] isDecoy, Boolean[] index) {
-        Boolean[] isTopTarget = getIsTopTarget(isDecoy, index).getModel();
+        Boolean[] isTopTarget = getIsTopTarget(isDecoy, index);
         if (isTopTarget != null && array.length == isTopTarget.length) {
             return getDecoyPeaks(array, isTopTarget);
         } else {
@@ -136,7 +136,7 @@ public class AirusUtils {
     }
 
     public static Double[] getTopTargetPeaks(Double[] array, Boolean[] isDecoy, Boolean[] index) {
-        Boolean[] isTopTarget = getIsTopTarget(isDecoy, index).getModel();
+        Boolean[] isTopTarget = getIsTopTarget(isDecoy, index);
         if (isTopTarget != null && array.length == isTopTarget.length) {
             return getDecoyPeaks(array, isTopTarget);
         } else {
@@ -146,7 +146,7 @@ public class AirusUtils {
     }
 
     public static Double[][] getTopDecoyPeaks(Double[][] array, Boolean[] isDecoy, Boolean[] index) {
-        Boolean[] isTopDecoy = getIsTopDecoy(isDecoy, index).getModel();
+        Boolean[] isTopDecoy = getIsTopDecoy(isDecoy, index);
         if (isTopDecoy != null && array.length == isTopDecoy.length) {
             return getDecoyPeaks(array, isTopDecoy);
         } else {
@@ -156,7 +156,7 @@ public class AirusUtils {
     }
 
     public static Double[] getTopDecoyPeaks(Double[] array, Boolean[] isDecoy, Boolean[] index) {
-        Boolean[] isTopDecoy = getIsTopDecoy(isDecoy, index).getModel();
+        Boolean[] isTopDecoy = getIsTopDecoy(isDecoy, index);
         if (isTopDecoy != null && array.length == isTopDecoy.length) {
             return getDecoyPeaks(array, isTopDecoy);
         } else {
@@ -311,35 +311,30 @@ public class AirusUtils {
         return isTarget;
     }
 
-    private static ResultDO<Boolean[]> getIsTopDecoy(Boolean[] isDecoy, Boolean[] index) {
-        ResultDO<Boolean[]> resultDO = new ResultDO<Boolean[]>();
+    private static Boolean[] getIsTopDecoy(Boolean[] isDecoy, Boolean[] index) {
         if (isDecoy.length == index.length) {
             Boolean[] isTopDecoy = new Boolean[isDecoy.length];
             for (int i = 0; i < isDecoy.length; i++) {
                 isTopDecoy[i] = isDecoy[i] && index[i];
             }
-            resultDO.setModel(isTopDecoy);
-            resultDO.setSuccess(true);
-            return resultDO;
+            return isTopDecoy;
         } else {
-            resultDO.setMsgInfo("GetIsTopDecoy Error.\n");
-            return resultDO;
+            logger.error("GetIsTopDecoy Error.Length not equals");
+            return null;
         }
     }
 
-    private static ResultDO<Boolean[]> getIsTopTarget(Boolean[] isDecoy, Boolean[] index) {
-        ResultDO<Boolean[]> resultDO = new ResultDO<Boolean[]>();
+    private static Boolean[] getIsTopTarget(Boolean[] isDecoy, Boolean[] index) {
+
         if (isDecoy.length == index.length) {
             Boolean[] isTopTarget = new Boolean[isDecoy.length];
             for (int i = 0; i < isDecoy.length; i++) {
                 isTopTarget[i] = !isDecoy[i] && index[i];
             }
-            resultDO.setModel(isTopTarget);
-            resultDO.setSuccess(true);
-            return resultDO;
+            return isTopTarget;
         } else {
-            resultDO.setMsgInfo("GetIsTopTarget Error.\n");
-            return resultDO;
+            logger.error("GetIsTopTarget Error.Length not equals");
+            return null;
         }
     }
 }
