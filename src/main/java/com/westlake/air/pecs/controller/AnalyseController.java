@@ -228,16 +228,13 @@ public class AnalyseController extends BaseController {
     @RequestMapping(value = "/overview/score")
     String score(Model model,
                  @RequestParam(value = "overviewId", required = true) String overviewId,
-                 @RequestParam(value = "slope", required = false) Float slope,
-                 @RequestParam(value = "intercept", required = false) Float intercept,
                  @RequestParam(value = "sigma", required = false) Float sigma,
                  @RequestParam(value = "spacing", required = false) Float spacing,
                  RedirectAttributes redirectAttributes) {
 
         model.addAttribute("sigma", sigma);
         model.addAttribute("spacing", spacing);
-        model.addAttribute("slope", slope);
-        model.addAttribute("intercept", intercept);
+
 
         ResultDO<AnalyseOverviewDO> resultDO = analyseOverviewService.getById(overviewId);
         if (resultDO.isFailed()) {
@@ -245,8 +242,10 @@ public class AnalyseController extends BaseController {
             return "redirect:/analyse/overview/list";
         }
 
-        model.addAttribute("overview", resultDO.getModel());
-
+        AnalyseOverviewDO overviewDO = resultDO.getModel();
+        model.addAttribute("overview", overviewDO);
+        model.addAttribute("slope", overviewDO.getSlope());
+        model.addAttribute("intercept", overviewDO.getIntercept());
         return "/analyse/overview/score";
     }
 

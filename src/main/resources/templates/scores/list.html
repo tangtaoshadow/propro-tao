@@ -87,40 +87,42 @@
 
                         <div th:each="score:${scores}" class="m-accordion__item">
                             <div class="m-accordion__item-head collapsed" role="tab" id="m_accordion_7_item_1_head"
-                                 data-toggle="collapse" th:href="|#${score.peptideRef}|" aria-expanded="false">
+                                 data-toggle="collapse" th:href="|#${score.peptideRef}_${score.isDecoy?'decoy':''}|" aria-expanded="false">
                                 <!--<span class="m-accordion__item-icon"><i class="fa flaticon-user-ok"></i></span>-->
                                 <span class="m-accordion__item-title"
-                                      th:text="|(${score?.featureScoresList?.size()})肽段:${score?.peptideRef}[${#dates.format(score?.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}]|"></span>
+                                      th:text="|(${score?.featureScoresList?.size()})${score.isDecoy?'伪肽段':'肽段'}:${score?.peptideRef}[${#dates.format(score?.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}]|"></span>
                                 <span class="m-accordion__item-mode"></span>
                             </div>
-                            <div class="m-accordion__item-body collapse" th:id="${score?.peptideRef}" role="tabpanel"
+                            <div class="m-accordion__item-body collapse" th:id="|${score?.peptideRef}_${score.isDecoy?'decoy':''}|" role="tabpanel"
                                  aria-labelledby="m_accordion_7_item_1_head" data-parent="#m_accordion_7">
                                 <div class="m-accordion__item-content">
                                     <table class="table table-bordered table-hover" style="table-layout:fixed;">
                                         <thead>
                                         <tr>
-                                            <th width="5%">LibraryCorr</th>
-                                            <th width="5%">LibraryRsmd</th>
-                                            <th width="5%">XcorrCoelution</th>
-                                            <th width="5%">XcorrCoelutionWeighted</th>
-                                            <th width="5%">XcorrShape</th>
-                                            <th width="5%">XcorrShapeWeighted</th>
-                                            <th width="5%">NormRtScore</th>
-                                            <th width="5%">IntensityScore</th>
-                                            <th width="5%">LogSnScore</th>
-                                            <th width="5%">ElutionModelFitScore</th>
-                                            <th width="5%">IsotopeCorrelationScore</th>
-                                            <th width="5%">IsotopeOverlapScore</th>
-                                            <th width="5%">MassdevScore</th>
-                                            <th width="5%">MassdevScoreWeighted</th>
-                                            <th width="5%">BseriesScore</th>
-                                            <th width="5%">YseriesScore</th>
-                                            <th width="5%">XxSwathPrelimScore</th>
+                                            <th width="5%">MainXxSwathPrelimScore</th>
+                                            <th width="5%">VarLibraryCorr</th>
+                                            <th width="5%">VarLibraryRsmd</th>
+                                            <th width="5%">VarXcorrCoelution</th>
+                                            <th width="5%">VarXcorrCoelutionWeighted</th>
+                                            <th width="5%">VarXcorrShape</th>
+                                            <th width="5%">VarXcorrShapeWeighted</th>
+                                            <th width="5%">VarNormRtScore</th>
+                                            <th width="5%">VarIntensityScore</th>
+                                            <th width="5%">VarLogSnScore</th>
+                                            <th width="5%">VarElutionModelFitScore</th>
+                                            <th width="5%">VarIsotopeCorrelationScore</th>
+                                            <th width="5%">VarIsotopeOverlapScore</th>
+                                            <th width="5%">VarMassdevScore</th>
+                                            <th width="5%">VarMassdevScoreWeighted</th>
+                                            <th width="5%">VarBseriesScore</th>
+                                            <th width="5%">VarYseriesScore</th>
+
                                             <!--<th width="5%">操作</th>-->
                                         </tr>
                                         </thead>
                                         <tbody>
                                         <tr th:each="featureScore:${score.featureScoresList}">
+                                            <td th:text="${featureScore.mainVarXxSwathPrelimScore}"></td>
                                             <td th:text="${featureScore.varLibraryCorr}"></td>
                                             <td th:text="${featureScore.varLibraryRsmd}"></td>
                                             <td th:text="${featureScore.varXcorrCoelution}"></td>
@@ -137,7 +139,7 @@
                                             <td th:text="${featureScore.varMassdevScoreWeighted}"></td>
                                             <td th:text="${featureScore.varBseriesScore}"></td>
                                             <td th:text="${featureScore.varYseriesScore}"></td>
-                                            <td th:text="${featureScore.mainVarXxSwathPrelimScore}"></td>
+
                                             <!--<td>-->
                                                 <!--<button th:if="${entry.value} != null" type="button" class="btn btn-sm btn-info" data-toggle="modal"-->
                                                         <!--data-target="#m_modal_target"-->

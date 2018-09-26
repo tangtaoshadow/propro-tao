@@ -38,7 +38,8 @@
                 <form id="searchForm" method="post" role="form" class="form-inline" action="/analyse/data/list">
                     <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                     <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
-                    <input id="overviewId" type="hidden" th:value="${overviewId}" class="form-control" name="overviewId">
+                    <input id="overviewId" type="hidden" th:value="${overviewId}" class="form-control"
+                           name="overviewId">
 
                     <div class="form-group m-form__group">
                         <div class="input-group">
@@ -76,7 +77,8 @@
                 <tr>
                     <th width="26%">蛋白名称</th>
                     <th width="25%">肽段全称</th>
-                    <th width="15%">标记</th>
+                    <th width="5%">标记</th>
+                    <th width="10%">肽段真伪</th>
                     <th width="5%">切分标记</th>
                     <th width="5%">MS等级</th>
                     <th width="7%">MZ</th>
@@ -89,6 +91,16 @@
                     <td th:text="${data.proteinName}"></td>
                     <td th:text="${data.peptideRef}"></td>
                     <td th:text="${data.annotations}"></td>
+                    <td th:if="${data.isDecoy}">
+                        <span class="m-badge m-badge--danger m-badge--wide">
+                            伪
+                        </span>
+                    </td>
+                    <td th:if="${!data.isDecoy}">
+                       <span class="m-badge m-badge--success m-badge--wide">
+                           真
+                       </span>
+                    </td>
                     <td th:text="${data.cutInfo}"></td>
                     <td th:text="${data.msLevel}"></td>
                     <td th:text="${data.mz}"></td>
@@ -259,15 +271,15 @@
 
         function query(dataId, overviewId, peptideRef, cutInfo) {
             var result = $.ajax({
-                type:"POST",
+                type: "POST",
                 url: "/analyse/view",
-                data:{
-                    dataId:dataId,
-                    overviewId:overviewId,
-                    peptideRef:peptideRef,
-                    cutInfo:cutInfo
+                data: {
+                    dataId: dataId,
+                    overviewId: overviewId,
+                    peptideRef: peptideRef,
+                    cutInfo: cutInfo
                 },
-                dataType:"json",
+                dataType: "json",
                 async: false
             });
 
@@ -275,10 +287,13 @@
             var datas = result.responseJSON.model;
             var data_rt = datas.rt;
             var data_intensity = datas.intensity;
-
+            var intensity = 0;
+            for (var i = 0; i < data_intensity.length; i++) {
+                intensity += data_intensity[i];
+            }
             option = {
                 title: {
-                    text: peptideRef + ":" + data_rt.length + "个信号",
+                    text: peptideRef + ":" + data_rt.length + "个信号;总强度为:" + intensity,
                     left: 10
                 },
                 legend: {

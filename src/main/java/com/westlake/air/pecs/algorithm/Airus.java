@@ -95,7 +95,8 @@ public class Airus {
         Double[][] scoresArray = new Double[peptideRefList.size()][SCORES_COUNT];
         for (int i = 0; i < scoreList.size(); i++) {
             Double[] jSeries = new Double[SCORES_COUNT];
-            scoreList.get(i).values().toArray(jSeries);
+            FeatureScores.fillScores(scoreList.get(i), jSeries);
+//            scoreList.get(i).values().toArray(jSeries);
             scoresArray[i] = jSeries;
         }
         logger.info("打分数据构造完毕,开始学习");

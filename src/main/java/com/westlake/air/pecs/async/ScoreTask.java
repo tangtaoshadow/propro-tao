@@ -41,6 +41,7 @@ public class ScoreTask extends BaseTask {
         input.setSigmaSpacing(sigmaSpacing);
         input.setSlopeIntercept(slopeIntercept);
         input.setOverviewId(overviewId);
+
         scoresService.score(dataList, input);
         taskDO.addLog("打分完毕,耗时:" + (System.currentTimeMillis() - start));
         taskDO.finish(TaskDO.STATUS_SUCCESS);

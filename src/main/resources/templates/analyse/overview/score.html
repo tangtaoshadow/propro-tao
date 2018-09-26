@@ -35,7 +35,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">准备打分,请选择相关的iRT校准库</h3>
+                            <h3 class="m-portlet__head-text">准备打分</h3>
                         </div>
                     </div>
                 </div>
@@ -84,6 +84,24 @@
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="libraryId" readonly name="libraryId"
                                        th:value="|${overview?.libraryName}(${overview?.libraryId})|">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="slope" class="col-2 col-form-label">
+                                已计算的Slope
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="slope" name="slope"
+                                       th:value="${overview?.slope}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="spacing" class="col-2 col-form-label">
+                                已计算的intercept
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="intercept" name="intercept"
+                                       th:value="${overview?.intercept}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
