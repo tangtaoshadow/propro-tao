@@ -140,13 +140,13 @@ public class Stats {
             }
             pi0 = Math.min(pi0Smooth[numOfLambda - 1], (double) 1);
         } else if (pi0Method.equals("bootstrap")) {
-            Double[] sortedPvalue = pvalues.clone();
-            Arrays.sort(sortedPvalue);
+            Double[] sortedPi0Lambda = pi0Lambda.clone();
+            Arrays.sort(sortedPi0Lambda);
             int w;
             double[] mse = new double[numOfLambda];
             for (int i = 0; i < numOfLambda; i++) {
                 w = ArrayUtils.countOverThreshold(pvalues, lambda[i]);
-                mse[i] = (w / (Math.pow(numOfPvalue, 2) * Math.pow((1 - lambda[i]), 2))) * (1 - w / numOfPvalue) + Math.pow((pi0Lambda[i] - sortedPvalue[0]), 2);
+                mse[i] = (w / (Math.pow(numOfPvalue, 2) * Math.pow((1 - lambda[i]), 2))) * (1 - w / numOfPvalue) + Math.pow((pi0Lambda[i] - sortedPi0Lambda[0]), 2);
             }
             pi0 = Math.min(pi0Lambda[ArrayUtils.argmin(mse)], 1);
             pi0Smooth = null;
