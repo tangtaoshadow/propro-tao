@@ -221,6 +221,7 @@ public class Airus {
 
         finalResult.setFinalErrorTable(finalErrorTable(errorStat));
         finalResult.setSummaryErrorTable(summaryErrorTable(errorStat));
+        finalResult.setAllInfo(errorStat);
         return finalResult;
     }
 

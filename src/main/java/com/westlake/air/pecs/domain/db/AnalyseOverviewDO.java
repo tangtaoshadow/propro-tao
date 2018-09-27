@@ -38,9 +38,9 @@ public class AnalyseOverviewDO extends BaseDO {
 
     String iRtLibraryName;
 
-    Float slope;
+    Double slope;
 
-    Float intercept;
+    Double intercept;
 
     //MS1是全光谱扫描的.没有RTwindow的参数,MS2有
     Float rtExtractWindow;

@@ -108,7 +108,7 @@ public class FeatureScores {
 
     public HashMap<String, Double> buildScoreMap() {
         HashMap<String, Double> map = new HashMap<>();
-//        map.put(MainVarXxSwathPrelimScore, mainVarXxSwathPrelimScore);
+        map.put(MainVarXxSwathPrelimScore, mainVarXxSwathPrelimScore);
         map.put(VarLibraryCorr, varLibraryCorr);
         map.put(VarLibraryRsmd, varLibraryRsmd);
         map.put(VarXcorrCoelution, varXcorrCoelution);
@@ -119,12 +119,12 @@ public class FeatureScores {
         map.put(VarIntensityScore, varIntensityScore);
         map.put(VarLogSnScore, varLogSnScore);
         map.put(VarElutionModelFitScore, varElutionModelFitScore);
-//        map.put(VarIsotopeCorrelationScore, varIsotopeCorrelationScore);
-//        map.put(VarIsotopeOverlapScore, varIsotopeOverlapScore);
-//        map.put(VarMassdevScore, varMassdevScore);
-//        map.put(VarMassdevScoreWeighted, varMassdevScoreWeighted);
-//        map.put(VarBseriesScore, varBseriesScore);
-//        map.put(VarYseriesScore, varYseriesScore);
+        map.put(VarIsotopeCorrelationScore, varIsotopeCorrelationScore);
+        map.put(VarIsotopeOverlapScore, varIsotopeOverlapScore);
+        map.put(VarMassdevScore, varMassdevScore);
+        map.put(VarMassdevScoreWeighted, varMassdevScoreWeighted);
+        map.put(VarBseriesScore, varBseriesScore);
+        map.put(VarYseriesScore, varYseriesScore);
 
         return map;
     }
@@ -136,23 +136,6 @@ public class FeatureScores {
             for (int i = 0; i < SCORES_COUNT; i++) {
                 columns[i] = scoreTypes[i].getScoreType();
             }
-//            columns[0] = MainVarXxSwathPrelimScore;
-//            columns[1] = VarLibraryCorr;
-//            columns[2] = VarLibraryRsmd;
-//            columns[3] = VarXcorrCoelution;
-//            columns[4] = VarXcorrCoelutionWeighted;
-//            columns[5] = VarXcorrShape;
-//            columns[6] = VarXcorrShapeWeighted;
-//            columns[7] = VarNormRtScore;
-//            columns[8] = VarIntensityScore;
-//            columns[9] = VarLogSnScore;
-//            columns[10] = VarElutionModelFitScore;
-//            columns[11] = VarIsotopeCorrelationScore;
-//            columns[12] = VarIsotopeOverlapScore;
-//            columns[13] = VarMassdevScore;
-//            columns[14] = VarMassdevScoreWeighted;
-//            columns[15] = VarBseriesScore;
-//            columns[16] = VarYseriesScore;
         }
 
         return columns;
@@ -163,27 +146,10 @@ public class FeatureScores {
         for (int i = 0; i < SCORES_COUNT; i++) {
             scoreArray[i] = scoreMap.get(scoreTypes[i].getScoreType());
         }
-//        scoreArray[0] = scoreMap.get(MainVarXxSwathPrelimScore);
-//        scoreArray[1] = scoreMap.get(VarLibraryCorr);
-//        scoreArray[2] = scoreMap.get(VarLibraryRsmd);
-//        scoreArray[3] = scoreMap.get(VarXcorrCoelution);
-//        scoreArray[4] = scoreMap.get(VarXcorrCoelutionWeighted);
-//        scoreArray[5] = scoreMap.get(VarXcorrShape);
-//        scoreArray[6] = scoreMap.get(VarXcorrShapeWeighted);
-//        scoreArray[7] = scoreMap.get(VarNormRtScore);
-//        scoreArray[8] = scoreMap.get(VarIntensityScore);
-//        scoreArray[9] = scoreMap.get(VarLogSnScore);
-//        scoreArray[10] = scoreMap.get(VarElutionModelFitScore);
-//        scoreArray[11] = scoreMap.get(VarIsotopeCorrelationScore);
-//        scoreArray[12] = scoreMap.get(VarIsotopeOverlapScore);
-//        scoreArray[13] = scoreMap.get(VarMassdevScore);
-//        scoreArray[14] = scoreMap.get(VarMassdevScoreWeighted);
-//        scoreArray[15] = scoreMap.get(VarBseriesScore);
-//        scoreArray[16] = scoreMap.get(VarYseriesScore);
     }
 
     public enum ScoreType {
-
+        MainVarXxSwathPrelimScore("mainVarXxSwathPrelimScore"),
         VarLibraryCorr("varLibraryCorr"),
         VarLibraryRsmd("varLibraryRsmd"),
         VarXcorrCoelution("varXcorrCoelution"),
@@ -194,13 +160,13 @@ public class FeatureScores {
         VarIntensityScore("varIntensityScore"),
         VarLogSnScore("varLogSnScore"),
         VarElutionModelFitScore("varElutionModelFitScore"),
-//        VarIsotopeCorrelationScore("varIsotopeCorrelationScore"),
-//        VarIsotopeOverlapScore("varIsotopeOverlapScore"),
-//        VarMassdevScore("varMassdevScore"),
-//        VarMassdevScoreWeighted("varMassdevScoreWeighted"),
-//        VarBseriesScore("varBseriesScore"),
-//        VarYseriesScore("varYseriesScore"),
-//        MainVarXxSwathPrelimScore("mainVarXxSwathPrelimScore"),
+        VarIsotopeCorrelationScore("varIsotopeCorrelationScore"),
+        VarIsotopeOverlapScore("varIsotopeOverlapScore"),
+        VarMassdevScore("varMassdevScore"),
+        VarMassdevScoreWeighted("varMassdevScoreWeighted"),
+        VarBseriesScore("varBseriesScore"),
+        VarYseriesScore("varYseriesScore"),
+
 ;
         String scoreType;
 

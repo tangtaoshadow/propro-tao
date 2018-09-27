@@ -14,12 +14,14 @@ import java.io.IOException;
 @Component
 public class ScoreTsvParser {
 
+    public static String SPLIT_COMMA = ",";
+    public static String SPLIT_CHANGE_LINE = "\t";
     /**
      * Read Scores data from tsv file
      * @param file
      * @return
      */
-    public ScoreData getScoreData(File file) {
+    public ScoreData getScoreData(File file, String split) {
         try {
             Integer lines = getFileLineCount(file);
             ScoreData scoreDataMap = new ScoreData();
@@ -30,13 +32,13 @@ public class ScoreTsvParser {
             Boolean[] isDecoy = new Boolean[lines];
             String[] readLine;
             String line = reader.readLine();
-            readLine = line.split("\t");
+            readLine = line.split(split);
             String[] scoreColumns = new String[17];
             System.arraycopy(readLine, 3, scoreColumns, 0, 17);
             line = reader.readLine();
             int i = 0;
             while (line != null) {
-                readLine = line.split("\t");
+                readLine = line.split(split);
                 groupId[i] = readLine[0];
                 runId[i] = Integer.parseInt(readLine[1]);
                 isDecoy[i] = readLine[2].equals("1");
