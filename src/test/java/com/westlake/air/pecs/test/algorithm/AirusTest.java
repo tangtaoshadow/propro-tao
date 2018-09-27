@@ -47,6 +47,21 @@ public class AirusTest extends BaseTest {
         }
         scoreData.setGroupId(newGroupIds);
 
+        Double[][] realDatas = scoreData.getScoreData();
+        for (int i = 0; i < realDatas.length; i++) {
+            realDatas[i][0] =
+                    realDatas[i][1] * -0.19011762 +
+                            realDatas[i][2] * 2.47298914 +
+                            realDatas[i][7] * 5.63906731 +
+                            realDatas[i][11] * -0.62640133 +
+                            realDatas[i][12] * 0.36006925 +
+                            realDatas[i][13] * 0.08814003 +
+                            realDatas[i][3] * 0.13978311 +
+                            realDatas[i][5] * -1.16475032 +
+                            realDatas[i][16] * -0.19267813 +
+                            realDatas[i][9] * -0.61712054;
+        }
+
         FinalResult finalResult = airus.buildResult(scoreData);
         int count = 0;
         for (double d : finalResult.getAllInfo().getStatMetrics().getFdr()) {
