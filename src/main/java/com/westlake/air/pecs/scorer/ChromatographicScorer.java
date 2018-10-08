@@ -32,14 +32,14 @@ public class ChromatographicScorer {
     /**
      * @param experimentFeatures list of features in selected mrmfeature
      */
-    public void calculateChromatographicScores(List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, FeatureScores scores) {
+    public void calculateChromatographicScores(List<ExperimentFeature> experimentFeatures, List<Double> libraryIntensity, FeatureScores scores) {
         Table<Integer, Integer, Double[]> xcorrMatrix = initializeXCorrMatrix(experimentFeatures);
 
         //xcorrCoelutionScore
         //xcorrCoelutionScoreWeighted
         //xcorrShapeScore
         //xcorrShapeScoreWeighted
-        double[] normalizedLibraryIntensity = ScoreUtil.normalizeSum(libraryIntensity);
+        double[] normalizedLibraryIntensity = ScoreUtil.normalizeSumDouble(libraryIntensity);
         List<Integer> deltas = new ArrayList<>();
         List<Double> deltasWeighted = new ArrayList<>();
         List<Double> intensities = new ArrayList<>();
@@ -114,20 +114,6 @@ public class ChromatographicScorer {
         }
     }
 
-
-    /**
-     *
-     * @param experimentFeatures
-     * @param scores
-     */
-//    public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores){
-//        double intensitySum = 0.0d;
-//        for(ExperimentFeature feature: experimentFeatures){
-//            intensitySum += feature.getIntensity();
-//        }
-//        double totalXic = experimentFeatures.get(0).getTotalXic();
-//        scores.setVarIntensityScore((intensitySum / totalXic));
-//    }
 
     /**
      * Get the XCorrMatrix with experiment Features

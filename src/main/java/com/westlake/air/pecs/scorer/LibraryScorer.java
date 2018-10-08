@@ -3,10 +3,13 @@ package com.westlake.air.pecs.scorer;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
+import com.westlake.air.pecs.utils.ArrayUtils;
 import com.westlake.air.pecs.utils.ScoreUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -28,7 +31,7 @@ public class LibraryScorer {
      * @param libraryIntensity get libraryIntensity: from transitions
      * @param scores library_corr, library_norm_manhattan
      */
-    public void calculateLibraryScores(List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, FeatureScores scores){
+    public void calculateLibraryScores(List<ExperimentFeature> experimentFeatures, List<Double> libraryIntensity, FeatureScores scores){
         List<Double> experimentIntensity = new ArrayList<>();
         for(ExperimentFeature experimentFeature: experimentFeatures){
             experimentIntensity.add(experimentFeature.getIntensity());
@@ -38,7 +41,7 @@ public class LibraryScorer {
         //library_norm_manhattan
         //占比差距平均
         double sum = 0.0d;
-        double[] x = ScoreUtil.normalizeSum(libraryIntensity);
+        double[] x = ScoreUtil.normalizeSumDouble(libraryIntensity);
         double[] y = ScoreUtil.normalizeSumDouble(experimentIntensity);
         for(int i=0; i<x.length; i++){
             sum += Math.abs(x[i] - y[i]);
@@ -67,6 +70,59 @@ public class LibraryScorer {
             scores.setVarLibraryCorr(corr);
         }
 
+        //dotprodScoring
+        double[] expIntSqrt = new double[experimentIntensity.size()];
+        double[] libIntSqrt = new double[libraryIntensity.size()];
+        for(int i=0; i<expIntSqrt.length; i++){
+            expIntSqrt[i] = Math.sqrt(experimentIntensity.get(i));
+            libIntSqrt[i] = Math.sqrt(libraryIntensity.get(i));
+        }
+        double expIntNorm = norm(expIntSqrt);
+        double libIntNorm = norm(libIntSqrt);
+
+        double[] expIntSqrtDivided = normalize(expIntSqrt, expIntNorm);
+        double[] libIntSqrtDivided = normalize(libIntSqrt, libIntNorm);
+
+        double sumOfMult = 0;
+        for(int i=0; i<expIntSqrt.length; i++){
+            sumOfMult += expIntSqrtDivided[i] * libIntSqrtDivided[i];
+        }
+        scores.setVarLibraryDotprod(sumOfMult);
+
+        //manhattan
+        double expIntTotal = ArrayUtils.sumArray(expIntSqrt);
+        double libIntTotal = ArrayUtils.sumArray(libIntSqrt);
+        expIntSqrtDivided = normalize(expIntSqrt, expIntTotal);
+        libIntSqrtDivided = normalize(libIntSqrt, libIntTotal);
+        double sumOfDivide = 0;
+        for(int i=0; i<expIntSqrt.length; i++){
+            sumOfDivide += Math.abs(expIntSqrtDivided[i] - libIntSqrtDivided[i]);
+        }
+        scores.setVarLibraryManhattan(sumOfDivide);
+
+        //spectral angle
+        double dotprod = 0, xLen = 0, yLen = 0;
+        for(int i=0; i<libraryIntensity.size(); i++){
+            dotprod += experimentIntensity.get(i) * libraryIntensity.get(i);
+            xLen += experimentIntensity.get(i) * experimentIntensity.get(i);
+            yLen += libraryIntensity.get(i) * libraryIntensity.get(i);
+        }
+        double spectralAngle = Math.acos(dotprod / (Math.sqrt(xLen) * Math.sqrt(yLen)));
+        scores.setVarLibrarySangle(spectralAngle);
+
+        //root mean square
+        if(libraryIntensity.size() == 0){
+            scores.setVarLibraryRootmeansquare(0);
+        }else {
+            double rms = 0;
+            for(int i=0; i<libraryIntensity.size(); i++){
+                rms += (libraryIntensity.get(i) - experimentIntensity.get(i)) * (libraryIntensity.get(i) - experimentIntensity.get(i));
+            }
+            rms = Math.sqrt(rms / libraryIntensity.size());
+            scores.setVarLibraryRootmeansquare(rms);
+        }
+
+
     }
 
     public void calculateNormRtScore(List<ExperimentFeature> experimentFeatures, SlopeIntercept slopeIntercept, double groupRt, FeatureScores scores){
@@ -90,4 +146,22 @@ public class LibraryScorer {
         double totalXic = experimentFeatures.get(0).getTotalXic();
         scores.setVarIntensityScore((intensitySum / totalXic));
     }
+
+    private double norm(double[] array){
+        double sum = 0;
+        for(int i=0; i<array.length; i++){
+            sum += array[i] * array[i];
+        }
+        return Math.sqrt(sum);
+    }
+
+    private double[] normalize(double[] array, double value){
+        if(value > 0){
+            for(int i=0; i<array.length; i++){
+                array[i] /= value;
+            }
+        }
+        return array;
+    }
+
 }

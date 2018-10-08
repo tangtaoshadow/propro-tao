@@ -37,9 +37,9 @@ public class ScorerTest extends BaseTest {
         //List<RtIntensityPairsDouble> chromatograms, List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, List<double[]> signalToNoiseList, FeatureScores scores
         List<RtIntensityPairsDouble> chromatograms = new ArrayList<>();
         List<ExperimentFeature> experimentFeatures = prepareChromatogramTestFeature();
-        List<Float> libraryIntensity = new ArrayList<>();
-        libraryIntensity.add(0.5f);
-        libraryIntensity.add(0.5f);
+        List<Double> libraryIntensity = new ArrayList<>();
+        libraryIntensity.add(0.5d);
+        libraryIntensity.add(0.5d);
         List<double[]> signalToNoiseList = new ArrayList<>();
         FeatureScores scores = new FeatureScores();
 
@@ -60,10 +60,10 @@ public class ScorerTest extends BaseTest {
         //List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, FeatureScores scores
         List<ExperimentFeature> experimentFeatures = prepareLibraryTestFeature();
 
-        List<Float> libraryIntensity = new ArrayList<>();
-        libraryIntensity.add(1f);
-        libraryIntensity.add(10000f);
-        libraryIntensity.add(2000f);
+        List<Double> libraryIntensity = new ArrayList<>();
+        libraryIntensity.add(1d);
+        libraryIntensity.add(10000d);
+        libraryIntensity.add(2000d);
 
         FeatureScores scores = new FeatureScores();
 

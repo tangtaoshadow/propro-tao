@@ -17,7 +17,7 @@ public class FeatureByPep {
 
     List<List<ExperimentFeature>> experimentFeatures;
 
-    List<Float> libraryIntensityList;
+    List<Double> libraryIntensityList;
 
     List<double[]> noise1000List;
 }

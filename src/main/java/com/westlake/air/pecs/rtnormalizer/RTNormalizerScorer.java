@@ -47,7 +47,7 @@ public class RTNormalizerScorer {
      * @param libraryIntensity intensity in transitionList in transitionGroup
      * @return List of overallQuality
      */
-    public List<ScoreRtPair> score(List<RtIntensityPairsDouble> chromatograms, List<List<ExperimentFeature>> experimentFeatures, List<Float> libraryIntensity, List<double[]> noise1000List, SlopeIntercept slopeIntercept, double groupRt){
+    public List<ScoreRtPair> score(List<RtIntensityPairsDouble> chromatograms, List<List<ExperimentFeature>> experimentFeatures, List<Double> libraryIntensity, List<double[]> noise1000List, SlopeIntercept slopeIntercept, double groupRt){
 
 
         List<ScoreRtPair> finalScores = new ArrayList<>();

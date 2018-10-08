@@ -14,7 +14,7 @@ import java.io.IOException;
 @Component
 public class ScoreTsvParser {
 
-    public static String SPLIT_COMMA = ",";
+    public static String SPLIT_COMMA = "\t";
     public static String SPLIT_CHANGE_LINE = "\t";
     /**
      * Read Scores data from tsv file

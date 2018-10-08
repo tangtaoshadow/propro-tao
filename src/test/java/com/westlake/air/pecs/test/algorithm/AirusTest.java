@@ -27,25 +27,25 @@ public class AirusTest extends BaseTest {
     public void airusFinalNumberTest() {
         ScoreData scoreData = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResult.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
         //这里需要特殊处理一下这份入参的group_id,因为它并不适配pyprophet的系统
-        String[] newGroupIds = new String[scoreData.getGroupId().length];
-        HashSet<String> existedGroupId = new HashSet<>();
-        int indexCount = 0;
-        for (int i = 0; i < scoreData.getGroupId().length; i++) {
-            String oldGroupId = scoreData.getGroupId()[i];
-            String newGroupId = "";
-            if (oldGroupId.contains("DECOY")) {
-                oldGroupId = oldGroupId.replace("DECOY_", "");
-                newGroupId = "DECOY_";
-            }
-            oldGroupId = oldGroupId.replace("_run0", "");
-            if (!existedGroupId.contains(oldGroupId)) {
-                indexCount++;
-                existedGroupId.add(oldGroupId);
-            }
-            newGroupId = newGroupId + indexCount + "_run0";
-            newGroupIds[i] = newGroupId;
-        }
-        scoreData.setGroupId(newGroupIds);
+//        String[] newGroupIds = new String[scoreData.getGroupId().length];
+//        HashSet<String> existedGroupId = new HashSet<>();
+//        int indexCount = 0;
+//        for (int i = 0; i < scoreData.getGroupId().length; i++) {
+//            String oldGroupId = scoreData.getGroupId()[i];
+//            String newGroupId = "";
+//            if (oldGroupId.contains("DECOY")) {
+//                oldGroupId = oldGroupId.replace("DECOY_", "");
+//                newGroupId = "DECOY_";
+//            }
+//            oldGroupId = oldGroupId.replace("_run0", "");
+//            if (!existedGroupId.contains(oldGroupId)) {
+//                indexCount++;
+//                existedGroupId.add(oldGroupId);
+//            }
+//            newGroupId = newGroupId + indexCount + "_run0";
+//            newGroupIds[i] = newGroupId;
+//        }
+//        scoreData.setGroupId(newGroupIds);
 
         FinalResult finalResult = airus.buildResult(scoreData);
         int count = 0;

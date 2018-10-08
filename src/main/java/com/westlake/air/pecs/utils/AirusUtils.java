@@ -243,32 +243,26 @@ public class AirusUtils {
      */
     public static ScoreData fakeSortTgId(ScoreData scoreData) {
         String[] groupId = scoreData.getGroupId();
-        Integer[] groupNumId = scoreData.getGroupNumId();
-//        AirusUtils.sort(groupNumId);
-//        Integer[] test1 = AirusUtils.sortedUnique(groupNumId);
         int groupIdLength = groupId.length;
-        Double[] tgIdNum = new Double[groupIdLength];
-        for (int i = 0; i < groupIdLength; i++) {
-            String[] groupIdSplit = groupId[i].split("_");
-            if (groupIdSplit[0].equals("DECOY")) {
-                tgIdNum[i] = Double.parseDouble(groupIdSplit[1]);
-//                groupId[i] = groupIdSplit[1] + "_" + groupIdSplit[2];
-            } else {
-                tgIdNum[i] = Double.parseDouble(groupIdSplit[0]);
-//                groupId[i] = groupIdSplit[0] + "_" + groupIdSplit[1];
-            }
-            if (tgIdNum[i] < 10) {
-                tgIdNum[i] = tgIdNum[i] * 100 + 99.5;
-            } else if (tgIdNum[i] < 100) {
-                tgIdNum[i] = tgIdNum[i] * 10 + 9.5;
-            }
-
-        }
-        Integer[] index = ArrayUtils.indexBeforeSort(tgIdNum);
+        Integer[] index = ArrayUtils.indexBeforeSort(groupId);
+//        Double[] tgIdNum = new Double[groupIdLength];
+//        for (int i = 0; i < groupIdLength; i++) {
+//            String[] groupIdSplit = groupId[i].split("_");
+//            if (groupIdSplit[0].equals("DECOY")) {
+//                tgIdNum[i] = Double.parseDouble(groupIdSplit[1]);
+//            } else {
+//                tgIdNum[i] = Double.parseDouble(groupIdSplit[0]);
+//            }
+//            if (tgIdNum[i] < 10) {
+//                tgIdNum[i] = tgIdNum[i] * 100 + 99.5;
+//            } else if (tgIdNum[i] < 100) {
+//                tgIdNum[i] = tgIdNum[i] * 10 + 9.5;
+//            }
+//
+//        }
+//        Integer[] index = ArrayUtils.indexBeforeSort(tgIdNum);
 //        Integer[] indexTest = AirusUtils.indexBeforeSort(tgIdNum);
 
-//        AirusUtils.sort(indexTest);
-//        Integer[] testNum = AirusUtils.sortedUnique(indexTest);
         Boolean[] isDecoy = scoreData.getIsDecoy();
         Double[][] scores = scoreData.getScoreData();
         String[] newGroupId = new String[groupIdLength];

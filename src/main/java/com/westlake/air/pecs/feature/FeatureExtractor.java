@@ -66,7 +66,7 @@ public class FeatureExtractor {
         List<IntensityRtLeftRtRightPairs> intensityRtLeftRtRightPairsList = new ArrayList<>();
 
         //得到peptideRef对应的intensityList
-        List<Float> libraryIntensityList = new ArrayList<>();
+        List<Double> libraryIntensityList = new ArrayList<>();
         HashMap<String,Float> intensityMap = intensityGroupByPep.getIntensityMap();
 
         //对每一个chromatogram进行运算,dataDO中不含有ms1
@@ -98,7 +98,7 @@ public class FeatureExtractor {
             rtIntensityPairsOriginList.add(rtIntensityPairsOrigin);
             maxRtIntensityPairsList.add(maxPeakPairs);
             intensityRtLeftRtRightPairsList.add(intensityRtLeftRtRightPairs);
-            libraryIntensityList.add(intensityMap.get(cutInfo));
+            libraryIntensityList.add(Double.parseDouble(Float.toString(intensityMap.get(cutInfo))));
             noise1000List.add(noisesOri1000);
         }
         if (rtIntensityPairsOriginList.size() == 0) {

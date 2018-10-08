@@ -7,35 +7,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class IndexValue implements Comparable<IndexValue> {
+public class IndexValue<T extends Comparable> implements Comparable<IndexValue<T>> {
 
-    double value;
+    T value;
     int index;
 
-    public IndexValue(double value, int index) {
+    public IndexValue(T value, int index) {
         this.value = value;
         this.index = index;
     }
 
-    public static List<IndexValue> buildList(Double[] arrays) {
+    public List<IndexValue<T>> buildList(T[] arrays) {
         if (arrays == null || arrays.length == 0) {
             return null;
         }
 
-        List<IndexValue> indexValues = new ArrayList<>();
+        List<IndexValue<T>> indexValues = new ArrayList<>();
         for (int i = 0; i < arrays.length; i++) {
-            indexValues.add(new IndexValue(arrays[i], i));
+            indexValues.add(new IndexValue<>(arrays[i], i));
         }
         return indexValues;
     }
 
     @Override
-    public int compareTo(@NotNull IndexValue o) {
+    public int compareTo(@NotNull IndexValue<T> o) {
 
-        if (value < o.value) {
+        if (value.compareTo(o.value) < 0) {
             return -1;
         }
-        if (value > o.value) {
+        if (value.compareTo(o.value) > 0) {
             return 1;
         }
         if(value == o.value){

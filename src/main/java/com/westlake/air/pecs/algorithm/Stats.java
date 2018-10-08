@@ -111,9 +111,9 @@ public class Stats {
         for (int i = 0; i < numOfLambda; i++) {
             for (int j = 0; j < numOfPvalue; j++) {
                 if (pvalues[j] < lambda[i]) {
-                    meanPL[j] = (double) 0;
+                    meanPL[j] = 0d;
                 } else {
-                    meanPL[j] = (double) 1;
+                    meanPL[j] = 1d;
                 }
             }
             pi0Lambda[i] = ArrayUtils.mean(meanPL) / (1 - lambda[i]);
@@ -147,7 +147,15 @@ public class Stats {
                 w = ArrayUtils.countOverThreshold(pvalues, lambda[i]);
                 mse[i] = (w / (Math.pow(numOfPvalue, 2) * Math.pow((1 - lambda[i]), 2))) * (1 - w / numOfPvalue) + Math.pow((pi0Lambda[i] - sortedPi0Lambda[0]), 2);
             }
-            pi0 = Math.min(pi0Lambda[ArrayUtils.argmin(mse)], 1);
+            double min = 100;
+            int index = 0;
+            for(int i=0; i<mse.length; i++){
+                if(pi0Lambda[i] > 0 && mse[i] < min){
+                    min = mse[i];
+                    index = i;
+                }
+            }
+            pi0 = Math.min(pi0Lambda[index], 1);
             pi0Smooth = null;
         } else {
             logger.error("Pi0Est Method Error.No Method Called "+pi0Method);

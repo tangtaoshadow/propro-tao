@@ -299,7 +299,7 @@ public class ScoresServiceImpl implements ScoresService {
             }
             List<List<ExperimentFeature>> experimentFeatures = featureByPep.getExperimentFeatures();
             List<RtIntensityPairsDouble> chromatogramList = featureByPep.getRtIntensityPairsOriginList();
-            List<Float> libraryIntensityList = featureByPep.getLibraryIntensityList();
+            List<Double> libraryIntensityList = featureByPep.getLibraryIntensityList();
             List<double[]> noise1000List = featureByPep.getNoise1000List();
             List<Double> productMzList = new ArrayList<>();
             for (AnalyseDataDO dataDO : group.getDataMap().values()){// TODO @Nico 精度必要性

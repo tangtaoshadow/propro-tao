@@ -39,9 +39,9 @@ public class ScoreTest extends BaseTest {
     public void scoreTest() throws IOException {
         double groupRt = 0.44;
 
-        List<Float> libraryIntensityList = new ArrayList<>();
-        libraryIntensityList.add(1f);
-        libraryIntensityList.add(2f);
+        List<Double> libraryIntensityList = new ArrayList<>();
+        libraryIntensityList.add(1d);
+        libraryIntensityList.add(2d);
 
         File fileTest1 = new File(PeakPickerTest.class.getClassLoader().getResource("data/scoreTest1.txt").getPath());
         BufferedReader readerTest1 = new BufferedReader(new FileReader(fileTest1));

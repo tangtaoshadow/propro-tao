@@ -346,8 +346,21 @@ public class ArrayUtils {
      * Get ascend sort index of array[].
      */
     public static Integer[] indexBeforeSort(Double[] array) {
+        IndexValue<Double> indexValue = new IndexValue<>(array[0],0);
+        List<IndexValue<Double>> indexValues = indexValue.buildList(array);
+        Collections.sort(indexValues);
 
-        List<IndexValue> indexValues = IndexValue.buildList(array);
+        int n = array.length;
+        Integer[] result = new Integer[n];
+
+        for (int i = 0; i < n; i++) {
+            result[i] = indexValues.get(i).getIndex();
+        }
+        return result;
+    }
+    public static Integer[] indexBeforeSort(String[] array) {
+        IndexValue<String> indexValue = new IndexValue<>(array[0],0);
+        List<IndexValue<String>> indexValues = indexValue.buildList(array);
         Collections.sort(indexValues);
 
         int n = array.length;
@@ -363,7 +376,8 @@ public class ArrayUtils {
      * Get descend sort index of array[].
      */
     public static Integer[] indexBeforeReversedSort(Double[] array) {
-        List<IndexValue> indexValues = IndexValue.buildList(array);
+        IndexValue<Double> indexValue = new IndexValue<>(0d,0);
+        List<IndexValue<Double>> indexValues = indexValue.buildList(array);
         Collections.sort(indexValues);
         Collections.reverse(indexValues);
         int n = array.length;
@@ -823,5 +837,13 @@ public class ArrayUtils {
                 }
             }
         }
+    }
+
+    public static double sumArray(double[] array){
+        double sum = 0;
+        for(double value: array){
+            sum += value;
+        }
+        return sum;
     }
 }

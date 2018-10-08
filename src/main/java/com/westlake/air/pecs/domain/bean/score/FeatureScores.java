@@ -45,6 +45,21 @@ public class FeatureScores {
     //对experiment intensity 算占比差距平均值
     double varLibraryRsmd;
 
+    //
+    double varLibraryDotprod;
+
+    //
+    double varLibraryManhattan;
+
+    //
+    double varLibrarySangle;
+
+    //
+    double varLibraryRootmeansquare;
+
+    //
+    double varManhattScore;
+
     //互相关偏移的mean + std
     double varXcorrCoelution;
 

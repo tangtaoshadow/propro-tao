@@ -69,10 +69,10 @@ public class SemiSupervised {
             //Get part of scores as train input.
             TrainAndTest trainAndTest = AirusUtils.splitForXval(scores, groupNumId, isDecoy, params.getXevalFraction(), params.isTest());
             Double[][] trainScores = trainAndTest.getTrainData();
-//            Double[][] testScores = trainAndTest.getTestData();
             Integer[] trainId = trainAndTest.getTrainId();
-//            Integer[] testId = trainAndTest.getTestId();
             Boolean[] trainIsDecoy = trainAndTest.getTrainIsDecoy();
+//            Double[][] testScores = trainAndTest.getTestData();
+//            Integer[] testId = trainAndTest.getTestId();
 //            Boolean[] testIsDecoy = trainAndTest.getTestIsDecoy();
             Double[] mainScore = ArrayUtils.extractColumn(trainScores, 0);
             Boolean[] isTopPeak = AirusUtils.findTopIndex(mainScore, trainId);

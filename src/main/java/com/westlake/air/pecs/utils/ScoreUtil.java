@@ -51,22 +51,6 @@ public class ScoreUtil {
      * @param libraryIntensity input intensity list
      * @return output normalized intensity list
      */
-    public static double[] normalizeSum(List<Float> libraryIntensity){
-        double[] normalizedLibraryIntensity = new double[libraryIntensity.size()];
-        double sum = 0d;
-        for(Float intensity: libraryIntensity){
-            sum += Double.parseDouble(Float.toString(intensity));
-        }
-
-        if(sum == 0d){
-            sum += 0.000001;
-        }
-
-        for(int i = 0; i<libraryIntensity.size(); i++){
-            normalizedLibraryIntensity[i] = Double.parseDouble(Float.toString(libraryIntensity.get(i)))/ sum;
-        }
-        return normalizedLibraryIntensity;
-    }
     public static double[] normalizeSumDouble(List<Double> libraryIntensity){
         double[] normalizedLibraryIntensity = new double[libraryIntensity.size()];
         double sum = 0d;
