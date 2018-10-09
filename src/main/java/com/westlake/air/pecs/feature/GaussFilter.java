@@ -3,6 +3,7 @@ package com.westlake.air.pecs.feature;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
+import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,6 +12,12 @@ import org.springframework.stereotype.Component;
  */
 @Component("gaussFilter")
 public class GaussFilter {
+
+    public Double[] filter(AnalyseDataDO dataDO) {
+        RtIntensityPairsDouble pairsDouble = new RtIntensityPairsDouble(dataDO.getRtArray(), dataDO.getIntensityArray());
+        RtIntensityPairsDouble result = filter(pairsDouble, SigmaSpacing.create());
+        return result.getIntensityArray();
+    }
 
     /**
      * @param pairs

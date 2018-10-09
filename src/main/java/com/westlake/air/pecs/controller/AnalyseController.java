@@ -16,6 +16,7 @@ import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
+import com.westlake.air.pecs.feature.GaussFilter;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.ExperimentService;
@@ -57,6 +58,8 @@ public class AnalyseController extends BaseController {
     ScoreTask scoreTask;
     @Autowired
     Airus airus;
+    @Autowired
+    GaussFilter gaussFilter;
 
     @RequestMapping(value = "/overview/list")
     String overviewList(Model model,
@@ -387,11 +390,12 @@ public class AnalyseController extends BaseController {
 
         List<AnalyseDataDO> dataList = dataResult.getModel();
 
+
         JSONObject res = new JSONObject();
         JSONArray rtArray = new JSONArray();
-
         JSONArray intensityArrays = new JSONArray();
         JSONArray cutInfoArray = new JSONArray();
+
         //同一组的rt坐标是相同的
         Float[] pairRtArray = dataList.get(0).getRtArray();
         for (int n = 0; n < pairRtArray.length; n++) {
@@ -400,6 +404,58 @@ public class AnalyseController extends BaseController {
 
         for(AnalyseDataDO data : dataList){
             Float[] pairIntensityArray = data.getIntensityArray();
+            JSONArray intensityArray = new JSONArray();
+            if(pairIntensityArray == null){
+                continue;
+            }
+            for (int i = 0; i < pairIntensityArray.length; i++) {
+                intensityArray.add(pairIntensityArray[i]);
+            }
+            cutInfoArray.add(data.getCutInfo());
+            intensityArrays.add(intensityArray);
+        }
+
+        res.put("rt", rtArray);
+        res.put("cutInfoArray", cutInfoArray);
+        res.put("intensityArrays", intensityArrays);
+        resultDO.setModel(res);
+        return resultDO;
+    }
+
+    @RequestMapping(value = "/gaussFilter")
+    @ResponseBody
+    ResultDO<JSONObject> gaussFilter(Model model,
+                                   @RequestParam(value = "overviewId", required = false) String overviewId,
+                                   @RequestParam(value = "isDecoy", required = false) Boolean isDecoy,
+                                   @RequestParam(value = "peptideRef", required = false) String peptideRef) {
+        ResultDO<List<AnalyseDataDO>> dataResult = null;
+        if (overviewId != null && peptideRef != null) {
+            dataResult = analyseDataService.getMS2DataList(overviewId, peptideRef, isDecoy);
+        } else {
+            return ResultDO.buildError(ResultCode.ANALYSE_DATA_NOT_EXISTED);
+        }
+
+        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
+        if (dataResult.isFailed()) {
+            resultDO.setErrorResult(ResultCode.ANALYSE_DATA_NOT_EXISTED);
+            return resultDO;
+        }
+
+        List<AnalyseDataDO> dataList = dataResult.getModel();
+
+        JSONObject res = new JSONObject();
+        JSONArray rtArray = new JSONArray();
+        JSONArray intensityArrays = new JSONArray();
+        JSONArray cutInfoArray = new JSONArray();
+
+        //同一组的rt坐标是相同的
+        Float[] pairRtArray = dataList.get(0).getRtArray();
+        for (int n = 0; n < pairRtArray.length; n++) {
+            rtArray.add(pairRtArray[n]);
+        }
+
+        for(AnalyseDataDO data : dataList){
+            Double[] pairIntensityArray = gaussFilter.filter(data);
             JSONArray intensityArray = new JSONArray();
             if(pairIntensityArray == null){
                 continue;

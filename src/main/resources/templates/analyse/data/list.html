@@ -75,15 +75,15 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="26%">蛋白名称</th>
-                    <th width="25%">肽段全称</th>
-                    <th width="5%">标记</th>
-                    <th width="10%">肽段真伪</th>
+                    <th width="25%">蛋白名称</th>
+                    <th width="20%">肽段全称</th>
+                    <th width="10%">标记</th>
+                    <th width="5%">肽段真伪</th>
                     <th width="5%">切分标记</th>
                     <th width="5%">MS等级</th>
                     <th width="7%">MZ</th>
-                    <th width="7%">RT</th>
-                    <th width="10%">操作</th>
+                    <th width="6%">RT</th>
+                    <th width="17%">操作</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -245,7 +245,14 @@
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Target Info</h5>
+                        <h5 class="modal-title">
+                            <button type="button" class="btn btn-sm btn-warning" th:onclick="|gaussFilter()|">
+                                高斯平滑
+                            </button>
+                            <button type="button" class="btn btn-sm btn-brand" th:onclick="|queryGroup()|">
+                                原始数据
+                            </button>
+                        </h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
                     </div>
@@ -277,6 +284,10 @@
         /*]]>*/
         var chart;
         var chartGroup;
+
+        var isDecoy;
+        var overviewId;
+        var peptideRef;
 
         $(document).ready(function () {
             $('#pagination').bootpag({
@@ -368,8 +379,23 @@
 
             chart.setOption(option);
         }
-
         function queryGroup(isDecoy, overviewId, peptideRef) {
+            if(isDecoy == null){
+                isDecoy = this.isDecoy;
+            }else{
+                this.isDecoy = isDecoy;
+            }
+            if(overviewId == null){
+                overviewId = this.overviewId;
+            }else{
+                this.overviewId = overviewId;
+            }
+            if(peptideRef == null){
+                peptideRef = this.peptideRef;
+            }else{
+                this.peptideRef = peptideRef;
+            }
+
             var result = $.ajax({
                 type: "POST",
                 url: "/analyse/viewGroup",
@@ -377,6 +403,78 @@
                     isDecoy: isDecoy,
                     overviewId: overviewId,
                     peptideRef: peptideRef
+                },
+                dataType: "json",
+                async: false
+            });
+
+            var datas = result.responseJSON.model;
+            var data_rt = datas.rt;
+            var cutinfo = datas.cutInfoArray;
+            var intensity_arrays = datas.intensityArrays;
+
+            var intensity_series = [];
+            for (var i = 0; i < intensity_arrays.length; i++) {
+                intensity_series.push({name: cutinfo[i], type: 'line',smooth: true, data: intensity_arrays[i]});
+            }
+            option = {
+                title: {
+                    text: peptideRef + ":" + intensity_arrays.length + "个MS2碎片;",
+                    left: 10
+                },
+                legend: {
+                    data: ['rt/intensity'],
+                    align: 'left'
+                },
+                toolbox: {
+                    // y: 'bottom',
+                    feature: {
+                        magicType: {
+                            type: ['stack', 'tiled']
+                        },
+                        dataView: {},
+                        dataZoom: {
+                            yAxisIndex: false
+                        },
+                        saveAsImage: {
+                            pixelRatio: 2
+                        }
+
+                    }
+                },
+                dataZoom: [{
+                    type: 'inside'
+                }, {
+                    type: 'slider'
+                }],
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                xAxis: {
+                    data: data_rt,
+                    silent: false,
+                    splitLine: {
+                        show: false
+                    }
+                },
+                yAxis: {},
+                series: intensity_series
+            };
+
+            chartGroup.setOption(option);
+        }
+
+        function gaussFilter() {
+            var result = $.ajax({
+                type: "POST",
+                url: "/analyse/gaussFilter",
+                data: {
+                    isDecoy: this.isDecoy,
+                    overviewId: this.overviewId,
+                    peptideRef: this.peptideRef
                 },
                 dataType: "json",
                 async: false
