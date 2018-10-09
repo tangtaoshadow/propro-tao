@@ -16,10 +16,11 @@ import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
-import com.westlake.air.pecs.domain.query.PageQuery;
-import com.westlake.air.pecs.service.*;
+import com.westlake.air.pecs.service.AnalyseDataService;
+import com.westlake.air.pecs.service.AnalyseOverviewService;
+import com.westlake.air.pecs.service.ExperimentService;
+import com.westlake.air.pecs.service.TransitionService;
 import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -361,6 +362,55 @@ public class AnalyseController extends BaseController {
 
         res.put("rt", rtArray);
         res.put("intensity", intensityArray);
+        resultDO.setModel(res);
+        return resultDO;
+    }
+
+    @RequestMapping(value = "/viewGroup")
+    @ResponseBody
+    ResultDO<JSONObject> viewGroup(Model model,
+                              @RequestParam(value = "overviewId", required = false) String overviewId,
+                              @RequestParam(value = "isDecoy", required = false) Boolean isDecoy,
+                              @RequestParam(value = "peptideRef", required = false) String peptideRef) {
+        ResultDO<List<AnalyseDataDO>> dataResult = null;
+        if (overviewId != null && peptideRef != null) {
+            dataResult = analyseDataService.getMS2DataList(overviewId, peptideRef, isDecoy);
+        } else {
+            return ResultDO.buildError(ResultCode.ANALYSE_DATA_NOT_EXISTED);
+        }
+
+        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
+        if (dataResult.isFailed()) {
+            resultDO.setErrorResult(ResultCode.ANALYSE_DATA_NOT_EXISTED);
+            return resultDO;
+        }
+
+        List<AnalyseDataDO> dataList = dataResult.getModel();
+
+        JSONObject res = new JSONObject();
+        JSONArray rtArray = new JSONArray();
+
+        JSONArray intensityArrays = new JSONArray();
+        //同一组的rt坐标是相同的
+        Float[] pairRtArray = dataList.get(0).getRtArray();
+        for (int n = 0; n < pairRtArray.length; n++) {
+            rtArray.add(pairRtArray[n]);
+        }
+
+        for(AnalyseDataDO data : dataList){
+            Float[] pairIntensityArray = data.getIntensityArray();
+            JSONArray intensityArray = new JSONArray();
+            if(pairIntensityArray == null){
+                continue;
+            }
+            for (int i = 0; i < pairIntensityArray.length; i++) {
+                intensityArray.add(pairIntensityArray[i]);
+            }
+            intensityArrays.add(intensityArray);
+        }
+
+        res.put("rt", rtArray);
+        res.put("intensityArrays", intensityArrays);
         resultDO.setModel(res);
         return resultDO;
     }

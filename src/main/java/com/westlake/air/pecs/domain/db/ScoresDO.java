@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -26,6 +27,9 @@ public class ScoresDO {
     @Indexed
     String peptideRef;
 
+    @Indexed
+    String proteinName;
+
     Boolean isDecoy = false;
 
     List<FeatureScores> featureScoresList;
@@ -33,4 +37,11 @@ public class ScoresDO {
     Date createDate;
 
     Date lastModifiedDate;
+
+    public void addFeatureScores(FeatureScores featureScores){
+        if(featureScoresList == null){
+            featureScoresList = new ArrayList<>();
+        }
+        featureScoresList.add(featureScores);
+    }
 }

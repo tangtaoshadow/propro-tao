@@ -1,20 +1,27 @@
 package com.westlake.air.pecs.parser;
 
 
-import com.westlake.air.pecs.utils.AirusUtils;
-import com.westlake.air.pecs.utils.ArrayUtils;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
+import com.westlake.air.pecs.domain.db.ScoresDO;
+import com.westlake.air.pecs.utils.AirusUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 
 @Component
 public class ScoreTsvParser {
 
-    public static String SPLIT_COMMA = "\t";
+    public final Logger logger = LoggerFactory.getLogger(ScoreTsvParser.class);
+
+    public static String SPLIT_COMMA = ",";
     public static String SPLIT_CHANGE_LINE = "\t";
     /**
      * Read Scores data from tsv file
@@ -58,6 +65,50 @@ public class ScoreTsvParser {
             scoreDataMap.setGroupNumId(groupNumId);
 
             return detectNull(scoreDataMap);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+    /**
+     * Read Scores data from tsv file
+     * key为 isDecoy_peptideRef
+     * @param file
+     * @return
+     */
+    public HashMap<String, ScoresDO> getScoreMap(File file, String split) {
+        try {
+            HashMap<String, ScoresDO> scoreDataMap = new HashMap<>();
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String[] lineArray;
+            //读取第一行label
+            String line = reader.readLine();
+            //读取第二行内容
+            line = reader.readLine();
+
+            while (line != null) {
+                lineArray = line.split(split);
+                String key = lineArray[2].equals("1") + "_" + lineArray[20]+"_"+lineArray[21];
+                ScoresDO scoresDO = scoreDataMap.get(key);
+                if(scoresDO == null){
+                    scoresDO = new ScoresDO();
+                    scoresDO.setIsDecoy(lineArray[2].equals("1"));
+                    scoresDO.setPeptideRef(lineArray[20]+"_"+lineArray[21]);
+                    scoreDataMap.put(key, scoresDO);
+                }
+                Double[] scores = new Double[17];
+                for (int j = 0; j < 17; j++) {
+                    scores[j] = Double.parseDouble(lineArray[j + 3]);
+                }
+                FeatureScores featureScores = FeatureScores.toFeaturesScores(scores);
+                scoresDO.addFeatureScores(featureScores);
+                line = reader.readLine();
+            }
+
+            return scoreDataMap;
+
         } catch (IOException e) {
             e.printStackTrace();
             return null;

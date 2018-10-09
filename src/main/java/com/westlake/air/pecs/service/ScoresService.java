@@ -9,6 +9,7 @@ import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.ScoresQuery;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -22,6 +23,8 @@ public interface ScoresService {
     ResultDO<List<ScoresDO>> getList(ScoresQuery targetQuery);
 
     List<ScoresDO> getAllByOverviewId(String overviewId);
+
+    HashMap<String, ScoresDO> getAllMapByOverviewId(String overviewId);
 
     ResultDO insert(ScoresDO scoresDO);
 

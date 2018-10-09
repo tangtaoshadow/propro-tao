@@ -4,13 +4,15 @@ import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
+import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.parser.ScoreTsvParser;
+import com.westlake.air.pecs.service.ScoresService;
 import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
-import java.util.HashSet;
+import java.util.HashMap;
 
 /**
  * Created by James Lu MiaoShan
@@ -18,49 +20,17 @@ import java.util.HashSet;
  */
 public class AirusTest extends BaseTest {
 
+
     @Autowired
     Airus airus;
     @Autowired
     ScoreTsvParser scoreTsvParser;
+    @Autowired
+    ScoresService scoresService;
 
     @Test
     public void airusFinalNumberTest() {
-        ScoreData scoreData = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResult.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
-        //这里需要特殊处理一下这份入参的group_id,因为它并不适配pyprophet的系统
-//        String[] newGroupIds = new String[scoreData.getGroupId().length];
-//        HashSet<String> existedGroupId = new HashSet<>();
-//        int indexCount = 0;
-//        for (int i = 0; i < scoreData.getGroupId().length; i++) {
-//            String oldGroupId = scoreData.getGroupId()[i];
-//            String newGroupId = "";
-//            if (oldGroupId.contains("DECOY")) {
-//                oldGroupId = oldGroupId.replace("DECOY_", "");
-//                newGroupId = "DECOY_";
-//            }
-//            oldGroupId = oldGroupId.replace("_run0", "");
-//            if (!existedGroupId.contains(oldGroupId)) {
-//                indexCount++;
-//                existedGroupId.add(oldGroupId);
-//            }
-//            newGroupId = newGroupId + indexCount + "_run0";
-//            newGroupIds[i] = newGroupId;
-//        }
-//        scoreData.setGroupId(newGroupIds);
-
-        Double[][] realDatas = scoreData.getScoreData();
-        for (int i = 0; i < realDatas.length; i++) {
-            realDatas[i][0] =
-                    realDatas[i][1] * -0.19011762 +
-                            realDatas[i][2] * 2.47298914 +
-                            realDatas[i][7] * 5.63906731 +
-                            realDatas[i][11] * -0.62640133 +
-                            realDatas[i][12] * 0.36006925 +
-                            realDatas[i][13] * 0.08814003 +
-                            realDatas[i][3] * 0.13978311 +
-                            realDatas[i][5] * -1.16475032 +
-                            realDatas[i][16] * -0.19267813 +
-                            realDatas[i][9] * -0.61712054;
-        }
+        ScoreData scoreData = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
 
         FinalResult finalResult = airus.buildResult(scoreData);
         int count = 0;
@@ -119,6 +89,27 @@ public class AirusTest extends BaseTest {
             assert isSimilar(fnr, fnrResult, Math.pow(10, -5));
             assert isSimilar(svalue, svalueResult, Math.pow(10, -5));
         }
+    }
+
+    @Test
+    public void isScoresSame() {
+        HashMap<String, ScoresDO> scoresMapFromFile = scoreTsvParser.getScoreMap(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
+        HashMap<String, ScoresDO> scoresMapFromDB = scoresService.getAllMapByOverviewId("5bab8822fc6f9e47c4604f05");
+
+        assert scoresMapFromDB.size() == 690;
+        assert scoresMapFromFile.size() == scoresMapFromDB.size();
+        int sameScoresCount = 0;
+        for(String key : scoresMapFromFile.keySet()){
+            ScoresDO fileScore = scoresMapFromFile.get(key);
+            ScoresDO dbScore = scoresMapFromDB.get(key);
+            if(fileScore.getFeatureScoresList().size() != dbScore.getFeatureScoresList().size()){
+                sameScoresCount++;
+                logger.info(key+"/"+fileScore.getFeatureScoresList().size() + "/" + dbScore.getFeatureScoresList().size());
+            }else{
+                System.out.println(key);
+            }
+        }
+        logger.info(sameScoresCount+"/690");
     }
 
     private boolean isSimilar(Double[] array1, Double[] array2, Double tolerance) {

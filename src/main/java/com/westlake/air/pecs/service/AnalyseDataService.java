@@ -50,6 +50,15 @@ public interface AnalyseDataService {
      */
     ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String peptideRef, String cutInfo);
 
+    /**
+     * 获取MS2的卷积组数据
+     *
+     * @param overviewId
+     * @param peptideRef
+     * @return
+     */
+    ResultDO<List<AnalyseDataDO>> getMS2DataList(String overviewId, String peptideRef, Boolean isDecoy);
+
     List<TransitionGroup> getTransitionGroup(List<AnalyseDataDO> dataList);
 
     /**

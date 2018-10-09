@@ -94,11 +94,9 @@ public class Airus {
         Integer[] groupNumIds = AirusUtils.getGroupNumId(peptideRefList.toArray(groupIds));
         Double[][] scoresArray = new Double[peptideRefList.size()][SCORES_COUNT];
         for (int i = 0; i < scoreList.size(); i++) {
-            Double[] jSeries = new Double[SCORES_COUNT];
-            FeatureScores.fillScores(scoreList.get(i), jSeries);
-//            scoreList.get(i).values().toArray(jSeries);
-            scoresArray[i] = jSeries;
+            scoresArray[i] = FeatureScores.toArray(scoreList.get(i));
         }
+
         logger.info("打分数据构造完毕,开始学习");
         scoreData.setGroupId(groupIds);
         scoreData.setGroupNumId(groupNumIds);
@@ -196,6 +194,24 @@ public class Airus {
         Double[] classifierScore = ArrayUtils.dot(scores, weights);
         Double[] classifierTopDecoyPeaks = AirusUtils.getTopDecoyPeaks(classifierScore, scoreData.getIsDecoy(), AirusUtils.findTopIndex(classifierScore, AirusUtils.getGroupNumId(scoreData.getGroupId())));
         return ArrayUtils.normalize(classifierScore, classifierTopDecoyPeaks);
+    }
+
+    private void fixMainScore(Double[][] scores) {
+        for (int i = 0; i < scores.length; i++) {
+            logger.info("原始分数:"+scores[i][0]);
+            scores[i][0] =
+                    scores[i][1] * -0.19011762 +
+                            scores[i][2] * 2.47298914 +
+                            scores[i][7] * 5.63906731 +
+                            scores[i][11] * -0.62640133 +
+                            scores[i][12] * 0.36006925 +
+                            scores[i][13] * 0.08814003 +
+                            scores[i][3] * 0.13978311 +
+                            scores[i][5] * -1.16475032 +
+                            scores[i][16] * -0.19267813 +
+                            scores[i][9] * -0.61712054;
+            logger.info("事后分数:"+scores[i][0]);
+        }
     }
 
     public FinalResult buildResult(ScoreData scoreData) {

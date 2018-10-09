@@ -92,7 +92,6 @@ public class FeatureExtractor {
             //根据信噪比和峰值形状选择最高峰
             RtIntensityPairsDouble maxPeakPairs = peakPicker.pickMaxPeak(rtIntensityPairsAfterSmooth, noises200);
 
-
             //根据信噪比和最高峰选择谱图
             IntensityRtLeftRtRightPairs intensityRtLeftRtRightPairs = chromatogramPicker.pickChromatogram(rtIntensityPairsOrigin, rtIntensityPairsAfterSmooth, noisesOri1000, maxPeakPairs);
             rtIntensityPairsOriginList.add(rtIntensityPairsOrigin);

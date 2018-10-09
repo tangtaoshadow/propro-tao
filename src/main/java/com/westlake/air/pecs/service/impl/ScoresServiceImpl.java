@@ -107,6 +107,17 @@ public class ScoresServiceImpl implements ScoresService {
     }
 
     @Override
+    public HashMap<String, ScoresDO> getAllMapByOverviewId(String overviewId) {
+        List<ScoresDO> scoresList = scoresDAO.getAllByOverviewId(overviewId);
+        HashMap<String, ScoresDO> map = new HashMap<>();
+        for(ScoresDO scoresDO : scoresList){
+            String key = scoresDO.getIsDecoy() + "_" + scoresDO.getPeptideRef();
+            map.put(key, scoresDO);
+        }
+        return map;
+    }
+
+    @Override
     public ResultDO insert(ScoresDO scoresDO) {
         try {
             scoresDO.setCreateDate(new Date());

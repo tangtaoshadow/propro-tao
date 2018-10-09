@@ -111,6 +111,11 @@
                                 th:onclick="|query('${data.id}','${overviewId}','${data.peptideRef}','${data.cutInfo}')|">
                             查看谱图
                         </button>
+                        <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
+                                data-target="#m_modal_group"
+                                th:onclick="|queryGroup('${data.isDecoy}','${overviewId}','${data.peptideRef}')|">
+                            查看组谱图
+                        </button>
                     </td>
                 </tr>
                 </tbody>
@@ -226,9 +231,25 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
                     </div>
-                    <div id="modal-body" class="modal-body" style="width: 1200px;height:600px;">
-
+                    <div id="modal-body" class="modal-body" style="width: 1200px;height:600px;"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            关闭
+                        </button>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="m_modal_group" tabindex="-1" role="dialog" aria-labelledby="TargetInfo"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Target Info</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div id="modal-body-group" class="modal-body" style="width: 1200px;height:600px;"></div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">
                             关闭
@@ -293,7 +314,7 @@
             }
             option = {
                 title: {
-                    text: peptideRef + ":" + data_rt.length + "个信号;总强度为:" + intensity,
+                    text: peptideRef + "-总强度为:" + intensity,
                     left: 10
                 },
                 legend: {
@@ -339,17 +360,82 @@
                     name: 'intensity',
                     type: 'line',
                     data: data_intensity
-                    // animationDelay: function (idx) {
-                    //     return idx;
-                    // }
-                }],
-                // animationEasing: 'elasticOut',
-                // animationDelayUpdate: function (idx) {
-                //     return idx;
-                // }
+                }]
             };
 
             var chart = echarts.init(document.getElementById('modal-body'));
+            chart.setOption(option);
+        }
+
+        function queryGroup(isDecoy, overviewId, peptideRef) {
+            var result = $.ajax({
+                type: "POST",
+                url: "/analyse/viewGroup",
+                data: {
+                    isDecoy: isDecoy,
+                    overviewId: overviewId,
+                    peptideRef: peptideRef
+                },
+                dataType: "json",
+                async: false
+            });
+
+            var datas = result.responseJSON.model;
+            var data_rt = datas.rt;
+            var intensity_arrays = datas.intensityArrays;
+
+            var intensity_series = [];
+            for (var i = 0; i < intensity_arrays.length; i++) {
+                intensity_series.push({name: 'intensity', type: 'line', data: intensity_arrays[i]});
+            }
+            option = {
+                title: {
+                    text: peptideRef + ":" + intensity_arrays.length + "个MS2碎片;",
+                    left: 10
+                },
+                legend: {
+                    data: ['rt/intensity'],
+                    align: 'left'
+                },
+                toolbox: {
+                    // y: 'bottom',
+                    feature: {
+                        magicType: {
+                            type: ['stack', 'tiled']
+                        },
+                        dataView: {},
+                        dataZoom: {
+                            yAxisIndex: false
+                        },
+                        saveAsImage: {
+                            pixelRatio: 2
+                        }
+
+                    }
+                },
+                dataZoom: [{
+                    type: 'inside'
+                }, {
+                    type: 'slider'
+                }],
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                xAxis: {
+                    data: data_rt,
+                    silent: false,
+                    splitLine: {
+                        show: false
+                    }
+                },
+                yAxis: {},
+                series: intensity_series
+            };
+
+            var chart = echarts.init(document.getElementById('modal-body-group'));
             chart.setOption(option);
         }
     </script>

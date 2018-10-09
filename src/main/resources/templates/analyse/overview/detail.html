@@ -141,44 +141,8 @@
                 </div>
                 <div class="m-portlet__body">
                     <a th:href="|/analyse/data/list?overviewId=${overview.id}|" class="btn btn-info btn-sm">查看卷积数据</a>
-                    <a th:href="|/analyse/data/group?overviewId=${overview.id}|"
-                       class="btn btn-warning btn-sm">查看iRT卷积组</a>
+                    <a th:href="|/analyse/data/group?overviewId=${overview.id}|" class="btn btn-warning btn-sm">查看iRT卷积组</a>
                     <a th:href="|/analyse/data/irtliblist?overviewId=${overview.id}|" class="btn btn-info btn-sm">查看校准库卷积数据</a>
-
-                    <form id="searchForm" method="post" role="form"
-                          class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
-                          action="/analyse/data/compute">
-                        <div class="form-group m-form__group row">
-                            <div class="input-group col-lg-4">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-success" type="button">
-                                        Sigma
-                                    </button>
-                                </div>
-                                <input hidden="hidden" name="overviewId" th:value="${overview.id}">
-                                <input type="text" class="form-control m-input" name="sigma"
-                                       placeholder="Sigma,默认为30" th:value="${sigma}">
-                            </div>
-                            <div class="input-group col-lg-4">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-success" type="button">
-                                        Spacing
-                                    </button>
-                                </div>
-                                <input type="text" class="form-control m-input" name="spacing"
-                                       placeholder="Spacing,默认为0.01" th:value="${spacing}">
-                                <div class="input-group-append">
-                                    <button class="btn btn-warning" type="submit">
-                                        计算RTNormalizer
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </form>
-
-
                 </div>
             </div>
         </div>

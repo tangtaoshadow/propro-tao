@@ -37,7 +37,10 @@ public class FeatureScores {
      * scores.massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比之和
      * scores.weighted_massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比按libraryIntensity加权之和
      */
-    public static final int SCORES_COUNT = 10;
+    public static final int SCORES_COUNT = 17;
+
+    //Swath主打分
+    double mainVarXxSwathPrelimScore;
 
     //对experiment和library intensity算Pearson相关系数
     double varLibraryCorr;
@@ -100,9 +103,6 @@ public class FeatureScores {
     //peptideRt对应的spectrumArray中，检测到的y离子的数量
     double varYseriesScore;
 
-    //Swath主打分
-    double mainVarXxSwathPrelimScore;
-
     public static final String MainVarXxSwathPrelimScore = "mainVarXxSwathPrelimScore";
     public static final String VarLibraryCorr = "varLibraryCorr";
     public static final String VarLibraryRsmd = "varLibraryRsmd";
@@ -156,11 +156,39 @@ public class FeatureScores {
         return columns;
     }
 
-    public static void fillScores(HashMap<String, Double> scoreMap, Double[] scoreArray) {
+    public static Double[] toArray(HashMap<String, Double> scoreMap) {
+        Double[] scoreArray = new Double[SCORES_COUNT];
         ScoreType[] scoreTypes = ScoreType.values();
         for (int i = 0; i < SCORES_COUNT; i++) {
             scoreArray[i] = scoreMap.get(scoreTypes[i].getScoreType());
         }
+
+        return scoreArray;
+    }
+
+    public static FeatureScores toFeaturesScores(Double[] scores){
+        if(scores == null || scores.length != 17){
+            return null;
+        }
+        FeatureScores featureScores = new FeatureScores();
+        featureScores.setMainVarXxSwathPrelimScore(scores[0]);
+        featureScores.setVarBseriesScore(scores[1]);
+        featureScores.setVarElutionModelFitScore(scores[2]);
+        featureScores.setVarIntensityScore(scores[3]);
+        featureScores.setVarIsotopeCorrelationScore(scores[4]);
+        featureScores.setVarIsotopeOverlapScore(scores[5]);
+        featureScores.setVarLibraryCorr(scores[6]);
+        featureScores.setVarLibraryRsmd(scores[7]);
+        featureScores.setVarLogSnScore(scores[8]);
+        featureScores.setVarMassdevScore(scores[9]);
+        featureScores.setVarMassdevScoreWeighted(scores[10]);
+        featureScores.setVarNormRtScore(scores[11]);
+        featureScores.setVarXcorrCoelution(scores[12]);
+        featureScores.setVarXcorrCoelutionWeighted(scores[13]);
+        featureScores.setVarXcorrShape(scores[14]);
+        featureScores.setVarXcorrShapeWeighted(scores[15]);
+        featureScores.setVarYseriesScore(scores[16]);
+        return featureScores;
     }
 
     public enum ScoreType {
