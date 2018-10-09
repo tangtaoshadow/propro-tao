@@ -390,7 +390,6 @@ public class AnalyseController extends BaseController {
 
         List<AnalyseDataDO> dataList = dataResult.getModel();
 
-
         JSONObject res = new JSONObject();
         JSONArray rtArray = new JSONArray();
         JSONArray intensityArrays = new JSONArray();

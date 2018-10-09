@@ -94,7 +94,8 @@ public class AirusTest extends BaseTest {
     @Test
     public void isScoresSame() {
         HashMap<String, ScoresDO> scoresMapFromFile = scoreTsvParser.getScoreMap(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
-        HashMap<String, ScoresDO> scoresMapFromDB = scoresService.getAllMapByOverviewId("5bab8822fc6f9e47c4604f05");
+        //黄金数据集,Water-10
+        HashMap<String, ScoresDO> scoresMapFromDB = scoresService.getAllMapByOverviewId("5bab8673fc6f9e47c46041ae");
 
         assert scoresMapFromDB.size() == 690;
         assert scoresMapFromFile.size() == scoresMapFromDB.size();
