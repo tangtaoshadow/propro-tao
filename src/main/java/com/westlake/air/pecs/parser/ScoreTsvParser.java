@@ -33,15 +33,15 @@ public class ScoreTsvParser {
             Integer lines = getFileLineCount(file);
             ScoreData scoreDataMap = new ScoreData();
             BufferedReader reader = new BufferedReader(new FileReader(file));
-            Double[][] scoreData = new Double[lines][17];
+            Double[][] scoreData = new Double[lines][FeatureScores.SCORES_COUNT];
             String[] groupId = new String[lines];
             Integer[] runId = new Integer[lines];
             Boolean[] isDecoy = new Boolean[lines];
             String[] readLine;
             String line = reader.readLine();
             readLine = line.split(split);
-            String[] scoreColumns = new String[17];
-            System.arraycopy(readLine, 3, scoreColumns, 0, 17);
+            String[] scoreColumns = new String[FeatureScores.SCORES_COUNT];
+            System.arraycopy(readLine, 3, scoreColumns, 0, FeatureScores.SCORES_COUNT);
             line = reader.readLine();
             int i = 0;
             while (line != null) {
@@ -49,7 +49,7 @@ public class ScoreTsvParser {
                 groupId[i] = readLine[0];
                 runId[i] = Integer.parseInt(readLine[1]);
                 isDecoy[i] = readLine[2].equals("1");
-                for (int j = 0; j < 17; j++) {
+                for (int j = 0; j < FeatureScores.SCORES_COUNT; j++) {
                     scoreData[i][j] = Double.parseDouble(readLine[j + 3]);
                 }
                 line = reader.readLine();
@@ -98,8 +98,8 @@ public class ScoreTsvParser {
                     scoresDO.setPeptideRef(lineArray[20]+"_"+lineArray[21]);
                     scoreDataMap.put(key, scoresDO);
                 }
-                Double[] scores = new Double[17];
-                for (int j = 0; j < 17; j++) {
+                Double[] scores = new Double[FeatureScores.SCORES_COUNT];
+                for (int j = 0; j < FeatureScores.SCORES_COUNT; j++) {
                     scores[j] = Double.parseDouble(lineArray[j + 3]);
                 }
                 FeatureScores featureScores = FeatureScores.toFeaturesScores(scores);
