@@ -113,7 +113,7 @@
                         </button>
                         <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
                                 data-target="#m_modal_group"
-                                th:onclick="|queryGroup('${data.isDecoy}','${overviewId}','${data.peptideRef}')|">
+                                th:onclick="|queryGroup('${data.isDecoy}','${overviewId}','${data.peptideRef}', false)|">
                             查看组谱图
                         </button>
                     </td>
@@ -246,7 +246,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
-                            <button type="button" class="btn btn-sm btn-warning" th:onclick="|gaussFilter()|">
+                            <button type="button" class="btn btn-sm btn-warning" th:onclick="|queryGroup(null,null,null,true)|">
                                 高斯平滑
                             </button>
                             <button type="button" class="btn btn-sm btn-brand" th:onclick="|queryGroup()|">
@@ -379,7 +379,7 @@
 
             chart.setOption(option);
         }
-        function queryGroup(isDecoy, overviewId, peptideRef) {
+        function queryGroup(isDecoy, overviewId, peptideRef, isGaussFilter) {
             if(isDecoy == null){
                 isDecoy = this.isDecoy;
             }else{
@@ -402,7 +402,8 @@
                 data: {
                     isDecoy: isDecoy,
                     overviewId: overviewId,
-                    peptideRef: peptideRef
+                    peptideRef: peptideRef,
+                    isGaussFilter: isGaussFilter
                 },
                 dataType: "json",
                 async: false

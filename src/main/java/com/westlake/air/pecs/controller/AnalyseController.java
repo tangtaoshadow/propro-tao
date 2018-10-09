@@ -372,61 +372,10 @@ public class AnalyseController extends BaseController {
     @RequestMapping(value = "/viewGroup")
     @ResponseBody
     ResultDO<JSONObject> viewGroup(Model model,
-                              @RequestParam(value = "overviewId", required = false) String overviewId,
-                              @RequestParam(value = "isDecoy", required = false) Boolean isDecoy,
-                              @RequestParam(value = "peptideRef", required = false) String peptideRef) {
-        ResultDO<List<AnalyseDataDO>> dataResult = null;
-        if (overviewId != null && peptideRef != null) {
-            dataResult = analyseDataService.getMS2DataList(overviewId, peptideRef, isDecoy);
-        } else {
-            return ResultDO.buildError(ResultCode.ANALYSE_DATA_NOT_EXISTED);
-        }
-
-        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
-        if (dataResult.isFailed()) {
-            resultDO.setErrorResult(ResultCode.ANALYSE_DATA_NOT_EXISTED);
-            return resultDO;
-        }
-
-        List<AnalyseDataDO> dataList = dataResult.getModel();
-
-        JSONObject res = new JSONObject();
-        JSONArray rtArray = new JSONArray();
-        JSONArray intensityArrays = new JSONArray();
-        JSONArray cutInfoArray = new JSONArray();
-
-        //同一组的rt坐标是相同的
-        Float[] pairRtArray = dataList.get(0).getRtArray();
-        for (int n = 0; n < pairRtArray.length; n++) {
-            rtArray.add(pairRtArray[n]);
-        }
-
-        for(AnalyseDataDO data : dataList){
-            Float[] pairIntensityArray = data.getIntensityArray();
-            JSONArray intensityArray = new JSONArray();
-            if(pairIntensityArray == null){
-                continue;
-            }
-            for (int i = 0; i < pairIntensityArray.length; i++) {
-                intensityArray.add(pairIntensityArray[i]);
-            }
-            cutInfoArray.add(data.getCutInfo());
-            intensityArrays.add(intensityArray);
-        }
-
-        res.put("rt", rtArray);
-        res.put("cutInfoArray", cutInfoArray);
-        res.put("intensityArrays", intensityArrays);
-        resultDO.setModel(res);
-        return resultDO;
-    }
-
-    @RequestMapping(value = "/gaussFilter")
-    @ResponseBody
-    ResultDO<JSONObject> gaussFilter(Model model,
                                    @RequestParam(value = "overviewId", required = false) String overviewId,
                                    @RequestParam(value = "isDecoy", required = false) Boolean isDecoy,
-                                   @RequestParam(value = "peptideRef", required = false) String peptideRef) {
+                                   @RequestParam(value = "peptideRef", required = false) String peptideRef,
+                                   @RequestParam(value = "isGaussFilter", required = false, defaultValue = "false") Boolean isGaussFilter) {
         ResultDO<List<AnalyseDataDO>> dataResult = null;
         if (overviewId != null && peptideRef != null) {
             dataResult = analyseDataService.getMS2DataList(overviewId, peptideRef, isDecoy);
@@ -448,17 +397,22 @@ public class AnalyseController extends BaseController {
         JSONArray cutInfoArray = new JSONArray();
 
         //同一组的rt坐标是相同的
-        Float[] pairRtArray = dataList.get(0).getRtArray();
-        for (int n = 0; n < pairRtArray.length; n++) {
-            rtArray.add(pairRtArray[n]);
-        }
+        Float[] pairRtArray = null;
 
         for(AnalyseDataDO data : dataList){
-            Double[] pairIntensityArray = gaussFilter.filter(data);
-            JSONArray intensityArray = new JSONArray();
-            if(pairIntensityArray == null){
+            if(!data.getIsHit()){
                 continue;
             }
+            if(pairRtArray == null){
+                pairRtArray = data.getRtArray();
+            }
+            Object[] pairIntensityArray = null;
+            if(isGaussFilter){
+                pairIntensityArray = gaussFilter.filter(data);
+            }else{
+                pairIntensityArray = data.getIntensityArray();
+            }
+            JSONArray intensityArray = new JSONArray();
             for (int i = 0; i < pairIntensityArray.length; i++) {
                 intensityArray.add(pairIntensityArray[i]);
             }
@@ -466,6 +420,13 @@ public class AnalyseController extends BaseController {
             intensityArrays.add(intensityArray);
         }
 
+        if(pairRtArray != null){
+            for (int n = 0; n < pairRtArray.length; n++) {
+                rtArray.add(pairRtArray[n]);
+            }
+        }else{
+            logger.error("No AnalyseData Has RtArray!!!");
+        }
         res.put("rt", rtArray);
         res.put("cutInfoArray", cutInfoArray);
         res.put("intensityArrays", intensityArrays);
