@@ -72,9 +72,10 @@ public class FeatureFinder {
             RtIntensityPairsDouble rtInt = pickedChroms.get(chrPeakIndex[0]);
             Double[] intensityArray = rtInt.getIntensityArray();
             intensityArray[chrPeakIndex[1]] = 0.0d;
-            rtInt.setIntensityArray(intensityArray);
-            pickedChroms.set(chrPeakIndex[0], rtInt);
+//            rtInt.setIntensityArray(intensityArray);
+//            pickedChroms.set(chrPeakIndex[0], rtInt);
 
+            removeOverlappingFeatures(pickedChroms, bestLeft, bestRight, intensityLeftRight);
 
             RtIntensityPairsDouble masterChromatogram = new RtIntensityPairsDouble(chromatograms.get(chrPeakIndex[0]));
 
@@ -255,6 +256,29 @@ public class FeatureFinder {
 
         return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
     }
+
+
+    private void removeOverlappingFeatures(List<RtIntensityPairsDouble> pickedChroms, double bestLeft, double bestRight, List<IntensityRtLeftRtRightPairs> intensityLeftRight){
+        for(int i=0; i<pickedChroms.size(); i++){
+            Double[] intensity = pickedChroms.get(i).getIntensityArray();
+            Double[] rt = pickedChroms.get(i).getRtArray();
+            for(int j=0; j<intensity.length; j++){
+                if(intensity[j] <= 0d){
+                    continue;
+                }
+                if(rt[j] >= bestLeft && rt[j] <= bestRight){
+                    intensity[j] = 0d;
+                }
+                double left = intensityLeftRight.get(i).getRtLeftArray()[j];
+                double right = intensityLeftRight.get(i).getRtRightArray()[j];
+                if((left > bestLeft && left < bestRight) || (right > bestLeft && right < bestRight)){
+                    intensity[j] = 0d;
+                }
+            }
+        }
+    }
+
+
 
     /**
      * 从feature中移除rt覆盖重复的feature

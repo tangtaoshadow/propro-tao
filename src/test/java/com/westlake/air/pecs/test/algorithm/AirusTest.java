@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.parser.ScoreTsvParser;
 import com.westlake.air.pecs.service.ScoresService;
@@ -12,7 +14,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -132,5 +136,22 @@ public class AirusTest extends BaseTest {
             }
         }
         return result;
+    }
+
+    @Test
+    public void test(){
+        List<RtIntensityPairsDouble> list = new ArrayList<>();
+        for(int i=0; i<3; i++){
+            RtIntensityPairsDouble rtIntensityPairsDouble = new RtIntensityPairsDouble();
+            Double[] rt = {(double)i};
+            rtIntensityPairsDouble.setRtArray(rt);
+            rtIntensityPairsDouble.setIntensityArray(rt);
+            list.add(rtIntensityPairsDouble);
+        }
+        System.out.println("list ready");
+        RtIntensityPairsDouble rtInt = list.get(1);
+        Double[] intensity = {0d};
+        rtInt.setIntensityArray(intensity);
+        System.out.println("what now");
     }
 }
