@@ -275,6 +275,8 @@
         var totalPage = [[${totalPage}]];
         var currentPage = [[${currentPage}]];
         /*]]>*/
+        var chart;
+        var chartGroup;
 
         $(document).ready(function () {
             $('#pagination').bootpag({
@@ -288,6 +290,8 @@
                 document.getElementById("currentPage").value = num;
                 document.getElementById("searchForm").submit();
             });
+            chart = echarts.init(document.getElementById('modal-body'));
+            chartGroup = echarts.init(document.getElementById('modal-body-group'));
         });
 
         function query(dataId, overviewId, peptideRef, cutInfo) {
@@ -303,7 +307,6 @@
                 dataType: "json",
                 async: false
             });
-
 
             var datas = result.responseJSON.model;
             var data_rt = datas.rt;
@@ -363,7 +366,6 @@
                 }]
             };
 
-            var chart = echarts.init(document.getElementById('modal-body'));
             chart.setOption(option);
         }
 
@@ -382,11 +384,12 @@
 
             var datas = result.responseJSON.model;
             var data_rt = datas.rt;
+            var cutinfo = datas.cutInfoArray;
             var intensity_arrays = datas.intensityArrays;
 
             var intensity_series = [];
             for (var i = 0; i < intensity_arrays.length; i++) {
-                intensity_series.push({name: 'intensity', type: 'line', data: intensity_arrays[i]});
+                intensity_series.push({name: cutinfo[i], type: 'line',smooth: true, data: intensity_arrays[i]});
             }
             option = {
                 title: {
@@ -435,8 +438,7 @@
                 series: intensity_series
             };
 
-            var chart = echarts.init(document.getElementById('modal-body-group'));
-            chart.setOption(option);
+            chartGroup.setOption(option);
         }
     </script>
 </th:block>

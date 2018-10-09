@@ -391,6 +391,7 @@ public class AnalyseController extends BaseController {
         JSONArray rtArray = new JSONArray();
 
         JSONArray intensityArrays = new JSONArray();
+        JSONArray cutInfoArray = new JSONArray();
         //同一组的rt坐标是相同的
         Float[] pairRtArray = dataList.get(0).getRtArray();
         for (int n = 0; n < pairRtArray.length; n++) {
@@ -406,10 +407,12 @@ public class AnalyseController extends BaseController {
             for (int i = 0; i < pairIntensityArray.length; i++) {
                 intensityArray.add(pairIntensityArray[i]);
             }
+            cutInfoArray.add(data.getCutInfo());
             intensityArrays.add(intensityArray);
         }
 
         res.put("rt", rtArray);
+        res.put("cutInfoArray", cutInfoArray);
         res.put("intensityArrays", intensityArrays);
         resultDO.setModel(res);
         return resultDO;
