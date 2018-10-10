@@ -26,6 +26,8 @@ public interface ExperimentService {
 
     List<ExperimentDO> getAll();
 
+    List<ExperimentDO> getSimpleAll();
+
     ResultDO insert(ExperimentDO experimentDO);
 
     ResultDO update(ExperimentDO experimentDO);

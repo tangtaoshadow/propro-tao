@@ -1,10 +1,13 @@
 package com.westlake.air.pecs.dao;
 
 import com.westlake.air.pecs.domain.db.ExperimentDO;
+import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +37,17 @@ public class ExperimentDAO {
 
     public List<ExperimentDO> getAll() {
         return mongoTemplate.findAll(ExperimentDO.class, CollectionName);
+    }
+
+    public List<ExperimentDO> getSimpleAll() {
+        Document queryDoc = new Document();
+        Document fieldsDoc = new Document();
+        fieldsDoc.put("id",true);
+        fieldsDoc.put("name",true);
+        fieldsDoc.put("fileLocation",true);
+
+        Query query = new BasicQuery(queryDoc, fieldsDoc);
+        return mongoTemplate.find(query, ExperimentDO.class, CollectionName);
     }
 
     public ExperimentDO getById(String id) {

@@ -40,6 +40,10 @@ public class Airus {
     public FinalResult doAirus(String overviewId) {
         logger.info("开始获取打分数据");
         List<ScoresDO> scores = scoresService.getAllByOverviewId(overviewId);
+        return doAirus(scores);
+    }
+
+    public FinalResult doAirus(List<ScoresDO> scores){
         logger.info("开始检查数据是否健康");
         ResultDO resultDO = checkData(scores);
         if(resultDO.isFailed()){
@@ -50,11 +54,18 @@ public class Airus {
         }
         logger.info("开始转换打分数据格式");
         ScoreData scoreData = trans(scores);
+        return doAirus(scoreData);
+    }
+
+    public FinalResult doAirus(ScoreData scoreData) {
+        Params params = new Params();
+        if (params.isTest()) {
+            scoreData = AirusUtils.fakeSortTgId(scoreData);
+        }
         logger.info("开始训练学习数据权重");
         Double[] weights = learn(scoreData.getScoreData(), scoreData.getGroupNumId(), scoreData.getIsDecoy());
         logger.info("开始计算打分");
         Double[] dscore = calculateDscore(weights, scoreData);
-
         Double[] topTargetDscores = AirusUtils.getTopTargetPeaks(dscore, scoreData.getIsDecoy(), AirusUtils.findTopIndex(dscore, scoreData.getGroupNumId()));
         Double[] topDecoyDscores = AirusUtils.getTopDecoyPeaks(dscore, scoreData.getIsDecoy(), AirusUtils.findTopIndex(dscore, scoreData.getGroupNumId()));
         String[] scoreColumns = FeatureScores.getScoresColumns();
@@ -69,8 +80,10 @@ public class Airus {
         finalResult.setFinalErrorTable(finalErrorTable(errorStat));
         finalResult.setSummaryErrorTable(summaryErrorTable(errorStat));
         finalResult.setAllInfo(errorStat);
+
         return finalResult;
     }
+
 
     public ResultDO checkData(List<ScoresDO> scores){
         boolean isAllDecoy = true;
@@ -245,32 +258,6 @@ public class Airus {
                             scores[i][9] * -0.61712054;
             logger.info("事后分数:"+scores[i][0]);
         }
-    }
-
-    public FinalResult buildResult(ScoreData scoreData) {
-        Params params = new Params();
-        if (params.isTest()) {
-            scoreData = AirusUtils.fakeSortTgId(scoreData);
-        }
-        Double[] weights = learn(scoreData.getScoreData(), scoreData.getGroupNumId(), scoreData.getIsDecoy());
-        Double[] dscore = calculateDscore(weights, scoreData);
-        Double[] topTargetDscores = AirusUtils.getTopTargetPeaks(dscore, scoreData.getIsDecoy(), AirusUtils.findTopIndex(dscore, scoreData.getGroupNumId()));
-        Double[] topDecoyDscores = AirusUtils.getTopDecoyPeaks(dscore, scoreData.getIsDecoy(), AirusUtils.findTopIndex(dscore, scoreData.getGroupNumId()));
-        String[] scoreColumns = FeatureScores.getScoresColumns();
-
-        HashMap<String, Double> classifierTable = new HashMap<String, Double>();
-        for (int i = 0; i < weights.length; i++) {
-            classifierTable.put(scoreColumns[i], weights[i]);
-        }
-        //Double[] score = LDALearner.score(scoreData.getScoreData(),weights,true).getFeedBack();
-        FinalResult finalResult = new FinalResult();
-        finalResult.setClassifierTable(classifierTable);
-        ErrorStat errorStat = stats.errorStatistics(topTargetDscores, topDecoyDscores);
-
-        finalResult.setFinalErrorTable(finalErrorTable(errorStat));
-        finalResult.setSummaryErrorTable(summaryErrorTable(errorStat));
-        finalResult.setAllInfo(errorStat);
-        return finalResult;
     }
 
 }

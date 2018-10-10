@@ -77,6 +77,11 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     @Override
+    public List<ExperimentDO> getSimpleAll() {
+        return experimentDAO.getSimpleAll();
+    }
+
+    @Override
     public ResultDO<List<ExperimentDO>> getList(ExperimentQuery query) {
         List<ExperimentDO> libraryDOS = experimentDAO.getList(query);
         long totalCount = experimentDAO.count(query);

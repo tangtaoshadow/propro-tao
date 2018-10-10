@@ -1,14 +1,19 @@
 package com.westlake.air.pecs.async;
 
+import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
+import com.westlake.air.pecs.domain.bean.airus.FinalResult;
+import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
+import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.ScoresService;
+import com.westlake.air.pecs.utils.AirusUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -26,6 +31,8 @@ public class ExperimentTask extends BaseTask {
     ExperimentService experimentService;
     @Autowired
     ScoresService scoresService;
+    @Autowired
+    Airus airus;
 
     @Async
     public void saveExperimentTask(ExperimentDO experimentDO, File file, TaskDO taskDO) {
@@ -84,22 +91,21 @@ public class ExperimentTask extends BaseTask {
 
     @Async
     public void swath(SwathInput input, TaskDO taskDO) {
+        long startAll = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         taskDO.addLog("开始卷积IRT校准库并且计算iRT值");
         taskService.update(taskDO);
 
         ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(input.getExperimentDO(), input.getIRtLibraryId(), input.getMzExtractWindow(), input.getSigmaSpacing());
         SlopeIntercept slopeIntercept = resultDO.getModel();
 
-        taskDO.addLog("iRT计算完毕,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept() + "开始卷积原始数据");
+        taskDO.addLog("iRT计算完毕,耗时:"+(System.currentTimeMillis() - start)+"毫秒,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept() + ",开始卷积原始数据");
         taskService.update(taskDO);
 
-        long start = System.currentTimeMillis();
+        start = System.currentTimeMillis();
         //将irt的计算结果加入到下一个步骤的入参中
         input.setSlopeIntercept(slopeIntercept);
         ResultDO<List<AnalyseDataDO>> originDataListResult = experimentService.extractWithList(input);
-
-        taskDO.addLog("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
-        taskService.update(taskDO);
 
         if(originDataListResult.isFailed() || originDataListResult.getModel() == null || originDataListResult.getModel().size() == 0){
             taskDO.addLog("卷积失败:"+originDataListResult.getMsgInfo());
@@ -107,9 +113,22 @@ public class ExperimentTask extends BaseTask {
             taskService.update(taskDO);
         }
 
-        List<AnalyseDataDO> dataList = originDataListResult.getModel();
+        taskDO.addLog("卷积完毕,耗时:" + (System.currentTimeMillis() - start) + ",开始打分");
+        taskService.update(taskDO);
 
-        scoresService.score(dataList, input);
+        start = System.currentTimeMillis();
+        List<AnalyseDataDO> dataList = originDataListResult.getModel();
+        List<ScoresDO> scores = scoresService.score(dataList, input);
+
+        taskDO.addLog("子分数打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",开始合并打分");
+        taskService.update(taskDO);
+        start = System.currentTimeMillis();
+        FinalResult finalResult = airus.doAirus(scores);
+
+        int count = AirusUtils.checkFdr(finalResult);
+        taskDO.addLog("合并打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为"+count);
+        taskDO.addLog("Swath流程总计耗时:" + (System.currentTimeMillis() - startAll));
+        taskService.update(taskDO);
 
         taskDO.finish(TaskDO.STATUS_SUCCESS);
         taskService.update(taskDO);

@@ -1,7 +1,9 @@
 package com.westlake.air.pecs.controller;
 
 import com.westlake.air.pecs.async.ExperimentTask;
+import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
+import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.LibraryService;
 import com.westlake.air.pecs.service.TaskService;
 import com.westlake.air.pecs.async.LibraryTask;
@@ -21,6 +23,8 @@ public class BaseController {
     @Autowired
     LibraryService libraryService;
     @Autowired
+    ExperimentService experimentService;
+    @Autowired
     TaskService taskService;
     @Autowired
     LibraryTask libraryTask;
@@ -30,6 +34,10 @@ public class BaseController {
     //0:标准库,1:irt校准库
     public List<LibraryDO> getLibraryList(Integer type){
         return libraryService.getSimpleAll(type);
+    }
+
+    public List<ExperimentDO> getExperimentList(){
+        return experimentService.getSimpleAll();
     }
 
     public final Logger logger = LoggerFactory.getLogger(getClass());

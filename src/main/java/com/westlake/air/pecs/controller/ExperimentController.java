@@ -6,6 +6,7 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
@@ -22,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -209,6 +209,72 @@ public class ExperimentController extends BaseController {
 
     }
 
+    @RequestMapping(value = "/swath")
+    String swath(Model model) {
+        List<LibraryDO> slist = getLibraryList(0);
+        List<LibraryDO> iRtlist = getLibraryList(1);
+        List<ExperimentDO> experimentList = getExperimentList();
+        model.addAttribute("libraries", slist);
+        model.addAttribute("iRtLibraries", iRtlist);
+        model.addAttribute("experiments", experimentList);
+        return "experiment/swath";
+    }
+
+    @RequestMapping(value = "/doswath")
+    String doSwath(Model model,
+                      @RequestParam(value = "libraryId", required = false) String libraryId,
+                      @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
+                      @RequestParam(value = "expId", required = false) String expId,
+                      @RequestParam(value = "rtExtractWindow", defaultValue = "1200") Float rtExtractWindow,
+                      @RequestParam(value = "mzExtractWindow", defaultValue = "0.05") Float mzExtractWindow,
+                      @RequestParam(value = "sigma", defaultValue = "6.25") Float sigma,
+                      @RequestParam(value = "spacing", defaultValue = "0.01") Float spacing
+    ) {
+        if (libraryId != null) {
+            model.addAttribute("libraryId", libraryId);
+        }
+        if (iRtLibraryId != null) {
+            model.addAttribute("iRtLibraryId", iRtLibraryId);
+        }
+        if (expId != null) {
+            model.addAttribute("expId", expId);
+        }
+        model.addAttribute("rtExtractWindow", rtExtractWindow);
+        model.addAttribute("mzExtractWindow", mzExtractWindow);
+        model.addAttribute("sigma", sigma);
+        model.addAttribute("spacing", spacing);
+
+        List<LibraryDO> slist = getLibraryList(0);
+        List<LibraryDO> iRtlist = getLibraryList(1);
+        List<ExperimentDO> experimentList = getExperimentList();
+        model.addAttribute("libraries", slist);
+        model.addAttribute("iRtLibraries", iRtlist);
+        model.addAttribute("experiments", experimentList);
+
+        ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
+        if(expResult.isFailed()){
+            return "/experiment/swath";
+        }
+
+        ExperimentDO exp = expResult.getModel();
+
+        TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_WORKFLOW, "expId:" + expId + ";libId:" + libraryId + ";iRtLib:" + iRtLibraryId);
+        taskService.insert(taskDO);
+
+        SwathInput input = new SwathInput();
+        input.setExperimentDO(exp);
+        input.setIRtLibraryId(iRtLibraryId);
+        input.setLibraryId(libraryId);
+        input.setCreator("Admin");
+        input.setRtExtractWindow(rtExtractWindow);
+        input.setMzExtractWindow(mzExtractWindow);
+        input.setBuildType(2);
+        input.setSigmaSpacing(new SigmaSpacing(sigma, spacing));
+
+        experimentTask.swath(input, taskDO);
+        return "redirect:/task/detail/" + taskDO.getId();
+    }
+
     @RequestMapping(value = "/extractor")
     String extractor(Model model,
                      @RequestParam(value = "id", required = true) String id,
@@ -244,7 +310,7 @@ public class ExperimentController extends BaseController {
             return "redirect:/extractor?id=" + id;
         }
 
-        TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_CONVOLUTION, resultDO.getModel().getName()+":"+libraryId);
+        TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_CONVOLUTION, resultDO.getModel().getName() + ":" + libraryId);
         taskService.insert(taskDO);
         SlopeIntercept si = SlopeIntercept.create();
         if (slope != null && intercept != null) {
@@ -259,9 +325,9 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/irt")
     String irt(Model model,
-                     @RequestParam(value = "id", required = true) String id,
-                     @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
-                     RedirectAttributes redirectAttributes) {
+               @RequestParam(value = "id", required = true) String id,
+               @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
+               RedirectAttributes redirectAttributes) {
         model.addAttribute("iRtLibraryId", iRtLibraryId);
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
@@ -277,19 +343,19 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/doirt")
     String doIrt(Model model,
-                     @RequestParam(value = "id", required = true) String id,
-                     @RequestParam(value = "iRtLibraryId", required = true) String iRtLibraryId,
-                     @RequestParam(value = "sigma", required = true, defaultValue = "3.75") Float sigma,
-                     @RequestParam(value = "spacing", required = true, defaultValue = "0.01") Float spacing,
-                     @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
-                     RedirectAttributes redirectAttributes) {
+                 @RequestParam(value = "id", required = true) String id,
+                 @RequestParam(value = "iRtLibraryId", required = true) String iRtLibraryId,
+                 @RequestParam(value = "sigma", required = true, defaultValue = "3.75") Float sigma,
+                 @RequestParam(value = "spacing", required = true, defaultValue = "0.01") Float spacing,
+                 @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
+                 RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
             return "redirect:/irt/" + id;
         }
 
-        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName()+":"+iRtLibraryId);
+        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName() + ":" + iRtLibraryId);
         taskService.insert(taskDO);
 
         SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);

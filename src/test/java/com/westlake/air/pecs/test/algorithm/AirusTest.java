@@ -35,9 +35,9 @@ public class AirusTest extends BaseTest {
     @Test
     public void scoreFromFileWork() {
         ScoreData scoreData = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
-        FinalResult finalResult = airus.buildResult(scoreData);
+        FinalResult finalResult = airus.doAirus(scoreData);
 
-        int count = checkFdr(finalResult);
+        int count = AirusUtils.checkFdr(finalResult);
         System.out.println(count);
 
         assert count >= 322;
@@ -47,9 +47,9 @@ public class AirusTest extends BaseTest {
     public void scoreFromDBWork() {
         HashMap<String, ScoresDO> scoreMap = scoreTsvParser.getScoreMap(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
         ScoreData scoreData = airus.trans(new ArrayList(scoreMap.values()));
-        FinalResult finalResult = airus.buildResult(scoreData);
+        FinalResult finalResult = airus.doAirus(scoreData);
 
-        int count = checkFdr(finalResult);
+        int count = AirusUtils.checkFdr(finalResult);
         System.out.println(count);
 
         assert count >= 322;
@@ -108,7 +108,7 @@ public class AirusTest extends BaseTest {
     public void airusTest() {
         ScoreData scoreData = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("scores_data.tsv").getPath()), ScoreTsvParser.SPLIT_CHANGE_LINE);
         if (scoreData != null) {
-            FinalResult finalResult = airus.buildResult(scoreData);
+            FinalResult finalResult = airus.doAirus(scoreData);
             System.out.println(JSON.toJSONString(finalResult));
 
             Double[] cutoff = finalResult.getSummaryErrorTable().getCutoff();
@@ -186,15 +186,5 @@ public class AirusTest extends BaseTest {
         Double[] intensity = {0d};
         rtInt.setIntensityArray(intensity);
         System.out.println("what now");
-    }
-
-    private int checkFdr(FinalResult finalResult) {
-        int count = 0;
-        for (double d : finalResult.getAllInfo().getStatMetrics().getFdr()) {
-            if (d < 0.01) {
-                count++;
-            }
-        }
-        return count;
     }
 }

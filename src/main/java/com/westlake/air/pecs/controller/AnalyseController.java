@@ -239,7 +239,6 @@ public class AnalyseController extends BaseController {
         model.addAttribute("sigma", sigma);
         model.addAttribute("spacing", spacing);
 
-
         ResultDO<AnalyseOverviewDO> resultDO = analyseOverviewService.getById(overviewId);
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());

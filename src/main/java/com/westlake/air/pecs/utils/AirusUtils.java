@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.utils;
 
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
 import org.slf4j.Logger;
@@ -260,6 +261,16 @@ public class AirusUtils {
         scoreData.setGroupNumId(newGroupNumId);
 
         return scoreData;
+    }
+
+    public static int checkFdr(FinalResult finalResult) {
+        int count = 0;
+        for (double d : finalResult.getAllInfo().getStatMetrics().getFdr()) {
+            if (d < 0.01) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private static Boolean[] getIsTarget(Boolean[] isDecoy) {
