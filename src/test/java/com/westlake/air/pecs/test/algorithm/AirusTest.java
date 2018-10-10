@@ -4,12 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.parser.ScoreTsvParser;
 import com.westlake.air.pecs.service.ScoresService;
 import com.westlake.air.pecs.test.BaseTest;
+import com.westlake.air.pecs.utils.AirusUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -33,20 +33,74 @@ public class AirusTest extends BaseTest {
     ScoresService scoresService;
 
     @Test
-    public void airusFinalNumberTest() {
+    public void scoreFromFileWork() {
         ScoreData scoreData = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
-
         FinalResult finalResult = airus.buildResult(scoreData);
-        int count = 0;
-        for (double d : finalResult.getAllInfo().getStatMetrics().getFdr()) {
-            if (d < 0.01) {
-                count++;
-            }
-        }
 
+        int count = checkFdr(finalResult);
         System.out.println(count);
 
         assert count >= 322;
+    }
+
+    @Test
+    public void scoreFromDBWork() {
+        HashMap<String, ScoresDO> scoreMap = scoreTsvParser.getScoreMap(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
+        ScoreData scoreData = airus.trans(new ArrayList(scoreMap.values()));
+        FinalResult finalResult = airus.buildResult(scoreData);
+
+        int count = checkFdr(finalResult);
+        System.out.println(count);
+
+        assert count >= 322;
+
+    }
+
+    @Test
+    public void isScoresSame() {
+        HashMap<String, ScoresDO> scoresMapFromFile = scoreTsvParser.getScoreMap(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
+        //黄金数据集,Water-10
+        HashMap<String, ScoresDO> scoresMapFromDB = scoresService.getAllMapByOverviewId("5bab4316fc6f9e34a888a3d5");
+
+        assert scoresMapFromDB.size() == 690;
+        assert scoresMapFromFile.size() == scoresMapFromDB.size();
+        int sameScoresCount = 0;
+        for (String key : scoresMapFromFile.keySet()) {
+            ScoresDO fileScore = scoresMapFromFile.get(key);
+            ScoresDO dbScore = scoresMapFromDB.get(key);
+            if (fileScore.getIsDecoy() && fileScore.getFeatureScoresList().size() != dbScore.getFeatureScoresList().size()) {
+                sameScoresCount++;
+                logger.info(key + "/" + fileScore.getFeatureScoresList().size() + "/" + dbScore.getFeatureScoresList().size());
+            } else {
+//                System.out.println(key);
+            }
+        }
+        logger.info(sameScoresCount + "/690");
+    }
+
+    @Test
+    public void isGetScoreMapMethodSame() {
+        ScoreData scoreData1 = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
+        HashMap<String, ScoresDO> scoreMap = scoreTsvParser.getScoreMap(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
+        ScoreData scoreData2 = airus.trans(new ArrayList(scoreMap.values()));
+
+        AirusUtils.fakeSortTgId(scoreData1);
+        AirusUtils.fakeSortTgId(scoreData2);
+        for (int i = 0; i < scoreData2.getGroupId().length; i++) {
+            String fullPeptide = scoreData2.getGroupId()[i].replace("_2", "");
+            boolean isHit = false;
+            for (int j = 0; j < scoreData1.getGroupId().length; j++) {
+                if (scoreData2.getIsDecoy()[i].equals(scoreData1.getIsDecoy()[j])
+                        && scoreData1.getGroupId()[j].contains(fullPeptide)
+                        && scoreData1.getScoreData()[j][0].equals(scoreData2.getScoreData()[i][0])
+                ) {
+                    isHit = true;
+                }
+            }
+            if (!isHit) {
+                System.out.println(fullPeptide);
+            }
+        }
 
     }
 
@@ -95,28 +149,6 @@ public class AirusTest extends BaseTest {
         }
     }
 
-    @Test
-    public void isScoresSame() {
-        HashMap<String, ScoresDO> scoresMapFromFile = scoreTsvParser.getScoreMap(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
-        //黄金数据集,Water-10
-        HashMap<String, ScoresDO> scoresMapFromDB = scoresService.getAllMapByOverviewId("5bab8673fc6f9e47c46041ae");
-
-        assert scoresMapFromDB.size() == 690;
-        assert scoresMapFromFile.size() == scoresMapFromDB.size();
-        int sameScoresCount = 0;
-        for(String key : scoresMapFromFile.keySet()){
-            ScoresDO fileScore = scoresMapFromFile.get(key);
-            ScoresDO dbScore = scoresMapFromDB.get(key);
-            if(fileScore.getFeatureScoresList().size() != dbScore.getFeatureScoresList().size()){
-                sameScoresCount++;
-                logger.info(key+"/"+fileScore.getFeatureScoresList().size() + "/" + dbScore.getFeatureScoresList().size());
-            }else{
-                System.out.println(key);
-            }
-        }
-        logger.info(sameScoresCount+"/690");
-    }
-
     private boolean isSimilar(Double[] array1, Double[] array2, Double tolerance) {
         if (array1.length != array2.length) return false;
         boolean result = true;
@@ -140,11 +172,11 @@ public class AirusTest extends BaseTest {
     }
 
     @Test
-    public void test(){
+    public void test() {
         List<RtIntensityPairsDouble> list = new ArrayList<>();
-        for(int i=0; i<3; i++){
+        for (int i = 0; i < 3; i++) {
             RtIntensityPairsDouble rtIntensityPairsDouble = new RtIntensityPairsDouble();
-            Double[] rt = {(double)i};
+            Double[] rt = {(double) i};
             rtIntensityPairsDouble.setRtArray(rt);
             rtIntensityPairsDouble.setIntensityArray(rt);
             list.add(rtIntensityPairsDouble);
@@ -154,5 +186,15 @@ public class AirusTest extends BaseTest {
         Double[] intensity = {0d};
         rtInt.setIntensityArray(intensity);
         System.out.println("what now");
+    }
+
+    private int checkFdr(FinalResult finalResult) {
+        int count = 0;
+        for (double d : finalResult.getAllInfo().getStatMetrics().getFdr()) {
+            if (d < 0.01) {
+                count++;
+            }
+        }
+        return count;
     }
 }

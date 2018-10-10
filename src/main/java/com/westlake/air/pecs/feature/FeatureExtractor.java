@@ -74,7 +74,7 @@ public class FeatureExtractor {
         for (String cutInfo: intensityMap.keySet()) {
             AnalyseDataDO dataDO = group.getDataMap().get(cutInfo);
             //如果没有卷积到信号,dataDO为null
-            if (!dataDO.getIsHit()) {
+            if (dataDO == null || !dataDO.getIsHit()) {
                 continue;
             }
 

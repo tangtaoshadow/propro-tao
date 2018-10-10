@@ -362,7 +362,7 @@ public class ScoresServiceImpl implements ScoresService {
                 libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, featureScores);
                 libraryScorer.calculateNormRtScore(experimentFeatureList, input.getSlopeIntercept(), group.getRt(), featureScores);
                 swathLDAScorer.calculateSwathLdaPrescore(featureScores);
-
+                featureScores.setRt(experimentFeatureList.get(0).getRt());
                 featureScoresList.add(featureScores);
             }
 

@@ -236,59 +236,24 @@ public class AirusUtils {
         return ArrayUtils.extract3dRow(data, groupNumId, isDecoy, learnIdSet);
     }
 
-    /**
-     * "1_run0">"19_run0"
-     * "10_run0">"109_run0"
-     * same sort as pyprophet
-     */
     public static ScoreData fakeSortTgId(ScoreData scoreData) {
         String[] groupId = scoreData.getGroupId();
         int groupIdLength = groupId.length;
         Integer[] index = ArrayUtils.indexBeforeSort(groupId);
-//        Double[] tgIdNum = new Double[groupIdLength];
-//        for (int i = 0; i < groupIdLength; i++) {
-//            String[] groupIdSplit = groupId[i].split("_");
-//            if (groupIdSplit[0].equals("DECOY")) {
-//                tgIdNum[i] = Double.parseDouble(groupIdSplit[1]);
-//            } else {
-//                tgIdNum[i] = Double.parseDouble(groupIdSplit[0]);
-//            }
-//            if (tgIdNum[i] < 10) {
-//                tgIdNum[i] = tgIdNum[i] * 100 + 99.5;
-//            } else if (tgIdNum[i] < 100) {
-//                tgIdNum[i] = tgIdNum[i] * 10 + 9.5;
-//            }
-//
-//        }
-//        Integer[] index = ArrayUtils.indexBeforeSort(tgIdNum);
-//        Integer[] indexTest = AirusUtils.indexBeforeSort(tgIdNum);
 
         Boolean[] isDecoy = scoreData.getIsDecoy();
         Double[][] scores = scoreData.getScoreData();
         String[] newGroupId = new String[groupIdLength];
         Boolean[] newIsDecoy = new Boolean[groupIdLength];
         Double[][] newScores = new Double[groupIdLength][scores[0].length];
-//        int emmm=0;
-//        for(int i=0;i<groupIdLength;i++){
-//            if(indexTest[i] == 0){
-//                emmm++;
-//            }
-//        }
 
         for (int i = 0; i < groupIdLength; i++) {
             int j = index[i];
             newGroupId[i] = groupId[j];
             newIsDecoy[i] = isDecoy[j];
             newScores[i] = scores[j];
-//            newGroupNumId[i] = groupNumId[j];
         }
         Integer[] newGroupNumId = AirusUtils.getGroupNumId(newGroupId);
-//        Integer[] testGD = ArrayUtils.getGroupNumId(newGroupNumId).getFeedBack();
-//        int hehe = testGD[9164];
-//        AirusUtils.sort(groupNumId);
-//        Integer[] test1 = AirusUtils.sortedUnique(groupNumId);
-//        AirusUtils.sort(newGroupNumId);
-//        Integer[] test = AirusUtils.sortedUnique(newGroupNumId);
         scoreData.setGroupId(newGroupId);
         scoreData.setIsDecoy(newIsDecoy);
         scoreData.setScoreData(newScores);

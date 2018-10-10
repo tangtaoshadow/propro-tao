@@ -1,6 +1,8 @@
 package com.westlake.air.pecs.algorithm;
 
 import com.alibaba.fastjson.JSON;
+import com.westlake.air.pecs.constants.ResultCode;
+import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.*;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.db.ScoresDO;
@@ -38,6 +40,14 @@ public class Airus {
     public FinalResult doAirus(String overviewId) {
         logger.info("开始获取打分数据");
         List<ScoresDO> scores = scoresService.getAllByOverviewId(overviewId);
+        logger.info("开始检查数据是否健康");
+        ResultDO resultDO = checkData(scores);
+        if(resultDO.isFailed()){
+            logger.info("数据异常");
+            FinalResult result = new FinalResult();
+            result.setErrorInfo(resultDO.getMsgInfo());
+            return result;
+        }
         logger.info("开始转换打分数据格式");
         ScoreData scoreData = trans(scores);
         logger.info("开始训练学习数据权重");
@@ -62,20 +72,42 @@ public class Airus {
         return finalResult;
     }
 
+    public ResultDO checkData(List<ScoresDO> scores){
+        boolean isAllDecoy = true;
+        boolean isAllReal = true;
+        for(ScoresDO score : scores){
+            if(score.getIsDecoy()){
+                isAllReal = false;
+            }else{
+                isAllDecoy = false;
+            }
+        }
+        if(isAllDecoy){
+            return ResultDO.buildError(ResultCode.ALL_SCORE_DATA_ARE_DECOY);
+        }
+        if(isAllReal){
+            return ResultDO.buildError(ResultCode.ALL_SCORE_DATA_ARE_REAL);
+        }
+        return new ResultDO(true);
+    }
+
     public ScoreData trans(List<ScoresDO> scores) {
         ScoreData scoreData = new ScoreData();
         if (scores == null || scores.size() == 0) {
             return null;
         }
 
-        logger.info("开始构造打分数据");
         List<Boolean> isDecoyList = new ArrayList<>();
         List<String> peptideRefList = new ArrayList<>();
         List<HashMap<String, Double>> scoreList = new ArrayList<>();
         for (ScoresDO score : scores) {
             for (FeatureScores fs : score.getFeatureScoresList()) {
                 isDecoyList.add(score.getIsDecoy());
-                peptideRefList.add(score.getPeptideRef());
+                String peptideRef = score.getPeptideRef();
+                if(score.getIsDecoy()){
+                    peptideRef = "DECOY_"+peptideRef;
+                }
+                peptideRefList.add(peptideRef);
                 HashMap<String, Double> scoreMap = fs.buildScoreMap();
                 scoreList.add(scoreMap);
                 for (String key : scoreMap.keySet()) {
@@ -91,13 +123,14 @@ public class Airus {
         isDecoyList.toArray(isDecoyArray);
 
         String[] groupIds = new String[peptideRefList.size()];
-        Integer[] groupNumIds = AirusUtils.getGroupNumId(peptideRefList.toArray(groupIds));
+        peptideRefList.toArray(groupIds);
+        Integer[] groupNumIds = AirusUtils.getGroupNumId(groupIds);
         Double[][] scoresArray = new Double[peptideRefList.size()][SCORES_COUNT];
         for (int i = 0; i < scoreList.size(); i++) {
             scoresArray[i] = FeatureScores.toArray(scoreList.get(i));
         }
 
-        logger.info("打分数据构造完毕,开始学习");
+        logger.info("打分数据构造完毕");
         scoreData.setGroupId(groupIds);
         scoreData.setGroupNumId(groupNumIds);
         scoreData.setIsDecoy(isDecoyArray);
@@ -219,12 +252,11 @@ public class Airus {
         if (params.isTest()) {
             scoreData = AirusUtils.fakeSortTgId(scoreData);
         }
-//        String[] uniqueGroupId = ArrayUtils.extractRow(scoreData.getGroupId(), AirusUtils.sortedUniqueIndex(scoreData.getGroupNumId()));
         Double[] weights = learn(scoreData.getScoreData(), scoreData.getGroupNumId(), scoreData.getIsDecoy());
         Double[] dscore = calculateDscore(weights, scoreData);
         Double[] topTargetDscores = AirusUtils.getTopTargetPeaks(dscore, scoreData.getIsDecoy(), AirusUtils.findTopIndex(dscore, scoreData.getGroupNumId()));
         Double[] topDecoyDscores = AirusUtils.getTopDecoyPeaks(dscore, scoreData.getIsDecoy(), AirusUtils.findTopIndex(dscore, scoreData.getGroupNumId()));
-        String[] scoreColumns = scoreData.getScoreColumns();
+        String[] scoreColumns = FeatureScores.getScoresColumns();
 
         HashMap<String, Double> classifierTable = new HashMap<String, Double>();
         for (int i = 0; i < weights.length; i++) {

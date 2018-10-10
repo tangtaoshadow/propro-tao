@@ -79,6 +79,14 @@ public enum ResultCode implements Serializable {
 
     /**
      * ******
+     * Scores
+     * *******
+     */
+     ALL_SCORE_DATA_ARE_DECOY("ALL_SCORE_DATA_ARE_DECOY","所有的数据都是伪肽段数据,无法打分"),
+     ALL_SCORE_DATA_ARE_REAL("ALL_SCORE_DATA_ARE_REAL","所有的数据都是真实肽段数据,未包含伪肽段,无法打分"),
+
+    /**
+     * ******
      * RT Normalizer
      * *******
      */

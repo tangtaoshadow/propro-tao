@@ -99,22 +99,23 @@
                                     <table class="table table-bordered table-hover" style="table-layout:fixed;">
                                         <thead>
                                         <tr>
+                                            <th width="5%">RT</th>
                                             <th width="5%">MainXxSwathPrelimScore</th>
+                                            <th width="5%">VarBseriesScore</th>
+                                            <th width="5%">VarElutionModelFitScore</th>
+                                            <th width="5%">VarIntensityScore</th>
+                                            <th width="5%">VarIsotopeCorrelationScore</th>
+                                            <th width="5%">VarIsotopeOverlapScore</th>
                                             <th width="5%">VarLibraryCorr</th>
                                             <th width="5%">VarLibraryRsmd</th>
+                                            <th width="5%">VarLogSnScore</th>
+                                            <th width="5%">VarMassdevScore</th>
+                                            <th width="5%">VarMassdevScoreWeighted</th>
+                                            <th width="5%">VarNormRtScore</th>
                                             <th width="5%">VarXcorrCoelution</th>
                                             <th width="5%">VarXcorrCoelutionWeighted</th>
                                             <th width="5%">VarXcorrShape</th>
                                             <th width="5%">VarXcorrShapeWeighted</th>
-                                            <th width="5%">VarNormRtScore</th>
-                                            <th width="5%">VarIntensityScore</th>
-                                            <th width="5%">VarLogSnScore</th>
-                                            <th width="5%">VarElutionModelFitScore</th>
-                                            <th width="5%">VarIsotopeCorrelationScore</th>
-                                            <th width="5%">VarIsotopeOverlapScore</th>
-                                            <th width="5%">VarMassdevScore</th>
-                                            <th width="5%">VarMassdevScoreWeighted</th>
-                                            <th width="5%">VarBseriesScore</th>
                                             <th width="5%">VarYseriesScore</th>
 
                                             <!--<th width="5%">操作</th>-->
@@ -122,22 +123,23 @@
                                         </thead>
                                         <tbody>
                                         <tr th:each="featureScore:${score.featureScoresList}">
+                                            <td th:text="${featureScore.rt}"></td>
                                             <td th:text="${featureScore.mainVarXxSwathPrelimScore}"></td>
+                                            <td th:text="${featureScore.varBseriesScore}"></td>
+                                            <td th:text="${featureScore.varElutionModelFitScore}"></td>
+                                            <td th:text="${featureScore.varIntensityScore}"></td>
+                                            <td th:text="${featureScore.varIsotopeCorrelationScore}"></td>
+                                            <td th:text="${featureScore.varIsotopeOverlapScore}"></td>
                                             <td th:text="${featureScore.varLibraryCorr}"></td>
                                             <td th:text="${featureScore.varLibraryRsmd}"></td>
+                                            <td th:text="${featureScore.varLogSnScore}"></td>
+                                            <td th:text="${featureScore.varMassdevScore}"></td>
+                                            <td th:text="${featureScore.varMassdevScoreWeighted}"></td>
+                                            <td th:text="${featureScore.varNormRtScore}"></td>
                                             <td th:text="${featureScore.varXcorrCoelution}"></td>
                                             <td th:text="${featureScore.varXcorrCoelutionWeighted}"></td>
                                             <td th:text="${featureScore.varXcorrShape}"></td>
                                             <td th:text="${featureScore.varXcorrShapeWeighted}"></td>
-                                            <td th:text="${featureScore.varNormRtScore}"></td>
-                                            <td th:text="${featureScore.varIntensityScore}"></td>
-                                            <td th:text="${featureScore.varLogSnScore}"></td>
-                                            <td th:text="${featureScore.varElutionModelFitScore}"></td>
-                                            <td th:text="${featureScore.varIsotopeCorrelationScore}"></td>
-                                            <td th:text="${featureScore.varIsotopeOverlapScore}"></td>
-                                            <td th:text="${featureScore.varMassdevScore}"></td>
-                                            <td th:text="${featureScore.varMassdevScoreWeighted}"></td>
-                                            <td th:text="${featureScore.varBseriesScore}"></td>
                                             <td th:text="${featureScore.varYseriesScore}"></td>
 
                                             <!--<td>-->

@@ -39,6 +39,8 @@ public class FeatureScores {
      */
     public static final int SCORES_COUNT = 17;
 
+    double rt;
+
     //Swath主打分
     double mainVarXxSwathPrelimScore;
 
@@ -161,6 +163,9 @@ public class FeatureScores {
         ScoreType[] scoreTypes = ScoreType.values();
         for (int i = 0; i < SCORES_COUNT; i++) {
             scoreArray[i] = scoreMap.get(scoreTypes[i].getScoreType());
+            if(i == 0){
+                scoreArray[i] = 0d;
+            }
         }
 
         return scoreArray;

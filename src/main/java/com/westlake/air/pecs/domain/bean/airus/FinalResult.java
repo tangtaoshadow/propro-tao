@@ -19,4 +19,6 @@ public class FinalResult {
     ErrorStat summaryErrorTable;
 
     ErrorStat allInfo;
+
+    String errorInfo;
 }

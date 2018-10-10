@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 
 @Component
 public class ScoreTsvParser {
@@ -47,6 +46,7 @@ public class ScoreTsvParser {
             while (line != null) {
                 readLine = line.split(split);
                 groupId[i] = readLine[0];
+
                 runId[i] = Integer.parseInt(readLine[1]);
                 isDecoy[i] = readLine[2].equals("1");
                 for (int j = 0; j < FeatureScores.SCORES_COUNT; j++) {
