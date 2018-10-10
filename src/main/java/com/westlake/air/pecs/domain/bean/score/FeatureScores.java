@@ -123,6 +123,12 @@ public class FeatureScores {
     public static final String VarBseriesScore = "varBseriesScore";
     public static final String VarYseriesScore = "varYseriesScore";
 
+    public static final String VarLibraryDotprod = "varLibraryDotprod";
+    public static final String VarLibraryManhattan = "varLibraryManhattan";
+    public static final String VarLibrarySangle = "varLibrarySangle";
+    public static final String VarLibraryRootmeansquare = "varLibraryRootmeansquare";
+    public static final String VarManhattScore = "varManhattScore";
+
     public HashMap<String, Double> buildScoreMap() {
         HashMap<String, Double> map = new HashMap<>();
         map.put(MainVarXxSwathPrelimScore, mainVarXxSwathPrelimScore);
@@ -142,6 +148,12 @@ public class FeatureScores {
         map.put(VarMassdevScoreWeighted, varMassdevScoreWeighted);
         map.put(VarBseriesScore, varBseriesScore);
         map.put(VarYseriesScore, varYseriesScore);
+
+        map.put(VarLibraryDotprod, varLibraryDotprod);
+        map.put(VarLibraryManhattan, varLibraryManhattan);
+        map.put(VarLibrarySangle, varLibrarySangle);
+        map.put(VarLibraryRootmeansquare, varLibraryRootmeansquare);
+        map.put(VarManhattScore, varManhattScore);
 
         return map;
     }

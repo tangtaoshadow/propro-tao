@@ -34,7 +34,7 @@ public class AirusTest extends BaseTest {
 
     @Test
     public void scoreFromFileWork() {
-        ScoreData scoreData = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
+        ScoreData scoreData = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_CHANGE_LINE);
         FinalResult finalResult = airus.doAirus(scoreData);
 
         int count = AirusUtils.checkFdr(finalResult);
@@ -45,7 +45,7 @@ public class AirusTest extends BaseTest {
 
     @Test
     public void scoreFromDBWork() {
-        HashMap<String, ScoresDO> scoreMap = scoreTsvParser.getScoreMap(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
+        HashMap<String, ScoresDO> scoreMap = scoresService.getAllMapByOverviewId("5bbe0031fc6f9e297cccf05d");
         ScoreData scoreData = airus.trans(new ArrayList(scoreMap.values()));
         FinalResult finalResult = airus.doAirus(scoreData);
 
@@ -53,7 +53,6 @@ public class AirusTest extends BaseTest {
         System.out.println(count);
 
         assert count >= 322;
-
     }
 
     @Test

@@ -10,6 +10,7 @@ import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.TaskQuery;
 import com.westlake.air.pecs.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +40,8 @@ public class TaskController extends BaseController {
         TaskQuery query = new TaskQuery();
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
+        query.setSortColumn("lastModifiedDate");
+        query.setOrderBy(Sort.Direction.DESC);
         ResultDO<List<TaskDO>> resultDO = taskService.getList(query);
 
         model.addAttribute("tasks", resultDO.getModel());

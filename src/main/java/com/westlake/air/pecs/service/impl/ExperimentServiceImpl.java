@@ -498,10 +498,10 @@ public class ExperimentServiceImpl implements ExperimentService {
                 List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
                 //Step4.提取指定原始谱图
                 rtMap = parseSpectrum(raf, indexes, getParser(swathInput.getExperimentDO().getFileType()));
-                //Step5.卷积数据
-                convolute(totalList, coordinates, rtMap, overviewId, swathInput.getMzExtractWindow(), swathInput.getRtExtractWindow(), false);
-                //Step6.存储数据
-                analyseDataDAO.insert(totalList);
+                //Step5.卷积并且存储数据
+                List<AnalyseDataDO> dataList = convoluteAndInsert(coordinates, rtMap, overviewId, swathInput.getMzExtractWindow(), swathInput.getRtExtractWindow(), false);
+
+                totalList.addAll(dataList);
                 logger.info("第" + count + "轮数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
                 count++;
             }
@@ -533,13 +533,15 @@ public class ExperimentServiceImpl implements ExperimentService {
         return rtMap;
     }
 
-    private void convoluteAndInsert(List<TargetTransition> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow, boolean isMS1) {
+    private List<AnalyseDataDO> convoluteAndInsert(List<TargetTransition> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow, boolean isMS1) {
         List<AnalyseDataDO> dataList = new ArrayList<>();
         for (TargetTransition ms : coordinates) {
             AnalyseDataDO dataDO = convForOne(isMS1, ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
             dataList.add(dataDO);
         }
         analyseDataDAO.insert(dataList);
+
+        return dataList;
     }
 
     /**
