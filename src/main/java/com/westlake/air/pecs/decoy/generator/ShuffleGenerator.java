@@ -35,19 +35,24 @@ public class ShuffleGenerator extends BaseGenerator {
 
     public List<TransitionDO> generate(List<TransitionDO> list) {
         List<TransitionDO> decoys = new ArrayList<>();
+
+        HashMap<String, TransitionDO> realDecoyMap = new HashMap<>();
         for (TransitionDO trans : list) {
-            TransitionDO decoy = generate(trans);
+            TransitionDO existedDecoy = realDecoyMap.get(trans.getPeptideRef());
+            TransitionDO decoy = null;
+            if(existedDecoy == null){
+                decoy = generate(trans);
+                realDecoyMap.put(trans.getPeptideRef(), decoy);
+            }else{
+                decoy = generateDecoyFromExistedDecoy(existedDecoy, trans);
+            }
+
             decoys.add(decoy);
         }
         return decoys;
     }
 
     public TransitionDO generate(TransitionDO transitionDO) {
-
-//        if (transitionDO.getIsDecoy()) {
-//            logger.warn("this is already a decoy!!!");
-//            return null;
-//        }
 
         String sequence = transitionDO.getSequence();
         HashMap<Integer, String> unimodMap = transitionDO.getUnimodMap();
@@ -107,6 +112,7 @@ public class ShuffleGenerator extends BaseGenerator {
         TransitionDO decoy = TransitionUtil.cloneForDecoy(transitionDO);
         decoy.setSequence(TransitionUtil.toSequence(bestDecoy, false));
         decoy.setUnimodMap(newUnimodMap);
+        decoy.setDecoyAcidList(bestDecoy);
 
         Annotation oneAnno = decoy.getAnnotation();
 
@@ -132,6 +138,47 @@ public class ShuffleGenerator extends BaseGenerator {
         decoy.setProductMz(productMz);
         decoy.setPeptideRef(decoy.getFullName()+"_"+decoy.getPrecursorCharge());
         decoy.setCutInfo(transitionDO.getCutInfo());
+        return decoy;
+    }
+
+    /**
+     * 从一个已经存在的Decoy生成另外一个Decoy,但是需要保持和已存在的Decoy的Sequence相同
+     * @param existedDecoy
+     * @param target
+     * @return
+     */
+    public TransitionDO generateDecoyFromExistedDecoy(TransitionDO existedDecoy, TransitionDO target) {
+
+        TransitionDO decoy = TransitionUtil.cloneForDecoy(existedDecoy);
+        decoy.setSequence(existedDecoy.getSequence());
+        decoy.setUnimodMap(existedDecoy.getUnimodMap());
+        decoy.setDecoyAcidList(existedDecoy.getDecoyAcidList());
+
+        Annotation oneAnno = decoy.getAnnotation();
+
+        List<String> unimodIds = new ArrayList<>();
+        List<AminoAcid> acids = fragmentCalculator.getFragmentSequence(decoy.getDecoyAcidList(), target.getAnnotation().getType(), target.getAnnotation().getLocation());
+        for (AminoAcid aminoAcid : acids) {
+            if (aminoAcid.getModId() != null) {
+                unimodIds.add(aminoAcid.getModId());
+            }
+        }
+
+        double productMz = formulaCalculator.getMonoMz(
+                TransitionUtil.toSequence(acids, false),
+                oneAnno.getType(),
+                oneAnno.getCharge(),
+                oneAnno.getAdjust(),
+                oneAnno.getDeviation(),
+                oneAnno.isIsotope(),
+                unimodIds
+        );
+
+        decoy.setFeatures("计算的肽段:"+TransitionUtil.toSequence(acids, false));
+        decoy.setProductMz(productMz);
+        decoy.setPeptideRef(decoy.getFullName()+"_"+decoy.getPrecursorCharge());
+        decoy.setCutInfo(target.getCutInfo());
+        decoy.setAnnotations(target.getAnnotations());
         return decoy;
     }
 }

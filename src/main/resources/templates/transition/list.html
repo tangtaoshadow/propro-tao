@@ -29,7 +29,7 @@
                             <div class="input-group col-lg-2">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-success" type="button">
-                                        标准库:
+                                        标准库/iRT库:
                                     </button>
                                 </div>
                                 <select class="form-control m-input" id="libraryId" name="libraryId">
@@ -38,20 +38,18 @@
                                             th:selected="${libraryId}==${library.id}?true:false"></option>
                                 </select>
                             </div>
-                            <!--<div class="input-group col-lg-2">-->
-                                <!--<div class="m-checkbox-inline">-->
-                                    <!--<label class="m-checkbox">-->
-                                        <!--<input type="checkbox" th:checked="${withProtein}" name="withProtein">-->
-                                        <!--按蛋白质聚合-->
-                                        <!--<span></span>-->
-                                    <!--</label>-->
-                                    <!--<label class="m-checkbox">-->
-                                        <!--<input type="checkbox" th:checked="${withPeptide}" name="withPeptide">-->
-                                        <!--按肽段聚合-->
-                                        <!--<span></span>-->
-                                    <!--</label>-->
-                                <!--</div>-->
-                            <!--</div>-->
+                            <div class="input-group col-lg-2">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        是否伪肽段:
+                                    </button>
+                                </div>
+                                <select class="form-control m-input" id="decoyFilter" name="decoyFilter">
+                                    <option th:text="Yes" th:selected="${decoyFilter}=='Yes'?true:false"></option>
+                                    <option th:text="No" th:selected="${decoyFilter}=='No'?true:false"></option>
+                                    <option th:text="All" th:selected="${decoyFilter}=='All'?true:false"></option>
+                                </select>
+                            </div>
                             <div class="input-group col-lg-2">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-success" type="button">
@@ -106,7 +104,7 @@
                                     PeptideRef
                                 </th>
                                 <th width="8%">
-                                    原始肽段序列
+                                    肽段序列(伪肽段序列)
                                 </th>
                                 <th width="14%">
                                     肽段全名

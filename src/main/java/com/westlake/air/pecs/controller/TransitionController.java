@@ -45,7 +45,7 @@ public class TransitionController extends BaseController {
                 @RequestParam(value = "peptideRef", required = false) String peptideRef,
                 @RequestParam(value = "name", required = false) String name,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                @RequestParam(value = "isDecoy", required = false) Boolean isDecoy,
+                @RequestParam(value = "decoyFilter", required = false, defaultValue = "All") String decoyFilter,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
         long startTime = System.currentTimeMillis();
         model.addAttribute("libraryId", libraryId);
@@ -53,7 +53,7 @@ public class TransitionController extends BaseController {
         model.addAttribute("peptideRef", peptideRef);
         model.addAttribute("name", name);
         model.addAttribute("pageSize", pageSize);
-        model.addAttribute("isDecoy", isDecoy);
+        model.addAttribute("decoyFilter", decoyFilter);
         model.addAttribute("libraries",getLibraryList(null));
 
         TransitionQuery query = new TransitionQuery();
@@ -70,8 +70,12 @@ public class TransitionController extends BaseController {
         if (name != null && !name.isEmpty()) {
             query.setName(name);
         }
-        if (isDecoy != null) {
-            query.setIsDecoy(isDecoy);
+        if (!decoyFilter.equals("All")) {
+            if(decoyFilter.equals("Yes")){
+                query.setIsDecoy(true);
+            }else if(decoyFilter.equals("No")){
+                query.setIsDecoy(false);
+            }
         }
 
         query.setPageSize(pageSize);

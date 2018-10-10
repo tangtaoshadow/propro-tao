@@ -82,12 +82,12 @@ public class TransitionDO extends BaseDO {
     Boolean isDecoy;
 
     /**
-     * 新字段,如果是伪肽段,则本字段为伪肽段对应的原始肽段的Sequence
+     * 新字段,如果是伪肽段,则本字段为伪肽段对应的原始真肽段的Sequence
      */
     String targetSequence;
 
     /**
-     * 对应肽段序列,如果是伪肽段,则为对应的伪肽段的序列
+     * 对应肽段序列,如果是伪肽段,则为对应的伪肽段的序列(不包含UniModId)
      */
     String sequence;
 
@@ -128,6 +128,11 @@ public class TransitionDO extends BaseDO {
      * 新字段,原始肽段的序列列表,包含修饰符
      */
     List<AminoAcid> acidList = new ArrayList<>();
+
+    /**
+     * 新字段,如果是伪肽段则为伪肽段的序列列表,包含修饰符
+     */
+    List<AminoAcid> decoyAcidList = new ArrayList<>();
 
     Boolean detecting = true;
     Boolean identifying = false;
