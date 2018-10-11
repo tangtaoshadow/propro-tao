@@ -96,8 +96,13 @@ public class ExperimentTask extends BaseTask {
         taskDO.addLog("开始卷积IRT校准库并且计算iRT值");
         taskService.update(taskDO);
 
-        ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(input.getExperimentDO(), input.getIRtLibraryId(), input.getMzExtractWindow(), input.getSigmaSpacing());
+        ExperimentDO experimentDO = input.getExperimentDO();
+        ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(experimentDO, input.getIRtLibraryId(), input.getMzExtractWindow(), input.getSigmaSpacing());
         SlopeIntercept slopeIntercept = resultDO.getModel();
+
+        experimentDO.setSlope(slopeIntercept.getSlope());
+        experimentDO.setIntercept(slopeIntercept.getIntercept());
+        experimentService.update(experimentDO);
 
         taskDO.addLog("iRT计算完毕,耗时:"+(System.currentTimeMillis() - start)+"毫秒,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept() + ",开始卷积原始数据");
         taskService.update(taskDO);

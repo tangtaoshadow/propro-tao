@@ -206,11 +206,11 @@ public class FeatureScores {
     }
 
     public enum ScoreType {
-        //        MainVarXxSwathPrelimScore("mainVarXxSwathPrelimScore"),
+                MainVarXxSwathPrelimScore("mainVarXxSwathPrelimScore"),
 //        VarBseriesScore("varBseriesScore"),
 //        VarElutionModelFitScore("varElutionModelFitScore"),
         VarIntensityScore("varIntensityScore"),
-//        VarIsotopeCorrelationScore("varIsotopeCorrelationScore"),
+        //        VarIsotopeCorrelationScore("varIsotopeCorrelationScore"),
 //        VarIsotopeOverlapScore("varIsotopeOverlapScore"),
         VarLibraryCorr("varLibraryCorr"),
         VarLibraryRsmd("varLibraryRsmd"),
@@ -223,10 +223,10 @@ public class FeatureScores {
         VarXcorrShape("varXcorrShape"),
         VarXcorrShapeWeighted("varXcorrShapeWeighted"),
 
-//        VarLibraryDotprod("varLibraryDotprod"),
-//        VarLibraryManhattan("varLibraryManhattan"),
-//        VarLibrarySangle("varLibrarySangle"),
-//        VarLibraryRootmeansquare("varLibraryRootmeansquare"),
+        VarLibraryDotprod("varLibraryDotprod"),
+        VarLibraryManhattan("varLibraryManhattan"),
+        VarLibrarySangle("varLibrarySangle"),
+        VarLibraryRootmeansquare("varLibraryRootmeansquare"),
 //        VarManhattScore("varManhattScore"),
 //        VarYseriesScore("varYseriesScore"),
 
