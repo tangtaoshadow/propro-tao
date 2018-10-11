@@ -31,13 +31,6 @@ public class AnalyseOverviewDO extends BaseDO {
 
     String libraryName;
 
-    /**
-     * 校准库ID
-     */
-    String iRtLibraryId;
-
-    String iRtLibraryName;
-
     Double slope;
 
     Double intercept;

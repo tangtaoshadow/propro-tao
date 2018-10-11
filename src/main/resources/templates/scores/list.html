@@ -118,6 +118,12 @@
                                             <th width="5%">VarXcorrShapeWeighted</th>
                                             <th width="5%">VarYseriesScore</th>
 
+                                            <th width="5%">VarLibraryDotprod</th>
+                                            <th width="5%">VarLibraryManhattan</th>
+                                            <th width="5%">VarLibrarySangle</th>
+                                            <th width="5%">VarLibraryRootmeansquare</th>
+                                            <th width="5%">VarManhattScore</th>
+
                                             <!--<th width="5%">操作</th>-->
                                         </tr>
                                         </thead>
@@ -141,6 +147,12 @@
                                             <td th:text="${featureScore.varXcorrShape}"></td>
                                             <td th:text="${featureScore.varXcorrShapeWeighted}"></td>
                                             <td th:text="${featureScore.varYseriesScore}"></td>
+
+                                            <td th:text="${featureScore.varLibraryDotprod}"></td>
+                                            <td th:text="${featureScore.varLibraryManhattan}"></td>
+                                            <td th:text="${featureScore.varLibrarySangle}"></td>
+                                            <td th:text="${featureScore.varLibraryRootmeansquare}"></td>
+                                            <td th:text="${featureScore.varManhattScore}"></td>
 
                                             <!--<td>-->
                                                 <!--<button th:if="${entry.value} != null" type="button" class="btn btn-sm btn-info" data-toggle="modal"-->

@@ -149,6 +149,15 @@
                         </div>
                         <div class="form-group m-form__group row">
                             <label for="id" class="col-3 col-form-label">
+                                卷积代号
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="expId" name="expId" readonly
+                                       th:value="${overview?.name}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="id" class="col-3 col-form-label">
                                 实验ID
                             </label>
                             <div class="col-9">
@@ -163,15 +172,6 @@
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="library" readonly
                                        th:value="|${overview?.libraryName}(${overview?.libraryId})|">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="iRtLibrary" class="col-3 col-form-label">
-                                关联校准库
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="iRtLibrary" readonly
-                                       th:value="|${overview?.iRtLibraryName}(${overview?.iRtLibraryId})|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">

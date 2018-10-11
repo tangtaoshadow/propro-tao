@@ -337,7 +337,7 @@ public class ScoresServiceImpl implements ScoresService {
                     }
                 }catch (Exception e){
                     e.printStackTrace();
-                    logger.info("cutinfo:"+ cutInfo+";data:"+ JSON.toJSONString(data));
+                    logger.info("cutInfo:"+ cutInfo+";data:"+ JSON.toJSONString(data));
                 }
 
             }

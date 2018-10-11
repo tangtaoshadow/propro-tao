@@ -34,32 +34,45 @@ public class AirusTest extends BaseTest {
 
     @Test
     public void scoreFromFileWork() {
-        ScoreData scoreData = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_CHANGE_LINE);
+        ScoreData scoreData = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResult.csv").getPath()), ScoreTsvParser.SPLIT_CHANGE_LINE);
         FinalResult finalResult = airus.doAirus(scoreData);
 
         int count = AirusUtils.checkFdr(finalResult);
         System.out.println(count);
-
+        System.out.println(JSON.toJSONString(finalResult.getClassifierTable()));
         assert count >= 322;
     }
 
     @Test
     public void scoreFromDBWork() {
-        HashMap<String, ScoresDO> scoreMap = scoresService.getAllMapByOverviewId("5bbe0031fc6f9e297cccf05d");
+        HashMap<String, ScoresDO> scoreMap = scoresService.getAllMapByOverviewId("5bbdaaf1fc6f9e1f2872d5ce");
         ScoreData scoreData = airus.trans(new ArrayList(scoreMap.values()));
         FinalResult finalResult = airus.doAirus(scoreData);
 
         int count = AirusUtils.checkFdr(finalResult);
         System.out.println(count);
+        System.out.println(JSON.toJSONString(finalResult.getClassifierTable()));
 
         assert count >= 322;
+    }
+
+    @Test
+    public void isWeightsSimilar(){
+        ScoreData scoreDataFromFile = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResult.csv").getPath()), ScoreTsvParser.SPLIT_CHANGE_LINE);
+        FinalResult finalResultForFile = airus.doAirus(scoreDataFromFile);
+
+        HashMap<String, ScoresDO> scoreMap = scoresService.getAllMapByOverviewId("5bbe11e2fc6f9e2e9057bd40");
+        ScoreData scoreDataFromDB = airus.trans(new ArrayList(scoreMap.values()));
+        FinalResult finalResultForDB = airus.doAirus(scoreDataFromDB);
+
+        System.out.println("aa");
     }
 
     @Test
     public void isScoresSame() {
         HashMap<String, ScoresDO> scoresMapFromFile = scoreTsvParser.getScoreMap(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
         //黄金数据集,Water-10
-        HashMap<String, ScoresDO> scoresMapFromDB = scoresService.getAllMapByOverviewId("5bab4316fc6f9e34a888a3d5");
+        HashMap<String, ScoresDO> scoresMapFromDB = scoresService.getAllMapByOverviewId("5bbe11e2fc6f9e2e9057bd40");
 
         assert scoresMapFromDB.size() == 690;
         assert scoresMapFromFile.size() == scoresMapFromDB.size();

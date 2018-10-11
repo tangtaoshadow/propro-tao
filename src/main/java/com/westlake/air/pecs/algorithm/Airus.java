@@ -64,7 +64,7 @@ public class Airus {
         }
         logger.info("开始训练学习数据权重");
         Double[] weights = learn(scoreData.getScoreData(), scoreData.getGroupNumId(), scoreData.getIsDecoy());
-        logger.info("开始计算打分");
+        logger.info("开始计算合并打分");
         Double[] dscore = calculateDscore(weights, scoreData);
         Double[] topTargetDscores = AirusUtils.getTopTargetPeaks(dscore, scoreData.getIsDecoy(), AirusUtils.findTopIndex(dscore, scoreData.getGroupNumId()));
         Double[] topDecoyDscores = AirusUtils.getTopDecoyPeaks(dscore, scoreData.getIsDecoy(), AirusUtils.findTopIndex(dscore, scoreData.getGroupNumId()));
@@ -80,7 +80,7 @@ public class Airus {
         finalResult.setFinalErrorTable(finalErrorTable(errorStat));
         finalResult.setSummaryErrorTable(summaryErrorTable(errorStat));
         finalResult.setAllInfo(errorStat);
-
+        logger.info("合并打分完毕");
         return finalResult;
     }
 

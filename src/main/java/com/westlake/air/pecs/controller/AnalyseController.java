@@ -290,43 +290,6 @@ public class AnalyseController extends BaseController {
         return "redirect:/task/detail/" + taskDO.getId();
     }
 
-    @RequestMapping(value = "/data/irtliblist")
-    String iRtLibList(Model model,
-                      @RequestParam(value = "overviewId", required = false) String overviewId,
-                      @RequestParam(value = "expId", required = false) String expId,
-                      RedirectAttributes redirectAttributes) {
-
-        model.addAttribute("overviewId", overviewId);
-
-        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
-        if (overviewResult.isFailed()) {
-            model.addAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-            return "/analyse/overview/list?expId=" + expId;
-        }
-
-        AnalyseOverviewDO overview = overviewResult.getModel();
-
-        List<TransitionDO> transitionDOList = transitionService.getAllByLibraryId(overview.getIRtLibraryId());
-        List<AnalyseDataDO> datas = new ArrayList<>();
-        for (TransitionDO transitionDO : transitionDOList) {
-            AnalyseDataDO data = new AnalyseDataDO();
-            data.setOverviewId(overviewId);
-            data.setPeptideRef(transitionDO.getPeptideRef());
-            data.setProteinName(transitionDO.getProteinName());
-            data.setAnnotations(transitionDO.getAnnotations());
-            data.setMsLevel(2);
-            data.setCutInfo(transitionDO.getCutInfo());
-            data.setMz(new Float(transitionDO.getProductMz()));
-
-            datas.add(data);
-        }
-        model.addAttribute("overview", overview);
-        model.addAttribute("overviewId", overview.getId());
-        model.addAttribute("datas", datas);
-
-        return "/analyse/data/list";
-    }
-
     @RequestMapping(value = "/view")
     @ResponseBody
     ResultDO<JSONObject> view(Model model,
@@ -448,6 +411,10 @@ public class AnalyseController extends BaseController {
             }
         }
         logger.info(JSON.toJSONString(finalResult.getAllInfo().getStatMetrics().getFdr()));
-        return "权重:"+JSON.toJSONString(finalResult.getClassifierTable())+"识别肽段数目"+count+"";
+        JSONObject object = new JSONObject();
+        object.put("子分数种类",finalResult.getClassifierTable().size());
+        object.put("权重",finalResult.getClassifierTable());
+        object.put("识别肽段数目",count);
+        return object.toJSONString();
     }
 }

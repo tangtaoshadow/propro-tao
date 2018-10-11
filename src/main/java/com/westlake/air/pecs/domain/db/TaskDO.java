@@ -48,6 +48,8 @@ public class TaskDO extends BaseDO {
 
     Long totalCost;
 
+    String features;
+
     public TaskDO() {
     }
 

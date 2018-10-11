@@ -32,12 +32,12 @@ public class FeatureScores {
      * scores.var_intensity_score 同一个peptideRef下, 所有HullPoints的intensity之和 除以 所有intensity之和
      * <p>
      * scores.library_corr //对experiment和library intensity算Pearson相关系数
-     * scores.library_norm_manhattan // 对experiment intensity 算平均占比差距
+     * scores.library_norm_manhattan //对experiment intensity 算平均占比差距
      * <p>
      * scores.massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比之和
      * scores.weighted_massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比按libraryIntensity加权之和
      */
-    public static final int SCORES_COUNT = 17;
+    public static final int SCORES_COUNT = ScoreType.values().length;
 
     double rt;
 
@@ -175,9 +175,6 @@ public class FeatureScores {
         ScoreType[] scoreTypes = ScoreType.values();
         for (int i = 0; i < SCORES_COUNT; i++) {
             scoreArray[i] = scoreMap.get(scoreTypes[i].getScoreType());
-            if(i == 0){
-                scoreArray[i] = 0d;
-            }
         }
 
         return scoreArray;
@@ -209,23 +206,29 @@ public class FeatureScores {
     }
 
     public enum ScoreType {
-        MainVarXxSwathPrelimScore("mainVarXxSwathPrelimScore"),
-        VarBseriesScore("varBseriesScore"),
-        VarElutionModelFitScore("varElutionModelFitScore"),
+        //        MainVarXxSwathPrelimScore("mainVarXxSwathPrelimScore"),
+//        VarBseriesScore("varBseriesScore"),
+//        VarElutionModelFitScore("varElutionModelFitScore"),
         VarIntensityScore("varIntensityScore"),
-        VarIsotopeCorrelationScore("varIsotopeCorrelationScore"),
-        VarIsotopeOverlapScore("varIsotopeOverlapScore"),
+//        VarIsotopeCorrelationScore("varIsotopeCorrelationScore"),
+//        VarIsotopeOverlapScore("varIsotopeOverlapScore"),
         VarLibraryCorr("varLibraryCorr"),
         VarLibraryRsmd("varLibraryRsmd"),
         VarLogSnScore("varLogSnScore"),
-        VarMassdevScore("varMassdevScore"),
-        VarMassdevScoreWeighted("varMassdevScoreWeighted"),
+//        VarMassdevScore("varMassdevScore"),
+//        VarMassdevScoreWeighted("varMassdevScoreWeighted"),
         VarNormRtScore("varNormRtScore"),
         VarXcorrCoelution("varXcorrCoelution"),
         VarXcorrCoelutionWeighted("varXcorrCoelutionWeighted"),
         VarXcorrShape("varXcorrShape"),
         VarXcorrShapeWeighted("varXcorrShapeWeighted"),
-        VarYseriesScore("varYseriesScore"),
+
+//        VarLibraryDotprod("varLibraryDotprod"),
+//        VarLibraryManhattan("varLibraryManhattan"),
+//        VarLibrarySangle("varLibrarySangle"),
+//        VarLibraryRootmeansquare("varLibraryRootmeansquare"),
+//        VarManhattScore("varManhattScore"),
+//        VarYseriesScore("varYseriesScore"),
 
 ;
         String scoreType;
