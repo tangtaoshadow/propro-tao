@@ -62,12 +62,12 @@ public class FeatureFinder {
                 break;
             }
 //TODO origin code error
-//            double bestLeft = intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]];
-//            double bestRight = intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]];
+            double bestLeft = intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]];
+            double bestRight = intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]];
             double peakApex = pickedChroms.get(chrPeakIndex[0]).getRtArray()[chrPeakIndex[1]];
 
-            double bestLeft = (double)(Float.parseFloat(Double.toString(intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]])));
-            double bestRight = (double)(Float.parseFloat(Double.toString(intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]])));
+//            double bestLeft = (double)(Float.parseFloat(Double.toString(intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]])));
+//            double bestRight = (double)(Float.parseFloat(Double.toString(intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]])));
 
             RtIntensityPairsDouble rtInt = pickedChroms.get(chrPeakIndex[0]);
             Double[] intensityArray = rtInt.getIntensityArray();

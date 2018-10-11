@@ -72,10 +72,19 @@ public class ScorerTest extends BaseTest {
         System.out.println("VarLibraryCorr Test PASSED.");
         assert isSimilar(scores.getVarLibraryRsmd(), 0.5800337593, Math.pow(10, -6));
         System.out.println("VarLibraryRsmd Test PASSED.");
+        assert isSimilar(scores.getVarLibraryDotprod(), 0.34514801, Math.pow(10, -6));
+        System.out.println("VarLibraryDotprod Test PASSED.");
+        assert isSimilar(scores.getVarLibraryManhattan(), 1.279644714, Math.pow(10, -6));
+        System.out.println("VarLibraryManhattan Test PASSED.");
+        assert isSimilar(scores.getVarLibrarySangle(), 1.483262, Math.pow(10, -6));
+        System.out.println("VarLibrarySangle Test PASSED.");
+        assert isSimilar(scores.getVarLibraryRootmeansquare(), 0.6727226674, Math.pow(10, -6));
+        System.out.println("VarLibraryRootmeansquare Test PASSED.");
     }
 
     @Test
     public void calcLogSnScoreTest(){
+
         //List<RtIntensityPairsDouble> chromatograms, List<ExperimentFeature> experimentFeatures, List<double[]> signalToNoiseList, FeatureScores scores
         double[] stn1 = {500};
         double[] stn2 = {1500};

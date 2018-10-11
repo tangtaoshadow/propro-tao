@@ -111,14 +111,14 @@ public class LibraryScorer {
         scores.setVarLibrarySangle(spectralAngle);
 
         //root mean square
-        if(libraryIntensity.size() == 0){
+        if(x.length == 0){
             scores.setVarLibraryRootmeansquare(0);
         }else {
             double rms = 0;
-            for(int i=0; i<libraryIntensity.size(); i++){
-                rms += (libraryIntensity.get(i) - experimentIntensity.get(i)) * (libraryIntensity.get(i) - experimentIntensity.get(i));
+            for(int i=0; i<x.length; i++){
+                rms += (x[i] - y[i]) * (x[i] - y[i]);
             }
-            rms = Math.sqrt(rms / libraryIntensity.size());
+            rms = Math.sqrt(rms / x.length);
             scores.setVarLibraryRootmeansquare(rms);
         }
 
