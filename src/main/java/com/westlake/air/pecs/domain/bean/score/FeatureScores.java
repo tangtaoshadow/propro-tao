@@ -223,7 +223,7 @@ public class FeatureScores {
         VarXcorrShape("varXcorrShape"),
         VarXcorrShapeWeighted("varXcorrShapeWeighted"),
 
-        VarLibraryDotprod("varLibraryDotprod"),
+//        VarLibraryDotprod("varLibraryDotprod"),
         VarLibraryManhattan("varLibraryManhattan"),
         VarLibrarySangle("varLibrarySangle"),
         VarLibraryRootmeansquare("varLibraryRootmeansquare"),

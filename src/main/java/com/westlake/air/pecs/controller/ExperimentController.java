@@ -204,7 +204,7 @@ public class ExperimentController extends BaseController {
 
         analyseOverviewService.deleteAllByExpId(id);
 
-        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_LIBRARY_SUCCESS);
+        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
         return "redirect:/experiment/list";
 
     }

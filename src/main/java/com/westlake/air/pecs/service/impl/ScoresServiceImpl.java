@@ -357,7 +357,7 @@ public class ScoresServiceImpl implements ScoresService {
 
                 //TODO @Nico charge from transition?
 //                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
-                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
+//                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, featureScores);
                 libraryScorer.calculateNormRtScore(experimentFeatureList, input.getSlopeIntercept(), group.getRt(), featureScores);

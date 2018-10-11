@@ -127,7 +127,6 @@ public class Airus {
                     if (scoreMap.get(key).equals(Double.NaN)) {
                         logger.info("包含空打分肽段名:" + JSON.toJSONString(score.getPeptideRef()));
                         logger.info("Key:" + key);
-                        logger.info("包含空打分全部数据:" + JSON.toJSONString(score));
                     }
                 }
             }
