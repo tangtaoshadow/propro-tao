@@ -33,7 +33,7 @@ public class ChromatogramPicker {
         int leftIndex, rightIndex;
 
         RtIntensityPairsDouble chromatogram;
-        if(Constants.CHROMATOGRAM_PICKER_METHOD == "legacy"){
+        if(Constants.CHROMATOGRAM_PICKER_METHOD.equals("legacy")){
             chromatogram = rtIntensityPairs;
         }else {
             chromatogram = smoothedRtIntensityPairs;

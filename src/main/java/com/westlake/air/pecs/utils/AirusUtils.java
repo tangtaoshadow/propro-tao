@@ -266,7 +266,7 @@ public class AirusUtils {
     public static int checkFdr(FinalResult finalResult) {
         int count = 0;
         for (double d : finalResult.getAllInfo().getStatMetrics().getFdr()) {
-            if (d < 0.01) {
+            if (d <= 0.01) {
                 count++;
             }
         }

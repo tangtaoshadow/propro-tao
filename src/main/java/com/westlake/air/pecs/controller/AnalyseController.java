@@ -10,6 +10,7 @@ import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
@@ -17,10 +18,12 @@ import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
 import com.westlake.air.pecs.feature.GaussFilter;
+import com.westlake.air.pecs.feature.SignalToNoiseEstimator;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.TransitionService;
+import com.westlake.air.pecs.utils.AirusUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -60,6 +63,8 @@ public class AnalyseController extends BaseController {
     Airus airus;
     @Autowired
     GaussFilter gaussFilter;
+    @Autowired
+    SignalToNoiseEstimator signalToNoiseEstimator;
 
     @RequestMapping(value = "/overview/list")
     String overviewList(Model model,
@@ -337,7 +342,9 @@ public class AnalyseController extends BaseController {
                                    @RequestParam(value = "overviewId", required = false) String overviewId,
                                    @RequestParam(value = "isDecoy", required = false) Boolean isDecoy,
                                    @RequestParam(value = "peptideRef", required = false) String peptideRef,
-                                   @RequestParam(value = "isGaussFilter", required = false, defaultValue = "false") Boolean isGaussFilter) {
+                                   @RequestParam(value = "isGaussFilter", required = false, defaultValue = "false") Boolean isGaussFilter,
+                                   @RequestParam(value = "useNoise1000", required = false, defaultValue = "false") Boolean useNoise1000
+                                   ) {
         ResultDO<List<AnalyseDataDO>> dataResult = null;
         if (overviewId != null && peptideRef != null) {
             dataResult = analyseDataService.getMS2DataList(overviewId, peptideRef, isDecoy);
@@ -374,12 +381,23 @@ public class AnalyseController extends BaseController {
             }else{
                 pairIntensityArray = data.getIntensityArray();
             }
+
             JSONArray intensityArray = new JSONArray();
             for (int i = 0; i < pairIntensityArray.length; i++) {
                 intensityArray.add(pairIntensityArray[i]);
             }
             cutInfoArray.add(data.getCutInfo());
             intensityArrays.add(intensityArray);
+
+            if(useNoise1000){
+                double[] noisePairIntensityArray = signalToNoiseEstimator.computeSTN(new RtIntensityPairsDouble(data.getRtArray(), data.getIntensityArray()), 1000, 30);
+                JSONArray noiseIntensityArray = new JSONArray();
+                for (int i = 0; i < pairIntensityArray.length; i++) {
+                    noiseIntensityArray.add(noisePairIntensityArray[i]);
+                }
+                cutInfoArray.add("Noise-"+data.getCutInfo());
+                intensityArrays.add(noiseIntensityArray);
+            }
         }
 
         if(pairRtArray != null){
@@ -404,12 +422,8 @@ public class AnalyseController extends BaseController {
         long start = System.currentTimeMillis();
         FinalResult finalResult = airus.doAirus(overviewId);
         logger.info("打分耗时:" + (System.currentTimeMillis() - start));
-        int count = 0;
-        for (Double d : finalResult.getAllInfo().getStatMetrics().getFdr()) {
-            if (d <= 0.01) {
-                count++;
-            }
-        }
+        int count = AirusUtils.checkFdr(finalResult);
+
         logger.info(JSON.toJSONString(finalResult.getAllInfo().getStatMetrics().getFdr()));
         JSONObject object = new JSONObject();
         object.put("子分数种类",finalResult.getClassifierTable().size());
