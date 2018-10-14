@@ -387,8 +387,8 @@ public class ExperimentServiceImpl implements ExperimentService {
         try {
             logger.info("开始卷积数据");
             long start = System.currentTimeMillis();
-//            List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
-            List<AnalyseDataDO> dataList = FileUtil.getAnalyseDataList(getClass().getClassLoader().getResource("data/conv.json").getPath());         //这边先读取本地已经卷积好的iRT数据
+            List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
+//            List<AnalyseDataDO> dataList = FileUtil.getAnalyseDataList(getClass().getClassLoader().getResource("data/conv.json").getPath());         //这边先读取本地已经卷积好的iRT数据
 
             logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
             start = System.currentTimeMillis();
@@ -427,30 +427,11 @@ public class ExperimentServiceImpl implements ExperimentService {
         int count = 1;
         try {
             for (WindowRang rang : rangs) {
-
                 long start = System.currentTimeMillis();
-                List<TargetTransition> coordinates;
-                TreeMap<Float, MzIntensityPairs> rtMap;
-                //Step2.获取标准库的目标肽段片段的坐标
-                coordinates = transitionService.buildMS2Coordinates(swathInput.getLibraryId(), swathInput.getSlopeIntercept(), swathInput.getRtExtractWindow(), rang.getMzStart(), rang.getMzEnd());
-                if (coordinates.isEmpty()) {
-                    logger.warn("No Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
-                    continue;
-                }
-                //Step3.获取指定索引列表
-                ScanIndexQuery query = new ScanIndexQuery(swathInput.getExperimentDO().getId(), 2);
-                query.setPrecursorMzStart(rang.getMzStart());
-                query.setPrecursorMzEnd(rang.getMzEnd());
-                List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
-                //Step4.提取指定原始谱图
-                rtMap = parseSpectrum(raf, indexes, getParser(swathInput.getExperimentDO().getFileType()));
-                //Step5.卷积并且存储数据
-                convoluteAndInsert(coordinates, rtMap, overviewId, swathInput.getRtExtractWindow(), swathInput.getMzExtractWindow(), false);
-
+                processConv(raf, swathInput, rang, overviewId);
                 logger.info("第" + count + "轮数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
                 count++;
             }
-
         } catch (Exception e) {
             logger.error(e.getMessage());
             try {
@@ -481,26 +462,11 @@ public class ExperimentServiceImpl implements ExperimentService {
         int count = 1;
         try {
             for (WindowRang rang : rangs) {
-
                 long start = System.currentTimeMillis();
-                List<TargetTransition> coordinates;
-                TreeMap<Float, MzIntensityPairs> rtMap;
-                //Step2.获取标准库的目标肽段片段的坐标
-                coordinates = transitionService.buildMS2Coordinates(swathInput.getLibraryId(), swathInput.getSlopeIntercept(), swathInput.getRtExtractWindow(), rang.getMzStart(), rang.getMzEnd());
-                if (coordinates.isEmpty()) {
-                    logger.warn("No Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
+                List<AnalyseDataDO> dataList = processConv(raf, swathInput, rang, overviewId);
+                if(dataList == null){
                     continue;
                 }
-                //Step3.获取指定索引列表
-                ScanIndexQuery query = new ScanIndexQuery(swathInput.getExperimentDO().getId(), 2);
-                query.setPrecursorMzStart(rang.getMzStart());
-                query.setPrecursorMzEnd(rang.getMzEnd());
-                List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
-                //Step4.提取指定原始谱图
-                rtMap = parseSpectrum(raf, indexes, getParser(swathInput.getExperimentDO().getFileType()));
-                //Step5.卷积并且存储数据
-                List<AnalyseDataDO> dataList = convoluteAndInsert(coordinates, rtMap, overviewId, swathInput.getMzExtractWindow(), swathInput.getRtExtractWindow(), false);
-
                 totalList.addAll(dataList);
                 logger.info("第" + count + "轮数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
                 count++;
@@ -517,6 +483,26 @@ public class ExperimentServiceImpl implements ExperimentService {
         }
 
         return totalList;
+    }
+
+    private List<AnalyseDataDO> processConv(RandomAccessFile raf, SwathInput swathInput, WindowRang rang, String overviewId){
+        List<TargetTransition> coordinates;
+        TreeMap<Float, MzIntensityPairs> rtMap;
+        //Step2.获取标准库的目标肽段片段的坐标
+        coordinates = transitionService.buildMS2Coordinates(swathInput.getLibraryId(), swathInput.getSlopeIntercept(), swathInput.getRtExtractWindow(), rang.getMzStart(), rang.getMzEnd());
+        if (coordinates.isEmpty()) {
+            logger.warn("No Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
+            return null;
+        }
+        //Step3.获取指定索引列表
+        ScanIndexQuery query = new ScanIndexQuery(swathInput.getExperimentDO().getId(), 2);
+        query.setPrecursorMzStart(rang.getMzStart());
+        query.setPrecursorMzEnd(rang.getMzEnd());
+        List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
+        //Step4.提取指定原始谱图
+        rtMap = parseSpectrum(raf, indexes, getParser(swathInput.getExperimentDO().getFileType()));
+
+        return convoluteAndInsert(coordinates, rtMap, overviewId, swathInput.getRtExtractWindow(), swathInput.getMzExtractWindow(), false);
     }
 
     private TreeMap<Float, MzIntensityPairs> parseSpectrum(RandomAccessFile raf, List<SimpleScanIndex> indexes, BaseExpParser baseExpParser) {

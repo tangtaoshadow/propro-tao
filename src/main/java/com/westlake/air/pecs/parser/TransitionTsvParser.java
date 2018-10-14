@@ -9,6 +9,7 @@ import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.service.TaskService;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.formatter.FormatUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,7 +169,12 @@ public class TransitionTsvParser extends BaseTransitionParser {
             annotations = annotations.replace("[", "").replace("]", "");
         }
         transitionDO.setAnnotations(annotations);
-        transitionDO.setFullName(row[columnMap.get(FullUniModPeptideName)]);
+        String fullName = row[columnMap.get(FullUniModPeptideName)];
+        if(fullName == null){
+            logger.info("Full Peptide Name cannot be empty");
+        }else{
+            transitionDO.setFullName(row[columnMap.get(FullUniModPeptideName)]);
+        }
         try{
             transitionDO.setPrecursorCharge(Integer.parseInt(row[columnMap.get(PrecursorCharge)]));
         }catch (Exception e){
