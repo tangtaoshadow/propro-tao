@@ -429,6 +429,7 @@ public class MzXMLParser extends BaseExpParser {
                     //在通过overlap调整前先保存原始的值
                     scanIndexDO.setOriginalPrecursorMzStart(scanIndexDO.getPrecursorMz() - scanIndexDO.getWindowWideness() / 2);
                     scanIndexDO.setOriginalPrecursorMzEnd(scanIndexDO.getPrecursorMz() + scanIndexDO.getWindowWideness() / 2);
+                    scanIndexDO.setOriginalWindowWideness(scanIndexDO.getWindowWideness());
                     if(overlap != null){
                         scanIndexDO.setWindowWideness(scanIndexDO.getWindowWideness() - overlap);
                     }

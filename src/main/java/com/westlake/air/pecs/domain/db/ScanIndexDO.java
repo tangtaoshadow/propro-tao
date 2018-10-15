@@ -56,6 +56,9 @@ public class ScanIndexDO extends BaseDO {
     //前体的荷质比窗口
     Float windowWideness;
 
+    //原始文件中前体的窗口大小,未经过ExperimentDO.overlap参数调整
+    Float originalWindowWideness;
+
     public ScanIndexDO() {}
 
     public ScanIndexDO(Long start, Long end) {

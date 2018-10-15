@@ -51,6 +51,5 @@ public class Compressor {
         query.setExperimentId(experimentDO.getId());
         List<ScanIndexDO> scanIndexList = scanIndexService.getAll(query);
         return null;
-
     }
 }

@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.dao;
 
+import com.westlake.air.pecs.domain.bean.compressor.OutputScanIndex;
 import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
@@ -40,6 +41,10 @@ public class ScanIndexDAO {
 
     public List<ScanIndexDO> getAll(ScanIndexQuery query) {
         return mongoTemplate.find(buildQueryWithoutPage(query), ScanIndexDO.class, CollectionName);
+    }
+
+    public List<OutputScanIndex> getOutputTargetAll(ScanIndexQuery query) {
+        return mongoTemplate.find(buildQueryWithoutPage(query), OutputScanIndex.class, CollectionName);
     }
 
     public List<SimpleScanIndex> getSimpleAll(ScanIndexQuery query) {
