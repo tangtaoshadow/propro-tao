@@ -20,7 +20,9 @@ import java.util.regex.Pattern;
 /**
  * Created by Song Jian
  * Time: 2018-07-25 20-14
+ * 未经过测试,没有Overlap调整 by 陆妙善
  */
+@Deprecated
 @Component
 public class MzMLParser extends BaseExpParser{
 

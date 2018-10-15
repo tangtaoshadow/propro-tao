@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.async;
 
 import com.westlake.air.pecs.algorithm.Airus;
+import com.westlake.air.pecs.compressor.MzXMLCompressor;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
@@ -40,8 +41,13 @@ public class ExperimentTask extends BaseTask {
     }
 
     @Async
-    public void compressorExperimentTask(ExperimentDO experimentDO, TaskDO taskDO) {
+    public void compressionAndSort(ExperimentDO experimentDO, TaskDO taskDO) {
+        long start = System.currentTimeMillis();
 
+
+        taskDO.addLog("转还完毕,总耗时:"+(System.currentTimeMillis() - start));
+        taskDO.finish(TaskDO.STATUS_SUCCESS);
+        taskService.update(taskDO);
     }
 
     /**

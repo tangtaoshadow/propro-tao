@@ -101,6 +101,13 @@ public enum ResultCode implements Serializable {
 
     /**
      * ******
+     * Compressor
+     * *******
+     */
+    CREATE_FILE_FAILED("CREATE_FILE_FAILED","创建文件失败"),
+
+    /**
+     * ******
      * SQL-COMMON
      * *******
      */

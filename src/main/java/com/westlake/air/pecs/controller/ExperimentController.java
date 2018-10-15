@@ -2,6 +2,8 @@ package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.westlake.air.pecs.compressor.Compressor;
+import com.westlake.air.pecs.compressor.MzXMLCompressor;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
@@ -49,6 +51,8 @@ public class ExperimentController extends BaseController {
     MzMLParser mzMLParser;
     @Autowired
     ScanIndexService scanIndexService;
+    @Autowired
+    Compressor compressor;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -397,9 +401,13 @@ public class ExperimentController extends BaseController {
             redirectAttributes.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
             return "redirect:/experiment/list";
         }
-
-        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, resultDO.getModel().getName() + ":" + expId);
-        taskService.insert(taskDO);
-        return "experiment/compressor";
+        ExperimentDO experimentDO = resultDO.getModel();
+        compressor.doCompress(experimentDO);
+//        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
+//        taskService.insert(taskDO);
+//
+//        experimentTask.compressionAndSort(experimentDO, taskDO);
+//        return "redirect:/task/detail/" + taskDO.getId();
+        return null;
     }
 }

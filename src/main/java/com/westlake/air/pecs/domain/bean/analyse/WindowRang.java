@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.domain.bean.analyse;
 
+import com.westlake.air.pecs.domain.bean.transition.Fragment;
 import lombok.Data;
 
 /**
@@ -12,4 +13,35 @@ public class WindowRang {
     Float mzStart;
     Float mzEnd;
     Float ms2Interval;
+
+    public WindowRang() {}
+    public WindowRang(Float mzStart, Float mzEnd){
+        this.mzStart = mzStart;
+        this.mzEnd = mzEnd;
+    }
+
+    public WindowRang(Float mzStart, Float mzEnd, Float ms2Interval){
+        this.mzStart = mzStart;
+        this.mzEnd = mzEnd;
+        this.ms2Interval = ms2Interval;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null){
+            return false;
+        }
+
+        if(obj instanceof WindowRang){
+            WindowRang windowRang = (WindowRang) obj;
+            if(mzStart == null || mzEnd == null || windowRang.getMzStart() == null || windowRang.getMzEnd()==null){
+                return false;
+            }
+
+            return (this.mzStart.equals(windowRang.getMzStart()) && this.mzEnd.equals(windowRang.getMzEnd()));
+        }else{
+            return false;
+        }
+
+    }
 }

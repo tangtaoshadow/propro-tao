@@ -21,7 +21,9 @@ import java.util.List;
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-08-09 14:57
+ * 未经过集成测试 by 陆妙善
  */
+@Deprecated
 @Component("mzXMLCompressor")
 public class MzXMLCompressor {
 
@@ -30,21 +32,20 @@ public class MzXMLCompressor {
     @Autowired
     MzXMLParser mzXMLParser;
 
-    public void convert(String originFilePath, String targetFilePath) {
+    public void convert(File originFile, File targetFile) {
         RandomAccessFile raf = null;
         RandomAccessFile copyRaf = null;
         try {
             //程序开始时时间
             long startTime = System.currentTimeMillis();
             //初始读入文件
-            File file = new File(originFilePath);
-            raf = new RandomAccessFile(file, "r");
+            raf = new RandomAccessFile(originFile, "r");
+
             //建立新的写文件目录
-            File filewrite = new File(targetFilePath);
-            if (!filewrite.exists()) {
-                filewrite.createNewFile();
+            if (!targetFile.exists()) {
+                targetFile.createNewFile();
             }
-            copyRaf = new RandomAccessFile(filewrite, "rw");
+            copyRaf = new RandomAccessFile(targetFile, "rw");
 
             //解析数据
             //获得offset起始位置
@@ -52,7 +53,7 @@ public class MzXMLCompressor {
             //将每个offest部分的id和索引值存到hashmap中
             HashMap<Integer, ScanIndexDO> dataMap = mzXMLParser.parseScanStartPosition(indexOffset, raf);
             //从hashmap中得到索引的一个List序列，使用该序列进行scan位置判定
-            List<ScanIndexDO> startList = mzXMLParser.indexForSwath(file);
+            List<ScanIndexDO> startList = mzXMLParser.indexForSwath(originFile);
             //对一定数目组的scan块进行转化并返回数组值
             int groupNumber = 3000;
             int k = 0;
@@ -68,8 +69,9 @@ public class MzXMLCompressor {
                 }
                 copyRaf.writeBytes(newString[groupNumber]);
                 writeNewString(startList.get(k + groupNumber - 1).getEnd(), startList.get(k + groupNumber).getStart(), raf, copyRaf);
-                logger.info("Cost Time:" + (System.currentTimeMillis() - start));
+                logger.info(k+"/"+startList.size()+";Cost Time:" + (System.currentTimeMillis() - start));
                 k += groupNumber;
+
             }
             //写最后一段的scan块
             String[] newString = parseAndUpdateOne(raf, startList.get(k).getStart(), startList.get(startList.size() - 1).getEnd(), startList.size() - k, startList, k);

@@ -48,6 +48,7 @@ public class TaskServiceImpl implements TaskService {
     public ResultDO insert(TaskDO taskDO) {
         try {
             taskDO.setCreateDate(new Date());
+            taskDO.setLastModifiedDate(new Date());
             taskDAO.insert(taskDO);
             return ResultDO.build(taskDO);
         } catch (Exception e) {
