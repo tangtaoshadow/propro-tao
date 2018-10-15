@@ -83,6 +83,9 @@
                         <a th:href="|/scanindex/list?experimentId=${experiment.id}|"
                            class="btn btn-info btn-sm">原始索引
                         </a>
+                        <a th:href="|/experiment/compressionsort?expId=${experiment.id}|"
+                           class="btn btn-danger btn-sm">压缩排序
+                        </a>
                         <a th:href="|/analyse/overview/list?expId=${experiment.id}|"
                            class="btn btn-warning btn-sm">查看卷积实验
                         </a>

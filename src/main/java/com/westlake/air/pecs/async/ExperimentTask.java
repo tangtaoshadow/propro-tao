@@ -39,6 +39,11 @@ public class ExperimentTask extends BaseTask {
         experimentService.uploadFile(experimentDO, file, taskDO);
     }
 
+    @Async
+    public void compressorExperimentTask(ExperimentDO experimentDO, TaskDO taskDO) {
+
+    }
+
     /**
      * @param experimentDO
      * @param libraryId

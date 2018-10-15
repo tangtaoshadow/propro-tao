@@ -67,9 +67,9 @@ public class TaskDO extends BaseDO {
     public void addLog(String content) {
         if (logs == null) {
             if (status == null || taskTemplate == null) {
-                this.taskTemplate = TaskTemplate.COMMON.getTemplateName();
+                this.taskTemplate = TaskTemplate.DEFAULT.getTemplateName();
                 this.status = STATUS_RUNNING;
-                this.name = TaskTemplate.COMMON.getTemplateName() + "-COMMON";
+                this.name = TaskTemplate.DEFAULT.getTemplateName() + "-DEFAULT";
             }
             logs = new ArrayList<>();
             logs.add(new TaskLog("Task Started"));

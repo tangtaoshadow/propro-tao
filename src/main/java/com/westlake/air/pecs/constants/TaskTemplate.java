@@ -6,25 +6,52 @@ package com.westlake.air.pecs.constants;
  */
 public enum TaskTemplate {
 
+    /**
+     * default template
+     */
+    DEFAULT("DEFAULT", ""),
+
+    /**
+     * upload experiment file(including mzxml and mzml)
+     */
     UPLOAD_EXPERIMENT_FILE("UPLOAD_EXPERIMENT_FILE", "/experiment/create"),
 
+    /**
+     * upload library file(including standard library and irt library)
+     */
     UPLOAD_LIBRARY_FILE("UPLOAD_LIBRARY_FILE", "/library/create"),
 
-    EXTRACT("EXTRACT", ""),
+    /**
+     * extract for mzxml or mzml with standard library
+     */
+    EXTRACTOR("EXTRACTOR", "/experiment/extractor"),
 
-    SWATH_CONVOLUTION("SWATH_CONVOLUTION", "/experiment/extractor"),
-
+    /**
+     * compute irt for slope and intercept
+     */
     IRT("IRT", "/experiment/irt"),
 
-    SWATH_WORKFLOW("SWATH_WORKFLOW", ""),
-
+    /**
+     * compute sub scores
+     */
     SCORE("SCORE", ""),
 
-    COMMON("COMMON", ""),
+    /**
+     * the whole workflow for swath including(irt -> extractor -> sub scores -> final score)
+     */
+    SWATH_WORKFLOW("SWATH_WORKFLOW", ""),
 
+    /**
+     * compress the mzxml and sort the mzxml scan for swath
+     */
+    COMPRESSOR_AND_SORT("COMPRESSOR_AND_SORT", ""),
+
+    /**
+     * task for any tests
+     */
     TEST("TEST", ""),
 
-    MZXML_COMPRESSOR("MZXML_COMPRESSOR", "/task/mzxmlcompressor"),
+
 
     ;
 

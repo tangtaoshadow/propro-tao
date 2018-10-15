@@ -98,7 +98,17 @@ public enum ResultCode implements Serializable {
      * *******
      */
     TASK_TEMPLATE_NOT_EXISTED("TASK_TEMPLATE_NOT_EXISTED","任务模板不存在"),
+
+    /**
+     * ******
+     * SQL-COMMON
+     * *******
+     */
+    CONNECTION_URL_CANNOT_BE_EMPTY("CONNECTION_URL_CANNOT_BE_EMPTY","数据库链接URL不能为空"),
+    CONNECTION_FAILED("CONNECTION_FAILED","数据库连接失败"),
+    CONNECTION_SUCCESS("CONNECTION_SUCCESS","数据库连接成功"),
     ;
+
 
     private String code = "";
     private String message = "";

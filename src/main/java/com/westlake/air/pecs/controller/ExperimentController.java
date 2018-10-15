@@ -310,7 +310,7 @@ public class ExperimentController extends BaseController {
             return "redirect:/extractor?id=" + id;
         }
 
-        TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_CONVOLUTION, resultDO.getModel().getName() + ":" + libraryId);
+        TaskDO taskDO = new TaskDO(TaskTemplate.EXTRACTOR, resultDO.getModel().getName() + ":" + libraryId);
         taskService.insert(taskDO);
         SlopeIntercept si = SlopeIntercept.create();
         if (slope != null && intercept != null) {
@@ -366,9 +366,7 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/getWindows")
     @ResponseBody
-    ResultDO<JSONObject> getWindows(Model model,
-                                    @RequestParam(value = "expId", required = false) String expId) {
-
+    ResultDO<JSONObject> getWindows(Model model, @RequestParam(value = "expId", required = false) String expId) {
         List<WindowRang> rangs = experimentService.getWindows(expId);
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
 
@@ -390,8 +388,18 @@ public class ExperimentController extends BaseController {
         return resultDO;
     }
 
-    @RequestMapping(value = "/compressor")
-    String compressor(Model model) {
+    @RequestMapping(value = "/compressionsort")
+    String compressionSort(Model model, @RequestParam(value = "expId", required = true) String expId,
+                      RedirectAttributes redirectAttributes) {
+
+        ResultDO<ExperimentDO> resultDO = experimentService.getById(expId);
+        if(resultDO.isFailed()){
+            redirectAttributes.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
+            return "redirect:/experiment/list";
+        }
+
+        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, resultDO.getModel().getName() + ":" + expId);
+        taskService.insert(taskDO);
         return "experiment/compressor";
     }
 }
