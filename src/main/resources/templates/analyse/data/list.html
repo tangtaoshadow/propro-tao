@@ -250,13 +250,18 @@
                                     th:onclick="|queryGroup(null,null,null,true,false)|">
                                 高斯平滑
                             </button>
+                            <button type="button" class="btn btn-sm btn-info"
+                                    th:onclick="|queryGroup(null,null,null,true, true)|">
+                                平滑去燥
+                            </button>
                             <button type="button" class="btn btn-sm btn-brand" th:onclick="|queryGroup(null,null,null,false, false)|">
                                 原始数据
                             </button>
                             <button type="button" class="btn btn-sm btn-accent"
                                     th:onclick="|queryGroup(null,null,null,false, true)|">
-                                原始数据(With Noise1000)
+                                原始去燥
                             </button>
+
                         </h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
@@ -294,6 +299,9 @@
         var overviewId;
         var peptideRef;
         var useNoise1000;
+
+        var dataZoomStart;
+        var dataZoomEnd;
 
         $(document).ready(function () {
             $('#pagination').bootpag({
@@ -358,7 +366,8 @@
                     }
                 },
                 dataZoom: [{
-                    type: 'inside'
+                    type: 'inside',
+                    filterMode:'empty'
                 }, {
                     type: 'slider'
                 }],
@@ -407,10 +416,6 @@
             } else {
                 this.useNoise1000 = useNoise1000;
             }
-
-            // if(!useNoise1000 && !isGaussFilter){
-            //     chartGroup.clear();
-            // }
 
             var result = $.ajax({
                 type: "POST",
@@ -462,7 +467,10 @@
                     }
                 },
                 dataZoom: [{
-                    type: 'inside'
+                    type: 'inside',
+                    filterMode:'empty',
+                    start: (chartGroup.getModel()&&chartGroup.getModel().getOption().dataZoom[0].start)?chartGroup.getModel().getOption().dataZoom[0].start:0,
+                    end: (chartGroup.getModel()&&chartGroup.getModel().getOption().dataZoom[0].end)?chartGroup.getModel().getOption().dataZoom[0].end:100
                 }, {
                     type: 'slider'
                 }],

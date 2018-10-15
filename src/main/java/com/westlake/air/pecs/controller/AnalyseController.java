@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.async.ScoreTask;
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
@@ -375,28 +376,32 @@ public class AnalyseController extends BaseController {
             if(pairRtArray == null){
                 pairRtArray = data.getRtArray();
             }
-            Object[] pairIntensityArray = null;
+            Float[] pairIntensityArray = null;
             if(isGaussFilter){
-                pairIntensityArray = gaussFilter.filter(data);
+                pairIntensityArray = gaussFilter.filterForFloat(data);
             }else{
                 pairIntensityArray = data.getIntensityArray();
             }
 
-            JSONArray intensityArray = new JSONArray();
-            for (int i = 0; i < pairIntensityArray.length; i++) {
-                intensityArray.add(pairIntensityArray[i]);
-            }
-            cutInfoArray.add(data.getCutInfo());
-            intensityArrays.add(intensityArray);
-
             if(useNoise1000){
-                double[] noisePairIntensityArray = signalToNoiseEstimator.computeSTN(new RtIntensityPairsDouble(data.getRtArray(), data.getIntensityArray()), 1000, 30);
+                double[] noisePairIntensityArray = signalToNoiseEstimator.computeSTN(new RtIntensityPairsDouble(data.getRtArray(), pairIntensityArray), 1000, 30);
                 JSONArray noiseIntensityArray = new JSONArray();
-                for (int i = 0; i < pairIntensityArray.length; i++) {
-                    noiseIntensityArray.add(noisePairIntensityArray[i]);
+                for (int i = 0; i < noisePairIntensityArray.length; i++) {
+                    if(noisePairIntensityArray[i] >= Constants.SIGNAL_TO_NOISE_LIMIT){
+                        noiseIntensityArray.add(pairIntensityArray[i]);
+                    }else{
+                        noiseIntensityArray.add(0);
+                    }
                 }
-                cutInfoArray.add("Noise-"+data.getCutInfo());
+                cutInfoArray.add(data.getCutInfo());
                 intensityArrays.add(noiseIntensityArray);
+            }else{
+                JSONArray intensityArray = new JSONArray();
+                for (int i = 0; i < pairIntensityArray.length; i++) {
+                    intensityArray.add(pairIntensityArray[i]);
+                }
+                cutInfoArray.add(data.getCutInfo());
+                intensityArrays.add(intensityArray);
             }
         }
 

@@ -19,6 +19,15 @@ public class GaussFilter {
         return result.getIntensityArray();
     }
 
+    public Float[] filterForFloat(AnalyseDataDO dataDO) {
+        Double[] result = filter(dataDO);
+        Float[] floatArray = new Float[result.length];
+        for(int i=0;i<floatArray.length;i++){
+            floatArray[i] = result[i].floatValue();
+        }
+        return floatArray;
+    }
+
     /**
      * @param pairs
      * @param sigmaSpacing
