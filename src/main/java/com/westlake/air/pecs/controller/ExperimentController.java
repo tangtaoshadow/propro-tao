@@ -3,7 +3,6 @@ package com.westlake.air.pecs.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.compressor.Compressor;
-import com.westlake.air.pecs.compressor.MzXMLCompressor;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
@@ -15,7 +14,6 @@ import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
-import com.westlake.air.pecs.parser.MzMLParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
 import com.westlake.air.pecs.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +45,6 @@ public class ExperimentController extends BaseController {
     AnalyseDataService analyseDataService;
     @Autowired
     MzXMLParser mzXMLParser;
-    @Autowired
-    MzMLParser mzMLParser;
     @Autowired
     ScanIndexService scanIndexService;
     @Autowired
@@ -111,7 +107,6 @@ public class ExperimentController extends BaseController {
 
         ExperimentDO experimentDO = new ExperimentDO();
         experimentDO.setName(name);
-        experimentDO.setFileType(fileLocation.substring(fileLocation.lastIndexOf(".") + 1).trim().toLowerCase());
         experimentDO.setDescription(description);
         experimentDO.setOverlap(overlap);
         experimentDO.setFileLocation(fileLocation);
@@ -167,7 +162,6 @@ public class ExperimentController extends BaseController {
     String update(Model model,
                   @RequestParam(value = "id", required = true) String id,
                   @RequestParam(value = "name") String name,
-                  @RequestParam(value = "fileType") String fileType,
                   @RequestParam(value = "slope") Double slope,
                   @RequestParam(value = "intercept") Double intercept,
                   @RequestParam(value = "fileLocation") String fileLocation,
@@ -182,7 +176,6 @@ public class ExperimentController extends BaseController {
         ExperimentDO experimentDO = resultDO.getModel();
 
         experimentDO.setName(name);
-        experimentDO.setFileType(fileType);
         experimentDO.setFileLocation(fileLocation);
         experimentDO.setDescription(description);
         experimentDO.setSlope(slope);

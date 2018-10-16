@@ -17,9 +17,6 @@ public class ExperimentDO extends BaseDO {
 
     private static final long serialVersionUID = -3258829839160856625L;
 
-    public static String FILE_TYPE_MZXML = "mzxml";
-    public static String FILE_TYPE_MZML = "mzml";
-
     @Id
     String id;
 
@@ -28,9 +25,6 @@ public class ExperimentDO extends BaseDO {
 
     //必填
     String fileLocation;
-
-    //目前只支持MzML和MzXML
-    String fileType;
 
     String description;
 
@@ -45,4 +39,10 @@ public class ExperimentDO extends BaseDO {
     Double slope;
 
     Double intercept;
+
+    //新增的三个字段,用以支持最新的数据格式,仅支持MzXML格式的文件
+    String compressionType;
+
+    String precision;
+
 }

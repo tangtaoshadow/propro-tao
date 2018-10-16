@@ -12,7 +12,7 @@ public enum TaskTemplate {
     DEFAULT("DEFAULT", ""),
 
     /**
-     * upload experiment file(including mzxml and mzml)
+     * upload experiment file(including mzxml)
      */
     UPLOAD_EXPERIMENT_FILE("UPLOAD_EXPERIMENT_FILE", "/experiment/create"),
 
@@ -22,7 +22,7 @@ public enum TaskTemplate {
     UPLOAD_LIBRARY_FILE("UPLOAD_LIBRARY_FILE", "/library/create"),
 
     /**
-     * extract for mzxml or mzml with standard library
+     * extract for mzxml with standard library
      */
     EXTRACTOR("EXTRACTOR", "/experiment/extractor"),
 

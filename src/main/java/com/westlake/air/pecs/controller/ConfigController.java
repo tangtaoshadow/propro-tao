@@ -1,6 +1,5 @@
 package com.westlake.air.pecs.controller;
 
-import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.db.ConfigDO;
@@ -32,12 +31,12 @@ public class ConfigController extends BaseController {
     String update(Model model,
                   @RequestParam(value = "experimentFilePath", required = false) String experimentFilePath,
                   @RequestParam(value = "libraryFilePath", required = false) String libraryFilePath,
-                  @RequestParam(value = "suffixForCompressorFile", required = false) String suffixForCompressorFile,
+                  @RequestParam(value = "prefixForCompressorFile", required = false) String prefixForCompressorFile,
                   @RequestParam(value = "oldExperimentFilePath", required = false) String oldExperimentFilePath) {
         ConfigDO configDO = configDAO.getConfig();
         configDO.setExperimentFilePath(experimentFilePath);
         configDO.setLibraryFilePath(libraryFilePath);
-        configDO.setSuffixForCompressorFile(suffixForCompressorFile);
+        configDO.setPrefixForCompressorFile(prefixForCompressorFile);
         configDO.setOldExperimentFilePath(oldExperimentFilePath);
 
         configDAO.updateConfig(configDO);

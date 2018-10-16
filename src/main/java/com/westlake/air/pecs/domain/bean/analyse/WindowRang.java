@@ -1,6 +1,5 @@
 package com.westlake.air.pecs.domain.bean.analyse;
 
-import com.westlake.air.pecs.domain.bean.transition.Fragment;
 import lombok.Data;
 
 /**
@@ -15,6 +14,7 @@ public class WindowRang {
     Float ms2Interval;
 
     public WindowRang() {}
+
     public WindowRang(Float mzStart, Float mzEnd){
         this.mzStart = mzStart;
         this.mzEnd = mzEnd;

@@ -2,6 +2,7 @@ package com.westlake.air.pecs.domain.bean.compressor;
 
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
+import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class DataInfo {
     /**
      * the swath window location(start and and) for new format file,
      * the key is the window rang which you can just focus on mzStart and mzEnd.
-     * the value is also the scanIndexDO, but you should only focus on the ScanIndexDO.start and ScanIndexDO.end properties.Other properties are not used
+     * the value is the SimpleScanIndex, but you should only focus on the SimpleScanIndex.start and SimpleScanIndex.end properties.Other properties are not used
      */
-    HashMap<WindowRang, ScanIndexDO> mzStartScansMap = new HashMap<>();
+    HashMap<WindowRang, SimpleScanIndex> mzRangScansMap = new HashMap<>();
 }

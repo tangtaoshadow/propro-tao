@@ -27,11 +27,17 @@ public class ScanIndexDO extends BaseDO {
 
     String experimentId;
 
-    //在源文件中的起始位置
+    //在MzXML源文件中的起始位置
     Long start;
 
-    //在源文件中的结束位置
+    //在MzXML源文件中的结束位置
     Long end;
+
+    //在AirusData源文件中的起始位置
+    Long start2;
+
+    //在AirusData源文件中的结束位置
+    Long end2;
 
     Integer num;
 

@@ -38,27 +38,6 @@ public class ExperimentTest extends BaseTest {
         ExperimentDO experimentDO = new ExperimentDO();
         experimentDO.setName("测试用实验");
         experimentDO.setFileLocation(filePath);
-        experimentDO.setFileType(ExperimentDO.FILE_TYPE_MZXML);
-        experimentService.insert(experimentDO);
-
-        File file = new File(filePath);
-        experimentService.uploadFile(experimentDO, file, new TaskDO());
-
-        ScanIndexQuery query = new ScanIndexQuery();
-        query.setExperimentId(experimentDO.getId());
-        assert 59 == scanIndexService.count(query);
-
-        scanIndexService.deleteAllByExperimentId(experimentDO.getId());
-        experimentService.delete(experimentDO.getId());
-    }
-
-    @Test
-    public void experiment_upload_mzml_parser_Test_1() throws Exception {
-        String filePath = getClass().getClassLoader().getResource("ChromatogramExtractor_input.mzML").getPath();
-        ExperimentDO experimentDO = new ExperimentDO();
-        experimentDO.setName("测试用实验");
-        experimentDO.setFileLocation(filePath);
-        experimentDO.setFileType(ExperimentDO.FILE_TYPE_MZML);
         experimentService.insert(experimentDO);
 
         File file = new File(filePath);
@@ -86,7 +65,6 @@ public class ExperimentTest extends BaseTest {
         ExperimentDO experimentDO = new ExperimentDO();
         experimentDO.setName("测试用实验");
         experimentDO.setFileLocation(filePath);
-        experimentDO.setFileType(ExperimentDO.FILE_TYPE_MZXML);
         experimentService.insert(experimentDO);
 
         File fileMZXML = new File(filePathMZXML);
@@ -103,10 +81,5 @@ public class ExperimentTest extends BaseTest {
 
         experimentService.extract(input);
     }
-
-//    @Test
-//    public void extractor_test() throws FileNotFoundException {
-//
-//    }
 
 }

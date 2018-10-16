@@ -1,11 +1,11 @@
 package com.westlake.air.pecs.parser;
 
-import com.google.common.collect.Ordering;
+import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
-import com.westlake.air.pecs.domain.bean.transition.Fragment;
+import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
-import com.westlake.air.pecs.parser.model.mzxml.*;
+import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.TaskService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
@@ -14,53 +14,65 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.util.*;
-import java.util.regex.Pattern;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-07-19 16:50
  */
 @Component
-public class MzXMLParser extends BaseExpParser {
+public class MzXMLParser {
 
     public final Logger logger = LoggerFactory.getLogger(MzXMLParser.class);
 
+    protected static int TAIL_TRY = 30;
+    protected static int PRECISION_32 = 32;
+    protected static int PRECISION_64 = 64;
+
     @Autowired
     TaskService taskService;
-
-    public Class<?>[] classes = new Class[]{
-            DataProcessing.class, Maldi.class, MsInstrument.class, MsRun.class, MzXML.class, NameValue.class,
-            OntologyEntry.class, Operator.class, Orientation.class, ParentFile.class, Pattern.class,
-            Peaks.class, Plate.class, PrecursorMz.class, Robot.class, Scan.class, ScanOrigin.class,
-            Separation.class, SeparationTechnique.class, Software.class, Spot.class, Spotting.class,
-    };
+    @Autowired
+    ExperimentService experimentService;
 
     public MzXMLParser() {
     }
 
-    private void prepare() {
-        airXStream.processAnnotations(classes);
-        airXStream.allowTypes(classes);
-    }
-
-    @Override
-    public List<ScanIndexDO> index(File file, String experimentId,Float overlap, TaskDO taskDO) {
+    public List<ScanIndexDO> index(File file, ExperimentDO experimentDO, TaskDO taskDO) {
         RandomAccessFile raf = null;
         List<ScanIndexDO> list = null;
         try {
             raf = new RandomAccessFile(file, "r");
             list = indexForSwath(file);
+            if (list != null && list.size() > 0) {
+                ScanIndexDO index = list.get(0);
+                String[] attributes = parsePeakAttribute(raf, index.getStart(), index.getEnd());
+                if (attributes != null && attributes.length == 2) {
+                    experimentDO.setCompressionType(attributes[0]);
+                    experimentDO.setPrecision(attributes[1]);
+                    ResultDO resultDO = experimentService.update(experimentDO);
+                    if (resultDO.isFailed()) {
+                        logger.info("Experiment save error! CompressionType and precision are mandatory! Index Action is interrupted", resultDO.getMsgInfo());
+                        return null;
+                    }
+                } else {
+                    logger.info("No Peak Attribute Found! CompressionType and precision are mandatory! Index Action is interrupted");
+                    return null;
+                }
+            }
             int count = 0;
-
             ScanIndexDO currentMS1 = null;
             for (ScanIndexDO scanIndex : list) {
-                parseAttribute(raf, overlap, scanIndex);
-                scanIndex.setExperimentId(experimentId);
+                parseAttribute(raf, experimentDO.getOverlap(), scanIndex);
+                scanIndex.setExperimentId(experimentDO.getId());
 
                 if (scanIndex.getMsLevel() == 1) {
                     currentMS1 = scanIndex;
@@ -78,6 +90,7 @@ public class MzXMLParser extends BaseExpParser {
                     taskService.update(taskDO);
                 }
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -93,9 +106,35 @@ public class MzXMLParser extends BaseExpParser {
         return list;
     }
 
-    @Override
-    public MzIntensityPairs parseOne(RandomAccessFile raf, long start, long end) {
+    public MzIntensityPairs parseValue(RandomAccessFile raf, long start, long end, String compressionType, String precision) {
         try {
+            raf.seek(start);
+            byte[] reader = new byte[(int) (end - start)];
+            raf.read(reader);
+            String tmp = new String(reader);
+            String[] content = tmp.substring(tmp.indexOf("<peaks"), tmp.indexOf("</peaks>")).split(">");
+            String value = content[1];
+            MzIntensityPairs pairs = getPeakMap(new Base64().decode(value), Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType));
+            return pairs;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     * Return value is a String Array that has two values--compressionType and precision.
+     * First is compressionType, Second is precision;
+     *
+     * @param raf
+     * @param start
+     * @param end
+     * @return
+     */
+    public String[] parsePeakAttribute(RandomAccessFile raf, long start, long end) {
+        try {
+            String[] peakAttributes = new String[2];
             raf.seek(start);
             byte[] reader = new byte[(int) (end - start)];
             raf.read(reader);
@@ -108,19 +147,20 @@ public class MzXMLParser extends BaseExpParser {
             for (String attribute : attributes) {
                 if (attribute.trim().contains("compressionType")) {
                     compressionType = attribute.split("=")[1].replace("\"", "");
+                    peakAttributes[0] = compressionType;
                     targetCount++;
                 }
                 if (attribute.trim().contains("precision")) {
                     precision = attribute.split("=")[1].replace("\"", "");
+                    peakAttributes[1] = precision;
                     targetCount++;
                 }
                 if (targetCount == 2) {
                     break;
                 }
             }
-            String value = content[1];
-            MzIntensityPairs pairs = getPeakMap(new Base64().decode(value), Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType));
-            return pairs;
+
+            return peakAttributes;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -128,8 +168,6 @@ public class MzXMLParser extends BaseExpParser {
         return null;
     }
 
-    //For MzXML
-    @Override
     public MzIntensityPairs getPeakMap(byte[] value, int precision, boolean isZlibCompression) {
         MzIntensityPairs pairs = new MzIntensityPairs();
         Float[] values = getValues(value, precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
@@ -154,12 +192,6 @@ public class MzXMLParser extends BaseExpParser {
         return pairs;
     }
 
-    //不需要实现
-    @Override
-    public MzIntensityPairs getPeakMap(byte[] mz, byte[] intensity, int mzPrecision, int intensityPrecision, boolean isZlibCompression) {
-        return null;
-    }
-
     public Long parseIndexOffset(RandomAccessFile rf) throws IOException {
         long position = rf.length() - 1;
         rf.seek(position);
@@ -179,6 +211,7 @@ public class MzXMLParser extends BaseExpParser {
         }
         return 0L;
     }
+
     /**
      * 本算法得到的ScanIndex的End包含了换行符
      * ">"的byte编码是62
@@ -328,7 +361,6 @@ public class MzXMLParser extends BaseExpParser {
             //记录总共的scan条数
             int totalCount = indexMap.size();
             byte[] lastRead;
-            ScanIndexDO currentMS1 = null;
             //对所有的记录开始做for循环,先解析第一个MS1
             for (int i = 1; i <= totalCount; i++) {
                 //如果已经是最后一个元素了
@@ -403,6 +435,97 @@ public class MzXMLParser extends BaseExpParser {
         return tmp;
     }
 
+    public Float[] getValues(byte[] value, int precision, boolean isCompression, ByteOrder byteOrder) {
+        double[] doubleValues;
+        Float[] floatValues;
+        ByteBuffer byteBuffer = ByteBuffer.wrap(value);
+
+        if (isCompression) {
+            byteBuffer = ByteBuffer.wrap(decompress(byteBuffer.array()));
+        }
+
+        byteBuffer.order(byteOrder);
+        if (precision == PRECISION_64) {
+            doubleValues = new double[byteBuffer.asDoubleBuffer().capacity()];
+            byteBuffer.asDoubleBuffer().get(doubleValues);
+            floatValues = new Float[doubleValues.length];
+            for (int index = 0; index < doubleValues.length; index++) {
+                floatValues[index] = (float) doubleValues[index];
+            }
+        } else {
+            FloatBuffer floats = byteBuffer.asFloatBuffer();
+            floatValues = new Float[floats.capacity()];
+
+            for (int index = 0; index < floats.capacity(); index++) {
+                floatValues[index] = floats.get(index);
+            }
+        }
+
+        byteBuffer.clear();
+        return floatValues;
+    }
+
+    //byte[]压缩为byte[]
+    public byte[] compress(byte[] data) {
+        byte[] output;
+
+        Deflater compresser = new Deflater();
+
+        compresser.reset();
+        compresser.setInput(data);
+        compresser.finish();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
+        try {
+            byte[] buf = new byte[1024];
+            while (!compresser.finished()) {
+                int i = compresser.deflate(buf);
+                bos.write(buf, 0, i);
+            }
+            output = bos.toByteArray();
+        } catch (Exception e) {
+            output = data;
+            e.printStackTrace();
+        } finally {
+            try {
+                bos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        compresser.end();
+        return output;
+    }
+
+    public byte[] decompress(byte[] data) {
+        byte[] output = new byte[0];
+
+        Inflater decompresser = new Inflater();
+        decompresser.reset();
+        decompresser.setInput(data);
+
+        ByteArrayOutputStream o = new ByteArrayOutputStream(data.length);
+        try {
+            byte[] buf = new byte[1024];
+            while (!decompresser.finished()) {
+                int i = decompresser.inflate(buf);
+                o.write(buf, 0, i);
+            }
+            output = o.toByteArray();
+        } catch (Exception e) {
+            output = data;
+            e.printStackTrace();
+        } finally {
+            try {
+                o.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        decompresser.end();
+        return output;
+    }
+
     //解析Scan标签的Attributes
     private void parseAttribute(RandomAccessFile raf, Float overlap, ScanIndexDO scanIndexDO) throws IOException {
 
@@ -430,7 +553,7 @@ public class MzXMLParser extends BaseExpParser {
                     scanIndexDO.setOriginalPrecursorMzStart(scanIndexDO.getPrecursorMz() - scanIndexDO.getWindowWideness() / 2);
                     scanIndexDO.setOriginalPrecursorMzEnd(scanIndexDO.getPrecursorMz() + scanIndexDO.getWindowWideness() / 2);
                     scanIndexDO.setOriginalWindowWideness(scanIndexDO.getWindowWideness());
-                    if(overlap != null){
+                    if (overlap != null) {
                         scanIndexDO.setWindowWideness(scanIndexDO.getWindowWideness() - overlap);
                     }
                     break;
@@ -438,9 +561,9 @@ public class MzXMLParser extends BaseExpParser {
             }
 
             //解决某些情况下在计算了Overlap以后窗口左区间大于400的情况,这个时候可以强制补齐到400
-            if(Math.abs(scanIndexDO.getPrecursorMz() - scanIndexDO.getWindowWideness() / 2 - 400) <= 1){
+            if (Math.abs(scanIndexDO.getPrecursorMz() - scanIndexDO.getWindowWideness() / 2 - 400) <= 1) {
                 scanIndexDO.setPrecursorMzStart(400f);
-            }else{
+            } else {
                 scanIndexDO.setPrecursorMzStart(scanIndexDO.getPrecursorMz() - scanIndexDO.getWindowWideness() / 2);
             }
             scanIndexDO.setPrecursorMzEnd(scanIndexDO.getPrecursorMz() + scanIndexDO.getWindowWideness() / 2);
@@ -470,4 +593,6 @@ public class MzXMLParser extends BaseExpParser {
         }
 
     }
+
+
 }

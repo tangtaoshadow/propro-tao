@@ -1,11 +1,9 @@
 package com.westlake.air.pecs.async;
 
 import com.westlake.air.pecs.algorithm.Airus;
-import com.westlake.air.pecs.compressor.MzXMLCompressor;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
-import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;

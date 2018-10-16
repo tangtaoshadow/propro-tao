@@ -18,7 +18,7 @@ public class ConfigDO extends BaseDO {
 
     String libraryFilePath;
 
-    String suffixForCompressorFile = "_compressed";
+    String prefixForCompressorFile = "airus_";
 
     String oldExperimentFilePath;
 

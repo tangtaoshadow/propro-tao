@@ -4,9 +4,7 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
-import com.westlake.air.pecs.parser.MzMLParser;
 import com.westlake.air.pecs.parser.TransitionTraMLParser;
-import com.westlake.air.pecs.parser.model.traml.Transition;
 import com.westlake.air.pecs.service.LibraryService;
 import com.westlake.air.pecs.service.TransitionService;
 import com.westlake.air.pecs.test.BaseTest;
@@ -23,8 +21,6 @@ import java.util.List;
  */
 public class LibraryTest extends BaseTest {
 
-    @Autowired
-    MzMLParser mzMLParser;
     @Autowired
     TransitionTraMLParser traMLParser;
     @Autowired
