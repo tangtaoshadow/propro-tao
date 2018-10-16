@@ -87,12 +87,12 @@ public class Compressor {
                     Float[] mzArray = mzIntensityPairs.getMzArray();
                     Float[] intensityArray = mzIntensityPairs.getIntensityArray();
 
-                    float[] mzIntensityArray = new float[mzArray.length * 2];
-                    for (int i = 0; i < mzArray.length; i++) {
-                        mzIntensityArray[i*2] = mzArray[i];
-                        mzIntensityArray[i*2 + 1] = intensityArray[i];
-                    }
-                    bwData.write(CompressUtil.transToString(mzIntensityArray) + CHANGE_LINE);
+//                    float[] mzIntensityArray = new float[mzArray.length * 2];
+//                    for (int i = 0; i < mzArray.length; i++) {
+//                        mzIntensityArray[i*2] = mzArray[i];
+//                        mzIntensityArray[i*2 + 1] = intensityArray[i];
+//                    }
+//                    bwData.write(CompressUtil.transToString(mzIntensityArray) + CHANGE_LINE);
                     float[] fMzArray = new float[mzArray.length];
                     float[] fIntensityArray = new float[intensityArray.length];
                     for (int i = 0; i < mzArray.length; i++) {

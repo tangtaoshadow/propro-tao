@@ -124,6 +124,22 @@ public class MzXMLParser {
         return null;
     }
 
+    public String getPeakValue(RandomAccessFile raf, long start, long end){
+        try {
+            raf.seek(start);
+            byte[] reader = new byte[(int) (end - start)];
+            raf.read(reader);
+            String tmp = new String(reader);
+            String[] content = tmp.substring(tmp.indexOf("<peaks"), tmp.indexOf("</peaks>")).split(">");
+            String value = content[1];
+            return value;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     /**
      * Return value is a String Array that has two values--compressionType and precision.
      * First is compressionType, Second is precision;
