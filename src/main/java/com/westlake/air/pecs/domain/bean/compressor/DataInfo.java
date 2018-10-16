@@ -12,7 +12,6 @@ import java.util.List;
 @Data
 public class DataInfo {
 
-    Long totalScanCount;
     String compressionType = "zlib";
     String byteOrder = "network";
     String precision = "32";

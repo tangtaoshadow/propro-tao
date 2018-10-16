@@ -2,7 +2,6 @@ package com.westlake.air.pecs.utils;
 
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.IndexValue;
-import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +13,9 @@ import java.util.*;
  * Time: 2018-06-12 21:44
  */
 
-public class ArrayUtils {
+public class ArrayUtil {
 
-    public static final Logger logger = LoggerFactory.getLogger(ArrayUtils.class);
+    public static final Logger logger = LoggerFactory.getLogger(ArrayUtil.class);
 
     /**
      * Return reverse of given array[].
@@ -418,7 +417,7 @@ public class ArrayUtils {
     public static double[] rankDataMax(Double[] array) {
         int n = array.length;
         double[] result = new double[n];
-        int[] countSort = ArrayUtils.reverse(countSort(array));
+        int[] countSort = ArrayUtil.reverse(countSort(array));
         int count = 0;
         int index = array.length;
         for (int j : countSort) {
@@ -437,7 +436,7 @@ public class ArrayUtils {
     public static double[] rankDataReversed(Double[] array) {
         int n = array.length;
         double[] result = new double[n];
-        int[] countSortReversed = ArrayUtils.reverse(countSort(array));
+        int[] countSortReversed = ArrayUtil.reverse(countSort(array));
         int count = 0;
         int index = array.length;
         for (int j : countSortReversed) {

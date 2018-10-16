@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.compressor.Compressor;
@@ -389,6 +390,7 @@ public class ExperimentController extends BaseController {
     }
 
     @RequestMapping(value = "/compressionsort")
+    @ResponseBody
     String compressionSort(Model model, @RequestParam(value = "expId", required = true) String expId,
                       RedirectAttributes redirectAttributes) {
 
@@ -398,12 +400,12 @@ public class ExperimentController extends BaseController {
             return "redirect:/experiment/list";
         }
         ExperimentDO experimentDO = resultDO.getModel();
-        compressor.doCompress(experimentDO);
+        ResultDO compressResult = compressor.doCompress(experimentDO);
 //        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
 //        taskService.insert(taskDO);
 //
 //        experimentTask.compressionAndSort(experimentDO, taskDO);
 //        return "redirect:/task/detail/" + taskDO.getId();
-        return null;
+        return JSON.toJSONString(compressResult);
     }
 }

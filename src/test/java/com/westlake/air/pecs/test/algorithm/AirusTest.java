@@ -9,7 +9,7 @@ import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.parser.ScoreTsvParser;
 import com.westlake.air.pecs.service.ScoresService;
 import com.westlake.air.pecs.test.BaseTest;
-import com.westlake.air.pecs.utils.AirusUtils;
+import com.westlake.air.pecs.utils.AirusUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -37,7 +37,7 @@ public class AirusTest extends BaseTest {
         ScoreData scoreData = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResult.csv").getPath()), ScoreTsvParser.SPLIT_CHANGE_LINE);
         FinalResult finalResult = airus.doAirus(scoreData);
 
-        int count = AirusUtils.checkFdr(finalResult);
+        int count = AirusUtil.checkFdr(finalResult);
         System.out.println(count);
         System.out.println(JSON.toJSONString(finalResult.getClassifierTable()));
         assert count >= 322;
@@ -49,7 +49,7 @@ public class AirusTest extends BaseTest {
         ScoreData scoreData = airus.trans(new ArrayList(scoreMap.values()));
         FinalResult finalResult = airus.doAirus(scoreData);
 
-        int count = AirusUtils.checkFdr(finalResult);
+        int count = AirusUtil.checkFdr(finalResult);
         System.out.println(count);
         System.out.println(JSON.toJSONString(finalResult.getClassifierTable()));
 
@@ -96,8 +96,8 @@ public class AirusTest extends BaseTest {
         HashMap<String, ScoresDO> scoreMap = scoreTsvParser.getScoreMap(new File(this.getClass().getClassLoader().getResource("SGSScoreResultUni.csv").getPath()), ScoreTsvParser.SPLIT_COMMA);
         ScoreData scoreData2 = airus.trans(new ArrayList(scoreMap.values()));
 
-        AirusUtils.fakeSortTgId(scoreData1);
-        AirusUtils.fakeSortTgId(scoreData2);
+        AirusUtil.fakeSortTgId(scoreData1);
+        AirusUtil.fakeSortTgId(scoreData2);
         for (int i = 0; i < scoreData2.getGroupId().length; i++) {
             String fullPeptide = scoreData2.getGroupId()[i].replace("_2", "");
             boolean isHit = false;

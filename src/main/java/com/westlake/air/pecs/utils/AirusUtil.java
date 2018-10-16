@@ -13,9 +13,9 @@ import java.util.*;
  * Created by Nico Wang Ruimin
  * Time: 2018-06-13 22:08
  */
-public class AirusUtils {
+public class AirusUtil {
 
-    public static final Logger logger = LoggerFactory.getLogger(AirusUtils.class);
+    public static final Logger logger = LoggerFactory.getLogger(AirusUtil.class);
 
     /**
      * 将GroupId简化为Integer数组
@@ -79,7 +79,7 @@ public class AirusUtils {
 
     public static Double[][] getDecoyPeaks(Double[][] array, Boolean[] isDecoy) {
         if (array.length == isDecoy.length) {
-            return ArrayUtils.extract3dRow(array, isDecoy);
+            return ArrayUtil.extract3dRow(array, isDecoy);
         } else {
             logger.error("GetDecoyPeaks Error");
             return null;
@@ -89,7 +89,7 @@ public class AirusUtils {
     public static Double[] getDecoyPeaks(Double[] array, Boolean[] isDecoy) {
 
         if (array.length == isDecoy.length) {
-            return ArrayUtils.extract3dRow(array, isDecoy);
+            return ArrayUtil.extract3dRow(array, isDecoy);
         } else {
             logger.error("GetDecoyPeaks Error");
             return null;
@@ -99,7 +99,7 @@ public class AirusUtils {
     public static Integer[] getDecoyPeaks(Integer[] array, Boolean[] isDecoy) {
         ResultDO<Integer[]> decoyPeaks = new ResultDO<Integer[]>();
         if (array.length == isDecoy.length) {
-            return ArrayUtils.extract3dRow(array, isDecoy);
+            return ArrayUtil.extract3dRow(array, isDecoy);
         } else {
             logger.error("GetDecoyPeaks Error");
             return null;
@@ -109,7 +109,7 @@ public class AirusUtils {
     public static Double[] getTargetPeaks(Double[] array, Boolean[] isDecoy) {
         if (array.length == isDecoy.length) {
             Boolean[] isTarget = getIsTarget(isDecoy);
-            return ArrayUtils.extract3dRow(array, isTarget);
+            return ArrayUtil.extract3dRow(array, isTarget);
         } else {
             logger.error("GetDecoyPeaks Error");
             return null;
@@ -119,7 +119,7 @@ public class AirusUtils {
     public static Integer[] getTargetPeaks(Integer[] array, Boolean[] isDecoy) {
         if (array.length == isDecoy.length) {
             Boolean[] isTarget = getIsTarget(isDecoy);
-            return ArrayUtils.extract3dRow(array, isTarget);
+            return ArrayUtil.extract3dRow(array, isTarget);
         } else {
             logger.error("GetDecoyPeaks Error");
             return null;
@@ -172,9 +172,9 @@ public class AirusUtils {
     public static Double[][] getFeatureMatrix(Double[][] array, Boolean useMainScore) {
         if (array != null) {
             if (useMainScore) {
-                return ArrayUtils.extract3dColumn(array, 0);
+                return ArrayUtil.extract3dColumn(array, 0);
             } else {
-                return ArrayUtils.extract3dColumn(array, 1);
+                return ArrayUtil.extract3dColumn(array, 1);
             }
         } else {
             logger.error("GetFeatureMatrix Error");
@@ -231,16 +231,16 @@ public class AirusUtils {
 
         int decoyLength = (int) (decoyIds.length * fraction) + 1;
         int targetLength = (int) (targetIds.length * fraction) + 1;
-        Integer[] learnIds = ArrayUtils.concat2d(ArrayUtils.getPartOfArray(decoyIds, decoyLength), ArrayUtils.getPartOfArray(targetIds, targetLength));
+        Integer[] learnIds = ArrayUtil.concat2d(ArrayUtil.getPartOfArray(decoyIds, decoyLength), ArrayUtil.getPartOfArray(targetIds, targetLength));
 
         HashSet<Integer> learnIdSet = new HashSet<Integer>(Arrays.asList(learnIds));
-        return ArrayUtils.extract3dRow(data, groupNumId, isDecoy, learnIdSet);
+        return ArrayUtil.extract3dRow(data, groupNumId, isDecoy, learnIdSet);
     }
 
     public static ScoreData fakeSortTgId(ScoreData scoreData) {
         String[] groupId = scoreData.getGroupId();
         int groupIdLength = groupId.length;
-        Integer[] index = ArrayUtils.indexBeforeSort(groupId);
+        Integer[] index = ArrayUtil.indexBeforeSort(groupId);
 
         Boolean[] isDecoy = scoreData.getIsDecoy();
         Double[][] scores = scoreData.getScoreData();
@@ -254,7 +254,7 @@ public class AirusUtils {
             newIsDecoy[i] = isDecoy[j];
             newScores[i] = scores[j];
         }
-        Integer[] newGroupNumId = AirusUtils.getGroupNumId(newGroupId);
+        Integer[] newGroupNumId = AirusUtil.getGroupNumId(newGroupId);
         scoreData.setGroupId(newGroupId);
         scoreData.setIsDecoy(newIsDecoy);
         scoreData.setScoreData(newScores);

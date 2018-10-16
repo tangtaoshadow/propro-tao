@@ -7,6 +7,7 @@ import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.TaskService;
+import com.westlake.air.pecs.utils.CompressUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -176,6 +177,32 @@ public class MzXMLParser {
             Float mz = values[peakIndex];
             Float intensity = values[peakIndex + 1];
             map.put(mz, intensity);
+        }
+
+        Float[] mzArray = new Float[map.size()];
+        Float[] intensityArray = new Float[map.size()];
+        int i = 0;
+        for (Float key : map.keySet()) {
+            mzArray[i] = key;
+            intensityArray[i] = map.get(key);
+            i++;
+        }
+
+        pairs.setMzArray(mzArray);
+        pairs.setIntensityArray(intensityArray);
+        return pairs;
+    }
+
+    public MzIntensityPairs getPeakMapWithoutZeroIntensity(byte[] value, int precision, boolean isZlibCompression) {
+        MzIntensityPairs pairs = new MzIntensityPairs();
+        Float[] values = getValues(value, precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
+        TreeMap<Float, Float> map = new TreeMap<>();
+        for (int peakIndex = 0; peakIndex < values.length - 1; peakIndex += 2) {
+            Float mz = values[peakIndex];
+            Float intensity = values[peakIndex + 1];
+//            if(intensity != 0f){
+//                map.put(mz, intensity);
+//            }
         }
 
         Float[] mzArray = new Float[map.size()];
@@ -441,7 +468,7 @@ public class MzXMLParser {
         ByteBuffer byteBuffer = ByteBuffer.wrap(value);
 
         if (isCompression) {
-            byteBuffer = ByteBuffer.wrap(decompress(byteBuffer.array()));
+            byteBuffer = ByteBuffer.wrap(CompressUtil.decompress(byteBuffer.array()));
         }
 
         byteBuffer.order(byteOrder);
@@ -463,67 +490,6 @@ public class MzXMLParser {
 
         byteBuffer.clear();
         return floatValues;
-    }
-
-    //byte[]压缩为byte[]
-    public byte[] compress(byte[] data) {
-        byte[] output;
-
-        Deflater compresser = new Deflater();
-
-        compresser.reset();
-        compresser.setInput(data);
-        compresser.finish();
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
-        try {
-            byte[] buf = new byte[1024];
-            while (!compresser.finished()) {
-                int i = compresser.deflate(buf);
-                bos.write(buf, 0, i);
-            }
-            output = bos.toByteArray();
-        } catch (Exception e) {
-            output = data;
-            e.printStackTrace();
-        } finally {
-            try {
-                bos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        compresser.end();
-        return output;
-    }
-
-    public byte[] decompress(byte[] data) {
-        byte[] output = new byte[0];
-
-        Inflater decompresser = new Inflater();
-        decompresser.reset();
-        decompresser.setInput(data);
-
-        ByteArrayOutputStream o = new ByteArrayOutputStream(data.length);
-        try {
-            byte[] buf = new byte[1024];
-            while (!decompresser.finished()) {
-                int i = decompresser.inflate(buf);
-                o.write(buf, 0, i);
-            }
-            output = o.toByteArray();
-        } catch (Exception e) {
-            output = data;
-            e.printStackTrace();
-        } finally {
-            try {
-                o.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        decompresser.end();
-        return output;
     }
 
     //解析Scan标签的Attributes

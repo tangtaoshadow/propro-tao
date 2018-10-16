@@ -3,8 +3,7 @@ package com.westlake.air.pecs.test.algorithm;
 import com.alibaba.fastjson.JSONArray;
 import com.westlake.air.pecs.algorithm.Stats;
 import com.westlake.air.pecs.test.BaseTest;
-import com.westlake.air.pecs.utils.AirusUtils;
-import com.westlake.air.pecs.utils.ArrayUtils;
+import com.westlake.air.pecs.utils.ArrayUtil;
 import com.westlake.air.pecs.utils.FileUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,7 @@ public class AirusUtilsTest extends BaseTest {
         d[4] = 5.0d;
         d[5] = 4.0d;
 
-        Integer[] argSort = ArrayUtils.indexBeforeSort(d);
+        Integer[] argSort = ArrayUtil.indexBeforeSort(d);
 
         assert argSort[0] == 0;
         assert argSort[1] == 2;
@@ -47,7 +46,7 @@ public class AirusUtilsTest extends BaseTest {
         d[4] = 5.0d;
         d[5] = 4.0d;
 
-        Integer[] argSort = ArrayUtils.indexBeforeReversedSort(d);
+        Integer[] argSort = ArrayUtil.indexBeforeReversedSort(d);
 
         assert argSort[0] == 4;
         assert argSort[1] == 5;
