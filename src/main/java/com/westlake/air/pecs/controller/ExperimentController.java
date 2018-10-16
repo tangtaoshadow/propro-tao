@@ -166,6 +166,8 @@ public class ExperimentController extends BaseController {
                   @RequestParam(value = "intercept") Double intercept,
                   @RequestParam(value = "fileLocation") String fileLocation,
                   @RequestParam(value = "description") String description,
+                  @RequestParam(value = "compressionType") String compressionType,
+                  @RequestParam(value = "precision") String precision,
                   RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
@@ -180,7 +182,8 @@ public class ExperimentController extends BaseController {
         experimentDO.setDescription(description);
         experimentDO.setSlope(slope);
         experimentDO.setIntercept(intercept);
-
+        experimentDO.setCompressionType(compressionType);
+        experimentDO.setPrecision(precision);
         ResultDO result = experimentService.update(experimentDO);
         if (result.isFailed()) {
             model.addAttribute(ERROR_MSG, result.getMsgInfo());

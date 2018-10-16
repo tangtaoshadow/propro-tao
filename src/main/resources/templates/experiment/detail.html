@@ -127,6 +127,24 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
+                            <label for="compressionType" class="col-2 col-form-label">
+                                压缩类型
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="compressionType" readonly
+                                       th:value="${experiment?.compressionType}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="precision" class="col-2 col-form-label">
+                                数值精度
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="precision" readonly
+                                       th:value="${experiment?.precision}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
                             <label for="creator" class="col-2 col-form-label">
                                 创建人
                             </label>
