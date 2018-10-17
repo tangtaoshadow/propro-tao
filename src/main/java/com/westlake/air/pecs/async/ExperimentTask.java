@@ -4,7 +4,6 @@ import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
-import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
@@ -13,7 +12,7 @@ import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.ScoresService;
-import com.westlake.air.pecs.utils.AirusUtils;
+import com.westlake.air.pecs.utils.AirusUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -40,8 +39,13 @@ public class ExperimentTask extends BaseTask {
     }
 
     @Async
-    public void compressorExperimentTask(ExperimentDO experimentDO, TaskDO taskDO) {
+    public void compressionAndSort(ExperimentDO experimentDO, TaskDO taskDO) {
+        long start = System.currentTimeMillis();
 
+
+        taskDO.addLog("转还完毕,总耗时:"+(System.currentTimeMillis() - start));
+        taskDO.finish(TaskDO.STATUS_SUCCESS);
+        taskService.update(taskDO);
     }
 
     /**
@@ -135,7 +139,7 @@ public class ExperimentTask extends BaseTask {
         start = System.currentTimeMillis();
         FinalResult finalResult = airus.doAirus(scores);
 
-        int count = AirusUtils.checkFdr(finalResult);
+        int count = AirusUtil.checkFdr(finalResult);
         taskDO.addLog("合并打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为"+count);
         taskDO.addLog("Swath流程总计耗时:" + (System.currentTimeMillis() - startAll));
         taskService.update(taskDO);

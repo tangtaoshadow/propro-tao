@@ -24,7 +24,7 @@ import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.TransitionService;
-import com.westlake.air.pecs.utils.AirusUtils;
+import com.westlake.air.pecs.utils.AirusUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -39,7 +39,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -427,7 +426,7 @@ public class AnalyseController extends BaseController {
         long start = System.currentTimeMillis();
         FinalResult finalResult = airus.doAirus(overviewId);
         logger.info("打分耗时:" + (System.currentTimeMillis() - start));
-        int count = AirusUtils.checkFdr(finalResult);
+        int count = AirusUtil.checkFdr(finalResult);
 
         logger.info(JSON.toJSONString(finalResult.getAllInfo().getStatMetrics().getFdr()));
         JSONObject object = new JSONObject();

@@ -2,13 +2,11 @@ package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
-import com.westlake.air.pecs.parser.MzMLParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.ScanIndexService;
@@ -23,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
+import java.nio.ByteOrder;
 
 /**
  * Created by James Lu MiaoShan
@@ -34,8 +33,6 @@ public class SpectrumController extends BaseController {
 
     @Autowired
     MzXMLParser mzXMLParser;
-    @Autowired
-    MzMLParser mzMLParser;
     @Autowired
     ExperimentService experimentService;
     @Autowired
@@ -73,13 +70,16 @@ public class SpectrumController extends BaseController {
         model.addAttribute("isZlibCompression", isZlibCompression);
 
         if (mz != null && !mz.isEmpty() && intensity != null && !intensity.isEmpty()) {
-            MzIntensityPairs pairs = mzMLParser.getPeakMap(new Base64().decode(mz.trim()), new Base64().decode(intensity.trim()), mzPrecision, intensityPrecision, isZlibCompression);
-            if (pairs != null) {
-                model.addAttribute("mzArray", pairs.getMzArray());
-                model.addAttribute("intensityArray", pairs.getIntensityArray());
-            } else {
-                model.addAttribute(ERROR_MSG, ResultCode.EXTRACT_FAILED.getMessage());
+
+            Float[] mzArray = mzXMLParser.getValues(new Base64().decode(mz.trim()), mzPrecision, isZlibCompression, ByteOrder.LITTLE_ENDIAN);
+            Float[] intensityArray = mzXMLParser.getValues(new Base64().decode(intensity.trim()), intensityPrecision, isZlibCompression, ByteOrder.LITTLE_ENDIAN);
+
+            if (mzArray == null || intensityArray == null || mzArray.length != intensityArray.length) {
+                return null;
             }
+
+            model.addAttribute("mzArray", mzArray);
+            model.addAttribute("intensityArray", intensityArray);
         }
 
         return "spectrum/mzmlextractor";
@@ -118,16 +118,10 @@ public class SpectrumController extends BaseController {
         File file = new File(experimentDO.getFileLocation());
         try {
             RandomAccessFile raf = new RandomAccessFile(file, "r");
-            if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZXML)) {
-                pairs = mzXMLParser.parseOne(raf, scanIndexDO.getStart(), scanIndexDO.getEnd());
-            } else {
-                pairs = mzMLParser.parseOne(raf, scanIndexDO.getStart(), scanIndexDO.getEnd());
-
-            }
+            pairs = mzXMLParser.parseValue(raf, scanIndexDO.getStart(), scanIndexDO.getEnd(), experimentDO.getCompressionType(), experimentDO.getPrecision());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
 
         JSONObject res = new JSONObject();
         JSONArray mzArray = new JSONArray();

@@ -4,7 +4,7 @@ package com.westlake.air.pecs.parser;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.db.ScoresDO;
-import com.westlake.air.pecs.utils.AirusUtils;
+import com.westlake.air.pecs.utils.AirusUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -55,7 +55,7 @@ public class ScoreTsvParser {
                 line = reader.readLine();
                 i++;
             }
-            Integer[] groupNumId = AirusUtils.getGroupNumId(groupId);
+            Integer[] groupNumId = AirusUtil.getGroupNumId(groupId);
 
             scoreDataMap.setGroupId(groupId);
             scoreDataMap.setRunId(runId);

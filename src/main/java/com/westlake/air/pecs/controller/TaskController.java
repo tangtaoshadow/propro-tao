@@ -40,7 +40,7 @@ public class TaskController extends BaseController {
         TaskQuery query = new TaskQuery();
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
-        query.setSortColumn("lastModifiedDate");
+        query.setSortColumn("createDate");
         query.setOrderBy(Sort.Direction.DESC);
         ResultDO<List<TaskDO>> resultDO = taskService.getList(query);
 

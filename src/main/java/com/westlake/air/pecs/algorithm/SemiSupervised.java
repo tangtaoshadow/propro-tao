@@ -4,8 +4,8 @@ import com.westlake.air.pecs.domain.bean.airus.LDALearn;
 import com.westlake.air.pecs.domain.bean.airus.Params;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
 import com.westlake.air.pecs.domain.bean.airus.TrainPeaks;
-import com.westlake.air.pecs.utils.AirusUtils;
-import com.westlake.air.pecs.utils.ArrayUtils;
+import com.westlake.air.pecs.utils.AirusUtil;
+import com.westlake.air.pecs.utils.ArrayUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +27,14 @@ public class SemiSupervised {
 
     private TrainPeaks selectTrainPeaks(Double[][] trainData, Double[] scores, Boolean[] trainIsDecoy, Boolean[] isTopPeak, double cutOffFdr) {
 
-        Double[][] topTargetPeaks = AirusUtils.getTopTargetPeaks(trainData, trainIsDecoy, isTopPeak);
-        Double[] topTargetScores = AirusUtils.getTopTargetPeaks(scores, trainIsDecoy, isTopPeak);
-        Double[][] topDecoyPeaks = AirusUtils.getTopDecoyPeaks(trainData, trainIsDecoy, isTopPeak);
-        Double[] topDecoyScores = AirusUtils.getTopDecoyPeaks(scores, trainIsDecoy, isTopPeak);
+        Double[][] topTargetPeaks = AirusUtil.getTopTargetPeaks(trainData, trainIsDecoy, isTopPeak);
+        Double[] topTargetScores = AirusUtil.getTopTargetPeaks(scores, trainIsDecoy, isTopPeak);
+        Double[][] topDecoyPeaks = AirusUtil.getTopDecoyPeaks(trainData, trainIsDecoy, isTopPeak);
+        Double[] topDecoyScores = AirusUtil.getTopDecoyPeaks(scores, trainIsDecoy, isTopPeak);
 
         // find cutoff fdr from scores and only use best target peaks:
         Double cutoff = stats.findCutoff(topTargetScores, topDecoyScores, cutOffFdr);
-        Double[][] bestTargetPeaks = AirusUtils.peaksFilter(topTargetPeaks, topTargetScores, cutoff);
+        Double[][] bestTargetPeaks = AirusUtil.peaksFilter(topTargetPeaks, topTargetScores, cutoff);
 
         TrainPeaks trainPeaks = new TrainPeaks();
         trainPeaks.setBestTargetPeaks(bestTargetPeaks);
@@ -67,23 +67,23 @@ public class SemiSupervised {
         Params params = new Params();
         try {
             //Get part of scores as train input.
-            TrainAndTest trainAndTest = AirusUtils.splitForXval(scores, groupNumId, isDecoy, params.getXevalFraction(), params.isTest());
+            TrainAndTest trainAndTest = AirusUtil.splitForXval(scores, groupNumId, isDecoy, params.getXevalFraction(), params.isTest());
             Double[][] trainScores = trainAndTest.getTrainData();
             Integer[] trainId = trainAndTest.getTrainId();
             Boolean[] trainIsDecoy = trainAndTest.getTrainIsDecoy();
 //            Double[][] testScores = trainAndTest.getTestData();
 //            Integer[] testId = trainAndTest.getTestId();
 //            Boolean[] testIsDecoy = trainAndTest.getTestIsDecoy();
-            Double[] mainScore = ArrayUtils.extractColumn(trainScores, 0);
-            Boolean[] isTopPeak = AirusUtils.findTopIndex(mainScore, trainId);
+            Double[] mainScore = ArrayUtil.extractColumn(trainScores, 0);
+            Boolean[] isTopPeak = AirusUtil.findTopIndex(mainScore, trainId);
 
 
             //Start the first time of training with mainScore as main score.
             TrainPeaks trainPeaks = selectTrainPeaks(trainScores, mainScore, trainIsDecoy, isTopPeak, params.getSsInitialFdr());
             Double[] w = ldaLearner.learn(trainPeaks.getTopDecoyPeaks(), trainPeaks.getBestTargetPeaks(), false);
             Double[] clfScores = ldaLearner.score(trainScores, w, false);
-            clfScores = ArrayUtils.normalize(clfScores);
-            isTopPeak = AirusUtils.findTopIndex(clfScores, trainId);
+            clfScores = ArrayUtil.normalize(clfScores);
+            isTopPeak = AirusUtil.findTopIndex(clfScores, trainId);
 
             //Begin "semi supervised learning" iteration.
             for (int times = 0; times < params.getXevalNumIter(); times++) {
@@ -92,17 +92,17 @@ public class SemiSupervised {
                 TrainPeaks trainPeaksTemp = selectTrainPeaks(trainScores, clfScores, trainIsDecoy, isTopPeak, params.getSsIterationFdr());
                 w = ldaLearner.learn(trainPeaksTemp.getTopDecoyPeaks(), trainPeaksTemp.getBestTargetPeaks(), true);
                 clfScores = ldaLearner.score(trainScores, w, true);
-                isTopPeak = AirusUtils.findTopIndex(clfScores, trainId);
+                isTopPeak = AirusUtil.findTopIndex(clfScores, trainId);
             }
             //After semi supervised iteration: calculate normalized clfScores of FULL data set.
 //            clfScores = score(scores, w);
-//            isTopPeak = AirusUtils.findTopIndex(clfScores, groupNumId);
-//            Double[] topDecoyScores = AirusUtils.getTopDecoyPeaks(clfScores, isDecoy, isTopPeak);
-//            ArrayUtils.normalize(clfScores, topDecoyScores);
+//            isTopPeak = AirusUtil.findTopIndex(clfScores, groupNumId);
+//            Double[] topDecoyScores = AirusUtil.getTopDecoyPeaks(clfScores, isDecoy, isTopPeak);
+//            ArrayUtil.normalize(clfScores, topDecoyScores);
 //            clfScores = score(testScores, w);
-//            Double[] topTestPeaks = AirusUtils.getDecoyPeaks(clfScores, AirusUtils.findTopIndex(clfScores, testId));
-//            Double[] topTestTargetScores = AirusUtils.getTargetPeaks(topTestPeaks, testIsDecoy);
-//            Double[] topTestDecoyScores = AirusUtils.getDecoyPeaks(topTestPeaks, testIsDecoy);
+//            Double[] topTestPeaks = AirusUtil.getDecoyPeaks(clfScores, AirusUtil.findTopIndex(clfScores, testId));
+//            Double[] topTestTargetScores = AirusUtil.getTargetPeaks(topTestPeaks, testIsDecoy);
+//            Double[] topTestDecoyScores = AirusUtil.getDecoyPeaks(topTestPeaks, testIsDecoy);
 //            ldaLearn.setTopTestDecoyScores(topTestDecoyScores);
 //            ldaLearn.setTopTestTargetScores(topTestTargetScores);
             ldaLearn.setParams(w);

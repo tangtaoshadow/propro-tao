@@ -52,18 +52,32 @@
                                    placeholder="" name="overlap" th:value="${experiment?.overlap}">
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="fileType">
+                            <label for="slope">
                                 iRT-slope
                             </label>
                             <input type="text" class="form-control m-input" id="slope" name="slope"
                                    th:value="${experiment?.slope}">
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="fileType">
+                            <label for="intercept">
                                 iRT-intercept
                             </label>
                             <input type="text" class="form-control m-input" id="intercept" name="intercept"
                                    th:value="${experiment?.intercept}">
+                        </div>
+                        <div class="form-group m-form__group">
+                            <label for="compressionType">
+                                压缩类型
+                            </label>
+                            <input type="text" class="form-control m-input" id="compressionType" name="compressionType"
+                                   th:value="${experiment?.compressionType}">
+                        </div>
+                        <div class="form-group m-form__group">
+                            <label for="compressionType">
+                                数值精度
+                            </label>
+                            <input type="text" class="form-control m-input" id="precision" name="precision"
+                                   th:value="${experiment?.precision}">
                         </div>
                         <div class="form-group m-form__group">
                             <label for="fileLocation">
@@ -72,14 +86,6 @@
                             <input type="text" class="form-control m-input" id="fileLocation" name="fileLocation"
                                    th:value="${experiment?.fileLocation}">
                             <span class="m-form__help">一般情况下不要乱改本字段</span>
-                        </div>
-                        <div class="form-group m-form__group">
-                            <label for="fileType">
-                                文件类型
-                            </label>
-                            <input type="text" class="form-control m-input" id="fileType" name="fileType"
-                                   th:value="${experiment?.fileType}">
-                            <span class="m-form__help">目前只支持mzxml和mzml,全部小写</span>
                         </div>
                         <div class="form-group m-form__group">
                             <label for="description">

@@ -1,6 +1,5 @@
 package com.westlake.air.pecs.service.impl;
 
-import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
@@ -17,12 +16,9 @@ import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.pecs.domain.db.simple.TargetTransition;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
-import com.westlake.air.pecs.parser.BaseExpParser;
-import com.westlake.air.pecs.parser.MzMLParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
 import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.ConvolutionUtil;
-import com.westlake.air.pecs.utils.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,8 +52,6 @@ public class ExperimentServiceImpl implements ExperimentService {
     ScanIndexDAO scanIndexDAO;
     @Autowired
     MzXMLParser mzXMLParser;
-    @Autowired
-    MzMLParser mzMLParser;
     @Autowired
     AnalyseDataDAO analyseDataDAO;
     @Autowired
@@ -123,7 +117,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             return ResultDO.build(experimentDO);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            return ResultDO.buildError(ResultCode.INSERT_ERROR);
+            return ResultDO.buildError(ResultCode.UPDATE_ERROR);
         }
     }
 
@@ -216,11 +210,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         try {
             List<ScanIndexDO> indexList = null;
             //传入不同的文件类型会调用不同的解析层
-            if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZXML)) {
-                indexList = mzXMLParser.index(file, experimentDO.getId(), experimentDO.getOverlap(), taskDO);
-            } else if (experimentDO.getFileType().equals(Constants.EXP_SUFFIX_MZML)) {
-                indexList = mzMLParser.index(file, experimentDO.getId(), experimentDO.getOverlap(), taskDO);
-            }
+            indexList = mzXMLParser.index(file, experimentDO, taskDO);
 
             taskDO.addLog("索引构建完毕,开始存储索引");
             taskService.update(taskDO);
@@ -364,7 +354,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                 query.setPrecursorMzEnd(rang.getMzEnd());
                 List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
                 //Step4.提取指定原始谱图
-                rtMap = parseSpectrum(raf, indexes, getParser(exp.getFileType()));
+                rtMap = parseSpectrum(raf, indexes, exp);
                 //Step5.卷积并且存储数据
                 convolute(finalList, coordinates, rtMap, null, mzExtractWindow, -1f, false);
             }
@@ -411,7 +401,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         //Step2.获取指定索引列表
         List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(new ScanIndexQuery(swathInput.getExperimentDO().getId(), 1));
         //Step4.提取指定原始谱图
-        TreeMap<Float, MzIntensityPairs> rtMap = parseSpectrum(raf, indexes, getParser(swathInput.getExperimentDO().getFileType()));
+        TreeMap<Float, MzIntensityPairs> rtMap = parseSpectrum(raf, indexes, swathInput.getExperimentDO());
         //Step5.卷积并且存储数据
         convoluteAndInsert(coordinates, rtMap, overviewId, swathInput.getRtExtractWindow(), swathInput.getMzExtractWindow(), true);
     }
@@ -500,18 +490,18 @@ public class ExperimentServiceImpl implements ExperimentService {
         query.setPrecursorMzEnd(rang.getMzEnd());
         List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
         //Step4.提取指定原始谱图
-        rtMap = parseSpectrum(raf, indexes, getParser(swathInput.getExperimentDO().getFileType()));
+        rtMap = parseSpectrum(raf, indexes, swathInput.getExperimentDO());
 
         return convoluteAndInsert(coordinates, rtMap, overviewId, swathInput.getRtExtractWindow(), swathInput.getMzExtractWindow(), false);
     }
 
-    private TreeMap<Float, MzIntensityPairs> parseSpectrum(RandomAccessFile raf, List<SimpleScanIndex> indexes, BaseExpParser baseExpParser) {
+    private TreeMap<Float, MzIntensityPairs> parseSpectrum(RandomAccessFile raf, List<SimpleScanIndex> indexes, ExperimentDO experimentDO) {
         long start = System.currentTimeMillis();
 
         TreeMap<Float, MzIntensityPairs> rtMap = new TreeMap<>();
 
         for (SimpleScanIndex index : indexes) {
-            MzIntensityPairs mzIntensityPairs = baseExpParser.parseOne(raf, index.getStart(), index.getEnd());
+            MzIntensityPairs mzIntensityPairs = mzXMLParser.parseValue(raf, index.getStart(), index.getEnd(), experimentDO.getCompressionType(), experimentDO.getPrecision());
             rtMap.put(index.getRt(), mzIntensityPairs);
         }
         logger.info("解析" + indexes.size() + "条XML谱图文件总计耗时:" + (System.currentTimeMillis() - start));
@@ -545,18 +535,6 @@ public class ExperimentServiceImpl implements ExperimentService {
         for (TargetTransition ms : coordinates) {
             AnalyseDataDO dataDO = convForOne(isMS1, ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
             finalList.add(dataDO);
-        }
-    }
-
-    private BaseExpParser getParser(String fileType) {
-        //默认返回MzXMLParser
-        if (fileType == null) {
-            return mzXMLParser;
-        }
-        if (fileType.equals(Constants.EXP_SUFFIX_MZXML)) {
-            return mzXMLParser;
-        } else {
-            return mzMLParser;
         }
     }
 

@@ -85,29 +85,26 @@
                     <th width="5%">
                         父节点
                     </th>
-                    <th width="5%">
+                    <th width="3%">
                         序列号
                     </th>
-                    <th width="5%">
+                    <th width="2%">
                         MS
                     </th>
-                    <th width="15%">
+                    <th width="10%">
                         RT
                     </th>
-                    <th width="10%">
-                        文件起始位置
+                    <th width="15%">
+                        文件位置(开始/结束)
                     </th>
                     <th width="10%">
-                        文件结束位置
+                        MZ窗口起始位置(校准前/后)
                     </th>
                     <th width="10%">
-                        MZ窗口起始位置
+                        MZ窗口结束位置(校准前/后)
                     </th>
                     <th width="10%">
-                        MZ窗口结束位置
-                    </th>
-                    <th width="5%">
-                        窗口宽度
+                        窗口宽度(校准前/后)
                     </th>
                     <th width="10%">
                         操作
@@ -127,11 +124,10 @@
                     <td th:text="${scanIndex.msLevel}"></td>
 
                     <td th:text="${scanIndex.rtStr}"></td>
-                    <td th:text="${scanIndex.start}"></td>
-                    <td th:text="${scanIndex.end}"></td>
-                    <td th:text="${scanIndex.precursorMzStart}"></td>
-                    <td th:text="${scanIndex.precursorMzEnd}"></td>
-                    <td th:text="${scanIndex.windowWideness}"></td>
+                    <td th:text="|${scanIndex.start} -> ${scanIndex.end}|"></td>
+                    <td th:text="|${scanIndex.originalPrecursorMzStart}/${scanIndex.precursorMzStart}|"></td>
+                    <td th:text="|${scanIndex.originalPrecursorMzEnd}/${scanIndex.precursorMzEnd}|">
+                    <td th:text="|${scanIndex.originalWindowWideness}/${scanIndex.windowWideness}|"></td>
                     <td>
                         <a th:href="|/scanindex/detail/${scanIndex.id}|"
                            class="btn btn-success btn-sm">详情

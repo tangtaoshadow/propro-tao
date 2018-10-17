@@ -3,13 +3,11 @@ package com.westlake.air.pecs.scorer;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
-import com.westlake.air.pecs.utils.ArrayUtils;
+import com.westlake.air.pecs.utils.ArrayUtil;
 import com.westlake.air.pecs.utils.ScoreUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -90,8 +88,8 @@ public class LibraryScorer {
         scores.setVarLibraryDotprod(sumOfMult);
 
         //manhattan
-        double expIntTotal = ArrayUtils.sumArray(expIntSqrt);
-        double libIntTotal = ArrayUtils.sumArray(libIntSqrt);
+        double expIntTotal = ArrayUtil.sumArray(expIntSqrt);
+        double libIntTotal = ArrayUtil.sumArray(libIntSqrt);
         expIntSqrtDivided = normalize(expIntSqrt, expIntTotal);
         libIntSqrtDivided = normalize(libIntSqrt, libIntTotal);
         double sumOfDivide = 0;

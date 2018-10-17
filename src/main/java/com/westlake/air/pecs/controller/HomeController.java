@@ -42,7 +42,7 @@ public class HomeController extends BaseController{
     @Autowired
     ConfigDAO configDAO;
 
-    public static int SHOW_NUM = 4;
+    public static int SHOW_NUM = 5;
     @RequestMapping("/")
     String home(Model model) {
         LibraryQuery libraryQuery = new LibraryQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");

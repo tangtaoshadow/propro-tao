@@ -5,8 +5,7 @@ import com.westlake.air.pecs.domain.bean.airus.ErrorStat;
 import com.westlake.air.pecs.domain.bean.airus.Params;
 import com.westlake.air.pecs.domain.bean.airus.Pi0Est;
 import com.westlake.air.pecs.domain.bean.airus.StatMetrics;
-import com.westlake.air.pecs.utils.AirusUtils;
-import com.westlake.air.pecs.utils.ArrayUtils;
+import com.westlake.air.pecs.utils.ArrayUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -23,14 +22,14 @@ public class Stats {
     public static final Logger logger = LoggerFactory.getLogger(Stats.class);
 
     private Double[] pNormalizer(Double[] targetScores, Double[] decoyScores) {
-        double mean = ArrayUtils.mean(decoyScores);
-        double std = ArrayUtils.std(decoyScores);
+        double mean = ArrayUtil.mean(decoyScores);
+        double std = ArrayUtil.std(decoyScores);
         int targetScoresLength = targetScores.length;
         Double[] results = new Double[targetScoresLength];
         double args;
         for (int i = 0; i < targetScoresLength; i++) {
             args = (targetScores[i] - mean) / std;
-            results[i] = 1 - (0.5 * (1.0 + ArrayUtils.erf(args / Math.sqrt(2.0))));
+            results[i] = 1 - (0.5 * (1.0 + ArrayUtil.erf(args / Math.sqrt(2.0))));
         }
         return results;
     }
@@ -46,11 +45,11 @@ public class Stats {
         int decoyScoreLength = decoyScores.length;
         int targetDecoyScoreLength = targetScoreLength + decoyScoreLength;
         double[] p = new double[targetScoreLength];
-        Double[] targetDecoyScores = ArrayUtils.concat2d(targetScores, decoyScores);
+        Double[] targetDecoyScores = ArrayUtil.concat2d(targetScores, decoyScores);
         boolean[] vmid = new boolean[targetDecoyScoreLength];
         boolean[] v = new boolean[targetDecoyScoreLength];
         int[] u = new int[targetScoreLength];
-        Integer[] perm = ArrayUtils.indexBeforeReversedSort(targetDecoyScores);
+        Integer[] perm = ArrayUtil.indexBeforeReversedSort(targetDecoyScores);
         for (int i = 0; i < targetScoreLength; i++) {
             vmid[i] = true;
         }
@@ -72,7 +71,7 @@ public class Stats {
         }
 
         int ranks;
-        double[] rankDataReversed = ArrayUtils.rankDataReversed(targetScores);
+        double[] rankDataReversed = ArrayUtil.rankDataReversed(targetScores);
         Double[] pFinal = new Double[targetScoreLength];
         for (int i = 0; i < targetScoreLength; i++) {
             ranks = (int) Math.floor(rankDataReversed[i]) - 1;
@@ -116,14 +115,14 @@ public class Stats {
                     meanPL[j] = 1d;
                 }
             }
-            pi0Lambda[i] = ArrayUtils.mean(meanPL) / (1 - lambda[i]);
+            pi0Lambda[i] = ArrayUtil.mean(meanPL) / (1 - lambda[i]);
         }
         if (pi0Method.equals("smoother")) {
             if (smoothLogPi0) {
                     for (int i = 0; i < numOfLambda; i++) {
                         pi0s[i] = Math.log(pi0Lambda[i]);
                     }
-                ResultDO<Double[]> pi0SmoothResult = ArrayUtils.lagrangeInterpolation(lambda, pi0s);
+                ResultDO<Double[]> pi0SmoothResult = ArrayUtil.lagrangeInterpolation(lambda, pi0s);
                 if (pi0SmoothResult.isSuccess()) {
                     pi0Smooth = pi0SmoothResult.getModel();
                 }
@@ -131,7 +130,7 @@ public class Stats {
                     pi0Smooth[i] = Math.exp(pi0Smooth[i]);
                 }
             } else {
-                ResultDO<Double[]> pi0SmoothResult = ArrayUtils.lagrangeInterpolation(lambda, pi0s);
+                ResultDO<Double[]> pi0SmoothResult = ArrayUtil.lagrangeInterpolation(lambda, pi0s);
                 if (pi0SmoothResult.isSuccess()) {
                     pi0Smooth = pi0SmoothResult.getModel();
                 }
@@ -144,7 +143,7 @@ public class Stats {
             int w;
             double[] mse = new double[numOfLambda];
             for (int i = 0; i < numOfLambda; i++) {
-                w = ArrayUtils.countOverThreshold(pvalues, lambda[i]);
+                w = ArrayUtil.countOverThreshold(pvalues, lambda[i]);
                 mse[i] = (w / (Math.pow(numOfPvalue, 2) * Math.pow((1 - lambda[i]), 2))) * (1 - w / numOfPvalue) + Math.pow((pi0Lambda[i] - sortedPi0Lambda[0]), 2);
             }
             double min = 100;
@@ -190,7 +189,7 @@ public class Stats {
                 meanPL[j] = (double) 1;
             }
         }
-        pi0Lambda = ArrayUtils.mean(meanPL);
+        pi0Lambda = ArrayUtil.mean(meanPL);
 
         pi0 = Math.min(pi0Lambda, (double) 1);
         Double[] lamda = new Double[1];
@@ -211,8 +210,8 @@ public class Stats {
      */
     private Double[] qvalue(Double[] pvalues, double pi0, boolean pfdr) {
         int pvalueLength = pvalues.length;
-        Integer[] u = ArrayUtils.indexBeforeSort(pvalues);
-        double[] v = ArrayUtils.rankDataMax(pvalues);
+        Integer[] u = ArrayUtil.indexBeforeSort(pvalues);
+        double[] v = ArrayUtil.rankDataMax(pvalues);
         Double[] qvalues = new Double[pvalueLength];
         for (int i = 0; i < pvalueLength; i++) {
 
@@ -232,7 +231,7 @@ public class Stats {
     private StatMetrics statMetrics(Double[] pvalues, Double pi0, boolean pfdr) {
         StatMetrics results = new StatMetrics();
         int numOfPvalue = pvalues.length;
-        int[] numPositives = ArrayUtils.countNumPositives(pvalues);
+        int[] numPositives = ArrayUtil.countNumPositives(pvalues);
         int[] numNegatives = new int[numOfPvalue];
         for (int i = 0; i < numOfPvalue; i++) {
             numNegatives[i] = numOfPvalue - numPositives[i];
@@ -280,7 +279,7 @@ public class Stats {
             if (fnr[i] > 1.0) fnr[i] = 1.0;
         }
 
-        svalues = ArrayUtils.reverse(ArrayUtils.cumMax(ArrayUtils.reverse(sens)));
+        svalues = ArrayUtil.reverse(ArrayUtil.cumMax(ArrayUtil.reverse(sens)));
         results.setTp(tp);
         results.setFp(fp);
         results.setTn(tn);
@@ -349,7 +348,7 @@ public class Stats {
         for(int i=0;i<qvalues.length;i++){
             qvalue_CutoffAbs[i] = Math.abs(qvalues[i]-cutoffFdr);
         }
-        int i0 = ArrayUtils.argmin(qvalue_CutoffAbs);
+        int i0 = ArrayUtil.argmin(qvalue_CutoffAbs);
         return errorStat.getCutoff()[i0];
     }
 }

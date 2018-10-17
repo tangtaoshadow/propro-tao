@@ -1,7 +1,9 @@
 package com.westlake.air.pecs.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.westlake.air.pecs.compressor.Compressor;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
@@ -13,7 +15,6 @@ import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
-import com.westlake.air.pecs.parser.MzMLParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
 import com.westlake.air.pecs.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +47,9 @@ public class ExperimentController extends BaseController {
     @Autowired
     MzXMLParser mzXMLParser;
     @Autowired
-    MzMLParser mzMLParser;
-    @Autowired
     ScanIndexService scanIndexService;
+    @Autowired
+    Compressor compressor;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -107,7 +108,6 @@ public class ExperimentController extends BaseController {
 
         ExperimentDO experimentDO = new ExperimentDO();
         experimentDO.setName(name);
-        experimentDO.setFileType(fileLocation.substring(fileLocation.lastIndexOf(".") + 1).trim().toLowerCase());
         experimentDO.setDescription(description);
         experimentDO.setOverlap(overlap);
         experimentDO.setFileLocation(fileLocation);
@@ -163,11 +163,12 @@ public class ExperimentController extends BaseController {
     String update(Model model,
                   @RequestParam(value = "id", required = true) String id,
                   @RequestParam(value = "name") String name,
-                  @RequestParam(value = "fileType") String fileType,
                   @RequestParam(value = "slope") Double slope,
                   @RequestParam(value = "intercept") Double intercept,
                   @RequestParam(value = "fileLocation") String fileLocation,
                   @RequestParam(value = "description") String description,
+                  @RequestParam(value = "compressionType") String compressionType,
+                  @RequestParam(value = "precision") String precision,
                   RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
@@ -178,12 +179,12 @@ public class ExperimentController extends BaseController {
         ExperimentDO experimentDO = resultDO.getModel();
 
         experimentDO.setName(name);
-        experimentDO.setFileType(fileType);
         experimentDO.setFileLocation(fileLocation);
         experimentDO.setDescription(description);
         experimentDO.setSlope(slope);
         experimentDO.setIntercept(intercept);
-
+        experimentDO.setCompressionType(compressionType);
+        experimentDO.setPrecision(precision);
         ResultDO result = experimentService.update(experimentDO);
         if (result.isFailed()) {
             model.addAttribute(ERROR_MSG, result.getMsgInfo());
@@ -389,6 +390,7 @@ public class ExperimentController extends BaseController {
     }
 
     @RequestMapping(value = "/compressionsort")
+    @ResponseBody
     String compressionSort(Model model, @RequestParam(value = "expId", required = true) String expId,
                       RedirectAttributes redirectAttributes) {
 
@@ -397,9 +399,13 @@ public class ExperimentController extends BaseController {
             redirectAttributes.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
             return "redirect:/experiment/list";
         }
-
-        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, resultDO.getModel().getName() + ":" + expId);
-        taskService.insert(taskDO);
-        return "experiment/compressor";
+        ExperimentDO experimentDO = resultDO.getModel();
+        ResultDO compressResult = compressor.doCompress(experimentDO);
+//        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
+//        taskService.insert(taskDO);
+//
+//        experimentTask.compressionAndSort(experimentDO, taskDO);
+//        return "redirect:/task/detail/" + taskDO.getId();
+        return JSON.toJSONString(compressResult);
     }
 }
