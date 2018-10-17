@@ -31,6 +31,10 @@ public class ElutionScorer {
         double avgScore = 0.0d;
         for (ExperimentFeature feature : experimentFeatures) {
             RtIntensityPairsDouble preparedHullPoints = prepareElutionFit(feature);
+            if(preparedHullPoints == null){
+                avgScore += -1;
+                continue;
+            }
             double sum = 0.0d;
             Double[] intArray = preparedHullPoints.getIntensityArray();
             Double[] rtArray = preparedHullPoints.getRtArray();
@@ -52,7 +56,7 @@ public class ElutionScorer {
             xInit[3] = rtArray[medianIndex];
             boolean symmetric = false;
             double symmetry;
-            if (rtArray[medianIndex] - rtArray[0] == 0f) {
+            if (rtArray[medianIndex] - rtArray[0] == 0d) {
                 symmetric = true;
                 symmetry = 10;
             } else {
@@ -82,11 +86,8 @@ public class ElutionScorer {
             avgScore += fScore;
         }
         avgScore /= experimentFeatures.size();
-        if (Double.isNaN(avgScore)) {
-            scores.setVarElutionModelFitScore(-1);
-        } else {
-            scores.setVarElutionModelFitScore(avgScore);
-        }
+
+        scores.setVarElutionModelFitScore(avgScore);
     }
     /**
      * prepareFit_
@@ -98,6 +99,9 @@ public class ElutionScorer {
         List<Double> rtArray = feature.getHullRt();
         List<Double> intArray = feature.getHullInt();
 
+        if(rtArray.size() < 2){
+            return null;
+        }
 
         //get rt distance average
         double sum = rtArray.get(rtArray.size() - 1) - rtArray.get(0);
@@ -169,7 +173,7 @@ public class ElutionScorer {
         for (int i = 0; position < max; i++) {
             position = min + i * step;
             tmp = position - retention;
-            data[i] = (part1 * sqrt2Pi * Math.exp(part2 - (tmp / symmetry)) / (1 + Math.exp(termSq2 * ((tmp / width) - part3))));
+            data[i] = part1 * sqrt2Pi * Math.exp(part2 - (tmp / symmetry)) / (1 + Math.exp(termSq2 * ((tmp / width) - part3)));
         }
         return data;
     }
