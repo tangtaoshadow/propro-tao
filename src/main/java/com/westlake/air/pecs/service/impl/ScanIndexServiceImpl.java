@@ -74,6 +74,17 @@ public class ScanIndexServiceImpl implements ScanIndexService {
     }
 
     @Override
+    public ResultDO update(ScanIndexDO scanIndexDO) {
+        try {
+            scanIndexDAO.update(scanIndexDO);
+            return new ResultDO(true);
+        } catch (Exception e) {
+            ResultDO resultDO = new ResultDO();
+            return resultDO.setErrorResult(ResultCode.UPDATE_ERROR.getMessage(), e.getMessage());
+        }
+    }
+
+    @Override
     public ResultDO insertAll(List<ScanIndexDO> scanIndexes, boolean isDeleteOld) {
         if (scanIndexes == null || scanIndexes.size() == 0) {
             return ResultDO.buildError(ResultCode.OBJECT_CANNOT_BE_NULL);
@@ -87,6 +98,11 @@ public class ScanIndexServiceImpl implements ScanIndexService {
         } catch (Exception e) {
             return ResultDO.buildError(ResultCode.INSERT_ERROR);
         }
+    }
+
+    @Override
+    public void updateAirusLoc(List<ScanIndexDO> scanIndexDOList) {
+        scanIndexDAO.updateAirusLoc(scanIndexDOList);
     }
 
     @Override

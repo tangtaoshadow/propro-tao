@@ -7,6 +7,7 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
+import com.westlake.air.pecs.parser.AirFileParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.ScanIndexService;
@@ -33,6 +34,8 @@ public class SpectrumController extends BaseController {
 
     @Autowired
     MzXMLParser mzXMLParser;
+    @Autowired
+    AirFileParser airFileParser;
     @Autowired
     ExperimentService experimentService;
     @Autowired
@@ -115,10 +118,67 @@ public class SpectrumController extends BaseController {
         ExperimentDO experimentDO = expResult.getModel();
         ScanIndexDO scanIndexDO = indexResult.getModel();
 
+        File file = new File(experimentDO.getAirdPath());
+
+        try {
+            RandomAccessFile raf = new RandomAccessFile(file, "r");
+            pairs = airFileParser.parseValue(raf, scanIndexDO.getStart2(), scanIndexDO.getEnd2(), experimentDO.getCompressionType(), experimentDO.getPrecision());
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        JSONObject res = new JSONObject();
+        JSONArray mzArray = new JSONArray();
+        JSONArray intensityArray = new JSONArray();
+        if (pairs == null) {
+            return ResultDO.buildError(ResultCode.DATA_IS_EMPTY);
+        }
+
+        Float[] pairMzArray = pairs.getMzArray();
+        Float[] pairIntensityArray = pairs.getIntensityArray();
+        for (int n = 0; n < pairMzArray.length; n++) {
+            mzArray.add(pairMzArray[n]);
+            intensityArray.add(pairIntensityArray[n]);
+        }
+
+        res.put("mz", mzArray);
+        res.put("intensity", intensityArray);
+        resultDO.setModel(res);
+        return resultDO;
+    }
+
+    @RequestMapping(value = "/viewmzxml")
+    @ResponseBody
+    ResultDO<JSONObject> viewMzXML(Model model,
+                              @RequestParam(value = "indexId", required = false) String indexId,
+                              @RequestParam(value = "expId", required = false) String expId) {
+
+        ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
+        ResultDO<ScanIndexDO> indexResult = scanIndexService.getById(indexId);
+
+        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
+        MzIntensityPairs pairs = null;
+        if (expResult.isFailed()) {
+            resultDO.setErrorResult(ResultCode.EXPERIMENT_NOT_EXISTED);
+            return resultDO;
+        }
+
+        if (indexResult.isFailed()) {
+            resultDO.setErrorResult(ResultCode.SCAN_INDEX_NOT_EXISTED);
+            return resultDO;
+        }
+
+        ExperimentDO experimentDO = expResult.getModel();
+        ScanIndexDO scanIndexDO = indexResult.getModel();
+
         File file = new File(experimentDO.getFileLocation());
+
+
         try {
             RandomAccessFile raf = new RandomAccessFile(file, "r");
             pairs = mzXMLParser.parseValue(raf, scanIndexDO.getStart(), scanIndexDO.getEnd(), experimentDO.getCompressionType(), experimentDO.getPrecision());
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

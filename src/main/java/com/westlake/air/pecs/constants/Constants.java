@@ -67,4 +67,8 @@ public class Constants {
 
     public static final double EMG_CONST = 2.4055;
     public static final int EMG_MAX_ITERATION = 500;
+
+    public static final String SUFFIX_AIRUS_INFO = ".airi";
+    public static final String SUFFIX_AIRUS_DATA = ".aird";
+    public static final String CHANGE_LINE = "\r\n";
 }

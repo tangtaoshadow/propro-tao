@@ -28,7 +28,11 @@ public interface ScanIndexService {
 
     ResultDO insert(ScanIndexDO scanIndexDO);
 
+    ResultDO update(ScanIndexDO scanIndexDO);
+
     ResultDO insertAll(List<ScanIndexDO> scanIndexDOList, boolean isDeleteOld);
+
+    void updateAirusLoc(List<ScanIndexDO> scanIndexDOList);
 
     ResultDO deleteAllByExperimentId(String experimentId);
 

@@ -76,13 +76,13 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="5%">
+                    <th width="2%">
                         No.
                     </th>
                     <th width="10%">
                         实验名称
                     </th>
-                    <th width="5%">
+                    <th width="3%">
                         父节点
                     </th>
                     <th width="3%">
@@ -94,7 +94,10 @@
                     <th width="10%">
                         RT
                     </th>
-                    <th width="15%">
+                    <th width="10%">
+                        文件位置(开始/结束)
+                    </th>
+                    <th width="10%">
                         文件位置(开始/结束)
                     </th>
                     <th width="10%">
@@ -106,7 +109,7 @@
                     <th width="10%">
                         窗口宽度(校准前/后)
                     </th>
-                    <th width="10%">
+                    <th width="20%">
                         操作
                     </th>
                 </tr>
@@ -125,6 +128,7 @@
 
                     <td th:text="${scanIndex.rtStr}"></td>
                     <td th:text="|${scanIndex.start} -> ${scanIndex.end}|"></td>
+                    <td th:text="|${scanIndex.start2} -> ${scanIndex.end2}|"></td>
                     <td th:text="|${scanIndex.originalPrecursorMzStart}/${scanIndex.precursorMzStart}|"></td>
                     <td th:text="|${scanIndex.originalPrecursorMzEnd}/${scanIndex.precursorMzEnd}|">
                     <td th:text="|${scanIndex.originalWindowWideness}/${scanIndex.windowWideness}|"></td>
@@ -133,8 +137,12 @@
                            class="btn btn-success btn-sm">详情
                         </a>
                         <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
-                                data-target="#m_modal_spectrum" th:onclick="|query('${scanIndex.id}','${experiment.id}')|">
+                                data-target="#m_modal_spectrum" th:onclick="|query('${scanIndex.id}','${experiment.id}', false)|">
                             查看谱图
+                        </button>
+                        <button type="button" class="btn btn-sm btn-brand" data-toggle="modal"
+                                data-target="#m_modal_spectrum" th:onclick="|query('${scanIndex.id}','${experiment.id}', true)|">
+                            查看原始谱图
                         </button>
                     </td>
                 </tr>
@@ -190,8 +198,13 @@
             });
         });
 
-        function query(indexId, expId) {
-            var result = $.ajax({url: "/spectrum/view?indexId=" + indexId + "&expId=" + expId, async: false});
+        function query(indexId, expId, isMzXML) {
+            var result;
+            if(isMzXML){
+                result = $.ajax({url: "/spectrum/viewmzxml?indexId=" + indexId + "&expId=" + expId, async: false})
+            }else{
+                result = $.ajax({url: "/spectrum/view?indexId=" + indexId + "&expId=" + expId, async: false})
+            }
             var datas = result.responseJSON.model;
             var data_mz = datas.mz;
             var data_intensity = datas.intensity;

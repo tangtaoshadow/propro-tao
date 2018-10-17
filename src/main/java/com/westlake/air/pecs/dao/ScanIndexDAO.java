@@ -5,8 +5,11 @@ import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,7 +32,7 @@ public class ScanIndexDAO {
         return mongoTemplate.count(buildQueryWithoutPage(query), ScanIndexDO.class);
     }
 
-    public List<ScanIndexDO> getAllByExperimentId(String experimentId){
+    public List<ScanIndexDO> getAllByExperimentId(String experimentId) {
         Query query = new Query(where("experimentId").is(experimentId));
         return mongoTemplate.find(query, ScanIndexDO.class, CollectionName);
     }
@@ -73,9 +76,23 @@ public class ScanIndexDAO {
         return scanIndexDO;
     }
 
+    public void updateAirusLoc(List<ScanIndexDO> scanIndexList) {
+        BulkOperations ops = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, CollectionName);
+        for (ScanIndexDO scanIndexDO : scanIndexList) {
+            Update update = new Update();
+            update.set("start2", scanIndexDO.getStart2());
+            update.set("end2", scanIndexDO.getEnd2());
+            Query query = new Query(Criteria.where("id").is(scanIndexDO.getId()));
+            ops.updateOne(query, update);
+
+        }
+
+        ops.execute();
+    }
+
     public void delete(String id) {
         Query query = new Query(where("id").is(id));
-        mongoTemplate.remove(query,ScanIndexDO.class, CollectionName);
+        mongoTemplate.remove(query, ScanIndexDO.class, CollectionName);
     }
 
     public void deleteAllByExperimentId(String experimentId) {
