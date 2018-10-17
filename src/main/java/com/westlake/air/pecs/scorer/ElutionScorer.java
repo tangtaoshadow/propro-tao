@@ -82,9 +82,12 @@ public class ElutionScorer {
             avgScore += fScore;
         }
         avgScore /= experimentFeatures.size();
-        scores.setVarElutionModelFitScore(avgScore);
+        if (Double.isNaN(avgScore)) {
+            scores.setVarElutionModelFitScore(-1);
+        } else {
+            scores.setVarElutionModelFitScore(avgScore);
+        }
     }
-
     /**
      * prepareFit_
      *

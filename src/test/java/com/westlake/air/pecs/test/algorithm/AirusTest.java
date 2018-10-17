@@ -34,7 +34,7 @@ public class AirusTest extends BaseTest {
 
     @Test
     public void scoreFromFileWork() {
-        ScoreData scoreData = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResult.csv").getPath()), ScoreTsvParser.SPLIT_CHANGE_LINE);
+        ScoreData scoreData = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResult.csv").getPath()), ScoreTsvParser.SPLIT_TAB);
         FinalResult finalResult = airus.doAirus(scoreData);
 
         int count = AirusUtils.checkFdr(finalResult);
@@ -58,7 +58,7 @@ public class AirusTest extends BaseTest {
 
     @Test
     public void isWeightsSimilar(){
-        ScoreData scoreDataFromFile = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResult.csv").getPath()), ScoreTsvParser.SPLIT_CHANGE_LINE);
+        ScoreData scoreDataFromFile = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("SGSScoreResult.csv").getPath()), ScoreTsvParser.SPLIT_TAB);
         FinalResult finalResultForFile = airus.doAirus(scoreDataFromFile);
 
         HashMap<String, ScoresDO> scoreMap = scoresService.getAllMapByOverviewId("5bbe11e2fc6f9e2e9057bd40");
@@ -118,7 +118,8 @@ public class AirusTest extends BaseTest {
 
     @Test
     public void airusTest() {
-        ScoreData scoreData = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("scores_data.tsv").getPath()), ScoreTsvParser.SPLIT_CHANGE_LINE);
+        ScoreData scoreData = scoreTsvParser.getScoreData(new File("E:\\SGS\\napedro_L120224_010_Water\\test_correspondence.tsv"), ScoreTsvParser.SPLIT_TAB);
+//        ScoreData scoreData = scoreTsvParser.getScoreData(new File(this.getClass().getClassLoader().getResource("scores_data.tsv").getPath()), ScoreTsvParser.SPLIT_TAB);
         if (scoreData != null) {
             FinalResult finalResult = airus.doAirus(scoreData);
             System.out.println(JSON.toJSONString(finalResult));

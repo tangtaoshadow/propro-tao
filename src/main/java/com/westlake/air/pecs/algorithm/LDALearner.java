@@ -61,6 +61,14 @@ public class LDALearner {
         }
         Double[] mu0 = ArrayUtils.getRowMean(x0);
         Double[] mu1 = ArrayUtils.getRowMean(x1);
+        double[] column6 = new double[x0.length];
+        double sum = 0d;
+        for(int i=0; i<x0.length; i++){
+            column6[i] = x0[i][6];
+            if(i<110){
+                sum += x0[i][6];
+            }
+        }
         double[][] xLine0 = new double[x0.length][x[0].length];
         double[][] xLine1 = new double[x1.length][x[0].length];
         for(int i=0;i<x0.length;i++) {
@@ -90,6 +98,7 @@ public class LDALearner {
             if(std[j] == 0) std[j] =1;
         }
         double fac = 1.0/(x.length -2);
+        float facF = 1.0f/(x.length - 2);
 
         // 2) Within variance scaling
         double sqrtFac = Math.sqrt(fac);

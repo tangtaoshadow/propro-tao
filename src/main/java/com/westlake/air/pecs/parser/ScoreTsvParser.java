@@ -21,7 +21,7 @@ public class ScoreTsvParser {
     public final Logger logger = LoggerFactory.getLogger(ScoreTsvParser.class);
 
     public static String SPLIT_COMMA = ",";
-    public static String SPLIT_CHANGE_LINE = "\t";
+    public static String SPLIT_TAB = "\t";
     /**
      * Read Scores data from tsv file
      * @param file
