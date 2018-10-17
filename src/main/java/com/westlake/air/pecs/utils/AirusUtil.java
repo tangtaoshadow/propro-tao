@@ -51,7 +51,7 @@ public class AirusUtil {
             for (int i = 0; i < groupNumId.length; i++) {
 
                 if (groupNumId[i] != null && groupNumId[i] == id) {
-                    if (array[i] > b) {
+                    if (array[i] >= b) {
                         b = array[i];
                         tempIndex = i;
                         //index[i]=1;

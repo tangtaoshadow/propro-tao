@@ -83,6 +83,8 @@ public class ScoresServiceImpl implements ScoresService {
     LibraryScorer libraryScorer;
     @Autowired
     SwathLDAScorer swathLDAScorer;
+    @Autowired
+    ScoreFileTest scoreFileTest;
 
     @Override
     public Long count(ScoresQuery query) {
@@ -357,7 +359,7 @@ public class ScoresServiceImpl implements ScoresService {
 
                 //TODO @Nico charge from transition?
 //                diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
-//                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
+                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
                 libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, featureScores);
                 libraryScorer.calculateNormRtScore(experimentFeatureList, input.getSlopeIntercept(), group.getRt(), featureScores);
@@ -380,6 +382,7 @@ public class ScoresServiceImpl implements ScoresService {
                 logger.info(count+"个Group已经打分完毕,总共有"+groups.size()+"个Group");
             }
         }
+//        scoreFileTest.ConsistencyTest(pecsScoreList);
         scoresDAO.insert(pecsScoreList);
         logger.info("打分插入完毕");
         return pecsScoreList;

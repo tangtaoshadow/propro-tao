@@ -38,6 +38,7 @@ public class FeatureScores {
      * scores.weighted_massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比按libraryIntensity加权之和
      */
     public static final int SCORES_COUNT = ScoreType.values().length;
+//    public static final int SCORES_COUNT = 17;
 
     double rt;
 
@@ -206,18 +207,18 @@ public class FeatureScores {
     }
 
     public enum ScoreType {
-//                MainVarXxSwathPrelimScore("mainVarXxSwathPrelimScore"),
-//        VarBseriesScore("varBseriesScore"),
-//        VarElutionModelFitScore("varElutionModelFitScore"),
-
+                MainVarXxSwathPrelimScore("mainVarXxSwathPrelimScore"),
+//                VarBseriesScore("varBseriesScore"),
+                VarElutionModelFitScore("varElutionModelFitScore"),
+//        VarXcorrShape("varXcorrShape"),
         VarIntensityScore("varIntensityScore"),
-        //        VarIsotopeCorrelationScore("varIsotopeCorrelationScore"),
-//        VarIsotopeOverlapScore("varIsotopeOverlapScore"),
+//                VarIsotopeCorrelationScore("varIsotopeCorrelationScore"),
+//                VarIsotopeOverlapScore("varIsotopeOverlapScore"),
         VarLibraryCorr("varLibraryCorr"),
         VarLibraryRsmd("varLibraryRsmd"),
         VarLogSnScore("varLogSnScore"),
-//        VarMassdevScore("varMassdevScore"),
-//        VarMassdevScoreWeighted("varMassdevScoreWeighted"),
+//                VarMassdevScore("varMassdevScore"),
+//                VarMassdevScoreWeighted("varMassdevScoreWeighted"),
         VarNormRtScore("varNormRtScore"),
         VarXcorrCoelution("varXcorrCoelution"),
         VarXcorrCoelutionWeighted("varXcorrCoelutionWeighted"),
@@ -228,8 +229,8 @@ public class FeatureScores {
         VarLibraryManhattan("varLibraryManhattan"),
         VarLibrarySangle("varLibrarySangle"),
         VarLibraryRootmeansquare("varLibraryRootmeansquare"),
-//        VarManhattScore("varManhattScore"),
-//        VarYseriesScore("varYseriesScore"),
+//          VarManhattScore("varManhattScore"),
+//                VarYseriesScore("varYseriesScore"),
 
 ;
         String scoreType;
