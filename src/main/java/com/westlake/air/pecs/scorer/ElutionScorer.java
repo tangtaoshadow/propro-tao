@@ -74,6 +74,7 @@ public class ElutionScorer {
                 xInitOptimized = xInit;
             }
             EmgModelParams emgModelParams = new EmgModelParams();
+
             emgModelParams = getEmgParams(preparedHullPoints, xInitOptimized, emgModelParams);
             double[] dataArray = getEmgSample(emgModelParams);
 
@@ -83,6 +84,9 @@ public class ElutionScorer {
             }
 
             double fScore = pearsonCorrelationCoefficient(intArray, modelData);
+            if(Double.isNaN(fScore)){
+                System.out.printf("sss");
+            }
             avgScore += fScore;
         }
         avgScore /= experimentFeatures.size();
@@ -173,7 +177,16 @@ public class ElutionScorer {
         for (int i = 0; position < max; i++) {
             position = min + i * step;
             tmp = position - retention;
-            data[i] = part1 * sqrt2Pi * Math.exp(part2 - (tmp / symmetry)) / (1 + Math.exp(termSq2 * ((tmp / width) - part3)));
+            double under = 1 + Math.exp(termSq2 * ((tmp / width) - part3));
+            double upper = part1 * sqrt2Pi * Math.exp(part2 - (tmp / symmetry));
+            if(Double.isInfinite(under)){
+                data[i] = 0;
+            }else {
+                data[i] = upper / under;
+            }
+            if(Double.isNaN(data[i])){
+                System.out.println("NaN");
+            }
         }
         return data;
     }
