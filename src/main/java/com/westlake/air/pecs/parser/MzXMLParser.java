@@ -7,7 +7,6 @@ import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.TaskService;
-import com.westlake.air.pecs.utils.CompressUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -15,29 +14,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.util.*;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
 
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-07-19 16:50
  */
 @Component
-public class MzXMLParser {
+public class MzXMLParser extends BaseParser{
 
     public final Logger logger = LoggerFactory.getLogger(MzXMLParser.class);
 
     protected static int TAIL_TRY = 30;
-    protected static int PRECISION_32 = 32;
-    protected static int PRECISION_64 = 64;
 
     @Autowired
     TaskService taskService;
@@ -108,23 +100,15 @@ public class MzXMLParser {
     }
 
     public MzIntensityPairs parseValue(RandomAccessFile raf, long start, long end, String compressionType, String precision) {
-        try {
-            raf.seek(start);
-            byte[] reader = new byte[(int) (end - start)];
-            raf.read(reader);
-            String tmp = new String(reader);
-            String[] content = tmp.substring(tmp.indexOf("<peaks"), tmp.indexOf("</peaks>")).split(">");
-            String value = content[1];
-            MzIntensityPairs pairs = getPeakMap(new Base64().decode(value), Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType));
-            return pairs;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
+         String value = parseValue(raf, start, end);
+         if(value == null){
+             return null;
+         }
+         MzIntensityPairs pairs = getPeakMap(new Base64().decode(value), Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType));
+         return pairs;
     }
 
-    public String getPeakValue(RandomAccessFile raf, long start, long end){
+    public String parseValue(RandomAccessFile raf, long start, long end) {
         try {
             raf.seek(start);
             byte[] reader = new byte[(int) (end - start)];
@@ -193,32 +177,6 @@ public class MzXMLParser {
             Float mz = values[peakIndex];
             Float intensity = values[peakIndex + 1];
             map.put(mz, intensity);
-        }
-
-        Float[] mzArray = new Float[map.size()];
-        Float[] intensityArray = new Float[map.size()];
-        int i = 0;
-        for (Float key : map.keySet()) {
-            mzArray[i] = key;
-            intensityArray[i] = map.get(key);
-            i++;
-        }
-
-        pairs.setMzArray(mzArray);
-        pairs.setIntensityArray(intensityArray);
-        return pairs;
-    }
-
-    public MzIntensityPairs getPeakMapWithoutZeroIntensity(byte[] value, int precision, boolean isZlibCompression) {
-        MzIntensityPairs pairs = new MzIntensityPairs();
-        Float[] values = getValues(value, precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
-        TreeMap<Float, Float> map = new TreeMap<>();
-        for (int peakIndex = 0; peakIndex < values.length - 1; peakIndex += 2) {
-            Float mz = values[peakIndex];
-            Float intensity = values[peakIndex + 1];
-//            if(intensity != 0f){
-//                map.put(mz, intensity);
-//            }
         }
 
         Float[] mzArray = new Float[map.size()];
@@ -476,36 +434,6 @@ public class MzXMLParser {
         raf.read(tmp);
 
         return tmp;
-    }
-
-    public Float[] getValues(byte[] value, int precision, boolean isCompression, ByteOrder byteOrder) {
-        double[] doubleValues;
-        Float[] floatValues;
-        ByteBuffer byteBuffer = ByteBuffer.wrap(value);
-
-        if (isCompression) {
-            byteBuffer = ByteBuffer.wrap(CompressUtil.decompress(byteBuffer.array()));
-        }
-
-        byteBuffer.order(byteOrder);
-        if (precision == PRECISION_64) {
-            doubleValues = new double[byteBuffer.asDoubleBuffer().capacity()];
-            byteBuffer.asDoubleBuffer().get(doubleValues);
-            floatValues = new Float[doubleValues.length];
-            for (int index = 0; index < doubleValues.length; index++) {
-                floatValues[index] = (float) doubleValues[index];
-            }
-        } else {
-            FloatBuffer floats = byteBuffer.asFloatBuffer();
-            floatValues = new Float[floats.capacity()];
-
-            for (int index = 0; index < floats.capacity(); index++) {
-                floatValues[index] = floats.get(index);
-            }
-        }
-
-        byteBuffer.clear();
-        return floatValues;
     }
 
     //解析Scan标签的Attributes

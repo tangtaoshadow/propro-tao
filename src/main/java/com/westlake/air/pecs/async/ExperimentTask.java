@@ -1,10 +1,12 @@
 package com.westlake.air.pecs.async;
 
 import com.westlake.air.pecs.algorithm.Airus;
+import com.westlake.air.pecs.compressor.Compressor;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
+import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
@@ -32,17 +34,21 @@ public class ExperimentTask extends BaseTask {
     ScoresService scoresService;
     @Autowired
     Airus airus;
+    @Autowired
+    Compressor compressor;
 
     @Async
     public void saveExperimentTask(ExperimentDO experimentDO, File file, TaskDO taskDO) {
         experimentService.uploadFile(experimentDO, file, taskDO);
+        List<WindowRang> rangs = experimentService.getWindows(experimentDO.getId());
+        experimentDO.setWindowRangs(rangs);
+        experimentService.update(experimentDO);
     }
 
     @Async
     public void compressionAndSort(ExperimentDO experimentDO, TaskDO taskDO) {
         long start = System.currentTimeMillis();
-
-
+        compressor.doCompress(experimentDO);
         taskDO.addLog("转还完毕,总耗时:"+(System.currentTimeMillis() - start));
         taskDO.finish(TaskDO.STATUS_SUCCESS);
         taskService.update(taskDO);

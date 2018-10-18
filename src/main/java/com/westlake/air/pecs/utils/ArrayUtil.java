@@ -357,6 +357,21 @@ public class ArrayUtil {
         }
         return result;
     }
+
+    public static Integer[] indexBeforeSort(Float[] array) {
+        IndexValue<Float> indexValue = new IndexValue<>(array[0],0);
+        List<IndexValue<Float>> indexValues = indexValue.buildList(array);
+        Collections.sort(indexValues);
+
+        int n = array.length;
+        Integer[] result = new Integer[n];
+
+        for (int i = 0; i < n; i++) {
+            result[i] = indexValues.get(i).getIndex();
+        }
+        return result;
+    }
+
     public static Integer[] indexBeforeSort(String[] array) {
         IndexValue<String> indexValue = new IndexValue<>(array[0],0);
         List<IndexValue<String>> indexValues = indexValue.buildList(array);

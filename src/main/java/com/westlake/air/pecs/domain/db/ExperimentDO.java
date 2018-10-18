@@ -1,11 +1,13 @@
 package com.westlake.air.pecs.domain.db;
 
 import com.westlake.air.pecs.domain.BaseDO;
+import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -26,6 +28,13 @@ public class ExperimentDO extends BaseDO {
     //必填
     String fileLocation;
 
+    //转换压缩后的aidata的文件名称
+    String airdPath;
+
+    String airiPath;
+
+    Boolean hasAirusFile;
+
     String description;
 
     String creator = "Admin";
@@ -44,5 +53,7 @@ public class ExperimentDO extends BaseDO {
     String compressionType;
 
     String precision;
+
+    List<WindowRang> windowRangs;
 
 }
