@@ -59,8 +59,11 @@ public class ExperimentDO extends BaseDO {
     List<WindowRang> windowRangs;
 
     /**
-     * 仅针对Aird文件有效
+     * Only Used on Aird Format File
+     * the swath window location(start and and) for new format file,
+     * the key is mzStart.
+     * the value is the SimpleScanIndex, but you should only focus on the SimpleScanIndex.start and SimpleScanIndex.end properties.Other properties are not used
      */
-    HashMap<WindowRang, SimpleScanIndex> swathLocMap = new HashMap<>();
+    String swathLocMapJson;
 
 }

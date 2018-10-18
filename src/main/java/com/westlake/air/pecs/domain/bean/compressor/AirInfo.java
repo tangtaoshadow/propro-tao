@@ -28,8 +28,8 @@ public class AirInfo {
 
     /**
      * the swath window location(start and and) for new format file,
-     * the key is the window rang which you can just focus on mzStart and mzEnd.
+     * the key is mzStart.
      * the value is the SimpleScanIndex, but you should only focus on the SimpleScanIndex.start and SimpleScanIndex.end properties.Other properties are not used
      */
-    HashMap<WindowRang, SimpleScanIndex> mzRangScansMap = new HashMap<>();
+    HashMap<Float, SimpleScanIndex> swathLocMap = new HashMap<>();
 }
