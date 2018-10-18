@@ -46,7 +46,14 @@ public class ScanIndexQuery extends PageQuery {
         this.msLevel = msLevel;
     }
 
-    public ScanIndexQuery(int pageNo,int pageSize){
+    public ScanIndexQuery(String experimentId, Integer msLevel, Float precursorMzStart, Float precursorMzEnd) {
+        this.experimentId = experimentId;
+        this.msLevel = msLevel;
+        this.precursorMzStart = precursorMzStart;
+        this.precursorMzEnd = precursorMzEnd;
+    }
+
+    public ScanIndexQuery(int pageNo, int pageSize) {
         super(pageNo, pageSize);
     }
 }

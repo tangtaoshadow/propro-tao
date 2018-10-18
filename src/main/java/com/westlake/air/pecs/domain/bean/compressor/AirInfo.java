@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Data
-public class DataInfo {
+public class AirInfo {
 
     String compressionType = "zlib";
     String byteOrder = "network";

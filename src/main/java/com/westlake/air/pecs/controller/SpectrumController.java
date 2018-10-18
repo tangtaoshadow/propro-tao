@@ -174,7 +174,6 @@ public class SpectrumController extends BaseController {
 
         File file = new File(experimentDO.getFileLocation());
 
-
         try {
             RandomAccessFile raf = new RandomAccessFile(file, "r");
             pairs = mzXMLParser.parseValue(raf, scanIndexDO.getStart(), scanIndexDO.getEnd(), experimentDO.getCompressionType(), experimentDO.getPrecision());

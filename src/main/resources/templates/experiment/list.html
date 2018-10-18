@@ -47,15 +47,21 @@
                         文件位置
                     </th>
                     <th width="5%">
+                        Aird压缩
+                    </th>
+                    <th width="5%">
                         压缩类型
                     </th>
                     <th width="5%">
                         数值精度
                     </th>
-                    <th width="15%">
+                    <th width="10%">
+                        iRT结果
+                    </th>
+                    <th width="10%">
                         创建时间
                     </th>
-                    <th width="15%">
+                    <th width="10%">
                         最后修改时间
                     </th>
                     <th width="30%">
@@ -67,8 +73,19 @@
                 <tr th:each="experiment:${experiments}">
                     <td th:text="${experiment.name}"></td>
                     <td th:text="${experiment.fileLocation}"></td>
+                    <td th:if="!${experiment.hasAirusFile}">
+                        <span class="m-badge m-badge--danger m-badge--wide">
+                            未压缩
+                        </span>
+                    </td>
+                    <td th:if="${experiment.hasAirusFile}">
+                       <span class="m-badge m-badge--success m-badge--wide">
+                           已压缩
+                       </span>
+                    </td>
                     <td th:text="${experiment.compressionType}"></td>
                     <td th:text="${experiment.precision}"></td>
+                    <td th:text="|${experiment.slope} -> ${experiment.intercept}|"></td>
                     <td th:text="${#dates.format(experiment.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(experiment.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>

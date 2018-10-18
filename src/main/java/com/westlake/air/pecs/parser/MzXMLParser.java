@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.parser;
 
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
@@ -7,6 +8,7 @@ import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.TaskService;
+import com.westlake.air.pecs.utils.CompressUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -122,6 +124,30 @@ public class MzXMLParser extends BaseParser{
         }
 
         return null;
+    }
+
+    public String parseValueForAird(RandomAccessFile raf, ScanIndexDO index, int precision, boolean isZlibCompression){
+        String value = parseValue(raf, index.getStart(), index.getEnd());
+        Float[] values = getValues(new Base64().decode(value), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
+
+        TreeMap<Float, Float> map = new TreeMap<>();
+        for (int i = 0; i < values.length - 1; i += 2) {
+            if (values[i + 1] == 0f) {
+                continue;
+            }
+            map.put(values[i], values[i + 1]);
+        }
+
+        int i = 0;
+        float[] mzArray = new float[map.keySet().size()];
+        float[] intensityArray = new float[map.keySet().size()];
+        for (Float key : map.keySet()) {
+            mzArray[i] = key;
+            intensityArray[i] = map.get(key);
+            i++;
+        }
+        String indexesStr = CompressUtil.transToString(mzArray) + Constants.CHANGE_LINE + CompressUtil.transToString(intensityArray) + Constants.CHANGE_LINE;
+        return indexesStr;
     }
 
     /**
