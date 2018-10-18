@@ -2,11 +2,9 @@ package com.westlake.air.pecs.domain.bean.compressor;
 
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
-import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;
 import lombok.Data;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @Data
@@ -27,9 +25,7 @@ public class AirInfo {
     List<ScanIndexDO> scanIndex = new ArrayList<>();
 
     /**
-     * the swath window location(start and and) for new format file,
-     * the key is mzStart.
-     * the value is the SimpleScanIndex, but you should only focus on the SimpleScanIndex.start and SimpleScanIndex.end properties.Other properties are not used
+     * the swath window location(start and and) for new format file
      */
-    HashMap<Float, SimpleScanIndex> swathLocMap = new HashMap<>();
+    List<ScanIndexDO> swathIndexes = new ArrayList<>();
 }

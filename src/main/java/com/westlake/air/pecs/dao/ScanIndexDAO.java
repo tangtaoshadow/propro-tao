@@ -104,7 +104,7 @@ public class ScanIndexDAO {
         Query query = buildQueryWithoutPage(scanIndexQuery);
         query.skip((scanIndexQuery.getPageNo() - 1) * scanIndexQuery.getPageSize());
         query.limit(scanIndexQuery.getPageSize());
-        query.with(new Sort(scanIndexQuery.getOrderBy(), scanIndexQuery.getSortColumn()));
+//        query.with(new Sort(scanIndexQuery.getOrderBy(), scanIndexQuery.getSortColumn()));
         return query;
     }
 

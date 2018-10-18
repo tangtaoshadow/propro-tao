@@ -2,13 +2,11 @@ package com.westlake.air.pecs.domain.db;
 
 import com.westlake.air.pecs.domain.BaseDO;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
-import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -57,13 +55,5 @@ public class ExperimentDO extends BaseDO {
     String precision;
 
     List<WindowRang> windowRangs;
-
-    /**
-     * Only Used on Aird Format File
-     * the swath window location(start and and) for new format file,
-     * the key is mzStart.
-     * the value is the SimpleScanIndex, but you should only focus on the SimpleScanIndex.start and SimpleScanIndex.end properties.Other properties are not used
-     */
-    String swathLocMapJson;
 
 }

@@ -7,6 +7,8 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.awt.datatransfer.FlavorListener;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -19,12 +21,16 @@ public class ScanIndexDO extends BaseDO {
     @Id
     String id;
 
+    /**
+     * 0 代表Swath Block Index
+     */
     @Indexed
     Integer msLevel;
 
     @Indexed
     Float rt;
 
+    @Indexed
     String experimentId;
 
     //在MzXML源文件中的起始位置
@@ -38,6 +44,9 @@ public class ScanIndexDO extends BaseDO {
 
     //在AirusData源文件中的结束位置
     Long end2;
+
+    //在AirusData中使用,一个Swath块中所有MS2的rt时间列表
+    List<Float> rts = new ArrayList<>();
 
     Integer num;
 

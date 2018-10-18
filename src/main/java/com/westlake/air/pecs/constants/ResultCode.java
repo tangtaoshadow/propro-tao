@@ -56,7 +56,8 @@ public enum ResultCode implements Serializable {
     FILE_NOT_EXISTED("FILE_NOT_EXISTED","文件不存在"),
     FILE_NOT_SET("FILE_NOT_SET","文件未设定"),
     LIBRARY_NOT_EXISTED("LIBRARY_NOT_EXISTED","指定的库不存在"),
-
+    EXPERIMENT_MZXML_FILE_MUST_BE_CONVERTED_TO_AIRD_FORMAT_FILE_FIRST("EXPERIMENT_MZXML_FILE_MUST_BE_CONVERTED_TO_AIRD_FORMAT_FILE_FIRST","原始实验文件必须转换为Aird格式文件才可以进入下一步"),
+    SWATH_INFORMATION_NOT_EXISTED("SWATH_INFORMATION_NOT_EXISTED","Swath的分块信息不存在,请确保Aird压缩过程正确"),
     /**
      * ******
      * ScanIndex

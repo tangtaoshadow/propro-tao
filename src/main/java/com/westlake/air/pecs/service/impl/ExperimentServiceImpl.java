@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
@@ -28,10 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Created by James Lu MiaoShan
@@ -334,13 +332,16 @@ public class ExperimentServiceImpl implements ExperimentService {
         File file = (File) checkResult.getModel();
         RandomAccessFile raf = null;
 
-        List<WindowRang> rangs = getWindows(exp.getId());
+        List<WindowRang> rangs = exp.getWindowRangs();
+//        String swathLocJson = exp.getSwathLocMapJson();
+//        HashMap<Float, SimpleScanIndex> swathLocMap = JSON.parseObject(swathLocJson, HashMap.class);
         List<AnalyseDataDO> finalList = new ArrayList<>();
         try {
             raf = new RandomAccessFile(file, "r");
             for (WindowRang rang : rangs) {
 
                 List<TargetTransition> coordinates;
+                //key为rt
                 TreeMap<Float, MzIntensityPairs> rtMap;
                 //Step2.获取标准库的目标肽段片段的坐标
                 coordinates = transitionService.buildMS2Coordinates(iRtLibraryId, SlopeIntercept.create(), -1, rang.getMzStart(), rang.getMzEnd());
