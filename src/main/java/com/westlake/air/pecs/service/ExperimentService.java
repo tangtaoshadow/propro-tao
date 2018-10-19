@@ -48,19 +48,12 @@ public interface ExperimentService {
     void uploadFile(ExperimentDO experimentDO, File file, TaskDO taskDO);
 
     /**
-     * 卷积但是不返回卷积结果
-     * @param swathInput
-     * @return
-     */
-    ResultDO extract(SwathInput swathInput);
-
-    /**
-     * 优化入参数目,卷积完毕后所有卷积结果加在到内存中并且返回
+     * 卷积完毕后所有卷积结果加在到内存中并且返回
      * 目前先只支持MS2的卷积
      * @param swathInput
      * @return
      */
-    ResultDO<List<AnalyseDataDO>> extractWithList(SwathInput swathInput);
+    ResultDO<List<AnalyseDataDO>> extract(SwathInput swathInput);
 
     /**
      * 卷积iRT校准库的数据

@@ -81,9 +81,10 @@ public class Compressor {
             }
             outputIndexList.addAll(ms1IndexList);
             logger.info("压缩MS1完毕,开始提取并且压缩MS2");
-            ScanIndexDO swathIndex = new ScanIndexDO();
+
             //再写入所有的MS2
             for (WindowRang rang : windowRangs) {
+                ScanIndexDO swathIndex = new ScanIndexDO();
                 swathIndex.setStart2(start);
                 swathIndex.setExperimentId(experimentDO.getId());
                 swathIndex.setMsLevel(0);
@@ -130,6 +131,7 @@ public class Compressor {
         experimentService.update(experimentDO);
 
         //新增SwathBlock块的索引
+        scanIndexService.deleteAllSwathIndexByExperimentId(experimentDO.getId());
         scanIndexService.insertAll(swathIndexes, false);
         return new ResultDO(true);
     }

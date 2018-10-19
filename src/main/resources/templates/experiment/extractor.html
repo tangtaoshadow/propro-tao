@@ -111,21 +111,21 @@
                                 <span class="m-form__help"></span>
                             </div>
                         </div>
-                        <div class="form-group m-form__group row">
-                            <label for="buildType" class="col-2 col-form-label">
-                                卷积类型
-                            </label>
-                            <div class="col-10">
-                                <select class="form-control m-input" id="buildType" name="buildType">
-                                    <option th:if="${buildType}==2" th:selected="true" value="2">MS2</option>
-                                    <option th:unless="${buildType}==2" value="2">MS2</option>
-                                    <option th:if="${buildType}==0" th:selected="true" value="0">MS1和MS2</option>
-                                    <option th:unless="${buildType}==0" value="0">MS1和MS2</option>
-                                    <option th:if="${buildType}==1" th:selected="true" value="1">MS1</option>
-                                    <option th:unless="${buildType}==1" value="1">MS1</option>
-                                </select>
-                            </div>
-                        </div>
+                        <!--<div class="form-group m-form__group row">-->
+                            <!--<label for="buildType" class="col-2 col-form-label">-->
+                                <!--卷积类型-->
+                            <!--</label>-->
+                            <!--<div class="col-10">-->
+                                <!--<select class="form-control m-input" id="buildType" name="buildType">-->
+                                    <!--<option th:if="${buildType}==2" th:selected="true" value="2">MS2</option>-->
+                                    <!--<option th:unless="${buildType}==2" value="2">MS2</option>-->
+                                    <!--<option th:if="${buildType}==0" th:selected="true" value="0">MS1和MS2</option>-->
+                                    <!--<option th:unless="${buildType}==0" value="0">MS1和MS2</option>-->
+                                    <!--<option th:if="${buildType}==1" th:selected="true" value="1">MS1</option>-->
+                                    <!--<option th:unless="${buildType}==1" value="1">MS1</option>-->
+                                <!--</select>-->
+                            <!--</div>-->
+                        <!--</div>-->
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">

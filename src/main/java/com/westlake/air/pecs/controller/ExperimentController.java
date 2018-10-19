@@ -299,7 +299,6 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/doextract")
     String doExtract(Model model,
                      @RequestParam(value = "id", required = true) String id,
-                     @RequestParam(value = "buildType", required = true) Integer buildType,
                      @RequestParam(value = "creator", required = false) String creator,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
                      @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "1200") Float rtExtractWindow,
@@ -321,7 +320,7 @@ public class ExperimentController extends BaseController {
             si.setIntercept(intercept);
         }
 
-        experimentTask.extract(resultDO.getModel(), libraryId, si, creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
+        experimentTask.extract(resultDO.getModel(), libraryId, si, creator, rtExtractWindow, mzExtractWindow, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }

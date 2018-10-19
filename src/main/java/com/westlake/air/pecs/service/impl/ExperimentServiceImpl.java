@@ -235,54 +235,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     @Override
-    public ResultDO extract(SwathInput swathInput) {
-        ResultDO resultDO = new ResultDO(true);
-        logger.info("基本条件检查开始");
-        ResultDO checkResult = ConvolutionUtil.checkExperiment(swathInput.getExperimentDO());
-        if (checkResult.isFailed()) {
-            logger.info("条件检查失败:" + checkResult.getMsgInfo());
-            return checkResult;
-        }
-
-        File file = (File) checkResult.getModel();
-        RandomAccessFile raf = null;
-
-        ResultDO<LibraryDO> libRes = libraryService.getById(swathInput.getLibraryId());
-        if (libRes.isFailed()) {
-            return ResultDO.buildError(ResultCode.LIBRARY_NOT_EXISTED);
-        }
-        //创建实验初始化概览数据
-        AnalyseOverviewDO overviewDO = createOverview(swathInput);
-        analyseOverviewDAO.insert(overviewDO);
-
-        try {
-            raf = new RandomAccessFile(file, "r");
-
-            if (swathInput.getBuildType() == 0) {
-                extractMS1(raf, overviewDO.getId(), swathInput);
-                extractMS2(raf, overviewDO.getId(), swathInput);
-            } else if (swathInput.getBuildType() == 1) {
-                extractMS1(raf, overviewDO.getId(), swathInput);
-            } else if (swathInput.getBuildType() == 2) {
-                extractMS2(raf, overviewDO.getId(), swathInput);
-            }
-
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            if (raf != null) {
-                try {
-                    raf.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        }
-
-        return resultDO;
-    }
-
-    @Override
-    public ResultDO<List<AnalyseDataDO>> extractWithList(SwathInput swathInput) {
+    public ResultDO<List<AnalyseDataDO>> extract(SwathInput swathInput) {
         ResultDO<List<AnalyseDataDO>> resultDO = new ResultDO(true);
         logger.info("基本条件检查开始");
         ResultDO checkResult = ConvolutionUtil.checkExperiment(swathInput.getExperimentDO());
@@ -333,9 +286,10 @@ public class ExperimentServiceImpl implements ExperimentService {
         RandomAccessFile raf = null;
 
         List<WindowRang> rangs = exp.getWindowRangs();
-//        String swathLocJson = exp.getSwathLocMapJson();
-//        HashMap<Float, SimpleScanIndex> swathLocMap = JSON.parseObject(swathLocJson, HashMap.class);
         List<AnalyseDataDO> finalList = new ArrayList<>();
+
+        HashMap<Float, ScanIndexDO> swathMap = scanIndexService.getSwathIndexList(exp.getId());
+
         try {
             raf = new RandomAccessFile(file, "r");
             for (WindowRang rang : rangs) {
@@ -343,6 +297,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                 List<TargetTransition> coordinates;
                 //key为rt
                 TreeMap<Float, MzIntensityPairs> rtMap;
+                TreeMap<Float, MzIntensityPairs> rtMap2;
                 //Step2.获取标准库的目标肽段片段的坐标
                 coordinates = transitionService.buildMS2Coordinates(iRtLibraryId, SlopeIntercept.create(), -1, rang.getMzStart(), rang.getMzEnd());
                 if (coordinates.size() == 0) {
@@ -350,12 +305,10 @@ public class ExperimentServiceImpl implements ExperimentService {
                     continue;
                 }
                 //Step3.获取指定索引列表
-                ScanIndexQuery query = new ScanIndexQuery(exp.getId(), 2);
-                query.setPrecursorMzStart(rang.getMzStart());
-                query.setPrecursorMzEnd(rang.getMzEnd());
-                List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
+//                List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(new ScanIndexQuery(exp.getId(), 2, rang.getMzStart(), rang.getMzEnd()));
                 //Step4.提取指定原始谱图
-                rtMap = parseSpectrum(raf, indexes, exp);
+                rtMap = parseSpectrum(raf, swathMap.get(rang.getMzStart()), exp);
+
                 //Step5.卷积并且存储数据
                 convolute(finalList, coordinates, rtMap, null, mzExtractWindow, -1f, false);
             }
@@ -392,6 +345,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         }
     }
 
+    @Deprecated
     private void extractMS1(RandomAccessFile raf, String overviewId, SwathInput swathInput) {
 
         //Step1.获取标准库目标卷积片段
@@ -407,19 +361,20 @@ public class ExperimentServiceImpl implements ExperimentService {
         convoluteAndInsert(coordinates, rtMap, overviewId, swathInput.getRtExtractWindow(), swathInput.getMzExtractWindow(), true);
     }
 
+    @Deprecated
     private void extractMS2(RandomAccessFile raf, String overviewId, SwathInput swathInput) {
 
         //Step1.获取窗口信息.
         logger.info("获取Swath窗口信息");
-        List<WindowRang> rangs = getWindows(swathInput.getExperimentDO().getId());
-
+        List<WindowRang> rangs = swathInput.getExperimentDO().getWindowRangs();
+        HashMap<Float, ScanIndexDO> swathMap = scanIndexService.getSwathIndexList(swathInput.getExperimentDO().getId());
         //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
         logger.info("总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
         int count = 1;
         try {
             for (WindowRang rang : rangs) {
                 long start = System.currentTimeMillis();
-                processConv(raf, swathInput, rang, overviewId);
+                processConv(raf, swathInput,swathMap.get(rang.getMzStart()), rang, overviewId);
                 logger.info("第" + count + "轮数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
                 count++;
             }
@@ -446,7 +401,9 @@ public class ExperimentServiceImpl implements ExperimentService {
 
         //Step1.获取窗口信息.
         logger.info("获取Swath窗口信息");
-        List<WindowRang> rangs = getWindows(swathInput.getExperimentDO().getId());
+        List<WindowRang> rangs = swathInput.getExperimentDO().getWindowRangs();
+        HashMap<Float, ScanIndexDO> swathMap = scanIndexService.getSwathIndexList(swathInput.getExperimentDO().getId());
+
         List<AnalyseDataDO> totalList = new ArrayList<>();
         //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
         logger.info("总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
@@ -454,8 +411,8 @@ public class ExperimentServiceImpl implements ExperimentService {
         try {
             for (WindowRang rang : rangs) {
                 long start = System.currentTimeMillis();
-                List<AnalyseDataDO> dataList = processConv(raf, swathInput, rang, overviewId);
-                if(dataList == null){
+                List<AnalyseDataDO> dataList = processConv(raf, swathInput,swathMap.get(rang.getMzStart()), rang, overviewId);
+                if (dataList == null) {
                     continue;
                 }
                 totalList.addAll(dataList);
@@ -476,7 +433,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         return totalList;
     }
 
-    private List<AnalyseDataDO> processConv(RandomAccessFile raf, SwathInput swathInput, WindowRang rang, String overviewId){
+    private List<AnalyseDataDO> processConv(RandomAccessFile raf, SwathInput swathInput,ScanIndexDO swathIndex, WindowRang rang, String overviewId) {
         List<TargetTransition> coordinates;
         TreeMap<Float, MzIntensityPairs> rtMap;
         //Step2.获取标准库的目标肽段片段的坐标
@@ -486,12 +443,12 @@ public class ExperimentServiceImpl implements ExperimentService {
             return null;
         }
         //Step3.获取指定索引列表
-        ScanIndexQuery query = new ScanIndexQuery(swathInput.getExperimentDO().getId(), 2);
-        query.setPrecursorMzStart(rang.getMzStart());
-        query.setPrecursorMzEnd(rang.getMzEnd());
-        List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
+//        ScanIndexQuery query = new ScanIndexQuery(swathInput.getExperimentDO().getId(), 2);
+//        query.setPrecursorMzStart(rang.getMzStart());
+//        query.setPrecursorMzEnd(rang.getMzEnd());
+//        List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
         //Step4.提取指定原始谱图
-        rtMap = parseSpectrum(raf, indexes, swathInput.getExperimentDO());
+        rtMap = parseSpectrum(raf, swathIndex, swathInput.getExperimentDO());
 
         return convoluteAndInsert(coordinates, rtMap, overviewId, swathInput.getRtExtractWindow(), swathInput.getMzExtractWindow(), false);
     }
@@ -506,6 +463,14 @@ public class ExperimentServiceImpl implements ExperimentService {
             rtMap.put(index.getRt(), mzIntensityPairs);
         }
         logger.info("解析" + indexes.size() + "条XML谱图文件总计耗时:" + (System.currentTimeMillis() - start));
+
+        return rtMap;
+    }
+
+    private TreeMap<Float, MzIntensityPairs> parseSpectrum(RandomAccessFile raf, ScanIndexDO swathIndex, ExperimentDO experimentDO) {
+        long start = System.currentTimeMillis();
+        TreeMap<Float, MzIntensityPairs> rtMap = mzXMLParser.parseSwathBlockValues(raf, swathIndex.getStart2(), swathIndex.getEnd2(), swathIndex.getRts(), experimentDO.getCompressionType(), experimentDO.getPrecision());
+        logger.info("解析" + swathIndex.getPrecursorMzStart() + "-" + swathIndex.getPrecursorMzEnd() + "范围谱图文件总计耗时:" + (System.currentTimeMillis() - start));
 
         return rtMap;
     }
