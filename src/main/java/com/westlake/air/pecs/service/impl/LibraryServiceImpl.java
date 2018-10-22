@@ -126,7 +126,7 @@ public class LibraryServiceImpl implements LibraryService {
         try {
             LibraryDO libraryDO = libraryDAO.getById(id);
             if (libraryDO == null) {
-                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
+                return ResultDO.buildError(ResultCode.LIBRARY_NOT_EXISTED);
             } else {
                 return ResultDO.build(libraryDO);
             }
@@ -145,7 +145,7 @@ public class LibraryServiceImpl implements LibraryService {
         try {
             LibraryDO libraryDO = libraryDAO.getByName(name);
             if (libraryDO == null) {
-                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
+                return ResultDO.buildError(ResultCode.LIBRARY_NOT_EXISTED);
             } else {
                 return ResultDO.build(libraryDO);
             }

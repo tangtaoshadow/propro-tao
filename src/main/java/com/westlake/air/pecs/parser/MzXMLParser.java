@@ -104,7 +104,7 @@ public class MzXMLParser extends BaseParser {
     public TreeMap<Float, MzIntensityPairs> parseSwathBlockValues(RandomAccessFile raf, long start, long end, List<Float> rts, String compressionType, String precision) throws Exception {
         TreeMap<Float, MzIntensityPairs> map = new TreeMap<>();
         List<MzIntensityPairs> pairsList = parseValuesFromAird(raf, start, end, Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType));
-        if(rts.size() != pairsList.size()){
+        if (rts.size() != pairsList.size()) {
             logger.error("RTs Length not equals to pairsList length!!!");
             throw new Exception("RTs Length not equals to pairsList length!!!");
         }
@@ -155,7 +155,7 @@ public class MzXMLParser extends BaseParser {
                 }
                 MzIntensityPairs pairs = new MzIntensityPairs();
                 Float[] mzArray = getValues(new Base64().decode(totalValuesArray[i]), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
-                Float[] intensityArray = getValues(new Base64().decode(totalValuesArray[i+1]), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
+                Float[] intensityArray = getValues(new Base64().decode(totalValuesArray[i + 1]), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
                 pairs.setMzArray(mzArray);
                 pairs.setIntensityArray(intensityArray);
                 pairsList.add(pairs);
@@ -177,6 +177,8 @@ public class MzXMLParser extends BaseParser {
             if (values[i + 1] == 0f) {
                 continue;
             }
+//            values[i] = (float) Math.round(values[i] * 1000) / 1000; //mz精确到小数点后面三位
+//            values[i + 1] = (float) Math.round(values[i + 1] * 10) / 10; //intensity精确到小数点后面一位
             map.put(values[i], values[i + 1]);
         }
 

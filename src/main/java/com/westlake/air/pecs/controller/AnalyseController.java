@@ -112,10 +112,11 @@ public class AnalyseController extends BaseController {
             Long realCount = analyseDataService.count(query);
             ResultDO<LibraryDO> resLib = libraryService.getById(resultDO.getModel().getLibraryId());
             if (resLib.isFailed()) {
-                redirectAttributes.addFlashAttribute(ERROR_MSG, resLib.getMsgInfo());
-                return "redirect:/analyse/overview/list";
+                model.addAttribute(ERROR_MSG, resLib.getMsgInfo());
+                model.addAttribute("rate", decoyCount + "/" + realCount);
+            }else{
+                model.addAttribute("rate", decoyCount + "/" + realCount + "/" + resLib.getModel().getTotalTargetCount());
             }
-            model.addAttribute("rate", decoyCount + "/" + realCount + "/" + resLib.getModel().getTotalTargetCount());
 
             model.addAttribute("slopeIntercept", resultDO.getModel().getSlope() + "/" + resultDO.getModel().getIntercept());
             return "/analyse/overview/detail";

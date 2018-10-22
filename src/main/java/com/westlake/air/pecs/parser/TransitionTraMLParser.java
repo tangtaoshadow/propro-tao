@@ -135,7 +135,13 @@ public class TransitionTraMLParser extends BaseTransitionParser{
         transitionDO.setSequence(peptide.getSequence());
         transitionDO.setProteinName(peptide.getProteinRefList().get(0).getRef());
         transitionDO.setFullName(peptide.getUserParams().get(0).getValue());
-        transitionDO.setPeptideRef(transitionDO.getFullName()+"_"+transitionDO.getPrecursorCharge());
+        for(CvParam cvParam : peptide.getCvParams()){
+            if(cvParam.getName().equals("charge state")){
+                transitionDO.setPrecursorCharge(Integer.valueOf(cvParam.getValue()));
+                transitionDO.setPeptideRef(transitionDO.getFullName()+"_"+transitionDO.getPrecursorCharge());
+            }
+        }
+
         // parse annotations
         String annotations = transitionDO.getAnnotations();
         if (annotations.contains("[")) {

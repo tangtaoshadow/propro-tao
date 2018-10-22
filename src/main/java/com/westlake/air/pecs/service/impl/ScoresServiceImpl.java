@@ -112,7 +112,7 @@ public class ScoresServiceImpl implements ScoresService {
     public HashMap<String, ScoresDO> getAllMapByOverviewId(String overviewId) {
         List<ScoresDO> scoresList = scoresDAO.getAllByOverviewId(overviewId);
         HashMap<String, ScoresDO> map = new HashMap<>();
-        for(ScoresDO scoresDO : scoresList){
+        for (ScoresDO scoresDO : scoresList) {
             String key = scoresDO.getIsDecoy() + "_" + scoresDO.getPeptideRef();
             map.put(key, scoresDO);
         }
@@ -217,9 +217,9 @@ public class ScoresServiceImpl implements ScoresService {
         List<List<ScoreRtPair>> scoreRtList = new ArrayList<>();
         List<Double> compoundRt = new ArrayList<>();
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
-        for(TransitionGroup group : groups){
+        for (TransitionGroup group : groups) {
             FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupMap.get(group.getPeptideRef()), sigmaSpacing);
-            if(!featureByPep.isFeatureFound()){
+            if (!featureByPep.isFeatureFound()) {
                 continue;
             }
             double groupRt = group.getRt();
@@ -234,7 +234,7 @@ public class ScoresServiceImpl implements ScoresService {
 //        if(!computeBinnedCoverage( , pairsCorrected, Constants.RT_BINS, Constants.MIN_PEPTIDES_PER_BIN, Constants.MIN_BINS_FILLED)){
 //            System.out.println("There were not enough bins with the minimal number of peptides.");
 //        }
-        if(pairsCorrected == null || pairsCorrected.size() < 2){
+        if (pairsCorrected == null || pairsCorrected.size() < 2) {
             logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
             resultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
             return resultDO;
@@ -258,10 +258,10 @@ public class ScoresServiceImpl implements ScoresService {
         List<List<ScoreRtPair>> scoreRtList = new ArrayList<>();
         List<Double> compoundRt = new ArrayList<>();
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
-        for(TransitionGroup group : groups){
+        for (TransitionGroup group : groups) {
             SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
             FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupMap.get(group.getPeptideRef()), sigmaSpacing);
-            if(!featureByPep.isFeatureFound()){
+            if (!featureByPep.isFeatureFound()) {
                 continue;
             }
             double groupRt = group.getRt();
@@ -273,7 +273,7 @@ public class ScoresServiceImpl implements ScoresService {
         List<RtPair> pairs = simpleFindBestFeature(scoreRtList, compoundRt);
         List<RtPair> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE);
 
-        if(pairsCorrected == null || pairsCorrected.size() < 2){
+        if (pairsCorrected == null || pairsCorrected.size() < 2) {
             logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
             resultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
             return resultDO;
@@ -289,7 +289,7 @@ public class ScoresServiceImpl implements ScoresService {
     @Override
     public List<ScoresDO> score(List<AnalyseDataDO> dataList, SwathInput input) {
 
-        if(dataList == null || dataList.size() == 0){
+        if (dataList == null || dataList.size() == 0) {
             return null;
         }
         input.setOverviewId(dataList.get(0).getOverviewId());//取一个AnalyseDataDO的OverviewId
@@ -305,9 +305,9 @@ public class ScoresServiceImpl implements ScoresService {
         int count = 0;
         for (TransitionGroup group : groups) {
             List<FeatureScores> featureScoresList = new ArrayList<>();
-            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupMap.get(group.getPeptideRef()), input.getSigmaSpacing());
+            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupMap.get(group.getPeptideRef() + "_" + group.getIsDecoy()), input.getSigmaSpacing());
 
-            if(!featureByPep.isFeatureFound()){
+            if (!featureByPep.isFeatureFound()) {
                 continue;
             }
             List<List<ExperimentFeature>> experimentFeatures = featureByPep.getExperimentFeatures();
@@ -315,7 +315,7 @@ public class ScoresServiceImpl implements ScoresService {
             List<Double> libraryIntensityList = featureByPep.getLibraryIntensityList();
             List<double[]> noise1000List = featureByPep.getNoise1000List();
             List<Double> productMzList = new ArrayList<>();
-            for (AnalyseDataDO dataDO : group.getDataMap().values()){// TODO @Nico 精度必要性
+            for (AnalyseDataDO dataDO : group.getDataMap().values()) {// TODO @Nico 精度必要性
                 productMzList.add(Double.parseDouble(Float.toString(dataDO.getMz())));
             }
 
@@ -329,17 +329,17 @@ public class ScoresServiceImpl implements ScoresService {
             List<Float> spectrumIntArray = new ArrayList<>();
 
             List<Integer> productChargeList = new ArrayList<>();
-            for(AnalyseDataDO data : group.getDataMap().values()){
+            for (AnalyseDataDO data : group.getDataMap().values()) {
                 String cutInfo = data.getCutInfo();
-                try{
-                    if(cutInfo.contains("^")){
+                try {
+                    if (cutInfo.contains("^")) {
                         productChargeList.add(Integer.parseInt(cutInfo.split("\\^")[1]));
-                    }else{
+                    } else {
                         productChargeList.add(1);
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
-                    logger.info("cutInfo:"+ cutInfo+";data:"+ JSON.toJSONString(data));
+                    logger.info("cutInfo:" + cutInfo + ";data:" + JSON.toJSONString(data));
                 }
 
             }
@@ -348,7 +348,7 @@ public class ScoresServiceImpl implements ScoresService {
             String sequence = group.getPeptideRef().split("_")[0];
             //for each mrmFeature, calculate scores
 
-            for(List<ExperimentFeature> experimentFeatureList : experimentFeatures) {
+            for (List<ExperimentFeature> experimentFeatureList : experimentFeatures) {
 
                 FeatureScores featureScores = new FeatureScores();
                 chromatographicScorer.calculateChromatographicScores(experimentFeatureList, libraryIntensityList, featureScores);
@@ -378,8 +378,8 @@ public class ScoresServiceImpl implements ScoresService {
             pecsScoreList.add(pecsScore);
 
             count++;
-            if(count % 100 == 0){
-                logger.info(count+"个Group已经打分完毕,总共有"+groups.size()+"个Group");
+            if (count % 100 == 0) {
+                logger.info(count + "个Group已经打分完毕,总共有" + groups.size() + "个Group");
             }
         }
 //        scoreFileTest.ConsistencyTest(pecsScoreList);
@@ -390,26 +390,27 @@ public class ScoresServiceImpl implements ScoresService {
 
     /**
      * get rt pairs for every peptideRef
+     *
      * @param scoresList peptideRef list of List<ScoreRtPair>
-     * @param rt get from groupsResult.getModel()
+     * @param rt         get from groupsResult.getModel()
      * @return rt pairs
      */
-    private List<RtPair> simpleFindBestFeature(List<List<ScoreRtPair>> scoresList, List<Double> rt){
+    private List<RtPair> simpleFindBestFeature(List<List<ScoreRtPair>> scoresList, List<Double> rt) {
 
         List<RtPair> pairs = new ArrayList<>();
 
-        for(int i=0; i<scoresList.size(); i++){
+        for (int i = 0; i < scoresList.size(); i++) {
             List<ScoreRtPair> scores = scoresList.get(i);
             double max = Double.MIN_VALUE;
             RtPair rtPair = new RtPair();
             //find max score's rt
-            for(int j=0; j<scores.size(); j++){
-                if(scores.get(j).getScore() > max){
+            for (int j = 0; j < scores.size(); j++) {
+                if (scores.get(j).getScore() > max) {
                     max = scores.get(j).getScore();
                     rtPair.setExpRt(scores.get(j).getRt());
                 }
             }
-            if(Constants.ESTIMATE_BEST_PEPTIDES && max < Constants.OVERALL_QUALITY_CUTOFF){
+            if (Constants.ESTIMATE_BEST_PEPTIDES && max < Constants.OVERALL_QUALITY_CUTOFF) {
                 continue;
             }
             rtPair.setTheoRt(rt.get(i));
@@ -420,15 +421,16 @@ public class ScoresServiceImpl implements ScoresService {
 
     /**
      * 先进行线性拟合，每次从pairs中选取一个residual最大的点丢弃，获得pairsCorrected
-     * @param pairs RTPairs
-     * @param minRsq goal of iteration
+     *
+     * @param pairs       RTPairs
+     * @param minRsq      goal of iteration
      * @param minCoverage limit of picking
      * @return pairsCorrected
      */
-    private List<RtPair> removeOutlierIterative(List<RtPair> pairs, double minRsq, double minCoverage){
+    private List<RtPair> removeOutlierIterative(List<RtPair> pairs, double minRsq, double minCoverage) {
 
         int pairsSize = pairs.size();
-        if( pairsSize < 3){
+        if (pairsSize < 3) {
             return null;
         }
 
@@ -437,15 +439,15 @@ public class ScoresServiceImpl implements ScoresService {
         double[] coEff;
 
         WeightedObservedPoints obs = new WeightedObservedPoints();
-        while(pairs.size() >= pairsSize * minCoverage && rsq< minRsq) {
+        while (pairs.size() >= pairsSize * minCoverage && rsq < minRsq) {
             obs.clear();
-            for(RtPair rtPair:pairs){
-                obs.add(rtPair.getExpRt(),rtPair.getTheoRt());
+            for (RtPair rtPair : pairs) {
+                obs.add(rtPair.getExpRt(), rtPair.getTheoRt());
             }
             PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
             coEff = fitter.fit(obs.toList());
 
-            rsq =  MathUtil.getRsq(pairs);
+            rsq = MathUtil.getRsq(pairs);
             if (rsq < minRsq) {
                 // calculate residual and get max index
                 double res, max = 0;
@@ -461,59 +463,61 @@ public class ScoresServiceImpl implements ScoresService {
                 pairs.remove(maxIndex);
             }
         }
-        if(rsq < minRsq){
+        if (rsq < minRsq) {
             System.out.println("RTNormalizer: unable to perform outlier detection.");
             return null;
-        }else {
+        } else {
             return pairs;
         }
     }
 
     /**
      * 判断是否对RT空间实现了正常密度的覆盖
-     * @param rtRange getRTRange
-     * @param pairsCorrected remove outlier之后的pairs
-     * @param rtBins 需要分成的bin的数量
+     *
+     * @param rtRange           getRTRange
+     * @param pairsCorrected    remove outlier之后的pairs
+     * @param rtBins            需要分成的bin的数量
      * @param minPeptidesPerBin 每个bin最小分到的数量
-     * @param minBinsFilled 需要满足↑条件的bin的数量
+     * @param minBinsFilled     需要满足↑条件的bin的数量
      * @return boolean 是否覆盖
      */
-    private boolean computeBinnedCoverage(double[] rtRange, List<RtPair> pairsCorrected, int rtBins, int minPeptidesPerBin, int minBinsFilled){
+    private boolean computeBinnedCoverage(double[] rtRange, List<RtPair> pairsCorrected, int rtBins, int minPeptidesPerBin, int minBinsFilled) {
         int[] binCounter = new int[rtBins];
         double rtDistance = rtRange[1] - rtRange[0];
 
         //获得theorRt部分的分布
-        for(RtPair pair: pairsCorrected){
-            double percent = (pair.getTheoRt() - rtRange[0])/rtDistance;
-            int bin = (int)(percent * rtBins);
-            if(bin>=rtBins){
-                bin = rtBins -1;
+        for (RtPair pair : pairsCorrected) {
+            double percent = (pair.getTheoRt() - rtRange[0]) / rtDistance;
+            int bin = (int) (percent * rtBins);
+            if (bin >= rtBins) {
+                bin = rtBins - 1;
             }
-            binCounter[bin] ++;
+            binCounter[bin]++;
         }
 
         //判断分布是否覆盖
         int binFilled = 0;
-        for(int binCount: binCounter){
-            if(binCount >= minPeptidesPerBin) binFilled++;
+        for (int binCount : binCounter) {
+            if (binCount >= minPeptidesPerBin) binFilled++;
         }
         return binFilled >= minBinsFilled;
     }
 
     /**
      * 最小二乘法线性拟合RTPairs
+     *
      * @param rtPairs <exp_rt, theor_rt>
      * @return 斜率和截距
      */
-    private SlopeIntercept fitRTPairs(List<RtPair> rtPairs){
+    private SlopeIntercept fitRTPairs(List<RtPair> rtPairs) {
         WeightedObservedPoints obs = new WeightedObservedPoints();
-        for(RtPair rtPair:rtPairs){
-            obs.add(rtPair.getExpRt(),rtPair.getTheoRt());
+        for (RtPair rtPair : rtPairs) {
+            obs.add(rtPair.getExpRt(), rtPair.getTheoRt());
         }
         PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
         double[] coeff = fitter.fit(obs.toList());
         SlopeIntercept slopeIntercept = new SlopeIntercept();
-        slopeIntercept.setSlope((float)coeff[1]);
+        slopeIntercept.setSlope((float) coeff[1]);
         slopeIntercept.setIntercept((float) coeff[0]);
         return slopeIntercept;
     }

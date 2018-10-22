@@ -87,7 +87,7 @@ public interface TransitionService {
     List<TargetTransition> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd);
 
     /**
-     * 根据LibraryId获取按照PeptideRef进行分组的Intensity Map
+     * 根据LibraryId获取按照PeptideRef+IsDecoy进行分组的Intensity Map
      *
      * @param libraryId
      * @return

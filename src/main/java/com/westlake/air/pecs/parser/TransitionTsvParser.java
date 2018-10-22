@@ -178,6 +178,7 @@ public class TransitionTsvParser extends BaseTransitionParser {
         try{
             transitionDO.setPrecursorCharge(Integer.parseInt(row[columnMap.get(PrecursorCharge)]));
         }catch (Exception e){
+            logger.error("Line插入错误(PrecursorCharge未知):" + line + ";");
             logger.error(e.getMessage());
         }
         transitionDO.setPeptideRef(transitionDO.getFullName() + "_" + transitionDO.getPrecursorCharge());
@@ -189,6 +190,7 @@ public class TransitionTsvParser extends BaseTransitionParser {
             resultDO.setModel(transitionDO);
         } catch (Exception e) {
             resultDO.setSuccess(false);
+            logger.error("Line插入错误(Sequence未知):" + line + ";");
             resultDO.setMsgInfo("Line插入错误(Sequence未知):" + line + ";");
             logger.error(transitionDO.getLibraryId() + ":" + transitionDO.getAnnotation(), e);
             return resultDO;
