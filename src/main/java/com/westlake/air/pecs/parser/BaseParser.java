@@ -40,4 +40,12 @@ public class BaseParser {
         byteBuffer.clear();
         return floatValues;
     }
+
+    public Float[] getValuesFromAird(byte[] value, int precision, boolean isCompression, ByteOrder byteOrder) {
+        Float[] values = getValues(value, precision, isCompression, byteOrder);
+        for (int i = 0; i < value.length; i++) {
+            values[i] = (float)(Math.round(values[i]*1000)/1000);
+        }
+        return values;
+    }
 }

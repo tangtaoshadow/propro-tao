@@ -209,7 +209,7 @@ public class FeatureScores {
     public enum ScoreType {
         MainVarXxSwathPrelimScore("mainVarXxSwathPrelimScore"),
 //      VarBseriesScore("varBseriesScore"),
-//      VarElutionModelFitScore("varElutionModelFitScore"),
+//        VarElutionModelFitScore("varElutionModelFitScore"),
 //      VarXcorrShape("varXcorrShape"),
         VarIntensityScore("varIntensityScore"),
 //      VarIsotopeCorrelationScore("varIsotopeCorrelationScore"),
