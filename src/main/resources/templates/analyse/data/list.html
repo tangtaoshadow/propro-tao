@@ -75,9 +75,10 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
+                    <th width="2%">No.</th>
                     <th width="25%">蛋白名称</th>
                     <th width="20%">肽段全称</th>
-                    <th width="10%">标记</th>
+                    <th width="8%">标记</th>
                     <th width="5%">肽段真伪</th>
                     <th width="5%">切分标记</th>
                     <th width="5%">MS等级</th>
@@ -87,7 +88,8 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="data:${datas}">
+                <tr th:each="data,status:${datas}">
+                    <td th:text="${status.index+1}"></td>
                     <td th:text="${data.proteinName}"></td>
                     <td th:text="${data.peptideRef}"></td>
                     <td th:text="${data.annotations}"></td>

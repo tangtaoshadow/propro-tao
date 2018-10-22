@@ -101,12 +101,12 @@ public class MzXMLParser extends BaseParser {
         return list;
     }
 
-    public TreeMap<Float, MzIntensityPairs> parseSwathBlockValues(RandomAccessFile raf, long start, long end, List<Float> rts, String compressionType, String precision) {
+    public TreeMap<Float, MzIntensityPairs> parseSwathBlockValues(RandomAccessFile raf, long start, long end, List<Float> rts, String compressionType, String precision) throws Exception {
         TreeMap<Float, MzIntensityPairs> map = new TreeMap<>();
         List<MzIntensityPairs> pairsList = parseValuesFromAird(raf, start, end, Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType));
         if(rts.size() != pairsList.size()){
             logger.error("RTs Length not equals to pairsList length!!!");
-            return null;
+            throw new Exception("RTs Length not equals to pairsList length!!!");
         }
         for (int i = 0; i < rts.size(); i++) {
             map.put(rts.get(i), pairsList.get(i));

@@ -85,7 +85,7 @@ public class ElutionScorer {
 
             double fScore = pearsonCorrelationCoefficient(intArray, modelData);
             if(Double.isNaN(fScore)){
-                System.out.printf("sss");
+                System.out.printf("fscore is NaN");
             }
             avgScore += fScore;
         }

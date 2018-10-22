@@ -49,7 +49,7 @@ public class ExperimentTask extends BaseTask {
     public void compressionAndSort(ExperimentDO experimentDO, TaskDO taskDO) {
         long start = System.currentTimeMillis();
         compressor.doCompress(experimentDO);
-        taskDO.addLog("转还完毕,总耗时:"+(System.currentTimeMillis() - start));
+        taskDO.addLog("压缩转换完毕,总耗时:"+(System.currentTimeMillis() - start));
         taskDO.finish(TaskDO.STATUS_SUCCESS);
         taskService.update(taskDO);
     }
@@ -91,6 +91,12 @@ public class ExperimentTask extends BaseTask {
         taskService.update(taskDO);
 
         ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(experimentDO, iRtLibraryId, mzExtractWindow, sigmaSpacing);
+        if(resultDO.isFailed()){
+            taskDO.addLog(resultDO.getMsgInfo()+":"+resultDO.getMsgInfo());
+            taskDO.finish(TaskDO.STATUS_SUCCESS);
+            taskService.update(taskDO);
+            return;
+        }
         SlopeIntercept slopeIntercept = resultDO.getModel();
 
         experimentDO.setSlope(slopeIntercept.getSlope());

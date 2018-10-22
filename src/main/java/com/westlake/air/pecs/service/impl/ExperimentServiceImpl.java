@@ -297,7 +297,6 @@ public class ExperimentServiceImpl implements ExperimentService {
                 List<TargetTransition> coordinates;
                 //key为rt
                 TreeMap<Float, MzIntensityPairs> rtMap;
-                TreeMap<Float, MzIntensityPairs> rtMap2;
                 //Step2.获取标准库的目标肽段片段的坐标
                 coordinates = transitionService.buildMS2Coordinates(iRtLibraryId, SlopeIntercept.create(), -1, rang.getMzStart(), rang.getMzEnd());
                 if (coordinates.size() == 0) {
@@ -307,7 +306,8 @@ public class ExperimentServiceImpl implements ExperimentService {
                 //Step3.获取指定索引列表
 //                List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(new ScanIndexQuery(exp.getId(), 2, rang.getMzStart(), rang.getMzEnd()));
                 //Step4.提取指定原始谱图
-                rtMap = parseSpectrum(raf, swathMap.get(rang.getMzStart()), exp);
+//                rtMap = parseSpectrum(raf, indexes, exp);
+                rtMap = parseSpectrumFromAird(raf, swathMap.get(rang.getMzStart()));
 
                 //Step5.卷积并且存储数据
                 convolute(finalList, coordinates, rtMap, null, mzExtractWindow, -1f, false);
@@ -332,7 +332,6 @@ public class ExperimentServiceImpl implements ExperimentService {
             logger.info("开始卷积数据");
             long start = System.currentTimeMillis();
             List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
-//            List<AnalyseDataDO> dataList = FileUtil.getAnalyseDataList(getClass().getClassLoader().getResource("data/conv.json").getPath());         //这边先读取本地已经卷积好的iRT数据
 
             logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
             start = System.currentTimeMillis();
@@ -345,6 +344,12 @@ public class ExperimentServiceImpl implements ExperimentService {
         }
     }
 
+    /**
+     * 仅适用于从MzXML中解析的函数,已经弃用
+     * @param raf
+     * @param overviewId
+     * @param swathInput
+     */
     @Deprecated
     private void extractMS1(RandomAccessFile raf, String overviewId, SwathInput swathInput) {
 
@@ -361,6 +366,12 @@ public class ExperimentServiceImpl implements ExperimentService {
         convoluteAndInsert(coordinates, rtMap, overviewId, swathInput.getRtExtractWindow(), swathInput.getMzExtractWindow(), true);
     }
 
+    /**
+     * 仅适用于从MzXML中解析的函数,已经弃用
+     * @param raf
+     * @param overviewId
+     * @param swathInput
+     */
     @Deprecated
     private void extractMS2(RandomAccessFile raf, String overviewId, SwathInput swathInput) {
 
@@ -433,7 +444,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         return totalList;
     }
 
-    private List<AnalyseDataDO> processConv(RandomAccessFile raf, SwathInput swathInput,ScanIndexDO swathIndex, WindowRang rang, String overviewId) {
+    private List<AnalyseDataDO> processConv(RandomAccessFile raf, SwathInput swathInput,ScanIndexDO swathIndex, WindowRang rang, String overviewId) throws Exception {
         List<TargetTransition> coordinates;
         TreeMap<Float, MzIntensityPairs> rtMap;
         //Step2.获取标准库的目标肽段片段的坐标
@@ -448,7 +459,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 //        query.setPrecursorMzEnd(rang.getMzEnd());
 //        List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
         //Step4.提取指定原始谱图
-        rtMap = parseSpectrum(raf, swathIndex, swathInput.getExperimentDO());
+        rtMap = parseSpectrumFromAird(raf, swathIndex);
 
         return convoluteAndInsert(coordinates, rtMap, overviewId, swathInput.getRtExtractWindow(), swathInput.getMzExtractWindow(), false);
     }
@@ -467,14 +478,24 @@ public class ExperimentServiceImpl implements ExperimentService {
         return rtMap;
     }
 
-    private TreeMap<Float, MzIntensityPairs> parseSpectrum(RandomAccessFile raf, ScanIndexDO swathIndex, ExperimentDO experimentDO) {
+    private TreeMap<Float, MzIntensityPairs> parseSpectrumFromAird(RandomAccessFile raf, ScanIndexDO swathIndex) throws Exception {
         long start = System.currentTimeMillis();
-        TreeMap<Float, MzIntensityPairs> rtMap = mzXMLParser.parseSwathBlockValues(raf, swathIndex.getStart2(), swathIndex.getEnd2(), swathIndex.getRts(), experimentDO.getCompressionType(), experimentDO.getPrecision());
+        TreeMap<Float, MzIntensityPairs> rtMap = mzXMLParser.parseSwathBlockValues(raf, swathIndex.getStart2(), swathIndex.getEnd2(), swathIndex.getRts(), "zlib", "32");
         logger.info("解析" + swathIndex.getPrecursorMzStart() + "-" + swathIndex.getPrecursorMzEnd() + "范围谱图文件总计耗时:" + (System.currentTimeMillis() - start));
 
         return rtMap;
     }
 
+    /**
+     * 最终的卷积结果需要落盘数据库,一般用于正式卷积的计算
+     * @param coordinates
+     * @param rtMap
+     * @param overviewId
+     * @param rtExtractWindow
+     * @param mzExtractWindow
+     * @param isMS1
+     * @return
+     */
     private List<AnalyseDataDO> convoluteAndInsert(List<TargetTransition> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow, boolean isMS1) {
         List<AnalyseDataDO> dataList = new ArrayList<>();
         for (TargetTransition ms : coordinates) {
@@ -488,7 +509,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     /**
      * 需要传入最终结果集的List对象
-     *
+     * 最终的卷积结果存储在内存中不落盘,一般用于iRT的计算
      * @param finalList
      * @param coordinates
      * @param rtMap

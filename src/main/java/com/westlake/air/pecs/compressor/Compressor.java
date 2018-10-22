@@ -47,8 +47,8 @@ public class Compressor {
 
         AirInfo airInfo = new AirInfo();
         airInfo.setWindowRangs(windowRangs);
-        airInfo.setCompressionType(experimentDO.getCompressionType());
-        airInfo.setPrecision(experimentDO.getPrecision());
+//        airInfo.setCompressionType(experimentDO.getCompressionType());
+//        airInfo.setPrecision(experimentDO.getPrecision());
         List<ScanIndexDO> swathIndexes = new ArrayList<>();
 
         try {

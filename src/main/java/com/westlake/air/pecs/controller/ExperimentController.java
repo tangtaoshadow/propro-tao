@@ -391,7 +391,6 @@ public class ExperimentController extends BaseController {
     }
 
     @RequestMapping(value = "/compressionsort")
-    @ResponseBody
     String compressionSort(Model model, @RequestParam(value = "expId", required = true) String expId,
                       RedirectAttributes redirectAttributes) {
 
@@ -401,12 +400,12 @@ public class ExperimentController extends BaseController {
             return "redirect:/experiment/list";
         }
         ExperimentDO experimentDO = resultDO.getModel();
-        ResultDO compressResult = compressor.doCompress(experimentDO);
-//        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
-//        taskService.insert(taskDO);
-//
-//        experimentTask.compressionAndSort(experimentDO, taskDO);
-//        return "redirect:/task/detail/" + taskDO.getId();
-        return JSON.toJSONString(compressResult);
+//        ResultDO compressResult = compressor.doCompress(experimentDO);
+        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
+        taskService.insert(taskDO);
+
+        experimentTask.compressionAndSort(experimentDO, taskDO);
+        return "redirect:/task/detail/" + taskDO.getId();
+//        return JSON.toJSONString(compressResult);
     }
 }
