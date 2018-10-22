@@ -177,15 +177,12 @@ public class ElutionScorer {
         for (int i = 0; position < max; i++) {
             position = min + i * step;
             tmp = position - retention;
-            double under = 1 + Math.exp(termSq2 * ((tmp / width) - part3));
-            double upper = part1 * sqrt2Pi * Math.exp(part2 - (tmp / symmetry));
-            if(Double.isInfinite(under)){
-                data[i] = 0;
+            double expUpper = part2 - (tmp / symmetry);
+            double expUnder = termSq2 * ((tmp / width) - part3);
+            if(expUpper>100 && expUnder>100){
+                data[i] = part1 * sqrt2Pi * Math.exp(expUpper - expUnder);
             }else {
-                data[i] = upper / under;
-            }
-            if(Double.isNaN(data[i])){
-                System.out.println("NaN");
+                data[i] = part1 * sqrt2Pi * Math.exp(expUpper) / (1 + Math.exp(expUnder));
             }
         }
         return data;
