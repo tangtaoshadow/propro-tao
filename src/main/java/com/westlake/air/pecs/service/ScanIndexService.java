@@ -5,6 +5,7 @@ import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -36,5 +37,9 @@ public interface ScanIndexService {
 
     ResultDO deleteAllByExperimentId(String experimentId);
 
+    ResultDO deleteAllSwathIndexByExperimentId(String experimentId);
+
     ResultDO<ScanIndexDO> getById(String id);
+
+    HashMap<Float, ScanIndexDO> getSwathIndexList(String expId);
 }

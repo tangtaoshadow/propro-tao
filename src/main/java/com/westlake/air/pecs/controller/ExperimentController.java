@@ -13,6 +13,7 @@ import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
+import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.MzXMLParser;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -297,7 +299,6 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/doextract")
     String doExtract(Model model,
                      @RequestParam(value = "id", required = true) String id,
-                     @RequestParam(value = "buildType", required = true) Integer buildType,
                      @RequestParam(value = "creator", required = false) String creator,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
                      @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "1200") Float rtExtractWindow,
@@ -319,7 +320,7 @@ public class ExperimentController extends BaseController {
             si.setIntercept(intercept);
         }
 
-        experimentTask.extract(resultDO.getModel(), libraryId, si, creator, rtExtractWindow, mzExtractWindow, buildType, taskDO);
+        experimentTask.extract(resultDO.getModel(), libraryId, si, creator, rtExtractWindow, mzExtractWindow, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }
@@ -390,7 +391,6 @@ public class ExperimentController extends BaseController {
     }
 
     @RequestMapping(value = "/compressionsort")
-    @ResponseBody
     String compressionSort(Model model, @RequestParam(value = "expId", required = true) String expId,
                       RedirectAttributes redirectAttributes) {
 
@@ -400,12 +400,12 @@ public class ExperimentController extends BaseController {
             return "redirect:/experiment/list";
         }
         ExperimentDO experimentDO = resultDO.getModel();
-        ResultDO compressResult = compressor.doCompress(experimentDO);
-//        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
-//        taskService.insert(taskDO);
-//
-//        experimentTask.compressionAndSort(experimentDO, taskDO);
-//        return "redirect:/task/detail/" + taskDO.getId();
-        return JSON.toJSONString(compressResult);
+//        ResultDO compressResult = compressor.doCompress(experimentDO);
+        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
+        taskService.insert(taskDO);
+
+        experimentTask.compressionAndSort(experimentDO, taskDO);
+        return "redirect:/task/detail/" + taskDO.getId();
+//        return JSON.toJSONString(compressResult);
     }
 }

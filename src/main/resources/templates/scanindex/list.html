@@ -101,10 +101,10 @@
                         文件位置(开始/结束)
                     </th>
                     <th width="10%">
-                        MZ窗口起始位置(校准前/后)
+                        MZ窗口位置(校准前)
                     </th>
                     <th width="10%">
-                        MZ窗口结束位置(校准前/后)
+                        MZ窗口位置(校准后)
                     </th>
                     <th width="10%">
                         窗口宽度(校准前/后)
@@ -129,8 +129,8 @@
                     <td th:text="${scanIndex.rtStr}"></td>
                     <td th:text="|${scanIndex.start} -> ${scanIndex.end}|"></td>
                     <td th:text="|${scanIndex.start2} -> ${scanIndex.end2}|"></td>
-                    <td th:text="|${scanIndex.originalPrecursorMzStart}/${scanIndex.precursorMzStart}|"></td>
-                    <td th:text="|${scanIndex.originalPrecursorMzEnd}/${scanIndex.precursorMzEnd}|">
+                    <td th:text="|${scanIndex.originalPrecursorMzStart}/${scanIndex.originalPrecursorMzEnd}|"></td>
+                    <td th:text="|${scanIndex.precursorMzStart}/${scanIndex.precursorMzEnd}|">
                     <td th:text="|${scanIndex.originalWindowWideness}/${scanIndex.windowWideness}|"></td>
                     <td>
                         <a th:href="|/scanindex/detail/${scanIndex.id}|"
@@ -138,7 +138,7 @@
                         </a>
                         <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
                                 data-target="#m_modal_spectrum" th:onclick="|query('${scanIndex.id}','${experiment.id}', false)|">
-                            查看谱图
+                            查看Aird谱图
                         </button>
                         <button type="button" class="btn btn-sm btn-brand" data-toggle="modal"
                                 data-target="#m_modal_spectrum" th:onclick="|query('${scanIndex.id}','${experiment.id}', true)|">

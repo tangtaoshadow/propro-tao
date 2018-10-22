@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.parser;
 
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
@@ -7,6 +8,7 @@ import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.TaskService;
+import com.westlake.air.pecs.utils.CompressUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -25,7 +27,7 @@ import java.util.*;
  * Time: 2018-07-19 16:50
  */
 @Component
-public class MzXMLParser extends BaseParser{
+public class MzXMLParser extends BaseParser {
 
     public final Logger logger = LoggerFactory.getLogger(MzXMLParser.class);
 
@@ -99,13 +101,26 @@ public class MzXMLParser extends BaseParser{
         return list;
     }
 
+    public TreeMap<Float, MzIntensityPairs> parseSwathBlockValues(RandomAccessFile raf, long start, long end, List<Float> rts, String compressionType, String precision) throws Exception {
+        TreeMap<Float, MzIntensityPairs> map = new TreeMap<>();
+        List<MzIntensityPairs> pairsList = parseValuesFromAird(raf, start, end, Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType));
+        if(rts.size() != pairsList.size()){
+            logger.error("RTs Length not equals to pairsList length!!!");
+            throw new Exception("RTs Length not equals to pairsList length!!!");
+        }
+        for (int i = 0; i < rts.size(); i++) {
+            map.put(rts.get(i), pairsList.get(i));
+        }
+        return map;
+    }
+
     public MzIntensityPairs parseValue(RandomAccessFile raf, long start, long end, String compressionType, String precision) {
-         String value = parseValue(raf, start, end);
-         if(value == null){
-             return null;
-         }
-         MzIntensityPairs pairs = getPeakMap(new Base64().decode(value), Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType));
-         return pairs;
+        String value = parseValue(raf, start, end);
+        if (value == null) {
+            return null;
+        }
+        MzIntensityPairs pairs = getPeakMap(new Base64().decode(value), Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType));
+        return pairs;
     }
 
     public String parseValue(RandomAccessFile raf, long start, long end) {
@@ -122,6 +137,59 @@ public class MzXMLParser extends BaseParser{
         }
 
         return null;
+    }
+
+    public List<MzIntensityPairs> parseValuesFromAird(RandomAccessFile raf, long start, long end, int precision, boolean isZlibCompression) {
+
+        List<MzIntensityPairs> pairsList = new ArrayList<>();
+        try {
+            raf.seek(start);
+            byte[] reader = new byte[(int) (end - start)];
+            raf.read(reader);
+            String totalValues = new String(reader);
+            String[] totalValuesArray = totalValues.split(Constants.CHANGE_LINE);
+
+            for (int i = 0; i < totalValuesArray.length - 1; i += 2) {
+                if (totalValuesArray[i].isEmpty()) {
+                    continue;
+                }
+                MzIntensityPairs pairs = new MzIntensityPairs();
+                Float[] mzArray = getValues(new Base64().decode(totalValuesArray[i]), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
+                Float[] intensityArray = getValues(new Base64().decode(totalValuesArray[i+1]), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
+                pairs.setMzArray(mzArray);
+                pairs.setIntensityArray(intensityArray);
+                pairsList.add(pairs);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return pairsList;
+    }
+
+    public String parseValueForAird(RandomAccessFile raf, ScanIndexDO index, int precision, boolean isZlibCompression) {
+        String value = parseValue(raf, index.getStart(), index.getEnd());
+        Float[] values = getValues(new Base64().decode(value), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
+
+        TreeMap<Float, Float> map = new TreeMap<>();
+        for (int i = 0; i < values.length - 1; i += 2) {
+            if (values[i + 1] == 0f) {
+                continue;
+            }
+            map.put(values[i], values[i + 1]);
+        }
+
+        int i = 0;
+        float[] mzArray = new float[map.keySet().size()];
+        float[] intensityArray = new float[map.keySet().size()];
+        for (Float key : map.keySet()) {
+            mzArray[i] = key;
+            intensityArray[i] = map.get(key);
+            i++;
+        }
+        String indexesStr = CompressUtil.transToString(mzArray) + Constants.CHANGE_LINE + CompressUtil.transToString(intensityArray) + Constants.CHANGE_LINE;
+        return indexesStr;
     }
 
     /**

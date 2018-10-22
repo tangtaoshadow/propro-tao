@@ -49,7 +49,7 @@ public class ExperimentTask extends BaseTask {
     public void compressionAndSort(ExperimentDO experimentDO, TaskDO taskDO) {
         long start = System.currentTimeMillis();
         compressor.doCompress(experimentDO);
-        taskDO.addLog("转还完毕,总耗时:"+(System.currentTimeMillis() - start));
+        taskDO.addLog("压缩转换完毕,总耗时:"+(System.currentTimeMillis() - start));
         taskDO.finish(TaskDO.STATUS_SUCCESS);
         taskService.update(taskDO);
     }
@@ -61,11 +61,10 @@ public class ExperimentTask extends BaseTask {
      * @param creator
      * @param rtExtractWindow
      * @param mzExtractWindow
-     * @param buildType       0:解压缩MS1和MS2; 1:解压缩MS1; 2:解压缩MS2
      * @return
      */
     @Async
-    public void extract(ExperimentDO experimentDO, String libraryId, SlopeIntercept slopeIntercept, String creator, float rtExtractWindow, float mzExtractWindow, int buildType, TaskDO taskDO) {
+    public void extract(ExperimentDO experimentDO, String libraryId, SlopeIntercept slopeIntercept, String creator, float rtExtractWindow, float mzExtractWindow, TaskDO taskDO) {
         SwathInput input = new SwathInput();
         input.setExperimentDO(experimentDO);
         input.setLibraryId(libraryId);
@@ -73,7 +72,6 @@ public class ExperimentTask extends BaseTask {
         input.setCreator(creator);
         input.setRtExtractWindow(rtExtractWindow);
         input.setMzExtractWindow(mzExtractWindow);
-        input.setBuildType(buildType);
 
         taskDO.addLog("录入有斜率:"+slopeIntercept.getSlope()+"截距:"+slopeIntercept.getIntercept());
         taskDO.addLog("使用标准库ID:"+libraryId);
@@ -93,13 +91,19 @@ public class ExperimentTask extends BaseTask {
         taskService.update(taskDO);
 
         ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(experimentDO, iRtLibraryId, mzExtractWindow, sigmaSpacing);
+        if(resultDO.isFailed()){
+            taskDO.addLog(resultDO.getMsgInfo()+":"+resultDO.getMsgInfo());
+            taskDO.finish(TaskDO.STATUS_SUCCESS);
+            taskService.update(taskDO);
+            return;
+        }
         SlopeIntercept slopeIntercept = resultDO.getModel();
 
         experimentDO.setSlope(slopeIntercept.getSlope());
         experimentDO.setIntercept(slopeIntercept.getIntercept());
         experimentService.update(experimentDO);
 
-        taskDO.addLog("iRT计算完毕,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept() + "开始卷积原始数据");
+        taskDO.addLog("iRT计算完毕,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept());
         taskDO.finish(TaskDO.STATUS_SUCCESS);
         taskService.update(taskDO);
     }
@@ -125,7 +129,7 @@ public class ExperimentTask extends BaseTask {
         start = System.currentTimeMillis();
         //将irt的计算结果加入到下一个步骤的入参中
         input.setSlopeIntercept(slopeIntercept);
-        ResultDO<List<AnalyseDataDO>> originDataListResult = experimentService.extractWithList(input);
+        ResultDO<List<AnalyseDataDO>> originDataListResult = experimentService.extract(input);
 
         if(originDataListResult.isFailed() || originDataListResult.getModel() == null || originDataListResult.getModel().size() == 0){
             taskDO.addLog("卷积失败:"+originDataListResult.getMsgInfo());

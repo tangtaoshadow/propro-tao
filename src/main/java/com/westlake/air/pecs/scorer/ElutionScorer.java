@@ -1,22 +1,17 @@
 package com.westlake.air.pecs.scorer;
 
 import com.westlake.air.pecs.constants.Constants;
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.EmgModelParams;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.utils.MathUtil;
 import net.finmath.optimizer.SolverException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Vector;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
 /**
  * scores.var_elution_model_fit_score
@@ -26,6 +21,8 @@ import java.util.concurrent.FutureTask;
  */
 @Component("elutionScorer")
 public class ElutionScorer {
+
+    public final Logger logger = LoggerFactory.getLogger(ElutionScorer.class);
 
     public void calculateElutionModelScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores) {
         double avgScore = 0.0d;
@@ -85,7 +82,7 @@ public class ElutionScorer {
 
             double fScore = pearsonCorrelationCoefficient(intArray, modelData);
             if(Double.isNaN(fScore)){
-                System.out.printf("sss");
+                logger.info("fscore is NaN");
             }
             avgScore += fScore;
         }

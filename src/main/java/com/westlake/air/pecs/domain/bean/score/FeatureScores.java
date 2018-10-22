@@ -207,18 +207,18 @@ public class FeatureScores {
     }
 
     public enum ScoreType {
-                MainVarXxSwathPrelimScore("mainVarXxSwathPrelimScore"),
-//                VarBseriesScore("varBseriesScore"),
-                VarElutionModelFitScore("varElutionModelFitScore"),
-//        VarXcorrShape("varXcorrShape"),
+        MainVarXxSwathPrelimScore("mainVarXxSwathPrelimScore"),
+//      VarBseriesScore("varBseriesScore"),
+//        VarElutionModelFitScore("varElutionModelFitScore"),
+//      VarXcorrShape("varXcorrShape"),
         VarIntensityScore("varIntensityScore"),
-//                VarIsotopeCorrelationScore("varIsotopeCorrelationScore"),
-//                VarIsotopeOverlapScore("varIsotopeOverlapScore"),
+//      VarIsotopeCorrelationScore("varIsotopeCorrelationScore"),
+//      VarIsotopeOverlapScore("varIsotopeOverlapScore"),
         VarLibraryCorr("varLibraryCorr"),
         VarLibraryRsmd("varLibraryRsmd"),
         VarLogSnScore("varLogSnScore"),
-//                VarMassdevScore("varMassdevScore"),
-//                VarMassdevScoreWeighted("varMassdevScoreWeighted"),
+//      VarMassdevScore("varMassdevScore"),
+//      VarMassdevScoreWeighted("varMassdevScoreWeighted"),
         VarNormRtScore("varNormRtScore"),
         VarXcorrCoelution("varXcorrCoelution"),
         VarXcorrCoelutionWeighted("varXcorrCoelutionWeighted"),
@@ -229,8 +229,8 @@ public class FeatureScores {
         VarLibraryManhattan("varLibraryManhattan"),
         VarLibrarySangle("varLibrarySangle"),
         VarLibraryRootmeansquare("varLibraryRootmeansquare"),
-//          VarManhattScore("varManhattScore"),
-//                VarYseriesScore("varYseriesScore"),
+//        VarManhattScore("varManhattScore"),
+//        VarYseriesScore("varYseriesScore"),
 
 ;
         String scoreType;

@@ -40,6 +40,7 @@ public class SwathInput {
      * 必填,默认为2
      * 0代表同时卷积MS1和MS2, 1代表卷积MS1, 2代表卷积MS2
      */
+    @Deprecated
     Integer buildType;
 
 }

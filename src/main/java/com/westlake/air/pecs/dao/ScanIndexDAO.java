@@ -100,11 +100,18 @@ public class ScanIndexDAO {
         mongoTemplate.remove(query, ScanIndexDO.class, CollectionName);
     }
 
+    public void deleteAllSwathIndexByExperimentId(String experimentId) {
+        Query query = new Query();
+        query.addCriteria(where("experimentId").is(experimentId));
+        query.addCriteria(where("msLevel").is(0));
+        mongoTemplate.remove(query, ScanIndexDO.class, CollectionName);
+    }
+
     private Query buildQuery(ScanIndexQuery scanIndexQuery) {
         Query query = buildQueryWithoutPage(scanIndexQuery);
         query.skip((scanIndexQuery.getPageNo() - 1) * scanIndexQuery.getPageSize());
         query.limit(scanIndexQuery.getPageSize());
-        query.with(new Sort(scanIndexQuery.getOrderBy(), scanIndexQuery.getSortColumn()));
+//        query.with(new Sort(scanIndexQuery.getOrderBy(), scanIndexQuery.getSortColumn()));
         return query;
     }
 

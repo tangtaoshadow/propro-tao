@@ -2,6 +2,7 @@ package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
@@ -122,7 +123,7 @@ public class SpectrumController extends BaseController {
 
         try {
             RandomAccessFile raf = new RandomAccessFile(file, "r");
-            pairs = airFileParser.parseValue(raf, scanIndexDO.getStart2(), scanIndexDO.getEnd2(), experimentDO.getCompressionType(), experimentDO.getPrecision());
+            pairs = airFileParser.parseValue(raf, scanIndexDO.getStart2(), scanIndexDO.getEnd2(), Constants.AIRD_COMPRESSION_TYPE_ZLIB, Constants.AIRD_PRECISION_32);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -151,8 +152,8 @@ public class SpectrumController extends BaseController {
     @RequestMapping(value = "/viewmzxml")
     @ResponseBody
     ResultDO<JSONObject> viewMzXML(Model model,
-                              @RequestParam(value = "indexId", required = false) String indexId,
-                              @RequestParam(value = "expId", required = false) String expId) {
+                                   @RequestParam(value = "indexId", required = false) String indexId,
+                                   @RequestParam(value = "expId", required = false) String expId) {
 
         ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
         ResultDO<ScanIndexDO> indexResult = scanIndexService.getById(indexId);
@@ -173,7 +174,6 @@ public class SpectrumController extends BaseController {
         ScanIndexDO scanIndexDO = indexResult.getModel();
 
         File file = new File(experimentDO.getFileLocation());
-
 
         try {
             RandomAccessFile raf = new RandomAccessFile(file, "r");

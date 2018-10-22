@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -116,6 +117,16 @@ public class ScanIndexServiceImpl implements ScanIndexService {
     }
 
     @Override
+    public ResultDO deleteAllSwathIndexByExperimentId(String experimentId) {
+        try {
+            scanIndexDAO.deleteAllSwathIndexByExperimentId(experimentId);
+            return new ResultDO(true);
+        } catch (Exception e) {
+            return ResultDO.buildError(ResultCode.DELETE_ERROR);
+        }
+    }
+
+    @Override
     public ResultDO<ScanIndexDO> getById(String id) {
         try {
             ScanIndexDO scanIndexDO = scanIndexDAO.getById(id);
@@ -129,5 +140,19 @@ public class ScanIndexServiceImpl implements ScanIndexService {
         } catch (Exception e) {
             return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
+    }
+
+    @Override
+    public HashMap<Float, ScanIndexDO> getSwathIndexList(String expId) {
+        ScanIndexQuery query = new ScanIndexQuery(expId, 0);
+        List<ScanIndexDO> indexes = scanIndexDAO.getAll(query);
+        if(indexes == null || indexes.size() == 0){
+            return null;
+        }
+        HashMap<Float, ScanIndexDO> map = new HashMap<>();
+        for(ScanIndexDO index : indexes){
+            map.put(index.getPrecursorMzStart(), index);
+        }
+        return map;
     }
 }

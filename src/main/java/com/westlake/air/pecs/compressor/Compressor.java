@@ -5,25 +5,21 @@ import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
-import com.westlake.air.pecs.domain.bean.compressor.DataInfo;
+import com.westlake.air.pecs.domain.bean.compressor.AirInfo;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.MzXMLParser;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.ScanIndexService;
-import com.westlake.air.pecs.utils.CompressUtil;
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
 
 @Component("compressor")
 public class Compressor {
@@ -47,9 +43,13 @@ public class Compressor {
         File airiFile = new File(airiFilePath);
         File airdFile = new File(airdFilePath);
 
-        DataInfo dataInfo = new DataInfo();
-        dataInfo.setCompressionType(experimentDO.getCompressionType());
-        dataInfo.setPrecision(experimentDO.getPrecision());
+        List<WindowRang> windowRangs = experimentService.getWindows(experimentDO.getId());
+
+        AirInfo airInfo = new AirInfo();
+        airInfo.setWindowRangs(windowRangs);
+//        airInfo.setCompressionType(experimentDO.getCompressionType());
+//        airInfo.setPrecision(experimentDO.getPrecision());
+        List<ScanIndexDO> swathIndexes = new ArrayList<>();
 
         try {
             if (!airiFile.exists()) {
@@ -66,64 +66,47 @@ public class Compressor {
             FileWriter fwData = new FileWriter(airdFile.getAbsoluteFile());
             BufferedWriter bwData = new BufferedWriter(fwData);
 
-            List<WindowRang> windowRangs = experimentService.getWindows(experimentDO.getId());
-            dataInfo.setWindowRangs(windowRangs);
-
             long startAll = System.currentTimeMillis();
             int precision = Integer.parseInt(experimentDO.getPrecision());
             boolean isZlibCompression = "zlib".equalsIgnoreCase(experimentDO.getCompressionType());
             List<ScanIndexDO> outputIndexList = new ArrayList<>();
-            long start = 0;
-            long end = 0;
+            Long start = 0L;
+
+            //先写入所有的MS1
+            List<ScanIndexDO> ms1IndexList = scanIndexService.getAll(new ScanIndexQuery(experimentDO.getId(), 1));
+            logger.info("开始提取压缩MS1");
+            for (ScanIndexDO index : ms1IndexList) {
+                Long offset = processWithIndex(rafRead, fwData, index, precision, isZlibCompression, start);
+                start = start + offset;
+            }
+            outputIndexList.addAll(ms1IndexList);
+            logger.info("压缩MS1完毕,开始提取并且压缩MS2");
+
+            //再写入所有的MS2
             for (WindowRang rang : windowRangs) {
-
+                ScanIndexDO swathIndex = new ScanIndexDO();
+                swathIndex.setStart2(start);
+                swathIndex.setExperimentId(experimentDO.getId());
+                swathIndex.setMsLevel(0);
+                swathIndex.setPrecursorMzStart(rang.getMzStart());
+                swathIndex.setPrecursorMzEnd(rang.getMzEnd());
                 long startTime = System.currentTimeMillis();
-                ScanIndexQuery query = new ScanIndexQuery(experimentDO.getId(), 2);
-                query.setPrecursorMzStart(rang.getMzStart());
-                query.setPrecursorMzEnd(rang.getMzEnd());
-                List<ScanIndexDO> indexes = scanIndexService.getAll(query);
-
+                List<ScanIndexDO> indexes = scanIndexService.getAll(new ScanIndexQuery(experimentDO.getId(), 2 , rang.getMzStart() , rang.getMzEnd()));
                 for (ScanIndexDO index : indexes) {
-
-                    String value = mzXMLParser.parseValue(rafRead, index.getStart(), index.getEnd());
-                    Float[] values = mzXMLParser.getValues(new Base64().decode(value), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
-
-                    TreeMap<Float, Float> map = new TreeMap<>();
-                    for (int i = 0; i < values.length - 1; i += 2) {
-                        if (values[i + 1] == 0f) {
-                            continue;
-                        }
-                        map.put(values[i], values[i + 1]);
-                    }
-
-                    int i = 0;
-                    float[] mzArray = new float[map.keySet().size()];
-                    float[] intensityArray = new float[map.keySet().size()];
-                    for (Float key : map.keySet()) {
-                        mzArray[i] = key;
-                        intensityArray[i] = map.get(key);
-                        i++;
-                    }
-                    String indexesStr = CompressUtil.transToString(mzArray) + Constants.CHANGE_LINE + CompressUtil.transToString(intensityArray) + Constants.CHANGE_LINE;
-
-                    index.setStart2(start);
-                    end = end + indexesStr.length();
-                    index.setEnd2(end);
-                    start = end;
-
-                    fwData.write(indexesStr);
-
-                    scanIndexService.update(index);
-                    //精简掉一些字段,保持输出的index尽量小
-                    readyToOutput(index);
+                    Long offset = processWithIndex(rafRead, fwData, index, precision, isZlibCompression, start);
+                    start = start + offset;
+                    swathIndex.getRts().add(index.getRt());
                 }
-
+                swathIndex.setEnd2(start);
+                swathIndexes.add(swathIndex);
                 outputIndexList.addAll(indexes);
                 logger.info("Rang:" + rang.getMzStart() + ":" + rang.getMzEnd() + " Finished,Time:" + (System.currentTimeMillis() - startTime));
             }
+
             //写入基本信息
-            dataInfo.setScanIndex(outputIndexList);
-            String dataInfoStr = JSON.toJSONString(dataInfo);
+            airInfo.setScanIndex(outputIndexList);
+            airInfo.setSwathIndexes(swathIndexes);
+            String dataInfoStr = JSON.toJSONString(airInfo);
             fwInfo.write(dataInfoStr);
             logger.info("Total Cost:" + (System.currentTimeMillis() - startAll));
 
@@ -144,7 +127,12 @@ public class Compressor {
         experimentDO.setHasAirusFile(true);
         experimentDO.setAiriPath(airiFilePath);
         experimentDO.setAirdPath(airdFilePath);
+        experimentDO.setWindowRangs(windowRangs);
         experimentService.update(experimentDO);
+
+        //新增SwathBlock块的索引
+        scanIndexService.deleteAllSwathIndexByExperimentId(experimentDO.getId());
+        scanIndexService.insertAll(swathIndexes, false);
         return new ResultDO(true);
     }
 
@@ -158,6 +146,17 @@ public class Compressor {
         index.setExperimentId(null);
         index.setStart(null);
         index.setEnd(null);
+    }
+
+    private Long processWithIndex(RandomAccessFile raf, FileWriter fwData ,ScanIndexDO index, int precision, boolean isZlibCompression, Long start) throws IOException {
+        String indexesStr = mzXMLParser.parseValueForAird(raf, index, precision, isZlibCompression);
+        index.setStart2(start);
+        index.setEnd2(start + indexesStr.length());
+        fwData.write(indexesStr);
+        scanIndexService.update(index);
+        readyToOutput(index);
+
+        return (long)indexesStr.length();
     }
 
 }
