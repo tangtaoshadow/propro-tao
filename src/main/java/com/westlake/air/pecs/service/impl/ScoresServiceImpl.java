@@ -260,7 +260,7 @@ public class ScoresServiceImpl implements ScoresService {
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
         for (TransitionGroup group : groups) {
             SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
-            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupMap.get(group.getPeptideRef()), sigmaSpacing);
+            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupMap.get(group.getPeptideRef()+"_"+group.getIsDecoy()), sigmaSpacing);
             if (!featureByPep.isFeatureFound()) {
                 continue;
             }
