@@ -8,7 +8,10 @@ import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.TaskService;
+import com.westlake.air.pecs.utils.ArrayUtil;
 import com.westlake.air.pecs.utils.CompressUtil;
+import me.lemire.integercompression.IntWrapper;
+import me.lemire.integercompression.differential.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -154,8 +157,8 @@ public class MzXMLParser extends BaseParser {
                     continue;
                 }
                 MzIntensityPairs pairs = new MzIntensityPairs();
-                Float[] mzArray = getValues(new Base64().decode(totalValuesArray[i]), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
-                Float[] intensityArray = getValues(new Base64().decode(totalValuesArray[i + 1]), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
+                Float[] mzArray = getValues(new Base64().decode(totalValuesArray[i]));
+                Float[] intensityArray = getValues(new Base64().decode(totalValuesArray[i + 1]));
                 pairs.setMzArray(mzArray);
                 pairs.setIntensityArray(intensityArray);
                 pairsList.add(pairs);
@@ -172,24 +175,36 @@ public class MzXMLParser extends BaseParser {
         String value = parseValue(raf, index.getStart(), index.getEnd());
         Float[] values = getValues(new Base64().decode(value), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
 
-        TreeMap<Float, Float> map = new TreeMap<>();
+        TreeMap<Integer, Integer> map = new TreeMap<>();
+
         for (int i = 0; i < values.length - 1; i += 2) {
             if (values[i + 1] == 0f) {
                 continue;
             }
+            //set the precision of new values
 //            values[i] = (float) Math.round(values[i] * 1000) / 1000; //mz精确到小数点后面三位
 //            values[i + 1] = (float) Math.round(values[i + 1] * 10) / 10; //intensity精确到小数点后面一位
-            map.put(values[i], values[i + 1]);
+            //如果MZ在四舍五入后相同的话需要做累加
+            Integer mz = Math.round(values[i] * 1000);
+            Integer intensity = Math.round(values[i + 1] * 10);
+            if (map.get(mz) != null) {
+                map.put(mz, map.get(mz) + intensity);
+            } else {
+                map.put(mz, intensity);
+            }
         }
 
         int i = 0;
-        float[] mzArray = new float[map.keySet().size()];
-        float[] intensityArray = new float[map.keySet().size()];
-        for (Float key : map.keySet()) {
+        int[] mzArray = new int[map.keySet().size()];
+        int[] intensityArray = new int[map.keySet().size()];
+        for (Integer key : map.keySet()) {
             mzArray[i] = key;
             intensityArray[i] = map.get(key);
             i++;
         }
+
+        mzArray = CompressUtil.compressForSortedInt(mzArray);
+
         String indexesStr = CompressUtil.transToString(mzArray) + Constants.CHANGE_LINE + CompressUtil.transToString(intensityArray) + Constants.CHANGE_LINE;
         return indexesStr;
     }

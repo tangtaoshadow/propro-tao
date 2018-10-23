@@ -5,6 +5,7 @@ import com.westlake.air.pecs.utils.CompressUtil;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 public class BaseParser {
 
@@ -37,6 +38,28 @@ public class BaseParser {
             }
         }
 
+        byteBuffer.clear();
+        return floatValues;
+    }
+
+    public Float[] getValues(byte[] value) {
+
+        Float[] floatValues;
+
+        ByteBuffer byteBuffer = ByteBuffer.wrap(value);
+        byteBuffer = ByteBuffer.wrap(CompressUtil.decompress(byteBuffer.array()));
+        byteBuffer.order(ByteOrder.BIG_ENDIAN);
+
+        IntBuffer ints = byteBuffer.asIntBuffer();
+        int[] intValues = new int[ints.capacity()];
+        for(int i=0;i<ints.capacity();i++){
+            intValues[i] = ints.get(i);
+        }
+        intValues = CompressUtil.decompressForSortedInt(intValues);
+        floatValues = new Float[intValues.length];
+        for (int index = 0; index < intValues.length; index++) {
+            floatValues[index] = (float)intValues[index]/1000;
+        }
         byteBuffer.clear();
         return floatValues;
     }

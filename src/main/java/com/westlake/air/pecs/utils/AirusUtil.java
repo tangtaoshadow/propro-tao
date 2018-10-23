@@ -240,7 +240,7 @@ public class AirusUtil {
     public static ScoreData fakeSortTgId(ScoreData scoreData) {
         String[] groupId = scoreData.getGroupId();
         int groupIdLength = groupId.length;
-        Integer[] index = ArrayUtil.indexBeforeSort(groupId);
+        Integer[] index = ArrayUtil.indexAfterSort(groupId);
 
         Boolean[] isDecoy = scoreData.getIsDecoy();
         Double[][] scores = scoreData.getScoreData();

@@ -225,10 +225,10 @@ public class FeatureScores {
         VarXcorrShape("varXcorrShape"),
         VarXcorrShapeWeighted("varXcorrShapeWeighted"),
 
-        VarLibraryDotprod("varLibraryDotprod"),
-        VarLibraryManhattan("varLibraryManhattan"),
-        VarLibrarySangle("varLibrarySangle"),
-        VarLibraryRootmeansquare("varLibraryRootmeansquare"),
+//        VarLibraryDotprod("varLibraryDotprod"),
+//        VarLibraryManhattan("varLibraryManhattan"),
+//        VarLibrarySangle("varLibrarySangle"),
+//        VarLibraryRootmeansquare("varLibraryRootmeansquare"),
 //        VarManhattScore("varManhattScore"),
 //        VarYseriesScore("varYseriesScore"),
 

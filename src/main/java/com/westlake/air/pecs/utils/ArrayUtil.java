@@ -344,9 +344,8 @@ public class ArrayUtil {
     /**
      * Get ascend sort index of array[].
      */
-    public static Integer[] indexBeforeSort(Double[] array) {
-        IndexValue<Double> indexValue = new IndexValue<>(array[0],0);
-        List<IndexValue<Double>> indexValues = indexValue.buildList(array);
+    public static Integer[] indexAfterSort(Double[] array) {
+        List<IndexValue<Double>> indexValues = new IndexValue<Double>().buildList(array);
         Collections.sort(indexValues);
 
         int n = array.length;
@@ -358,9 +357,11 @@ public class ArrayUtil {
         return result;
     }
 
-    public static Integer[] indexBeforeSort(Float[] array) {
-        IndexValue<Float> indexValue = new IndexValue<>(array[0],0);
-        List<IndexValue<Float>> indexValues = indexValue.buildList(array);
+    /**
+     * Get ascend sort index of array[].
+     */
+    public static Integer[] indexAfterSort(Integer[] array) {
+        List<IndexValue<Integer>> indexValues = new IndexValue<Integer>().buildList(array);
         Collections.sort(indexValues);
 
         int n = array.length;
@@ -372,9 +373,38 @@ public class ArrayUtil {
         return result;
     }
 
-    public static Integer[] indexBeforeSort(String[] array) {
-        IndexValue<String> indexValue = new IndexValue<>(array[0],0);
-        List<IndexValue<String>> indexValues = indexValue.buildList(array);
+    /**
+     * Get ascend sort index of array[].
+     */
+    public static int[] indexAfterSortWithArraySorted(Integer[] array) {
+        List<IndexValue<Integer>> indexValues = new IndexValue<Integer>().buildList(array);
+        Collections.sort(indexValues);
+
+        int n = array.length;
+        int[] result = new int[n];
+
+        for (int i = 0; i < n; i++) {
+            result[i] = indexValues.get(i).getIndex();
+            array[i] = indexValues.get(i).getValue();
+        }
+        return result;
+    }
+
+    public static Integer[] indexAfterSort(Float[] array) {
+        List<IndexValue<Float>> indexValues = new IndexValue<Float>().buildList(array);
+        Collections.sort(indexValues);
+
+        int n = array.length;
+        Integer[] result = new Integer[n];
+
+        for (int i = 0; i < n; i++) {
+            result[i] = indexValues.get(i).getIndex();
+        }
+        return result;
+    }
+
+    public static Integer[] indexAfterSort(String[] array) {
+        List<IndexValue<String>> indexValues = new IndexValue<String>().buildList(array);
         Collections.sort(indexValues);
 
         int n = array.length;
@@ -390,8 +420,7 @@ public class ArrayUtil {
      * Get descend sort index of array[].
      */
     public static Integer[] indexBeforeReversedSort(Double[] array) {
-        IndexValue<Double> indexValue = new IndexValue<>(0d,0);
-        List<IndexValue<Double>> indexValues = indexValue.buildList(array);
+        List<IndexValue<Double>> indexValues = new IndexValue<Double>().buildList(array);
         Collections.sort(indexValues);
         Collections.reverse(indexValues);
         int n = array.length;

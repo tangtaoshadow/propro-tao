@@ -210,7 +210,7 @@ public class Stats {
      */
     private Double[] qvalue(Double[] pvalues, double pi0, boolean pfdr) {
         int pvalueLength = pvalues.length;
-        Integer[] u = ArrayUtil.indexBeforeSort(pvalues);
+        Integer[] u = ArrayUtil.indexAfterSort(pvalues);
         double[] v = ArrayUtil.rankDataMax(pvalues);
         Double[] qvalues = new Double[pvalueLength];
         for (int i = 0; i < pvalueLength; i++) {

@@ -26,7 +26,7 @@ public class AirusUtilsTest extends BaseTest {
         d[4] = 5.0d;
         d[5] = 4.0d;
 
-        Integer[] argSort = ArrayUtil.indexBeforeSort(d);
+        Integer[] argSort = ArrayUtil.indexAfterSort(d);
 
         assert argSort[0] == 0;
         assert argSort[1] == 2;
