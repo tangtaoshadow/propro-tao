@@ -1,6 +1,5 @@
 package com.westlake.air.pecs.feature;
 
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.utils.MathUtil;
 

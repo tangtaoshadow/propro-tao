@@ -48,7 +48,7 @@ public class CompressUtil {
     }
 
     public static byte[] decompress(byte[] data) {
-        byte[] output = new byte[0];
+        byte[] output = null;
 
         Inflater decompresser = new Inflater();
         decompresser.reset();
@@ -56,7 +56,7 @@ public class CompressUtil {
 
         ByteArrayOutputStream o = new ByteArrayOutputStream(data.length);
         try {
-            byte[] buf = new byte[4096];
+            byte[] buf = new byte[2048];
             while (!decompresser.finished()) {
                 int i = decompresser.inflate(buf);
                 o.write(buf, 0, i);

@@ -7,6 +7,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+
 public class CompressorTest extends BaseTest {
 
     @Autowired

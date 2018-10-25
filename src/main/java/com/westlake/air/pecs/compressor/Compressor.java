@@ -150,6 +150,7 @@ public class Compressor {
 
     private Long processWithIndex(RandomAccessFile raf, FileWriter fwData ,ScanIndexDO index, int precision, boolean isZlibCompression, Long start) throws IOException {
         String indexesStr = mzXMLParser.parseValueForAird(raf, index, precision, isZlibCompression);
+//        String indexesStr = "";
         index.setStart2(start);
         index.setEnd2(start + indexesStr.length());
         fwData.write(indexesStr);

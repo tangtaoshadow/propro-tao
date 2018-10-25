@@ -7,8 +7,6 @@ import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static jdk.nashorn.internal.objects.Global.Infinity;
-
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-08-08 19:00
@@ -42,7 +40,7 @@ public class FormulaCalculatorTest extends BaseTest {
         TransitionDO transitionDO = getJsonFromFileTest();
         transitionDO.setPrecursorCharge(0);
         double result = formulaCalculator.getMonoMz(transitionDO);
-        assert (result == Infinity);
+        assert (Double.isNaN(result));
     }
 
 
@@ -228,7 +226,7 @@ public class FormulaCalculatorTest extends BaseTest {
         TransitionDO transitionDO = getJsonFromFileTest1();
         transitionDO.setPrecursorCharge(0);
         double result = formulaCalculator.getMonoMz(transitionDO);
-        assert (result == Infinity);
+        assert Double.isNaN(result);
     }
 
     @Test
@@ -282,7 +280,7 @@ public class FormulaCalculatorTest extends BaseTest {
         TransitionDO transitionDO = getJsonFromFileTest2();
         transitionDO.setPrecursorCharge(0);
         double result = formulaCalculator.getMonoMz(transitionDO);
-        assert (result == Infinity);
+        assert Double.isNaN(result);
     }
 
     @Test
@@ -336,7 +334,7 @@ public class FormulaCalculatorTest extends BaseTest {
         TransitionDO transitionDO = getJsonFromFileTest3();
         transitionDO.setPrecursorCharge(0);
         double result = formulaCalculator.getMonoMz(transitionDO);
-        assert (result == Infinity);
+        assert Double.isNaN(result);
     }
 
     @Test
@@ -430,7 +428,7 @@ public class FormulaCalculatorTest extends BaseTest {
         TransitionDO transitionDO = getJsonFromFileTest4();
         transitionDO.setPrecursorCharge(0);
         double result = formulaCalculator.getMonoMz(transitionDO);
-        assert (result == Infinity);
+        assert Double.isNaN(result);
     }
 
     @Test

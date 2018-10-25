@@ -480,7 +480,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     private TreeMap<Float, MzIntensityPairs> parseSpectrumFromAird(RandomAccessFile raf, ScanIndexDO swathIndex) throws Exception {
         long start = System.currentTimeMillis();
-        TreeMap<Float, MzIntensityPairs> rtMap = mzXMLParser.parseSwathBlockValues(raf, swathIndex.getStart2(), swathIndex.getEnd2(), swathIndex.getRts(), "zlib", "32");
+        TreeMap<Float, MzIntensityPairs> rtMap = mzXMLParser.parseSwathBlockValues(raf, swathIndex.getStart2(), swathIndex.getEnd2(), swathIndex.getRts());
         logger.info("解析" + swathIndex.getPrecursorMzStart() + "-" + swathIndex.getPrecursorMzEnd() + "范围谱图文件总计耗时:" + (System.currentTimeMillis() - start));
 
         return rtMap;

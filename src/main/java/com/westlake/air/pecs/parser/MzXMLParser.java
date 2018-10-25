@@ -13,6 +13,7 @@ import com.westlake.air.pecs.utils.CompressUtil;
 import me.lemire.integercompression.IntWrapper;
 import me.lemire.integercompression.differential.*;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,9 +105,9 @@ public class MzXMLParser extends BaseParser {
         return list;
     }
 
-    public TreeMap<Float, MzIntensityPairs> parseSwathBlockValues(RandomAccessFile raf, long start, long end, List<Float> rts, String compressionType, String precision) throws Exception {
+    public TreeMap<Float, MzIntensityPairs> parseSwathBlockValues(RandomAccessFile raf, long start, long end, List<Float> rts) throws Exception {
         TreeMap<Float, MzIntensityPairs> map = new TreeMap<>();
-        List<MzIntensityPairs> pairsList = parseValuesFromAird(raf, start, end, Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType));
+        List<MzIntensityPairs> pairsList = parseValuesFromAird(raf, start, end);
         if (rts.size() != pairsList.size()) {
             logger.error("RTs Length not equals to pairsList length!!!");
             throw new Exception("RTs Length not equals to pairsList length!!!");
@@ -142,7 +143,7 @@ public class MzXMLParser extends BaseParser {
         return null;
     }
 
-    public List<MzIntensityPairs> parseValuesFromAird(RandomAccessFile raf, long start, long end, int precision, boolean isZlibCompression) {
+    public List<MzIntensityPairs> parseValuesFromAird(RandomAccessFile raf, long start, long end) {
 
         List<MzIntensityPairs> pairsList = new ArrayList<>();
         try {
@@ -158,7 +159,7 @@ public class MzXMLParser extends BaseParser {
                 }
                 MzIntensityPairs pairs = new MzIntensityPairs();
                 Float[] mzArray = getValues(new Base64().decode(totalValuesArray[i]));
-                Float[] intensityArray = getValues(new Base64().decode(totalValuesArray[i + 1]));
+                Float[] intensityArray = getValues(new Base64().decode(totalValuesArray[i + 1]), 32, true, ByteOrder.BIG_ENDIAN);
                 pairs.setMzArray(mzArray);
                 pairs.setIntensityArray(intensityArray);
                 pairsList.add(pairs);
@@ -175,33 +176,22 @@ public class MzXMLParser extends BaseParser {
         String value = parseValue(raf, index.getStart(), index.getEnd());
         Float[] values = getValues(new Base64().decode(value), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
 
-        TreeMap<Integer, Integer> map = new TreeMap<>();
-
+        int[] mzArray = new int[values.length/2];
+        float[] intensityArray = new float[values.length/2];
+        int j=0;
         for (int i = 0; i < values.length - 1; i += 2) {
             if (values[i + 1] == 0f) {
                 continue;
             }
-            //set the precision of new values
-//            values[i] = (float) Math.round(values[i] * 1000) / 1000; //mz精确到小数点后面三位
-//            values[i + 1] = (float) Math.round(values[i + 1] * 10) / 10; //intensity精确到小数点后面一位
-            //如果MZ在四舍五入后相同的话需要做累加
-            Integer mz = Math.round(values[i] * 1000);
-            Integer intensity = Math.round(values[i + 1] * 10);
-            if (map.get(mz) != null) {
-                map.put(mz, map.get(mz) + intensity);
-            } else {
-                map.put(mz, intensity);
-            }
+            float intensity = (float) Math.round(values[i + 1] * 10) / 10; //intensity精确到小数点后面一位
+            int mz = Math.round(values[i] * 1000);//mz精确到小数点后面三位
+            mzArray[j] = mz;
+            intensityArray[j] = intensity;
+            j++;
         }
 
-        int i = 0;
-        int[] mzArray = new int[map.keySet().size()];
-        int[] intensityArray = new int[map.keySet().size()];
-        for (Integer key : map.keySet()) {
-            mzArray[i] = key;
-            intensityArray[i] = map.get(key);
-            i++;
-        }
+        mzArray = ArrayUtils.subarray(mzArray,0,j);
+        intensityArray = ArrayUtils.subarray(intensityArray,0,j);
 
         mzArray = CompressUtil.compressForSortedInt(mzArray);
 
