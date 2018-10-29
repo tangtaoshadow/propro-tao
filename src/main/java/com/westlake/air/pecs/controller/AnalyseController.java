@@ -14,6 +14,7 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
@@ -97,7 +98,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("overviews", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
-
+        model.addAttribute("scores", FeatureScores.ScoreType.getUsedTypes());
         return "/analyse/overview/list";
     }
 
