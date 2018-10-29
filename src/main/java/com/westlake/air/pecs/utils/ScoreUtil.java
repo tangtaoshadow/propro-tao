@@ -150,7 +150,7 @@ public class ScoreUtil {
             case VarLibraryDotprod:
                 return featureScores.getVarLibraryDotprod();
             case VarLibraryManhattan:
-                return featureScores.getVarManhattScore();
+                return featureScores.getVarLibraryManhattan();
             case VarLibrarySangle:
                 return featureScores.getVarLibrarySangle();
             case VarLibraryRootmeansquare:
