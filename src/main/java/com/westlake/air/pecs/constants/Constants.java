@@ -71,6 +71,7 @@ public class Constants {
     public static final String SUFFIX_AIRUS_INFO = ".airi";
     public static final String SUFFIX_AIRUS_DATA = ".aird";
     public static final String CHANGE_LINE = "\r\n";
+    public static final String TAB = "\t";
 
     public static final String AIRD_COMPRESSION_TYPE_ZLIB = "zlib";
     public static final String AIRD_PRECISION_32 = "32";

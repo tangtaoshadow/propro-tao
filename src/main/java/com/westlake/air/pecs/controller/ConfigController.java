@@ -30,18 +30,34 @@ public class ConfigController extends BaseController {
     @RequestMapping(value = "/update")
     String update(Model model,
                   @RequestParam(value = "experimentFilePath", required = false) String experimentFilePath,
+                  @RequestParam(value = "oldExperimentFilePath", required = false) String oldExperimentFilePath,
                   @RequestParam(value = "libraryFilePath", required = false) String libraryFilePath,
-                  @RequestParam(value = "prefixForCompressorFile", required = false) String prefixForCompressorFile,
-                  @RequestParam(value = "oldExperimentFilePath", required = false) String oldExperimentFilePath) {
+                  @RequestParam(value = "exportScoresFilePath", required = false) String exportScoresFilePath,
+                  @RequestParam(value = "exportAnalyseFilePath", required = false) String exportAnalyseFilePath,
+                  @RequestParam(value = "prefixForCompressorFile", required = false) String prefixForCompressorFile
+                  ) {
         ConfigDO configDO = configDAO.getConfig();
-        configDO.setExperimentFilePath(experimentFilePath);
-        configDO.setLibraryFilePath(libraryFilePath);
-        configDO.setPrefixForCompressorFile(prefixForCompressorFile);
-        configDO.setOldExperimentFilePath(oldExperimentFilePath);
-
+        if(experimentFilePath != null){
+            configDO.setExperimentFilePath(experimentFilePath);
+        }
+        if(libraryFilePath != null){
+            configDO.setLibraryFilePath(libraryFilePath);
+        }
+        if(prefixForCompressorFile != null){
+            configDO.setPrefixForCompressorFile(prefixForCompressorFile);
+        }
+        if(oldExperimentFilePath != null){
+            configDO.setOldExperimentFilePath(oldExperimentFilePath);
+        }
+        if(exportAnalyseFilePath != null){
+            configDO.setExportAnalyseFilePath(exportAnalyseFilePath);
+        }
+        if(exportScoresFilePath != null){
+            configDO.setExportScoresFilePath(exportScoresFilePath);
+        }
         configDAO.updateConfig(configDO);
         model.addAttribute(SUCCESS_MSG, SuccessMsg.UPDATE_SUCCESS);
-        model.addAttribute("config", configDO);
+        model.addAttribute("config", configDAO.getConfig());
         return "config";
     }
 }

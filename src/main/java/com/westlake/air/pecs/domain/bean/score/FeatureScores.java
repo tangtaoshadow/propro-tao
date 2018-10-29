@@ -1,8 +1,11 @@
 package com.westlake.air.pecs.domain.bean.score;
 
+import com.westlake.air.pecs.constants.Constants;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by Nico Wang Ruimin
@@ -37,7 +40,7 @@ public class FeatureScores {
      * scores.massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比之和
      * scores.weighted_massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比按libraryIntensity加权之和
      */
-    public static final int SCORES_COUNT = ScoreType.values().length;
+    public static final int SCORES_COUNT = ScoreType.getUsedTypes().size();
 //    public static final int SCORES_COUNT = 17;
 
     double rt;
@@ -162,9 +165,9 @@ public class FeatureScores {
     public static String[] getScoresColumns() {
         if (columns == null) {
             columns = new String[SCORES_COUNT];
-            ScoreType[] scoreTypes = ScoreType.values();
+            List<ScoreType> scoreTypes = ScoreType.getUsedTypes();
             for (int i = 0; i < SCORES_COUNT; i++) {
-                columns[i] = scoreTypes[i].getScoreType();
+                columns[i] = scoreTypes.get(i).getTypeName();
             }
         }
 
@@ -173,16 +176,16 @@ public class FeatureScores {
 
     public static Double[] toArray(HashMap<String, Double> scoreMap) {
         Double[] scoreArray = new Double[SCORES_COUNT];
-        ScoreType[] scoreTypes = ScoreType.values();
+        List<ScoreType> scoreTypes = ScoreType.getUsedTypes();
         for (int i = 0; i < SCORES_COUNT; i++) {
-            scoreArray[i] = scoreMap.get(scoreTypes[i].getScoreType());
+            scoreArray[i] = scoreMap.get(scoreTypes.get(i).getTypeName());
         }
 
         return scoreArray;
     }
 
-    public static FeatureScores toFeaturesScores(Double[] scores){
-        if(scores == null || scores.length != 17){
+    public static FeatureScores toFeaturesScores(Double[] scores) {
+        if (scores == null || scores.length != 17) {
             return null;
         }
         FeatureScores featureScores = new FeatureScores();
@@ -207,41 +210,86 @@ public class FeatureScores {
     }
 
     public enum ScoreType {
-        MainVarXxSwathPrelimScore("mainVarXxSwathPrelimScore"),
-//      VarBseriesScore("varBseriesScore"),
-//        VarElutionModelFitScore("varElutionModelFitScore"),
-//      VarXcorrShape("varXcorrShape"),
-        VarIntensityScore("varIntensityScore"),
-//      VarIsotopeCorrelationScore("varIsotopeCorrelationScore"),
-//      VarIsotopeOverlapScore("varIsotopeOverlapScore"),
-        VarLibraryCorr("varLibraryCorr"),
-        VarLibraryRsmd("varLibraryRsmd"),
-        VarLogSnScore("varLogSnScore"),
-//      VarMassdevScore("varMassdevScore"),
-//      VarMassdevScoreWeighted("varMassdevScoreWeighted"),
-        VarNormRtScore("varNormRtScore"),
-        VarXcorrCoelution("varXcorrCoelution"),
-        VarXcorrCoelutionWeighted("varXcorrCoelutionWeighted"),
-        VarXcorrShape("varXcorrShape"),
-        VarXcorrShapeWeighted("varXcorrShapeWeighted"),
+        MainVarXxSwathPrelimScore("mainVarXxSwathPrelimScore", "main_VarXxSwathPrelimScore", true),
+        VarBseriesScore("varBseriesScore", "var_BseriesScore", false),
+        VarElutionModelFitScore("varElutionModelFitScore", "var_ElutionModelFitScore", false),
+        VarIntensityScore("varIntensityScore", "var_IntensityScore", true),
+        VarIsotopeCorrelationScore("varIsotopeCorrelationScore", "var_IsotopeCorrelationScore", false),
+        VarIsotopeOverlapScore("varIsotopeOverlapScore", "var_IsotopeOverlapScore", false),
+        VarLibraryCorr("varLibraryCorr", "var_LibraryCorr", true),
+        VarLibraryRsmd("varLibraryRsmd", "var_LibraryRsmd", true),
+        VarLogSnScore("varLogSnScore", "var_LogSnScore", true),
+        VarMassdevScore("varMassdevScore", "var_MassdevScore", false),
+        VarMassdevScoreWeighted("varMassdevScoreWeighted", "var_MassdevScoreWeighted", false),
+        VarNormRtScore("varNormRtScore", "var_NormRtScore", true),
+        VarXcorrCoelution("varXcorrCoelution", "var_XcorrCoelution", true),
+        VarXcorrCoelutionWeighted("varXcorrCoelutionWeighted", "var_XcorrCoelutionWeighted", true),
+        VarXcorrShape("varXcorrShape", "var_XcorrShape", true),
+        VarXcorrShapeWeighted("varXcorrShapeWeighted", "var_XcorrShapeWeighted", true),
 
-//        VarLibraryDotprod("varLibraryDotprod"),
-//        VarLibraryManhattan("varLibraryManhattan"),
-//        VarLibrarySangle("varLibrarySangle"),
-//        VarLibraryRootmeansquare("varLibraryRootmeansquare"),
-//        VarManhattScore("varManhattScore"),
-//        VarYseriesScore("varYseriesScore"),
+        VarLibraryDotprod("varLibraryDotprod", "var_LibraryDotprod", false),
+        VarLibraryManhattan("varLibraryManhattan", "var_LibraryManhattan", false),
+        VarLibrarySangle("varLibrarySangle", "var_LibrarySangle", false),
+        VarLibraryRootmeansquare("varLibraryRootmeansquare", "var_LibraryRootmeansquare", false),
+        VarManhattScore("varManhattScore", "var_ManhattScore", false),
+        VarYseriesScore("varYseriesScore", "var_YseriesScore", false),
+        ;
 
-;
-        String scoreType;
+        String typeName;
 
-        ScoreType(String scoreType) {
-            this.scoreType = scoreType;
+        String pyProphetName;
+
+        boolean isUsed;
+
+        ScoreType(String typeName, String pyProphetName, Boolean isUsed) {
+            this.typeName = typeName;
+            this.pyProphetName = pyProphetName;
+            this.isUsed = isUsed;
         }
 
-        public String getScoreType(){
-            return scoreType;
+        public String getTypeName() {
+            return typeName;
         }
 
+        public String getPyProphetName() {
+            return pyProphetName;
+        }
+
+        public boolean isUsed() {
+            return isUsed;
+        }
+
+        public static List<ScoreType> getUsedTypes() {
+            List<ScoreType> types = new ArrayList<>();
+            for (ScoreType type : values()) {
+                if (type.isUsed) {
+                    types.add(type);
+                }
+            }
+            return types;
+        }
+
+        public static List<ScoreType> getUnusedTypes() {
+            List<ScoreType> types = new ArrayList<>();
+            for (ScoreType type : values()) {
+                if (!type.isUsed) {
+                    types.add(type);
+                }
+            }
+            return types;
+        }
+
+        public static String getPyProphetScoresColumns() {
+            StringBuilder columns = new StringBuilder();
+            List<ScoreType> scoreTypes = ScoreType.getUsedTypes();
+            for (int i = 0; i < scoreTypes.size(); i++) {
+                if (i != scoreTypes.size() - 1) {
+                    columns.append(scoreTypes.get(i).getPyProphetName()).append(Constants.TAB);
+                } else {
+                    columns.append(scoreTypes.get(i).getPyProphetName()).append(Constants.CHANGE_LINE);
+                }
+            }
+            return columns.toString();
+        }
     }
 }

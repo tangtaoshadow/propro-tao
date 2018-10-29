@@ -70,5 +70,10 @@ public interface ScoresService {
      */
     List<ScoresDO> score(List<AnalyseDataDO> dataList, SwathInput input);
 
-
+    /**
+     * Generate the tsv format file for pyprophet
+     * @param overviewId
+     * @return
+     */
+    String getPyProphetTxt(String overviewId);
 }

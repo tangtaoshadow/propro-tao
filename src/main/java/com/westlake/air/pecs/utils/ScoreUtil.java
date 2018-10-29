@@ -1,8 +1,11 @@
 package com.westlake.air.pecs.utils;
 
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores.ScoreType;
 import com.westlake.air.pecs.domain.bean.score.IntegrateWindowMzIntensity;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
-import com.westlake.air.pecs.feature.FeatureFinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -12,29 +15,33 @@ import java.util.List;
  */
 public class ScoreUtil {
 
+    public static final Logger logger = LoggerFactory.getLogger(ScoreUtil.class);
+
     /**
      * invert y = kx + b to x = 1/k y + -b/k;
+     *
      * @param slopeIntercept k & b input
      * @return 1/k -b/k
      */
-    public static SlopeIntercept trafoInverter(SlopeIntercept slopeIntercept){
+    public static SlopeIntercept trafoInverter(SlopeIntercept slopeIntercept) {
         double slope = slopeIntercept.getSlope();
         double intercept = slopeIntercept.getIntercept();
         SlopeIntercept slopeInterceptInvert = new SlopeIntercept();
 
-        if(slope == 0d){
+        if (slope == 0d) {
             slope = 0.000001d;
         }
         slopeInterceptInvert.setSlope(1 / slope);
-        slopeInterceptInvert.setIntercept(- intercept / slope);
+        slopeInterceptInvert.setIntercept(-intercept / slope);
 
         return slopeInterceptInvert;
     }
 
     /**
      * apply kx + b
+     *
      * @param slopeIntercept k & b (may be inverted)
-     * @param value x
+     * @param value          x
      * @return y
      */
     public static double trafoApplier(SlopeIntercept slopeIntercept, Double value) {
@@ -48,21 +55,22 @@ public class ScoreUtil {
     /**
      * 1) get sum of list
      * 2) divide elements in list by sum
+     *
      * @param libraryIntensity input intensity list
      * @return output normalized intensity list
      */
-    public static double[] normalizeSumDouble(List<Double> libraryIntensity){
+    public static double[] normalizeSumDouble(List<Double> libraryIntensity) {
         double[] normalizedLibraryIntensity = new double[libraryIntensity.size()];
         double sum = 0d;
-        for(Double intensity: libraryIntensity){
+        for (Double intensity : libraryIntensity) {
             sum += intensity;
         }
 
-        if(sum == 0d){
+        if (sum == 0d) {
             sum += 0.000001;
         }
 
-        for(int i = 0; i<libraryIntensity.size(); i++){
+        for (int i = 0; i < libraryIntensity.size(); i++) {
             normalizedLibraryIntensity[i] = (libraryIntensity.get(i) / sum);
         }
         return normalizedLibraryIntensity;
@@ -72,27 +80,28 @@ public class ScoreUtil {
      * 1) get left and right index corresponding to spectrum
      * 2) get interval intensity sum to intensity
      * 3) get interval average mz by intensity(as weight)
-     * @param spectrumMzArray spectrum
+     *
+     * @param spectrumMzArray  spectrum
      * @param spectrumIntArray spectrum
-     * @param left left mz
-     * @param right right mz
+     * @param left             left mz
+     * @param right            right mz
      * @return float mz,intensity boolean signalFound
      */
-    public static IntegrateWindowMzIntensity integrateWindow(List<Float> spectrumMzArray, List<Float> spectrumIntArray, double left, double right){
+    public static IntegrateWindowMzIntensity integrateWindow(List<Float> spectrumMzArray, List<Float> spectrumIntArray, double left, double right) {
         IntegrateWindowMzIntensity mzIntensity = new IntegrateWindowMzIntensity();
 
         double mz = 0d, intensity = 0d;
         int leftIndex = MathUtil.bisection(spectrumMzArray, left).getHigh();
         int rightIndex = MathUtil.bisection(spectrumMzArray, right).getLow();
 
-        for(int index = leftIndex; index <=rightIndex; index ++){
+        for (int index = leftIndex; index <= rightIndex; index++) {
             intensity += spectrumIntArray.get(index);
             mz += spectrumMzArray.get(index) * spectrumIntArray.get(index);
         }
-        if(intensity > 0f) {
+        if (intensity > 0f) {
             mz /= intensity;
             mzIntensity.setSignalFound(true);
-        }else {
+        } else {
             mz = -1;
             intensity = 0;
             mzIntensity.setSignalFound(false);
@@ -101,5 +110,58 @@ public class ScoreUtil {
         mzIntensity.setIntensity(intensity);
 
         return mzIntensity;
+    }
+
+    public static Double getScoreByType(FeatureScores featureScores, ScoreType type) {
+
+        switch (type) {
+            case MainVarXxSwathPrelimScore:
+                return featureScores.getMainVarXxSwathPrelimScore();
+            case VarBseriesScore:
+                return featureScores.getVarBseriesScore();
+            case VarElutionModelFitScore:
+                return featureScores.getVarElutionModelFitScore();
+            case VarIntensityScore:
+                return featureScores.getVarIntensityScore();
+            case VarIsotopeCorrelationScore:
+                return featureScores.getVarIsotopeCorrelationScore();
+            case VarIsotopeOverlapScore:
+                return featureScores.getVarIsotopeOverlapScore();
+            case VarLibraryCorr:
+                return featureScores.getVarLibraryCorr();
+            case VarLibraryRsmd:
+                return featureScores.getVarLibraryRsmd();
+            case VarLogSnScore:
+                return featureScores.getVarLogSnScore();
+            case VarMassdevScore:
+                return featureScores.getVarMassdevScore();
+            case VarMassdevScoreWeighted:
+                return featureScores.getVarMassdevScoreWeighted();
+            case VarNormRtScore:
+                return featureScores.getVarNormRtScore();
+            case VarXcorrCoelution:
+                return featureScores.getVarXcorrCoelution();
+            case VarXcorrCoelutionWeighted:
+                return featureScores.getVarXcorrCoelutionWeighted();
+            case VarXcorrShape:
+                return featureScores.getVarXcorrShape();
+            case VarXcorrShapeWeighted:
+                return featureScores.getVarXcorrShapeWeighted();
+            case VarLibraryDotprod:
+                return featureScores.getVarLibraryDotprod();
+            case VarLibraryManhattan:
+                return featureScores.getVarManhattScore();
+            case VarLibrarySangle:
+                return featureScores.getVarLibrarySangle();
+            case VarLibraryRootmeansquare:
+                return featureScores.getVarLibraryRootmeansquare();
+            case VarManhattScore:
+                return featureScores.getVarManhattScore();
+            case VarYseriesScore:
+                return featureScores.getVarYseriesScore();
+        }
+
+        logger.error("No Score Type Matched:" + type.getTypeName());
+        return 0d;
     }
 }

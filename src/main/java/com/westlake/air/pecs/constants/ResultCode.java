@@ -16,6 +16,7 @@ public enum ResultCode implements Serializable {
      */
     ERROR("SYSTEM_ERROR", "系统繁忙 ，请稍后再试!"),
     EXCEPTION("SYSTEM_EXCEPTION", "系统繁忙， 稍后再试!"),
+    IO_EXCEPTION("IO_EXCEPTION", "文件读写错误"),
 
     /**
      * ******
@@ -85,6 +86,7 @@ public enum ResultCode implements Serializable {
      */
      ALL_SCORE_DATA_ARE_DECOY("ALL_SCORE_DATA_ARE_DECOY","所有的数据都是伪肽段数据,无法打分"),
      ALL_SCORE_DATA_ARE_REAL("ALL_SCORE_DATA_ARE_REAL","所有的数据都是真实肽段数据,未包含伪肽段,无法打分"),
+     SCORES_NOT_EXISTED("SCORES_NOT_EXISTED","打分数据不存在"),
 
     /**
      * ******

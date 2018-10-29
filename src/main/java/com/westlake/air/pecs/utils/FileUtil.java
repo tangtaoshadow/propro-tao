@@ -77,11 +77,16 @@ public class FileUtil {
 
     }
 
-    public static void writeFile(String filePath, String content) throws IOException {
+    public static void writeFile(String filePath, String content, boolean isOverride) throws IOException {
         File file = new File(filePath);
-        if(!file.exists()){
+        if(isOverride){
             file.createNewFile();
+        }else{
+            if(!file.exists()){
+                file.createNewFile();
+            }
         }
+
         byte[] b = content.getBytes();
         int l = b.length;
         OutputStream os = new FileOutputStream(file);
@@ -89,11 +94,16 @@ public class FileUtil {
         os.close();
     }
 
-    public static void writeFile(String filePath, List list) throws IOException {
+    public static void writeFile(String filePath, List list, boolean isOverride) throws IOException {
         File file = new File(filePath);
-        if(!file.exists()){
+        if(isOverride){
             file.createNewFile();
+        }else{
+            if(!file.exists()){
+                file.createNewFile();
+            }
         }
+
         String content = JSONArray.toJSONString(list);
         byte[] b = content.getBytes();
         int l = b.length;

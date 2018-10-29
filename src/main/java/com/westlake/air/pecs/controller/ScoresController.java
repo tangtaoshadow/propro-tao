@@ -1,20 +1,24 @@
 package com.westlake.air.pecs.controller;
 
-import com.westlake.air.pecs.constants.SuccessMsg;
+import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.ConfigDO;
-import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.ScoresDO;
-import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScoresQuery;
+import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.ScoresService;
+import com.westlake.air.pecs.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -27,6 +31,10 @@ public class ScoresController extends BaseController {
 
     @Autowired
     ScoresService scoresService;
+    @Autowired
+    ConfigDAO configDAO;
+    @Autowired
+    AnalyseOverviewService analyseOverviewService;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -51,5 +59,28 @@ public class ScoresController extends BaseController {
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalNum", resultDO.getTotalNum());
         return "scores/list";
+    }
+
+    @RequestMapping(value = "/export/{overviewId}")
+    @ResponseBody
+    ResultDO export(Model model, @PathVariable("overviewId") String overviewId) {
+        model.addAttribute("overviewId", overviewId);
+        ConfigDO configDO = configDAO.getConfig();
+        String exportPath = configDO.getExportScoresFilePath();
+        ResultDO<AnalyseOverviewDO> result = analyseOverviewService.getById(overviewId);
+        if (result.isFailed()) {
+            return ResultDO.buildError(ResultCode.SCORES_NOT_EXISTED);
+        }
+
+        AnalyseOverviewDO overviewDO = result.getModel();
+        String outputFileName = exportPath + "/" + overviewDO.getExpName() + "-" + overviewDO.getLibraryName() + "-" + overviewId + ".tsv";
+
+        String content = scoresService.getPyProphetTxt(overviewId);
+        try {
+            FileUtil.writeFile(outputFileName, content, true);
+        } catch (IOException e) {
+            return ResultDO.buildError(ResultCode.IO_EXCEPTION);
+        }
+        return new ResultDO(true);
     }
 }

@@ -9,6 +9,7 @@ import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
+import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
@@ -65,6 +66,8 @@ public class AnalyseController extends BaseController {
     GaussFilter gaussFilter;
     @Autowired
     SignalToNoiseEstimator signalToNoiseEstimator;
+    @Autowired
+    ConfigDAO configDAO;
 
     @RequestMapping(value = "/overview/list")
     String overviewList(Model model,
@@ -133,6 +136,7 @@ public class AnalyseController extends BaseController {
         AnalyseDataQuery query = new AnalyseDataQuery(id, 2);
         int count = analyseDataService.count(query).intValue();
         int totalPage = count % pageSize == 0 ? count / pageSize : (count / pageSize + 1);
+
         File file = new File("D://test.json");
         if (!file.exists()) {
             file.createNewFile();

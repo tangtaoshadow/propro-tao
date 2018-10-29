@@ -24,6 +24,7 @@ import com.westlake.air.pecs.rtnormalizer.RTNormalizerScorer;
 import com.westlake.air.pecs.scorer.*;
 import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.MathUtil;
+import com.westlake.air.pecs.utils.ScoreUtil;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
 import org.slf4j.Logger;
@@ -386,6 +387,29 @@ public class ScoresServiceImpl implements ScoresService {
         scoresDAO.insert(pecsScoreList);
         logger.info("打分插入完毕");
         return pecsScoreList;
+    }
+
+    @Override
+    public String getPyProphetTxt(String overviewId) {
+        List<ScoresDO> scores = getAllByOverviewId(overviewId);
+        String pyprophetColumns = "transition_group_id\trun_id\tdecoy\t" + FeatureScores.ScoreType.getPyProphetScoresColumns();
+        StringBuilder sb = new StringBuilder(pyprophetColumns);
+        List<FeatureScores.ScoreType> scoreTypes = FeatureScores.ScoreType.getUsedTypes();
+        for (ScoresDO score : scores) {
+            for (FeatureScores fs : score.getFeatureScoresList()) {
+                sb.append((score.getIsDecoy() ? "DECOY_" : "") + score.getPeptideRef()).append(Constants.TAB);
+                sb.append(0).append(Constants.TAB);
+                sb.append(score.getIsDecoy() ? 1 : 0).append(Constants.TAB);
+                for (int i = 0; i < scoreTypes.size(); i++) {
+                    if (i == scoreTypes.size() - 1) {
+                        sb.append(ScoreUtil.getScoreByType(fs, scoreTypes.get(i))).append(Constants.CHANGE_LINE);
+                    } else {
+                        sb.append(ScoreUtil.getScoreByType(fs, scoreTypes.get(i))).append(Constants.TAB);
+                    }
+                }
+            }
+        }
+        return sb.toString();
     }
 
     /**
