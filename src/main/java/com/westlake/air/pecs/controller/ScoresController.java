@@ -1,11 +1,14 @@
 package com.westlake.air.pecs.controller;
 
+import com.westlake.air.pecs.async.ScoreTask;
 import com.westlake.air.pecs.constants.ResultCode;
+import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.ConfigDO;
 import com.westlake.air.pecs.domain.db.ScoresDO;
+import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.ScoresQuery;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.ScoresService;
@@ -35,6 +38,8 @@ public class ScoresController extends BaseController {
     ConfigDAO configDAO;
     @Autowired
     AnalyseOverviewService analyseOverviewService;
+    @Autowired
+    ScoreTask scoreTask;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -76,10 +81,12 @@ public class ScoresController extends BaseController {
     }
 
     @RequestMapping(value = "/export/{overviewId}")
-    @ResponseBody
-    ResultDO export(Model model, @PathVariable("overviewId") String overviewId) {
-        model.addAttribute("overviewId", overviewId);
+    String export(Model model, @PathVariable("overviewId") String overviewId) {
 
-        return new ResultDO(true);
+        TaskDO taskDO = new TaskDO(TaskTemplate.EXPORT_SUBSCORES_TSV_FILE_FOR_PYPROPHET, "OverviewId" + ":" + overviewId);
+        taskService.insert(taskDO);
+        scoreTask.exportForPyProphet(overviewId, taskDO);
+
+        return "redirect:/task/detail/" + taskDO.getId();
     }
 }

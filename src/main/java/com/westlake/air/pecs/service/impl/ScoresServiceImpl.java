@@ -420,7 +420,7 @@ public class ScoresServiceImpl implements ScoresService {
     }
 
     @Override
-    public ResultDO export(String overviewId) {
+    public ResultDO exportForPyProphet(String overviewId) {
 
         ConfigDO configDO = configDAO.getConfig();
         String exportPath = configDO.getExportScoresFilePath();

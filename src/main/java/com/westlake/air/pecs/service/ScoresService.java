@@ -83,5 +83,5 @@ public interface ScoresService {
      * @param overviewId
      * @return
      */
-    ResultDO export(String overviewId);
+    ResultDO exportForPyProphet(String overviewId);
 }

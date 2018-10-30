@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.async;
 
+import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
@@ -32,7 +33,7 @@ public class ScoreTask extends BaseTask {
         taskService.update(taskDO);
         List<AnalyseDataDO> dataList = analyseDataService.getAllByOverviewId(overviewId);
 
-        taskDO.addLog("卷积结果获取完毕,耗时:"+(System.currentTimeMillis() - start)+".开始进行打分");
+        taskDO.addLog("卷积结果获取完毕,耗时:" + (System.currentTimeMillis() - start) + ".开始进行打分");
         taskService.update(taskDO);
 
         start = System.currentTimeMillis();
@@ -49,8 +50,20 @@ public class ScoreTask extends BaseTask {
     }
 
     @Async
-    public void score(String overviewId, TaskDO taskDO){
-
-        scoresService.export(overviewId);
+    public void exportForPyProphet(String overviewId, TaskDO taskDO) {
+        long start = System.currentTimeMillis();
+        taskDO.addLog("开始进行子分数TSV文件导出");
+        taskService.update(taskDO);
+        ResultDO resultDO = scoresService.exportForPyProphet(overviewId);
+        if (resultDO.isSuccess()) {
+            taskDO.addLog("文件导出成功,耗时:" + (System.currentTimeMillis() - start));
+            taskDO.finish(TaskDO.STATUS_SUCCESS);
+            taskService.update(taskDO);
+        } else {
+            taskDO.addLog("文件导出失败,耗时:" + (System.currentTimeMillis() - start));
+            taskDO.addLog(resultDO.getMsgInfo());
+            taskDO.finish(TaskDO.STATUS_FAILED);
+            taskService.update(taskDO);
+        }
     }
 }

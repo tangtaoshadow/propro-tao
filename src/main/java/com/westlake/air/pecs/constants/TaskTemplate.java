@@ -47,6 +47,11 @@ public enum TaskTemplate {
     COMPRESSOR_AND_SORT("COMPRESSOR_AND_SORT", ""),
 
     /**
+     * export subscores tsv file for pyprophet
+     */
+    EXPORT_SUBSCORES_TSV_FILE_FOR_PYPROPHET("EXPORT_SUBSCORES_TSV_FILE_FOR_PYPROPHET", ""),
+
+    /**
      * task for any tests
      */
     TEST("TEST", ""),
