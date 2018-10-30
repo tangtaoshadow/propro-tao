@@ -68,7 +68,7 @@ public class Airus {
         Double[] dscore = calculateDscore(weights, scoreData);
         Double[] topTargetDscores = AirusUtil.getTopTargetPeaks(dscore, scoreData.getIsDecoy(), AirusUtil.findTopIndex(dscore, scoreData.getGroupNumId()));
         Double[] topDecoyDscores = AirusUtil.getTopDecoyPeaks(dscore, scoreData.getIsDecoy(), AirusUtil.findTopIndex(dscore, scoreData.getGroupNumId()));
-        String[] scoreColumns = FeatureScores.getScoresColumns();
+        String[] scoreColumns = FeatureScores.getScoresColumnNames();
 
         HashMap<String, Double> classifierTable = new HashMap<String, Double>();
         for (int i = 0; i < weights.length; i++) {
@@ -121,7 +121,7 @@ public class Airus {
                     peptideRef = "DECOY_"+peptideRef;
                 }
                 peptideRefList.add(peptideRef);
-                HashMap<String, Double> scoreMap = fs.buildScoreMap();
+                HashMap<String, Double> scoreMap = fs.getScoresMap();
                 scoreList.add(scoreMap);
                 for (String key : scoreMap.keySet()) {
                     if (scoreMap.get(key).equals(Double.NaN)) {

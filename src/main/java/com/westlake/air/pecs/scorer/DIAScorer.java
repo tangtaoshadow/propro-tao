@@ -70,8 +70,8 @@ public class DIAScorer {
                 ppmScoreWeighted += diffPpm * libraryIntensity.get(i);
             }
         }
-        scores.setVarMassdevScore(ppmScore);
-        scores.setVarMassdevScoreWeighted(ppmScoreWeighted);
+        scores.put(FeatureScores.ScoreType.VarMassdevScore, ppmScore);
+        scores.put(FeatureScores.ScoreType.VarMassdevScoreWeighted, ppmScoreWeighted);
     }
 
 
@@ -242,8 +242,8 @@ public class DIAScorer {
             }
             isotopeOverlap += nrOccurences * relIntensity;
         }
-        scores.setVarIsotopeCorrelationScore(isotopeCorr);
-        scores.setVarIsotopeOverlapScore(isotopeOverlap);
+        scores.put(FeatureScores.ScoreType.VarIsotopeCorrelationScore, isotopeCorr);
+        scores.put(FeatureScores.ScoreType.VarIsotopeOverlapScore, isotopeOverlap);
     }
 
     /**
@@ -266,8 +266,8 @@ public class DIAScorer {
         List<Double> ySeriesList = bySeries.getYSeries();
         int ySeriesScore = getSeriesScore(ySeriesList, spectrumMzArray, spectrumIntArray);
 
-        scores.setVarBseriesScore(bSeriesScore);
-        scores.setVarYseriesScore(ySeriesScore);
+        scores.put(FeatureScores.ScoreType.VarBseriesScore, (double)bSeriesScore);
+        scores.put(FeatureScores.ScoreType.VarYseriesScore, (double)ySeriesScore);
     }
 
 

@@ -35,28 +35,29 @@ public class RTNormalizerScorer {
 
 
     /**
-     *        return scores.library_corr                     * -0.34664267 +
-     *               scores.library_norm_manhattan           *  2.98700722 +
-     *               scores.norm_rt_score                    *  7.05496384 +
-     *               scores.xcorr_coelution_score            *  0.09445371 +
-     *               scores.xcorr_shape_score                * -5.71823862 +
-     *               scores.log_sn_score                     * -0.72989582 +
-     *               scores.elution_model_fit_score          *  1.88443209;
-     * @param chromatograms chromatogramList in transitionGroup
+     * return scores.library_corr                     * -0.34664267 +
+     * scores.library_norm_manhattan           *  2.98700722 +
+     * scores.norm_rt_score                    *  7.05496384 +
+     * scores.xcorr_coelution_score            *  0.09445371 +
+     * scores.xcorr_shape_score                * -5.71823862 +
+     * scores.log_sn_score                     * -0.72989582 +
+     * scores.elution_model_fit_score          *  1.88443209;
+     *
+     * @param chromatograms      chromatogramList in transitionGroup
      * @param experimentFeatures features extracted from chromatogramList in transitionGroup
-     * @param libraryIntensity intensity in transitionList in transitionGroup
+     * @param libraryIntensity   intensity in transitionList in transitionGroup
      * @return List of overallQuality
      */
-    public List<ScoreRtPair> score(List<RtIntensityPairsDouble> chromatograms, List<List<ExperimentFeature>> experimentFeatures, List<Double> libraryIntensity, List<double[]> noise1000List, SlopeIntercept slopeIntercept, double groupRt){
+    public List<ScoreRtPair> score(List<RtIntensityPairsDouble> chromatograms, List<List<ExperimentFeature>> experimentFeatures, List<Double> libraryIntensity, List<double[]> noise1000List, SlopeIntercept slopeIntercept, double groupRt) {
 
 
         List<ScoreRtPair> finalScores = new ArrayList<>();
-        for(List<ExperimentFeature> features: experimentFeatures){
+        for (List<ExperimentFeature> features : experimentFeatures) {
             FeatureScores scores = new FeatureScores();
             chromatographicScorer.calculateChromatographicScores(features, libraryIntensity, scores);
             chromatographicScorer.calculateLogSnScore(chromatograms, features, noise1000List, scores);
 //            libraryScorer.calculateIntensityScore(features, scores);
-            libraryScorer.calculateLibraryScores(features,libraryIntensity, scores);
+            libraryScorer.calculateLibraryScores(features, libraryIntensity, scores);
 
 //            new ElutionScorer().calculateElutionModelScore(features,scores);
 //            libraryScorer.calculateNormRtScore(features, slopeIntercept, groupRt, scores);
@@ -75,17 +76,18 @@ public class RTNormalizerScorer {
 
     /**
      * The score that is really matter to final pairs selection.
+     *
      * @param scores pre-calculated
      * @return final score
      */
-    private double calculateLdaPrescore(FeatureScores scores){
-        return  scores.getVarLibraryCorr()              * -0.34664267d +
-                scores.getVarLibraryRsmd()              *  2.98700722d +
-                scores.getVarXcorrCoelution()           *  0.09445371d +
-                scores.getVarXcorrShape()               * -5.71823862d +
-                scores.getVarLogSnScore()               * -0.72989582d +
-                scores.getVarNormRtScore()              *  7.05496384d +
-                scores.getVarElutionModelFitScore()     *  1.88443209d;
+    private double calculateLdaPrescore(FeatureScores scores) {
+        return scores.get(FeatureScores.ScoreType.VarLibraryCorr) * -0.34664267d +
+                scores.get(FeatureScores.ScoreType.VarLibraryRsmd) * 2.98700722d +
+                scores.get(FeatureScores.ScoreType.VarXcorrCoelution) * 0.09445371d +
+                scores.get(FeatureScores.ScoreType.VarXcorrShape) * -5.71823862d +
+                scores.get(FeatureScores.ScoreType.VarLogSnScore) * -0.72989582d +
+                scores.get(FeatureScores.ScoreType.VarNormRtScore) * 7.05496384d +
+                scores.get(FeatureScores.ScoreType.VarElutionModelFitScore) * 1.88443209d;
     }
 
 

@@ -41,128 +41,12 @@ public class FeatureScores {
      * scores.weighted_massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比按libraryIntensity加权之和
      */
     public static final int SCORES_COUNT = ScoreType.getUsedTypes().size();
-//    public static final int SCORES_COUNT = 17;
 
     double rt;
 
-    //Swath主打分
-    double mainVarXxSwathPrelimScore;
+    HashMap<String, Double> scoresMap;
 
-    //对experiment和library intensity算Pearson相关系数
-    double varLibraryCorr;
-
-    //对experiment intensity 算占比差距平均值
-    double varLibraryRsmd;
-
-    //
-    double varLibraryDotprod;
-
-    //
-    double varLibraryManhattan;
-
-    //
-    double varLibrarySangle;
-
-    //
-    double varLibraryRootmeansquare;
-
-    //
-    double varManhattScore;
-
-    //互相关偏移的mean + std
-    double varXcorrCoelution;
-
-    //互相关序列最大值的平均值
-    double varXcorrShape;
-
-    //log(距离ApexRt最近点的stn值之和)
-    double varLogSnScore;
-
-    //同一个peptideRef下, 所有HullPoints的intensity之和 除以 所有intensity之和
-    double varIntensityScore;
-
-    //带权重的相关偏移sum
-    double varXcorrCoelutionWeighted;
-
-    //带权重的互相关序列最大值的平均值
-    double varXcorrShapeWeighted;
-
-    //normalizedExperimentalRt与groupRt之差
-    double varNormRtScore;
-
-    //
-    double varElutionModelFitScore;
-
-    //
-    double varIsotopeCorrelationScore;
-
-    //feature intensity加权的可能（带电量1-4）无法区分同位素峰值的平均发生次数之和
-    double varIsotopeOverlapScore;
-
-    //按spectrum intensity加权的mz与product mz的偏差ppm百分比之和
-    double varMassdevScore;
-    //按spectrum intensity加权的mz与product mz的偏差ppm百分比按libraryIntensity加权之和
-    double varMassdevScoreWeighted;
-
-    //peptideRt对应的spectrumArray中，检测到的b离子的数量
-    double varBseriesScore;
-    //peptideRt对应的spectrumArray中，检测到的y离子的数量
-    double varYseriesScore;
-
-    public static final String MainVarXxSwathPrelimScore = "mainVarXxSwathPrelimScore";
-    public static final String VarLibraryCorr = "varLibraryCorr";
-    public static final String VarLibraryRsmd = "varLibraryRsmd";
-    public static final String VarXcorrCoelution = "varXcorrCoelution";
-    public static final String VarXcorrCoelutionWeighted = "varXcorrCoelutionWeighted";
-    public static final String VarXcorrShape = "varXcorrShape";
-    public static final String VarXcorrShapeWeighted = "varXcorrShapeWeighted";
-    public static final String VarNormRtScore = "varNormRtScore";
-    public static final String VarIntensityScore = "varIntensityScore";
-    public static final String VarLogSnScore = "varLogSnScore";
-    public static final String VarElutionModelFitScore = "varElutionModelFitScore";
-    public static final String VarIsotopeCorrelationScore = "varIsotopeCorrelationScore";
-    public static final String VarIsotopeOverlapScore = "varIsotopeOverlapScore";
-    public static final String VarMassdevScore = "varMassdevScore";
-    public static final String VarMassdevScoreWeighted = "varMassdevScoreWeighted";
-    public static final String VarBseriesScore = "varBseriesScore";
-    public static final String VarYseriesScore = "varYseriesScore";
-
-    public static final String VarLibraryDotprod = "varLibraryDotprod";
-    public static final String VarLibraryManhattan = "varLibraryManhattan";
-    public static final String VarLibrarySangle = "varLibrarySangle";
-    public static final String VarLibraryRootmeansquare = "varLibraryRootmeansquare";
-    public static final String VarManhattScore = "varManhattScore";
-
-    public HashMap<String, Double> buildScoreMap() {
-        HashMap<String, Double> map = new HashMap<>();
-        map.put(MainVarXxSwathPrelimScore, mainVarXxSwathPrelimScore);
-        map.put(VarLibraryCorr, varLibraryCorr);
-        map.put(VarLibraryRsmd, varLibraryRsmd);
-        map.put(VarXcorrCoelution, varXcorrCoelution);
-        map.put(VarXcorrCoelutionWeighted, varXcorrCoelutionWeighted);
-        map.put(VarXcorrShape, varXcorrShape);
-        map.put(VarXcorrShapeWeighted, varXcorrShapeWeighted);
-        map.put(VarNormRtScore, varNormRtScore);
-        map.put(VarIntensityScore, varIntensityScore);
-        map.put(VarLogSnScore, varLogSnScore);
-        map.put(VarElutionModelFitScore, varElutionModelFitScore);
-        map.put(VarIsotopeCorrelationScore, varIsotopeCorrelationScore);
-        map.put(VarIsotopeOverlapScore, varIsotopeOverlapScore);
-        map.put(VarMassdevScore, varMassdevScore);
-        map.put(VarMassdevScoreWeighted, varMassdevScoreWeighted);
-        map.put(VarBseriesScore, varBseriesScore);
-        map.put(VarYseriesScore, varYseriesScore);
-
-        map.put(VarLibraryDotprod, varLibraryDotprod);
-        map.put(VarLibraryManhattan, varLibraryManhattan);
-        map.put(VarLibrarySangle, varLibrarySangle);
-        map.put(VarLibraryRootmeansquare, varLibraryRootmeansquare);
-        map.put(VarManhattScore, varManhattScore);
-
-        return map;
-    }
-
-    public static String[] getScoresColumns() {
+    public static String[] getScoresColumnNames() {
         if (columns == null) {
             columns = new String[SCORES_COUNT];
             List<ScoreType> scoreTypes = ScoreType.getUsedTypes();
@@ -184,66 +68,117 @@ public class FeatureScores {
         return scoreArray;
     }
 
-    public static FeatureScores toFeaturesScores(Double[] scores) {
-        if (scores == null || scores.length != 17) {
-            return null;
+    public void put(String typeName, Double score) {
+        if (scoresMap == null) {
+            scoresMap = new HashMap<>();
         }
-        FeatureScores featureScores = new FeatureScores();
-        featureScores.setMainVarXxSwathPrelimScore(scores[0]);
-        featureScores.setVarBseriesScore(scores[1]);
-        featureScores.setVarElutionModelFitScore(scores[2]);
-        featureScores.setVarIntensityScore(scores[3]);
-        featureScores.setVarIsotopeCorrelationScore(scores[4]);
-        featureScores.setVarIsotopeOverlapScore(scores[5]);
-        featureScores.setVarLibraryCorr(scores[6]);
-        featureScores.setVarLibraryRsmd(scores[7]);
-        featureScores.setVarLogSnScore(scores[8]);
-        featureScores.setVarMassdevScore(scores[9]);
-        featureScores.setVarMassdevScoreWeighted(scores[10]);
-        featureScores.setVarNormRtScore(scores[11]);
-        featureScores.setVarXcorrCoelution(scores[12]);
-        featureScores.setVarXcorrCoelutionWeighted(scores[13]);
-        featureScores.setVarXcorrShape(scores[14]);
-        featureScores.setVarXcorrShapeWeighted(scores[15]);
-        featureScores.setVarYseriesScore(scores[16]);
-        return featureScores;
+        scoresMap.put(typeName, score);
+    }
+
+    public void put(ScoreType type, Double score) {
+        if (scoresMap == null) {
+            scoresMap = new HashMap<>();
+        }
+        scoresMap.put(type.getTypeName(), score);
+    }
+
+    public Double get(ScoreType type) {
+        if (scoresMap == null) {
+            return null;
+        } else {
+            return scoresMap.get(type.getTypeName());
+        }
+    }
+
+    public Double get(String typeName) {
+        if (scoresMap == null) {
+            return null;
+        } else {
+            return scoresMap.get(typeName);
+        }
     }
 
     public enum ScoreType {
-        MainVarXxSwathPrelimScore("MainScore", "main_VarXxSwathPrelimScore", true),
-        VarBseriesScore("BseriesScore", "var_BseriesScore", true),
-        VarElutionModelFitScore("ElutionModelFitScore", "var_ElutionModelFitScore", true),
-        VarIntensityScore("IntensityScore", "var_IntensityScore", true),
-        VarIsotopeCorrelationScore("IsotopeCorrelationScore", "var_IsotopeCorrelationScore", true),
-        VarIsotopeOverlapScore("IsotopeOverlapScore", "var_IsotopeOverlapScore", true),
-        VarLibraryCorr("LibraryCorr", "var_LibraryCorr", true),
-        VarLibraryRsmd("LibraryRsmd", "var_LibraryRsmd", true),
-        VarLogSnScore("LogSnScore", "var_LogSnScore", true),
-        VarMassdevScore("MassdevScore", "var_MassdevScore", true),
-        VarMassdevScoreWeighted("MassdevScoreWeighted", "var_MassdevScoreWeighted", true),
-        VarNormRtScore("NormRtScore", "var_NormRtScore", true),
-        VarXcorrCoelution("XcorrCoelution", "var_XcorrCoelution", true),
-        VarXcorrCoelutionWeighted("XcorrCoelutionWeighted", "var_XcorrCoelutionWeighted", true),
-        VarXcorrShape("XcorrShape", "var_XcorrShape", true),
-        VarXcorrShapeWeighted("XcorrShapeWeighted", "var_XcorrShapeWeighted", true),
-        VarLibraryDotprod("LibraryDotprod", "var_LibraryDotprod", true),
-        VarLibraryManhattan("LibraryManhattan", "var_LibraryManhattan", true),
-        VarLibrarySangle("LibrarySangle", "var_LibrarySangle", true),
-        VarLibraryRootmeansquare("LibraryRootmeansquare", "var_LibraryRootmeansquare", true),
-        VarManhattScore("ManhattScore", "var_ManhattScore", true),
-        VarYseriesScore("YseriesScore", "var_YseriesScore", true),
+
+        MainVarXxSwathPrelimScore("MainScore", "main_VarXxSwathPrelimScore",
+                "Swath主打分",
+                true),
+        VarBseriesScore("BseriesScore", "var_BseriesScore",
+                "peptideRt对应的spectrumArray中，检测到的b离子的数量",
+                true),
+        VarElutionModelFitScore("ElutionModelFitScore", "var_ElutionModelFitScore",
+                "",
+                true),
+        VarIntensityScore("IntensityScore", "var_IntensityScore",
+                "同一个peptideRef下, 所有HullPoints的intensity之和 除以 所有intensity之和",
+                true),
+        VarIsotopeCorrelationScore("IsotopeCorrelationScore", "var_IsotopeCorrelationScore",
+                "",
+                true),
+        VarIsotopeOverlapScore("IsotopeOverlapScore", "var_IsotopeOverlapScore",
+                "feature intensity加权的可能（带电量1-4）无法区分同位素峰值的平均发生次数之和",
+                true),
+        VarLibraryCorr("LibraryCorr", "var_LibraryCorr",
+                "对experiment和library intensity算Pearson相关系",
+                true),
+        VarLibraryRsmd("LibraryRsmd", "var_LibraryRsmd",
+                "对experiment intensity 算占比差距平均值", true),
+        VarLogSnScore("LogSnScore", "var_LogSnScore", "log(距离ApexRt最近点的stn值之和)",
+                true),
+        VarMassdevScore("MassdevScore", "var_MassdevScore",
+                "按spectrum intensity加权的mz与product mz的偏差ppm百分比之和",
+                true),
+        VarMassdevScoreWeighted("MassdevScoreWeighted", "var_MassdevScoreWeighted",
+                "按spectrum intensity加权的mz与product mz的偏差ppm百分比按libraryIntensity加权之和",
+                true),
+        VarNormRtScore("NormRtScore", "var_NormRtScore",
+                "normalizedExperimentalRt与groupRt之差",
+                true),
+        VarXcorrCoelution("XcorrCoelution", "var_XcorrCoelution",
+                "互相关偏移的mean + std",
+                true),
+        VarXcorrCoelutionWeighted("XcorrCoelutionWeighted", "var_XcorrCoelutionWeighted",
+                "带权重的相关偏移sum",
+                true),
+        VarXcorrShape("XcorrShape", "var_XcorrShape",
+                "互相关序列最大值的平均值",
+                true),
+        VarXcorrShapeWeighted("XcorrShapeWeighted", "var_XcorrShapeWeighted",
+                "带权重的互相关序列最大值的平均值",
+                true),
+        VarLibraryDotprod("LibraryDotprod", "var_LibraryDotprod",
+                "",
+                true),
+        VarLibraryManhattan("LibraryManhattan", "var_LibraryManhattan",
+                "",
+                true),
+        VarLibrarySangle("LibrarySangle", "var_LibrarySangle",
+                "",
+                true),
+        VarLibraryRootmeansquare("LibraryRootmeansquare", "var_LibraryRootmeansquare",
+                "",
+                true),
+        VarManhattScore("ManhattScore", "var_ManhattScore",
+                "",
+                true),
+        VarYseriesScore("YseriesScore", "var_YseriesScore",
+                "peptideRt对应的spectrumArray中，检测到的y离子的数量",
+                true),
         ;
 
         String typeName;
 
         String pyProphetName;
 
+        String description;
+
         boolean isUsed;
 
-        ScoreType(String typeName, String pyProphetName, Boolean isUsed) {
+        ScoreType(String typeName, String pyProphetName, String description, Boolean isUsed) {
             this.typeName = typeName;
             this.pyProphetName = pyProphetName;
             this.isUsed = isUsed;
+            this.description = description;
         }
 
         public String getTypeName() {
@@ -256,6 +191,10 @@ public class FeatureScores {
 
         public boolean isUsed() {
             return isUsed;
+        }
+
+        public String getDescription() {
+            return description;
         }
 
         public static List<ScoreType> getUsedTypes() {

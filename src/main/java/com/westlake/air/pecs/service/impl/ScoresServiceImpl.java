@@ -86,8 +86,6 @@ public class ScoresServiceImpl implements ScoresService {
     @Autowired
     SwathLDAScorer swathLDAScorer;
     @Autowired
-    ScoreFileTest scoreFileTest;
-    @Autowired
     ConfigDAO configDAO;
 
     @Override
@@ -110,33 +108,6 @@ public class ScoresServiceImpl implements ScoresService {
     @Override
     public List<ScoresDO> getAllByOverviewId(String overviewId) {
         return scoresDAO.getAllByOverviewId(overviewId);
-    }
-
-    @Override
-    public ResultDO<List<ScoreDistribution>> generateScoreRangesByOverviewId(String overviewId) {
-        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
-        if (overviewResult.isFailed()) {
-            return ResultDO.buildError(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
-        }
-
-        List<ScoresDO> scores = scoresDAO.getAllByOverviewId(overviewId);
-        if (scores == null || scores.isEmpty()) {
-            return ResultDO.buildError(ResultCode.SCORES_NOT_EXISTED);
-        }
-        ResultDO<List<ScoreDistribution>> resultDO = new ResultDO<>();
-        List<ScoreDistribution> distributions = new ArrayList<>();
-
-        List<FeatureScores.ScoreType> scoreTypes = FeatureScores.ScoreType.getUsedTypes();
-
-        for (ScoresDO score : scores) {
-            for (FeatureScores fs : score.getFeatureScoresList()) {
-                for (int i = 0; i < scoreTypes.size(); i++) {
-
-                }
-            }
-        }
-
-        return resultDO;
     }
 
     @Override
@@ -413,7 +384,6 @@ public class ScoresServiceImpl implements ScoresService {
                 logger.info(count + "个Group已经打分完毕,总共有" + groups.size() + "个Group");
             }
         }
-//        scoreFileTest.ConsistencyTest(pecsScoreList);
         scoresDAO.insert(pecsScoreList);
         logger.info("打分插入完毕");
         return pecsScoreList;
@@ -432,7 +402,7 @@ public class ScoresServiceImpl implements ScoresService {
         AnalyseOverviewDO overviewDO = result.getModel();
         String outputFileName = exportPath + "/" + overviewDO.getExpName() + "-" + overviewDO.getLibraryName() + "-" + overviewId + ".tsv";
 
-        //generate the txt for pyprophet
+        //Generate the txt for pyprophet
         List<ScoresDO> scores = getAllByOverviewId(overviewId);
         String pyprophetColumns = "transition_group_id\trun_id\tdecoy\t" + FeatureScores.ScoreType.getPyProphetScoresColumns();
         StringBuilder sb = new StringBuilder(pyprophetColumns);
@@ -444,9 +414,9 @@ public class ScoresServiceImpl implements ScoresService {
                 sb.append(score.getIsDecoy() ? 1 : 0).append(Constants.TAB);
                 for (int i = 0; i < scoreTypes.size(); i++) {
                     if (i == scoreTypes.size() - 1) {
-                        sb.append(ScoreUtil.getScoreByType(fs, scoreTypes.get(i))).append(Constants.CHANGE_LINE);
+                        sb.append(fs.get(scoreTypes.get(i))).append(Constants.CHANGE_LINE);
                     } else {
-                        sb.append(ScoreUtil.getScoreByType(fs, scoreTypes.get(i))).append(Constants.TAB);
+                        sb.append(fs.get(scoreTypes.get(i))).append(Constants.TAB);
                     }
                 }
             }
@@ -459,6 +429,34 @@ public class ScoresServiceImpl implements ScoresService {
         }
 
         return new ResultDO(true);
+    }
+
+    @Override
+    public ResultDO<List<ScoreDistribution>> buildScoreDistributions(String overviewId) {
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        if (overviewResult.isFailed()) {
+            return ResultDO.buildError(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
+        }
+
+        List<ScoresDO> scores = scoresDAO.getAllByOverviewId(overviewId);
+        if (scores == null || scores.isEmpty()) {
+            return ResultDO.buildError(ResultCode.SCORES_NOT_EXISTED);
+        }
+        ResultDO<List<ScoreDistribution>> resultDO = new ResultDO<>();
+        List<ScoreDistribution> distributions = new ArrayList<>();
+
+        List<FeatureScores.ScoreType> scoreTypes = FeatureScores.ScoreType.getUsedTypes();
+
+        for (ScoresDO score : scores) {
+            HashMap<String, Double> maxScoreMap = new HashMap<>();
+            for (FeatureScores fs : score.getFeatureScoresList()) {
+                for (int i = 0; i < scoreTypes.size(); i++) {
+
+                }
+            }
+        }
+
+        return resultDO;
     }
 
     /**

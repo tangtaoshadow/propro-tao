@@ -2,7 +2,6 @@ package com.westlake.air.pecs.scorer;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
@@ -77,13 +76,13 @@ public class ChromatographicScorer {
         }
         //TODO WRM 这里可能会出现deltas.size()==1的情况
         double stdDelta = 0d;
-        if(deltas.size() != 1){
+        if (deltas.size() != 1) {
             stdDelta = Math.sqrt(sumDelta / (deltas.size() - 1));
         }
-        scores.setVarXcorrCoelution(meanDelta + stdDelta); //时间偏差
-        scores.setVarXcorrCoelutionWeighted(sumDeltaWeighted);
-        scores.setVarXcorrShape(meanIntensity); // 平均的吻合程度--> 新的吻合系数
-        scores.setVarXcorrShapeWeighted(sumIntensityWeighted);
+        scores.put(FeatureScores.ScoreType.VarXcorrCoelution, meanDelta + stdDelta); //时间偏差
+        scores.put(FeatureScores.ScoreType.VarXcorrCoelutionWeighted, sumDeltaWeighted);
+        scores.put(FeatureScores.ScoreType.VarXcorrShape, meanIntensity); // 平均的吻合程度--> 新的吻合系数
+        scores.put(FeatureScores.ScoreType.VarXcorrShapeWeighted, sumIntensityWeighted);
     }
 
     public void calculateLogSnScore(List<RtIntensityPairsDouble> chromatograms, List<ExperimentFeature> experimentFeatures, List<double[]> signalToNoiseList, FeatureScores scores) {
@@ -108,9 +107,9 @@ public class ChromatographicScorer {
         }
         snScore /= signalToNoiseList.size();
         if (snScore < 1) {
-            scores.setVarLogSnScore(0);
+            scores.put(FeatureScores.ScoreType.VarLogSnScore, 0d);
         } else {
-            scores.setVarLogSnScore(Math.log(snScore));
+            scores.put(FeatureScores.ScoreType.VarXcorrShape, Math.log(snScore));
         }
     }
 
@@ -121,7 +120,7 @@ public class ChromatographicScorer {
      *
      * @param experimentFeatures features in mrmFeature
      *                           HullInt: redistributed chromatogram in range of (peptideRef constant) leftRt and rightRt
-     * @return Table<Integer   ,       Integer   ,       Float   [   ]> xcorrMatrix
+     * @return Table<Integer       ,               Integer       ,               Float       [       ]> xcorrMatrix
      */
     private Table<Integer, Integer, Double[]> initializeXCorrMatrix(List<ExperimentFeature> experimentFeatures) {
         int listLength = experimentFeatures.size();
@@ -139,7 +138,7 @@ public class ChromatographicScorer {
 
     /**
      * xcorrMatrix的意义：sum(反斜向的元素)/data.length(3)
-     *      0   1   2
+     * 0   1   2
      * 0   |0  |1  |2
      * 1   |-1 |0  |1
      * 2   |-2 |-1 |0

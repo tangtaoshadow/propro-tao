@@ -88,7 +88,7 @@ public class ElutionScorer {
         }
         avgScore /= experimentFeatures.size();
 
-        scores.setVarElutionModelFitScore(avgScore);
+        scores.put(FeatureScores.ScoreType.VarElutionModelFitScore, avgScore);
     }
     /**
      * prepareFit_
