@@ -86,7 +86,8 @@ public class FeatureScores {
         if (scoresMap == null) {
             return null;
         } else {
-            return scoresMap.get(type.getTypeName());
+            Double d = scoresMap.get(type.getTypeName());
+            return d == null ? 0d : d;
         }
     }
 
@@ -94,7 +95,8 @@ public class FeatureScores {
         if (scoresMap == null) {
             return null;
         } else {
-            return scoresMap.get(typeName);
+            Double d = scoresMap.get(typeName);
+            return d == null ? 0d : d;
         }
     }
 

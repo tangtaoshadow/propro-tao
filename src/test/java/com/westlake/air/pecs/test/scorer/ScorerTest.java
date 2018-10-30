@@ -180,7 +180,6 @@ public class ScorerTest extends BaseTest {
         assert isSimilar(scores.get(FeatureScores.ScoreType.VarMassdevScore), 13.33d, Math.pow(10, -1));
         assert isSimilar(scores.get(FeatureScores.ScoreType.VarMassdevScoreWeighted), 7.38d, Math.pow(10, -1));
         System.out.println("VarMassdevScore Test PASSED.");
-
     }
 
     @Test
