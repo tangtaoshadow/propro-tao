@@ -256,7 +256,8 @@
                                     th:onclick="|queryGroup(null,null,null,true, true)|">
                                 平滑去噪
                             </button>
-                            <button type="button" class="btn btn-sm btn-brand" th:onclick="|queryGroup(null,null,null,false, false)|">
+                            <button type="button" class="btn btn-sm btn-brand"
+                                    th:onclick="|queryGroup(null,null,null,false, false)|">
                                 原始数据
                             </button>
                             <button type="button" class="btn btn-sm btn-accent"
@@ -319,7 +320,9 @@
         });
 
         function query(dataId, overviewId, peptideRef, cutInfo) {
-            var result = $.ajax({
+
+            var datas = null;
+            $.ajax({
                 type: "POST",
                 url: "/analyse/view",
                 data: {
@@ -329,10 +332,19 @@
                     cutInfo: cutInfo
                 },
                 dataType: "json",
-                async: false
+                async: false,
+                success: function (result) {
+                    if (result.success) {
+                        datas = result.model;
+                    } else {
+                        chart.clear();
+                    }
+                }
             });
 
-            var datas = result.responseJSON.model;
+            if (datas == null) {
+                return;
+            }
             var data_rt = datas.rt;
             var data_intensity = datas.intensity;
             var intensity = 0;
@@ -366,7 +378,7 @@
                 },
                 dataZoom: [{
                     type: 'inside',
-                    filterMode:'empty'
+                    filterMode: 'empty'
                 }, {
                     type: 'slider'
                 }],
@@ -415,8 +427,8 @@
             } else {
                 this.useNoise1000 = useNoise1000;
             }
-
-            var result = $.ajax({
+            var datas = null;
+            $.ajax({
                 type: "POST",
                 url: "/analyse/viewGroup",
                 data: {
@@ -428,10 +440,19 @@
                 },
 
                 dataType: "json",
-                async: false
-            });
+                async: false,
+                success: function (result) {
+                    if (result.success) {
+                        datas = result.model;
+                    } else {
+                        chartGroup.clear();
+                    }
+                }
 
-            var datas = result.responseJSON.model;
+            });
+            if (datas == null) {
+                return;
+            }
             var data_rt = datas.rt;
             var cutinfo = datas.cutInfoArray;
             var intensity_arrays = datas.intensityArrays;
@@ -467,9 +488,9 @@
                 },
                 dataZoom: [{
                     type: 'inside',
-                    filterMode:'empty',
-                    start: (chartGroup.getModel()&&chartGroup.getModel().getOption().dataZoom[0].start)?chartGroup.getModel().getOption().dataZoom[0].start:0,
-                    end: (chartGroup.getModel()&&chartGroup.getModel().getOption().dataZoom[0].end)?chartGroup.getModel().getOption().dataZoom[0].end:100
+                    filterMode: 'empty',
+                    start: (chartGroup.getModel() && chartGroup.getModel().getOption().dataZoom[0].start) ? chartGroup.getModel().getOption().dataZoom[0].start : 0,
+                    end: (chartGroup.getModel() && chartGroup.getModel().getOption().dataZoom[0].end) ? chartGroup.getModel().getOption().dataZoom[0].end : 100
                 }, {
                     type: 'slider'
                 }],
@@ -490,7 +511,7 @@
                 series: intensity_series
             };
 
-            chartGroup.setOption(option,true);
+            chartGroup.setOption(option, true);
 
         }
     </script>

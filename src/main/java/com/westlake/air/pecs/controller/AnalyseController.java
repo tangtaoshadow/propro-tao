@@ -118,7 +118,7 @@ public class AnalyseController extends BaseController {
             if (resLib.isFailed()) {
                 model.addAttribute(ERROR_MSG, resLib.getMsgInfo());
                 model.addAttribute("rate", decoyCount + "/" + realCount);
-            }else{
+            } else {
                 model.addAttribute("rate", decoyCount + "/" + realCount + "/" + resLib.getModel().getTotalTargetCount());
             }
 
@@ -324,7 +324,9 @@ public class AnalyseController extends BaseController {
         }
 
         AnalyseDataDO dataDO = dataResult.getModel();
-
+        if (!dataDO.getIsHit()) {
+            return ResultDO.buildError(ResultCode.ANALYSE_DATA_NOT_EXISTED, 201);
+        }
         JSONObject res = new JSONObject();
         JSONArray rtArray = new JSONArray();
         JSONArray intensityArray = new JSONArray();
@@ -350,7 +352,7 @@ public class AnalyseController extends BaseController {
                                    @RequestParam(value = "peptideRef", required = false) String peptideRef,
                                    @RequestParam(value = "isGaussFilter", required = false, defaultValue = "false") Boolean isGaussFilter,
                                    @RequestParam(value = "useNoise1000", required = false, defaultValue = "false") Boolean useNoise1000
-                                   ) {
+    ) {
         ResultDO<List<AnalyseDataDO>> dataResult = null;
         if (overviewId != null && peptideRef != null) {
             dataResult = analyseDataService.getMS2DataList(overviewId, peptideRef, isDecoy);
@@ -374,33 +376,33 @@ public class AnalyseController extends BaseController {
         //同一组的rt坐标是相同的
         Float[] pairRtArray = null;
 
-        for(AnalyseDataDO data : dataList){
-            if(!data.getIsHit()){
+        for (AnalyseDataDO data : dataList) {
+            if (!data.getIsHit()) {
                 continue;
             }
-            if(pairRtArray == null){
+            if (pairRtArray == null) {
                 pairRtArray = data.getRtArray();
             }
             Float[] pairIntensityArray = null;
-            if(isGaussFilter){
+            if (isGaussFilter) {
                 pairIntensityArray = gaussFilter.filterForFloat(data);
-            }else{
+            } else {
                 pairIntensityArray = data.getIntensityArray();
             }
 
-            if(useNoise1000){
+            if (useNoise1000) {
                 double[] noisePairIntensityArray = signalToNoiseEstimator.computeSTN(new RtIntensityPairsDouble(data.getRtArray(), pairIntensityArray), 1000, 30);
                 JSONArray noiseIntensityArray = new JSONArray();
                 for (int i = 0; i < noisePairIntensityArray.length; i++) {
-                    if(noisePairIntensityArray[i] >= Constants.SIGNAL_TO_NOISE_LIMIT){
+                    if (noisePairIntensityArray[i] >= Constants.SIGNAL_TO_NOISE_LIMIT) {
                         noiseIntensityArray.add(pairIntensityArray[i]);
-                    }else{
+                    } else {
                         noiseIntensityArray.add(0);
                     }
                 }
                 cutInfoArray.add(data.getCutInfo());
                 intensityArrays.add(noiseIntensityArray);
-            }else{
+            } else {
                 JSONArray intensityArray = new JSONArray();
                 for (int i = 0; i < pairIntensityArray.length; i++) {
                     intensityArray.add(pairIntensityArray[i]);
@@ -410,11 +412,11 @@ public class AnalyseController extends BaseController {
             }
         }
 
-        if(pairRtArray != null){
+        if (pairRtArray != null) {
             for (int n = 0; n < pairRtArray.length; n++) {
                 rtArray.add(pairRtArray[n]);
             }
-        }else{
+        } else {
             logger.error("No AnalyseData Has RtArray!!!");
         }
         res.put("rt", rtArray);
@@ -436,9 +438,9 @@ public class AnalyseController extends BaseController {
 
         logger.info(JSON.toJSONString(finalResult.getAllInfo().getStatMetrics().getFdr()));
         JSONObject object = new JSONObject();
-        object.put("子分数种类",finalResult.getClassifierTable().size());
-        object.put("权重",finalResult.getClassifierTable());
-        object.put("识别肽段数目",count);
+        object.put("子分数种类", finalResult.getClassifierTable().size());
+        object.put("权重", finalResult.getClassifierTable());
+        object.put("识别肽段数目", count);
         return object.toJSONString();
     }
 }

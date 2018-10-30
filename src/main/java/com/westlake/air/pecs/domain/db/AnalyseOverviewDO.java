@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -42,6 +43,8 @@ public class AnalyseOverviewDO extends BaseDO {
     Float mzExtractWindow;
 
     String creator = "Admin";
+
+    List<ScoreDistribution> scoreDistributions;
 
     Date createDate;
 

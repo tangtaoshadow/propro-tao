@@ -47,4 +47,10 @@ public class ScoreTask extends BaseTask {
         taskDO.finish(TaskDO.STATUS_SUCCESS);
         taskService.update(taskDO);
     }
+
+    @Async
+    public void score(String overviewId, TaskDO taskDO){
+
+        scoresService.export(overviewId);
+    }
 }

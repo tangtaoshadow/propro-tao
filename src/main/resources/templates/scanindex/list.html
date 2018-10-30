@@ -183,7 +183,7 @@
         var totalPage = [[${totalPage}]];
         var currentPage = [[${currentPage}]];
         /*]]>*/
-
+        var chart;
         $(document).ready(function () {
             $('#pagination').bootpag({
                 paginationClass: 'pagination',
@@ -196,16 +196,41 @@
                 document.getElementById("currentPage").value = num;
                 document.getElementById("searchForm").submit();
             });
+
+            chart = echarts.init(document.getElementById('modal-body'));
         });
 
         function query(indexId, expId, isMzXML) {
-            var result;
+
+            var datas = null;
             if(isMzXML){
-                result = $.ajax({url: "/spectrum/viewmzxml?indexId=" + indexId + "&expId=" + expId, async: false})
+                $.ajax({
+                    url: "/spectrum/viewmzxml?indexId=" + indexId + "&expId=" + expId,
+                    async: false,
+                    success: function (result) {
+                        if (result.success) {
+                            datas = result.model;
+                        } else {
+                            chart.clear();
+                        }
+                    }
+                })
             }else{
-                result = $.ajax({url: "/spectrum/view?indexId=" + indexId + "&expId=" + expId, async: false})
+                $.ajax({
+                    url: "/spectrum/view?indexId=" + indexId + "&expId=" + expId,
+                    async: false,
+                    success: function (result) {
+                        if (result.success) {
+                            datas = result.model;
+                        } else {
+                            chart.clear();
+                        }
+                    }
+                })
             }
-            var datas = result.responseJSON.model;
+            if(datas == null){
+                return;
+            }
             var data_mz = datas.mz;
             var data_intensity = datas.intensity;
 
@@ -268,9 +293,7 @@
                 }
             };
 
-            var chart = echarts.init(document.getElementById('modal-body'));
             chart.setOption(option);
-
         }
     </script>
 </th:block>

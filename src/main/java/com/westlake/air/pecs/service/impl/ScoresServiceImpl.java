@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.TaskTemplate;
+import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.dao.ScoresDAO;
 import com.westlake.air.pecs.dao.TaskDAO;
 import com.westlake.air.pecs.domain.ResultDO;
@@ -11,9 +12,7 @@ import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.*;
-import com.westlake.air.pecs.domain.db.AnalyseDataDO;
-import com.westlake.air.pecs.domain.db.ScoresDO;
-import com.westlake.air.pecs.domain.db.TaskDO;
+import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.query.ScoresQuery;
@@ -23,6 +22,7 @@ import com.westlake.air.pecs.rtnormalizer.ChromatogramFilter;
 import com.westlake.air.pecs.rtnormalizer.RTNormalizerScorer;
 import com.westlake.air.pecs.scorer.*;
 import com.westlake.air.pecs.service.*;
+import com.westlake.air.pecs.utils.FileUtil;
 import com.westlake.air.pecs.utils.MathUtil;
 import com.westlake.air.pecs.utils.ScoreUtil;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -86,6 +87,8 @@ public class ScoresServiceImpl implements ScoresService {
     SwathLDAScorer swathLDAScorer;
     @Autowired
     ScoreFileTest scoreFileTest;
+    @Autowired
+    ConfigDAO configDAO;
 
     @Override
     public Long count(ScoresQuery query) {
@@ -107,6 +110,33 @@ public class ScoresServiceImpl implements ScoresService {
     @Override
     public List<ScoresDO> getAllByOverviewId(String overviewId) {
         return scoresDAO.getAllByOverviewId(overviewId);
+    }
+
+    @Override
+    public ResultDO<List<ScoreDistribution>> generateScoreRangesByOverviewId(String overviewId) {
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        if (overviewResult.isFailed()) {
+            return ResultDO.buildError(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
+        }
+
+        List<ScoresDO> scores = scoresDAO.getAllByOverviewId(overviewId);
+        if (scores == null || scores.isEmpty()) {
+            return ResultDO.buildError(ResultCode.SCORES_NOT_EXISTED);
+        }
+        ResultDO<List<ScoreDistribution>> resultDO = new ResultDO<>();
+        List<ScoreDistribution> distributions = new ArrayList<>();
+
+        List<FeatureScores.ScoreType> scoreTypes = FeatureScores.ScoreType.getUsedTypes();
+
+        for (ScoresDO score : scores) {
+            for (FeatureScores fs : score.getFeatureScoresList()) {
+                for (int i = 0; i < scoreTypes.size(); i++) {
+
+                }
+            }
+        }
+
+        return resultDO;
     }
 
     @Override
@@ -390,7 +420,19 @@ public class ScoresServiceImpl implements ScoresService {
     }
 
     @Override
-    public String getPyProphetTxt(String overviewId) {
+    public ResultDO export(String overviewId) {
+
+        ConfigDO configDO = configDAO.getConfig();
+        String exportPath = configDO.getExportScoresFilePath();
+        ResultDO<AnalyseOverviewDO> result = analyseOverviewService.getById(overviewId);
+        if (result.isFailed()) {
+            return ResultDO.buildError(ResultCode.SCORES_NOT_EXISTED);
+        }
+
+        AnalyseOverviewDO overviewDO = result.getModel();
+        String outputFileName = exportPath + "/" + overviewDO.getExpName() + "-" + overviewDO.getLibraryName() + "-" + overviewId + ".tsv";
+
+        //generate the txt for pyprophet
         List<ScoresDO> scores = getAllByOverviewId(overviewId);
         String pyprophetColumns = "transition_group_id\trun_id\tdecoy\t" + FeatureScores.ScoreType.getPyProphetScoresColumns();
         StringBuilder sb = new StringBuilder(pyprophetColumns);
@@ -409,7 +451,14 @@ public class ScoresServiceImpl implements ScoresService {
                 }
             }
         }
-        return sb.toString();
+
+        try {
+            FileUtil.writeFile(outputFileName, sb.toString(), true);
+        } catch (IOException e) {
+            return ResultDO.buildError(ResultCode.IO_EXCEPTION);
+        }
+
+        return new ResultDO(true);
     }
 
     /**

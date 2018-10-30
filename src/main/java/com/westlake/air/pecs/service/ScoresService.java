@@ -5,6 +5,7 @@ import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
+import com.westlake.air.pecs.domain.db.ScoreDistribution;
 import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.ScoresQuery;
@@ -23,6 +24,13 @@ public interface ScoresService {
     ResultDO<List<ScoresDO>> getList(ScoresQuery targetQuery);
 
     List<ScoresDO> getAllByOverviewId(String overviewId);
+
+    /**
+     * 在某个卷积使用中查询某个ScoreType的分布范围
+     * @param overviewId
+     * @return
+     */
+    ResultDO<List<ScoreDistribution>> generateScoreRangesByOverviewId(String overviewId);
 
     HashMap<String, ScoresDO> getAllMapByOverviewId(String overviewId);
 
@@ -75,5 +83,5 @@ public interface ScoresService {
      * @param overviewId
      * @return
      */
-    String getPyProphetTxt(String overviewId);
+    ResultDO export(String overviewId);
 }

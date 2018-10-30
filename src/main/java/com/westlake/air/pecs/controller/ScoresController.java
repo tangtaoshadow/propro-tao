@@ -61,26 +61,25 @@ public class ScoresController extends BaseController {
         return "scores/list";
     }
 
+    @RequestMapping(value = "/detail")
+    String detail(Model model,
+                @RequestParam(value = "overviewId", required = true) String overviewId,
+                @RequestParam(value = "scoreType", required = true) String scoreType) {
+        model.addAttribute("overviewId", overviewId);
+        model.addAttribute("scoreType", scoreType);
+
+        List<ScoresDO> scores = scoresService.getAllByOverviewId(overviewId);
+
+        model.addAttribute("scores", scores);
+
+        return "scores/detail";
+    }
+
     @RequestMapping(value = "/export/{overviewId}")
     @ResponseBody
     ResultDO export(Model model, @PathVariable("overviewId") String overviewId) {
         model.addAttribute("overviewId", overviewId);
-        ConfigDO configDO = configDAO.getConfig();
-        String exportPath = configDO.getExportScoresFilePath();
-        ResultDO<AnalyseOverviewDO> result = analyseOverviewService.getById(overviewId);
-        if (result.isFailed()) {
-            return ResultDO.buildError(ResultCode.SCORES_NOT_EXISTED);
-        }
 
-        AnalyseOverviewDO overviewDO = result.getModel();
-        String outputFileName = exportPath + "/" + overviewDO.getExpName() + "-" + overviewDO.getLibraryName() + "-" + overviewId + ".tsv";
-
-        String content = scoresService.getPyProphetTxt(overviewId);
-        try {
-            FileUtil.writeFile(outputFileName, content, true);
-        } catch (IOException e) {
-            return ResultDO.buildError(ResultCode.IO_EXCEPTION);
-        }
         return new ResultDO(true);
     }
 }

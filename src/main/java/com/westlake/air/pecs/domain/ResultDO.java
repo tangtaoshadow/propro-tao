@@ -29,6 +29,11 @@ public class ResultDO<T> implements Serializable {
     private String msgInfo;
 
     /**
+     * Http 返回状态
+     */
+    private int status;
+
+    /**
      * 错误信息列表
      */
     private List<String> errorList;
@@ -132,6 +137,13 @@ public class ResultDO<T> implements Serializable {
         return resultDO;
     }
 
+    public static ResultDO buildError(ResultCode resultCode, int status) {
+        ResultDO resultDO = new ResultDO();
+        resultDO.setErrorResult(resultCode);
+        resultDO.setStatus(status);
+        return resultDO;
+    }
+
     public static ResultDO build(Object object) {
         ResultDO resultDO = new ResultDO(true);
         resultDO.setModel(object);
@@ -148,6 +160,14 @@ public class ResultDO<T> implements Serializable {
 
     public int getPageSize() {
         return pageSize;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public void setPageSize(int pageSize) {
