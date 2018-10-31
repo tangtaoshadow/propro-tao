@@ -188,6 +188,15 @@ public class FeatureScores {
             this.description = description;
         }
 
+        public static Boolean getBiggerIsBetter(String typeName){
+            for(ScoreType type : values()){
+                if (type.getTypeName().equals(typeName)){
+                    return type.getBiggerIsBetter();
+                }
+            }
+            return null;
+        }
+
         public String getTypeName() {
             return typeName;
         }

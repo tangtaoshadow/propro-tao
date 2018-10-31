@@ -526,9 +526,9 @@ public class ScoresServiceImpl implements ScoresService {
                 targetCount[i] = 0;
                 decoyCount[i] = 0;
                 if (i != (Constants.SCORE_RANGE - 1)) {
-                    ranges[i] = nf.format(min + step * (i - 1)) + "~" + nf.format(min + step * i);
+                    ranges[i] = nf.format(min + step * (i)) + "~" + nf.format(min + step * (i + 1));
                 } else {
-                    ranges[i] = nf.format(min + step * (i - 1)) + "~" + nf.format(max);
+                    ranges[i] = nf.format(min + step * (i)) + "~" + nf.format(max);
                 }
             }
             for (Double d : oneScores) {

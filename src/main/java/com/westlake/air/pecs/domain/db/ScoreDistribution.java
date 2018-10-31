@@ -1,13 +1,14 @@
 package com.westlake.air.pecs.domain.db;
 
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import lombok.Data;
-
-import java.util.TreeMap;
 
 @Data
 public class ScoreDistribution {
 
     String scoreType;
+
+    Boolean biggerIsBetter;
 
     String[] ranges;
 
@@ -15,9 +16,9 @@ public class ScoreDistribution {
 
     Integer[] decoyCount;
 
-
     public ScoreDistribution(String scoreType) {
         this.scoreType = scoreType;
+        this.biggerIsBetter = FeatureScores.ScoreType.getBiggerIsBetter(scoreType);
     }
 
     public void buildData(String[] ranges, Integer[] targetCount, Integer[] decoyCount) {

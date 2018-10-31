@@ -33,10 +33,10 @@
 
     <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
     <div class="row">
-        <div class="col-md-12 alert alert-success" role="alert" th:text="|${overview.expName}---${overview.expName}(${overview.expId})---${overview.libraryName}(${overview.libraryId})---overviewId:${overview.id}|"></div>
+        <div class="col-md-12 alert alert-success" role="alert" th:text="|子分数分布图 : ${overview.expName}---${overview.expName}(${overview.expId})---${overview.libraryName}(${overview.libraryId})---overviewId:${overview.id}|"></div>
     </div>
     <div class="row">
-        <div class="col-md-3" style="width: 25%;height:300px;" th:each="scoreType:${scoreTypes}" th:id="${scoreType.typeName}" th:text="${scoreType.typeName}"></div>
+        <div class="col-md-3" style="width: 25%;height:300px;" th:each="scoreType:${scoreTypes}" th:id="${scoreType.typeName}"></div>
     </div>
 
 </div>
@@ -81,8 +81,8 @@
                     if (result.success) {
                         distributions = result.model;
                     } else {
-                        for(chart in charts){
-                            chart.clear();
+                        for(i in chartMap){
+                            chartMap[i].clear();
                         }
                     }
                 }
@@ -98,12 +98,15 @@
                     continue;
                 }
                 var count_series = [];
-                count_series.push({name: "target", type: 'line', smooth: true, data: distributions[i].targetCount});
-                count_series.push({name: "decoy", type: 'line', smooth: true, data: distributions[i].decoyCount});
+                var targetCount = distributions[i].targetCount;
+                var decoyCount = distributions[i].decoyCount;
+                var ranges = distributions[i].ranges;
+                count_series.push({name: "target", type: 'line', smooth: true, data: targetCount});
+                count_series.push({name: "decoy", type: 'line', smooth: true, data: decoyCount});
 
                 option = {
                     title: {
-                        text: distributions[i].scoreType,
+                        text: distributions[i].scoreType + "-" + (distributions[i].biggerIsBetter?"Bigger Is Better":"Less Is Better"),
                         left: 10
                     },
                     legend: {
@@ -133,7 +136,7 @@
                         }
                     },
                     xAxis: {
-                        data: distributions[i].ranges,
+                        data: ranges,
                         silent: false,
                         splitLine: {
                             show: false

@@ -100,6 +100,7 @@ public class ScoresController extends BaseController {
             return "redirect:/analyse/overview/list";
         }
         model.addAttribute("scoreTypes", FeatureScores.ScoreType.getUsedTypes());
+        model.addAttribute("scoreTypeArray", JSONArray.parseArray(JSON.toJSONString(FeatureScores.ScoreType.getUsedTypes())));
         model.addAttribute("overview", overviewResult.getModel());
         return "scores/detail";
     }
