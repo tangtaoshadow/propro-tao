@@ -428,8 +428,7 @@ public class AnalyseController extends BaseController {
 
     @RequestMapping(value = "/overview/airus/{overviewId}")
     @ResponseBody
-    String airus(Model model,
-                 @PathVariable("overviewId") String overviewId) {
+    String airus(Model model, @PathVariable("overviewId") String overviewId) {
 
         long start = System.currentTimeMillis();
         FinalResult finalResult = airus.doAirus(overviewId);

@@ -8,13 +8,11 @@ import com.westlake.air.pecs.domain.bean.score.BYSeries;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.IntegrateWindowMzIntensity;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
-import com.westlake.air.pecs.domain.bean.transition.Annotation;
 import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
 import com.westlake.air.pecs.parser.model.chemistry.Element;
 import com.westlake.air.pecs.parser.model.chemistry.Unimod;
 import com.westlake.air.pecs.utils.MathUtil;
 import com.westlake.air.pecs.utils.ScoreUtil;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -70,8 +68,8 @@ public class DIAScorer {
                 ppmScoreWeighted += diffPpm * libraryIntensity.get(i);
             }
         }
-        scores.put(FeatureScores.ScoreType.VarMassdevScore, ppmScore);
-        scores.put(FeatureScores.ScoreType.VarMassdevScoreWeighted, ppmScoreWeighted);
+        scores.put(FeatureScores.ScoreType.MassdevScore, ppmScore);
+        scores.put(FeatureScores.ScoreType.MassdevScoreWeighted, ppmScoreWeighted);
     }
 
 
@@ -242,8 +240,8 @@ public class DIAScorer {
             }
             isotopeOverlap += nrOccurences * relIntensity;
         }
-        scores.put(FeatureScores.ScoreType.VarIsotopeCorrelationScore, isotopeCorr);
-        scores.put(FeatureScores.ScoreType.VarIsotopeOverlapScore, isotopeOverlap);
+        scores.put(FeatureScores.ScoreType.IsotopeCorrelationScore, isotopeCorr);
+        scores.put(FeatureScores.ScoreType.IsotopeOverlapScore, isotopeOverlap);
     }
 
     /**
@@ -266,8 +264,8 @@ public class DIAScorer {
         List<Double> ySeriesList = bySeries.getYSeries();
         int ySeriesScore = getSeriesScore(ySeriesList, spectrumMzArray, spectrumIntArray);
 
-        scores.put(FeatureScores.ScoreType.VarBseriesScore, (double)bSeriesScore);
-        scores.put(FeatureScores.ScoreType.VarYseriesScore, (double)ySeriesScore);
+        scores.put(FeatureScores.ScoreType.BseriesScore, (double)bSeriesScore);
+        scores.put(FeatureScores.ScoreType.YseriesScore, (double)ySeriesScore);
     }
 
 

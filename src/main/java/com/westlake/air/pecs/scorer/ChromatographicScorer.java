@@ -79,10 +79,10 @@ public class ChromatographicScorer {
         if (deltas.size() != 1) {
             stdDelta = Math.sqrt(sumDelta / (deltas.size() - 1));
         }
-        scores.put(FeatureScores.ScoreType.VarXcorrCoelution, meanDelta + stdDelta); //时间偏差
-        scores.put(FeatureScores.ScoreType.VarXcorrCoelutionWeighted, sumDeltaWeighted);
-        scores.put(FeatureScores.ScoreType.VarXcorrShape, meanIntensity); // 平均的吻合程度--> 新的吻合系数
-        scores.put(FeatureScores.ScoreType.VarXcorrShapeWeighted, sumIntensityWeighted);
+        scores.put(FeatureScores.ScoreType.XcorrCoelution, meanDelta + stdDelta); //时间偏差
+        scores.put(FeatureScores.ScoreType.XcorrCoelutionWeighted, sumDeltaWeighted);
+        scores.put(FeatureScores.ScoreType.XcorrShape, meanIntensity); // 平均的吻合程度--> 新的吻合系数
+        scores.put(FeatureScores.ScoreType.XcorrShapeWeighted, sumIntensityWeighted);
     }
 
     public void calculateLogSnScore(List<RtIntensityPairsDouble> chromatograms, List<ExperimentFeature> experimentFeatures, List<double[]> signalToNoiseList, FeatureScores scores) {
@@ -107,9 +107,9 @@ public class ChromatographicScorer {
         }
         snScore /= signalToNoiseList.size();
         if (snScore < 1) {
-            scores.put(FeatureScores.ScoreType.VarLogSnScore, 0d);
+            scores.put(FeatureScores.ScoreType.LogSnScore, 0d);
         } else {
-            scores.put(FeatureScores.ScoreType.VarXcorrShape, Math.log(snScore));
+            scores.put(FeatureScores.ScoreType.LogSnScore, Math.log(snScore));
         }
     }
 

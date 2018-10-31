@@ -3,10 +3,8 @@ package com.westlake.air.pecs.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
-import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.dao.ScoresDAO;
-import com.westlake.air.pecs.dao.TaskDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
@@ -16,7 +14,6 @@ import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.query.ScoresQuery;
-import com.westlake.air.pecs.domain.query.TaskQuery;
 import com.westlake.air.pecs.feature.*;
 import com.westlake.air.pecs.rtnormalizer.ChromatogramFilter;
 import com.westlake.air.pecs.rtnormalizer.RTNormalizerScorer;
@@ -24,7 +21,6 @@ import com.westlake.air.pecs.scorer.*;
 import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.FileUtil;
 import com.westlake.air.pecs.utils.MathUtil;
-import com.westlake.air.pecs.utils.ScoreUtil;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
 import org.slf4j.Logger;
@@ -33,10 +29,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.*;
 
 /**
  * Created by James Lu MiaoShan
@@ -442,21 +439,119 @@ public class ScoresServiceImpl implements ScoresService {
         if (scores == null || scores.isEmpty()) {
             return ResultDO.buildError(ResultCode.SCORES_NOT_EXISTED);
         }
-        ResultDO<List<ScoreDistribution>> resultDO = new ResultDO<>();
-        List<ScoreDistribution> distributions = new ArrayList<>();
-
         List<FeatureScores.ScoreType> scoreTypes = FeatureScores.ScoreType.getUsedTypes();
 
-        for (ScoresDO score : scores) {
-            HashMap<String, Double> maxScoreMap = new HashMap<>();
-            for (FeatureScores fs : score.getFeatureScoresList()) {
-                for (int i = 0; i < scoreTypes.size(); i++) {
+        ResultDO<List<ScoreDistribution>> resultDO = new ResultDO<>(true);
 
+        HashMap<String, List<Double>> resultMap = new HashMap<>();
+        HashMap<String, List<Double>> resultDecoyMap = new HashMap<>();
+        for (ScoresDO score : scores) {
+            HashMap<String, Double> bestScoreMap = new HashMap<>();
+            //计算最优分数
+            for (FeatureScores fs : score.getFeatureScoresList()) {
+                for (FeatureScores.ScoreType scoreType : scoreTypes) {
+                    if (bestScoreMap.get(scoreType.getTypeName()) == null) {
+                        bestScoreMap.put(scoreType.getTypeName(), fs.get(scoreType));
+                        continue;
+                    }
+
+                    if (scoreType.getBiggerIsBetter() && fs.get(scoreType) > bestScoreMap.get(scoreType.getTypeName())) {
+                        bestScoreMap.put(scoreType.getTypeName(), fs.get(scoreType));
+                        continue;
+                    }
+
+                    if (!scoreType.getBiggerIsBetter() && fs.get(scoreType) < bestScoreMap.get(scoreType.getTypeName())) {
+                        bestScoreMap.put(scoreType.getTypeName(), fs.get(scoreType));
+                        continue;
+                    }
+                }
+            }
+            if (score.getIsDecoy()) {
+                for (String key : bestScoreMap.keySet()) {
+                    resultDecoyMap.computeIfAbsent(key, k -> new ArrayList<>());
+                    resultDecoyMap.get(key).add(bestScoreMap.get(key));
+                }
+            } else {
+                for (String key : bestScoreMap.keySet()) {
+                    resultMap.computeIfAbsent(key, k -> new ArrayList<>());
+                    resultMap.get(key).add(bestScoreMap.get(key));
                 }
             }
         }
 
+        List<ScoreDistribution> distributions = new ArrayList<>();
+
+        buildScoreDisList(resultMap, resultDecoyMap, distributions);
+        AnalyseOverviewDO overviewDO = overviewResult.getModel();
+        overviewDO.setScoreDistributions(distributions);
+        analyseOverviewService.update(overviewDO);
+
+        resultDO.setModel(distributions);
         return resultDO;
+    }
+
+    /**
+     * 根据分数的分布情况,对所有的分数进行分组,总共分为Constants.SCORE_RANGE组,如果所有分数都相同,那么不分组
+     *
+     * @param scoreMap
+     * @return
+     */
+    private void buildScoreDisList(HashMap<String, List<Double>> scoreMap, HashMap<String, List<Double>> decoyScoreMap, List<ScoreDistribution> distributions) {
+
+        for (String key : scoreMap.keySet()) {
+            ScoreDistribution sd = new ScoreDistribution(key);
+            List<Double> oneScores = scoreMap.get(key);
+            List<Double> decoyOneScores = decoyScoreMap.get(key);
+            Collections.sort(oneScores);
+            Collections.sort(decoyOneScores);
+
+            double min = Math.floor(oneScores.get(0) > decoyOneScores.get(0) ? decoyOneScores.get(0) : oneScores.get(0));
+            double max = Math.ceil(oneScores.get(oneScores.size() - 1) > decoyOneScores.get(decoyOneScores.size() - 1) ? oneScores.get(oneScores.size() - 1) : decoyOneScores.get(decoyOneScores.size() - 1));
+            double range = max - min;
+            if (range == 0) {
+                distributions.add(sd);
+                continue;
+            }
+            double stepOri = range / Constants.SCORE_RANGE;
+
+            NumberFormat nf = NumberFormat.getNumberInstance();
+            nf.setMaximumFractionDigits(2);
+
+            double step = Double.valueOf(nf.format(stepOri));
+
+            String[] ranges = new String[Constants.SCORE_RANGE];
+            Integer[] targetCount = new Integer[Constants.SCORE_RANGE];
+            Integer[] decoyCount = new Integer[Constants.SCORE_RANGE];
+            for (int i = 0; i < Constants.SCORE_RANGE; i++) {
+                targetCount[i] = 0;
+                decoyCount[i] = 0;
+                if (i != (Constants.SCORE_RANGE - 1)) {
+                    ranges[i] = nf.format(min + step * (i - 1)) + "~" + nf.format(min + step * i);
+                } else {
+                    ranges[i] = nf.format(min + step * (i - 1)) + "~" + nf.format(max);
+                }
+            }
+            for (Double d : oneScores) {
+                int count = (int) Math.ceil((d - min) / step);
+                //如果count为0,则直接调整到第一个区间范围内
+                if(count == 0){
+                    count = 1;
+                }
+                targetCount[count-1] = targetCount[count-1] + 1;
+            }
+
+            for (Double d : decoyOneScores) {
+                int count = (int) Math.ceil((d - min) / step);
+                //如果count为0,则直接调整到第一个区间范围内
+                if(count == 0){
+                    count = 1;
+                }
+                decoyCount[count-1] = decoyCount[count-1] + 1;
+            }
+            sd.buildData(ranges, targetCount, decoyCount);
+            distributions.add(sd);
+        }
+
     }
 
     /**

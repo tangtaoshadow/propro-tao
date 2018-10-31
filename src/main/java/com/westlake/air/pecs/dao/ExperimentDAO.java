@@ -1,7 +1,6 @@
 package com.westlake.air.pecs.dao;
 
 import com.westlake.air.pecs.domain.db.ExperimentDO;
-import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;

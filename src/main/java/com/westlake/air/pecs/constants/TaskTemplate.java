@@ -52,6 +52,11 @@ public enum TaskTemplate {
     EXPORT_SUBSCORES_TSV_FILE_FOR_PYPROPHET("EXPORT_SUBSCORES_TSV_FILE_FOR_PYPROPHET", ""),
 
     /**
+     * generate all the score types' distribute map
+     */
+    BUILD_SCORE_DISTRIBUTE("BUILD_SCORE_DISTRIBUTE", ""),
+
+    /**
      * task for any tests
      */
     TEST("TEST", ""),

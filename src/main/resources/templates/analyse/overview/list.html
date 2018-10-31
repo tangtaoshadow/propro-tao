@@ -53,18 +53,21 @@
                     <td>
                         <a th:href="|/analyse/overview/detail/${overview.id}|" class="btn btn-success btn-sm">详情</a>
                         <a th:href="|/analyse/data/list?overviewId=${overview.id}|" class="btn btn-info btn-sm">查看卷积数据</a>
-                        <a th:href="|/analyse/overview/score?overviewId=${overview.id}|" class="btn btn-brand btn-sm">开始打分</a>
-                        <a th:href="|/scores/list?overviewId=${overview.id}|" class="btn btn-accent btn-sm">查看子分数</a>
+
+
                         <div class="btn-group dropright" role="group">
                             <button id="scoresBtnGroup" type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                子分数分布图
+                                打分相关
                             </button>
                             <div class="dropdown-menu" aria-labelledby="scoresBtn">
-                                <a class="dropdown-item" th:href="|/scores/list?overviewId=${overview.id}|">子分数总览</a>
-                                <a class="dropdown-item" th:each="score:${scores}" th:href="|/scores/detail?scoreType=${score.typeName}|" th:text="${score.typeName}"></a>
+                                <a class="dropdown-item" th:href="|/analyse/overview/score?overviewId=${overview.id}|">开始打分</a>
+                                <a class="dropdown-item" th:href="|/scores/list?overviewId=${overview.id}|" >查看子分数</a>
+                                <a class="dropdown-item" th:if="${overview.scoreDistributions}" th:href="|/scores/detail?overviewId=${overview.id}|">子分数总览</a>
+                                <a class="dropdown-item" th:href="|/scores/buildDistribution?overviewId=${overview.id}|">生成子分数总览</a>
+                                <a class="dropdown-item" th:href="|/analyse/overview/airus/${overview.id}|">Airus合并打分</a>
                             </div>
                         </div>
-                        <a th:href="|/analyse/overview/airus/${overview.id}|" class="btn btn-dark btn-sm">Airus合并打分</a>
+
                         <!--<a th:href="|/analyse/overview/export/${overview.id}|" class="btn btn-warning btn-sm">导出卷积数据</a>-->
                         <a th:href="|/scores/export/${overview.id}|" class="btn btn-danger btn-sm">导出子分数</a>
                     </td>

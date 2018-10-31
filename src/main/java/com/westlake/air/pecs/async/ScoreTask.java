@@ -5,6 +5,7 @@ import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
+import com.westlake.air.pecs.domain.db.ScoreDistribution;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.ScoresService;
@@ -61,6 +62,24 @@ public class ScoreTask extends BaseTask {
             taskService.update(taskDO);
         } else {
             taskDO.addLog("文件导出失败,耗时:" + (System.currentTimeMillis() - start));
+            taskDO.addLog(resultDO.getMsgInfo());
+            taskDO.finish(TaskDO.STATUS_FAILED);
+            taskService.update(taskDO);
+        }
+    }
+
+    @Async
+    public void buildScoreDistributions(String overviewId, TaskDO taskDO) {
+        long start = System.currentTimeMillis();
+        taskDO.addLog("开始构建子分数分布图");
+        taskService.update(taskDO);
+        ResultDO<List<ScoreDistribution>> resultDO = scoresService.buildScoreDistributions(overviewId);
+        if (resultDO.isSuccess()) {
+            taskDO.addLog("子分数分布图构建成功,耗时:" + (System.currentTimeMillis() - start));
+            taskDO.finish(TaskDO.STATUS_SUCCESS);
+            taskService.update(taskDO);
+        } else {
+            taskDO.addLog("子分数分布图构建失败,耗时:" + (System.currentTimeMillis() - start));
             taskDO.addLog(resultDO.getMsgInfo());
             taskDO.finish(TaskDO.STATUS_FAILED);
             taskService.update(taskDO);

@@ -1,18 +1,20 @@
 package com.westlake.air.pecs.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.westlake.air.pecs.async.ScoreTask;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
-import com.westlake.air.pecs.domain.db.ConfigDO;
+import com.westlake.air.pecs.domain.db.ScoreDistribution;
 import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.ScoresQuery;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.ScoresService;
-import com.westlake.air.pecs.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,8 +22,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -46,7 +48,8 @@ public class ScoresController extends BaseController {
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
                 @RequestParam(value = "overviewId", required = true) String overviewId,
-                @RequestParam(value = "peptideRef", required = false) String peptideRef) {
+                @RequestParam(value = "peptideRef", required = false) String peptideRef,
+                RedirectAttributes redirectAttributes) {
         model.addAttribute("overviewId", overviewId);
         model.addAttribute("peptideRef", peptideRef);
         model.addAttribute("pageSize", pageSize);
@@ -59,6 +62,12 @@ public class ScoresController extends BaseController {
         query.setPageNo(currentPage);
         ResultDO<List<ScoresDO>> resultDO = scoresService.getList(query);
 
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        if (overviewResult.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
+            return "redirect:/analyse/overview/list";
+        }
+        model.addAttribute("overview", overviewResult.getModel());
         model.addAttribute("scores", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
@@ -66,18 +75,57 @@ public class ScoresController extends BaseController {
         return "scores/list";
     }
 
-    @RequestMapping(value = "/detail")
-    String detail(Model model,
-                @RequestParam(value = "overviewId", required = true) String overviewId,
-                @RequestParam(value = "scoreType", required = true) String scoreType) {
+    @RequestMapping(value = "/buildDistribution")
+    String buildDistribution(Model model, @RequestParam(value = "overviewId", required = true) String overviewId, RedirectAttributes redirectAttributes) {
         model.addAttribute("overviewId", overviewId);
-        model.addAttribute("scoreType", scoreType);
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        if (overviewResult.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
+            return "redirect:/analyse/overview/list";
+        }
+        AnalyseOverviewDO overviewDO = overviewResult.getModel();
 
-        List<ScoresDO> scores = scoresService.getAllByOverviewId(overviewId);
+        TaskDO taskDO = TaskDO.create(TaskTemplate.BUILD_SCORE_DISTRIBUTE, overviewDO.getExpName() + "-" + overviewId);
+        taskService.insert(taskDO);
+        scoreTask.buildScoreDistributions(overviewId, taskDO);
+        return "redirect:/task/detail/" + taskDO.getId();
+    }
 
-        model.addAttribute("scores", scores);
+    @RequestMapping(value = "/detail")
+    String detail(Model model, @RequestParam(value = "overviewId", required = true) String overviewId, RedirectAttributes redirectAttributes) {
 
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        if (overviewResult.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
+            return "redirect:/analyse/overview/list";
+        }
+        model.addAttribute("scoreTypes", FeatureScores.ScoreType.getUsedTypes());
+        model.addAttribute("overview", overviewResult.getModel());
         return "scores/detail";
+    }
+
+    @RequestMapping(value = "/distributions")
+    @ResponseBody
+    ResultDO<JSONArray> getDistributions(Model model, @RequestParam(value = "overviewId", required = false) String overviewId) {
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        if (overviewResult.isFailed()) {
+            ResultDO resultDO = new ResultDO();
+            resultDO.setErrorResult(overviewResult.getMsgCode(), overviewResult.getMsgInfo());
+            return resultDO;
+        }
+        AnalyseOverviewDO overviewDO = overviewResult.getModel();
+
+        if (overviewDO.getScoreDistributions() == null || overviewDO.getScoreDistributions().size() == 0) {
+            return ResultDO.buildError(ResultCode.SCORE_DISTRIBUTION_NOT_GENERATED_YET);
+        }
+
+        List<ScoreDistribution> distributions = overviewDO.getScoreDistributions();
+
+        ResultDO<JSONArray> resultDO = new ResultDO(true);
+        JSONArray array = JSON.parseArray(JSON.toJSONString(distributions));
+
+        resultDO.setModel(array);
+        return resultDO;
     }
 
     @RequestMapping(value = "/export/{overviewId}")

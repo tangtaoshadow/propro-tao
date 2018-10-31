@@ -88,6 +88,7 @@ public enum ResultCode implements Serializable {
      ALL_SCORE_DATA_ARE_DECOY("ALL_SCORE_DATA_ARE_DECOY","所有的数据都是伪肽段数据,无法打分"),
      ALL_SCORE_DATA_ARE_REAL("ALL_SCORE_DATA_ARE_REAL","所有的数据都是真实肽段数据,未包含伪肽段,无法打分"),
      SCORES_NOT_EXISTED("SCORES_NOT_EXISTED","打分数据不存在"),
+     SCORE_DISTRIBUTION_NOT_GENERATED_YET("SCORE_DISTRIBUTION_NOT_GENERATED_YET","子分数分布情况还未生成"),
 
     /**
      * ******

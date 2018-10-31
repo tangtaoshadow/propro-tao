@@ -45,7 +45,7 @@ public class LibraryScorer {
         for (int i = 0; i < x.length; i++) {
             sum += Math.abs(x[i] - y[i]);
         }
-        scores.put(FeatureScores.ScoreType.VarLibraryRsmd,sum / x.length);
+        scores.put(FeatureScores.ScoreType.LibraryRsmd,sum / x.length);
 
         //library_corr
         //pearson 相关系数
@@ -62,11 +62,11 @@ public class LibraryScorer {
         s1 -= m1 * m1 * libraryIntensity.size();
         s2 -= m2 * m2 * libraryIntensity.size();
         if (s1 < Math.pow(10, -12) || s2 < Math.pow(10, -12)) {
-            scores.put(FeatureScores.ScoreType.VarLibraryCorr, 0.0d);
+            scores.put(FeatureScores.ScoreType.LibraryCorr, 0.0d);
         } else {
             corr -= m1 * m2 * libraryIntensity.size();
             corr /= Math.sqrt(s1 * s2);
-            scores.put(FeatureScores.ScoreType.VarLibraryCorr, corr);
+            scores.put(FeatureScores.ScoreType.LibraryCorr, corr);
         }
 
         //dotprodScoring
@@ -86,7 +86,7 @@ public class LibraryScorer {
         for (int i = 0; i < expIntSqrt.length; i++) {
             sumOfMult += expIntSqrtDivided[i] * libIntSqrtDivided[i];
         }
-        scores.put(FeatureScores.ScoreType.VarLibraryDotprod, sumOfMult);
+        scores.put(FeatureScores.ScoreType.LibraryDotprod, sumOfMult);
 
         //manhattan
         double expIntTotal = ArrayUtil.sumArray(expIntSqrt);
@@ -97,7 +97,7 @@ public class LibraryScorer {
         for (int i = 0; i < expIntSqrt.length; i++) {
             sumOfDivide += Math.abs(expIntSqrtDivided[i] - libIntSqrtDivided[i]);
         }
-        scores.put(FeatureScores.ScoreType.VarLibraryManhattan, sumOfDivide);
+        scores.put(FeatureScores.ScoreType.LibraryManhattan, sumOfDivide);
 
         //spectral angle
         double dotprod = 0, xLen = 0, yLen = 0;
@@ -107,18 +107,18 @@ public class LibraryScorer {
             yLen += libraryIntensity.get(i) * libraryIntensity.get(i);
         }
         double spectralAngle = Math.acos(dotprod / (Math.sqrt(xLen) * Math.sqrt(yLen)));
-        scores.put(FeatureScores.ScoreType.VarLibrarySangle, spectralAngle);
+        scores.put(FeatureScores.ScoreType.LibrarySangle, spectralAngle);
 
         //root mean square
         if (x.length == 0) {
-            scores.put(FeatureScores.ScoreType.VarLibraryRootmeansquare, 0d);
+            scores.put(FeatureScores.ScoreType.LibraryRootmeansquare, 0d);
         } else {
             double rms = 0;
             for (int i = 0; i < x.length; i++) {
                 rms += (x[i] - y[i]) * (x[i] - y[i]);
             }
             rms = Math.sqrt(rms / x.length);
-            scores.put(FeatureScores.ScoreType.VarLibraryRootmeansquare, rms);
+            scores.put(FeatureScores.ScoreType.LibraryRootmeansquare, rms);
         }
 
 
@@ -129,9 +129,9 @@ public class LibraryScorer {
         double experimentalRt = experimentFeatures.get(0).getRt();
         double normalizedExperimentalRt = ScoreUtil.trafoApplier(slopeIntercept, experimentalRt);
         if (groupRt <= -1000d) {
-            scores.put(FeatureScores.ScoreType.VarNormRtScore, 0d);
+            scores.put(FeatureScores.ScoreType.NormRtScore, 0d);
         } else {
-            scores.put(FeatureScores.ScoreType.VarNormRtScore, Math.abs(normalizedExperimentalRt - groupRt));
+            scores.put(FeatureScores.ScoreType.NormRtScore, Math.abs(normalizedExperimentalRt - groupRt));
         }
     }
 
@@ -143,7 +143,7 @@ public class LibraryScorer {
     public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores) {
         double intensitySum = experimentFeatures.get(0).getIntensitySum();
         double totalXic = experimentFeatures.get(0).getTotalXic();
-        scores.put(FeatureScores.ScoreType.VarIntensityScore,(intensitySum / totalXic));
+        scores.put(FeatureScores.ScoreType.IntensityScore,(intensitySum / totalXic));
     }
 
     private double norm(double[] array) {

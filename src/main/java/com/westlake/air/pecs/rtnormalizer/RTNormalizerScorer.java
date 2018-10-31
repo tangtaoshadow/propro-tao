@@ -2,10 +2,7 @@ package com.westlake.air.pecs.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.*;
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
-import com.westlake.air.pecs.feature.SignalToNoiseEstimator;
 import com.westlake.air.pecs.scorer.ChromatographicScorer;
-import com.westlake.air.pecs.scorer.ElutionScorer;
 import com.westlake.air.pecs.scorer.LibraryScorer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -81,13 +78,13 @@ public class RTNormalizerScorer {
      * @return final score
      */
     private double calculateLdaPrescore(FeatureScores scores) {
-        return scores.get(FeatureScores.ScoreType.VarLibraryCorr) * -0.34664267d +
-                scores.get(FeatureScores.ScoreType.VarLibraryRsmd) * 2.98700722d +
-                scores.get(FeatureScores.ScoreType.VarXcorrCoelution) * 0.09445371d +
-                scores.get(FeatureScores.ScoreType.VarXcorrShape) * -5.71823862d +
-                scores.get(FeatureScores.ScoreType.VarLogSnScore) * -0.72989582d +
-                scores.get(FeatureScores.ScoreType.VarNormRtScore) * 7.05496384d +
-                scores.get(FeatureScores.ScoreType.VarElutionModelFitScore) * 1.88443209d;
+        return scores.get(FeatureScores.ScoreType.LibraryCorr) * -0.34664267d +
+                scores.get(FeatureScores.ScoreType.LibraryRsmd) * 2.98700722d +
+                scores.get(FeatureScores.ScoreType.XcorrCoelution) * 0.09445371d +
+                scores.get(FeatureScores.ScoreType.XcorrShape) * -5.71823862d +
+                scores.get(FeatureScores.ScoreType.LogSnScore) * -0.72989582d +
+                scores.get(FeatureScores.ScoreType.NormRtScore) * 7.05496384d +
+                scores.get(FeatureScores.ScoreType.ElutionModelFitScore) * 1.88443209d;
     }
 
 

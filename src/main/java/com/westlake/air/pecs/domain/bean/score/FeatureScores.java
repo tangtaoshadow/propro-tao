@@ -102,70 +102,72 @@ public class FeatureScores {
 
     public enum ScoreType {
 
-        MainVarXxSwathPrelimScore("MainScore", "main_VarXxSwathPrelimScore",
+        MainScore("MainScore", "main_VarXxSwathPrelimScore",
                 "Swath主打分",
-                true),
-        VarBseriesScore("BseriesScore", "var_BseriesScore",
+                true, true),
+        BseriesScore("BseriesScore", "var_BseriesScore",
                 "peptideRt对应的spectrumArray中，检测到的b离子的数量",
-                true),
-        VarElutionModelFitScore("ElutionModelFitScore", "var_ElutionModelFitScore",
+                null, false),
+        ElutionModelFitScore("ElutionModelFitScore", "var_ElutionModelFitScore",
                 "",
-                true),
-        VarIntensityScore("IntensityScore", "var_IntensityScore",
+                null, false),
+        IntensityScore("IntensityScore", "var_IntensityScore",
                 "同一个peptideRef下, 所有HullPoints的intensity之和 除以 所有intensity之和",
-                true),
-        VarIsotopeCorrelationScore("IsotopeCorrelationScore", "var_IsotopeCorrelationScore",
+                true, true),
+        IsotopeCorrelationScore("IsotopeCorrelationScore", "var_IsotopeCorrelationScore",
                 "",
-                true),
-        VarIsotopeOverlapScore("IsotopeOverlapScore", "var_IsotopeOverlapScore",
+                null, false),
+        IsotopeOverlapScore("IsotopeOverlapScore", "var_IsotopeOverlapScore",
                 "feature intensity加权的可能（带电量1-4）无法区分同位素峰值的平均发生次数之和",
-                true),
-        VarLibraryCorr("LibraryCorr", "var_LibraryCorr",
+                null, false),
+        LibraryCorr("LibraryCorr", "var_LibraryCorr",
                 "对experiment和library intensity算Pearson相关系",
-                true),
-        VarLibraryRsmd("LibraryRsmd", "var_LibraryRsmd",
-                "对experiment intensity 算占比差距平均值", true),
-        VarLogSnScore("LogSnScore", "var_LogSnScore", "log(距离ApexRt最近点的stn值之和)",
-                true),
-        VarMassdevScore("MassdevScore", "var_MassdevScore",
+                true, true),
+        LibraryRsmd("LibraryRsmd", "var_LibraryRsmd",
+                "对experiment intensity 算占比差距平均值",
+                false, true),
+        LogSnScore("LogSnScore", "var_LogSnScore",
+                "log(距离ApexRt最近点的stn值之和)",
+                true, true),
+        MassdevScore("MassdevScore", "var_MassdevScore",
                 "按spectrum intensity加权的mz与product mz的偏差ppm百分比之和",
-                true),
-        VarMassdevScoreWeighted("MassdevScoreWeighted", "var_MassdevScoreWeighted",
+                null, false),
+        MassdevScoreWeighted("MassdevScoreWeighted", "var_MassdevScoreWeighted",
                 "按spectrum intensity加权的mz与product mz的偏差ppm百分比按libraryIntensity加权之和",
-                true),
-        VarNormRtScore("NormRtScore", "var_NormRtScore",
+                null, false),
+        NormRtScore("NormRtScore", "var_NormRtScore",
                 "normalizedExperimentalRt与groupRt之差",
-                true),
-        VarXcorrCoelution("XcorrCoelution", "var_XcorrCoelution",
+                false, true),
+        XcorrCoelution("XcorrCoelution", "var_XcorrCoelution",
                 "互相关偏移的mean + std",
-                true),
-        VarXcorrCoelutionWeighted("XcorrCoelutionWeighted", "var_XcorrCoelutionWeighted",
+                false, true),
+        XcorrCoelutionWeighted("XcorrCoelutionWeighted", "var_XcorrCoelutionWeighted",
                 "带权重的相关偏移sum",
-                true),
-        VarXcorrShape("XcorrShape", "var_XcorrShape",
+                false, true),
+        XcorrShape("XcorrShape", "var_XcorrShape",
                 "互相关序列最大值的平均值",
-                true),
-        VarXcorrShapeWeighted("XcorrShapeWeighted", "var_XcorrShapeWeighted",
+                true, true),
+        XcorrShapeWeighted("XcorrShapeWeighted", "var_XcorrShapeWeighted",
                 "带权重的互相关序列最大值的平均值",
-                true),
-        VarLibraryDotprod("LibraryDotprod", "var_LibraryDotprod",
+                true, true),
+        LibraryDotprod("LibraryDotprod", "var_LibraryDotprod",
                 "",
-                true),
-        VarLibraryManhattan("LibraryManhattan", "var_LibraryManhattan",
+                true, true),
+        LibraryManhattan("LibraryManhattan", "var_LibraryManhattan",
                 "",
-                true),
-        VarLibrarySangle("LibrarySangle", "var_LibrarySangle",
+                false, true),
+        LibrarySangle("LibrarySangle", "var_LibrarySangle",
                 "",
-                true),
-        VarLibraryRootmeansquare("LibraryRootmeansquare", "var_LibraryRootmeansquare",
+                false, true),
+        LibraryRootmeansquare("LibraryRootmeansquare", "var_LibraryRootmeansquare",
                 "",
-                true),
-        VarManhattScore("ManhattScore", "var_ManhattScore",
+                false, true),
+        ManhattScore("ManhattScore", "var_ManhattScore",
                 "",
-                true),
-        VarYseriesScore("YseriesScore", "var_YseriesScore",
+                null, false),
+        YseriesScore("YseriesScore", "var_YseriesScore",
                 "peptideRt对应的spectrumArray中，检测到的y离子的数量",
-                true),
+                null, false),
         ;
 
         String typeName;
@@ -174,12 +176,15 @@ public class FeatureScores {
 
         String description;
 
+        Boolean biggerIsBetter;
+
         boolean isUsed;
 
-        ScoreType(String typeName, String pyProphetName, String description, Boolean isUsed) {
+        ScoreType(String typeName, String pyProphetName, String description, Boolean biggerIsBetter, Boolean isUsed) {
             this.typeName = typeName;
             this.pyProphetName = pyProphetName;
             this.isUsed = isUsed;
+            this.biggerIsBetter = biggerIsBetter;
             this.description = description;
         }
 
@@ -193,6 +198,10 @@ public class FeatureScores {
 
         public boolean isUsed() {
             return isUsed;
+        }
+
+        public Boolean getBiggerIsBetter() {
+            return biggerIsBetter;
         }
 
         public String getDescription() {

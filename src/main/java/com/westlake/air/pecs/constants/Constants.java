@@ -64,6 +64,7 @@ public class Constants {
     public static final double P = 0d;
     public static final double PROTON_MASS_U = 1.007276466771d;
 
+    public static final int SCORE_RANGE = 20;
 
     public static final double EMG_CONST = 2.4055;
     public static final int EMG_MAX_ITERATION = 500;

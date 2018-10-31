@@ -7,7 +7,6 @@ import com.westlake.air.pecs.dao.TransitionDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.LibraryDO;
-import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.Peptide;
@@ -241,7 +240,7 @@ public class TransitionServiceImpl implements TransitionService {
     private List<TargetTransition> sortMS1Coordinates(List<TargetTransition> targetList) {
         //存储set中从而过滤出MS1
         HashSet<TargetTransition> targetSet = new HashSet<>(targetList);
-        Ordering<TargetTransition> ordering2 = Ordering.from(new Comparator<TargetTransition>() {
+        Ordering<TargetTransition> ordering = Ordering.from(new Comparator<TargetTransition>() {
             @Override
             public int compare(TargetTransition o1, TargetTransition o2) {
                 if (o1.getPrecursorMz() > o2.getPrecursorMz()) {
@@ -254,7 +253,7 @@ public class TransitionServiceImpl implements TransitionService {
             }
         });
 
-        return ordering2.sortedCopy(targetSet);
+        return ordering.sortedCopy(targetSet);
     }
 
     private List<TargetTransition> sortMS2Coordinates(List<TargetTransition> targetList) {
