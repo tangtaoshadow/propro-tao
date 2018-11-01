@@ -53,7 +53,6 @@ public class ScoreTask extends BaseTask {
         taskDO.addLog("子分数打分成功,耗时:" + (System.currentTimeMillis() - start) + ".开始清理子分数总览图");
         taskService.update(taskDO);
 
-
         start = System.currentTimeMillis();
         scoresService.buildScoreDistributions(overviewId);
         taskDO.addLog("生成子分数总览图完毕,流程结束,耗时:" + (System.currentTimeMillis() - start));

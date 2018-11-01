@@ -253,7 +253,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         List<AnalyseDataDO> dataList = new ArrayList<>();
         AnalyseOverviewDO overviewDO = createOverview(swathInput);
         analyseOverviewDAO.insert(overviewDO);
-
+        swathInput.setOverviewId(overviewDO.getId());
         try {
             raf = new RandomAccessFile(file, "r");
             dataList = extractMS2WithList(raf, overviewDO.getId(), swathInput);

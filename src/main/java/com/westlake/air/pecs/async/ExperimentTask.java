@@ -113,10 +113,16 @@ public class ExperimentTask extends BaseTask {
     public void swath(SwathInput input, TaskDO taskDO) {
         long startAll = System.currentTimeMillis();
         long start = System.currentTimeMillis();
-        taskDO.addLog("开始卷积IRT校准库并且计算iRT值");
-        taskService.update(taskDO);
-
         ExperimentDO experimentDO = input.getExperimentDO();
+
+        taskDO.addLog("开始创建Aird压缩文件");
+        taskService.update(taskDO);
+        compressor.doCompress(experimentDO);
+
+        taskDO.addLog("文件压缩完毕,耗时"+(System.currentTimeMillis() - start)+"开始卷积IRT校准库并且计算iRT值");
+        taskService.update(taskDO);
+        start = System.currentTimeMillis();
+
         ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(experimentDO, input.getIRtLibraryId(), input.getMzExtractWindow(), input.getSigmaSpacing());
         SlopeIntercept slopeIntercept = resultDO.getModel();
 
@@ -145,16 +151,19 @@ public class ExperimentTask extends BaseTask {
         List<AnalyseDataDO> dataList = originDataListResult.getModel();
         List<ScoresDO> scores = scoresService.score(dataList, input);
 
-        taskDO.addLog("子分数打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",开始合并打分");
+        taskDO.addLog("子分数打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",开始生成子分数分布图");
         taskService.update(taskDO);
+
         start = System.currentTimeMillis();
-        FinalResult finalResult = airus.doAirus(scores);
+        scoresService.buildScoreDistributions(input.getOverviewId());
+        taskDO.addLog("生成子分数总览图完毕,耗时:" + (System.currentTimeMillis() - start));
 
-        int count = AirusUtil.checkFdr(finalResult);
-        taskDO.addLog("合并打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为"+count);
+//        start = System.currentTimeMillis();
+//        FinalResult finalResult = airus.doAirus(scores);
+//
+//        int count = AirusUtil.checkFdr(finalResult);
+//        taskDO.addLog("合并打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为"+count);
         taskDO.addLog("Swath流程总计耗时:" + (System.currentTimeMillis() - startAll));
-        taskService.update(taskDO);
-
         taskDO.finish(TaskDO.STATUS_SUCCESS);
         taskService.update(taskDO);
     }
