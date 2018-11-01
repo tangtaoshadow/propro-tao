@@ -214,7 +214,7 @@ public class AnalyseController extends BaseController {
     @RequestMapping(value = "/data/group")
     String dataGroup(Model model,
                      @RequestParam(value = "overviewId", required = true) String overviewId,
-                     @RequestParam(value = "libraryId", required = true) String libraryId,
+                     @RequestParam(value = "libraryId", required = false) String libraryId,
                      @RequestParam(value = "isIrt", required = true) Boolean isIrt,
                      RedirectAttributes redirectAttributes) {
 
@@ -229,13 +229,14 @@ public class AnalyseController extends BaseController {
 
         List<TransitionGroup> groups = null;
         if (isIrt) {
-            groups = analyseDataService.getIrtTransitionGroup(overviewId, libraryId);
+            groups = analyseDataService.getIrtTransitionGroup(overviewId, experimentService.getById(overviewResult.getModel().getExpId()).getModel().getIRtLibraryId());
         } else {
             groups = analyseDataService.getTransitionGroup(overviewResult.getModel());
             groups = groups.subList(0, 100);
         }
 
         model.addAttribute("groups", groups);
+        model.addAttribute("totalNum", groups.size());
 
         return "/analyse/data/group";
     }

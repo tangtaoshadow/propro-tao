@@ -91,7 +91,10 @@
                 <tr th:each="data,status:${datas}">
                     <td th:text="${status.index+1}"></td>
                     <td th:text="${data.proteinName}"></td>
-                    <td th:text="${data.peptideRef}"></td>
+                    <td>
+                        <a target="_Blank" th:href="|/transition/list?libraryId=${overview?.libraryId}&peptideRef=${data.peptideRef}|"
+                           th:text="${data.peptideRef}"></a>
+                    </td>
                     <td th:text="${data.annotations}"></td>
                     <td th:if="${data.isDecoy}">
                         <span class="m-badge m-badge--danger m-badge--wide">
@@ -192,6 +195,15 @@
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="ExtractWindow" readonly
                                        th:value="|${overview?.rtExtractWindow}/${overview?.mzExtractWindow}|">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="slopeIntercept" class="col-3 col-form-label">
+                                Slope/Intercept
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="slopeIntercept" readonly
+                                       th:value="|${overview?.slope}/${overview?.intercept}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">

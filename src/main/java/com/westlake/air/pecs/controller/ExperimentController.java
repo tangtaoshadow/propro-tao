@@ -165,6 +165,7 @@ public class ExperimentController extends BaseController {
     String update(Model model,
                   @RequestParam(value = "id", required = true) String id,
                   @RequestParam(value = "name") String name,
+                  @RequestParam(value = "iRtLibraryId") String iRtLibraryId,
                   @RequestParam(value = "slope") Double slope,
                   @RequestParam(value = "intercept") Double intercept,
                   @RequestParam(value = "fileLocation") String fileLocation,
@@ -183,6 +184,7 @@ public class ExperimentController extends BaseController {
         experimentDO.setName(name);
         experimentDO.setFileLocation(fileLocation);
         experimentDO.setDescription(description);
+        experimentDO.setIRtLibraryId(iRtLibraryId);
         experimentDO.setSlope(slope);
         experimentDO.setIntercept(intercept);
         experimentDO.setCompressionType(compressionType);

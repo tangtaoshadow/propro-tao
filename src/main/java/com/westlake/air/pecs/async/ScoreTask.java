@@ -5,9 +5,11 @@ import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
+import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.ScoreDistribution;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.AnalyseDataService;
+import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.ScoresService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -26,6 +28,8 @@ public class ScoreTask extends BaseTask {
     ScoresService scoresService;
     @Autowired
     AnalyseDataService analyseDataService;
+    @Autowired
+    AnalyseOverviewService analyseOverviewService;
 
     @Async
     public void score(String overviewId, SlopeIntercept slopeIntercept, String libraryId, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
@@ -45,9 +49,17 @@ public class ScoreTask extends BaseTask {
         input.setOverviewId(overviewId);
 
         scoresService.score(dataList, input);
-        taskDO.addLog("打分完毕,耗时:" + (System.currentTimeMillis() - start));
+
+        taskDO.addLog("子分数打分成功,耗时:" + (System.currentTimeMillis() - start) + ".开始清理子分数总览图");
+        taskService.update(taskDO);
+
+
+        start = System.currentTimeMillis();
+        scoresService.buildScoreDistributions(overviewId);
+        taskDO.addLog("生成子分数总览图完毕,流程结束,耗时:" + (System.currentTimeMillis() - start));
         taskDO.finish(TaskDO.STATUS_SUCCESS);
         taskService.update(taskDO);
+
     }
 
     @Async

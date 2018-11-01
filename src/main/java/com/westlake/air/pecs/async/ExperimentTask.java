@@ -101,6 +101,7 @@ public class ExperimentTask extends BaseTask {
 
         experimentDO.setSlope(slopeIntercept.getSlope());
         experimentDO.setIntercept(slopeIntercept.getIntercept());
+        experimentDO.setIRtLibraryId(iRtLibraryId);
         experimentService.update(experimentDO);
 
         taskDO.addLog("iRT计算完毕,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept());

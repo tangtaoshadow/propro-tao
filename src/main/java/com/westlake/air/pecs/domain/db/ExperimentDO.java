@@ -45,6 +45,8 @@ public class ExperimentDO extends BaseDO {
 
     Float overlap;
 
+    String iRtLibraryId;
+
     Double slope;
 
     Double intercept;
