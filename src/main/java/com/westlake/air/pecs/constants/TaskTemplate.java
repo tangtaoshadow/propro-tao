@@ -12,7 +12,7 @@ public enum TaskTemplate {
     DEFAULT("DEFAULT", ""),
 
     /**
-     * upload experiment file(including mzxml)
+     * upload experiment file
      */
     UPLOAD_EXPERIMENT_FILE("UPLOAD_EXPERIMENT_FILE", "/experiment/create"),
 

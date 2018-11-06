@@ -72,7 +72,7 @@
                 <tbody>
                 <tr th:each="experiment:${experiments}">
                     <td th:text="${experiment.name}"></td>
-                    <td th:text="${experiment.fileLocation}"></td>
+                    <td th:text="${experiment.filePath}"></td>
                     <td th:if="!${experiment.hasAirusFile}">
                         <span class="m-badge m-badge--danger m-badge--wide">
                             未压缩

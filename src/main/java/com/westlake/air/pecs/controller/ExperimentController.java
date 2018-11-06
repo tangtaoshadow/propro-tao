@@ -1,6 +1,5 @@
 package com.westlake.air.pecs.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.compressor.Compressor;
@@ -13,7 +12,8 @@ import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
-import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;
+import com.westlake.air.pecs.domain.params.Exp;
+import com.westlake.air.pecs.domain.params.ExpModel;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.MzXMLParser;
@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -76,17 +75,18 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/create")
     String create(Model model) {
-        List<LibraryDO> slist = getLibraryList(0);
-        List<LibraryDO> iRtlist = getLibraryList(1);
-        model.addAttribute("libraries", slist);
-        model.addAttribute("iRtLibraries", iRtlist);
         return "experiment/create";
+    }
+
+    @RequestMapping(value = "/batchcreate")
+    String batchCreate(Model model) {
+        return "experiment/batchcreate";
     }
 
     @RequestMapping(value = "/add")
     String add(Model model,
                @RequestParam(value = "name", required = true) String name,
-               @RequestParam(value = "fileLocation", required = true) String fileLocation,
+               @RequestParam(value = "filePath", required = true) String filePath,
                @RequestParam(value = "description", required = false) String description,
                @RequestParam(value = "overlap", required = false) Float overlap,
                RedirectAttributes redirectAttributes) {
@@ -96,12 +96,12 @@ public class ExperimentController extends BaseController {
         model.addAttribute("description", description);
 
         //Check Params Start
-        if (fileLocation == null || fileLocation.isEmpty()) {
+        if (filePath == null || filePath.isEmpty()) {
             model.addAttribute(ERROR_MSG, ResultCode.FILE_LOCATION_CANNOT_BE_EMPTY.getMessage());
             return "experiment/create";
         }
-        model.addAttribute("fileLocation", fileLocation);
-        File file = new File(fileLocation);
+        model.addAttribute("filePath", filePath);
+        File file = new File(filePath);
 
         if (!file.exists()) {
             model.addAttribute(ERROR_MSG, ResultCode.FILE_NOT_EXISTED.getMessage());
@@ -112,7 +112,7 @@ public class ExperimentController extends BaseController {
         experimentDO.setName(name);
         experimentDO.setDescription(description);
         experimentDO.setOverlap(overlap);
-        experimentDO.setFileLocation(fileLocation);
+        experimentDO.setFilePath(filePath);
 
         ResultDO result = experimentService.insert(experimentDO);
         if (result.isFailed()) {
@@ -125,6 +125,41 @@ public class ExperimentController extends BaseController {
 
         experimentTask.saveExperimentTask(experimentDO, file, taskDO);
         return "redirect:/task/detail/" + taskDO.getId();
+    }
+
+    @RequestMapping(value = "/batchadd", method = {RequestMethod.POST})
+    String batchAdd(Model model, ExpModel exps,RedirectAttributes redirectAttributes) {
+
+        String errorInfo = "";
+        List<Exp> expList = exps.getExps();
+        for (Exp exp : expList) {
+            if (exp.getFilePath() == null || exp.getFilePath().isEmpty()) {
+                errorInfo += ResultCode.FILE_LOCATION_CANNOT_BE_EMPTY.getMessage() + ":" + exp.getName() + "\r\n";
+            }
+            File file = new File(exp.getFilePath());
+
+            if (!file.exists()) {
+                errorInfo += ResultCode.FILE_NOT_EXISTED.getMessage() + ":" + exp.getFilePath() + "\r\n";
+            }
+
+            ExperimentDO experimentDO = new ExperimentDO();
+            experimentDO.setName(exp.getName());
+            experimentDO.setDescription(exp.getDescription());
+            experimentDO.setOverlap(exp.getOverlap());
+            experimentDO.setFilePath(exp.getFilePath());
+
+            ResultDO result = experimentService.insert(experimentDO);
+            if (result.isFailed()) {
+                errorInfo += result.getMsgInfo() + ":" + exp.getName() + "\r\n";
+            }
+
+            TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_EXPERIMENT_FILE, experimentDO.getName());
+            taskService.insert(taskDO);
+            experimentTask.saveExperimentTask(experimentDO, file, taskDO);
+        }
+
+        redirectAttributes.addFlashAttribute(ERROR_MSG, errorInfo);
+        return "redirect:/task/list?taskTemplate=" + TaskTemplate.UPLOAD_EXPERIMENT_FILE.getTemplateName();
     }
 
     @RequestMapping(value = "/edit/{id}")
@@ -168,7 +203,7 @@ public class ExperimentController extends BaseController {
                   @RequestParam(value = "iRtLibraryId") String iRtLibraryId,
                   @RequestParam(value = "slope") Double slope,
                   @RequestParam(value = "intercept") Double intercept,
-                  @RequestParam(value = "fileLocation") String fileLocation,
+                  @RequestParam(value = "filePath") String filePath,
                   @RequestParam(value = "description") String description,
                   @RequestParam(value = "compressionType") String compressionType,
                   @RequestParam(value = "precision") String precision,
@@ -182,7 +217,7 @@ public class ExperimentController extends BaseController {
         ExperimentDO experimentDO = resultDO.getModel();
 
         experimentDO.setName(name);
-        experimentDO.setFileLocation(fileLocation);
+        experimentDO.setFilePath(filePath);
         experimentDO.setDescription(description);
         experimentDO.setIRtLibraryId(iRtLibraryId);
         experimentDO.setSlope(slope);
@@ -227,13 +262,13 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/doswath")
     String doSwath(Model model,
-                      @RequestParam(value = "libraryId", required = false) String libraryId,
-                      @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
-                      @RequestParam(value = "expId", required = false) String expId,
-                      @RequestParam(value = "rtExtractWindow", defaultValue = "1200") Float rtExtractWindow,
-                      @RequestParam(value = "mzExtractWindow", defaultValue = "0.05") Float mzExtractWindow,
-                      @RequestParam(value = "sigma", defaultValue = "6.25") Float sigma,
-                      @RequestParam(value = "spacing", defaultValue = "0.01") Float spacing
+                   @RequestParam(value = "libraryId", required = false) String libraryId,
+                   @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
+                   @RequestParam(value = "expId", required = false) String expId,
+                   @RequestParam(value = "rtExtractWindow", defaultValue = "1200") Float rtExtractWindow,
+                   @RequestParam(value = "mzExtractWindow", defaultValue = "0.05") Float mzExtractWindow,
+                   @RequestParam(value = "sigma", defaultValue = "6.25") Float sigma,
+                   @RequestParam(value = "spacing", defaultValue = "0.01") Float spacing
     ) {
         if (libraryId != null) {
             model.addAttribute("libraryId", libraryId);
@@ -257,7 +292,7 @@ public class ExperimentController extends BaseController {
         model.addAttribute("experiments", experimentList);
 
         ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
-        if(expResult.isFailed()){
+        if (expResult.isFailed()) {
             return "/experiment/swath";
         }
 
@@ -394,10 +429,10 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/compressionsort")
     String compressionSort(Model model, @RequestParam(value = "expId", required = true) String expId,
-                      RedirectAttributes redirectAttributes) {
+                           RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(expId);
-        if(resultDO.isFailed()){
+        if (resultDO.isFailed()) {
             redirectAttributes.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
             return "redirect:/experiment/list";
         }

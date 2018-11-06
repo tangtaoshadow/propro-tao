@@ -1,6 +1,5 @@
 package com.westlake.air.pecs.test.experiment;
 
-import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
@@ -11,7 +10,6 @@ import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.LibraryService;
 import com.westlake.air.pecs.service.ScanIndexService;
 import com.westlake.air.pecs.test.BaseTest;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -37,7 +35,7 @@ public class ExperimentTest extends BaseTest {
         String filePath = getClass().getClassLoader().getResource("ChromatogramExtractor_input.mzXML").getPath();
         ExperimentDO experimentDO = new ExperimentDO();
         experimentDO.setName("测试用实验");
-        experimentDO.setFileLocation(filePath);
+        experimentDO.setFilePath(filePath);
         experimentService.insert(experimentDO);
 
         File file = new File(filePath);
@@ -64,7 +62,7 @@ public class ExperimentTest extends BaseTest {
         String filePathMZXML = getClass().getClassLoader().getResource("ChromatogramExtractor_input.mzXML").getPath();
         ExperimentDO experimentDO = new ExperimentDO();
         experimentDO.setName("测试用实验");
-        experimentDO.setFileLocation(filePath);
+        experimentDO.setFilePath(filePath);
         experimentService.insert(experimentDO);
 
         File fileMZXML = new File(filePathMZXML);

@@ -34,10 +34,15 @@ public class TaskController extends BaseController {
     @RequestMapping(value = "/list")
     String list(Model model,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize) {
+                @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
+                @RequestParam(value = "taskTemplate", required = false) String taskTemplate
+                ) {
 
         model.addAttribute("pageSize", pageSize);
         TaskQuery query = new TaskQuery();
+        if(taskTemplate != null && !taskTemplate.isEmpty()){
+            query.setTaskTemplate(taskTemplate);
+        }
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
         query.setSortColumn("createDate");

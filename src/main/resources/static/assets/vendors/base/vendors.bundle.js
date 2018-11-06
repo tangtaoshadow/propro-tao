@@ -14103,15 +14103,18 @@ $.fn.repeater = function (fig) {
                 .each(function () {
                     var $input = $(this);
                     // match non empty brackets (ex: "[foo]")
-                    var matches = $input.attr('name').match(/\[[^\]]+\]/g);
+                    // var matches = $input.attr('name').match(/\[[^\]]+\]/g);
+                    //
+                    // var name = matches ?
+                    //     // strip "[" and "]" characters
+                    //     last(matches).replace(/\[|\]/g, '') :
+                    //     $input.attr('name');
 
-                    var name = matches ?
-                        // strip "[" and "]" characters
-                        last(matches).replace(/\[|\]/g, '') :
-                        $input.attr('name');
+                    name = $input.attr("origin-name");
+                    // var newName = groupName + '[' + index + '][' + name + ']' +
+                    //     ($input.is(':checkbox') || $input.attr('multiple') ? '[]' : '');
 
-
-                    var newName = groupName + '[' + index + '][' + name + ']' +
+                    var newName = groupName + '[' + index + '].' + name +
                         ($input.is(':checkbox') || $input.attr('multiple') ? '[]' : '');
 
                     $input.attr('name', newName);
@@ -14150,7 +14153,8 @@ $.fn.repeater = function (fig) {
                 if(data || fig.defaultValues) {
                     var inputNames = {};
                     $filterNested($item.find('[name]'), repeaters).each(function () {
-                        var key = $(this).attr('name').match(/\[([^\]]*)(\]|\]\[\])$/)[1];
+                        // var key = $(this).attr('name').match(/\[([^\]]*)(\]|\]\[\])$/)[1];
+                        var key = $(this).attr('origin-name');
                         inputNames[key] = $(this).attr('name');
                     });
 

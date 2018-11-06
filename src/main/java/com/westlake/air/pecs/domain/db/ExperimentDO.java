@@ -26,7 +26,7 @@ public class ExperimentDO extends BaseDO {
     String name;
 
     //必填
-    String fileLocation;
+    String filePath;
 
     //转换压缩后的aidata的文件名称
     String airdPath;

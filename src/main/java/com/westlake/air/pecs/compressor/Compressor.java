@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.compressor.AirInfo;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
@@ -18,13 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
 
 @Component("compressor")
 public class Compressor {
@@ -39,8 +34,8 @@ public class Compressor {
     MzXMLParser mzXMLParser;
 
     public ResultDO doCompress(ExperimentDO experimentDO) {
-        String fileLocation = experimentDO.getFileLocation();
-        File file = new File(fileLocation);
+        String filePath = experimentDO.getFilePath();
+        File file = new File(filePath);
         String fileParent = file.getParent();
         String fileNameWithoutSuffix = file.getName().replace(".mzXML", "").replace(".mzxml", "");
         String airiFilePath = fileParent + "/" + fileNameWithoutSuffix + Constants.SUFFIX_AIRUS_INFO;

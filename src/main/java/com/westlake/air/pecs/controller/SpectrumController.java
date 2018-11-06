@@ -173,7 +173,7 @@ public class SpectrumController extends BaseController {
         ExperimentDO experimentDO = expResult.getModel();
         ScanIndexDO scanIndexDO = indexResult.getModel();
 
-        File file = new File(experimentDO.getFileLocation());
+        File file = new File(experimentDO.getFilePath());
 
         try {
             RandomAccessFile raf = new RandomAccessFile(file, "r");

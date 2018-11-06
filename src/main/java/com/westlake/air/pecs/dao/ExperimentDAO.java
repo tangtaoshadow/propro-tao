@@ -43,7 +43,7 @@ public class ExperimentDAO {
         Document fieldsDoc = new Document();
         fieldsDoc.put("id",true);
         fieldsDoc.put("name",true);
-        fieldsDoc.put("fileLocation",true);
+        fieldsDoc.put("filePath",true);
 
         Query query = new BasicQuery(queryDoc, fieldsDoc);
         return mongoTemplate.find(query, ExperimentDO.class, CollectionName);

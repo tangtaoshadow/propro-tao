@@ -36,7 +36,7 @@
                             <div class="col-10">
                                 <select class="form-control m-input" id="exp" name="expId">
                                     <option th:each="exp:${experiments}" th:value="${exp.id}"
-                                            th:text="|${exp.name}(${exp.id}-${exp.fileLocation})|"
+                                            th:text="|${exp.name}(${exp.id}-${exp.filePath})|"
                                             th:selected="${expId}==${exp.id}?true:false"></option>
                                 </select>
                             </div>
