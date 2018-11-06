@@ -40,25 +40,25 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="20%">
+                    <th width="40%">
                         任务名称
                     </th>
                     <th width="10%">
                         任务模板类型
                     </th>
-                    <th width="10%">
+                    <th width="5%">
                         任务状态
                     </th>
-                    <th width="15%">
+                    <th width="5%">
                         总计耗时
                     </th>
-                    <th width="15%">
+                    <th width="10%">
                         创建时间
                     </th>
-                    <th width="15%">
+                    <th width="10%">
                         最后修改时间
                     </th>
-                    <th width="15%">
+                    <th width="20%">
                         操作
                     </th>
                 </tr>
@@ -68,7 +68,7 @@
                     <td th:text="${task.name}"></td>
                     <td th:text="${task.taskTemplate}"></td>
                     <td th:text="${task.status}"></td>
-                    <td th:text="|${task.totalCost}毫秒|"></td>
+                    <td th:text="|${task.totalCost} ms|"></td>
                     <td th:text="${#dates.format(task.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(task.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>

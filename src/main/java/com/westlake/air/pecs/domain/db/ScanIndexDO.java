@@ -21,7 +21,7 @@ public class ScanIndexDO extends BaseDO {
     String id;
 
     /**
-     * 0 代表Swath Block Index
+     * 0 代表Swath Block Index,包含了一个完整的Swath窗口中的所有谱图
      */
     @Indexed
     Integer msLevel;

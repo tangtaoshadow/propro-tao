@@ -10,6 +10,7 @@ import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.TaskService;
 import com.westlake.air.pecs.utils.ArrayUtil;
 import com.westlake.air.pecs.utils.CompressUtil;
+import com.westlake.air.pecs.utils.FileUtil;
 import me.lemire.integercompression.IntWrapper;
 import me.lemire.integercompression.differential.*;
 import org.apache.commons.codec.binary.Base64;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteOrder;
@@ -105,6 +107,16 @@ public class MzXMLParser extends BaseParser {
         return list;
     }
 
+    /**
+     * the result key is rt
+     *
+     * @param raf
+     * @param start
+     * @param end
+     * @param rts
+     * @return
+     * @throws Exception
+     */
     public TreeMap<Float, MzIntensityPairs> parseSwathBlockValues(RandomAccessFile raf, long start, long end, List<Float> rts) throws Exception {
         TreeMap<Float, MzIntensityPairs> map = new TreeMap<>();
         List<MzIntensityPairs> pairsList = parseValuesFromAird(raf, start, end);
@@ -176,9 +188,9 @@ public class MzXMLParser extends BaseParser {
         String value = parseValue(raf, index.getStart(), index.getEnd());
         Float[] values = getValues(new Base64().decode(value), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
 
-        int[] mzArray = new int[values.length/2];
-        float[] intensityArray = new float[values.length/2];
-        int j=0;
+        int[] mzArray = new int[values.length / 2];
+        float[] intensityArray = new float[values.length / 2];
+        int j = 0;
         for (int i = 0; i < values.length - 1; i += 2) {
             if (values[i + 1] == 0f) {
                 continue;
@@ -190,8 +202,8 @@ public class MzXMLParser extends BaseParser {
             j++;
         }
 
-        mzArray = ArrayUtils.subarray(mzArray,0,j);
-        intensityArray = ArrayUtils.subarray(intensityArray,0,j);
+        mzArray = ArrayUtils.subarray(mzArray, 0, j);
+        intensityArray = ArrayUtils.subarray(intensityArray, 0, j);
 
         mzArray = CompressUtil.compressForSortedInt(mzArray);
 
@@ -284,6 +296,30 @@ public class MzXMLParser extends BaseParser {
             }
 
             rf.seek(--position);
+        }
+        return 0L;
+    }
+
+    /**
+     * 使用FileInputStream读取,效率最高
+     *
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public Long parseIndexOffset(File file) throws IOException {
+
+        FileInputStream inputStream = new FileInputStream(file);
+        long skip = inputStream.getChannel().size() - 1000;
+        FileUtil.fileInputStreamSkip(inputStream, skip);
+
+        byte words[] = new byte[1000];
+        inputStream.read(words);
+        inputStream.close();
+        String temp = new String(words);
+        if (temp.contains("<indexOffset>")) {
+            temp = temp.substring(temp.indexOf("<indexOffset>") + 13, temp.indexOf("</indexOffset>"));
+            return Long.valueOf(temp);
         }
         return 0L;
     }
@@ -429,10 +465,10 @@ public class MzXMLParser extends BaseParser {
         try {
             raf = new RandomAccessFile(file, "r");
             //获取索引的起始位置
-            Long indexOffset = parseIndexOffset(raf);
+            Long indexOffset = parseIndexOffset(file);
 
             //根据索引的内容获取id以及对应的startPosition
-            HashMap<Integer, ScanIndexDO> indexMap = parseScanStartPosition(indexOffset, raf);
+            HashMap<Integer, ScanIndexDO> indexMap = parseScanStartPosition(indexOffset, file);
 
             //记录总共的scan条数
             int totalCount = indexMap.size();
@@ -442,7 +478,7 @@ public class MzXMLParser extends BaseParser {
                 //如果已经是最后一个元素了
                 if (i == totalCount) {
                     //读取尾部的50个字符
-                    lastRead = read(raf, indexOffset - 50, 50);
+                    lastRead = read(file, indexOffset - 50, 50);
                     Long length = searchForLength(lastRead, 2, 62);
                     indexMap.get(i).setEnd(indexOffset - length);
                     indexList.add(indexMap.get(i));
@@ -489,6 +525,31 @@ public class MzXMLParser extends BaseParser {
         return indexMap;
     }
 
+    public HashMap<Integer, ScanIndexDO> parseScanStartPosition(Long indexOffset, File file) throws IOException {
+        FileInputStream inputStream = new FileInputStream(file);
+        HashMap<Integer, ScanIndexDO> indexMap = new HashMap<>();
+        FileUtil.fileInputStreamSkip(inputStream, indexOffset);
+
+        int indexSize = (int) (inputStream.getChannel().size() - 1 - indexOffset);
+        byte[] indexArray = new byte[indexSize];
+        inputStream.read(indexArray);
+        inputStream.close();
+        String totalLine = new String(indexArray);
+        String[] indexLines = totalLine.split("\n");
+        int count = 1;
+        for (String line : indexLines) {
+            if (line.contains("<offset")) {
+                line = line.trim();
+                String id = line.substring(line.indexOf("\"") + 1, line.lastIndexOf("\""));
+                String offset = line.substring(line.indexOf(">") + 1, line.lastIndexOf("<"));
+                indexMap.put(count, new ScanIndexDO(Integer.valueOf(id.trim()), Long.valueOf(offset.trim()), null));
+                count++;
+            }
+        }
+        return indexMap;
+    }
+
+
     private Long searchForLength(byte[] strToFind, int findTime, int findStr) {
         int count = 0;
         //因为">"的byte编码时62,所以要搜索倒数第二个62所处的位置
@@ -507,6 +568,16 @@ public class MzXMLParser extends BaseParser {
         byte[] tmp = new byte[size];
         raf.seek(start);
         raf.read(tmp);
+
+        return tmp;
+    }
+
+    public byte[] read(File file, long start, int size) throws IOException {
+        FileInputStream inputStream = new FileInputStream(file);
+
+        byte[] tmp = new byte[size];
+        FileUtil.fileInputStreamSkip(inputStream, start);
+        inputStream.read(tmp);
 
         return tmp;
     }

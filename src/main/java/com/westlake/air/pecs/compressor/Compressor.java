@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.compressor.AirInfo;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
@@ -17,9 +18,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 @Component("compressor")
 public class Compressor {
@@ -89,7 +94,7 @@ public class Compressor {
                 swathIndex.setPrecursorMzStart(rang.getMzStart());
                 swathIndex.setPrecursorMzEnd(rang.getMzEnd());
                 long startTime = System.currentTimeMillis();
-                List<ScanIndexDO> indexes = scanIndexService.getAll(new ScanIndexQuery(experimentDO.getId(), 2 , rang.getMzStart() , rang.getMzEnd()));
+                List<ScanIndexDO> indexes = scanIndexService.getAll(new ScanIndexQuery(experimentDO.getId(), 2, rang.getMzStart(), rang.getMzEnd()));
                 for (ScanIndexDO index : indexes) {
                     Long offset = processWithIndex(rafRead, fwData, index, precision, isZlibCompression, start);
                     start = start + offset;
@@ -146,16 +151,15 @@ public class Compressor {
         index.setEnd(null);
     }
 
-    private Long processWithIndex(RandomAccessFile raf, FileWriter fwData ,ScanIndexDO index, int precision, boolean isZlibCompression, Long start) throws IOException {
+    private Long processWithIndex(RandomAccessFile raf, FileWriter fwData, ScanIndexDO index, int precision, boolean isZlibCompression, Long start) throws IOException {
         String indexesStr = mzXMLParser.parseValueForAird(raf, index, precision, isZlibCompression);
-//        String indexesStr = "";
         index.setStart2(start);
         index.setEnd2(start + indexesStr.length());
         fwData.write(indexesStr);
         scanIndexService.update(index);
         readyToOutput(index);
 
-        return (long)indexesStr.length();
+        return (long) indexesStr.length();
     }
 
 }

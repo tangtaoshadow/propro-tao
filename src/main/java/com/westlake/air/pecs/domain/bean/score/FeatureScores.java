@@ -46,6 +46,10 @@ public class FeatureScores {
 
     HashMap<String, Double> scoresMap;
 
+    public static int getScoresCount() {
+        return ScoreType.getUsedTypes().size();
+    }
+
     public static String[] getScoresColumnNames() {
         if (columns == null) {
             columns = new String[SCORES_COUNT];
@@ -188,9 +192,9 @@ public class FeatureScores {
             this.description = description;
         }
 
-        public static Boolean getBiggerIsBetter(String typeName){
-            for(ScoreType type : values()){
-                if (type.getTypeName().equals(typeName)){
+        public static Boolean getBiggerIsBetter(String typeName) {
+            for (ScoreType type : values()) {
+                if (type.getTypeName().equals(typeName)) {
                     return type.getBiggerIsBetter();
                 }
             }

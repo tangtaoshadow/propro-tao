@@ -111,4 +111,15 @@ public class FileUtil {
         os.write(b,0,l);
         os.close();
     }
+
+    public static void fileInputStreamSkip(FileInputStream inputStream, long skip) throws IOException {
+        //避免IO错误
+        while (skip > 0) {
+            long amt = inputStream.skip(skip);
+            if (amt == -1) {
+                throw new RuntimeException(inputStream + ": unexpected EOF");
+            }
+            skip -= amt;
+        }
+    }
 }
