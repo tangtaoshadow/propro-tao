@@ -21,17 +21,42 @@
                 <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                 <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
 
-                <!--<div class="form-group m-form__group">-->
-                    <!--<div class="input-group">-->
-                        <!--<input type="text" class="form-control" id="searchName" name="searchName" placeholder=""-->
-                               <!--th:value="${searchName}">-->
-                        <!--<div class="input-group-append">-->
-                            <!--<button class="btn btn-primary" type="submit">-->
-                                <!--查找-->
-                            <!--</button>-->
-                        <!--</div>-->
-                    <!--</div>-->
-                <!--</div>-->
+                <div class="form-group m-form__group">
+                    <div class="input-group col-lg-4">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-success" type="button">
+                                类型:
+                            </button>
+                        </div>
+                        <select class="form-control m-input" id="taskTemplate" name="taskTemplate">
+                            <option value="All" selected="selected" th:text="All"></option>
+                            <option th:each="template:${taskTemplates}" th:value="${template.name}" th:text="${template.name}"
+                                    th:selected="${taskTemplate}==${template.name}?true:false"></option>
+                        </select>
+                    </div>
+                    <div class="input-group col-lg-4">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-success" type="button">
+                                状态:
+                            </button>
+                        </div>
+                        <select class="form-control m-input" id="taskStatus" name="taskStatus">
+                            <option value="All" selected="selected" th:text="All"></option>
+                            <option th:each="status:${statusList}" th:value="${status.name}"
+                                    th:text="${status.name}"
+                                    th:selected="${taskStatus}==${status.name}?true:false"></option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchName" name="searchName" placeholder=""
+                               th:value="${searchName}">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit">
+                                查找
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </form>
         </div>
         <!--end: Search Form -->

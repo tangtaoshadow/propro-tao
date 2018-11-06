@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.compressor.Compressor;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
+import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
@@ -156,7 +157,7 @@ public class ExperimentController extends BaseController {
             TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_EXPERIMENT_FILE, experimentDO.getName());
             if(!errorInfo.isEmpty()){
                 taskDO.addLog(errorInfo);
-                taskDO.finish(TaskDO.STATUS_FAILED);
+                taskDO.finish(TaskStatus.FAILED.getName());
             }else{
                 taskService.insert(taskDO);
                 experimentTask.saveExperimentTask(experimentDO, file, taskDO);
@@ -166,7 +167,7 @@ public class ExperimentController extends BaseController {
         if(!errorInfo.isEmpty()){
             redirectAttributes.addFlashAttribute(ERROR_MSG, errorInfo);
         }
-        return "redirect:/task/list?taskTemplate=" + TaskTemplate.UPLOAD_EXPERIMENT_FILE.getTemplateName();
+        return "redirect:/task/list?taskTemplate=" + TaskTemplate.UPLOAD_EXPERIMENT_FILE.getName();
     }
 
     @RequestMapping(value = "/edit/{id}")

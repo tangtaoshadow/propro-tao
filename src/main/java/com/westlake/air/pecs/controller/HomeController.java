@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.controller;
 
+import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.*;
@@ -43,6 +44,7 @@ public class HomeController extends BaseController{
     ConfigDAO configDAO;
 
     public static int SHOW_NUM = 5;
+
     @RequestMapping("/")
     String home(Model model) {
         LibraryQuery libraryQuery = new LibraryQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");
@@ -54,7 +56,7 @@ public class HomeController extends BaseController{
 
         TaskQuery query = new TaskQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");
         ResultDO<List<TaskDO>> taskTotalRes = taskService.getList(query);
-        query.setStatus(TaskDO.STATUS_RUNNING);
+        query.setStatus(TaskStatus.RUNNING.getName());
         ResultDO<List<TaskDO>> taskRunningRes = taskService.getList(query);
         ConfigDO configDO = configDAO.getConfig();
 

@@ -2,6 +2,7 @@ package com.westlake.air.pecs.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.constants.ResultCode;
+import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
 import com.westlake.air.pecs.dao.ExperimentDAO;
@@ -216,19 +217,19 @@ public class ExperimentServiceImpl implements ExperimentService {
             ResultDO resultDO = scanIndexService.insertAll(indexList, true);
             if (resultDO.isFailed()) {
                 taskDO.addLog("索引存储失败" + resultDO.getMsgInfo());
-                taskDO.finish(TaskDO.STATUS_FAILED);
+                taskDO.finish(TaskStatus.FAILED.getName());
                 taskService.update(taskDO);
                 delete(experimentDO.getId());
                 scanIndexService.deleteAllByExperimentId(experimentDO.getId());
             } else {
                 taskDO.addLog("索引存储成功");
-                taskDO.finish(TaskDO.STATUS_SUCCESS);
+                taskDO.finish(TaskStatus.SUCCESS.getName());
                 taskService.update(taskDO);
             }
 
         } catch (Exception e) {
             taskDO.addLog("索引存储失败:" + e.getMessage());
-            taskDO.finish(TaskDO.STATUS_FAILED);
+            taskDO.finish(TaskStatus.FAILED.getName());
             taskService.update(taskDO);
             e.printStackTrace();
         }

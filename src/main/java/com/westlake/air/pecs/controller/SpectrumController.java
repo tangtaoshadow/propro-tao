@@ -193,9 +193,9 @@ public class SpectrumController extends BaseController {
         Float[] pairMzArray = pairs.getMzArray();
         Float[] pairIntensityArray = pairs.getIntensityArray();
         for (int n = 0; n < pairMzArray.length; n++) {
-            if(pairIntensityArray[n] == 0f){
-                continue;
-            }
+//            if(pairIntensityArray[n] == 0f){
+//                continue;
+//            }
             mzArray.add(pairMzArray[n]);
             intensityArray.add(pairIntensityArray[n]);
         }

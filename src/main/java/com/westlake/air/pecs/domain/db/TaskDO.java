@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.domain.db;
 
+import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.BaseDO;
 import com.westlake.air.pecs.domain.bean.task.MachineInfo;
@@ -21,11 +22,6 @@ import java.util.List;
 @Data
 @Document(collection = "task")
 public class TaskDO extends BaseDO {
-
-    public static String STATUS_UNKNOWN = "UNKNOWN";
-    public static String STATUS_RUNNING = "RUNNING";
-    public static String STATUS_FAILED = "FAILED";
-    public static String STATUS_SUCCESS = "SUCCESS";
 
     @Id
     String id;
@@ -58,18 +54,18 @@ public class TaskDO extends BaseDO {
     }
 
     public TaskDO(TaskTemplate taskTemplate, String taskSuffixName) {
-        this.taskTemplate = taskTemplate.getTemplateName();
-        this.status = STATUS_RUNNING;
-        this.name = taskTemplate.getTemplateName() + "-" + taskSuffixName;
+        this.taskTemplate = taskTemplate.getName();
+        this.status = TaskStatus.RUNNING.getName();
+        this.name = taskTemplate.getName() + "-" + taskSuffixName;
         start();
     }
 
     public void addLog(String content) {
         if (logs == null) {
             if (status == null || taskTemplate == null) {
-                this.taskTemplate = TaskTemplate.DEFAULT.getTemplateName();
-                this.status = STATUS_RUNNING;
-                this.name = TaskTemplate.DEFAULT.getTemplateName() + "-DEFAULT";
+                this.taskTemplate = TaskTemplate.DEFAULT.getName();
+                this.status = TaskStatus.RUNNING.getName();
+                this.name = TaskTemplate.DEFAULT.getName() + "-DEFAULT";
             }
             logs = new ArrayList<>();
             logs.add(new TaskLog("Task Started"));

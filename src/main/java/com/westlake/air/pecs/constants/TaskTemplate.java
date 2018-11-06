@@ -65,26 +65,26 @@ public enum TaskTemplate {
 
     ;
 
-    String templateName;
+    String name;
 
     String pagePath;
 
     TaskTemplate(String templateName, String pagePath) {
-        this.templateName = templateName;
+        this.name = templateName;
         this.pagePath = pagePath;
     }
 
-    public static TaskTemplate getByName(String templateName) {
+    public static TaskTemplate getByName(String name) {
         for (TaskTemplate template : values()) {
-            if (template.getTemplateName().equals(templateName)) {
+            if (template.getName().equals(name)) {
                 return template;
             }
         }
         return null;
     }
 
-    public String getTemplateName() {
-        return templateName;
+    public String getName() {
+        return name;
     }
 
     public String getPagePath() {

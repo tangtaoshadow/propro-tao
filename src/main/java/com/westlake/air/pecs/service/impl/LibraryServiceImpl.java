@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.service.impl;
 
 import com.westlake.air.pecs.constants.ResultCode;
+import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.dao.LibraryDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
@@ -215,7 +216,7 @@ public class LibraryServiceImpl implements LibraryService {
 
         if (result.isFailed()) {
             taskDO.addLog(result.getMsgInfo());
-            taskDO.finish(TaskDO.STATUS_FAILED);
+            taskDO.finish(TaskStatus.FAILED.getName());
         }
 
         /**
@@ -226,7 +227,7 @@ public class LibraryServiceImpl implements LibraryService {
         countAndUpdateForLibrary(library);
 
         taskDO.addLog("统计完毕");
-        taskDO.finish(TaskDO.STATUS_SUCCESS);
+        taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
     }
 }

@@ -2,6 +2,7 @@ package com.westlake.air.pecs.async;
 
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.compressor.Compressor;
+import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
@@ -50,7 +51,7 @@ public class ExperimentTask extends BaseTask {
         long start = System.currentTimeMillis();
         compressor.doCompress(experimentDO);
         taskDO.addLog("压缩转换完毕,总耗时:"+(System.currentTimeMillis() - start));
-        taskDO.finish(TaskDO.STATUS_SUCCESS);
+        taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
     }
 
@@ -81,7 +82,7 @@ public class ExperimentTask extends BaseTask {
         experimentService.extract(input);
 
         taskDO.addLog("卷积完毕,总耗时:"+(System.currentTimeMillis() - start));
-        taskDO.finish(TaskDO.STATUS_SUCCESS);
+        taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
     }
 
@@ -93,7 +94,7 @@ public class ExperimentTask extends BaseTask {
         ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(experimentDO, iRtLibraryId, mzExtractWindow, sigmaSpacing);
         if(resultDO.isFailed()){
             taskDO.addLog(resultDO.getMsgInfo()+":"+resultDO.getMsgInfo());
-            taskDO.finish(TaskDO.STATUS_SUCCESS);
+            taskDO.finish(TaskStatus.SUCCESS.getName());
             taskService.update(taskDO);
             return;
         }
@@ -105,7 +106,7 @@ public class ExperimentTask extends BaseTask {
         experimentService.update(experimentDO);
 
         taskDO.addLog("iRT计算完毕,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept());
-        taskDO.finish(TaskDO.STATUS_SUCCESS);
+        taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
     }
 
@@ -140,7 +141,7 @@ public class ExperimentTask extends BaseTask {
 
         if(originDataListResult.isFailed() || originDataListResult.getModel() == null || originDataListResult.getModel().size() == 0){
             taskDO.addLog("卷积失败:"+originDataListResult.getMsgInfo());
-            taskDO.finish(TaskDO.STATUS_FAILED);
+            taskDO.finish(TaskStatus.FAILED.getName());
             taskService.update(taskDO);
         }
 
@@ -164,7 +165,7 @@ public class ExperimentTask extends BaseTask {
 //        int count = AirusUtil.checkFdr(finalResult);
 //        taskDO.addLog("合并打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为"+count);
         taskDO.addLog("Swath流程总计耗时:" + (System.currentTimeMillis() - startAll));
-        taskDO.finish(TaskDO.STATUS_SUCCESS);
+        taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
     }
 }

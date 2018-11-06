@@ -2,6 +2,7 @@ package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.constants.ResultCode;
+import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
@@ -35,13 +36,27 @@ public class TaskController extends BaseController {
     String list(Model model,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
-                @RequestParam(value = "taskTemplate", required = false) String taskTemplate
+                @RequestParam(value = "taskTemplate", required = false) String taskTemplate,
+                @RequestParam(value = "taskStatus", required = false) String taskStatus
                 ) {
+
+        if(taskTemplate != null){
+            model.addAttribute("taskTemplate", taskTemplate);
+        }
+        model.addAttribute("taskTemplates", TaskTemplate.values());
+
+        if(taskStatus != null){
+            model.addAttribute("taskStatus", taskStatus);
+        }
+        model.addAttribute("statusList", TaskStatus.values());
 
         model.addAttribute("pageSize", pageSize);
         TaskQuery query = new TaskQuery();
-        if(taskTemplate != null && !taskTemplate.isEmpty()){
+        if(taskTemplate != null && !taskTemplate.isEmpty() && !taskTemplate.equals("All")){
             query.setTaskTemplate(taskTemplate);
+        }
+        if(taskStatus != null && !taskStatus.isEmpty() && !taskStatus.equals("All")){
+            query.setStatus(taskStatus);
         }
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);

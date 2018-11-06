@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.async;
 
+import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
@@ -56,7 +57,7 @@ public class ScoreTask extends BaseTask {
         start = System.currentTimeMillis();
         scoresService.buildScoreDistributions(overviewId);
         taskDO.addLog("生成子分数总览图完毕,流程结束,耗时:" + (System.currentTimeMillis() - start));
-        taskDO.finish(TaskDO.STATUS_SUCCESS);
+        taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
 
     }
@@ -69,12 +70,12 @@ public class ScoreTask extends BaseTask {
         ResultDO resultDO = scoresService.exportForPyProphet(overviewId);
         if (resultDO.isSuccess()) {
             taskDO.addLog("文件导出成功,耗时:" + (System.currentTimeMillis() - start));
-            taskDO.finish(TaskDO.STATUS_SUCCESS);
+            taskDO.finish(TaskStatus.SUCCESS.getName());
             taskService.update(taskDO);
         } else {
             taskDO.addLog("文件导出失败,耗时:" + (System.currentTimeMillis() - start));
             taskDO.addLog(resultDO.getMsgInfo());
-            taskDO.finish(TaskDO.STATUS_FAILED);
+            taskDO.finish(TaskStatus.FAILED.getName());
             taskService.update(taskDO);
         }
     }
@@ -87,12 +88,12 @@ public class ScoreTask extends BaseTask {
         ResultDO<List<ScoreDistribution>> resultDO = scoresService.buildScoreDistributions(overviewId);
         if (resultDO.isSuccess()) {
             taskDO.addLog("子分数分布图构建成功,耗时:" + (System.currentTimeMillis() - start));
-            taskDO.finish(TaskDO.STATUS_SUCCESS);
+            taskDO.finish(TaskStatus.SUCCESS.getName());
             taskService.update(taskDO);
         } else {
             taskDO.addLog("子分数分布图构建失败,耗时:" + (System.currentTimeMillis() - start));
             taskDO.addLog(resultDO.getMsgInfo());
-            taskDO.finish(TaskDO.STATUS_FAILED);
+            taskDO.finish(TaskStatus.FAILED.getName());
             taskService.update(taskDO);
         }
     }
