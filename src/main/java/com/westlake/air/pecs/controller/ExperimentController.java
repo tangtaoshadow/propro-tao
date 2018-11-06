@@ -128,7 +128,7 @@ public class ExperimentController extends BaseController {
     }
 
     @RequestMapping(value = "/batchadd", method = {RequestMethod.POST})
-    String batchAdd(Model model, ExpModel exps,RedirectAttributes redirectAttributes) {
+    String batchAdd(Model model, ExpModel exps, RedirectAttributes redirectAttributes) {
 
         String errorInfo = "";
         List<Exp> expList = exps.getExps();
@@ -154,11 +154,18 @@ public class ExperimentController extends BaseController {
             }
 
             TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_EXPERIMENT_FILE, experimentDO.getName());
-            taskService.insert(taskDO);
-            experimentTask.saveExperimentTask(experimentDO, file, taskDO);
+            if(!errorInfo.isEmpty()){
+                taskDO.addLog(errorInfo);
+                taskDO.finish(TaskDO.STATUS_FAILED);
+            }else{
+                taskService.insert(taskDO);
+                experimentTask.saveExperimentTask(experimentDO, file, taskDO);
+            }
         }
 
-        redirectAttributes.addFlashAttribute(ERROR_MSG, errorInfo);
+        if(!errorInfo.isEmpty()){
+            redirectAttributes.addFlashAttribute(ERROR_MSG, errorInfo);
+        }
         return "redirect:/task/list?taskTemplate=" + TaskTemplate.UPLOAD_EXPERIMENT_FILE.getTemplateName();
     }
 
@@ -204,6 +211,8 @@ public class ExperimentController extends BaseController {
                   @RequestParam(value = "slope") Double slope,
                   @RequestParam(value = "intercept") Double intercept,
                   @RequestParam(value = "filePath") String filePath,
+                  @RequestParam(value = "airdPath") String airdPath,
+                  @RequestParam(value = "airiPath") String airiPath,
                   @RequestParam(value = "description") String description,
                   @RequestParam(value = "compressionType") String compressionType,
                   @RequestParam(value = "precision") String precision,
@@ -218,6 +227,8 @@ public class ExperimentController extends BaseController {
 
         experimentDO.setName(name);
         experimentDO.setFilePath(filePath);
+        experimentDO.setAirdPath(airdPath);
+        experimentDO.setAiriPath(airiPath);
         experimentDO.setDescription(description);
         experimentDO.setIRtLibraryId(iRtLibraryId);
         experimentDO.setSlope(slope);
@@ -437,12 +448,10 @@ public class ExperimentController extends BaseController {
             return "redirect:/experiment/list";
         }
         ExperimentDO experimentDO = resultDO.getModel();
-//        ResultDO compressResult = compressor.doCompress(experimentDO);
         TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
         taskService.insert(taskDO);
 
         experimentTask.compressionAndSort(experimentDO, taskDO);
         return "redirect:/task/detail/" + taskDO.getId();
-//        return JSON.toJSONString(compressResult);
     }
 }

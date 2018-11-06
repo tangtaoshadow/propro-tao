@@ -3,6 +3,7 @@ package com.westlake.air.pecs.compressor;
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
+import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.compressor.AirInfo;
@@ -32,11 +33,20 @@ public class Compressor {
     ExperimentService experimentService;
     @Autowired
     MzXMLParser mzXMLParser;
+    @Autowired
+    ConfigDAO configDAO;
 
     public ResultDO doCompress(ExperimentDO experimentDO) {
         String filePath = experimentDO.getFilePath();
         File file = new File(filePath);
-        String fileParent = file.getParent();
+
+        String configAirdPath = configDAO.getConfig().getAirdFilePath();
+        String fileParent = "";
+        if(configAirdPath != null && !configAirdPath.isEmpty()){
+            fileParent = configAirdPath;
+        }else{
+            fileParent = file.getParent();
+        }
         String fileNameWithoutSuffix = file.getName().replace(".mzXML", "").replace(".mzxml", "");
         String airiFilePath = fileParent + "/" + fileNameWithoutSuffix + Constants.SUFFIX_AIRUS_INFO;
         String airdFilePath = fileParent + "/" + fileNameWithoutSuffix + Constants.SUFFIX_AIRUS_DATA;

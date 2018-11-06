@@ -29,16 +29,16 @@ public class ConfigController extends BaseController {
 
     @RequestMapping(value = "/update")
     String update(Model model,
-                  @RequestParam(value = "experimentFilePath", required = false) String experimentFilePath,
-                  @RequestParam(value = "oldExperimentFilePath", required = false) String oldExperimentFilePath,
+                  @RequestParam(value = "airdFilePath", required = false) String airdFilePath,
+                  @RequestParam(value = "mzxmlFilePath", required = false) String oldExperimentFilePath,
                   @RequestParam(value = "libraryFilePath", required = false) String libraryFilePath,
                   @RequestParam(value = "exportScoresFilePath", required = false) String exportScoresFilePath,
                   @RequestParam(value = "exportAnalyseFilePath", required = false) String exportAnalyseFilePath,
                   @RequestParam(value = "prefixForCompressorFile", required = false) String prefixForCompressorFile
                   ) {
         ConfigDO configDO = configDAO.getConfig();
-        if(experimentFilePath != null){
-            configDO.setExperimentFilePath(experimentFilePath);
+        if(airdFilePath != null){
+            configDO.setAirdFilePath(airdFilePath);
         }
         if(libraryFilePath != null){
             configDO.setLibraryFilePath(libraryFilePath);
@@ -47,7 +47,7 @@ public class ConfigController extends BaseController {
             configDO.setPrefixForCompressorFile(prefixForCompressorFile);
         }
         if(oldExperimentFilePath != null){
-            configDO.setOldExperimentFilePath(oldExperimentFilePath);
+            configDO.setMzxmlFilePath(oldExperimentFilePath);
         }
         if(exportAnalyseFilePath != null){
             configDO.setExportAnalyseFilePath(exportAnalyseFilePath);
