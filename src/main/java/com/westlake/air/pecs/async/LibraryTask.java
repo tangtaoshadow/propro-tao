@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.async;
 
+import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.LibraryService;
@@ -21,8 +22,10 @@ public class LibraryTask extends BaseTask{
     @Autowired
     LibraryService libraryService;
 
-    @Async
+    @Async(value = "uploadFileExecutor")
     public void saveLibraryTask(LibraryDO library, InputStream in, String fileName, Boolean justReal, TaskDO taskDO) {
+        taskDO.setStatus(TaskStatus.RUNNING.getName());
+        taskService.update(taskDO);
         libraryService.uploadFile(library, in, fileName, justReal, taskDO);
     }
 }

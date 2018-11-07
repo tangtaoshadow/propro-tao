@@ -55,7 +55,7 @@ public class TaskDO extends BaseDO {
 
     public TaskDO(TaskTemplate taskTemplate, String taskSuffixName) {
         this.taskTemplate = taskTemplate.getName();
-        this.status = TaskStatus.RUNNING.getName();
+        this.status = TaskStatus.WAITING.getName();
         this.name = taskTemplate.getName() + "-" + taskSuffixName;
         start();
     }
@@ -64,7 +64,7 @@ public class TaskDO extends BaseDO {
         if (logs == null) {
             if (status == null || taskTemplate == null) {
                 this.taskTemplate = TaskTemplate.DEFAULT.getName();
-                this.status = TaskStatus.RUNNING.getName();
+                this.status = TaskStatus.WAITING.getName();
                 this.name = TaskTemplate.DEFAULT.getName() + "-DEFAULT";
             }
             logs = new ArrayList<>();

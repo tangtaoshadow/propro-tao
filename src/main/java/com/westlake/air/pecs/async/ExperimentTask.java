@@ -38,16 +38,20 @@ public class ExperimentTask extends BaseTask {
     @Autowired
     Compressor compressor;
 
-    @Async
+    @Async(value="uploadFileExecutor")
     public void saveExperimentTask(ExperimentDO experimentDO, File file, TaskDO taskDO) {
+        taskDO.setStatus(TaskStatus.RUNNING.getName());
+        taskService.update(taskDO);
         experimentService.uploadFile(experimentDO, file, taskDO);
         List<WindowRang> rangs = experimentService.getWindows(experimentDO.getId());
         experimentDO.setWindowRangs(rangs);
         experimentService.update(experimentDO);
     }
 
-    @Async
+    @Async(value = "compressFileExecutor")
     public void compressionAndSort(ExperimentDO experimentDO, TaskDO taskDO) {
+        taskDO.setStatus(TaskStatus.RUNNING.getName());
+        taskService.update(taskDO);
         long start = System.currentTimeMillis();
         compressor.doCompress(experimentDO);
         taskDO.addLog("压缩转换完毕,总耗时:"+(System.currentTimeMillis() - start));
@@ -64,8 +68,10 @@ public class ExperimentTask extends BaseTask {
      * @param mzExtractWindow
      * @return
      */
-    @Async
+    @Async(value = "extractorExecutor")
     public void extract(ExperimentDO experimentDO, String libraryId, SlopeIntercept slopeIntercept, String creator, float rtExtractWindow, float mzExtractWindow, TaskDO taskDO) {
+        taskDO.setStatus(TaskStatus.RUNNING.getName());
+        taskService.update(taskDO);
         SwathInput input = new SwathInput();
         input.setExperimentDO(experimentDO);
         input.setLibraryId(libraryId);
@@ -86,9 +92,10 @@ public class ExperimentTask extends BaseTask {
         taskService.update(taskDO);
     }
 
-    @Async
+    @Async(value = "extractorExecutor")
     public void convAndIrt(ExperimentDO experimentDO, String iRtLibraryId, Float mzExtractWindow, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
         taskDO.addLog("开始卷积IRT校准库并且计算iRT值");
+        taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
 
         ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(experimentDO, iRtLibraryId, mzExtractWindow, sigmaSpacing);
@@ -110,13 +117,14 @@ public class ExperimentTask extends BaseTask {
         taskService.update(taskDO);
     }
 
-    @Async
+    @Async(value = "extractorExecutor")
     public void swath(SwathInput input, TaskDO taskDO) {
         long startAll = System.currentTimeMillis();
         long start = System.currentTimeMillis();
         ExperimentDO experimentDO = input.getExperimentDO();
 
         taskDO.addLog("开始创建Aird压缩文件");
+        taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         compressor.doCompress(experimentDO);
 

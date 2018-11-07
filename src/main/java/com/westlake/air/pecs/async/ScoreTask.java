@@ -36,6 +36,7 @@ public class ScoreTask extends BaseTask {
     public void score(String overviewId, SlopeIntercept slopeIntercept, String libraryId, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
         long start = System.currentTimeMillis();
         taskDO.addLog("开始查询所有卷积结果");
+        taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         List<AnalyseDataDO> dataList = analyseDataService.getAllByOverviewId(overviewId);
 
@@ -66,6 +67,7 @@ public class ScoreTask extends BaseTask {
     public void exportForPyProphet(String overviewId, TaskDO taskDO) {
         long start = System.currentTimeMillis();
         taskDO.addLog("开始进行子分数TSV文件导出");
+        taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         ResultDO resultDO = scoresService.exportForPyProphet(overviewId);
         if (resultDO.isSuccess()) {
@@ -84,6 +86,7 @@ public class ScoreTask extends BaseTask {
     public void buildScoreDistributions(String overviewId, TaskDO taskDO) {
         long start = System.currentTimeMillis();
         taskDO.addLog("开始构建子分数分布图");
+        taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         ResultDO<List<ScoreDistribution>> resultDO = scoresService.buildScoreDistributions(overviewId);
         if (resultDO.isSuccess()) {
