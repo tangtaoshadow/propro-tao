@@ -32,7 +32,7 @@ public class ScoreTask extends BaseTask {
     @Autowired
     AnalyseOverviewService analyseOverviewService;
 
-    @Async
+    @Async(value = "scoreExecutor")
     public void score(String overviewId, SlopeIntercept slopeIntercept, String libraryId, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
         long start = System.currentTimeMillis();
         taskDO.addLog("开始查询所有卷积结果");
@@ -63,7 +63,7 @@ public class ScoreTask extends BaseTask {
 
     }
 
-    @Async
+    @Async(value = "commonExecutor")
     public void exportForPyProphet(String overviewId, TaskDO taskDO) {
         long start = System.currentTimeMillis();
         taskDO.addLog("开始进行子分数TSV文件导出");
@@ -82,7 +82,7 @@ public class ScoreTask extends BaseTask {
         }
     }
 
-    @Async
+    @Async(value = "commonExecutor")
     public void buildScoreDistributions(String overviewId, TaskDO taskDO) {
         long start = System.currentTimeMillis();
         taskDO.addLog("开始构建子分数分布图");

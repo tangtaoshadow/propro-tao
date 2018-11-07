@@ -52,4 +52,32 @@ public class TaskExecutor {
         return executor;
     }
 
+    @Bean(name = "scoreExecutor")
+    public Executor scoreExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(100);
+        executor.setKeepAliveSeconds(5);
+        executor.setThreadNamePrefix("scoreExecutor-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(60);
+        return executor;
+    }
+
+    @Bean(name = "commonExecutor")
+    public Executor commonExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(100);
+        executor.setKeepAliveSeconds(5);
+        executor.setThreadNamePrefix("commonExecutor-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(60);
+        return executor;
+    }
+
 }

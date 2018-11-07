@@ -56,7 +56,7 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/list")
     String list(Model model,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
+                @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
                 @RequestParam(value = "searchName", required = false) String searchName) {
         model.addAttribute("searchName", searchName);
         model.addAttribute("pageSize", pageSize);
