@@ -184,16 +184,35 @@ public class MzXMLParser extends BaseParser {
         return pairsList;
     }
 
-    public String parseValueForAird(RandomAccessFile raf, ScanIndexDO index, int precision, boolean isZlibCompression) {
+    /**
+     *
+     * @param raf
+     * @param index
+     * @param precision
+     * @param isZlibCompression
+     * @param zeroLeft 两个Intensity非0的间隔内保留多少个Intensity为0的数值
+     * @return
+     */
+    public String parseValueForAird(RandomAccessFile raf, ScanIndexDO index, int precision, boolean isZlibCompression, int zeroLeft) {
         String value = parseValue(raf, index.getStart(), index.getEnd());
         Float[] values = getValues(new Base64().decode(value), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
 
+        //如果存在连续的intensity为0的情况仅保留其中的一个0,所以数组的最大值是values.length/2
         int[] mzArray = new int[values.length / 2];
         float[] intensityArray = new float[values.length / 2];
         int j = 0;
+        int countZero = 0;
         for (int i = 0; i < values.length - 1; i += 2) {
+            //如果取到的intensity是0,那么进行判断
             if (values[i + 1] == 0f) {
-                continue;
+                if (countZero < zeroLeft) {
+                    countZero++;
+                } else {
+                    //如果不是第一个0,那么不保存
+                    continue;
+                }
+            } else {
+                countZero = 0;
             }
             float intensity = (float) Math.round(values[i + 1] * 10) / 10; //intensity精确到小数点后面一位
             int mz = Math.round(values[i] * 1000);//mz精确到小数点后面三位
@@ -209,6 +228,10 @@ public class MzXMLParser extends BaseParser {
 
         String indexesStr = CompressUtil.transToString(mzArray) + Constants.CHANGE_LINE + CompressUtil.transToString(intensityArray) + Constants.CHANGE_LINE;
         return indexesStr;
+    }
+
+    public String parseValueForAird(RandomAccessFile raf, ScanIndexDO index, int precision, boolean isZlibCompression) {
+        return parseValueForAird(raf, index, precision, isZlibCompression, 0);
     }
 
     /**

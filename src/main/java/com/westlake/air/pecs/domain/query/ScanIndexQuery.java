@@ -25,6 +25,8 @@ public class ScanIndexQuery extends PageQuery {
 
     Double rtEnd;
 
+    String rtStr;
+
     Integer parentNum;
 
     //前体的荷质比窗口开始位置,已经经过ExperimentDO.overlap参数调整

@@ -129,6 +129,9 @@ public class ScanIndexDAO {
         if (scanIndexQuery.getMsLevel() != null) {
             query.addCriteria(where("msLevel").is(scanIndexQuery.getMsLevel()));
         }
+        if (scanIndexQuery.getRtStr() != null) {
+            query.addCriteria(where("rtStr").is(scanIndexQuery.getRtStr()));
+        }
         if (scanIndexQuery.getRtStart() != null && scanIndexQuery.getRtEnd() != null) {
             query.addCriteria(where("rt").gte(scanIndexQuery.getRtStart()).lte(scanIndexQuery.getRtEnd()));
         }

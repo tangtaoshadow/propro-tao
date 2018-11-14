@@ -39,6 +39,7 @@ public class ScanIndexController extends BaseController {
                 @RequestParam(value = "numEnd", required = false) Integer numEnd,
                 @RequestParam(value = "rtStart", required = false) Double rtStart,
                 @RequestParam(value = "rtEnd", required = false) Double rtEnd,
+                @RequestParam(value = "rtStr", required = false) String rtStr,
                 @RequestParam(value = "precursorMzStart", required = false) Float precursorMzStart,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
@@ -50,6 +51,7 @@ public class ScanIndexController extends BaseController {
         model.addAttribute("numEnd", numEnd);
         model.addAttribute("rtStart", rtStart);
         model.addAttribute("rtEnd", rtEnd);
+        model.addAttribute("rtStr", rtStr);
         model.addAttribute("msLevel", msLevel);
         model.addAttribute("precursorMzStart", precursorMzStart);
 
@@ -80,6 +82,9 @@ public class ScanIndexController extends BaseController {
         }
         if (rtEnd != null) {
             query.setRtEnd(rtEnd);
+        }
+        if (rtStr != null) {
+            query.setRtStr("PT"+rtStr+"S");
         }
         if(precursorMzStart != null){
             query.setPrecursorMzStart(precursorMzStart);

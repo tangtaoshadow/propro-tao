@@ -77,7 +77,13 @@ public class Compressor {
             long startAll = System.currentTimeMillis();
             int precision = Integer.parseInt(experimentDO.getPrecision());
             boolean isZlibCompression = "zlib".equalsIgnoreCase(experimentDO.getCompressionType());
-            List<ScanIndexDO> outputIndexList = new ArrayList<>();
+
+            //在进行正式压缩之前,先把experiment的是否有AirusFile的状态置为false,以防在压缩错误的时候数据库的AirusFile状态仍然为可用
+            if(experimentDO.getHasAirusFile()){
+                experimentDO.setHasAirusFile(false);
+                experimentService.update(experimentDO);
+            }
+
             Long start = 0L;
 
             //先写入所有的MS1
@@ -87,7 +93,7 @@ public class Compressor {
                 Long offset = processWithIndex(rafRead, fwData, index, precision, isZlibCompression, start);
                 start = start + offset;
             }
-            outputIndexList.addAll(ms1IndexList);
+            List<ScanIndexDO> outputIndexList = new ArrayList<>(ms1IndexList);
             logger.info("压缩MS1完毕,开始提取并且压缩MS2");
 
             //再写入所有的MS2
@@ -144,6 +150,9 @@ public class Compressor {
         return new ResultDO(true);
     }
 
+    private void prepare(){
+
+    }
     /**
      * 输出到文件前将一些没有作用的字符串删除
      *

@@ -35,25 +35,34 @@
                         <input type="text" class="form-control m-input" name="experimentId"
                                th:value="${experimentId}">
                     </div>
-                    <div class="input-group col-lg-3">
+                    <div class="input-group col-lg-1">
                         <div class="input-group-prepend">
                             <button class="btn btn-success" type="button">
                                 MS等级:
                             </button>
                         </div>
                         <input type="text" class="form-control m-input" name="msLevel"
-                               placeholder="msLevel" th:value="${msLevel}">
+                               placeholder="" th:value="${msLevel}">
                     </div>
-                    <div class="input-group col-lg-3">
+                    <div class="input-group col-lg-2">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-success" type="button">
+                                RT:
+                            </button>
+                        </div>
+                        <input type="text" class="form-control m-input" name="rtStr"
+                               placeholder="such as PT1036.45S" th:value="${rtStr}">
+                    </div>
+                    <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
                             <button class="btn btn-success" type="button">
                                 内部序列Num:
                             </button>
                         </div>
                         <input type="text" class="form-control m-input" name="num"
-                               placeholder="sequence" th:value="${num}">
+                               placeholder="" th:value="${num}">
                     </div>
-                    <div class="input-group col-lg-3">
+                    <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
                             <button class="btn btn-success" type="button">
                                 前体Mz-Start:

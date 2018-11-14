@@ -146,7 +146,7 @@
                                 <!--th:text="${transition.targetSequence}"></a>-->
                                 <!--</td>-->
                                 <td>
-                                    <a th:href="|/transition/list?sequence=${transition.sequence}|"
+                                    <a th:href="|/transition/list?sequence=${transition.sequence}&libraryId=${transition.libraryId}|"
                                        th:text="${transition.sequence}"></a>
                                 </td>
                                 <td th:text="${transition.fullName}"></td>

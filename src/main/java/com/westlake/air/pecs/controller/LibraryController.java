@@ -6,6 +6,7 @@ import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
+import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.LibraryQuery;
 import com.westlake.air.pecs.parser.TransitionTraMLParser;
 import com.westlake.air.pecs.parser.TransitionTsvParser;
@@ -60,8 +61,8 @@ public class LibraryController extends BaseController {
         return "library/list";
     }
 
-    @RequestMapping(value = "/listVerify")
-    String listVerify(Model model,
+    @RequestMapping(value = "/listIrt")
+    String listIrt(Model model,
                       @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                       @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
                       @RequestParam(value = "searchName", required = false) String searchName) {
@@ -185,7 +186,7 @@ public class LibraryController extends BaseController {
 
         String redirectListUrl = null;
         if (type == 1) {
-            redirectListUrl = "redirect:/library/listVerify";
+            redirectListUrl = "redirect:/library/listIrt";
         } else {
             redirectListUrl = "redirect:/library/listStandard";
         }
@@ -231,7 +232,7 @@ public class LibraryController extends BaseController {
 
         String redirectListUrl = null;
         if (type == 1) {
-            redirectListUrl = "redirect:/library/listVerify";
+            redirectListUrl = "redirect:/library/listIrt";
         } else {
             redirectListUrl = "redirect:/library/listStandard";
         }
@@ -243,5 +244,15 @@ public class LibraryController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return redirectListUrl;
         }
+    }
+
+    @RequestMapping(value = "/overview/{id}")
+    String overview(Model model, @PathVariable("id") String id,
+                  RedirectAttributes redirectAttributes) {
+
+        List<TransitionDO> transitions = transitionService.getAllByLibraryIdAndIsDecoy(id, false);
+        
+
+        return "";
     }
 }
