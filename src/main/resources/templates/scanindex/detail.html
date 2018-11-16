@@ -81,21 +81,30 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="start" class="col-2 col-form-label">
+                                    <label for="mzxmlStart" class="col-2 col-form-label">
                                         所在文件位置
                                     </label>
                                     <div class="col-10">
-                                        <input type="text" class="form-control m-input" id="start" name="start"
-                                               readonly th:value="|${scanIndex?.start} -> ${scanIndex?.end}|">
+                                        <input type="text" class="form-control m-input" id="mzxmlStart" name="mzxmlStart"
+                                               readonly th:value="|${scanIndex?.positionMap?.get('mzxml')?.start} -> ${scanIndex?.positionMap?.get('mzxml')?.end}|">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="start2" class="col-2 col-form-label">
+                                    <label for="airdStart" class="col-2 col-form-label">
                                         所在文件位置(In aird File)
                                     </label>
                                     <div class="col-10">
-                                        <input type="text" class="form-control m-input" id="start2" name="start2"
-                                               readonly th:value="|${scanIndex?.start2} -> ${scanIndex?.end2}|">
+                                        <input type="text" class="form-control m-input" id="airdStart" name="airdStart"
+                                               readonly th:value="|${scanIndex?.positionMap?.get('aird')?.start} -> ${scanIndex?.positionMap?.get('aird')?.end}|">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label for="airdBinStart" class="col-2 col-form-label">
+                                        所在文件位置(In aird bin File)
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="airdBinStart" name="airdBinStart"
+                                               readonly th:value="|${scanIndex?.positionMap?.get('aird')?.start} -> ${scanIndex?.positionMap?.get('aird')?.end}|">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
@@ -104,7 +113,7 @@
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="originalPrecursorMz" name="originalPrecursorMz"
-                                               readonly th:value="|${scanIndex.originalPrecursorMzStart}/${scanIndex.originalPrecursorMzEnd}|">
+                                               readonly th:value="|${scanIndex?.originalPrecursorMzStart}/${scanIndex?.originalPrecursorMzEnd}|">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
@@ -113,7 +122,7 @@
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="precursorMz" name="precursorMz"
-                                               readonly th:value="|${scanIndex.precursorMzStart}/${scanIndex.precursorMzEnd}|">
+                                               readonly th:value="|${scanIndex?.precursorMzStart}/${scanIndex?.precursorMzEnd}|">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
@@ -122,7 +131,7 @@
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="windowWideness" name="windowWideness"
-                                               readonly th:value="|${scanIndex.originalWindowWideness}/${scanIndex.windowWideness}|">
+                                               readonly th:value="|${scanIndex?.originalWindowWideness}/${scanIndex?.windowWideness}|">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">

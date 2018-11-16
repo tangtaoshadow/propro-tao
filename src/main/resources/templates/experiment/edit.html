@@ -96,6 +96,14 @@
                         </div>
                         <div class="form-group m-form__group">
                             <label for="airdPath">
+                                Aird Bin文件位置
+                            </label>
+                            <input type="text" class="form-control m-input" id="airdBinPath" name="airdBinPath"
+                                   th:value="${experiment?.airdBinPath}">
+                            <span class="m-form__help">一般情况下不要乱改本字段</span>
+                        </div>
+                        <div class="form-group m-form__group">
+                            <label for="airdPath">
                                 Aird文件位置
                             </label>
                             <input type="text" class="form-control m-input" id="airdPath" name="airdPath"
@@ -103,11 +111,11 @@
                             <span class="m-form__help">一般情况下不要乱改本字段</span>
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="airiPath">
-                                Airi文件位置
+                            <label for="airdIndexPath">
+                                Aird索引文件位置
                             </label>
-                            <input type="text" class="form-control m-input" id="airiPath" name="airiPath"
-                                   th:value="${experiment?.airiPath}">
+                            <input type="text" class="form-control m-input" id="airdIndexPath" name="airdIndexPath"
+                                   th:value="${experiment?.airdIndexPath}">
                             <span class="m-form__help">一般情况下不要乱改本字段</span>
                         </div>
                         <div class="form-group m-form__group">

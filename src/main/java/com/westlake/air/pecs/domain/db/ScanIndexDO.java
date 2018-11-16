@@ -1,12 +1,14 @@
 package com.westlake.air.pecs.domain.db;
 
 import com.westlake.air.pecs.domain.BaseDO;
+import com.westlake.air.pecs.domain.bean.scanindex.Position;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -32,23 +34,16 @@ public class ScanIndexDO extends BaseDO {
     @Indexed
     String experimentId;
 
-    //在MzXML源文件中的起始位置
-    Long start;
-
-    //在MzXML源文件中的结束位置
-    Long end;
-
-    //在AirusData源文件中的起始位置
-    Long start2;
-
-    //在AirusData源文件中的结束位置
-    Long end2;
+    //key为对应的文件类型, @see MsFileType.class
+    HashMap<String, Position> positionMap;
 
     //在AirusData中使用,一个Swath块中所有MS2的rt时间列表
     List<Float> rts = new ArrayList<>();
 
+    //在mzxml中的序号
     Integer num;
 
+    //RT(Time)S格式
     String rtStr;
 
     Integer parentNum;
@@ -75,21 +70,79 @@ public class ScanIndexDO extends BaseDO {
 
     public ScanIndexDO() {}
 
-    public ScanIndexDO(Long start, Long end) {
-        this.start = start;
-        this.end = end;
+    public ScanIndexDO(String fileType, Long start, Long end) {
+        addPosition(fileType, new Position(start, end));
     }
 
-    public ScanIndexDO(int num, Long start, Long end) {
+    public ScanIndexDO(int num,String fileType, Long start, Long end) {
         this.num = num;
-        this.start = start;
-        this.end = end;
+        addPosition(fileType, new Position(start, end));
     }
 
     public void setRtStr(String rtStr) {
         this.rtStr = rtStr;
         if (rtStr.startsWith("PT") && rtStr.endsWith("S")) {
             this.rt = Float.parseFloat(rtStr.substring(2, rtStr.length() - 1));
+        }
+    }
+
+    public void addPosition(String key, Position position){
+        if(positionMap == null){
+            positionMap = new HashMap<>();
+        }
+
+        positionMap.put(key, position);
+    }
+
+    public void removePosition(String key){
+        if(positionMap == null){
+            return;
+        }
+
+        positionMap.remove(key);
+    }
+
+    public Long getPosStart(String key){
+        if(positionMap != null){
+            Position pos = positionMap.get(key);
+            if(pos != null){
+                return pos.getStart();
+            }
+        }
+        return null;
+    }
+
+    public Long getPosEnd(String key){
+        if(positionMap != null){
+            Position pos = positionMap.get(key);
+            if(pos != null){
+                return pos.getEnd();
+            }
+        }
+        return null;
+    }
+
+    public void setPosStart(String key, Long startValue){
+        Position position = null;
+        if(positionMap == null){
+            positionMap = new HashMap<>();
+            position = new Position(startValue, null);
+            positionMap.put(key, position);
+        }else{
+            position = positionMap.get(key);
+            position.setStart(startValue);
+        }
+    }
+
+    public void setPosEnd(String key, Long endValue){
+        Position position = null;
+        if(positionMap == null){
+            positionMap = new HashMap<>();
+            position = new Position(null, endValue);
+            positionMap.put(key, position);
+        }else{
+            position = positionMap.get(key);
+            position.setEnd(endValue);
         }
     }
 }

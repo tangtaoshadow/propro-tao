@@ -15,7 +15,7 @@ public class BaseParser {
         ByteBuffer byteBuffer = null;
 
         if (isCompression) {
-            byteBuffer = ByteBuffer.wrap(CompressUtil.decompress(value));
+            byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(value));
         }else{
             byteBuffer = ByteBuffer.wrap(value);
         }
@@ -46,7 +46,7 @@ public class BaseParser {
         Float[] floatValues;
 
         ByteBuffer byteBuffer = ByteBuffer.wrap(value);
-        byteBuffer = ByteBuffer.wrap(CompressUtil.decompress(byteBuffer.array()));
+        byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(byteBuffer.array()));
         byteBuffer.order(ByteOrder.BIG_ENDIAN);
 
         IntBuffer ints = byteBuffer.asIntBuffer();

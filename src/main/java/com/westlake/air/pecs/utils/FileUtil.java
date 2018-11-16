@@ -57,11 +57,11 @@ public class FileUtil {
         return dataList;
     }
 
-    public static RtIntensityPairsDouble txtReader(BufferedReader reader,String divide, int column1, int column2) throws IOException {
+    public static RtIntensityPairsDouble txtReader(BufferedReader reader, String divide, int column1, int column2) throws IOException {
         String line = reader.readLine();
         List<Double> rtList = new ArrayList<>();
         List<Double> intensityList = new ArrayList<>();
-        while (line != null){
+        while (line != null) {
             String[] item = line.split(divide);
             rtList.add(Double.parseDouble(item[column1]));
             intensityList.add(Double.parseDouble(item[column2]));
@@ -69,7 +69,7 @@ public class FileUtil {
         }
         Double[] rtArray = new Double[rtList.size()];
         Double[] intArray = new Double[intensityList.size()];
-        for(int i=0; i<rtArray.length; i++){
+        for (int i = 0; i < rtArray.length; i++) {
             rtArray[i] = rtList.get(i);
             intArray[i] = intensityList.get(i);
         }
@@ -79,10 +79,10 @@ public class FileUtil {
 
     public static void writeFile(String filePath, String content, boolean isOverride) throws IOException {
         File file = new File(filePath);
-        if(isOverride){
+        if (isOverride) {
             file.createNewFile();
-        }else{
-            if(!file.exists()){
+        } else {
+            if (!file.exists()) {
                 file.createNewFile();
             }
         }
@@ -90,16 +90,16 @@ public class FileUtil {
         byte[] b = content.getBytes();
         int l = b.length;
         OutputStream os = new FileOutputStream(file);
-        os.write(b,0,l);
+        os.write(b, 0, l);
         os.close();
     }
 
     public static void writeFile(String filePath, List list, boolean isOverride) throws IOException {
         File file = new File(filePath);
-        if(isOverride){
+        if (isOverride) {
             file.createNewFile();
-        }else{
-            if(!file.exists()){
+        } else {
+            if (!file.exists()) {
                 file.createNewFile();
             }
         }
@@ -108,7 +108,7 @@ public class FileUtil {
         byte[] b = content.getBytes();
         int l = b.length;
         OutputStream os = new FileOutputStream(file);
-        os.write(b,0,l);
+        os.write(b, 0, l);
         os.close();
     }
 
@@ -120,6 +120,56 @@ public class FileUtil {
                 throw new RuntimeException(inputStream + ": unexpected EOF");
             }
             skip -= amt;
+        }
+    }
+
+    public static void close(RandomAccessFile raf) {
+        if (raf != null) {
+            try {
+                raf.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void close(FileWriter fw) {
+        if (fw != null) {
+            try {
+                fw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void close(BufferedWriter bw) {
+        if (bw != null) {
+            try {
+                bw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void close(FileOutputStream fos) {
+        if (fos != null) {
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void close(BufferedOutputStream bos) {
+        if (bos != null) {
+            try {
+                bos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

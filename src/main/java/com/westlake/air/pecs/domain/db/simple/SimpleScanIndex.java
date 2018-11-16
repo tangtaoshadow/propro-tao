@@ -1,6 +1,9 @@
 package com.westlake.air.pecs.domain.db.simple;
 
+import com.westlake.air.pecs.domain.bean.scanindex.Position;
 import lombok.Data;
+
+import java.util.HashMap;
 
 /**
  * Created by James Lu MiaoShan
@@ -11,16 +14,25 @@ public class SimpleScanIndex {
 
     Float rt;
 
-    Long start;
+    HashMap<String, Position> positionMap;
 
-    Long end;
-
-    public SimpleScanIndex(){
-
+    public Long getPosStart(String key){
+        if(positionMap != null){
+            Position pos = positionMap.get(key);
+            if(pos != null){
+                return pos.getStart();
+            }
+        }
+        return null;
     }
 
-    public SimpleScanIndex(Long start,Long end){
-        this.start = start;
-        this.end = end;
+    public Long getPosEnd(String key){
+        if(positionMap != null){
+            Position pos = positionMap.get(key);
+            if(pos != null){
+                return pos.getEnd();
+            }
+        }
+        return null;
     }
 }

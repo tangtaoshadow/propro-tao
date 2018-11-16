@@ -2,6 +2,7 @@ package com.westlake.air.pecs.async;
 
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.compressor.Compressor;
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
@@ -49,11 +50,15 @@ public class ExperimentTask extends BaseTask {
     }
 
     @Async(value = "compressFileExecutor")
-    public void compressionAndSort(ExperimentDO experimentDO, TaskDO taskDO) {
+    public void compress(ExperimentDO experimentDO, String type, TaskDO taskDO) {
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         long start = System.currentTimeMillis();
-        compressor.doCompress(experimentDO);
+        if(type.equals(Constants.AIRD_FILE_TYPE_BIN)){
+            compressor.doCompress(experimentDO, true);
+        }else{
+            compressor.doCompress(experimentDO, false);
+        }
         taskDO.addLog("压缩转换完毕,总耗时:"+(System.currentTimeMillis() - start));
         taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
@@ -126,7 +131,7 @@ public class ExperimentTask extends BaseTask {
         taskDO.addLog("开始创建Aird压缩文件");
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
-        compressor.doCompress(experimentDO);
+        compressor.doCompress(experimentDO, false);
 
         taskDO.addLog("文件压缩完毕,耗时"+(System.currentTimeMillis() - start)+"开始卷积IRT校准库并且计算iRT值");
         taskService.update(taskDO);

@@ -91,12 +91,21 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="airiPath" class="col-2 col-form-label">
-                                Airi文件路径
+                            <label for="airdBinPath" class="col-2 col-form-label">
+                                Aird Bin文件路径
                             </label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="airiPath" readonly
-                                       th:value="${experiment?.airiPath}">
+                                <input type="text" class="form-control m-input" id="airdBinPath" readonly
+                                       th:value="${experiment?.airdBinPath}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="airdIndexPath" class="col-2 col-form-label">
+                                Aird索引文件路径
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="airdIndexPath" readonly
+                                       th:value="${experiment?.airdIndexPath}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">

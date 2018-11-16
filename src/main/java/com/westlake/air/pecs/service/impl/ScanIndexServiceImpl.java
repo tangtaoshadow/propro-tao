@@ -102,11 +102,6 @@ public class ScanIndexServiceImpl implements ScanIndexService {
     }
 
     @Override
-    public void updateAirusLoc(List<ScanIndexDO> scanIndexDOList) {
-        scanIndexDAO.updateAirusLoc(scanIndexDOList);
-    }
-
-    @Override
     public ResultDO deleteAllByExperimentId(String experimentId) {
         try {
             scanIndexDAO.deleteAllByExperimentId(experimentId);

@@ -76,20 +76,6 @@ public class ScanIndexDAO {
         return scanIndexDO;
     }
 
-    public void updateAirusLoc(List<ScanIndexDO> scanIndexList) {
-        BulkOperations ops = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, CollectionName);
-        for (ScanIndexDO scanIndexDO : scanIndexList) {
-            Update update = new Update();
-            update.set("start2", scanIndexDO.getStart2());
-            update.set("end2", scanIndexDO.getEnd2());
-            Query query = new Query(Criteria.where("id").is(scanIndexDO.getId()));
-            ops.updateOne(query, update);
-
-        }
-
-        ops.execute();
-    }
-
     public void delete(String id) {
         Query query = new Query(where("id").is(id));
         mongoTemplate.remove(query, ScanIndexDO.class, CollectionName);

@@ -3,15 +3,18 @@ package com.westlake.air.pecs.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.constants.Constants;
+import com.westlake.air.pecs.constants.MsFileType;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
-import com.westlake.air.pecs.parser.AirFileParser;
+import com.westlake.air.pecs.parser.AirdFileParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
+import com.westlake.air.pecs.parser.model.traml.Configuration;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.ScanIndexService;
+import com.westlake.air.pecs.utils.FileUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -36,7 +39,7 @@ public class SpectrumController extends BaseController {
     @Autowired
     MzXMLParser mzXMLParser;
     @Autowired
-    AirFileParser airFileParser;
+    AirdFileParser airdFileParser;
     @Autowired
     ExperimentService experimentService;
     @Autowired
@@ -99,6 +102,7 @@ public class SpectrumController extends BaseController {
     @ResponseBody
     ResultDO<JSONObject> view(Model model,
                               @RequestParam(value = "indexId", required = false) String indexId,
+                              @RequestParam(value = "type", required = false) String type,
                               @RequestParam(value = "expId", required = false) String expId) {
 
         ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
@@ -119,14 +123,22 @@ public class SpectrumController extends BaseController {
         ExperimentDO experimentDO = expResult.getModel();
         ScanIndexDO scanIndexDO = indexResult.getModel();
 
-        File file = new File(experimentDO.getAirdPath());
 
+        RandomAccessFile raf = null;
         try {
-            RandomAccessFile raf = new RandomAccessFile(file, "r");
-            pairs = airFileParser.parseValue(raf, scanIndexDO.getStart2(), scanIndexDO.getEnd2(), Constants.AIRD_COMPRESSION_TYPE_ZLIB, Constants.AIRD_PRECISION_32);
-
+            if(type.equals(Constants.AIRD_FILE_TYPE_TEXT)){
+                File file = new File(experimentDO.getAirdPath());
+                raf = new RandomAccessFile(file, "r");
+                pairs = airdFileParser.parseValueFromText(raf, scanIndexDO.getPosStart(MsFileType.AIRD), scanIndexDO.getPosEnd(MsFileType.AIRD), Constants.AIRD_COMPRESSION_TYPE_ZLIB, Constants.AIRD_PRECISION_32);
+            }else{
+                File file = new File(experimentDO.getAirdBinPath());
+                raf = new RandomAccessFile(file, "r");
+                pairs = airdFileParser.parseValueFromBin(raf, scanIndexDO.getPosStart(MsFileType.AIRD_BIN), scanIndexDO.getPosEnd(MsFileType.AIRD_BIN), Constants.AIRD_COMPRESSION_TYPE_ZLIB, Constants.AIRD_PRECISION_32);
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+        } finally {
+            FileUtil.close(raf);
         }
 
         JSONObject res = new JSONObject();
@@ -175,12 +187,15 @@ public class SpectrumController extends BaseController {
 
         File file = new File(experimentDO.getFilePath());
 
+        RandomAccessFile raf = null;
         try {
-            RandomAccessFile raf = new RandomAccessFile(file, "r");
-            pairs = mzXMLParser.parseValue(raf, scanIndexDO.getStart(), scanIndexDO.getEnd(), experimentDO.getCompressionType(), experimentDO.getPrecision());
+            raf = new RandomAccessFile(file, "r");
+            pairs = mzXMLParser.parseValue(raf, scanIndexDO.getPosStart(MsFileType.MZXML), scanIndexDO.getPosEnd(MsFileType.MZXML), experimentDO.getCompressionType(), experimentDO.getPrecision());
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+        } finally {
+            FileUtil.close(raf);
         }
 
         JSONObject res = new JSONObject();

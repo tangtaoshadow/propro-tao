@@ -3,10 +3,7 @@ package com.westlake.air.pecs.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.compressor.Compressor;
-import com.westlake.air.pecs.constants.ResultCode;
-import com.westlake.air.pecs.constants.SuccessMsg;
-import com.westlake.air.pecs.constants.TaskStatus;
-import com.westlake.air.pecs.constants.TaskTemplate;
+import com.westlake.air.pecs.constants.*;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
@@ -155,16 +152,16 @@ public class ExperimentController extends BaseController {
             }
 
             TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_EXPERIMENT_FILE, experimentDO.getName());
-            if(!errorInfo.isEmpty()){
+            if (!errorInfo.isEmpty()) {
                 taskDO.addLog(errorInfo);
                 taskDO.finish(TaskStatus.FAILED.getName());
-            }else{
+            } else {
                 taskService.insert(taskDO);
                 experimentTask.saveExperimentTask(experimentDO, file, taskDO);
             }
         }
 
-        if(!errorInfo.isEmpty()){
+        if (!errorInfo.isEmpty()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, errorInfo);
         }
         return "redirect:/task/list?taskTemplate=" + TaskTemplate.UPLOAD_EXPERIMENT_FILE.getName();
@@ -213,7 +210,7 @@ public class ExperimentController extends BaseController {
                   @RequestParam(value = "intercept") Double intercept,
                   @RequestParam(value = "filePath") String filePath,
                   @RequestParam(value = "airdPath") String airdPath,
-                  @RequestParam(value = "airiPath") String airiPath,
+                  @RequestParam(value = "airdIndexPath") String airdIndexPath,
                   @RequestParam(value = "description") String description,
                   @RequestParam(value = "compressionType") String compressionType,
                   @RequestParam(value = "precision") String precision,
@@ -229,7 +226,7 @@ public class ExperimentController extends BaseController {
         experimentDO.setName(name);
         experimentDO.setFilePath(filePath);
         experimentDO.setAirdPath(airdPath);
-        experimentDO.setAiriPath(airiPath);
+        experimentDO.setAirdIndexPath(airdIndexPath);
         experimentDO.setDescription(description);
         experimentDO.setIRtLibraryId(iRtLibraryId);
         experimentDO.setSlope(slope);
@@ -439,9 +436,11 @@ public class ExperimentController extends BaseController {
         return resultDO;
     }
 
-    @RequestMapping(value = "/compressionsort")
-    String compressionSort(Model model, @RequestParam(value = "expId", required = true) String expId,
-                           RedirectAttributes redirectAttributes) {
+    @RequestMapping(value = "/compress")
+    String compress(Model model,
+                       @RequestParam(value = "expId", required = true) String expId,
+                       @RequestParam(value = "type", required = true) String type,
+                       RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(expId);
         if (resultDO.isFailed()) {
@@ -449,10 +448,15 @@ public class ExperimentController extends BaseController {
             return "redirect:/experiment/list";
         }
         ExperimentDO experimentDO = resultDO.getModel();
-        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
+        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId + ";CompressType:" + type);
         taskService.insert(taskDO);
 
-        experimentTask.compressionAndSort(experimentDO, taskDO);
+        if (type.equals(Constants.AIRD_FILE_TYPE_BIN)) {
+            experimentTask.compress(experimentDO, Constants.AIRD_FILE_TYPE_BIN, taskDO);
+        } else {
+            experimentTask.compress(experimentDO, Constants.AIRD_FILE_TYPE_TEXT, taskDO);
+        }
+
         return "redirect:/task/detail/" + taskDO.getId();
     }
 }

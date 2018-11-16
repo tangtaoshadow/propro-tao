@@ -6,7 +6,6 @@ import org.apache.commons.codec.binary.Base64;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -17,7 +16,7 @@ import java.util.zip.Inflater;
 public class CompressUtil {
 
     //byte[]压缩为byte[]
-    public static byte[] compress(byte[] data) {
+    public static byte[] zlibCompress(byte[] data) {
         byte[] output;
 
         Deflater compresser = new Deflater();
@@ -47,7 +46,7 @@ public class CompressUtil {
         return output;
     }
 
-    public static byte[] decompress(byte[] data) {
+    public static byte[] zlibDecompress(byte[] data) {
         byte[] output = null;
 
         Inflater decompresser = new Inflater();
@@ -138,8 +137,8 @@ public class CompressUtil {
         ByteBuffer bbTarget = ByteBuffer.allocate(fbTarget.capacity() * 4);
         bbTarget.asFloatBuffer().put(fbTarget);
         byte[] targetArray = bbTarget.array();
-        byte[] targetCompressedArray = CompressUtil.compress(targetArray);
-        String targetStr = new String(new Base64().encode(targetCompressedArray));
+        byte[] compressedArray = CompressUtil.zlibCompress(targetArray);
+        String targetStr = new String(new Base64().encode(compressedArray));
         return targetStr;
     }
 
@@ -148,9 +147,27 @@ public class CompressUtil {
         ByteBuffer bbTarget = ByteBuffer.allocate(ibTarget.capacity() * 4);
         bbTarget.asIntBuffer().put(ibTarget);
         byte[] targetArray = bbTarget.array();
-        byte[] targetCompressedArray = CompressUtil.compress(targetArray);
-        String targetStr = new String(new Base64().encode(targetCompressedArray));
+        byte[] compressedArray = CompressUtil.zlibCompress(targetArray);
+        String targetStr = new String(new Base64().encode(compressedArray));
         return targetStr;
+    }
+
+    public static byte[] transToByte(int[] target) {
+        IntBuffer ibTarget = IntBuffer.wrap(target);
+        ByteBuffer bbTarget = ByteBuffer.allocate(ibTarget.capacity() * 4);
+        bbTarget.asIntBuffer().put(ibTarget);
+        byte[] targetArray = bbTarget.array();
+        byte[] compressedArray = CompressUtil.zlibCompress(targetArray);
+        return compressedArray;
+    }
+
+    public static byte[] transToByte(float[] target) {
+        FloatBuffer fbTarget = FloatBuffer.wrap(target);
+        ByteBuffer bbTarget = ByteBuffer.allocate(fbTarget.capacity() * 4);
+        bbTarget.asFloatBuffer().put(fbTarget);
+        byte[] targetArray = bbTarget.array();
+        byte[] compressedArray = CompressUtil.zlibCompress(targetArray);
+        return compressedArray;
     }
 
 }

@@ -2,6 +2,7 @@ package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.algorithm.Airus;
+import com.westlake.air.pecs.constants.MsFileType;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.domain.ResultDO;
@@ -10,11 +11,9 @@ import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
+import com.westlake.air.pecs.domain.bean.scanindex.Position;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
-import com.westlake.air.pecs.domain.db.AnalyseDataDO;
-import com.westlake.air.pecs.domain.db.ExperimentDO;
-import com.westlake.air.pecs.domain.db.ScoresDO;
-import com.westlake.air.pecs.domain.db.TaskDO;
+import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.FileUtil;
@@ -26,6 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -38,6 +38,8 @@ public class TestController extends BaseController {
 
     @Autowired
     ExperimentService experimentService;
+    @Autowired
+    ScanIndexService scanIndexService;
     @Autowired
     TaskService taskService;
     @Autowired
@@ -57,8 +59,7 @@ public class TestController extends BaseController {
     @RequestMapping("test")
     @ResponseBody
     String test(Model model, RedirectAttributes redirectAttributes) {
-        ExperimentDO experimentDO = experimentService.getById("5b89029258487f0e14a62b75").getModel();
-        return JSON.toJSONString(experimentService.convAndIrt(experimentDO, "5b88fece58487f13f0609019", MZ_EXTRACT_WINDOW, SigmaSpacing.create()));
+        return "success";
     }
 
     //计算iRT
@@ -123,9 +124,9 @@ public class TestController extends BaseController {
     @ResponseBody
     String test5(Model model, RedirectAttributes redirectAttributes) throws IOException {
         List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("D://convWithDecoy.json");
-        for(AnalyseDataDO data : dataList){
-            if(data.getCutInfo() == null){
-                logger.error("卷积数据异常:"+data.getPeptideRef());
+        for (AnalyseDataDO data : dataList) {
+            if (data.getCutInfo() == null) {
+                logger.error("卷积数据异常:" + data.getPeptideRef());
             }
         }
         logger.info("卷积数据大小:" + dataList.size());
@@ -140,7 +141,7 @@ public class TestController extends BaseController {
     String test6(Model model, RedirectAttributes redirectAttributes) throws IOException {
         long start = System.currentTimeMillis();
         FinalResult finalResult = airus.doAirus("5b967e5fcbaa7e2940fc6537");
-        logger.info("打分耗时:"+(System.currentTimeMillis() - start));
+        logger.info("打分耗时:" + (System.currentTimeMillis() - start));
         return JSON.toJSONString(finalResult);
     }
 
@@ -150,7 +151,7 @@ public class TestController extends BaseController {
         String trainAndTestContent = FileUtil.readFile("D://trainAndTest.json");
         long start = System.currentTimeMillis();
         TrainAndTest tt = JSON.parseObject(trainAndTestContent, TrainAndTest.class);
-        return tt.getTestData().length+"/"+tt.getTrainData().length+"/"+tt.getTestId().length+"/"+tt.getTrainId().length;
+        return tt.getTestData().length + "/" + tt.getTrainData().length + "/" + tt.getTestId().length + "/" + tt.getTrainId().length;
     }
 
     @RequestMapping("test8")
