@@ -17,7 +17,7 @@ public class AirdFileParser extends BaseParser {
 
         try {
             raf.seek(position.getStart());
-            byte[] reader = new byte[(int) (position.getDelta())];
+            byte[] reader = new byte[position.getDelta().intValue()];
             raf.read(reader);
             String tmp = new String(reader);
             String[] mzIntensity = tmp.split(Constants.CHANGE_LINE);
@@ -38,11 +38,11 @@ public class AirdFileParser extends BaseParser {
 
         try {
             raf.seek(mzPos.getStart());
-            byte[] reader = new byte[(int) (mzPos.getDelta())];
+            byte[] reader = new byte[mzPos.getDelta().intValue()];
             raf.read(reader);
             Float[] mzArray = getMzValues(reader);
             raf.seek(intPos.getStart());
-            reader = new byte[(int) intPos.getDelta()];
+            reader = new byte[intPos.getDelta().intValue()];
             raf.read(reader);
             Float[] intensityArray = getValues(reader, Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType), ByteOrder.BIG_ENDIAN);
             return new MzIntensityPairs(mzArray, intensityArray);

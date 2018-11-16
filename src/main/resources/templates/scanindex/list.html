@@ -139,9 +139,9 @@
                     <td th:text="${scanIndex.msLevel}"></td>
 
                     <td th:text="${scanIndex.rtStr}"></td>
-                    <td th:text="|${scanIndex.positionMap?.get('mzxml')?.start} -> ${scanIndex.positionMap?.get('mzxml')?.end}|"></td>
-                    <td th:text="|${scanIndex.positionMap?.get('aird')?.start} -> ${scanIndex.positionMap?.get('aird')?.end}|"></td>
-                    <td th:text="|${scanIndex.positionMap?.get('airdbin')?.start} -> ${scanIndex.positionMap?.get('airdbin')?.end}|"></td>
+                    <td th:text="|start:${scanIndex.positionMap?.get('mzxml')?.start} ;delta: ${scanIndex.positionMap?.get('mzxml')?.delta}|"></td>
+                    <td th:text="|start:${scanIndex.positionMap?.get('aird')?.start} ;delta: ${scanIndex.positionMap?.get('aird')?.delta}|"></td>
+                    <td th:text="|start:${scanIndex.positionMap?.get('airdbin')?.start} ;delta: ${scanIndex.positionMap?.get('airdbin')?.delta}|"></td>
                     <td th:text="|${scanIndex.originalPrecursorMzStart}/${scanIndex.originalPrecursorMzEnd}|"></td>
                     <td th:text="|${scanIndex.precursorMzStart}/${scanIndex.precursorMzEnd}|">
                     <td th:text="|${scanIndex.originalWindowWideness}/${scanIndex.windowWideness}|"></td>

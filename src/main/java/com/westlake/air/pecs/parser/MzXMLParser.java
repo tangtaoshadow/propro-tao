@@ -266,8 +266,9 @@ public class MzXMLParser extends BaseParser {
         mzArray = CompressUtil.compressForSortedInt(mzArray);
         byte[] mzArrayByte = CompressUtil.transToByte(mzArray);
         byte[] intensityArrayByte = CompressUtil.transToByte(intensityArray);
-        index.addPosition(PositionType.AIRD_BIN_MZ, new Position(start, start + mzArrayByte.length));
-        index.addPosition(PositionType.AIRD_BIN_INTENSITY, new Position(start + mzArrayByte.length, start + mzArrayByte.length + intensityArray.length));
+
+        index.addPosition(PositionType.AIRD_BIN_MZ, new Position(start, (long)mzArrayByte.length));
+        index.addPosition(PositionType.AIRD_BIN_INTENSITY, new Position(start + (long)mzArrayByte.length, (long)intensityArrayByte.length));
 
         return ArrayUtils.addAll(mzArrayByte, intensityArrayByte);
     }

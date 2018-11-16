@@ -114,7 +114,7 @@ public class Compressor {
                     experimentService.update(experimentDO);
                 }
             } else {
-                if (experimentDO.getHasAirusBinFile() == null || experimentDO.getHasAirusFile()) {
+                if (experimentDO.getHasAirusFile() == null || experimentDO.getHasAirusFile()) {
                     experimentDO.setHasAirusFile(false);
                     experimentService.update(experimentDO);
                 }
@@ -147,6 +147,7 @@ public class Compressor {
                 swathIndex.setPrecursorMzEnd(rang.getMzEnd());
                 long startTime = System.currentTimeMillis();
                 List<ScanIndexDO> indexes = scanIndexService.getAll(new ScanIndexQuery(experimentDO.getId(), 2, rang.getMzStart(), rang.getMzEnd()));
+                List<Float> rts = new ArrayList<>();
                 for (ScanIndexDO index : indexes) {
                     Long offset = null;
                     if (isBinary) {
@@ -155,10 +156,12 @@ public class Compressor {
                         offset = processWithIndexForAirdText(rafRead, fwData, index, precision, isZlibCompression, start);
                     }
                     start = start + offset;
-                    swathIndex.getRts().add(index.getRt());
+                    rts.add(index.getRt());
                 }
                 swathIndex.setPosEnd(PositionType.AIRD, start);
+                swathIndex.setRts(rts);
                 swathIndexes.add(swathIndex);
+
                 outputIndexList.addAll(indexes);
                 logger.info("Rang:" + rang.getMzStart() + ":" + rang.getMzEnd() + " Finished,Time:" + (System.currentTimeMillis() - startTime));
             }
@@ -251,7 +254,7 @@ public class Compressor {
     private Long processWithIndexForAirdText(RandomAccessFile raf, FileWriter fwData, ScanIndexDO index, int precision, boolean isZlibCompression, Long start, int zeroCount) throws IOException {
         String indexesStr = mzXMLParser.parseValueForAird(raf, index, precision, isZlibCompression, zeroCount);
         index.setPosStart(PositionType.AIRD, start);
-        index.setPosEnd(PositionType.AIRD, start + indexesStr.length());
+        index.setPosDelta(PositionType.AIRD, (long)indexesStr.length());
         fwData.write(indexesStr);
         scanIndexService.update(index);
         readyToOutput(index);

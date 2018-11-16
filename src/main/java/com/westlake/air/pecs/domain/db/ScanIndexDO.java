@@ -38,7 +38,7 @@ public class ScanIndexDO extends BaseDO {
     HashMap<String, Position> positionMap;
 
     //在AirusData中使用,一个Swath块中所有MS2的rt时间列表
-    List<Float> rts = new ArrayList<>();
+    List<Float> rts;
 
     //在mzxml中的序号
     Integer num;
@@ -70,13 +70,9 @@ public class ScanIndexDO extends BaseDO {
 
     public ScanIndexDO() {}
 
-    public ScanIndexDO(String fileType, Long start, Long end) {
-        addPosition(fileType, new Position(start, end));
-    }
-
-    public ScanIndexDO(int num,String fileType, Long start, Long end) {
+    public ScanIndexDO(int num,String fileType, Long start, Long delta) {
         this.num = num;
-        addPosition(fileType, new Position(start, end));
+        addPosition(fileType, new Position(start, delta));
     }
 
     public void setRtStr(String rtStr) {
@@ -116,7 +112,7 @@ public class ScanIndexDO extends BaseDO {
         if(positionMap != null){
             Position pos = positionMap.get(key);
             if(pos != null){
-                return pos.getEnd();
+                return pos.getStart() + pos.getDelta();
             }
         }
         return null;
@@ -130,19 +126,32 @@ public class ScanIndexDO extends BaseDO {
             positionMap.put(key, position);
         }else{
             position = positionMap.get(key);
-            position.setStart(startValue);
+            if(position == null){
+                position = new Position(startValue, null);
+                positionMap.put(key, position);
+            }else{
+                position.setStart(startValue);
+            }
+        }
+    }
+
+    public void setPosDelta(String key, Long deltaValue){
+        Position position = null;
+        if(positionMap == null){
+            positionMap = new HashMap<>();
+            position = new Position(null, deltaValue);
+            positionMap.put(key, position);
+        }else{
+            position = positionMap.get(key);
+            position.setDelta(deltaValue);
         }
     }
 
     public void setPosEnd(String key, Long endValue){
         Position position = null;
-        if(positionMap == null){
-            positionMap = new HashMap<>();
-            position = new Position(null, endValue);
-            positionMap.put(key, position);
-        }else{
+        if(positionMap != null){
             position = positionMap.get(key);
-            position.setEnd(endValue);
+            position.setDelta(endValue - position.getStart());
         }
     }
 }

@@ -30,9 +30,20 @@ public class SimpleScanIndex {
         if(positionMap != null){
             Position pos = positionMap.get(key);
             if(pos != null){
-                return pos.getEnd();
+                return pos.getStart() + pos.getDelta();
             }
         }
         return null;
     }
+
+    public Long getPosDelta(String key){
+        if(positionMap != null){
+            Position pos = positionMap.get(key);
+            if(pos != null){
+                return pos.getDelta();
+            }
+        }
+        return null;
+    }
+
 }

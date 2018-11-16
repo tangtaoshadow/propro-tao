@@ -7,20 +7,12 @@ public class Position {
 
     Long start;
 
-    Long end;
+    Long delta;
 
-    public Position() {
-    }
+    public Position(){}
 
-    public Position(Long start, Long end) {
+    public Position(Long start, Long delta){
         this.start = start;
-        this.end = end;
-    }
-
-    public long getDelta(){
-        if(start != null && end != null){
-            return end - start;
-        }
-        return 0L;
+        this.delta = delta;
     }
 }
