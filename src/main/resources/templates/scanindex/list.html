@@ -151,17 +151,17 @@
                         </a>
                         <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
                                 data-target="#m_modal_spectrum"
-                                th:onclick="|query('${scanIndex.id}','${experiment.id}', 'aird')|">
+                                th:onclick="|query('${scanIndex.id}','${experiment.id}','aird')|">
                             Aird谱图
                         </button>
                         <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
                                 data-target="#m_modal_spectrum"
-                                th:onclick="|query('${scanIndex.id}','${experiment.id}', 'aird.bin')|">
+                                th:onclick="|query('${scanIndex.id}','${experiment.id}','aird.bin')|">
                             Aird.bin谱图
                         </button>
                         <button type="button" class="btn btn-sm btn-brand" data-toggle="modal"
                                 data-target="#m_modal_spectrum"
-                                th:onclick="|query('${scanIndex.id}','${experiment.id}', 'mzxml')|">
+                                th:onclick="|query('${scanIndex.id}','${experiment.id}','mzxml')|">
                             MzXML谱图
                         </button>
                     </td>
@@ -250,7 +250,7 @@
                 })
             } else {
                 $.ajax({
-                    url: "/spectrum/view?indexId=" + indexId + "&expId=" + expId + "type=bin",
+                    url: "/spectrum/view?indexId=" + indexId + "&expId=" + expId + "&type=bin",
                     async: false,
                     success: function (result) {
                         if (result.success) {

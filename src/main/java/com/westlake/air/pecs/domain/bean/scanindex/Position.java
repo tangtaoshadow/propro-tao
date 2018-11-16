@@ -16,4 +16,11 @@ public class Position {
         this.start = start;
         this.end = end;
     }
+
+    public long getDelta(){
+        if(start != null && end != null){
+            return end - start;
+        }
+        return 0L;
+    }
 }

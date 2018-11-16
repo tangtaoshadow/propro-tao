@@ -1,7 +1,6 @@
 package com.westlake.air.pecs.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.westlake.air.pecs.constants.MsFileType;
+import com.westlake.air.pecs.constants.PositionType;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
@@ -467,7 +466,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         TreeMap<Float, MzIntensityPairs> rtMap = new TreeMap<>();
 
         for (SimpleScanIndex index : indexes) {
-            MzIntensityPairs mzIntensityPairs = mzXMLParser.parseValue(raf, index.getPosStart(MsFileType.MZXML), index.getPosEnd(MsFileType.MZXML), experimentDO.getCompressionType(), experimentDO.getPrecision());
+            MzIntensityPairs mzIntensityPairs = mzXMLParser.parseValue(raf, index.getPosStart(PositionType.MZXML), index.getPosEnd(PositionType.MZXML), experimentDO.getCompressionType(), experimentDO.getPrecision());
             rtMap.put(index.getRt(), mzIntensityPairs);
         }
         logger.info("解析" + indexes.size() + "条XML谱图文件总计耗时:" + (System.currentTimeMillis() - start));
@@ -477,7 +476,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     private TreeMap<Float, MzIntensityPairs> parseSpectrumFromAird(RandomAccessFile raf, ScanIndexDO swathIndex) throws Exception {
         long start = System.currentTimeMillis();
-        TreeMap<Float, MzIntensityPairs> rtMap = mzXMLParser.parseSwathBlockValues(raf, swathIndex.getPosStart(MsFileType.AIRD), swathIndex.getPosEnd(MsFileType.AIRD), swathIndex.getRts());
+        TreeMap<Float, MzIntensityPairs> rtMap = mzXMLParser.parseSwathBlockValues(raf, swathIndex.getPosStart(PositionType.AIRD), swathIndex.getPosEnd(PositionType.AIRD), swathIndex.getRts());
         logger.info("解析" + swathIndex.getPrecursorMzStart() + "-" + swathIndex.getPrecursorMzEnd() + "范围谱图文件总计耗时:" + (System.currentTimeMillis() - start));
 
         return rtMap;

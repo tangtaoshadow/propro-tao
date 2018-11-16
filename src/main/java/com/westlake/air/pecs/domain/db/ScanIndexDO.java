@@ -34,7 +34,7 @@ public class ScanIndexDO extends BaseDO {
     @Indexed
     String experimentId;
 
-    //key为对应的文件类型, @see MsFileType.class
+    //key为对应的文件类型, @see PositionType.class
     HashMap<String, Position> positionMap;
 
     //在AirusData中使用,一个Swath块中所有MS2的rt时间列表

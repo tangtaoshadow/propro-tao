@@ -3,7 +3,7 @@ package com.westlake.air.pecs.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.constants.Constants;
-import com.westlake.air.pecs.constants.MsFileType;
+import com.westlake.air.pecs.constants.PositionType;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
@@ -11,7 +11,6 @@ import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.parser.AirdFileParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
-import com.westlake.air.pecs.parser.model.traml.Configuration;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.ScanIndexService;
 import com.westlake.air.pecs.utils.FileUtil;
@@ -126,14 +125,14 @@ public class SpectrumController extends BaseController {
 
         RandomAccessFile raf = null;
         try {
-            if(type.equals(Constants.AIRD_FILE_TYPE_TEXT)){
+            if (type.equals(Constants.AIRD_FILE_TYPE_TEXT)) {
                 File file = new File(experimentDO.getAirdPath());
                 raf = new RandomAccessFile(file, "r");
-                pairs = airdFileParser.parseValueFromText(raf, scanIndexDO.getPosStart(MsFileType.AIRD), scanIndexDO.getPosEnd(MsFileType.AIRD), Constants.AIRD_COMPRESSION_TYPE_ZLIB, Constants.AIRD_PRECISION_32);
-            }else{
+                pairs = airdFileParser.parseValueFromText(raf, scanIndexDO.getPositionMap().get(PositionType.AIRD), Constants.AIRD_COMPRESSION_TYPE_ZLIB, Constants.AIRD_PRECISION_32);
+            } else {
                 File file = new File(experimentDO.getAirdBinPath());
                 raf = new RandomAccessFile(file, "r");
-                pairs = airdFileParser.parseValueFromBin(raf, scanIndexDO.getPosStart(MsFileType.AIRD_BIN), scanIndexDO.getPosEnd(MsFileType.AIRD_BIN), Constants.AIRD_COMPRESSION_TYPE_ZLIB, Constants.AIRD_PRECISION_32);
+                pairs = airdFileParser.parseValueFromBin(raf, scanIndexDO.getPositionMap().get(PositionType.AIRD_BIN_MZ),scanIndexDO.getPositionMap().get(PositionType.AIRD_BIN_INTENSITY), Constants.AIRD_COMPRESSION_TYPE_ZLIB, Constants.AIRD_PRECISION_32);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -190,7 +189,7 @@ public class SpectrumController extends BaseController {
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(file, "r");
-            pairs = mzXMLParser.parseValue(raf, scanIndexDO.getPosStart(MsFileType.MZXML), scanIndexDO.getPosEnd(MsFileType.MZXML), experimentDO.getCompressionType(), experimentDO.getPrecision());
+            pairs = mzXMLParser.parseValue(raf, scanIndexDO.getPosStart(PositionType.MZXML), scanIndexDO.getPosEnd(PositionType.MZXML), experimentDO.getCompressionType(), experimentDO.getPrecision());
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

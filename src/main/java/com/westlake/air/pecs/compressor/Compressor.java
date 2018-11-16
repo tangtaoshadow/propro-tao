@@ -2,7 +2,7 @@ package com.westlake.air.pecs.compressor;
 
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.constants.Constants;
-import com.westlake.air.pecs.constants.MsFileType;
+import com.westlake.air.pecs.constants.PositionType;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
@@ -108,12 +108,12 @@ public class Compressor {
             boolean isZlibCompression = "zlib".equalsIgnoreCase(experimentDO.getCompressionType());
 
             //在进行正式压缩之前,先把experiment的是否有AirusFile的状态置为false,以防在压缩错误的时候数据库的AirusFile状态仍然为可用
-            if(isBinary){
+            if (isBinary) {
                 if (experimentDO.getHasAirusBinFile() == null || experimentDO.getHasAirusBinFile()) {
                     experimentDO.setHasAirusBinFile(false);
                     experimentService.update(experimentDO);
                 }
-            }else{
+            } else {
                 if (experimentDO.getHasAirusBinFile() == null || experimentDO.getHasAirusFile()) {
                     experimentDO.setHasAirusFile(false);
                     experimentService.update(experimentDO);
@@ -128,9 +128,9 @@ public class Compressor {
             for (ScanIndexDO index : ms1IndexList) {
                 Long offset = null;
                 if (isBinary) {
-                    offset = processWithIndex(rafRead, bos, index, precision, isZlibCompression, start);
+                    offset = processWithIndexForAirdBin(rafRead, bos, index, precision, isZlibCompression, start);
                 } else {
-                    offset = processWithIndex(rafRead, fwData, index, precision, isZlibCompression, start);
+                    offset = processWithIndexForAirdText(rafRead, fwData, index, precision, isZlibCompression, start);
                 }
                 start = start + offset;
             }
@@ -140,7 +140,7 @@ public class Compressor {
             //再写入所有的MS2
             for (WindowRang rang : windowRangs) {
                 ScanIndexDO swathIndex = new ScanIndexDO();
-                swathIndex.setPosStart(MsFileType.AIRD, start);
+                swathIndex.setPosStart(PositionType.AIRD, start);
                 swathIndex.setExperimentId(experimentDO.getId());
                 swathIndex.setMsLevel(0);
                 swathIndex.setPrecursorMzStart(rang.getMzStart());
@@ -150,14 +150,14 @@ public class Compressor {
                 for (ScanIndexDO index : indexes) {
                     Long offset = null;
                     if (isBinary) {
-                        offset = processWithIndex(rafRead, bos, index, precision, isZlibCompression, start);
+                        offset = processWithIndexForAirdBin(rafRead, bos, index, precision, isZlibCompression, start);
                     } else {
-                        offset = processWithIndex(rafRead, fwData, index, precision, isZlibCompression, start);
+                        offset = processWithIndexForAirdText(rafRead, fwData, index, precision, isZlibCompression, start);
                     }
                     start = start + offset;
                     swathIndex.getRts().add(index.getRt());
                 }
-                swathIndex.setPosEnd(MsFileType.AIRD, start);
+                swathIndex.setPosEnd(PositionType.AIRD, start);
                 swathIndexes.add(swathIndex);
                 outputIndexList.addAll(indexes);
                 logger.info("Rang:" + rang.getMzStart() + ":" + rang.getMzEnd() + " Finished,Time:" + (System.currentTimeMillis() - startTime));
@@ -186,16 +186,16 @@ public class Compressor {
             FileUtil.close(rafRead);
         }
 
-        if(isBinary){
+        if (isBinary) {
             experimentDO.setHasAirusBinFile(true);
-        }else{
+        } else {
             experimentDO.setHasAirusFile(true);
         }
 
         experimentDO.setAirdIndexPath(airdIndexPath);
-        if(isBinary){
+        if (isBinary) {
             experimentDO.setAirdBinPath(airdFilePath);
-        }else{
+        } else {
             experimentDO.setAirdPath(airdFilePath);
         }
         experimentDO.setWindowRangs(windowRangs);
@@ -219,8 +219,6 @@ public class Compressor {
     private void readyToOutput(ScanIndexDO index) {
         index.setId(null);
         index.setExperimentId(null);
-//        index.setStart(null);
-//        index.setEnd(null);
     }
 
     /**
@@ -235,10 +233,10 @@ public class Compressor {
      * @return
      * @throws IOException
      */
-    private Long processWithIndex(RandomAccessFile raf, BufferedOutputStream bos, ScanIndexDO index, int precision, boolean isZlibCompression, Long start) throws IOException {
-        byte[] indexesByte = mzXMLParser.parseByteValueForAird(raf, index, precision, isZlibCompression, 0);
-        index.setPosStart(MsFileType.AIRD, start);
-        index.setPosEnd(MsFileType.AIRD, start + indexesByte.length);
+    private Long processWithIndexForAirdBin(RandomAccessFile raf, BufferedOutputStream bos, ScanIndexDO index, int precision, boolean isZlibCompression, Long start) throws IOException {
+        byte[] indexesByte = mzXMLParser.parseByteValueForAird(raf, index, start, precision, isZlibCompression, 0);
+//        index.setPosStart(PositionType.AIRD, start);
+//        index.setPosEnd(PositionType.AIRD, start + indexesByte.length);
         bos.write(indexesByte);
         scanIndexService.update(index);
         readyToOutput(index);
@@ -246,14 +244,14 @@ public class Compressor {
         return (long) indexesByte.length;
     }
 
-    private Long processWithIndex(RandomAccessFile raf, FileWriter fwData, ScanIndexDO index, int precision, boolean isZlibCompression, Long start) throws IOException {
-        return processWithIndex(raf, fwData, index, precision, isZlibCompression, start, 0);
+    private Long processWithIndexForAirdText(RandomAccessFile raf, FileWriter fwData, ScanIndexDO index, int precision, boolean isZlibCompression, Long start) throws IOException {
+        return processWithIndexForAirdText(raf, fwData, index, precision, isZlibCompression, start, 0);
     }
 
-    private Long processWithIndex(RandomAccessFile raf, FileWriter fwData, ScanIndexDO index, int precision, boolean isZlibCompression, Long start, int zeroCount) throws IOException {
+    private Long processWithIndexForAirdText(RandomAccessFile raf, FileWriter fwData, ScanIndexDO index, int precision, boolean isZlibCompression, Long start, int zeroCount) throws IOException {
         String indexesStr = mzXMLParser.parseValueForAird(raf, index, precision, isZlibCompression, zeroCount);
-        index.setPosStart(MsFileType.AIRD, start);
-        index.setPosEnd(MsFileType.AIRD, start + indexesStr.length());
+        index.setPosStart(PositionType.AIRD, start);
+        index.setPosEnd(PositionType.AIRD, start + indexesStr.length());
         fwData.write(indexesStr);
         scanIndexService.update(index);
         readyToOutput(index);

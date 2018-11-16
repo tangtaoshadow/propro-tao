@@ -1,19 +1,17 @@
 package com.westlake.air.pecs.parser;
 
 import com.westlake.air.pecs.constants.Constants;
-import com.westlake.air.pecs.constants.MsFileType;
+import com.westlake.air.pecs.constants.PositionType;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
+import com.westlake.air.pecs.domain.bean.scanindex.Position;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.TaskService;
-import com.westlake.air.pecs.utils.ArrayUtil;
 import com.westlake.air.pecs.utils.CompressUtil;
 import com.westlake.air.pecs.utils.FileUtil;
-import me.lemire.integercompression.IntWrapper;
-import me.lemire.integercompression.differential.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,7 +54,7 @@ public class MzXMLParser extends BaseParser {
             list = indexForSwath(file);
             if (list != null && list.size() > 0) {
                 ScanIndexDO index = list.get(0);
-                String[] attributes = parsePeakAttribute(raf, index.getPosStart(MsFileType.MZXML), index.getPosEnd(MsFileType.MZXML));
+                String[] attributes = parsePeakAttribute(raf, index.getPosStart(PositionType.MZXML), index.getPosEnd(PositionType.MZXML));
                 if (attributes != null && attributes.length == 2) {
                     experimentDO.setCompressionType(attributes[0]);
                     experimentDO.setPrecision(attributes[1]);
@@ -171,7 +169,7 @@ public class MzXMLParser extends BaseParser {
                     continue;
                 }
                 MzIntensityPairs pairs = new MzIntensityPairs();
-                Float[] mzArray = getValues(new Base64().decode(totalValuesArray[i]));
+                Float[] mzArray = getMzValues(new Base64().decode(totalValuesArray[i]));
                 Float[] intensityArray = getValues(new Base64().decode(totalValuesArray[i + 1]), 32, true, ByteOrder.BIG_ENDIAN);
                 pairs.setMzArray(mzArray);
                 pairs.setIntensityArray(intensityArray);
@@ -194,7 +192,7 @@ public class MzXMLParser extends BaseParser {
      * @return
      */
     public String parseValueForAird(RandomAccessFile raf, ScanIndexDO index, int precision, boolean isZlibCompression, int zeroLeft) {
-        String value = parseValue(raf, index.getPosStart(MsFileType.MZXML), index.getPosEnd(MsFileType.MZXML));
+        String value = parseValue(raf, index.getPosStart(PositionType.MZXML), index.getPosEnd(PositionType.MZXML));
         Float[] values = getValues(new Base64().decode(value), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
 
         //如果存在连续的intensity为0的情况仅保留其中的一个0,所以数组的最大值是values.length/2
@@ -234,8 +232,8 @@ public class MzXMLParser extends BaseParser {
         return parseValueForAird(raf, index, precision, isZlibCompression, 0);
     }
 
-    public byte[] parseByteValueForAird(RandomAccessFile raf, ScanIndexDO index, int precision, boolean isZlibCompression, int zeroLeft) {
-        String value = parseValue(raf, index.getPosStart(MsFileType.MZXML), index.getPosEnd(MsFileType.MZXML));
+    public byte[] parseByteValueForAird(RandomAccessFile raf, ScanIndexDO index, Long start, int precision, boolean isZlibCompression, int zeroLeft) {
+        String value = parseValue(raf, index.getPosStart(PositionType.MZXML), index.getPosEnd(PositionType.MZXML));
         Float[] values = getValues(new Base64().decode(value), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
 
         //如果存在连续的intensity为0的情况仅保留其中的一个0,所以数组的最大值是values.length/2
@@ -266,8 +264,12 @@ public class MzXMLParser extends BaseParser {
         intensityArray = ArrayUtils.subarray(intensityArray, 0, j);
 
         mzArray = CompressUtil.compressForSortedInt(mzArray);
+        byte[] mzArrayByte = CompressUtil.transToByte(mzArray);
+        byte[] intensityArrayByte = CompressUtil.transToByte(intensityArray);
+        index.addPosition(PositionType.AIRD_BIN_MZ, new Position(start, start + mzArrayByte.length));
+        index.addPosition(PositionType.AIRD_BIN_INTENSITY, new Position(start + mzArrayByte.length, start + mzArrayByte.length + intensityArray.length));
 
-        return ArrayUtils.addAll(CompressUtil.transToByte(mzArray),CompressUtil.transToByte(intensityArray));
+        return ArrayUtils.addAll(mzArrayByte, intensityArrayByte);
     }
 
     /**
@@ -422,11 +424,11 @@ public class MzXMLParser extends BaseParser {
                         //先处理一级节点的位置,因为包含了</msRun>这个额外的标签,所以需要从indexOffset的位置往前搜索2个">"
                         ScanIndexDO lastIndex = indexStack.pop();
                         Long length = searchForLength(lastRead, 2, 62);
-                        lastIndex.setPosEnd(MsFileType.MZXML, indexOffset - length);
+                        lastIndex.setPosEnd(PositionType.MZXML, indexOffset - length);
 
                         //再处理二级节点,二级节点则是从indexOffset往前处理3个">"
                         Long length2 = searchForLength(lastRead, 3, 62);
-                        indexMap.get(i).setPosEnd(MsFileType.MZXML, indexOffset - length2);
+                        indexMap.get(i).setPosEnd(PositionType.MZXML, indexOffset - length2);
 
                         //二级节点处理完毕以后为二级节点设置对应的父节点
                         indexMap.get(i).setParentNum(lastIndex.getNum());
@@ -438,7 +440,7 @@ public class MzXMLParser extends BaseParser {
                     } else {
                         //如果是空说明最后一个节点是一级节点,直接找倒数第二个>即可定位
                         Long length = searchForLength(lastRead, 2, 62);
-                        indexMap.get(i).setPosEnd(MsFileType.MZXML, indexOffset - length);
+                        indexMap.get(i).setPosEnd(PositionType.MZXML, indexOffset - length);
                         indexList.add(indexMap.get(i));
                         break;
                     }
@@ -447,7 +449,7 @@ public class MzXMLParser extends BaseParser {
                 ScanIndexDO index = indexMap.get(i);
 
                 ScanIndexDO nextIndex = indexMap.get(i + 1);
-                byte[] tailBytes = read(raf, nextIndex.getPosStart(MsFileType.MZXML) - TAIL_TRY, TAIL_TRY);
+                byte[] tailBytes = read(raf, nextIndex.getPosStart(PositionType.MZXML) - TAIL_TRY, TAIL_TRY);
 
                 String tail = new String(tailBytes);
                 //如果stack中不为空,说明这个节点是一个二级节点
@@ -456,12 +458,12 @@ public class MzXMLParser extends BaseParser {
                     if (StringUtils.countMatches(tail, "</scan>") == 2) {
                         //如果检测到两个</scan>,那么认为是跳出了二级节点了,开始为上一个一级节点做索引
                         ScanIndexDO lastIndex = indexStack.pop();
-                        lastIndex.setPosEnd(MsFileType.MZXML, nextIndex.getPosStart(MsFileType.MZXML) - 1);
+                        lastIndex.setPosEnd(PositionType.MZXML, nextIndex.getPosStart(PositionType.MZXML) - 1);
 
                         //再为二级节点做索引,二级节点的索引为nextIndex索引一步一步向前搜索,直到搜索到第2个">",我们先往前读30个字节
                         //因为">"的byte编码是62,所以要搜索倒数第二个62所处的位置
                         Long length = searchForLength(tailBytes, 2, 62);
-                        index.setPosEnd(MsFileType.MZXML, nextIndex.getPosStart(MsFileType.MZXML) - length);
+                        index.setPosEnd(PositionType.MZXML, nextIndex.getPosStart(PositionType.MZXML) - length);
 
                         //将二级节点的ParentNum设置为对应的一级节点
                         index.setParentNum(lastIndex.getNum());
@@ -473,7 +475,7 @@ public class MzXMLParser extends BaseParser {
 
                     //一级节点下的兄弟节点,还未跳出一级节点
                     if (tail.contains("</scan>")) {
-                        index.setPosEnd(MsFileType.MZXML, nextIndex.getPosStart(MsFileType.MZXML) - 1);
+                        index.setPosEnd(PositionType.MZXML, nextIndex.getPosStart(PositionType.MZXML) - 1);
                         //操作堆栈中的一级节点,但是不要pop出来
                         index.setParentNum(indexStack.peek().getNum());
                         continue;
@@ -482,7 +484,7 @@ public class MzXMLParser extends BaseParser {
 
                 //如果stack中是空的,那么是一个一级节点
                 if (tail.contains("</scan>")) {
-                    index.setPosEnd(MsFileType.MZXML, nextIndex.getPosStart(MsFileType.MZXML) - 1);
+                    index.setPosEnd(PositionType.MZXML, nextIndex.getPosStart(PositionType.MZXML) - 1);
                     indexList.add(index);
                     continue;
                 }
@@ -533,13 +535,13 @@ public class MzXMLParser extends BaseParser {
                     //读取尾部的50个字符
                     lastRead = read(file, indexOffset - 50, 50);
                     Long length = searchForLength(lastRead, 2, 62);
-                    indexMap.get(i).setPosEnd(MsFileType.MZXML, indexOffset - length);
+                    indexMap.get(i).setPosEnd(PositionType.MZXML, indexOffset - length);
                     indexList.add(indexMap.get(i));
                     break;
                 }
                 ScanIndexDO index = indexMap.get(i);
                 ScanIndexDO nextIndex = indexMap.get(i + 1);
-                index.setPosEnd(MsFileType.MZXML, nextIndex.getPosStart(MsFileType.MZXML) - 1);
+                index.setPosEnd(PositionType.MZXML, nextIndex.getPosStart(PositionType.MZXML) - 1);
                 indexList.add(index);
             }
         } catch (Exception e) {
@@ -565,7 +567,7 @@ public class MzXMLParser extends BaseParser {
                 line = line.trim();
                 String id = line.substring(line.indexOf("\"") + 1, line.lastIndexOf("\""));
                 String offset = line.substring(line.indexOf(">") + 1, line.lastIndexOf("<"));
-                indexMap.put(count, new ScanIndexDO(Integer.valueOf(id.trim()), MsFileType.MZXML, Long.valueOf(offset.trim()), null));
+                indexMap.put(count, new ScanIndexDO(Integer.valueOf(id.trim()), PositionType.MZXML, Long.valueOf(offset.trim()), null));
                 count++;
             }
         }
@@ -589,7 +591,7 @@ public class MzXMLParser extends BaseParser {
                 line = line.trim();
                 String id = line.substring(line.indexOf("\"") + 1, line.lastIndexOf("\""));
                 String offset = line.substring(line.indexOf(">") + 1, line.lastIndexOf("<"));
-                indexMap.put(count, new ScanIndexDO(Integer.valueOf(id.trim()), MsFileType.MZXML, Long.valueOf(offset.trim()), null));
+                indexMap.put(count, new ScanIndexDO(Integer.valueOf(id.trim()), PositionType.MZXML, Long.valueOf(offset.trim()), null));
                 count++;
             }
         }
@@ -634,7 +636,7 @@ public class MzXMLParser extends BaseParser {
 
         //仅关注两个attribute msLevel和retentionTime.因此如果扫描到这两个属性以后就可以跳出循环以节省时间开销
         int focusAttributeCount = 2;
-        byte[] readBytes = read(raf, scanIndexDO.getPosStart(MsFileType.MZXML) + 1, 600);
+        byte[] readBytes = read(raf, scanIndexDO.getPosStart(PositionType.MZXML) + 1, 600);
 
         String read = new String(readBytes);
         String precursorMz;

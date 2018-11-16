@@ -41,7 +41,12 @@ public class BaseParser {
         return floatValues;
     }
 
-    public Float[] getValues(byte[] value) {
+    /**
+     * get mz values only for aird file
+     * @param value
+     * @return
+     */
+    public Float[] getMzValues(byte[] value) {
 
         Float[] floatValues;
 
@@ -62,4 +67,5 @@ public class BaseParser {
         byteBuffer.clear();
         return floatValues;
     }
+
 }
