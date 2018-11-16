@@ -50,15 +50,11 @@ public class ExperimentTask extends BaseTask {
     }
 
     @Async(value = "compressFileExecutor")
-    public void compress(ExperimentDO experimentDO, String type, TaskDO taskDO) {
+    public void compress(ExperimentDO experimentDO, TaskDO taskDO) {
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         long start = System.currentTimeMillis();
-        if(type.equals(Constants.AIRD_FILE_TYPE_BIN)){
-            compressor.doCompress(experimentDO, true);
-        }else{
-            compressor.doCompress(experimentDO, false);
-        }
+        compressor.doCompress(experimentDO);
         taskDO.addLog("压缩转换完毕,总耗时:"+(System.currentTimeMillis() - start));
         taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
@@ -131,7 +127,7 @@ public class ExperimentTask extends BaseTask {
         taskDO.addLog("开始创建Aird压缩文件");
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
-        compressor.doCompress(experimentDO, false);
+        compressor.doCompress(experimentDO);
 
         taskDO.addLog("文件压缩完毕,耗时"+(System.currentTimeMillis() - start)+"开始卷积IRT校准库并且计算iRT值");
         taskService.update(taskDO);

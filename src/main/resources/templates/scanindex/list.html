@@ -104,13 +104,13 @@
                         RT
                     </th>
                     <th width="10%">
-                        mzxml位置(开始/结束)
+                        Mzxml Position(Start/Size)
                     </th>
                     <th width="10%">
-                        aird位置(开始/结束)
+                        Mz Position(Start/Size)
                     </th>
                     <th width="10%">
-                        airdbin位置(开始/结束)
+                        Intensity Position(Start/Size)
                     </th>
                     <th width="10%">
                         MZ窗口(校准前)
@@ -118,10 +118,10 @@
                     <th width="10%">
                         MZ窗口(校准后)
                     </th>
-                    <th width="5%">
+                    <th width="10%">
                         窗口宽度(校准前/后)
                     </th>
-                    <th width="20%">
+                    <th width="15%">
                         操作
                     </th>
                 </tr>
@@ -137,11 +137,10 @@
 
                     <td th:text="${scanIndex.num}"></td>
                     <td th:text="${scanIndex.msLevel}"></td>
-
                     <td th:text="${scanIndex.rtStr}"></td>
-                    <td th:text="|start:${scanIndex.positionMap?.get('mzxml')?.start} ;delta: ${scanIndex.positionMap?.get('mzxml')?.delta}|"></td>
-                    <td th:text="|start:${scanIndex.positionMap?.get('aird')?.start} ;delta: ${scanIndex.positionMap?.get('aird')?.delta}|"></td>
-                    <td th:text="|start:${scanIndex.positionMap?.get('airdbin')?.start} ;delta: ${scanIndex.positionMap?.get('airdbin')?.delta}|"></td>
+                    <td th:text="|${scanIndex.positionMap?.get('mzxml')?.start} : ${scanIndex.positionMap?.get('mzxml')?.delta}|"></td>
+                    <td th:text="|${scanIndex.positionMap?.get('mz')?.start} : ${scanIndex.positionMap?.get('mz')?.delta}|"></td>
+                    <td th:text="|${scanIndex.positionMap?.get('int')?.start} : ${scanIndex.positionMap?.get('int')?.delta}|"></td>
                     <td th:text="|${scanIndex.originalPrecursorMzStart}/${scanIndex.originalPrecursorMzEnd}|"></td>
                     <td th:text="|${scanIndex.precursorMzStart}/${scanIndex.precursorMzEnd}|">
                     <td th:text="|${scanIndex.originalWindowWideness}/${scanIndex.windowWideness}|"></td>
@@ -153,11 +152,6 @@
                                 data-target="#m_modal_spectrum"
                                 th:onclick="|query('${scanIndex.id}','${experiment.id}','aird')|">
                             Aird谱图
-                        </button>
-                        <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
-                                data-target="#m_modal_spectrum"
-                                th:onclick="|query('${scanIndex.id}','${experiment.id}','aird.bin')|">
-                            Aird.bin谱图
                         </button>
                         <button type="button" class="btn btn-sm btn-brand" data-toggle="modal"
                                 data-target="#m_modal_spectrum"
@@ -238,19 +232,7 @@
                 })
             } else if (type === 'aird') {
                 $.ajax({
-                    url: "/spectrum/view?indexId=" + indexId + "&expId=" + expId + "&type=text",
-                    async: false,
-                    success: function (result) {
-                        if (result.success) {
-                            datas = result.model;
-                        } else {
-                            chart.clear();
-                        }
-                    }
-                })
-            } else {
-                $.ajax({
-                    url: "/spectrum/view?indexId=" + indexId + "&expId=" + expId + "&type=bin",
+                    url: "/spectrum/view?indexId=" + indexId + "&expId=" + expId,
                     async: false,
                     success: function (result) {
                         if (result.success) {

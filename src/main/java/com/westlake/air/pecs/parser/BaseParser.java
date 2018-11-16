@@ -1,6 +1,8 @@
 package com.westlake.air.pecs.parser;
 
 import com.westlake.air.pecs.utils.CompressUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.*;
 
@@ -8,6 +10,8 @@ public class BaseParser {
 
     protected static int PRECISION_32 = 32;
     protected static int PRECISION_64 = 64;
+
+    public final Logger logger = LoggerFactory.getLogger(BaseParser.class);
 
     public Float[] getValues(byte[] value, int precision, boolean isCompression, ByteOrder byteOrder) {
         double[] doubleValues;
@@ -48,8 +52,6 @@ public class BaseParser {
      */
     public Float[] getMzValues(byte[] value) {
 
-        Float[] floatValues;
-
         ByteBuffer byteBuffer = ByteBuffer.wrap(value);
         byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(byteBuffer.array()));
         byteBuffer.order(ByteOrder.BIG_ENDIAN);
@@ -60,12 +62,32 @@ public class BaseParser {
             intValues[i] = ints.get(i);
         }
         intValues = CompressUtil.decompressForSortedInt(intValues);
-        floatValues = new Float[intValues.length];
+        Float[] floatValues = new Float[intValues.length];
         for (int index = 0; index < intValues.length; index++) {
             floatValues[index] = (float) intValues[index] / 1000;
         }
         byteBuffer.clear();
         return floatValues;
+    }
+
+    /**
+     * get mz values only for aird file
+     * @param value
+     * @return
+     */
+    public Float[] getIntValues(byte[] value) {
+        ByteBuffer byteBuffer = ByteBuffer.wrap(value);
+        byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(byteBuffer.array()));
+        byteBuffer.order(ByteOrder.BIG_ENDIAN);
+
+        FloatBuffer intensities = byteBuffer.asFloatBuffer();
+        Float[] intValues = new Float[intensities.capacity()];
+        for (int i = 0; i < intensities.capacity(); i++) {
+            intValues[i] = intensities.get(i);
+        }
+
+        byteBuffer.clear();
+        return intValues;
     }
 
 }

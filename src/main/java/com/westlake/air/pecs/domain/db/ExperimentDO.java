@@ -28,16 +28,12 @@ public class ExperimentDO extends BaseDO {
     //必填
     String filePath;
 
-    //转换压缩后的aidata的文件名称
+    //转换压缩后的aird的文件名称
     String airdPath;
-
-    String airdBinPath;
 
     String airdIndexPath;
 
     Boolean hasAirusFile;
-
-    Boolean hasAirusBinFile;
 
     String description;
 

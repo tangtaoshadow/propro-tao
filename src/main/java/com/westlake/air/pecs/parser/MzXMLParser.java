@@ -1,6 +1,5 @@
 package com.westlake.air.pecs.parser;
 
-import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.PositionType;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
@@ -46,6 +45,13 @@ public class MzXMLParser extends BaseParser {
     public MzXMLParser() {
     }
 
+    /**
+     * 解析MzXML原始文件
+     * @param file
+     * @param experimentDO
+     * @param taskDO
+     * @return
+     */
     public List<ScanIndexDO> index(File file, ExperimentDO experimentDO, TaskDO taskDO) {
         RandomAccessFile raf = null;
         List<ScanIndexDO> list = null;
@@ -107,28 +113,14 @@ public class MzXMLParser extends BaseParser {
     }
 
     /**
-     * the result key is rt
-     *
+     * 从MzXML中解析Mz和Intensity的值
      * @param raf
      * @param start
      * @param end
-     * @param rts
+     * @param compressionType
+     * @param precision
      * @return
-     * @throws Exception
      */
-    public TreeMap<Float, MzIntensityPairs> parseSwathBlockValues(RandomAccessFile raf, long start, long end, List<Float> rts) throws Exception {
-        TreeMap<Float, MzIntensityPairs> map = new TreeMap<>();
-        List<MzIntensityPairs> pairsList = parseValuesFromAird(raf, start, end);
-        if (rts.size() != pairsList.size()) {
-            logger.error("RTs Length not equals to pairsList length!!!");
-            throw new Exception("RTs Length not equals to pairsList length!!!");
-        }
-        for (int i = 0; i < rts.size(); i++) {
-            map.put(rts.get(i), pairsList.get(i));
-        }
-        return map;
-    }
-
     public MzIntensityPairs parseValue(RandomAccessFile raf, long start, long end, String compressionType, String precision) {
         String value = parseValue(raf, start, end);
         if (value == null) {
@@ -138,101 +130,7 @@ public class MzXMLParser extends BaseParser {
         return pairs;
     }
 
-    public String parseValue(RandomAccessFile raf, long start, long end) {
-        try {
-            raf.seek(start);
-            byte[] reader = new byte[(int) (end - start)];
-            raf.read(reader);
-            String tmp = new String(reader);
-            String[] content = tmp.substring(tmp.indexOf("<peaks"), tmp.indexOf("</peaks>")).split(">");
-            String value = content[1];
-            return value;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    public List<MzIntensityPairs> parseValuesFromAird(RandomAccessFile raf, long start, long end) {
-
-        List<MzIntensityPairs> pairsList = new ArrayList<>();
-        try {
-            raf.seek(start);
-            byte[] reader = new byte[(int) (end - start)];
-            raf.read(reader);
-            String totalValues = new String(reader);
-            String[] totalValuesArray = totalValues.split(Constants.CHANGE_LINE);
-
-            for (int i = 0; i < totalValuesArray.length - 1; i += 2) {
-                if (totalValuesArray[i].isEmpty()) {
-                    continue;
-                }
-                MzIntensityPairs pairs = new MzIntensityPairs();
-                Float[] mzArray = getMzValues(new Base64().decode(totalValuesArray[i]));
-                Float[] intensityArray = getValues(new Base64().decode(totalValuesArray[i + 1]), 32, true, ByteOrder.BIG_ENDIAN);
-                pairs.setMzArray(mzArray);
-                pairs.setIntensityArray(intensityArray);
-                pairsList.add(pairs);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return pairsList;
-    }
-
-    /**
-     * @param raf
-     * @param index
-     * @param precision
-     * @param isZlibCompression
-     * @param zeroLeft          两个Intensity非0的间隔内保留多少个Intensity为0的数值
-     * @return
-     */
-    public String parseValueForAird(RandomAccessFile raf, ScanIndexDO index, int precision, boolean isZlibCompression, int zeroLeft) {
-        String value = parseValue(raf, index.getPosStart(PositionType.MZXML), index.getPosEnd(PositionType.MZXML));
-        Float[] values = getValues(new Base64().decode(value), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
-
-        //如果存在连续的intensity为0的情况仅保留其中的一个0,所以数组的最大值是values.length/2
-        int[] mzArray = new int[values.length / 2];
-        float[] intensityArray = new float[values.length / 2];
-        int j = 0;
-        int countZero = 0;
-        for (int i = 0; i < values.length - 1; i += 2) {
-            //如果取到的intensity是0,那么进行判断
-            if (values[i + 1] == 0f) {
-                if (countZero < zeroLeft) {
-                    countZero++;
-                } else {
-                    //如果不是第一个0,那么不保存
-                    continue;
-                }
-            } else {
-                countZero = 0;
-            }
-            float intensity = ((float) Math.round(values[i + 1] * 10)) / 10; //intensity精确到小数点后面一位
-            int mz = Math.round((values[i]) * 1000);//mz精确到小数点后面三位
-            mzArray[j] = mz;
-            intensityArray[j] = intensity;
-            j++;
-        }
-
-        mzArray = ArrayUtils.subarray(mzArray, 0, j);
-        intensityArray = ArrayUtils.subarray(intensityArray, 0, j);
-
-        mzArray = CompressUtil.compressForSortedInt(mzArray);
-
-        String indexesStr = CompressUtil.transToString(mzArray) + Constants.CHANGE_LINE + CompressUtil.transToString(intensityArray) + Constants.CHANGE_LINE;
-        return indexesStr;
-    }
-
-    public String parseValueForAird(RandomAccessFile raf, ScanIndexDO index, int precision, boolean isZlibCompression) {
-        return parseValueForAird(raf, index, precision, isZlibCompression, 0);
-    }
-
-    public byte[] parseByteValueForAird(RandomAccessFile raf, ScanIndexDO index, Long start, int precision, boolean isZlibCompression, int zeroLeft) {
+    public byte[] parseValueForAird(RandomAccessFile raf, ScanIndexDO index, Long start, int precision, boolean isZlibCompression, int zeroLeft) {
         String value = parseValue(raf, index.getPosStart(PositionType.MZXML), index.getPosEnd(PositionType.MZXML));
         Float[] values = getValues(new Base64().decode(value), precision, isZlibCompression, ByteOrder.BIG_ENDIAN);
 
@@ -267,8 +165,8 @@ public class MzXMLParser extends BaseParser {
         byte[] mzArrayByte = CompressUtil.transToByte(mzArray);
         byte[] intensityArrayByte = CompressUtil.transToByte(intensityArray);
 
-        index.addPosition(PositionType.AIRD_BIN_MZ, new Position(start, (long)mzArrayByte.length));
-        index.addPosition(PositionType.AIRD_BIN_INTENSITY, new Position(start + (long)mzArrayByte.length, (long)intensityArrayByte.length));
+        index.addPosition(PositionType.AIRD_MZ, new Position(start, (long) mzArrayByte.length));
+        index.addPosition(PositionType.AIRD_INTENSITY, new Position(start + (long) mzArrayByte.length, (long) intensityArrayByte.length));
 
         return ArrayUtils.addAll(mzArrayByte, intensityArrayByte);
     }
@@ -700,5 +598,20 @@ public class MzXMLParser extends BaseParser {
 
     }
 
+    private String parseValue(RandomAccessFile raf, long start, long end) {
+        try {
+            raf.seek(start);
+            byte[] reader = new byte[(int) (end - start)];
+            raf.read(reader);
+            String tmp = new String(reader);
+            String[] content = tmp.substring(tmp.indexOf("<peaks"), tmp.indexOf("</peaks>")).split(">");
+            String value = content[1];
+            return value;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 
 }

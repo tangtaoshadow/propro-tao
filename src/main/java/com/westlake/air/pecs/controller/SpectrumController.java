@@ -125,15 +125,10 @@ public class SpectrumController extends BaseController {
 
         RandomAccessFile raf = null;
         try {
-            if (type.equals(Constants.AIRD_FILE_TYPE_TEXT)) {
-                File file = new File(experimentDO.getAirdPath());
-                raf = new RandomAccessFile(file, "r");
-                pairs = airdFileParser.parseValueFromText(raf, scanIndexDO.getPositionMap().get(PositionType.AIRD), Constants.AIRD_COMPRESSION_TYPE_ZLIB, Constants.AIRD_PRECISION_32);
-            } else {
-                File file = new File(experimentDO.getAirdBinPath());
-                raf = new RandomAccessFile(file, "r");
-                pairs = airdFileParser.parseValueFromBin(raf, scanIndexDO.getPositionMap().get(PositionType.AIRD_BIN_MZ),scanIndexDO.getPositionMap().get(PositionType.AIRD_BIN_INTENSITY), Constants.AIRD_COMPRESSION_TYPE_ZLIB, Constants.AIRD_PRECISION_32);
-            }
+            File file = new File(experimentDO.getAirdPath());
+            raf = new RandomAccessFile(file, "r");
+            pairs = airdFileParser.parseValue(raf, scanIndexDO.getPositionMap().get(PositionType.AIRD_MZ),scanIndexDO.getPositionMap().get(PositionType.AIRD_INTENSITY), Constants.AIRD_COMPRESSION_TYPE_ZLIB, Constants.AIRD_PRECISION_32);
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } finally {

@@ -1,40 +1,70 @@
 package com.westlake.air.pecs.parser;
 
-import com.westlake.air.pecs.constants.Constants;
+import com.westlake.air.pecs.constants.PositionType;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.bean.scanindex.Position;
-import org.apache.commons.codec.binary.Base64;
+import com.westlake.air.pecs.domain.db.ScanIndexDO;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
 
 @Component("airdFileParser")
 public class AirdFileParser extends BaseParser {
 
-    public MzIntensityPairs parseValueFromText(RandomAccessFile raf, Position position, String compressionType, String precision) {
+    /**
+     * the result key is rt
+     *
+     * @param raf
+     * @return
+     * @throws Exception
+     */
+    public TreeMap<Float, MzIntensityPairs> parseSwathBlockValues(RandomAccessFile raf, ScanIndexDO indexDO) throws Exception {
+        TreeMap<Float, MzIntensityPairs> map = new TreeMap<>();
+        List<Float> rts = indexDO.getRts();
+        List<MzIntensityPairs> pairsList = new ArrayList<>();
 
-        try {
-            raf.seek(position.getStart());
-            byte[] reader = new byte[position.getDelta().intValue()];
-            raf.read(reader);
-            String tmp = new String(reader);
-            String[] mzIntensity = tmp.split(Constants.CHANGE_LINE);
-            String mzStr = mzIntensity[0];
-            String intensityStr = mzIntensity[1];
-            Float[] mzArray = getMzValues(new Base64().decode(mzStr));
-            Float[] intensityArray = getValues(new Base64().decode(intensityStr), Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType), ByteOrder.BIG_ENDIAN);
-            return new MzIntensityPairs(mzArray, intensityArray);
-        } catch (IOException e) {
-            e.printStackTrace();
+        raf.seek(indexDO.getPosStart(PositionType.SWATH));
+        byte[] result = new byte[indexDO.getPosDelta(PositionType.SWATH).intValue()];
+
+        raf.read(result);
+        List<Integer> blockSizes = indexDO.getBlockSizes();
+
+        int start = 0;
+        for (int i = 0; i < blockSizes.size() - 1; i = i + 2) {
+            byte[] mz = ArrayUtils.subarray(result, start, start + blockSizes.get(i));
+            start = start + blockSizes.get(i);
+            byte[] intensity = ArrayUtils.subarray(result, start, start + blockSizes.get(i + 1));
+            start = start + blockSizes.get(i + 1);
+            pairsList.add(new MzIntensityPairs(getMzValues(mz), getIntValues(intensity)));
         }
-
-        return null;
-
+        if (rts.size() != pairsList.size()) {
+            logger.error("RTs Length not equals to pairsList length!!!");
+            throw new Exception("RTs Length not equals to pairsList length!!!");
+        }
+        for (int i = 0; i < rts.size(); i++) {
+            map.put(rts.get(i), pairsList.get(i));
+        }
+        return map;
     }
 
-    public MzIntensityPairs parseValueFromBin(RandomAccessFile raf, Position mzPos, Position intPos, String compressionType, String precision) {
+    /**
+     * 从aird文件中获取某一条记录
+     *
+     * @param raf
+     * @param mzPos
+     * @param intPos
+     * @param compressionType
+     * @param precision
+     * @return
+     */
+    public MzIntensityPairs parseValue(RandomAccessFile raf, Position mzPos, Position intPos, String compressionType, String precision) {
 
         try {
             raf.seek(mzPos.getStart());

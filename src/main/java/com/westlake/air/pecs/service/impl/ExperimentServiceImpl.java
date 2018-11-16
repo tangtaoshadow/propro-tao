@@ -18,6 +18,7 @@ import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.pecs.domain.db.simple.TargetTransition;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
+import com.westlake.air.pecs.parser.AirdFileParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
 import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.ConvolutionUtil;
@@ -52,6 +53,8 @@ public class ExperimentServiceImpl implements ExperimentService {
     ScanIndexDAO scanIndexDAO;
     @Autowired
     MzXMLParser mzXMLParser;
+    @Autowired
+    AirdFileParser airdFileParser;
     @Autowired
     AnalyseDataDAO analyseDataDAO;
     @Autowired
@@ -259,9 +262,9 @@ public class ExperimentServiceImpl implements ExperimentService {
         try {
             raf = new RandomAccessFile(file, "r");
             dataList = extractMS2WithList(raf, overviewDO.getId(), swathInput);
-
         } catch (Exception e) {
             logger.error(e.getMessage());
+        } finally {
             FileUtil.close(raf);
         }
 
@@ -299,24 +302,16 @@ public class ExperimentServiceImpl implements ExperimentService {
                     logger.warn("No Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
                     continue;
                 }
-                //Step3.获取指定索引列表
-//                List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(new ScanIndexQuery(exp.getId(), 2, rang.getMzStart(), rang.getMzEnd()));
-                //Step4.提取指定原始谱图
-//                rtMap = parseSpectrum(raf, indexes, exp);
-                rtMap = parseSpectrumFromAird(raf, swathMap.get(rang.getMzStart()));
+                //Step3.提取指定原始谱图
+                rtMap = airdFileParser.parseSwathBlockValues(raf, swathMap.get(rang.getMzStart()));
 
-                //Step5.卷积并且存储数据
+                //Step4.卷积并且存储数据
                 convolute(finalList, coordinates, rtMap, null, mzExtractWindow, -1f, false);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            try {
-                if (raf != null) {
-                    raf.close();
-                }
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+        }finally {
+            FileUtil.close(raf);
         }
 
         return finalList;
@@ -428,19 +423,12 @@ public class ExperimentServiceImpl implements ExperimentService {
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            try {
-                if (raf != null) {
-                    raf.close();
-                }
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
         }
 
         return totalList;
     }
 
-    private List<AnalyseDataDO> processConv(RandomAccessFile raf, SwathInput swathInput,ScanIndexDO swathIndex, WindowRang rang, String overviewId) throws Exception {
+    private List<AnalyseDataDO> processConv(RandomAccessFile raf, SwathInput swathInput, ScanIndexDO swathIndex, WindowRang rang, String overviewId) throws Exception {
         List<TargetTransition> coordinates;
         TreeMap<Float, MzIntensityPairs> rtMap;
         //Step2.获取标准库的目标肽段片段的坐标
@@ -449,13 +437,8 @@ public class ExperimentServiceImpl implements ExperimentService {
             logger.warn("No Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
             return null;
         }
-        //Step3.获取指定索引列表
-//        ScanIndexQuery query = new ScanIndexQuery(swathInput.getExperimentDO().getId(), 2);
-//        query.setPrecursorMzStart(rang.getMzStart());
-//        query.setPrecursorMzEnd(rang.getMzEnd());
-//        List<SimpleScanIndex> indexes = scanIndexService.getSimpleAll(query);
-        //Step4.提取指定原始谱图
-        rtMap = parseSpectrumFromAird(raf, swathIndex);
+        //Step3.提取指定原始谱图
+        rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex);
 
         return convoluteAndInsert(coordinates, rtMap, overviewId, swathInput.getRtExtractWindow(), swathInput.getMzExtractWindow(), false);
     }
@@ -470,14 +453,6 @@ public class ExperimentServiceImpl implements ExperimentService {
             rtMap.put(index.getRt(), mzIntensityPairs);
         }
         logger.info("解析" + indexes.size() + "条XML谱图文件总计耗时:" + (System.currentTimeMillis() - start));
-
-        return rtMap;
-    }
-
-    private TreeMap<Float, MzIntensityPairs> parseSpectrumFromAird(RandomAccessFile raf, ScanIndexDO swathIndex) throws Exception {
-        long start = System.currentTimeMillis();
-        TreeMap<Float, MzIntensityPairs> rtMap = mzXMLParser.parseSwathBlockValues(raf, swathIndex.getPosStart(PositionType.AIRD), swathIndex.getPosEnd(PositionType.AIRD), swathIndex.getRts());
-        logger.info("解析" + swathIndex.getPrecursorMzStart() + "-" + swathIndex.getPrecursorMzEnd() + "范围谱图文件总计耗时:" + (System.currentTimeMillis() - start));
 
         return rtMap;
     }

@@ -40,6 +40,8 @@ public class ScanIndexDO extends BaseDO {
     //在AirusData中使用,一个Swath块中所有MS2的rt时间列表
     List<Float> rts;
 
+    List<Integer> blockSizes;
+
     //在mzxml中的序号
     Integer num;
 
@@ -76,6 +78,10 @@ public class ScanIndexDO extends BaseDO {
     }
 
     public void setRtStr(String rtStr) {
+        if(rtStr == null){
+            this.rtStr = null;
+            return;
+        }
         this.rtStr = rtStr;
         if (rtStr.startsWith("PT") && rtStr.endsWith("S")) {
             this.rt = Float.parseFloat(rtStr.substring(2, rtStr.length() - 1));
@@ -113,6 +119,16 @@ public class ScanIndexDO extends BaseDO {
             Position pos = positionMap.get(key);
             if(pos != null){
                 return pos.getStart() + pos.getDelta();
+            }
+        }
+        return null;
+    }
+
+    public Long getPosDelta(String key){
+        if(positionMap != null){
+            Position pos = positionMap.get(key);
+            if(pos != null){
+                return pos.getDelta();
             }
         }
         return null;

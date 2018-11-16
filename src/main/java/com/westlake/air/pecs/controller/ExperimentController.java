@@ -439,7 +439,6 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/compress")
     String compress(Model model,
                        @RequestParam(value = "expId", required = true) String expId,
-                       @RequestParam(value = "type", required = true) String type,
                        RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(expId);
@@ -448,14 +447,9 @@ public class ExperimentController extends BaseController {
             return "redirect:/experiment/list";
         }
         ExperimentDO experimentDO = resultDO.getModel();
-        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId + ";CompressType:" + type);
+        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
         taskService.insert(taskDO);
-
-        if (type.equals(Constants.AIRD_FILE_TYPE_BIN)) {
-            experimentTask.compress(experimentDO, Constants.AIRD_FILE_TYPE_BIN, taskDO);
-        } else {
-            experimentTask.compress(experimentDO, Constants.AIRD_FILE_TYPE_TEXT, taskDO);
-        }
+        experimentTask.compress(experimentDO, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }

@@ -50,9 +50,6 @@
                         Aird压缩
                     </th>
                     <th width="5%">
-                        Aird Bin压缩
-                    </th>
-                    <th width="5%">
                         压缩类型
                     </th>
                     <th width="5%">
@@ -86,16 +83,6 @@
                            已压缩
                        </span>
                     </td>
-                    <td th:if="!${experiment.hasAirusBinFile}">
-                        <span class="m-badge m-badge--danger m-badge--wide">
-                            未压缩
-                        </span>
-                    </td>
-                    <td th:if="${experiment.hasAirusBinFile}">
-                       <span class="m-badge m-badge--success m-badge--wide">
-                           已压缩
-                       </span>
-                    </td>
                     <td th:text="${experiment.compressionType}"></td>
                     <td th:text="${experiment.precision}"></td>
                     <td th:text="|${experiment.slope} -> ${experiment.intercept}|"></td>
@@ -117,16 +104,9 @@
                         <a th:href="|/scanindex/list?experimentId=${experiment.id}|"
                            class="btn btn-info btn-sm">原始索引
                         </a>
-                        <div class="btn-group dropright" role="group">
-                            <button id="scoresBtnGroup" type="button" class="btn btn-sm dropdown-toggle"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                文件压缩
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="compressBtn">
-                                <a class="dropdown-item" th:href="|/experiment/compress?expId=${experiment.id}&type=text|">压缩为文本文件</a>
-                                <a class="dropdown-item" th:href="|/experiment/compress?expId=${experiment.id}&type=bin|">压缩为二进制文件</a>
-                            </div>
-                        </div>
+                        <a th:href="|/experiment/compress?expId=${experiment.id}|"
+                           class="btn btn-danger btn-sm">Aird压缩
+                        </a>
                         <a th:href="|/analyse/overview/list?expId=${experiment.id}|"
                            class="btn btn-warning btn-sm">查看卷积实验
                         </a>
