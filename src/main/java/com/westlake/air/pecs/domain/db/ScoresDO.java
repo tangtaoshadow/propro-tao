@@ -38,10 +38,6 @@ public class ScoresDO {
 
     Date lastModifiedDate;
 
-    public void addFeatureScores(FeatureScores featureScores){
-        if(featureScoresList == null){
-            featureScoresList = new ArrayList<>();
-        }
-        featureScoresList.add(featureScores);
-    }
+    //本字段仅在排序的时候使用,不保存在数据库中
+    String groupId;
 }

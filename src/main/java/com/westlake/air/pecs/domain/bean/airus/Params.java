@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 public class Params {
-    double xevalFraction = 0.5;
+    double trainTestRatio = 0.5;
 
     int xevalNumIter = 10;
 
@@ -17,7 +17,8 @@ public class Params {
 
     double ssIterationFdr = 0.02;
 
-    int ssNumIter = 10;
+    //训练数据集的次数
+    int trainTimes = 10;
 
     String ssMainScore = "var_xcorr_shape";
 
@@ -50,5 +51,5 @@ public class Params {
 
     Double[] qvalues = {0.0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5};
 
-    boolean isTest = true;
+    boolean isDebug = true;
 }

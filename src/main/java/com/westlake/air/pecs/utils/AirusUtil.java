@@ -4,6 +4,8 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
+import com.westlake.air.pecs.domain.db.ScoresDO;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +89,6 @@ public class AirusUtil {
     }
 
     public static Double[] getDecoyPeaks(Double[] array, Boolean[] isDecoy) {
-
         if (array.length == isDecoy.length) {
             return ArrayUtil.extract3dRow(array, isDecoy);
         } else {
@@ -97,7 +98,6 @@ public class AirusUtil {
     }
 
     public static Integer[] getDecoyPeaks(Integer[] array, Boolean[] isDecoy) {
-        ResultDO<Integer[]> decoyPeaks = new ResultDO<Integer[]>();
         if (array.length == isDecoy.length) {
             return ArrayUtil.extract3dRow(array, isDecoy);
         } else {
@@ -205,21 +205,14 @@ public class AirusUtil {
      * @param groupNumId
      * @param isDecoy
      * @param fraction   目前写死0.5
-     * @param isTest
+     * @param isDebug
      * @return
      */
-    public static TrainAndTest splitForXval(Double[][] data, Integer[] groupNumId, Boolean[] isDecoy, double fraction, boolean isTest) {
+    public static TrainAndTest split(Double[][] data, Integer[] groupNumId, Boolean[] isDecoy, double fraction, boolean isDebug) {
         Integer[] decoyIds = getDecoyPeaks(groupNumId, isDecoy);
         Integer[] targetIds = getTargetPeaks(groupNumId, isDecoy);
 
-        if (!isTest) {
-            List<Integer> decoyIdShuffle = Arrays.asList(decoyIds);
-            List<Integer> targetIdShuffle = Arrays.asList(targetIds);
-            Collections.shuffle(decoyIdShuffle);
-            Collections.shuffle(targetIdShuffle);
-            decoyIdShuffle.toArray(decoyIds);
-            targetIdShuffle.toArray(targetIds);
-        } else {
+        if (isDebug) {
             TreeSet<Integer> decoyIdSet = new TreeSet<Integer>(Arrays.asList(decoyIds));
             TreeSet<Integer> targetIdSet = new TreeSet<Integer>(Arrays.asList(targetIds));
 
@@ -227,6 +220,13 @@ public class AirusUtil {
             decoyIdSet.toArray(decoyIds);
             targetIds = new Integer[targetIdSet.size()];
             targetIdSet.toArray(targetIds);
+        } else {
+            List<Integer> decoyIdShuffle = Arrays.asList(decoyIds);
+            List<Integer> targetIdShuffle = Arrays.asList(targetIds);
+            Collections.shuffle(decoyIdShuffle);
+            Collections.shuffle(targetIdShuffle);
+            decoyIdShuffle.toArray(decoyIds);
+            targetIdShuffle.toArray(targetIds);
         }
 
         int decoyLength = (int) (decoyIds.length * fraction) + 1;
@@ -235,6 +235,51 @@ public class AirusUtil {
 
         HashSet<Integer> learnIdSet = new HashSet<Integer>(Arrays.asList(learnIds));
         return ArrayUtil.extract3dRow(data, groupNumId, isDecoy, learnIdSet);
+    }
+
+    /**
+     * 划分测试集与训练集,保证每一次对于同一份原始数据划分出的测试集都是同一份
+     *
+     * @param scores
+     * @param fraction 切分比例,目前写死1:1,即0.5
+     * @param isDebug  是否取测试集
+     * @return
+     */
+    public static TrainAndTest split(List<ScoresDO> scores, double fraction, boolean isDebug) {
+
+        List<ScoresDO> targets = new ArrayList<>();
+        List<ScoresDO> decoys = new ArrayList<>();
+        //按照是否是伪肽段分为两个数组
+        for (ScoresDO score : scores) {
+            if (score.getIsDecoy()) {
+                decoys.add(score);
+            } else {
+                targets.add(score);
+            }
+        }
+
+        //是否在调试程序,调试程序时需要保证每一次的随机结果都相同,因此不做随机打乱,而是每一次都按照PeptideRef进行排序
+        if (isDebug) {
+            SortUtil.sortByPeptideRef(targets);
+            SortUtil.sortByPeptideRef(decoys);
+        } else {
+            Collections.shuffle(targets);
+            Collections.shuffle(decoys);
+        }
+
+        int decoyLength = (int) (targets.size() * fraction) + 1;
+        int targetLength = (int) (decoys.size() * fraction) + 1;
+
+        List<ScoresDO> trains = new ArrayList<>();
+        List<ScoresDO> tests = new ArrayList<>();
+        trains.addAll(targets.subList(0, targetLength));
+        trains.addAll(decoys.subList(0, decoyLength));
+
+        tests.addAll(targets.subList(targetLength, targets.size()));
+        tests.addAll(decoys.subList(decoyLength, decoys.size()));
+
+        TrainAndTest tat = new TrainAndTest(trains, tests);
+        return tat;
     }
 
     public static ScoreData fakeSortTgId(ScoreData scoreData) {

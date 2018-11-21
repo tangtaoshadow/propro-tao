@@ -39,16 +39,6 @@ public class ArrayUtil {
     }
 
     /**
-     * Concatenate arrayA[] and arrayB[].
-     */
-    public static Double[] concat2d(Double[] arrayA, Double[] arrayB) {
-        Double[] arrayC = new Double[arrayA.length + arrayB.length];
-        System.arraycopy(arrayA, 0, arrayC, 0, arrayA.length);
-        System.arraycopy(arrayB, 0, arrayC, arrayA.length, arrayB.length);
-        return arrayC;
-    }
-
-    /**
      * Concatenate arrayA[] and arrayB[][] y dimension.
      */
     public static Double[][] concat3d(Double[][] arrayA, Double[][] arrayB) {
@@ -83,22 +73,7 @@ public class ArrayUtil {
         }
     }
 
-    /**
-     * Extract array from array.
-     */
-    public static Double[] extract2d(Double[] array, Integer begin, Integer end) {
-        if (begin <= end && end < array.length) {
-            Double[] b = new Double[end - begin + 1];
-            System.arraycopy(array, begin, b, 0, end - begin + 1);
-            return b;
-        } else {
-            logger.error("Extract2d Error");
-            return null;
-        }
-    }
-
     public static Double[] extractRow(Double[] array, Integer[] row) {
-        ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
         Double[] result = new Double[row.length];
         for (int i = 0; i < row.length; i++) {
             if (row[i] > -1 && row[i] < array.length) {
@@ -112,7 +87,6 @@ public class ArrayUtil {
     }
 
     public static double[] extractRow(double[] array, Integer[] row) {
-        ResultDO<double[]> resultDO = new ResultDO<double[]>();
         double[] result = new double[row.length];
         for (int i = 0; i < row.length; i++) {
             if (row[i] > -1 && row[i] < array.length) {
@@ -315,26 +289,6 @@ public class ArrayUtil {
         }
     }
 
-
-
-    public static Double[] dot(Double[][] array, Double[] w) {
-        int aLength = array.length;
-        int wLength = w.length;
-        if (array[0].length == wLength) {
-            Double[] result = new Double[aLength];
-            for (int i = 0; i < aLength; i++) {
-                result[i] = 0.0;
-                for (int j = 0; j < wLength; j++) {
-                    result[i] += array[i][j] * w[j];
-                }
-            }
-            return result;
-        } else {
-            logger.error("Dot Error");
-            return null;
-        }
-    }
-
     public static Integer[] getPartOfArray(Integer[] array, int cutoff) {
         Integer[] result = new Integer[cutoff];
         System.arraycopy(array, 0, result, 0, cutoff);
@@ -369,23 +323,6 @@ public class ArrayUtil {
 
         for (int i = 0; i < n; i++) {
             result[i] = indexValues.get(i).getIndex();
-        }
-        return result;
-    }
-
-    /**
-     * Get ascend sort index of array[].
-     */
-    public static int[] indexAfterSortWithArraySorted(Integer[] array) {
-        List<IndexValue<Integer>> indexValues = new IndexValue<Integer>().buildList(array);
-        Collections.sort(indexValues);
-
-        int n = array.length;
-        int[] result = new int[n];
-
-        for (int i = 0; i < n; i++) {
-            result[i] = indexValues.get(i).getIndex();
-            array[i] = indexValues.get(i).getValue();
         }
         return result;
     }
@@ -493,301 +430,31 @@ public class ArrayUtil {
         return result;
     }
 
-    public static double mean(Double[] array) {
-        int n = array.length;
-        double sum = 0;
-        for (Double i : array) {
-            if(!i.isNaN()){
-                sum += i;
-            }
-        }
-        return sum / n;
-    }
-
-    public static double std(Double[] array) {
-        double mean = mean(array);
-        int length = array.length;
-        double error = 0;
-        for (Double i : array) {
-            if(!i.isNaN()){
-                error += Math.pow(i - mean, 2);
-            }
-        }
-        error /= (double) length - 1;
-        return Math.sqrt(error);
-    }
-
     /**
-     * Normalize a with a's mean and std.
+     * count number of times corresponding to unique sorted array.
      */
-    public static Double[] normalize(Double[] array) {
-        double mean = mean(array);
-        Double[] result = array.clone();
-        double std = std(array);
-        for (int i = 0; i < array.length; i++) {
-            result[i] = (result[i] - mean) / std;
-        }
-        return result;
-    }
-
-    /**
-     * Normalize a with b's mean and std.
-     */
-    public static Double[] normalize(Double[] arrayA, Double[] arrayB) {
-        double mean = mean(arrayB);
-        double std = std(arrayB);
-        Double[] result = arrayA.clone();
-        for (int i = 0; i < arrayA.length; i++) {
-            result[i] = (result[i] - mean) / std;
-        }
-        return result;
-    }
-
-    /**
-     * Error function erf().
-     */
-    public static double erf(double t) {
-        double result = 0.0;
-        for (int i = 1; i < 101; i++) {
-            result += t * 2.0 * Math.exp(-Math.pow(i * t / 100, 2)) / Math.sqrt(Math.PI) / 100.0;
-        }
-        return result;
-    }
-
-    /**
-     * Count number of value in array[] <= present value.
-     */
-    public static int[] countNumPositives(Double[] array) {
-        int i0 = 0, i1 = 0;
-        int n = array.length;
-        int[] result = new int[n];
-        while (i0 < n) {
-            while (i1 < n && array[i0].equals(array[i1])) {
-                result[i1] = n - i0;
-                i1++;
-            }
-            i0++;
-        }
-        return result;
-    }
-
-    /**
-     * Get an array of Max in the rest.
-     */
-    public static double[] cumMax(double[] array) {
-        double max = array[0];
-        int length = array.length;
-        double[] result = new double[length];
-        for (int i = 0; i < length; i++) {
-            if (array[i] > max) {
-                max = array[i];
-            }
-            result[i] = max;
-        }
-        return result;
-    }
-
-    /**
-     * Find index of the min value.
-     */
-    public static int argmin(double[] array) {
-        double min = array[0];
-        int minIndex = 0;
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] < min) {
-                min = array[i];
-                minIndex = i;
-            }
-        }
-        return minIndex;
-    }
-
-    /**
-     * Count number of values bigger than threshold in array.
-     */
-    public static int countOverThreshold(Double[] array, double threshold) {
-        int n = 0;
-        for (double i : array) {
-            if (i >= threshold) n++;
-        }
-        return n;
-    }
-
-
-    /**
-     * Return index of nearest elements of samplePoints[] in array[].
-     */
-    public static Integer[] findNearestMatches(Double[] array, Double[] samplePoints, int useSortOrder) {
-
-        int numBasis = array.length;
-        int numSamples = samplePoints.length;
-        Integer[] results = new Integer[numSamples];
-        int i, bestJ;
-        int low, mid, high;
-        double spI, bestDist, dist;
-        int sortOrder;
-
-        if (useSortOrder != 1) {
-            for (i = 0; i < numSamples; i++) {
-                spI = samplePoints[i];
-                bestJ = 0;
-                bestDist = Math.abs(array[0] - spI);
-                for (int j = 1; j < numBasis; j++) {
-                    dist = Math.abs(array[j] - spI);
-                    if (dist < bestDist) {
-                        bestDist = dist;
-                        bestJ = j;
-                    }
-                }
-                results[i] = bestJ;
-
-            }
-            return results;
-        }
-        sortOrder = findSortOrder(array);
-        for (i = 0; i < numSamples; i++) {
-            spI = samplePoints[i];
-            if (sortOrder == 0) {
-                bestJ = 0;
-                bestDist = Math.abs(array[0] - spI);
-                for (int j = 1; j < numBasis; j++) {
-                    dist = Math.abs(array[j] - spI);
-                    if (dist < bestDist) {
-                        bestDist = dist;
-                        bestJ = j;
-                    }
-                }
-            } else if (sortOrder == 1) {
-                low = 0;
-                high = numBasis - 1;
-                bestJ = -1;
-                if (array[low] == spI) {
-                    bestJ = low;
-                } else if (array[high] == spI) {
-                    bestJ = high;
-                } else {
-                    while (low < high - 1) {
-                        mid = (low + high) / 2;
-                        if (array[mid] == spI) {
-                            bestJ = mid;
-                        }
-                        if (array[mid] < spI) {
-                            low = mid;
-                        } else {
-                            high = mid;
-                        }
-                    }
-                    if (bestJ == -1) {
-                        if (Math.abs(array[low] - spI) < Math.abs(array[high] - spI)) {
-                            bestJ = low;
-                        } else {
-                            bestJ = high;
-                        }
-                    }
-                }
-                while (bestJ > 0) {
-                    if (array[bestJ - 1].equals(array[bestJ])) {
-                        bestJ = bestJ - 1;
-                    } else {
-                        break;
-                    }
-                }
+    private static int[] countSort(Double[] array) {
+        Double[] aSort = array.clone();
+        Arrays.sort(aSort);
+        int j = 0, k = 0;
+        int[] result = new int[numOfUnique(aSort)];
+        double value = aSort[0];
+        for (int i = 0; i < aSort.length; i++) {
+            if (aSort[i] == value) {
+                j++;
             } else {
-                low = 0;
-                high = numBasis - 1;
-                bestJ = -1;
-                if (array[low] == spI) {
-                    bestJ = low;
-                } else if (array[high] == spI) {
-                    bestJ = high;
-                } else {
-                    while (low < high - 1) {
-                        mid = (low + high) / 2;
-                        if (array[mid] == spI) {
-                            bestJ = mid;
-                            break;
-                        }
-                        if (array[mid] > spI) {
-                            low = mid;
-                        } else {
-                            high = mid;
-                        }
-                    }
-                    if (bestJ == -1) {
-                        if (Math.abs(array[low] - spI) < Math.abs(array[high] - spI)) {
-                            bestJ = low;
-                        } else {
-                            bestJ = high;
-                        }
-                    }
-                }
-                while (bestJ > 0) {
-                    if (array[bestJ - 1].equals(array[bestJ])) {
-                        bestJ = bestJ - 1;
-                    } else {
-                        break;
-                    }
-                }
+                result[k] = j;
+                k++;
+                j = 1;
+                value = aSort[i];
             }
-            results[i] = bestJ;
 
         }
-        return results;
-    }
-
-    /**
-     * Get numCutOffs points equally picked from [a,b).
-     */
-    public static Double[] linspace(Double a, Double b, int numCutOffs) {
-        Double[] result = new Double[numCutOffs];
-        double inc = Math.abs(b - a) / (numCutOffs - 1);
-        for (int i = 0; i < numCutOffs; i++) {
-            result[i] = a + inc * i;
-        }
+        result[k] = j;
         return result;
     }
 
-    /**
-     * Get the row-mean of rows in array[].
-     */
-    public static Double[] getRowMean(Double[][] array) {
-        int arrayLength = array.length;
-        int arrayWidth = array[0].length;
-        Double[] rowMean = new Double[arrayWidth];
-        double sumRowElement = 0;
-        for (int i = 0; i < arrayWidth; i++) {
-            for (int j = 0; j < arrayLength; j++) {
-                sumRowElement += array[j][i];
-            }
-            rowMean[i] = sumRowElement / arrayLength;
-            sumRowElement = 0;
-        }
-        return rowMean;
-    }
 
-    public static ResultDO<Double[]> lagrangeInterpolation(Double[] x, Double[] y) {
-        int n = x.length;
-        ResultDO<Double[]> resultDO = new ResultDO<Double[]>();
-        Double[] results = new Double[n];
-        if (n == y.length) {
-            Double result;
-            for (int i = 0; i < n; i++) {
-                result = (double) 0;
-                for (int j = 0; j < n - 2; j++) {
-                    result += (x[i] - x[j + 1]) * (x[i] - x[j + 2]) / ((x[j] - x[j + 1]) * (x[j] - x[j + 2]));
-                }
-                result += (x[i] - x[n - 3]) * (x[i] - x[n - 1]) / ((x[n - 2] - x[n - 3]) * (x[n - 2] - x[n - 1]));
-                result += (x[i] - x[n - 3]) * (x[i] - x[n - 2]) / ((x[n - 1] - x[n - 3]) * (x[n - 1] - x[n - 2]));
-                results[i] = result;
-            }
-            resultDO.setSuccess(true);
-            resultDO.setModel(results);
-            return resultDO;
-        } else {
-            resultDO.setMsgInfo("Interpolation Error.\n");
-            return resultDO;
-        }
-    }
 
     /**
      * Exchange position of element i,j in array[].
@@ -814,36 +481,12 @@ public class ArrayUtil {
     }
 
     /**
-     * count number of times corresponding to unique sorted array.
-     */
-    private static int[] countSort(Double[] array) {
-        Double[] aSort = array.clone();
-        Arrays.sort(aSort);
-        int j = 0, k = 0;
-        int[] result = new int[numOfUnique(aSort)];
-        double value = aSort[0];
-        for (int i = 0; i < aSort.length; i++) {
-            if (aSort[i] == value) {
-                j++;
-            } else {
-                result[k] = j;
-                k++;
-                j = 1;
-                value = aSort[i];
-            }
-
-        }
-        result[k] = j;
-        return result;
-    }
-
-    /**
      * Find order of array.
      * 0: unsorted
      * 1: ascending
      * -1: descending
      */
-    private static int findSortOrder(Double[] array) {
+    public static int findSortOrder(Double[] array) {
         int i = 0;
         int n = array.length;
         if (n <= 1) {
@@ -880,13 +523,5 @@ public class ArrayUtil {
                 }
             }
         }
-    }
-
-    public static double sumArray(double[] array){
-        double sum = 0;
-        for(double value: array){
-            sum += value;
-        }
-        return sum;
     }
 }

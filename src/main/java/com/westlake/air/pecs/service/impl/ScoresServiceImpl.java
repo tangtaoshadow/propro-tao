@@ -308,7 +308,7 @@ public class ScoresServiceImpl implements ScoresService {
             List<FeatureScores> featureScoresList = new ArrayList<>();
             //获取标准库中对应的PeptideRef组
             IntensityGroup ig = intensityGroupMap.get(group.getPeptideRef() + "_" + group.getIsDecoy());
-
+            
             FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, ig, input.getSigmaSpacing());
 
             if (!featureByPep.isFeatureFound()) {
@@ -406,7 +406,7 @@ public class ScoresServiceImpl implements ScoresService {
 
         //Generate the txt for pyprophet
         List<ScoresDO> scores = getAllByOverviewId(overviewId);
-        String pyprophetColumns = "group_id" + spliter + "run_id" + spliter + "decoy" + spliter + FeatureScores.ScoreType.getPyProphetScoresColumns(spliter);
+        String pyprophetColumns = "transition_group_id" + spliter + "run_id" + spliter + "decoy" + spliter + FeatureScores.ScoreType.getPyProphetScoresColumns(spliter);
         StringBuilder sb = new StringBuilder(pyprophetColumns);
         List<FeatureScores.ScoreType> scoreTypes = FeatureScores.ScoreType.getUsedTypes();
         for (ScoresDO score : scores) {

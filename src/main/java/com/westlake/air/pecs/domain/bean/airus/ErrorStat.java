@@ -16,15 +16,3 @@ public class ErrorStat {
     Pi0Est pi0Est;
 }
 
-//{'cutoff': target_scores,
-//        'pvalue': target_pvalues,
-//        'qvalue': target_qvalues,
-//        'svalue': metrics['svalue'],
-//        'tp': metrics['tp'],
-//        'fp': metrics['fp'],
-//        'tn': metrics['tn'],
-//        'fn': metrics['fn'],
-//        'fpr': metrics['fpr'],
-//        'fdr': metrics['fdr'],
-//        'fnr': metrics['fnr']})
-

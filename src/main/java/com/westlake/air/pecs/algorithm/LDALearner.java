@@ -8,6 +8,7 @@ import cern.colt.matrix.linalg.Algebra;
 import cern.colt.matrix.linalg.SingularValueDecomposition;
 import com.westlake.air.pecs.utils.AirusUtil;
 import com.westlake.air.pecs.utils.ArrayUtil;
+import com.westlake.air.pecs.utils.MathUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ public class LDALearner {
 
         Double[][] featureMatrix = AirusUtil.getFeatureMatrix(peaks, useMainScore);
         if (featureMatrix != null) {
-            return ArrayUtil.dot(featureMatrix, params);
+            return MathUtil.dot(featureMatrix, params);
         } else {
             logger.error("Score Error");
             return null;
@@ -32,16 +33,16 @@ public class LDALearner {
     }
 
     /**
-     * Calculate average confidence(weight) of nevals(ssNumIter).
+     * Calculate average confidence(weight) of nevals(trainTimes).
      */
-    public Double[] averagedWeight(Double[][] weight){
-        Double[] averagedW = new Double[weight[0].length];
+    public Double[] averagedWeight(Double[][] weights){
+        Double[] averagedW = new Double[weights[0].length];
         double sum = 0.0;
-        for(int i=0;i<weight[0].length;i++){
-            for(Double[] j : weight){
+        for(int i=0;i<weights[0].length;i++){
+            for(Double[] j : weights){
                 sum += j[i];
             }
-            averagedW[i] = sum / weight.length;
+            averagedW[i] = sum / weights.length;
             sum =0;
         }
         return averagedW;
@@ -59,8 +60,8 @@ public class LDALearner {
         for(int i = x0.length;i<x0.length+x1.length;i++){
             y[i] = 1.0;
         }
-        Double[] mu0 = ArrayUtil.getRowMean(x0);
-        Double[] mu1 = ArrayUtil.getRowMean(x1);
+        Double[] mu0 = MathUtil.getRowMean(x0);
+        Double[] mu1 = MathUtil.getRowMean(x1);
         double[][] xLine0 = new double[x0.length][x[0].length];
         double[][] xLine1 = new double[x1.length][x[0].length];
         for(int i=0;i<x0.length;i++) {

@@ -7,9 +7,13 @@ public class ScoreData {
 
     /**
      * groupId represents which peak group the row data belongs to.
+     * like decoy_peptideRef
      */
     String[] groupId;
 
+    /**
+     * 对应groupId的integer版的groupId
+     */
     Integer[] groupNumId;
 
     @Deprecated

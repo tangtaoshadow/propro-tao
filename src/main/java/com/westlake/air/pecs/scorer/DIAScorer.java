@@ -293,7 +293,7 @@ public class DIAScorer {
         }
         int maxIsotope = Constants.DIA_NR_ISOTOPES + 1;
 
-        int log2n = MathUtil.getLog2n(factor);//>
+        int log2n = MathUtil.log2n(factor);//>
 
         List<Double> distributionResult = new ArrayList<>();
         if((factor & 1) == 1){

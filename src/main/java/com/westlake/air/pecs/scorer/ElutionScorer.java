@@ -212,8 +212,8 @@ public class ElutionScorer {
 
     private double pearsonCorrelationCoefficient(Double[] realData, Double[] modelData) {
         assert realData.length == modelData.length;
-        double realDataAverage = MathUtil.getAverage(realData);
-        double modelDataAverage = MathUtil.getAverage(modelData);
+        double realDataAverage = MathUtil.mean(realData);
+        double modelDataAverage = MathUtil.mean(modelData);
         double numerator = 0.0d, realDenominator = 0.0d, modelDenominator = 0.0d;
         double realTemp, modelTemp;
         for (int i = 0; i < realData.length; i++) {

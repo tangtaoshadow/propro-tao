@@ -11,5 +11,5 @@ import lombok.Data;
 public class LDALearn {
     Double[] topTestTargetScores;
     Double[] topTestDecoyScores;
-    Double[] params;
+    Double[] weights;
 }

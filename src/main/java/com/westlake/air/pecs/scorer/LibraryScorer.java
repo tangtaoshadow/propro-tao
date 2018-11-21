@@ -4,6 +4,7 @@ import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.utils.ArrayUtil;
+import com.westlake.air.pecs.utils.MathUtil;
 import com.westlake.air.pecs.utils.ScoreUtil;
 import org.springframework.stereotype.Component;
 
@@ -89,8 +90,8 @@ public class LibraryScorer {
         scores.put(FeatureScores.ScoreType.LibraryDotprod, sumOfMult);
 
         //manhattan
-        double expIntTotal = ArrayUtil.sumArray(expIntSqrt);
-        double libIntTotal = ArrayUtil.sumArray(libIntSqrt);
+        double expIntTotal = MathUtil.sum(expIntSqrt);
+        double libIntTotal = MathUtil.sum(libIntSqrt);
         expIntSqrtDivided = normalize(expIntSqrt, expIntTotal);
         libIntSqrtDivided = normalize(libIntSqrt, libIntTotal);
         double sumOfDivide = 0;
