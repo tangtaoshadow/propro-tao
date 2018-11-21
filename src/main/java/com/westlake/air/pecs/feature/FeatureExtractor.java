@@ -65,13 +65,14 @@ public class FeatureExtractor {
         List<RtIntensityPairsDouble> maxRtIntensityPairsList = new ArrayList<>();
         List<IntensityRtLeftRtRightPairs> intensityRtLeftRtRightPairsList = new ArrayList<>();
 
-        //得到peptideRef对应的intensityList
         List<Double> libraryIntensityList = new ArrayList<>();
-        HashMap<String,Float> intensityMap = intensityGroupByPep.getIntensityMap();
+        //得到标准库中peptideRef对应的碎片和强度的键值对
+        HashMap<String, Float> intensityMap = intensityGroupByPep.getIntensityMap();
 
         //对每一个chromatogram进行运算,dataDO中不含有ms1
         List<double[]> noise1000List = new ArrayList<>();
-        for (String cutInfo: intensityMap.keySet()) {
+        for (String cutInfo : intensityMap.keySet()) {
+            //获取对应的卷积数据
             AnalyseDataDO dataDO = group.getDataMap().get(cutInfo);
             //如果没有卷积到信号,dataDO为null
             if (dataDO == null || !dataDO.getIsHit()) {

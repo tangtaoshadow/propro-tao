@@ -241,12 +241,12 @@ public class FeatureScores {
             return types;
         }
 
-        public static String getPyProphetScoresColumns() {
+        public static String getPyProphetScoresColumns(String spliter) {
             StringBuilder columns = new StringBuilder();
             List<ScoreType> scoreTypes = ScoreType.getUsedTypes();
             for (int i = 0; i < scoreTypes.size(); i++) {
                 if (i != scoreTypes.size() - 1) {
-                    columns.append(scoreTypes.get(i).getPyProphetName()).append(Constants.TAB);
+                    columns.append(scoreTypes.get(i).getPyProphetName()).append(spliter);
                 } else {
                     columns.append(scoreTypes.get(i).getPyProphetName()).append(Constants.CHANGE_LINE);
                 }

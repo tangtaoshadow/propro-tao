@@ -174,7 +174,7 @@ public class Compressor {
         return new ResultDO(true);
     }
 
-    private void prepare() {
+    public void doCompressToLMS(ExperimentDO experimentDO){
 
     }
 

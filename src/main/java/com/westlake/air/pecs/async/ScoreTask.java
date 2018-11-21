@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.async;
 
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
@@ -69,7 +70,7 @@ public class ScoreTask extends BaseTask {
         taskDO.addLog("开始进行子分数TSV文件导出");
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
-        ResultDO resultDO = scoresService.exportForPyProphet(overviewId);
+        ResultDO resultDO = scoresService.exportForPyProphet(overviewId, Constants.TAB);
         if (resultDO.isSuccess()) {
             taskDO.addLog("文件导出成功,耗时:" + (System.currentTimeMillis() - start));
             taskDO.finish(TaskStatus.SUCCESS.getName());

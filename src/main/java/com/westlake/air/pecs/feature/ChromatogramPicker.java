@@ -19,10 +19,11 @@ public class ChromatogramPicker {
      * 1）根据pickPicker选出的maxPeak的rt在smooth后的rtIntensity pairs中找到最接近的index
      * 2）选取出左右边界
      * 3）根据origin chromatogram 和左右边界对intensity求和
-     * @param rtIntensityPairs origin rtIntensity pair
+     *
+     * @param rtIntensityPairs         origin rtIntensity pair
      * @param smoothedRtIntensityPairs rtIntensity pair after smooth
-     * @param signalToNoise window length = 1000
-     * @param maxPeakPairs picked max peak
+     * @param signalToNoise            window length = 1000
+     * @param maxPeakPairs             picked max peak
      * @return 左右边界rt, chromatogram边界内intensity求和
      */
     public IntensityRtLeftRtRightPairs pickChromatogram(RtIntensityPairsDouble rtIntensityPairs, RtIntensityPairsDouble smoothedRtIntensityPairs, double[] signalToNoise, RtIntensityPairsDouble maxPeakPairs) {
@@ -33,9 +34,9 @@ public class ChromatogramPicker {
         int leftIndex, rightIndex;
 
         RtIntensityPairsDouble chromatogram;
-        if(Constants.CHROMATOGRAM_PICKER_METHOD.equals("legacy")){
+        if (Constants.CHROMATOGRAM_PICKER_METHOD.equals("legacy")) {
             chromatogram = rtIntensityPairs;
-        }else {
+        } else {
             chromatogram = smoothedRtIntensityPairs;
         }
 
@@ -46,19 +47,19 @@ public class ChromatogramPicker {
 
             //to the left
             leftIndex = closestPeakIndex - 1;
-            while(leftIndex > 0 &&
-                    (chromatogram.getIntensityArray()[leftIndex - 1] < chromatogram.getIntensityArray()[leftIndex] ||(
+            while (leftIndex > 0 &&
+                    (chromatogram.getIntensityArray()[leftIndex - 1] < chromatogram.getIntensityArray()[leftIndex] || (
                             Constants.PEAK_WIDTH > 0 && centralPeakRt - chromatogram.getRtArray()[leftIndex - 1] < Constants.PEAK_WIDTH)) &&
-                    signalToNoise[leftIndex - 1] >= Constants.SIGNAL_TO_NOISE_LIMIT){
+                    signalToNoise[leftIndex - 1] >= Constants.SIGNAL_TO_NOISE_LIMIT) {
                 leftIndex--;
             }
 
             //to the right
             rightIndex = closestPeakIndex + 1;
-            while(rightIndex <chromatogram.getIntensityArray().length - 1 &&
-                    (chromatogram.getIntensityArray()[rightIndex + 1] < chromatogram.getIntensityArray()[rightIndex] ||(
+            while (rightIndex < chromatogram.getIntensityArray().length - 1 &&
+                    (chromatogram.getIntensityArray()[rightIndex + 1] < chromatogram.getIntensityArray()[rightIndex] || (
                             Constants.PEAK_WIDTH > 0 && chromatogram.getRtArray()[rightIndex + 1] - centralPeakRt < Constants.PEAK_WIDTH)) &&
-                    signalToNoise[rightIndex + 1] >= Constants.SIGNAL_TO_NOISE_LIMIT){
+                    signalToNoise[rightIndex + 1] >= Constants.SIGNAL_TO_NOISE_LIMIT) {
                 rightIndex++;
             }
 
@@ -81,21 +82,21 @@ public class ChromatogramPicker {
         int low = bisectionLowHigh.getLow();
         int high = bisectionLowHigh.getHigh();
 
-        if( Math.abs(rtIntensityPairs.getRtArray()[low] - rt) < Math.abs(rtIntensityPairs.getRtArray()[high] - rt)){
+        if (Math.abs(rtIntensityPairs.getRtArray()[low] - rt) < Math.abs(rtIntensityPairs.getRtArray()[high] - rt)) {
             return low;
-        }else {
+        } else {
             return high;
         }
     }
 
-    private Double[] integratePeaks(RtIntensityPairsDouble rtIntensityPairs, int[][] leftRight){
+    private Double[] integratePeaks(RtIntensityPairsDouble rtIntensityPairs, int[][] leftRight) {
         int leftIndex, rightIndex;
         Double[] intensity = new Double[leftRight.length];
-        for(int i = 0; i< leftRight.length; i++){
+        for (int i = 0; i < leftRight.length; i++) {
             intensity[i] = 0d;
             leftIndex = leftRight[i][0];
             rightIndex = leftRight[i][1];
-            for(int j=leftIndex; j<= rightIndex; j++){
+            for (int j = leftIndex; j <= rightIndex; j++) {
                 intensity[i] += rtIntensityPairs.getIntensityArray()[j];
             }
         }

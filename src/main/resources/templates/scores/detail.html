@@ -36,7 +36,7 @@
         <div class="col-md-12 alert alert-success" role="alert" th:text="|子分数分布图 : ${overview.expName}---${overview.expName}(${overview.expId})---${overview.libraryName}(${overview.libraryId})---overviewId:${overview.id}|"></div>
     </div>
     <div class="row">
-        <div class="col-md-2" style="width: 25%;height:300px;" th:each="scoreType:${scoreTypes}" th:id="${scoreType.typeName}"></div>
+        <div class="col-md-3" style="width: 25%;height:300px;" th:each="scoreType:${scoreTypes}" th:id="${scoreType.typeName}"></div>
     </div>
 
 </div>

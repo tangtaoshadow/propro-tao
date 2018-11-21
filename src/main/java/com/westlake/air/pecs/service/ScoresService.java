@@ -78,7 +78,7 @@ public interface ScoresService {
      * @param overviewId
      * @return
      */
-    ResultDO exportForPyProphet(String overviewId);
+    ResultDO exportForPyProphet(String overviewId, String spliter);
 
     /**
      * 生成某个ScoreType的子分数分布范围,包含分布区间和命中个数,命中个数按PeptideRef进行统计,取每一个PeptideRef的下属于该ScoreType的最高分

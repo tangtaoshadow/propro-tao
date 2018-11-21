@@ -13,8 +13,7 @@ public class Constants {
     public static final double MATH_ROUND_PRECISION = 1000000d;
 
     //RT Normalizer
-    //not static final
-    public static final boolean CHECK_SPACINGS = true;//////////////
+    public static final boolean CHECK_SPACINGS = true;
     public static final double SPACING_DIFFERENCE = 1.5d;
     public static final double SPACING_DIFFERENCE_GAP = 4d;
     public static final double SIGNAL_TO_NOISE_LIMIT = 1.0d;
@@ -23,14 +22,12 @@ public class Constants {
     public static final double AUTO_MAX_STDEV_FACTOR = 3.0d;
     public static final int MIN_REQUIRED_ELEMENTS = 10;
 
-    //not static final
 //    public static final double NOISE_FOR_EMPTY_WINDOW = Math.pow(10.0,20);
     public static final double NOISE_FOR_EMPTY_WINDOW = 2.0d;
     public static final double STOP_AFTER_INTENSITY_RATIO = 0.0001d;
     public static final double MIN_RSQ = 0.95d;
     public static final double MIN_COVERAGE = 0.6d;
 
-    //not static final
     public static final String CHROMATOGRAM_PICKER_METHOD = "legacy";
 //    public static final String CHROMATOGRAM_PICKER_METHOD = "corrected";
 
@@ -73,6 +70,7 @@ public class Constants {
     public static final String SUFFIX_AIRUS_DATA = ".aird";
     public static final String CHANGE_LINE = "\r\n";
     public static final String TAB = "\t";
+    public static final String COMMA = ",";
 
     public static final String AIRD_COMPRESSION_TYPE_ZLIB = "zlib";
     public static final String AIRD_PRECISION_32 = "32";

@@ -296,15 +296,20 @@ public class ScoresServiceImpl implements ScoresService {
         //开始打分前先删除原有的打分数据
         scoresDAO.deleteAllByOverviewId(input.getOverviewId());
         logger.info("原有打分数据删除完毕");
+        //卷积结果按照PeptideRef分组
         List<TransitionGroup> groups = analyseDataService.getTransitionGroup(dataList);
-
+        //标准库按照PeptideRef分组
         HashMap<String, IntensityGroup> intensityGroupMap = transitionService.getIntensityGroupMap(input.getLibraryId());
         List<ScoresDO> pecsScoreList = new ArrayList<>();
 
         int count = 0;
+        //为每一组PeptideRef卷积结果打分
         for (TransitionGroup group : groups) {
             List<FeatureScores> featureScoresList = new ArrayList<>();
-            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupMap.get(group.getPeptideRef() + "_" + group.getIsDecoy()), input.getSigmaSpacing());
+            //获取标准库中对应的PeptideRef组
+            IntensityGroup ig = intensityGroupMap.get(group.getPeptideRef() + "_" + group.getIsDecoy());
+
+            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, ig, input.getSigmaSpacing());
 
             if (!featureByPep.isFeatureFound()) {
                 continue;
@@ -387,7 +392,7 @@ public class ScoresServiceImpl implements ScoresService {
     }
 
     @Override
-    public ResultDO exportForPyProphet(String overviewId) {
+    public ResultDO exportForPyProphet(String overviewId, String spliter) {
 
         ConfigDO configDO = configDAO.getConfig();
         String exportPath = configDO.getExportScoresFilePath();
@@ -401,19 +406,19 @@ public class ScoresServiceImpl implements ScoresService {
 
         //Generate the txt for pyprophet
         List<ScoresDO> scores = getAllByOverviewId(overviewId);
-        String pyprophetColumns = "transition_group_id\trun_id\tdecoy\t" + FeatureScores.ScoreType.getPyProphetScoresColumns();
+        String pyprophetColumns = "group_id" + spliter + "run_id" + spliter + "decoy" + spliter + FeatureScores.ScoreType.getPyProphetScoresColumns(spliter);
         StringBuilder sb = new StringBuilder(pyprophetColumns);
         List<FeatureScores.ScoreType> scoreTypes = FeatureScores.ScoreType.getUsedTypes();
         for (ScoresDO score : scores) {
             for (FeatureScores fs : score.getFeatureScoresList()) {
-                sb.append((score.getIsDecoy() ? "DECOY_" : "") + score.getPeptideRef()).append(Constants.TAB);
-                sb.append(0).append(Constants.TAB);
-                sb.append(score.getIsDecoy() ? 1 : 0).append(Constants.TAB);
+                sb.append((score.getIsDecoy() ? "DECOY_" : "") + score.getPeptideRef()).append(spliter);
+                sb.append(0).append(spliter);
+                sb.append(score.getIsDecoy() ? 1 : 0).append(spliter);
                 for (int i = 0; i < scoreTypes.size(); i++) {
                     if (i == scoreTypes.size() - 1) {
                         sb.append(fs.get(scoreTypes.get(i))).append(Constants.CHANGE_LINE);
                     } else {
-                        sb.append(fs.get(scoreTypes.get(i))).append(Constants.TAB);
+                        sb.append(fs.get(scoreTypes.get(i))).append(spliter);
                     }
                 }
             }
@@ -534,19 +539,19 @@ public class ScoresServiceImpl implements ScoresService {
             for (Double d : oneScores) {
                 int count = (int) Math.ceil((d - min) / step);
                 //如果count为0,则直接调整到第一个区间范围内
-                if(count == 0){
+                if (count == 0) {
                     count = 1;
                 }
-                targetCount[count-1] = targetCount[count-1] + 1;
+                targetCount[count - 1] = targetCount[count - 1] + 1;
             }
 
             for (Double d : decoyOneScores) {
                 int count = (int) Math.ceil((d - min) / step);
                 //如果count为0,则直接调整到第一个区间范围内
-                if(count == 0){
+                if (count == 0) {
                     count = 1;
                 }
-                decoyCount[count-1] = decoyCount[count-1] + 1;
+                decoyCount[count - 1] = decoyCount[count - 1] + 1;
             }
             sd.buildData(ranges, targetCount, decoyCount);
             distributions.add(sd);

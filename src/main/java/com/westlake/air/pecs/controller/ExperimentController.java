@@ -453,4 +453,22 @@ public class ExperimentController extends BaseController {
 
         return "redirect:/task/detail/" + taskDO.getId();
     }
+
+    @RequestMapping(value = "/compressToLMS")
+    String compressToLMS(Model model,
+                    @RequestParam(value = "expId", required = true) String expId,
+                    RedirectAttributes redirectAttributes) {
+
+        ResultDO<ExperimentDO> resultDO = experimentService.getById(expId);
+        if (resultDO.isFailed()) {
+            redirectAttributes.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
+            return "redirect:/experiment/list";
+        }
+        ExperimentDO experimentDO = resultDO.getModel();
+        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
+        taskService.insert(taskDO);
+        experimentTask.compressToLMS(experimentDO, taskDO);
+
+        return "redirect:/task/detail/" + taskDO.getId();
+    }
 }

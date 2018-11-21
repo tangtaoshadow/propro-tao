@@ -60,6 +60,17 @@ public class ExperimentTask extends BaseTask {
         taskService.update(taskDO);
     }
 
+    @Async(value = "compressFileExecutor")
+    public void compressToLMS(ExperimentDO experimentDO, TaskDO taskDO) {
+        taskDO.setStatus(TaskStatus.RUNNING.getName());
+        taskService.update(taskDO);
+        long start = System.currentTimeMillis();
+        compressor.doCompressToLMS(experimentDO);
+        taskDO.addLog("压缩转换完毕,总耗时:"+(System.currentTimeMillis() - start));
+        taskDO.finish(TaskStatus.SUCCESS.getName());
+        taskService.update(taskDO);
+    }
+
     /**
      * @param experimentDO
      * @param libraryId

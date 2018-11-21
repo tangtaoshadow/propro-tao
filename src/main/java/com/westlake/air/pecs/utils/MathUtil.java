@@ -1,13 +1,10 @@
 package com.westlake.air.pecs.utils;
 
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.RtPair;
-import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -283,6 +280,33 @@ public class MathUtil {
         return sum / valueArray.length;
     }
 
+    /**
+     * 求出数组的平均值和方差
+     *
+     * @param arrays k,v
+     * @return 0:mean 1:variance
+     */
+    public static double[] getMeanVariance(Double[] arrays) {
 
+        double[] meanVariance = new double[2];
+
+        //get mean
+        double sum = 0;
+        int count = 0;
+        for (double array : arrays) {
+            sum += array;
+            count++;
+        }
+        meanVariance[0] = sum / count;
+
+        //get variance
+        sum = 0;
+        for (double array : arrays) {
+            sum += (meanVariance[0] - array) * (meanVariance[0] - array);
+        }
+        meanVariance[1] = sum / count;
+
+        return meanVariance;
+    }
 
 }

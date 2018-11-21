@@ -2,6 +2,9 @@ package com.westlake.air.pecs.feature;
 
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
+import com.westlake.air.pecs.utils.MathUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -10,6 +13,8 @@ import org.springframework.stereotype.Component;
  */
 @Component("signalToNoiseEstimator")
 public class SignalToNoiseEstimator {
+
+    public final Logger logger = LoggerFactory.getLogger(SignalToNoiseEstimator.class);
 
     /**
      * 计算信噪比
@@ -26,7 +31,7 @@ public class SignalToNoiseEstimator {
         double[] stnResults = new double[rtIntensity.getRtArray().length];
 
         //get mean and variance
-        double[] meanVariance = getMeanVariance(rtIntensity);
+        double[] meanVariance = MathUtil.getMeanVariance(rtIntensity.getIntensityArray());
 
         //get max intensity
         double maxIntensity = meanVariance[0] + Math.sqrt(meanVariance[1]) * Constants.AUTO_MAX_STDEV_FACTOR;
@@ -96,47 +101,14 @@ public class SignalToNoiseEstimator {
         sparseWindowPercent = sparseWindowPercent * 100 / windowCount;
         histogramOobPercent = histogramOobPercent * 100 / windowCount;
         if (sparseWindowPercent > 20) {
-            System.out.println("Warning in SignalToNoiseEstimator: " + sparseWindowPercent + "% of windows were sparse.\nIncreasing windowLength or decreasing minRequiredElements");
+            logger.warn("Warning in SignalToNoiseEstimator: " + sparseWindowPercent + "% of windows were sparse.\nIncreasing windowLength or decreasing minRequiredElements");
         }
         if (histogramOobPercent != 0) {
-            System.out.println("WARNING in SignalToNoiseEstimatorMedian: " + histogramOobPercent + "% of all Signal-to-Noise estimates are too high, because the median was found in the rightmost histogram-bin. " +
+            logger.warn("WARNING in SignalToNoiseEstimatorMedian: " + histogramOobPercent + "% of all Signal-to-Noise estimates are too high, because the median was found in the rightmost histogram-bin. " +
                     "You should consider increasing 'max_intensity' (and maybe 'bin_count' with it, to keep bin width reasonable)");
         }
 
         return stnResults;
     }
 
-    /**
-     * 求出intensity的平均值和方差
-     *
-     * @param rtIntensity k,v
-     * @return 0:mean 1:variance
-     */
-    private double[] getMeanVariance(RtIntensityPairsDouble rtIntensity) {
-
-        double[] meanVariance = new double[2];
-        Double[] intensity = rtIntensity.getIntensityArray();
-
-        //get mean
-        double sum = 0;
-        int count = 0;
-        for (double intens : intensity) {
-            sum += intens;
-            count++;
-        }
-        meanVariance[0] = sum / count;
-
-        //get variance
-        sum = 0;
-        for (double intens : intensity) {
-            sum += (meanVariance[0] - intens) * (meanVariance[0] - intens);
-        }
-        meanVariance[1] = sum / count;
-
-        return meanVariance;
-    }
-
-//    private RtIntensityPairsDouble gaussianEstimate(RtIntensityPairsDouble rtIntensity){
-//
-//    }
 }

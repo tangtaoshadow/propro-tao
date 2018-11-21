@@ -59,6 +59,11 @@ public interface AnalyseDataService {
      */
     ResultDO<List<AnalyseDataDO>> getMS2DataList(String overviewId, String peptideRef, Boolean isDecoy);
 
+    /**
+     * 获取以Peptide为分组的transition列表,每一个TransitionGroup都包含了某个PeptideRef下的所有碎片的卷积结果
+     * @param dataList
+     * @return
+     */
     List<TransitionGroup> getTransitionGroup(List<AnalyseDataDO> dataList);
 
     /**

@@ -15,14 +15,14 @@ public class RtIntensityPairsDouble {
     public RtIntensityPairsDouble(){}
 
     public RtIntensityPairsDouble(Float[] rtArray, Float[] intensityArray){
-        Double[] rt = new Double[rtArray.length];
-        Double[] intens = new Double[intensityArray.length];
-        for(int i=0; i<rt.length; i++){
-            rt[i] = Double.parseDouble(rtArray[i].toString());
-            intens[i] = Double.parseDouble(intensityArray[i].toString());
+        Double[] rts = new Double[rtArray.length];
+        Double[] ints = new Double[intensityArray.length];
+        for(int i=0; i<rts.length; i++){
+            rts[i] = Double.parseDouble(rtArray[i].toString());
+            ints[i] = Double.parseDouble(intensityArray[i].toString());
         }
-        this.rtArray = rt;
-        this.intensityArray = intens;
+        this.rtArray = rts;
+        this.intensityArray = ints;
     }
 
     public RtIntensityPairsDouble(Double[] rtArray, Double[] intensityArray){
