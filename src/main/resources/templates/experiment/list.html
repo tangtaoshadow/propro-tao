@@ -17,12 +17,12 @@
     <div class="m-portlet__body">
         <!--begin: Search Form -->
         <div class="clearfix">
-            <form id="searchForm" method="post" role="form" class="form-inline" action="/experiment/list">
+            <form id="searchForm" method="post" role="form" class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed" action="/experiment/list">
                 <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                 <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
 
-                <div class="form-group m-form__group">
-                    <div class="input-group">
+                <div class="form-group m-form__group row">
+                    <div class="input-group col-lg-2">
                         <input type="text" class="form-control" id="searchName" name="searchName" placeholder="实验名称"
                                th:value="${searchName}">
                         <div class="input-group-append">

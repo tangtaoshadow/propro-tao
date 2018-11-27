@@ -5,6 +5,9 @@ import com.westlake.air.pecs.domain.bean.airus.ErrorStat;
 import com.westlake.air.pecs.domain.bean.airus.Params;
 import com.westlake.air.pecs.domain.bean.airus.Pi0Est;
 import com.westlake.air.pecs.domain.bean.airus.StatMetrics;
+import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
+import com.westlake.air.pecs.domain.db.simple.SimpleScores;
+import com.westlake.air.pecs.utils.AirusUtil;
 import com.westlake.air.pecs.utils.ArrayUtil;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.apache.commons.lang3.ArrayUtils;
@@ -12,7 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by Nico Wang Ruimin
@@ -25,7 +30,7 @@ public class Stats {
 
     private Double[] pNormalizer(Double[] targetScores, Double[] decoyScores) {
         double mean = MathUtil.mean(decoyScores);
-        double std = MathUtil.std(decoyScores);
+        double std = MathUtil.std(decoyScores, mean);
         int targetScoresLength = targetScores.length;
         Double[] results = new Double[targetScoresLength];
         double args;
@@ -38,6 +43,7 @@ public class Stats {
 
     /**
      * 经验概率计算
+     *
      * @param targetScores
      * @param decoyScores
      * @return
@@ -79,9 +85,9 @@ public class Stats {
             ranks = (int) Math.floor(rankDataReversed[i]) - 1;
             pFinal[i] = p[ranks];
         }
-        double fix = 1.0/decoyScoreLength;
-        for(int i=0;i<pFinal.length;i++){
-            if(pFinal[i]<fix){
+        double fix = 1.0 / decoyScoreLength;
+        for (int i = 0; i < pFinal.length; i++) {
+            if (pFinal[i] < fix) {
                 pFinal[i] = fix;
             }
         }
@@ -121,9 +127,9 @@ public class Stats {
         }
         if (pi0Method.equals("smoother")) {
             if (smoothLogPi0) {
-                    for (int i = 0; i < numOfLambda; i++) {
-                        pi0s[i] = Math.log(pi0Lambda[i]);
-                    }
+                for (int i = 0; i < numOfLambda; i++) {
+                    pi0s[i] = Math.log(pi0Lambda[i]);
+                }
                 ResultDO<Double[]> pi0SmoothResult = MathUtil.lagrangeInterpolation(lambda, pi0s);
                 if (pi0SmoothResult.isSuccess()) {
                     pi0Smooth = pi0SmoothResult.getModel();
@@ -150,8 +156,8 @@ public class Stats {
             }
             double min = 100;
             int index = 0;
-            for(int i=0; i<mse.length; i++){
-                if(pi0Lambda[i] > 0 && mse[i] < min){
+            for (int i = 0; i < mse.length; i++) {
+                if (pi0Lambda[i] > 0 && mse[i] < min) {
                     min = mse[i];
                     index = i;
                 }
@@ -159,7 +165,7 @@ public class Stats {
             pi0 = Math.min(pi0Lambda[index], 1);
             pi0Smooth = null;
         } else {
-            logger.error("Pi0Est Method Error.No Method Called "+pi0Method);
+            logger.error("Pi0Est Method Error.No Method Called " + pi0Method);
             return null;
         }
         if (pi0 <= 0) {
@@ -306,28 +312,71 @@ public class Stats {
         Arrays.sort(targetScores);
         Arrays.sort(decoyScores);
 
-        /*
-        compute p-values using decoy scores;
-         */
+        //compute p-values using decoy scores;
         if (params.isParametric()) {
             targetPvalues = pNormalizer(targetScores, decoyScores);
         } else {
             targetPvalues = pEmpirical(targetScores, decoyScores);
         }
 
-        /*
-        estimate pi0;
-         */
+        //estimate pi0;
         Pi0Est pi0Est = pi0Est(targetPvalues, params.getPi0Lambda(), params.getPi0Method(), params.isPi0SmoothLogPi0());
-
-        /*
-        compute q-value;
-         */
+        //compute q-value;
         Double[] targetQvalues = qvalue(targetPvalues, pi0Est.getPi0(), params.isPFdr());
+        //compute other metrics;
+        StatMetrics statMetrics = statMetrics(targetPvalues, pi0Est.getPi0(), params.isPFdr());
 
-        /*
-        compute other metrics;
-         */
+        errorStat.setCutoff(targetScores);
+        errorStat.setPvalue(targetPvalues);
+        errorStat.setQvalue(targetQvalues);
+        errorStat.setStatMetrics(statMetrics);
+        errorStat.setPi0Est(pi0Est);
+
+        return errorStat;
+    }
+
+    /**
+     * Estimate final results.
+     * TODO 没有实现 pep(lfdr);
+     */
+    public ErrorStat errorStatistics(List<SimpleFeatureScores> scores, Params params) {
+
+        List<SimpleFeatureScores> targets = new ArrayList<>();
+        List<SimpleFeatureScores> decoys = new ArrayList<>();
+        for (SimpleFeatureScores featureScores : scores) {
+            if (featureScores.getIsDecoy()) {
+                decoys.add(featureScores);
+            } else {
+                targets.add(featureScores);
+            }
+        }
+
+        return errorStatistics(targets, decoys, params);
+    }
+
+    /**
+     * Estimate final results.
+     * TODO 没有实现 pep(lfdr);
+     */
+    public ErrorStat errorStatistics(List<SimpleFeatureScores> targets, List<SimpleFeatureScores> decoys, Params params) {
+
+        ErrorStat errorStat = new ErrorStat();
+        Double[] targetScores = AirusUtil.buildSortedMainScoreArray(targets);
+        Double[] decoyScores = AirusUtil.buildSortedMainScoreArray(decoys);
+        Double[] targetPvalues;
+
+        //compute p-values using decoy scores;
+        if (params.isParametric()) {
+            targetPvalues = pNormalizer(targetScores, decoyScores);
+        } else {
+            targetPvalues = pEmpirical(targetScores, decoyScores);
+        }
+
+        //estimate pi0;
+        Pi0Est pi0Est = pi0Est(targetPvalues, params.getPi0Lambda(), params.getPi0Method(), params.isPi0SmoothLogPi0());
+        //compute q-value;
+        Double[] targetQvalues = qvalue(targetPvalues, pi0Est.getPi0(), params.isPFdr());
+        //compute other metrics;
         StatMetrics statMetrics = statMetrics(targetPvalues, pi0Est.getPi0(), params.isPFdr());
 
         errorStat.setCutoff(targetScores);
@@ -347,8 +396,22 @@ public class Stats {
         ErrorStat errorStat = errorStatistics(topTargetScores, topDecoyScores);
         Double[] qvalues = errorStat.getQvalue();
         double[] qvalue_CutoffAbs = new double[qvalues.length];
-        for(int i=0;i<qvalues.length;i++){
-            qvalue_CutoffAbs[i] = Math.abs(qvalues[i]-cutoffFdr);
+        for (int i = 0; i < qvalues.length; i++) {
+            qvalue_CutoffAbs[i] = Math.abs(qvalues[i] - cutoffFdr);
+        }
+        int i0 = MathUtil.argmin(qvalue_CutoffAbs);
+        return errorStat.getCutoff()[i0];
+    }
+
+    /**
+     * Finds cut-off target score for specified false discovery rate(fdr).
+     */
+    public Double findCutoff(List<SimpleFeatureScores> topTargets, List<SimpleFeatureScores> topDecoys, Params params) {
+        ErrorStat errorStat = errorStatistics(topTargets, topDecoys, params);
+        Double[] qvalues = errorStat.getQvalue();
+        double[] qvalue_CutoffAbs = new double[qvalues.length];
+        for (int i = 0; i < qvalues.length; i++) {
+            qvalue_CutoffAbs[i] = Math.abs(qvalues[i] - params.getSsInitialFdr());
         }
         int i0 = MathUtil.argmin(qvalue_CutoffAbs);
         return errorStat.getCutoff()[i0];

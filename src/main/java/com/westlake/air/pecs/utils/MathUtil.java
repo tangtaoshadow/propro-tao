@@ -270,9 +270,9 @@ public class MathUtil {
      * Normalize a with a's mean and std.
      */
     public static Double[] normalize(Double[] array) {
-        double mean = mean(array);
         Double[] result = array.clone();
-        double std = std(array);
+        double mean = mean(array);
+        double std = std(array, mean);
         for (int i = 0; i < array.length; i++) {
             result[i] = (result[i] - mean) / std;
         }
@@ -284,7 +284,7 @@ public class MathUtil {
      */
     public static Double[] normalize(Double[] arrayA, Double[] arrayB) {
         double mean = mean(arrayB);
-        double std = std(arrayB);
+        double std = std(arrayB, mean);
         Double[] result = arrayA.clone();
         for (int i = 0; i < arrayA.length; i++) {
             result[i] = (result[i] - mean) / std;
@@ -326,10 +326,10 @@ public class MathUtil {
                 var += Math.pow(i - mean, 2);
             }
         }
-        if (n <= 1) {
-            logger.error("Most of the data in array are NaN!!!");
+        if (n <= 0) {
+            logger.error("All of the data in array are NaN!!!");
         }
-        var = var / (n - 1);
+        var = var / n;
         return Math.sqrt(var);
     }
 
@@ -339,7 +339,7 @@ public class MathUtil {
         return var(array, mean);
     }
 
-    //已知平均值,求方差,如果是NaN的直接跳过,自由度为n-1
+    //已知平均值,求方差,如果是NaN的直接跳过
     public static double var(Double[] array, double mean) {
         int n = array.length;
         double var = 0;
@@ -350,10 +350,10 @@ public class MathUtil {
                 var += Math.pow(i - mean, 2);
             }
         }
-        if (n <= 1) {
-            logger.error("Most of the data in array are NaN!!!");
+        if (n <= 0) {
+            logger.error("All of the data in array are NaN!!!");
         }
-        var /= (double) n - 1;
+        var /= n;
         return var;
     }
 
@@ -386,29 +386,28 @@ public class MathUtil {
         return result;
     }
 
-    public static double sum(double[] array){
+    public static double sum(double[] array) {
         double sum = 0;
-        for(double value: array){
+        for (double value : array) {
             sum += value;
         }
         return sum;
     }
 
     /**
-     * Count number of value in array[] <= present value.
-     *
-     * TODO LMS Need To Review
+     * 统计一个数组中的每一位数字,在该数组中小于等于自己的数还有几个
+     * 例如数组3,2,1,1. 经过本函数后得到的结果是4,3,2,2
+     * 入参array必须是降序排序后的数组
      */
     public static int[] countNumPositives(Double[] array) {
-        int i0 = 0, i1 = 0;
+        int step = 0;
         int n = array.length;
         int[] result = new int[n];
-        while (i0 < n) {
-            while (i1 < n && array[i0].equals(array[i1])) {
-                result[i1] = n - i0;
-                i1++;
+        for (int i = 0; i < n; i++) {
+            while (step < n && array[i].equals(array[step])) {
+                result[step] = n - i;
+                step++;
             }
-            i0++;
         }
         return result;
     }

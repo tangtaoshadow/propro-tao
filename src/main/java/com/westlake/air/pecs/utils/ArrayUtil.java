@@ -455,7 +455,6 @@ public class ArrayUtil {
     }
 
 
-
     /**
      * Exchange position of element i,j in array[].
      */
@@ -517,9 +516,9 @@ public class ArrayUtil {
 
     public static void checkNull(Double[][] array) {
         for (int i = 0; i < array.length; i++) {
-            for(int j = 0;j<array[i].length;j++){
-                if(array[i][j].equals(Double.NaN)){
-                    logger.info("发现空值:i/j:"+i+"/"+j);
+            for (int j = 0; j < array[i].length; j++) {
+                if (array[i][j].equals(Double.NaN)) {
+                    logger.info("发现空值:i/j:" + i + "/" + j);
                 }
             }
         }

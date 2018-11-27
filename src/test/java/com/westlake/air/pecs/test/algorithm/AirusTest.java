@@ -3,6 +3,7 @@ package com.westlake.air.pecs.test.algorithm;
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
+import com.westlake.air.pecs.domain.bean.airus.Params;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.db.ScoresDO;
@@ -32,11 +33,11 @@ public class AirusTest extends BaseTest {
     public void scoreFromDBWork() {
         HashMap<String, ScoresDO> scoreMap = scoresService.getAllMapByOverviewId("5bbdaaf1fc6f9e1f2872d5ce");
         ScoreData scoreData = airus.trans(new ArrayList(scoreMap.values()));
-        FinalResult finalResult = airus.doAirus(scoreData);
+        FinalResult finalResult = airus.doAirus(scoreData, new Params());
 
         int count = AirusUtil.checkFdr(finalResult);
         System.out.println(count);
-        System.out.println(JSON.toJSONString(finalResult.getClassifierTable()));
+        System.out.println(JSON.toJSONString(finalResult.getWeightsMap()));
 
         assert count >= 322;
     }

@@ -30,9 +30,14 @@ public class ScoresDO {
     @Indexed
     String proteinName;
 
+    @Indexed
     Boolean isDecoy = false;
 
     List<FeatureScores> featureScoresList;
+
+    Double bestRt;
+
+    Boolean isIdentified = false;
 
     Date createDate;
 

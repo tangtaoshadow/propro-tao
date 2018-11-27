@@ -34,14 +34,19 @@ public class LibraryDO extends BaseDO {
 
     String instrument;
 
+    //蛋白总数目
     Long proteinCount;
 
+    //真肽段数目
     Long peptideCount;
 
+    //肽段片段总数目
     Long totalCount;
 
+    //真肽段片段总数目
     Long totalTargetCount;
 
+    //为肽段片段总数目
     Long totalDecoyCount;
 
     Date createDate;

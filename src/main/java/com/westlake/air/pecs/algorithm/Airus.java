@@ -5,12 +5,13 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.*;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
+import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.pecs.domain.db.ScoresDO;
+import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.service.ScoresService;
 import com.westlake.air.pecs.utils.AirusUtil;
 import com.westlake.air.pecs.utils.ArrayUtil;
 import com.westlake.air.pecs.utils.MathUtil;
-import com.westlake.air.pecs.utils.SortUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,17 +36,21 @@ public class Airus {
     @Autowired
     SemiSupervised semiSupervised;
     @Autowired
+    LDALearner ldaLearner;
+    @Autowired
     Stats stats;
     @Autowired
     ScoresService scoresService;
 
-    public FinalResult doAirus(String overviewId) {
+    public FinalResult doAirus(String overviewId, Params params) {
         logger.info("开始获取打分数据");
-        List<ScoresDO> scores = scoresService.getAllByOverviewId(overviewId);
-        return doAirus(scores);
+//        List<ScoresDO> scores = scoresService.getAllByOverviewId(overviewId);
+//        return doAirus(scores, params);
+        List<SimpleScores> scores = scoresService.getSimpleAllByOverviewId(overviewId);
+        return doAirusWithDB(overviewId, scores, params);
     }
 
-    public FinalResult doAirus(List<ScoresDO> scores) {
+    public FinalResult doAirus(List<ScoresDO> scores, Params params) {
         logger.info("开始检查数据是否健康");
         ResultDO resultDO = checkData(scores);
         if (resultDO.isFailed()) {
@@ -56,40 +61,39 @@ public class Airus {
         }
         logger.info("开始转换打分数据格式");
         ScoreData scoreData = trans(scores);
-        return doAirus(scoreData);
+        return doAirus(scoreData, params);
     }
 
-    public FinalResult doAirusWithDB(List<ScoresDO> scores) {
+    public FinalResult doAirusWithDB(String overviewId, List<SimpleScores> scores, Params params) {
         logger.info("开始检查数据是否健康");
-        ResultDO resultDO = checkData(scores);
-        if (resultDO.isFailed()) {
-            logger.info("数据异常:" + resultDO.getMsgInfo());
-            FinalResult result = new FinalResult();
-            result.setErrorInfo(resultDO.getMsgInfo());
-            return result;
-        }
-        logger.info("开始转换打分数据格式");
-
-        for (ScoresDO score : scores) {
+        for (SimpleScores score : scores) {
             score.setGroupId(score.getIsDecoy() ? ("DECOY_" + score.getPeptideRef()) : score.getPeptideRef());
         }
-//        Params params = new Params();
-//        //按照peptideRefWithDecoy排序
-//        if(params.isDebug()){
-//            scores = SortUtil.sortByPeptideRefWithDecoy(scores);
-//        }
+
         logger.info("开始训练学习数据权重");
-        Double[] weights = learn(scores);
-        return null;
+        HashMap<String, Double> weightsMap = learn(scores, params);
+        logger.info("开始计算合并打分");
+        ldaLearner.score(scores, weightsMap);
+        List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+        //对于最终的打分结果和选峰结果保存到数据库中
+        for(SimpleFeatureScores simpleFeatureScores : featureScoresList){
+            ScoresDO scoresDO = scoresService.getByPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
+            scoresDO.setBestRt(simpleFeatureScores.getRt());
+            scoresService.update(scoresDO);
+        }
+        ErrorStat errorStat = stats.errorStatistics(featureScoresList, params);
+        FinalResult finalResult = new FinalResult();
+        finalResult.setAllInfo(errorStat);
+        finalResult.setWeightsMap(weightsMap);
+        return finalResult;
     }
 
-    public FinalResult doAirus(ScoreData scoreData) {
-        Params params = new Params();
+    public FinalResult doAirus(ScoreData scoreData, Params params) {
         if (params.isDebug()) {
             scoreData = AirusUtil.fakeSortTgId(scoreData);
         }
         logger.info("开始训练学习数据权重");
-        Double[] weights = learn(scoreData.getScoreData(), scoreData.getGroupNumId(), scoreData.getIsDecoy());
+        Double[] weights = learn(scoreData.getScoreData(), scoreData.getGroupNumId(), scoreData.getIsDecoy(), params);
         logger.info("开始计算合并打分");
         Double[] dscore = calculateDscore(weights, scoreData);
         Double[] topTargetDscores = AirusUtil.getTopTargetPeaks(dscore, scoreData.getIsDecoy(), AirusUtil.findTopIndex(dscore, scoreData.getGroupNumId()));
@@ -101,10 +105,10 @@ public class Airus {
             classifierTable.put(scoreColumns[i], weights[i]);
         }
         FinalResult finalResult = new FinalResult();
-        finalResult.setClassifierTable(classifierTable);
+        finalResult.setWeightsMap(classifierTable);
         ErrorStat errorStat = stats.errorStatistics(topTargetDscores, topDecoyDscores);
-        finalResult.setFinalErrorTable(finalErrorTable(errorStat));
-        finalResult.setSummaryErrorTable(summaryErrorTable(errorStat));
+        finalResult.setFinalErrorTable(finalErrorTable(errorStat, params));
+        finalResult.setSummaryErrorTable(summaryErrorTable(errorStat, params));
         finalResult.setAllInfo(errorStat);
         logger.info("合并打分完毕");
         return finalResult;
@@ -129,6 +133,25 @@ public class Airus {
         }
         return new ResultDO(true);
     }
+
+//    public ResultDO checkData(List<SimpleScores> scores) {
+//        boolean isAllDecoy = true;
+//        boolean isAllReal = true;
+//        for (SimpleScores score : scores) {
+//            if (score.getIsDecoy()) {
+//                isAllReal = false;
+//            } else {
+//                isAllDecoy = false;
+//            }
+//        }
+//        if (isAllDecoy) {
+//            return ResultDO.buildError(ResultCode.ALL_SCORE_DATA_ARE_DECOY);
+//        }
+//        if (isAllReal) {
+//            return ResultDO.buildError(ResultCode.ALL_SCORE_DATA_ARE_REAL);
+//        }
+//        return new ResultDO(true);
+//    }
 
     public ScoreData trans(List<ScoresDO> scores) {
         ScoreData scoreData = new ScoreData();
@@ -188,37 +211,56 @@ public class Airus {
      * @param isDecoy
      * @return
      */
-    public Double[] learn(Double[][] scores, Integer[] groupNumId, Boolean[] isDecoy) {
-        Params params = new Params();
-
+    public Double[] learn(Double[][] scores, Integer[] groupNumId, Boolean[] isDecoy, Params params) {
         int neval = params.getTrainTimes();
         Double[][] weights = new Double[neval][scores[0].length];
         for (int i = 0; i < neval; i++) {
-            LDALearn ldaLearn = semiSupervised.learnRandomized(scores, groupNumId, isDecoy);
-            weights[i] = ldaLearn.getWeights();
+            LDALearnData ldaLearnData = semiSupervised.learnRandomized(scores, groupNumId, isDecoy, params);
+
+            if (params.isDebug()) {
+                weights = new Double[1][scores[0].length];
+                weights[0] = ldaLearnData.getWeights();
+                break;
+            } else {
+                weights[i] = ldaLearnData.getWeights();
+            }
         }
         logger.info("学习完毕");
 
         return semiSupervised.averagedLearner(weights);
     }
 
-    public Double[] learn(List<ScoresDO> scores) {
-        Params params = new Params();
+    public HashMap<String, Double> learn(List<SimpleScores> scores, Params params) {
         int neval = params.getTrainTimes();
-        Double[][] weights = new Double[neval][FeatureScores.SCORES_COUNT];
+        List<HashMap<String, Double>> weightsMapList = new ArrayList<>();
+        int maxCount = 0;
         for (int i = 0; i < neval; i++) {
-            LDALearn ldaLearn = semiSupervised.learnRandomized(scores);
-            weights[i] = ldaLearn.getWeights();
-        }
-        logger.info("学习完毕");
+            logger.info("开始第" + i + "轮尝试");
+            LDALearnData ldaLearnData = semiSupervised.learnRandomized(scores, params);
 
-        return semiSupervised.averagedLearner(weights);
+            ldaLearner.score(scores, ldaLearnData.getWeightsMap());
+            List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+            ErrorStat errorStat = stats.errorStatistics(featureScoresList, params);
+            int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
+            if (count > 0) {
+                logger.info("本轮尝试有效果:检测结果:" + count + "个");
+            }
+            if(count > maxCount){
+                maxCount = count;
+                weightsMapList.add(ldaLearnData.getWeightsMap());
+            }
+
+            if (params.isDebug()) {
+                break;
+            }
+        }
+
+        return AirusUtil.averagedWeights(weightsMapList);
     }
 
 
-    private ErrorStat finalErrorTable(ErrorStat errorStat) {
+    private ErrorStat finalErrorTable(ErrorStat errorStat, Params params) {
 
-        Params params = new Params();
         StatMetrics statMetrics = errorStat.getStatMetrics();
         Double[] cutOffs = errorStat.getCutoff();
         Double[] cutOffsSort = cutOffs.clone();
@@ -249,8 +291,7 @@ public class Airus {
         return sampleErrorStat;
     }
 
-    private ErrorStat summaryErrorTable(ErrorStat errorStat) {
-        Params params = new Params();
+    private ErrorStat summaryErrorTable(ErrorStat errorStat, Params params) {
         StatMetrics statMetrics = errorStat.getStatMetrics();
         Double[] qvalues = params.getQvalues();
         Integer[] ix = MathUtil.findNearestMatches(errorStat.getQvalue(), qvalues, params.getUseSortOrders());

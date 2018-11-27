@@ -12,6 +12,7 @@ import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
+import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.query.ScoresQuery;
 import com.westlake.air.pecs.feature.*;
@@ -29,9 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 
@@ -105,6 +103,11 @@ public class ScoresServiceImpl implements ScoresService {
     @Override
     public List<ScoresDO> getAllByOverviewId(String overviewId) {
         return scoresDAO.getAllByOverviewId(overviewId);
+    }
+
+    @Override
+    public List<SimpleScores> getSimpleAllByOverviewId(String overviewId) {
+        return scoresDAO.getSimpleAllByOverviewId(overviewId);
     }
 
     @Override
@@ -189,17 +192,8 @@ public class ScoresServiceImpl implements ScoresService {
     }
 
     @Override
-    public ResultDO<ScoresDO> getByPeptideRef(String peptideRef) {
-        try {
-            ScoresDO scoresDO = scoresDAO.getByPeptideRef(peptideRef);
-            if (scoresDO == null) {
-                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
-            } else {
-                return ResultDO.build(scoresDO);
-            }
-        } catch (Exception e) {
-            return ResultDO.buildError(ResultCode.QUERY_ERROR);
-        }
+    public ScoresDO getByPeptideRefAndIsDecoy(String overviewId, String peptideRef, Boolean isDecoy) {
+        return scoresDAO.getByPeptideRefAndIsDecoy(overviewId, peptideRef, isDecoy);
     }
 
     @Override
@@ -308,7 +302,7 @@ public class ScoresServiceImpl implements ScoresService {
             List<FeatureScores> featureScoresList = new ArrayList<>();
             //获取标准库中对应的PeptideRef组
             IntensityGroup ig = intensityGroupMap.get(group.getPeptideRef() + "_" + group.getIsDecoy());
-            
+
             FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, ig, input.getSigmaSpacing());
 
             if (!featureByPep.isFeatureFound()) {
@@ -319,7 +313,7 @@ public class ScoresServiceImpl implements ScoresService {
             List<Double> libraryIntensityList = featureByPep.getLibraryIntensityList();
             List<double[]> noise1000List = featureByPep.getNoise1000List();
             List<Double> productMzList = new ArrayList<>();
-            for (AnalyseDataDO dataDO : group.getDataMap().values()) {// TODO @Nico 精度必要性
+            for (AnalyseDataDO dataDO : group.getDataMap().values()) {
                 productMzList.add(Double.parseDouble(Float.toString(dataDO.getMz())));
             }
 

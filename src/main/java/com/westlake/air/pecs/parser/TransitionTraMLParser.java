@@ -126,7 +126,7 @@ public class TransitionTraMLParser extends BaseTransitionParser{
         }
 
         // parse product interpretation
-            // ToDO: transition.getProduct().getInterpretationList()
+            // TODO: transition.getProduct().getInterpretationList()
 
         // parse rt, sequence, full name, protein name from peptideMap
         Peptide peptide = peptideMap.get(transition.getPeptideRef());

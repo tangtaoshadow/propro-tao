@@ -8,6 +8,7 @@ import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ScoreDistribution;
 import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
+import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.domain.query.ScoresQuery;
 
 import java.util.HashMap;
@@ -25,6 +26,8 @@ public interface ScoresService {
 
     List<ScoresDO> getAllByOverviewId(String overviewId);
 
+    List<SimpleScores> getSimpleAllByOverviewId(String overviewId);
+
     HashMap<String, ScoresDO> getAllMapByOverviewId(String overviewId);
 
     ResultDO insert(ScoresDO scoresDO);
@@ -37,7 +40,7 @@ public interface ScoresService {
 
     ResultDO<ScoresDO> getById(String id);
 
-    ResultDO<ScoresDO> getByPeptideRef(String peptideRef);
+    ScoresDO getByPeptideRefAndIsDecoy(String overviewId, String peptideRef, Boolean isDecoy);
 
     /**
      * 从一个已经卷积完毕的数据集中求出iRT

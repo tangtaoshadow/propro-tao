@@ -2,6 +2,7 @@ package com.westlake.air.pecs.dao;
 
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.ScoresDO;
+import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.domain.query.LibraryQuery;
 import com.westlake.air.pecs.domain.query.ScoresQuery;
 import org.apache.commons.lang3.StringUtils;
@@ -35,9 +36,11 @@ public class ScoresDAO {
         return mongoTemplate.findById(id, ScoresDO.class, CollectionName);
     }
 
-    public ScoresDO getByPeptideRef(String peptideRef) {
+    public ScoresDO getByPeptideRefAndIsDecoy(String overviewId, String peptideRef, Boolean isDecoy) {
         ScoresQuery query = new ScoresQuery();
+        query.setOverviewId(overviewId);
         query.setPeptideRef(peptideRef);
+        query.setIsDecoy(isDecoy);
         return mongoTemplate.findOne(buildQuery(query), ScoresDO.class, CollectionName);
     }
 
@@ -45,6 +48,12 @@ public class ScoresDAO {
         ScoresQuery query = new ScoresQuery();
         query.setOverviewId(overviewId);
         return mongoTemplate.find(buildQueryWithoutPage(query), ScoresDO.class, CollectionName);
+    }
+
+    public List<SimpleScores> getSimpleAllByOverviewId(String overviewId) {
+        ScoresQuery query = new ScoresQuery();
+        query.setOverviewId(overviewId);
+        return mongoTemplate.find(buildQueryWithoutPage(query), SimpleScores.class, CollectionName);
     }
 
     public ScoresDO insert(ScoresDO scoresDO) {
@@ -94,6 +103,9 @@ public class ScoresDAO {
         }
         if (targetQuery.getPeptideRef() != null) {
             query.addCriteria(where("peptideRef").is(targetQuery.getPeptideRef()));
+        }
+        if (targetQuery.getIsDecoy() != null) {
+            query.addCriteria(where("isDecoy").is(targetQuery.getIsDecoy()));
         }
 
         return query;

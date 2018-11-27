@@ -42,9 +42,11 @@ public class FeatureScores {
      */
     public static final int SCORES_COUNT = ScoreType.getUsedTypes().size();
 
-    double rt;
+    Double rt;
 
     HashMap<String, Double> scoresMap;
+
+    Double finalScore;
 
     public static int getScoresCount() {
         return ScoreType.getUsedTypes().size();
@@ -171,6 +173,9 @@ public class FeatureScores {
                 null, false),
         YseriesScore("YseriesScore", "var_YseriesScore",
                 "peptideRt对应的spectrumArray中，检测到的y离子的数量",
+                null, false),
+        WeightedTotalScore("WeightedTotalScore", "",
+                "根据权重算出的加权总分-加权总分的平均分",
                 null, false),
         ;
 

@@ -1,11 +1,13 @@
 package com.westlake.air.pecs.utils;
 
-import com.westlake.air.pecs.domain.ResultDO;
+import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
-import com.westlake.air.pecs.domain.db.ScoresDO;
-import org.apache.commons.lang3.ArrayUtils;
+import com.westlake.air.pecs.domain.bean.airus.TrainData;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
+import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
+import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -167,6 +169,94 @@ public class AirusUtil {
     }
 
     /**
+     * 以scoreType为主分数挑选出所有主分数最高的峰
+     *
+     * @param scores
+     * @param scoreType
+     * @return
+     */
+    public static List<SimpleFeatureScores> findTopFeatureScores(List<SimpleScores> scores, String scoreType) {
+        List<SimpleFeatureScores> bestFeatureScoresList = new ArrayList<>();
+        for (SimpleScores score : scores) {
+            SimpleFeatureScores bestFeatureScores = new SimpleFeatureScores(score.getPeptideRef(), score.getIsDecoy());
+            for (FeatureScores featureScores : score.getFeatureScoresList()) {
+                if (bestFeatureScores.getMainScore() == null) {
+                    bestFeatureScores.setMainScore(featureScores.get(scoreType));
+                    bestFeatureScores.setScoresMap(featureScores.getScoresMap());
+                    bestFeatureScores.setRt(featureScores.getRt());
+                } else {
+                    Double featureMainScore = featureScores.get(scoreType);
+                    if (featureMainScore > bestFeatureScores.getMainScore()) {
+                        bestFeatureScores.setMainScore(featureMainScore);
+                        bestFeatureScores.setScoresMap(featureScores.getScoresMap());
+                        bestFeatureScores.setRt(featureScores.getRt());
+                    }
+                }
+            }
+
+            score.setBestRt(bestFeatureScores.getRt());
+            bestFeatureScoresList.add(bestFeatureScores);
+
+        }
+        return bestFeatureScoresList;
+    }
+
+    public static Double[] buildSortedMainScoreArray(List<SimpleFeatureScores> scores) {
+        Double[] result = new Double[scores.size()];
+        for (int i = 0; i < scores.size(); i++) {
+            result[i] = scores.get(i).getMainScore();
+        }
+        Arrays.sort(result);
+        return result;
+    }
+
+    /**
+     * 按子分数类型计算数组中所有分数的平均值,返回值中key为子分数类型,value为该类型的子分数的平均值
+     * skipScoreType为需要略去不进去计算逻辑的子分数类型
+     * @param scores
+     * @return
+     */
+    public static HashMap<String, Double> getScoresMeans(List<SimpleFeatureScores> scores, String skipScoreType) {
+        if(scores == null || scores.size() == 0){
+            return null;
+        }
+        HashMap<String, Double> meanScoresMap = new HashMap<>();
+        for (SimpleFeatureScores score : scores) {
+            HashMap<String, Double> scoreMap = score.getScoresMap();
+            for (String key : scoreMap.keySet()) {
+                if (key.equals(skipScoreType)) {
+                    continue;
+                }
+                Double value = meanScoresMap.get(key);
+                if (value == null) {
+                    value = scoreMap.get(key);
+                    meanScoresMap.put(key, value);
+                } else {
+                    meanScoresMap.put(key, value + scoreMap.get(key));
+                }
+            }
+        }
+        int size = scores.size();
+        for (String key : meanScoresMap.keySet()) {
+            meanScoresMap.put(key, meanScoresMap.get(key) / size);
+        }
+
+        return meanScoresMap;
+    }
+
+    public static void computeDScore(List<SimpleScores> scores, HashMap<String, Double> weightsMap) {
+        for (SimpleScores score : scores) {
+            for (FeatureScores fs : score.getFeatureScoresList()) {
+                double finalScore = 0;
+                for (String key : weightsMap.keySet()) {
+                    finalScore += fs.getScoresMap().get(key) * weightsMap.get(key);
+                }
+                fs.setFinalScore(finalScore);
+            }
+        }
+    }
+
+    /**
      * Get feature Matrix of useMainScore or not.
      */
     public static Double[][] getFeatureMatrix(Double[][] array, Boolean useMainScore) {
@@ -180,6 +270,17 @@ public class AirusUtil {
             logger.error("GetFeatureMatrix Error");
             return null;
         }
+    }
+
+    public static List<SimpleFeatureScores> peaksFilter(List<SimpleFeatureScores> trainTargets, double cutOff) {
+        List<SimpleFeatureScores> peakScores = new ArrayList<>();
+        for (SimpleFeatureScores i : trainTargets) {
+            if (i.getMainScore() >= cutOff) {
+                peakScores.add(i);
+            }
+        }
+
+        return peakScores;
     }
 
     public static Double[][] peaksFilter(Double[][] ttPeaks, Double[] ttScores, double cutOff) {
@@ -245,12 +346,12 @@ public class AirusUtil {
      * @param isDebug  是否取测试集
      * @return
      */
-    public static TrainAndTest split(List<ScoresDO> scores, double fraction, boolean isDebug) {
+    public static TrainData split(List<SimpleScores> scores, double fraction, boolean isDebug) {
 
-        List<ScoresDO> targets = new ArrayList<>();
-        List<ScoresDO> decoys = new ArrayList<>();
+        List<SimpleScores> targets = new ArrayList<>();
+        List<SimpleScores> decoys = new ArrayList<>();
         //按照是否是伪肽段分为两个数组
-        for (ScoresDO score : scores) {
+        for (SimpleScores score : scores) {
             if (score.getIsDecoy()) {
                 decoys.add(score);
             } else {
@@ -270,16 +371,8 @@ public class AirusUtil {
         int decoyLength = (int) (targets.size() * fraction) + 1;
         int targetLength = (int) (decoys.size() * fraction) + 1;
 
-        List<ScoresDO> trains = new ArrayList<>();
-        List<ScoresDO> tests = new ArrayList<>();
-        trains.addAll(targets.subList(0, targetLength));
-        trains.addAll(decoys.subList(0, decoyLength));
-
-        tests.addAll(targets.subList(targetLength, targets.size()));
-        tests.addAll(decoys.subList(decoyLength, decoys.size()));
-
-        TrainAndTest tat = new TrainAndTest(trains, tests);
-        return tat;
+        TrainData td = new TrainData(targets.subList(0, targetLength), decoys.subList(0, decoyLength));
+        return td;
     }
 
     public static ScoreData fakeSortTgId(ScoreData scoreData) {
@@ -309,8 +402,12 @@ public class AirusUtil {
     }
 
     public static int checkFdr(FinalResult finalResult) {
+        return checkFdr(finalResult.getAllInfo().getStatMetrics().getFdr());
+    }
+
+    public static int checkFdr(double[] dArray) {
         int count = 0;
-        for (double d : finalResult.getAllInfo().getStatMetrics().getFdr()) {
+        for (double d : dArray) {
             if (d <= 0.01) {
                 count++;
             }
@@ -351,5 +448,24 @@ public class AirusUtil {
             logger.error("GetIsTopTarget Error.Length not equals");
             return null;
         }
+    }
+
+    /**
+     * set w as average
+     *
+     * @param weightsMapList the result of nevals
+     */
+    public static HashMap<String, Double> averagedWeights(List<HashMap<String, Double>> weightsMapList) {
+        HashMap<String, Double> finalWeightsMap = new HashMap<>();
+        for (HashMap<String, Double> weightsMap : weightsMapList) {
+            for (String key : weightsMap.keySet()) {
+                finalWeightsMap.put(key, finalWeightsMap.get(key) == null ? weightsMap.get(key) : (finalWeightsMap.get(key) + weightsMap.get(key)));
+            }
+        }
+        for (String key : finalWeightsMap.keySet()) {
+            finalWeightsMap.put(key, finalWeightsMap.get(key) / weightsMapList.size());
+        }
+
+        return finalWeightsMap;
     }
 }

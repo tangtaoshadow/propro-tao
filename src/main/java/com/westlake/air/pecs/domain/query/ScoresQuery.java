@@ -10,4 +10,6 @@ public class ScoresQuery extends PageQuery{
     String overviewId;
 
     String peptideRef;
+
+    Boolean isDecoy;
 }

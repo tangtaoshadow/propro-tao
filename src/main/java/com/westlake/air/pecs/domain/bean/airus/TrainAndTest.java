@@ -1,6 +1,6 @@
 package com.westlake.air.pecs.domain.bean.airus;
 
-import com.westlake.air.pecs.domain.db.ScoresDO;
+import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import lombok.Data;
 
 import java.util.List;
@@ -18,13 +18,17 @@ public class TrainAndTest {
     Integer[] testId;
     Boolean[] testIsDecoy;
 
-    List<ScoresDO> trains;
-    List<ScoresDO> tests;
+    List<SimpleScores> trainTargets;
+    List<SimpleScores> trainDecoys;
+    List<SimpleScores> testTargets;
+    List<SimpleScores> testDecoys;
 
     public TrainAndTest(){}
 
-    public TrainAndTest(List<ScoresDO> trains, List<ScoresDO> tests){
-        this.trains = trains;
-        this.tests = tests;
+    public TrainAndTest(List<SimpleScores> trainTargets, List<SimpleScores> trainDecoys, List<SimpleScores> testTargets, List<SimpleScores> testDecoys){
+        this.trainTargets = trainTargets;
+        this.trainDecoys = trainDecoys;
+        this.testTargets = testTargets;
+        this.testDecoys = testDecoys;
     }
 }

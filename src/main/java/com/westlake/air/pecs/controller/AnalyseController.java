@@ -12,6 +12,7 @@ import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
+import com.westlake.air.pecs.domain.bean.airus.Params;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
@@ -22,10 +23,7 @@ import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
 import com.westlake.air.pecs.feature.GaussFilter;
 import com.westlake.air.pecs.feature.SignalToNoiseEstimator;
-import com.westlake.air.pecs.service.AnalyseDataService;
-import com.westlake.air.pecs.service.AnalyseOverviewService;
-import com.westlake.air.pecs.service.ExperimentService;
-import com.westlake.air.pecs.service.TransitionService;
+import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.AirusUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +57,8 @@ public class AnalyseController extends BaseController {
     TransitionService transitionService;
     @Autowired
     ExperimentService experimentService;
+    @Autowired
+    ScoresService scoresService;
     @Autowired
     ScoreTask scoreTask;
     @Autowired
@@ -177,7 +177,7 @@ public class AnalyseController extends BaseController {
     String dataList(Model model,
                     @RequestParam(value = "overviewId", required = true) String overviewId,
                     @RequestParam(value = "peptideRef", required = false) String peptideRef,
-                    @RequestParam(value = "msLevel", required = false) Integer msLevel,
+                    @RequestParam(value = "msLevel", required = false) String msLevel,
                     @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                     @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
                     RedirectAttributes redirectAttributes) {
@@ -194,8 +194,12 @@ public class AnalyseController extends BaseController {
         AnalyseDataQuery query = new AnalyseDataQuery();
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
-        if (msLevel != null) {
-            query.setMsLevel(msLevel);
+        if (msLevel != null && !msLevel.equals("All")) {
+            try {
+                query.setMsLevel(Integer.parseInt(msLevel));
+            } catch (Exception e) {
+                logger.error("msLevel必须为1或者2");
+            }
         }
         if (StringUtils.isNotEmpty(peptideRef)) {
             query.setPeptideRef(peptideRef);
@@ -368,6 +372,7 @@ public class AnalyseController extends BaseController {
         }
 
         List<AnalyseDataDO> dataList = dataResult.getModel();
+        ScoresDO scoresDO = scoresService.getByPeptideRefAndIsDecoy(overviewId, peptideRef, isDecoy);
 
         JSONObject res = new JSONObject();
         JSONArray rtArray = new JSONArray();
@@ -423,6 +428,10 @@ public class AnalyseController extends BaseController {
         res.put("rt", rtArray);
         res.put("cutInfoArray", cutInfoArray);
         res.put("intensityArrays", intensityArrays);
+        if (scoresDO.getBestRt() != null) {
+            res.put("bestRt", (double) Math.round(scoresDO.getBestRt() * 100) / 100);
+        }
+
         resultDO.setModel(res);
         return resultDO;
     }
@@ -432,15 +441,22 @@ public class AnalyseController extends BaseController {
     String airus(Model model, @PathVariable("overviewId") String overviewId) {
 
         long start = System.currentTimeMillis();
-        FinalResult finalResult = airus.doAirus(overviewId);
+        Params params = new Params();
+        params.setDebug(false);
+        params.setMainScore(FeatureScores.ScoreType.MainScore.getTypeName());
+        params.setTrainTimes(100);
+        FinalResult finalResult = airus.doAirus(overviewId, params);
         logger.info("打分耗时:" + (System.currentTimeMillis() - start));
         int count = AirusUtil.checkFdr(finalResult);
 
         logger.info(JSON.toJSONString(finalResult.getAllInfo().getStatMetrics().getFdr()));
         JSONObject object = new JSONObject();
-        object.put("子分数种类", finalResult.getClassifierTable().size());
-        object.put("权重", finalResult.getClassifierTable());
+        object.put("是否测试", params.isDebug());
+        object.put("主分数类型", params.getMainScore());
+        object.put("子分数种类", finalResult.getWeightsMap().size());
+        object.put("权重", finalResult.getWeightsMap());
         object.put("识别肽段数目", count);
+        object.put("打分耗时", (System.currentTimeMillis() - start));
         return object.toJSONString();
     }
 }

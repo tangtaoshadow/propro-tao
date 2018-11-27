@@ -1,6 +1,9 @@
 package com.westlake.air.pecs.domain.bean.airus;
 
+import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * Created by Nico Wang Ruimin
@@ -13,4 +16,7 @@ public class TrainPeaks {
 
     Double[][] bestTargetPeaks;
 
+    List<SimpleFeatureScores> bestTargets;
+
+    List<SimpleFeatureScores> topDecoys;
 }

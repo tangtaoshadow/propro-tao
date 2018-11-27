@@ -7,6 +7,7 @@ import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
+import com.westlake.air.pecs.domain.bean.airus.Params;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
@@ -137,7 +138,7 @@ public class TestController extends BaseController {
     @ResponseBody
     String test6(Model model, RedirectAttributes redirectAttributes) throws IOException {
         long start = System.currentTimeMillis();
-        FinalResult finalResult = airus.doAirus("5b967e5fcbaa7e2940fc6537");
+        FinalResult finalResult = airus.doAirus("5b967e5fcbaa7e2940fc6537",new Params());
         logger.info("打分耗时:" + (System.currentTimeMillis() - start));
         return JSON.toJSONString(finalResult);
     }

@@ -12,7 +12,7 @@ import java.util.HashMap;
 @Data
 public class FinalResult {
 
-    HashMap classifierTable;
+    HashMap<String, Double> weightsMap;
 
     ErrorStat finalErrorTable;
 
