@@ -104,8 +104,8 @@
                             <div class="m-accordion__item-head collapsed" role="tab" id="m_accordion_7_item_1_head"
                                  data-toggle="collapse" th:href="|#${score.peptideRef}_${score.isDecoy?'decoy':''}|"
                                  aria-expanded="false">
-                                <span th:if="${score.isDecoy}" class="m-accordion__item-icon"><i class="fa fa-bomb"></i></span>
-                                <!--<span th:unless="${score.isDecoy}" class="m-accordion__item-icon"><i class="fa 	fa-diamond"></i></span>-->
+                                <!--<span th:if="${score.isDecoy}" class="m-accordion__item-icon"><i class="fa fa-bomb"></i></span>-->
+                                <span th:if="${!score.isDecoy}" class="m-accordion__item-icon"><i class="fa fa-diamond"></i></span>
 
                                 <span th:if="${!score.isDecoy&&score.isIdentified}" class="m-accordion__item-icon"><i class="fa fa-check"></i></span>
                                 <span th:if="${!score.isDecoy&&!score.isIdentified}" class="m-accordion__item-icon"><i class="fa fa-close"></i></span>

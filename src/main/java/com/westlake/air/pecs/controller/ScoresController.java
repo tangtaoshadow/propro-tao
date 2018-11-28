@@ -47,7 +47,7 @@ public class ScoresController extends BaseController {
     String list(Model model,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
-                @RequestParam(value = "overviewId", required = true) String overviewId,
+                @RequestParam(value = "overviewId", required = false) String overviewId,
                 @RequestParam(value = "peptideRef", required = false) String peptideRef,
                 @RequestParam(value = "isIdentified", required = false) String isIdentified,
                 RedirectAttributes redirectAttributes) {
@@ -59,12 +59,16 @@ public class ScoresController extends BaseController {
         if (peptideRef != null && !peptideRef.isEmpty()) {
             query.setPeptideRef(peptideRef);
         }
-        if (isIdentified!= null && isIdentified.equals("Yes")) {
+        if (isIdentified != null && isIdentified.equals("Yes")) {
             query.setIsIdentified(true);
             query.setIsDecoy(false);
-        }else if(isIdentified!= null && isIdentified.equals("No")){
+        } else if (isIdentified != null && isIdentified.equals("No")) {
             query.setIsIdentified(false);
             query.setIsDecoy(false);
+        }
+        if (overviewId == null) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_ID_CAN_NOT_BE_EMPTY.getMessage());
+            return "redirect:/analyse/overview/list";
         }
         query.setOverviewId(overviewId);
         query.setPageSize(pageSize);
