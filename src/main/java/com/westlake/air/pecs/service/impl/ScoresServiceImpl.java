@@ -316,7 +316,6 @@ public class ScoresServiceImpl implements ScoresService {
             for (AnalyseDataDO dataDO : group.getDataMap().values()) {
                 productMzList.add(Double.parseDouble(Float.toString(dataDO.getMz())));
             }
-
             //TODO  mrmFeature - peptideRef - ...
             //数据格式见下面的new
             //spectrum: get by peptideRef RT(nearest)
@@ -339,7 +338,6 @@ public class ScoresServiceImpl implements ScoresService {
                     e.printStackTrace();
                     logger.info("cutInfo:" + cutInfo + ";data:" + JSON.toJSONString(data));
                 }
-
             }
 
             HashMap<Integer, String> unimodHashMap = group.getUnimodMap();

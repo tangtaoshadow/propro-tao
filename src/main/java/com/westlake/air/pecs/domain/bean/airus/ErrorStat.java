@@ -1,6 +1,9 @@
 package com.westlake.air.pecs.domain.bean.airus;
 
+import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * Created by Nico Wang Ruimin
@@ -9,10 +12,20 @@ import lombok.Data;
 
 @Data
 public class ErrorStat {
-    Double[] cutoff;
-    Double[] pvalue;
-    Double[] qvalue;
+
+    List<SimpleFeatureScores> bestFeatureScoresList;
+
     StatMetrics statMetrics;
+
     Pi0Est pi0Est;
+
+    @Deprecated
+    Double[] cutoff;
+    @Deprecated
+    Double[] pvalue;
+    @Deprecated
+    Double[] qvalue;
+
+
 }
 

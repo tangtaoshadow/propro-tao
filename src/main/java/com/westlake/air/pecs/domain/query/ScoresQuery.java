@@ -12,4 +12,6 @@ public class ScoresQuery extends PageQuery{
     String peptideRef;
 
     Boolean isDecoy;
+
+    Boolean isIdentified;
 }

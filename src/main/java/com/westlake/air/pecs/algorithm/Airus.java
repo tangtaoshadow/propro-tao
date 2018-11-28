@@ -75,16 +75,21 @@ public class Airus {
         logger.info("开始计算合并打分");
         ldaLearner.score(scores, weightsMap);
         List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
-        //对于最终的打分结果和选峰结果保存到数据库中
-        for(SimpleFeatureScores simpleFeatureScores : featureScoresList){
-            ScoresDO scoresDO = scoresService.getByPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
-            scoresDO.setBestRt(simpleFeatureScores.getRt());
-            scoresService.update(scoresDO);
-        }
+
         ErrorStat errorStat = stats.errorStatistics(featureScoresList, params);
         FinalResult finalResult = new FinalResult();
         finalResult.setAllInfo(errorStat);
         finalResult.setWeightsMap(weightsMap);
+
+        //对于最终的打分结果和选峰结果保存到数据库中
+        for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
+            ScoresDO scoresDO = scoresService.getByPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
+            scoresDO.setBestRt(simpleFeatureScores.getRt());
+            if(!simpleFeatureScores.getIsDecoy()){
+                scoresDO.setIsIdentified(simpleFeatureScores.getFdr() <= 0.01);
+            }
+            scoresService.update(scoresDO);
+        }
         return finalResult;
     }
 
@@ -106,7 +111,7 @@ public class Airus {
         }
         FinalResult finalResult = new FinalResult();
         finalResult.setWeightsMap(classifierTable);
-        ErrorStat errorStat = stats.errorStatistics(topTargetDscores, topDecoyDscores);
+        ErrorStat errorStat = stats.errorStatistics(topTargetDscores, topDecoyDscores, params);
         finalResult.setFinalErrorTable(finalErrorTable(errorStat, params));
         finalResult.setSummaryErrorTable(summaryErrorTable(errorStat, params));
         finalResult.setAllInfo(errorStat);
@@ -242,10 +247,11 @@ public class Airus {
             List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
             ErrorStat errorStat = stats.errorStatistics(featureScoresList, params);
             int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
+            logger.info("pi0:" + errorStat.getPi0Est().getPi0());
             if (count > 0) {
                 logger.info("本轮尝试有效果:检测结果:" + count + "个");
             }
-            if(count > maxCount){
+            if (count > maxCount) {
                 maxCount = count;
                 weightsMapList.add(ldaLearnData.getWeightsMap());
             }

@@ -33,11 +33,12 @@ public class ScoresDO {
     @Indexed
     Boolean isDecoy = false;
 
+    @Indexed
+    Boolean isIdentified;
+
     List<FeatureScores> featureScoresList;
 
     Double bestRt;
-
-    Boolean isIdentified = false;
 
     Date createDate;
 

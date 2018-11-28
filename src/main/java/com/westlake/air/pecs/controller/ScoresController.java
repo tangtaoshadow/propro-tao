@@ -49,13 +49,22 @@ public class ScoresController extends BaseController {
                 @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
                 @RequestParam(value = "overviewId", required = true) String overviewId,
                 @RequestParam(value = "peptideRef", required = false) String peptideRef,
+                @RequestParam(value = "isIdentified", required = false) String isIdentified,
                 RedirectAttributes redirectAttributes) {
         model.addAttribute("overviewId", overviewId);
         model.addAttribute("peptideRef", peptideRef);
         model.addAttribute("pageSize", pageSize);
+        model.addAttribute("isIdentified", isIdentified);
         ScoresQuery query = new ScoresQuery();
         if (peptideRef != null && !peptideRef.isEmpty()) {
             query.setPeptideRef(peptideRef);
+        }
+        if (isIdentified!= null && isIdentified.equals("Yes")) {
+            query.setIsIdentified(true);
+            query.setIsDecoy(false);
+        }else if(isIdentified!= null && isIdentified.equals("No")){
+            query.setIsIdentified(false);
+            query.setIsDecoy(false);
         }
         query.setOverviewId(overviewId);
         query.setPageSize(pageSize);

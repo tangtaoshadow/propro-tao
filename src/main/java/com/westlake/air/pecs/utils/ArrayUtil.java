@@ -392,10 +392,11 @@ public class ArrayUtil {
     }
 
     /**
-     * rankDataMax([1,2,2,3,3,3,4])
-     * -> [1, 3, 3, 6, 6, 6, 7]
+     * rank([1,2,2,3,3,3,4])
+     * -> [1, 3(并列第3), 3(并列第3), 6(并列第6), 6(并列第6), 6(并列第6), 7]
+     * 统计数组中每一个数字的排名,数字相同的按照最低并列排名算
      */
-    public static double[] rankDataMax(Double[] array) {
+    public static double[] rank(Double[] array) {
         int n = array.length;
         double[] result = new double[n];
         int[] countSort = ArrayUtil.reverse(countSort(array));
@@ -411,10 +412,12 @@ public class ArrayUtil {
     }
 
     /**
-     * rankDataMax([1,2,2,3,3,3,4])
+     * rank([1,2,2,3,3,3,4])
      * -> [7, 5.5, 5.5, 3, 3, 3, 1]
+     * 计算一个数组中每一个数字的从大到小的排名的平均数,然后取倒置
+     * 例如上例中的数字3,从大到小排名第2,3,4位,因此平均排名是3,数字2从大到小的排名是5,6,所以平均排名是5.5
      */
-    public static double[] rankDataReversed(Double[] array) {
+    public static double[] averageRankReverse(Double[] array) {
         int n = array.length;
         double[] result = new double[n];
         int[] countSortReversed = ArrayUtil.reverse(countSort(array));
@@ -432,8 +435,10 @@ public class ArrayUtil {
 
     /**
      * count number of times corresponding to unique sorted array.
+     * 将数组转置,然后计算每一个数字出现的次数
+     *
      */
-    private static int[] countSort(Double[] array) {
+    public static int[] countSort(Double[] array) {
         Double[] aSort = array.clone();
         Arrays.sort(aSort);
         int j = 0, k = 0;

@@ -107,6 +107,9 @@ public class ScoresDAO {
         if (targetQuery.getIsDecoy() != null) {
             query.addCriteria(where("isDecoy").is(targetQuery.getIsDecoy()));
         }
+        if (targetQuery.getIsIdentified() != null) {
+            query.addCriteria(where("isIdentified").is(targetQuery.getIsIdentified()));
+        }
 
         return query;
     }

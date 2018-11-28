@@ -623,8 +623,10 @@ public class MathUtil {
      */
     public static int countOverThreshold(Double[] array, double threshold) {
         int n = 0;
-        for (double i : array) {
-            if (i >= threshold) n++;
+        for (Double i : array) {
+            if (i >= threshold) {
+                n++;
+            }
         }
         return n;
     }

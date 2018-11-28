@@ -201,12 +201,25 @@ public class AirusUtil {
         return bestFeatureScoresList;
     }
 
-    public static Double[] buildSortedMainScoreArray(List<SimpleFeatureScores> scores) {
+    public static Double[] buildMainScoreArray(List<SimpleFeatureScores> scores, Boolean needToSort) {
         Double[] result = new Double[scores.size()];
         for (int i = 0; i < scores.size(); i++) {
             result[i] = scores.get(i).getMainScore();
         }
-        Arrays.sort(result);
+        if(needToSort){
+            Arrays.sort(result);
+        }
+        return result;
+    }
+
+    public static Double[] buildPValueArray(List<SimpleFeatureScores> scores, Boolean needToSort) {
+        Double[] result = new Double[scores.size()];
+        for (int i = 0; i < scores.size(); i++) {
+            result[i] = scores.get(i).getPValue();
+        }
+        if(needToSort){
+            Arrays.sort(result);
+        }
         return result;
     }
 
@@ -467,5 +480,36 @@ public class AirusUtil {
         }
 
         return finalWeightsMap;
+    }
+
+    /**
+     * Count number of values bigger than threshold in array.
+     */
+    public static int countOverThreshold(List<SimpleFeatureScores> scores, double threshold) {
+        int n = 0;
+        for (SimpleFeatureScores i : scores) {
+            if (i.getPValue() >= threshold) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    /**
+     * 统计一个数组中的每一位数字,在该数组中小于等于自己的数还有几个
+     * 例如数组3,2,1,1. 经过本函数后得到的结果是4,3,2,2
+     * 入参array必须是降序排序后的数组
+     */
+    public static int[] countPValueNumPositives(List<SimpleFeatureScores> array) {
+        int step = 0;
+        int n = array.size();
+        int[] result = new int[n];
+        for (int i = 0; i < n; i++) {
+            while (step < n && array.get(i).getPValue().equals(array.get(step).getPValue())) {
+                result[step] = n - i;
+                step++;
+            }
+        }
+        return result;
     }
 }

@@ -53,7 +53,7 @@ public class SemiSupervised {
             Boolean[] isTopPeak = AirusUtil.findTopIndex(mainScore, trainId);
 
             //Start the first time of training with mainScore as main score.
-            TrainPeaks trainPeaks = selectTrainPeaks(trainScores, mainScore, trainIsDecoy, isTopPeak, params.getSsInitialFdr());
+            TrainPeaks trainPeaks = selectTrainPeaks(trainScores, mainScore, trainIsDecoy, isTopPeak, params.getSsInitialFdr(), params);
 
             Double[] w = ldaLearner.learn(trainPeaks.getTopDecoyPeaks(), trainPeaks.getBestTargetPeaks(), false);
 
@@ -66,7 +66,7 @@ public class SemiSupervised {
             for (int times = 0; times < params.getXevalNumIter(); times++) {
                 logger.info("开始第" + times + "轮机器学习");
 
-                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainScores, clfScores, trainIsDecoy, isTopPeak, params.getSsIterationFdr());
+                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainScores, clfScores, trainIsDecoy, isTopPeak, params.getSsIterationFdr(), params);
 
                 w = ldaLearner.learn(trainPeaksTemp.getTopDecoyPeaks(), trainPeaksTemp.getBestTargetPeaks(), true);
 
@@ -126,7 +126,7 @@ public class SemiSupervised {
         return trainPeaks;
     }
 
-    private TrainPeaks selectTrainPeaks(Double[][] trainData, Double[] scores, Boolean[] trainIsDecoy, Boolean[] isTopPeak, double cutOffFdr) {
+    private TrainPeaks selectTrainPeaks(Double[][] trainData, Double[] scores, Boolean[] trainIsDecoy, Boolean[] isTopPeak, double cutOffFdr, Params params) {
 
         Double[][] topTargetPeaks = AirusUtil.getTopTargetPeaks(trainData, trainIsDecoy, isTopPeak);
         Double[] topTargetScores = AirusUtil.getTopTargetPeaks(scores, trainIsDecoy, isTopPeak);
@@ -134,7 +134,7 @@ public class SemiSupervised {
         Double[] topDecoyScores = AirusUtil.getTopDecoyPeaks(scores, trainIsDecoy, isTopPeak);
 
         // find cutoff fdr from scores and only use best target peaks:
-        Double cutoff = stats.findCutoff(topTargetScores, topDecoyScores, cutOffFdr);
+        Double cutoff = stats.findCutoff(topTargetScores, topDecoyScores, cutOffFdr, params);
         Double[][] bestTargetPeaks = AirusUtil.peaksFilter(topTargetPeaks, topTargetScores, cutoff);
 
         TrainPeaks trainPeaks = new TrainPeaks();

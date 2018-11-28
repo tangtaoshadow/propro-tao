@@ -15,11 +15,19 @@ public class SimpleFeatureScores {
 
     Boolean isDecoy;
 
-    double rt;
+    Double rt;
 
     HashMap<String, Double> scoresMap;
 
     Double mainScore;
+
+    Double pValue;
+
+    Double qValue;
+
+    Double fdr;
+
+    public SimpleFeatureScores(){}
 
     public SimpleFeatureScores(String peptideRef, Boolean isDecoy){
         this.peptideRef = peptideRef;
