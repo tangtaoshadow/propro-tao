@@ -17,6 +17,76 @@
         <div class="m-portlet__body m-portlet__body--no-padding">
             <div class="row m-row--no-padding m-row--col-separator-xl">
                 <div class="col-md-12 col-lg-6 col-xl-3">
+                    <div class="m-widget24">
+                        <div class="m-widget24__item">
+                            <h2 class="m-widget24__title">实验数据(Experiments)</h2>
+                            <br>
+                            <span class="m-widget24__desc"><a class="btn btn-primary btn-sm" th:href="|/experiment/list|" th:text="|See All|"></a></span>
+                            <span class="m-widget24__stats m--font-brand" th:text="${expCount}"></span>
+                            <div class="m--space-10"></div>
+                            <div class="m-widget2">
+                                <div th:each="exp:${exps}" class="m-widget2__item m-widget2__item--warning">
+                                    <div class="m-widget2__checkbox"></div>
+                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/experiment/detail/${exp.id}'|">
+                                        <span class="m-widget2__text" th:text="${exp.name}">
+                                        </span>
+                                        <br>
+                                        <span class="m-widget2__user-name">
+										    <a href="#" class="m-widget2__link" th:text="|${exp.creator}-${#dates.format(exp.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 col-lg-6 col-xl-3">
+                    <div class="m-widget24">
+                        <div class="m-widget24__item">
+                            <h2 class="m-widget24__title">数据分析(Analyses)</h2>
+                            <br>
+                            <span class="m-widget24__desc">The convoluted data</span>
+                            <span class="m-widget24__stats m--font-danger" th:text="${overviewCount}"></span>
+                            <div class="m--space-10"></div>
+                            <div class="m-widget2">
+                                <div th:each="overview:${overviews}" class="m-widget2__item m-widget2__item--accent">
+                                    <div class="m-widget2__checkbox"></div>
+                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/analyse/overview/detail/${overview.id}'|">
+                                        <span class="m-widget2__text" th:text="${overview.name}"></span>
+                                        <br>
+                                        <span class="m-widget2__user-name">
+										    <a href="#" class="m-widget2__link" th:text="|${overview.creator}-${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 col-lg-6 col-xl-3">
+                    <div class="m-widget24">
+                        <div class="m-widget24__item">
+                            <h2 class="m-widget24__title">标准库(Libraries)</h2>
+                            <br>
+                            <span class="m-widget24__desc">Include Standard and iRT libraries</span>
+                            <span class="m-widget24__stats m--font-info" th:text="${libCount}"></span>
+                            <div class="m--space-10"></div>
+                            <div class="m-widget2">
+                                <div th:each="lib:${libs}" class="m-widget2__item m-widget2__item--info">
+                                    <div class="m-widget2__checkbox"></div>
+                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/library/detail/${lib.id}'|">
+                                        <span class="m-widget2__text" th:text="${lib.name}"></span>
+                                        <br>
+                                        <span class="m-widget2__user-name">
+										    <a href="#" class="m-widget2__link" th:text="|${lib.creator}-${#dates.format(lib.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 col-lg-6 col-xl-3">
                     <!--begin::New Users-->
                     <div class="m-widget24">
                         <div class="m-widget24__item">
@@ -42,82 +112,6 @@
                         </div>
                     </div>
                     <!--end::New Users-->
-                </div>
-                <div class="col-md-12 col-lg-6 col-xl-3">
-                    <!--begin::Total Profit-->
-                    <div class="m-widget24">
-                        <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">实验数据(Experiments)</h2>
-                            <br>
-                            <span class="m-widget24__desc">MzXML or MzXML Format</span>
-                            <span class="m-widget24__stats m--font-brand" th:text="${expCount}"></span>
-                            <div class="m--space-10"></div>
-                            <div class="m-widget2">
-                                <div th:each="exp:${exps}" class="m-widget2__item m-widget2__item--warning">
-                                    <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/experiment/detail/${exp.id}'|">
-                                        <span class="m-widget2__text" th:text="${exp.name}">
-                                        </span>
-                                        <br>
-                                        <span class="m-widget2__user-name">
-										    <a href="#" class="m-widget2__link" th:text="|${exp.creator}-${#dates.format(exp.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!--end::Total Profit-->
-                </div>
-                <div class="col-md-12 col-lg-6 col-xl-3">
-                    <!--begin::New Feedbacks-->
-                    <div class="m-widget24">
-                        <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">标准库(Libraries)</h2>
-                            <br>
-                            <span class="m-widget24__desc">Include Standard and iRT libraries</span>
-                            <span class="m-widget24__stats m--font-info" th:text="${libCount}"></span>
-                            <div class="m--space-10"></div>
-                            <div class="m-widget2">
-                                <div th:each="lib:${libs}" class="m-widget2__item m-widget2__item--info">
-                                    <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/library/detail/${lib.id}'|">
-                                        <span class="m-widget2__text" th:text="${lib.name}"></span>
-                                        <br>
-                                        <span class="m-widget2__user-name">
-										    <a href="#" class="m-widget2__link" th:text="|${lib.creator}-${#dates.format(lib.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!--end::New Feedbacks-->
-                </div>
-                <div class="col-md-12 col-lg-6 col-xl-3">
-                    <!--begin::New Orders-->
-                    <div class="m-widget24">
-                        <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">卷积分析(Analyses)</h2>
-                            <br>
-                            <span class="m-widget24__desc">The convoluted data</span>
-                            <span class="m-widget24__stats m--font-danger" th:text="${overviewCount}"></span>
-                            <div class="m--space-10"></div>
-                            <div class="m-widget2">
-                                <div th:each="overview:${overviews}" class="m-widget2__item m-widget2__item--accent">
-                                    <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/analyse/overview/detail/${overview.id}'|">
-                                        <span class="m-widget2__text" th:text="${overview.name}"></span>
-                                        <br>
-                                        <span class="m-widget2__user-name">
-										    <a href="#" class="m-widget2__link" th:text="|${overview.creator}-${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!--end::New Orders-->
                 </div>
             </div>
         </div>

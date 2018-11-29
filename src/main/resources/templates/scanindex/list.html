@@ -26,7 +26,7 @@
                 <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
 
                 <div class="form-group m-form__group row">
-                    <div class="input-group col-lg-3">
+                    <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
                             <button class="btn btn-success" type="button">
                                 实验ID:
@@ -35,14 +35,13 @@
                         <input type="text" class="form-control m-input" name="experimentId"
                                th:value="${experimentId}">
                     </div>
-                    <div class="input-group col-lg-1">
+                    <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
                             <button class="btn btn-success" type="button">
                                 MS等级:
                             </button>
                         </div>
-                        <input type="text" class="form-control m-input" name="msLevel"
-                               placeholder="" th:value="${msLevel}">
+                        <input type="text" class="form-control m-input" name="msLevel" th:value="${msLevel}">
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
@@ -56,7 +55,7 @@
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
                             <button class="btn btn-success" type="button">
-                                内部序列Num:
+                                Num:
                             </button>
                         </div>
                         <input type="text" class="form-control m-input" name="num"
@@ -70,6 +69,9 @@
                         </div>
                         <input type="text" class="form-control m-input" name="precursorMzStart"
                                placeholder="precursorMzStart" th:value="${precursorMzStart}">
+
+                    </div>
+                    <div class="input-group col-lg-2">
                         <div class="input-group-append">
                             <button class="btn btn-warning" type="submit">
                                 搜索

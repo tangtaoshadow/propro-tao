@@ -37,7 +37,9 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">实验数据详情页</h3>
+                            <h3 class="m-portlet__head-text">实验数据详情页
+                                <a th:href="|/scanindex/list?experimentId=${experiment?.id}|" class="btn btn-primary">查看原始谱图列表</a>
+                            </h3>
                         </div>
                     </div>
                 </div>
