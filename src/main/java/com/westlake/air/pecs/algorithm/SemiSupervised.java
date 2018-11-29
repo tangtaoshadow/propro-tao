@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.algorithm;
 
+import com.alibaba.fastjson.JSONArray;
 import com.westlake.air.pecs.domain.bean.airus.*;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
@@ -38,52 +39,6 @@ public class SemiSupervised {
         return ldaLearner.averagedWeight(weights);
     }
 
-    @Deprecated
-    public LDALearnData learnRandomized(Double[][] scores, Integer[] groupNumId, Boolean[] isDecoy, Params params) {
-        LDALearnData ldaLearnData = new LDALearnData();
-        try {
-
-            //Get part of scores as train input.
-            TrainAndTest trainAndTest = AirusUtil.split(scores, groupNumId, isDecoy, params.getTrainTestRatio(), params.isDebug());
-
-            Double[][] trainScores = trainAndTest.getTrainData();
-            Integer[] trainId = trainAndTest.getTrainId();
-            Boolean[] trainIsDecoy = trainAndTest.getTrainIsDecoy();
-            Double[] mainScore = ArrayUtil.extractColumn(trainScores, 0);
-            Boolean[] isTopPeak = AirusUtil.findTopIndex(mainScore, trainId);
-
-            //Start the first time of training with mainScore as main score.
-            TrainPeaks trainPeaks = selectTrainPeaks(trainScores, mainScore, trainIsDecoy, isTopPeak, params.getSsInitialFdr(), params);
-
-            Double[] w = ldaLearner.learn(trainPeaks.getTopDecoyPeaks(), trainPeaks.getBestTargetPeaks(), false);
-
-            Double[] clfScores = ldaLearner.score(trainScores, w, false);
-
-            clfScores = MathUtil.normalize(clfScores);
-            isTopPeak = AirusUtil.findTopIndex(clfScores, trainId);
-
-            //Begin "semi supervised learning" iteration.
-            for (int times = 0; times < params.getXevalNumIter(); times++) {
-                logger.info("开始第" + times + "轮机器学习");
-
-                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainScores, clfScores, trainIsDecoy, isTopPeak, params.getSsIterationFdr(), params);
-
-                w = ldaLearner.learn(trainPeaksTemp.getTopDecoyPeaks(), trainPeaksTemp.getBestTargetPeaks(), true);
-
-                clfScores = ldaLearner.score(trainScores, w, true);
-
-                isTopPeak = AirusUtil.findTopIndex(clfScores, trainId);
-            }
-
-            ldaLearnData.setWeights(w);
-            return ldaLearnData;
-        } catch (Exception e) {
-            logger.error("learnRandomized Fail.\n");
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     public LDALearnData learnRandomized(List<SimpleScores> scores, Params params) {
         LDALearnData ldaLearnData = new LDALearnData();
         try {
@@ -92,14 +47,15 @@ public class SemiSupervised {
             //第一次训练数据集使用MainScore进行训练
             TrainPeaks trainPeaks = selectTrainPeaks(trainData, params.getMainScore(), params);
             HashMap<String, Double> weightsMap = ldaLearner.learn(trainPeaks, params.getMainScore());
+            logger.info("Train1:"+ JSONArray.toJSONString(weightsMap));
             //根据weightsMap计算子分数的加权总分
             ldaLearner.score(trainData, weightsMap);
-
             for (int times = 0; times < params.getXevalNumIter(); times++) {
                 TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, FeatureScores.ScoreType.WeightedTotalScore.getTypeName(), params);
                 weightsMap = ldaLearner.learn(trainPeaksTemp, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
                 ldaLearner.score(trainData, weightsMap);
             }
+            //每一轮结束后要将这一轮打出的加权总分删除掉,以免影响下一轮打分
             trainData.removeWeightedTotalScore();
             ldaLearnData.setWeightsMap(weightsMap);
             return ldaLearnData;
@@ -124,26 +80,5 @@ public class SemiSupervised {
         trainPeaks.setBestTargets(bestTargetPeaks);
         trainPeaks.setTopDecoys(topDecoyPeaks);
         return trainPeaks;
-    }
-
-    private TrainPeaks selectTrainPeaks(Double[][] trainData, Double[] scores, Boolean[] trainIsDecoy, Boolean[] isTopPeak, double cutOffFdr, Params params) {
-
-        Double[][] topTargetPeaks = AirusUtil.getTopTargetPeaks(trainData, trainIsDecoy, isTopPeak);
-        Double[] topTargetScores = AirusUtil.getTopTargetPeaks(scores, trainIsDecoy, isTopPeak);
-        Double[][] topDecoyPeaks = AirusUtil.getTopDecoyPeaks(trainData, trainIsDecoy, isTopPeak);
-        Double[] topDecoyScores = AirusUtil.getTopDecoyPeaks(scores, trainIsDecoy, isTopPeak);
-
-        // find cutoff fdr from scores and only use best target peaks:
-        Double cutoff = stats.findCutoff(topTargetScores, topDecoyScores, cutOffFdr, params);
-        Double[][] bestTargetPeaks = AirusUtil.peaksFilter(topTargetPeaks, topTargetScores, cutoff);
-
-        TrainPeaks trainPeaks = new TrainPeaks();
-        trainPeaks.setBestTargetPeaks(bestTargetPeaks);
-        trainPeaks.setTopDecoyPeaks(topDecoyPeaks);
-        return trainPeaks;
-    }
-
-    private Double[] score(Double[][] data, Double[] params) {
-        return ldaLearner.score(data, params, true);
     }
 }

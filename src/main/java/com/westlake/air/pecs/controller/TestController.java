@@ -151,13 +151,4 @@ public class TestController extends BaseController {
         TrainAndTest tt = JSON.parseObject(trainAndTestContent, TrainAndTest.class);
         return tt.getTestData().length + "/" + tt.getTrainData().length + "/" + tt.getTestId().length + "/" + tt.getTrainId().length;
     }
-
-    @RequestMapping("test8")
-    @ResponseBody
-    String test8(Model model, RedirectAttributes redirectAttributes) throws IOException {
-        long start = System.currentTimeMillis();
-        List<ScoresDO> scores = scoresService.getAllByOverviewId("5b967e5fcbaa7e2940fc6537");
-        ScoreData scoreData = airus.trans(scores);
-        return "HelloWorld";
-    }
 }

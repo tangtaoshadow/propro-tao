@@ -29,19 +29,6 @@ public class AirusTest extends BaseTest {
     @Autowired
     ScoresService scoresService;
 
-    @Test
-    public void scoreFromDBWork() {
-        HashMap<String, ScoresDO> scoreMap = scoresService.getAllMapByOverviewId("5bbdaaf1fc6f9e1f2872d5ce");
-        ScoreData scoreData = airus.trans(new ArrayList(scoreMap.values()));
-        FinalResult finalResult = airus.doAirus(scoreData, new Params());
-
-        int count = AirusUtil.checkFdr(finalResult);
-        System.out.println(count);
-        System.out.println(JSON.toJSONString(finalResult.getWeightsMap()));
-
-        assert count >= 322;
-    }
-
     private boolean isSimilar(Double[] array1, Double[] array2, Double tolerance) {
         if (array1.length != array2.length) return false;
         boolean result = true;

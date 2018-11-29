@@ -443,8 +443,8 @@ public class AnalyseController extends BaseController {
         long start = System.currentTimeMillis();
         Params params = new Params();
         params.setDebug(false);
-        params.setMainScore(FeatureScores.ScoreType.XcorrShape.getTypeName());
-        params.setTrainTimes(50);
+        params.setMainScore(FeatureScores.ScoreType.MainScore.getTypeName());
+        params.setTrainTimes(10);
         FinalResult finalResult = airus.doAirus(overviewId, params);
         logger.info("打分耗时:" + (System.currentTimeMillis() - start));
         int count = AirusUtil.checkFdr(finalResult);

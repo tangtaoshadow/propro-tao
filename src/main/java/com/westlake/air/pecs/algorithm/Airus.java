@@ -43,28 +43,14 @@ public class Airus {
     ScoresService scoresService;
 
     public FinalResult doAirus(String overviewId, Params params) {
+        FinalResult finalResult = new FinalResult();
         logger.info("开始获取打分数据");
-//        List<ScoresDO> scores = scoresService.getAllByOverviewId(overviewId);
-//        return doAirus(scores, params);
         List<SimpleScores> scores = scoresService.getSimpleAllByOverviewId(overviewId);
-        return doAirusWithDB(overviewId, scores, params);
-    }
-
-    public FinalResult doAirus(List<ScoresDO> scores, Params params) {
-        logger.info("开始检查数据是否健康");
         ResultDO resultDO = checkData(scores);
         if (resultDO.isFailed()) {
-            logger.info("数据异常:" + resultDO.getMsgInfo());
-            FinalResult result = new FinalResult();
-            result.setErrorInfo(resultDO.getMsgInfo());
-            return result;
+            finalResult.setErrorInfo(resultDO.getMsgInfo());
+            return finalResult;
         }
-        logger.info("开始转换打分数据格式");
-        ScoreData scoreData = trans(scores);
-        return doAirus(scoreData, params);
-    }
-
-    public FinalResult doAirusWithDB(String overviewId, List<SimpleScores> scores, Params params) {
         logger.info("开始检查数据是否健康");
         for (SimpleScores score : scores) {
             score.setGroupId(score.getIsDecoy() ? ("DECOY_" + score.getPeptideRef()) : score.getPeptideRef());
@@ -77,7 +63,7 @@ public class Airus {
         List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
 
         ErrorStat errorStat = stats.errorStatistics(featureScoresList, params);
-        FinalResult finalResult = new FinalResult();
+
         finalResult.setAllInfo(errorStat);
         finalResult.setWeightsMap(weightsMap);
 
@@ -85,7 +71,7 @@ public class Airus {
         for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
             ScoresDO scoresDO = scoresService.getByPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
             scoresDO.setBestRt(simpleFeatureScores.getRt());
-            if(!simpleFeatureScores.getIsDecoy()){
+            if (!simpleFeatureScores.getIsDecoy()) {
                 scoresDO.setIsIdentified(simpleFeatureScores.getFdr() <= 0.01);
             }
             scoresService.update(scoresDO);
@@ -93,37 +79,10 @@ public class Airus {
         return finalResult;
     }
 
-    public FinalResult doAirus(ScoreData scoreData, Params params) {
-        if (params.isDebug()) {
-            scoreData = AirusUtil.fakeSortTgId(scoreData);
-        }
-        logger.info("开始训练学习数据权重");
-        Double[] weights = learn(scoreData.getScoreData(), scoreData.getGroupNumId(), scoreData.getIsDecoy(), params);
-        logger.info("开始计算合并打分");
-        Double[] dscore = calculateDscore(weights, scoreData);
-        Double[] topTargetDscores = AirusUtil.getTopTargetPeaks(dscore, scoreData.getIsDecoy(), AirusUtil.findTopIndex(dscore, scoreData.getGroupNumId()));
-        Double[] topDecoyDscores = AirusUtil.getTopDecoyPeaks(dscore, scoreData.getIsDecoy(), AirusUtil.findTopIndex(dscore, scoreData.getGroupNumId()));
-        String[] scoreColumns = FeatureScores.getScoresColumnNames();
-
-        HashMap<String, Double> classifierTable = new HashMap<String, Double>();
-        for (int i = 0; i < weights.length; i++) {
-            classifierTable.put(scoreColumns[i], weights[i]);
-        }
-        FinalResult finalResult = new FinalResult();
-        finalResult.setWeightsMap(classifierTable);
-        ErrorStat errorStat = stats.errorStatistics(topTargetDscores, topDecoyDscores, params);
-        finalResult.setFinalErrorTable(finalErrorTable(errorStat, params));
-        finalResult.setSummaryErrorTable(summaryErrorTable(errorStat, params));
-        finalResult.setAllInfo(errorStat);
-        logger.info("合并打分完毕");
-        return finalResult;
-    }
-
-
-    public ResultDO checkData(List<ScoresDO> scores) {
+    public ResultDO checkData(List<SimpleScores> scores) {
         boolean isAllDecoy = true;
         boolean isAllReal = true;
-        for (ScoresDO score : scores) {
+        for (SimpleScores score : scores) {
             if (score.getIsDecoy()) {
                 isAllReal = false;
             } else {
@@ -139,102 +98,6 @@ public class Airus {
         return new ResultDO(true);
     }
 
-//    public ResultDO checkData(List<SimpleScores> scores) {
-//        boolean isAllDecoy = true;
-//        boolean isAllReal = true;
-//        for (SimpleScores score : scores) {
-//            if (score.getIsDecoy()) {
-//                isAllReal = false;
-//            } else {
-//                isAllDecoy = false;
-//            }
-//        }
-//        if (isAllDecoy) {
-//            return ResultDO.buildError(ResultCode.ALL_SCORE_DATA_ARE_DECOY);
-//        }
-//        if (isAllReal) {
-//            return ResultDO.buildError(ResultCode.ALL_SCORE_DATA_ARE_REAL);
-//        }
-//        return new ResultDO(true);
-//    }
-
-    public ScoreData trans(List<ScoresDO> scores) {
-        ScoreData scoreData = new ScoreData();
-        if (scores == null || scores.size() == 0) {
-            return null;
-        }
-
-        //之后会转化为Decoy
-        List<Boolean> isDecoyList = new ArrayList<>();
-        //之后会转化为GroupId
-        List<String> peptideRefList = new ArrayList<>();
-        //之后会转化为FeatureScores
-        List<HashMap<String, Double>> scoreList = new ArrayList<>();
-        for (ScoresDO score : scores) {
-            for (FeatureScores fs : score.getFeatureScoresList()) {
-                isDecoyList.add(score.getIsDecoy());
-                String peptideRef = score.getPeptideRef();
-                if (score.getIsDecoy()) {
-                    peptideRef = "DECOY_" + peptideRef;
-                }
-                peptideRefList.add(peptideRef);
-                HashMap<String, Double> scoreMap = fs.getScoresMap();
-                scoreList.add(scoreMap);
-                for (String key : scoreMap.keySet()) {
-                    if (scoreMap.get(key).equals(Double.NaN)) {
-                        logger.info("包含空打分肽段名:" + JSON.toJSONString(score.getPeptideRef()));
-                        logger.info("Key:" + key);
-                    }
-                }
-            }
-        }
-
-        Boolean[] isDecoyArray = new Boolean[isDecoyList.size()];
-        isDecoyList.toArray(isDecoyArray);
-
-        String[] groupIds = new String[peptideRefList.size()];
-        peptideRefList.toArray(groupIds);
-        Integer[] groupNumIds = AirusUtil.getGroupNumId(groupIds);
-        Double[][] scoresArray = new Double[peptideRefList.size()][SCORES_COUNT];
-        for (int i = 0; i < scoreList.size(); i++) {
-            scoresArray[i] = FeatureScores.toArray(scoreList.get(i));
-        }
-
-        logger.info("打分数据构造完毕");
-        scoreData.setGroupId(groupIds);
-        scoreData.setGroupNumId(groupNumIds);
-        scoreData.setIsDecoy(isDecoyArray);
-        scoreData.setScoreData(scoresArray);
-        return scoreData;
-    }
-
-    /**
-     * Airus入口函数
-     *
-     * @param scores
-     * @param groupNumId
-     * @param isDecoy
-     * @return
-     */
-    public Double[] learn(Double[][] scores, Integer[] groupNumId, Boolean[] isDecoy, Params params) {
-        int neval = params.getTrainTimes();
-        Double[][] weights = new Double[neval][scores[0].length];
-        for (int i = 0; i < neval; i++) {
-            LDALearnData ldaLearnData = semiSupervised.learnRandomized(scores, groupNumId, isDecoy, params);
-
-            if (params.isDebug()) {
-                weights = new Double[1][scores[0].length];
-                weights[0] = ldaLearnData.getWeights();
-                break;
-            } else {
-                weights[i] = ldaLearnData.getWeights();
-            }
-        }
-        logger.info("学习完毕");
-
-        return semiSupervised.averagedLearner(weights);
-    }
-
     public HashMap<String, Double> learn(List<SimpleScores> scores, Params params) {
         int neval = params.getTrainTimes();
         List<HashMap<String, Double>> weightsMapList = new ArrayList<>();
@@ -247,14 +110,11 @@ public class Airus {
             List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
             ErrorStat errorStat = stats.errorStatistics(featureScoresList, params);
             int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
-            logger.info("pi0:" + errorStat.getPi0Est().getPi0());
             if (count > 0) {
                 logger.info("本轮尝试有效果:检测结果:" + count + "个");
             }
-            if (count > maxCount) {
-                maxCount = count;
-                weightsMapList.add(ldaLearnData.getWeightsMap());
-            }
+
+            weightsMapList.add(ldaLearnData.getWeightsMap());
 
             if (params.isDebug()) {
                 break;

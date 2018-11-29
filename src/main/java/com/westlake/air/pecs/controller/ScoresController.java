@@ -46,7 +46,7 @@ public class ScoresController extends BaseController {
     @RequestMapping(value = "/list")
     String list(Model model,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
+                @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
                 @RequestParam(value = "overviewId", required = false) String overviewId,
                 @RequestParam(value = "peptideRef", required = false) String peptideRef,
                 @RequestParam(value = "isIdentified", required = false) String isIdentified,
