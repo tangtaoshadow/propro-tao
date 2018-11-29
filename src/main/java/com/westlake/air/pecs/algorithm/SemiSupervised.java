@@ -1,13 +1,12 @@
 package com.westlake.air.pecs.algorithm;
 
 import com.alibaba.fastjson.JSONArray;
+import com.westlake.air.pecs.algorithm.learner.LDALearner;
 import com.westlake.air.pecs.domain.bean.airus.*;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.utils.AirusUtil;
-import com.westlake.air.pecs.utils.ArrayUtil;
-import com.westlake.air.pecs.utils.MathUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,15 +28,6 @@ public class SemiSupervised {
     Stats stats;
     @Autowired
     LDALearner ldaLearner;
-
-    /**
-     * set w as average
-     *
-     * @param weights w[]: the result of nevals
-     */
-    public Double[] averagedLearner(Double[][] weights) {
-        return ldaLearner.averagedWeight(weights);
-    }
 
     public LDALearnData learnRandomized(List<SimpleScores> scores, Params params) {
         LDALearnData ldaLearnData = new LDALearnData();

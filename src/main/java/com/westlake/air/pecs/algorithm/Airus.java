@@ -1,6 +1,6 @@
 package com.westlake.air.pecs.algorithm;
 
-import com.alibaba.fastjson.JSON;
+import com.westlake.air.pecs.algorithm.learner.LDALearner;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.*;
@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
-import static com.westlake.air.pecs.domain.bean.score.FeatureScores.SCORES_COUNT;
 
 /**
  * Created by Nico Wang Ruimin
@@ -101,7 +99,6 @@ public class Airus {
     public HashMap<String, Double> learn(List<SimpleScores> scores, Params params) {
         int neval = params.getTrainTimes();
         List<HashMap<String, Double>> weightsMapList = new ArrayList<>();
-        int maxCount = 0;
         for (int i = 0; i < neval; i++) {
             logger.info("开始第" + i + "轮尝试");
             LDALearnData ldaLearnData = semiSupervised.learnRandomized(scores, params);
@@ -115,7 +112,6 @@ public class Airus {
             }
 
             weightsMapList.add(ldaLearnData.getWeightsMap());
-
             if (params.isDebug()) {
                 break;
             }

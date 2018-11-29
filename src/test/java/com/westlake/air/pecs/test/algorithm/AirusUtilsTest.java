@@ -55,22 +55,4 @@ public class AirusUtilsTest extends BaseTest {
         assert argSort[4] == 2;
         assert argSort[5] == 0;
     }
-
-    @Test
-    public void pEmpiricalTest() throws IOException {
-
-        String content = FileUtil.readFileFromSource("data/targetScoresDecoyScores.json");
-        JSONArray object = JSONArray.parseArray(content);
-
-        String targetArrayStr = object.getString(0);
-        String decoyArrayStr = object.getString(1);
-        List<Double> targetList = JSONArray.parseArray(targetArrayStr, Double.class);
-        List<Double> decoyList = JSONArray.parseArray(decoyArrayStr, Double.class);
-        Double[] targetArray = new Double[targetList.size()];
-        Double[] decoyArray = new Double[decoyList.size()];
-        targetList.toArray(targetArray);
-        decoyList.toArray(decoyArray);
-        Double[] finalResult = stats.pEmpirical(targetArray,decoyArray);
-        System.out.println("");
-    }
 }

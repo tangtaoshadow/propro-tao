@@ -17,8 +17,7 @@ public class TrainData {
     List<SimpleScores> targets;
     List<SimpleScores> decoys;
 
-    public TrainData() {
-    }
+    public TrainData() {}
 
     public TrainData(List<SimpleScores> targets, List<SimpleScores> decoys) {
         this.targets = targets;

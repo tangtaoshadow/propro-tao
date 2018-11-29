@@ -630,4 +630,17 @@ public class MathUtil {
         }
         return n;
     }
+
+    public static Double[] average(Double[][] array){
+        Double[] averagedW = new Double[array[0].length];
+        double sum = 0.0;
+        for (int i = 0; i < array[0].length; i++) {
+            for (Double[] j : array) {
+                sum += j[i];
+            }
+            averagedW[i] = sum / array.length;
+            sum = 0;
+        }
+        return averagedW;
+    }
 }
