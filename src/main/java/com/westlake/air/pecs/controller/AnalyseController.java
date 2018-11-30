@@ -292,6 +292,12 @@ public class AnalyseController extends BaseController {
         AnalyseOverviewDO overviewDO = overviewResult.getModel();
         model.addAttribute("overview", overviewDO);
 
+        ResultDO<ExperimentDO> expResult = experimentService.getById(overviewDO.getExpId());
+        if (expResult.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
+            return "redirect:/experiment/list";
+        }
+
         TaskDO taskDO = new TaskDO(TaskTemplate.SCORE, overviewDO.getName());
         taskService.insert(taskDO);
 
@@ -302,7 +308,7 @@ public class AnalyseController extends BaseController {
             si.setSlope(slope);
             si.setIntercept(intercept);
         }
-        scoreTask.score(overviewId, si, overviewDO.getLibraryId(), new SigmaSpacing(sigma, spacing), taskDO);
+        scoreTask.score(overviewId, expResult.getModel(), si, overviewDO.getLibraryId(), new SigmaSpacing(sigma, spacing), taskDO);
         return "redirect:/task/detail/" + taskDO.getId();
     }
 

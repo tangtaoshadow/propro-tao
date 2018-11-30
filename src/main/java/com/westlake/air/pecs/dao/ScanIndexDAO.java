@@ -118,11 +118,26 @@ public class ScanIndexDAO {
         if (scanIndexQuery.getRtStr() != null) {
             query.addCriteria(where("rtStr").is(scanIndexQuery.getRtStr()));
         }
-        if (scanIndexQuery.getRtStart() != null && scanIndexQuery.getRtEnd() != null) {
-            query.addCriteria(where("rt").gte(scanIndexQuery.getRtStart()).lte(scanIndexQuery.getRtEnd()));
+        Criteria c = null;
+        if (scanIndexQuery.getRtStart() != null) {
+            c = where("rt").gte(scanIndexQuery.getRtStart());
+        }
+        if (scanIndexQuery.getRtEnd() != null) {
+            if (c != null) {
+                c.lte(scanIndexQuery.getRtEnd());
+            } else {
+                c = where("rt").lte(scanIndexQuery.getRtEnd());
+            }
+        }
+        if (c != null) {
+            query.addCriteria(c);
         }
         if (scanIndexQuery.getParentNum() != null && scanIndexQuery.getParentNum() != null) {
             query.addCriteria(where("parentNum").is(scanIndexQuery.getParentNum()));
+        }
+        if (scanIndexQuery.getTargetPrecursorMz() != null) {
+            query.addCriteria(where("precursorMzStart").lte(scanIndexQuery.getTargetPrecursorMz()));
+            query.addCriteria(where("precursorMzEnd").gte(scanIndexQuery.getTargetPrecursorMz()));
         }
         if (scanIndexQuery.getPrecursorMzStart() != null && scanIndexQuery.getPrecursorMzStart() != null) {
             query.addCriteria(where("precursorMzStart").is(scanIndexQuery.getPrecursorMzStart()));

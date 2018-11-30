@@ -34,7 +34,7 @@ public class ScoresDO {
     Boolean isDecoy = false;
 
     @Indexed
-    Boolean isIdentified;
+    Boolean isIdentified = false;
 
     List<FeatureScores> featureScoresList;
 

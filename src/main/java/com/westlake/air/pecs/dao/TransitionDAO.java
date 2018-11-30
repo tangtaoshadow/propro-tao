@@ -187,18 +187,22 @@ public class TransitionDAO {
         fieldsDoc.put("intensity", true);
         fieldsDoc.put("cutInfo", true);
         fieldsDoc.put("isDecoy", true);
+        fieldsDoc.put("precursorMz", true);
+        fieldsDoc.put("sequence", true);
 
         Query query = new BasicQuery(queryDoc, fieldsDoc);
 
         List<TransitionDO> list = mongoTemplate.find(query, TransitionDO.class, CollectionName);
         HashMap<String, IntensityGroup> hashMap = new HashMap<>();
         for (TransitionDO transition : list) {
-            IntensityGroup group = hashMap.get(transition.getPeptideRef()+"_"+transition.getIsDecoy());
+            IntensityGroup group = hashMap.get(transition.getPeptideRef() + "_" + transition.getIsDecoy());
             if (group == null) {
                 group = new IntensityGroup();
                 group.setPeptideRef(transition.getPeptideRef());
                 group.setProteinName(transition.getProteinName());
-                hashMap.put(transition.getPeptideRef()+"_"+transition.getIsDecoy(), group);
+                group.setPrecursorMz(transition.getPrecursorMz().floatValue());
+                group.setSequence(transition.getSequence());
+                hashMap.put(transition.getPeptideRef() + "_" + transition.getIsDecoy(), group);
             }
 
             group.getIntensityMap().put(transition.getCutInfo(), Float.parseFloat(transition.getIntensity().toString()));

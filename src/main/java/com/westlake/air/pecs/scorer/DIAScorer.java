@@ -21,13 +21,13 @@ import java.util.*;
 /**
  * Created by Nico Wang Ruimin
  * Time: 2018-08-15 16:09
- *
+ * <p>
  * scores.massdev_score
  * scores.weighted_massdev_score
- *
+ * <p>
  * scores.isotope_correlation
  * scores.isotope_overlap
- *
+ * <p>
  * scores.bseries_score
  * scores.yseries_score
  */
@@ -45,28 +45,33 @@ public class DIAScorer {
      * scores.massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比之和
      * scores.weighted_massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比按libraryIntensity加权之和
      *
-     * @param productMzArray 根据transitionGroup获得存在transition中的productMz，存成Float array
-     * @param spectrumMzArray 根据transitionGroup选取的RT选择的最近的Spectrum对应的mzArray
+     * @param productMzArray   根据transitionGroup获得存在transition中的productMz，存成Float array
+     * @param spectrumMzArray  根据transitionGroup选取的RT选择的最近的Spectrum对应的mzArray
      * @param spectrumIntArray 根据transitionGroup选取的RT选择的最近的Spectrum对应的intensityArray
-     * @param libraryIntensity unNormalized library intensity(in transition)
-     * @param scores score for JProphet
+     * @param libraryIntensityMap unNormalized library intensity(in transition)
+     * @param scores           score for JProphet
      */
-    public void calculateDiaMassDiffScore(List<Double> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Float> libraryIntensity, FeatureScores scores){
+    public void calculateDiaMassDiffScore(HashMap<String, Double> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, HashMap<String, Float> libraryIntensityMap, FeatureScores scores) {
 
         double ppmScore = 0.0d;
         double ppmScoreWeighted = 0.0d;
-        for(int i=0; i< productMzArray.size(); i++){
-            double productMz = productMzArray.get(i);
+        for (String key : productMzArray.keySet()) {
+            double productMz = productMzArray.get(key);
             double left = productMz - Constants.DIA_EXTRACT_WINDOW / 2d;
-            double right = productMz + Constants.DIA_EXTRACT_WINDOW/ 2d;
+            double right = productMz + Constants.DIA_EXTRACT_WINDOW / 2d;
 
             //integrate window
-            IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left, right);
-            if(mzIntensity.isSignalFound()){
-                double diffPpm = Math.abs(mzIntensity.getMz() - productMz) * 1000000d / productMz;
-                ppmScore += diffPpm;
-                ppmScoreWeighted += diffPpm * libraryIntensity.get(i);
+            try{
+                IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left, right);
+                if (mzIntensity.isSignalFound()) {
+                    double diffPpm = Math.abs(mzIntensity.getMz() - productMz) * 1000000d / productMz;
+                    ppmScore += diffPpm;
+                    ppmScoreWeighted += diffPpm * libraryIntensityMap.get(key);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
             }
+
         }
         scores.put(FeatureScores.ScoreType.MassdevScore, ppmScore);
         scores.put(FeatureScores.ScoreType.MassdevScoreWeighted, ppmScoreWeighted);
@@ -78,13 +83,13 @@ public class DIAScorer {
      * scores.isotope_overlap //feature intensity加权的可能（带电量1-4）无法区分同位素峰值的平均发生次数之和
      *
      * @param experimentFeatures single mrmFeature
-     * @param productMzArray mz of transition
-     * @param spectrumMzArray mz array of selected Rt
-     * @param spectrumIntArray intensity array of selected Rt
-     * @param productCharge charge in transition
-     * @param scores score for JProphet
+     * @param productMzList       mz of transition
+     * @param spectrumMzArray    mz array of selected Rt
+     * @param spectrumIntArray   intensity array of selected Rt
+     * @param productCharge      charge in transition
+     * @param scores             score for JProphet
      */
-    public void calculateDiaIsotopeScores(List<ExperimentFeature> experimentFeatures, List<Double> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Integer> productCharge, FeatureScores scores){
+    public void calculateDiaIsotopeScores(List<ExperimentFeature> experimentFeatures, List<Double> productMzList, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Integer> productCharge, FeatureScores scores) {
         double isotopeCorr = 0d;
         double isotopeOverlap = 0d;
 
@@ -93,27 +98,27 @@ public class DIAScorer {
         double intensitySum = 0.0d;
 
         //intensity sum of feature
-        for(ExperimentFeature feature: experimentFeatures){
+        for (ExperimentFeature feature : experimentFeatures) {
             intensitySum += feature.getIntensity();
         }
 
-        for(int i=0; i<experimentFeatures.size(); i++){
+        for (int i = 0; i < experimentFeatures.size(); i++) {
             relIntensity = (experimentFeatures.get(i).getIntensity() / intensitySum);
             int putativeFragmentCharge = 1;
-            if(productCharge.get(i) > 1){
+            if (productCharge.get(i) > 1) {
                 putativeFragmentCharge = productCharge.get(i);
             }
             List<Double> isotopesIntList = new ArrayList<>();
             double maxIntensity = 0.0d;
-            for(int iso=0; iso<=Constants.DIA_NR_ISOTOPES; iso++){
-                double left = productMzArray.get(i) + iso * Constants.C13C12_MASSDIFF_U / putativeFragmentCharge;
+            for (int iso = 0; iso <= Constants.DIA_NR_ISOTOPES; iso++) {
+                double left = productMzList.get(i) + iso * Constants.C13C12_MASSDIFF_U / putativeFragmentCharge;
                 double right = left;
                 left -= Constants.DIA_EXTRACT_WINDOW / 2d;
-                right += Constants.DIA_EXTRACT_WINDOW/ 2d;
+                right += Constants.DIA_EXTRACT_WINDOW / 2d;
 
                 //integrate window
                 IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left, right);
-                if(mzIntensity.getIntensity() > maxIntensity){
+                if (mzIntensity.getIntensity() > maxIntensity) {
                     maxIntensity = mzIntensity.getIntensity();
                 }
                 isotopesIntList.add(mzIntensity.getIntensity());
@@ -121,7 +126,7 @@ public class DIAScorer {
 
             //get scores.isotope_correlation
             List<Double> isotopeDistList;
-            double averageWeight = Math.abs(productMzArray.get(i) * putativeFragmentCharge);
+            double averageWeight = Math.abs(productMzList.get(i) * putativeFragmentCharge);
             //TODO @Nico no need to get each loop
             double averageWeightC = elementsDAO.getElementBySymbol(Element.C).getAverageWeight();
             double averageWeightH = elementsDAO.getElementBySymbol(Element.H).getAverageWeight();
@@ -184,14 +189,14 @@ public class DIAScorer {
 
             MathUtil.renormalize(distributionResult);
             double maxValueOfDistribution = distributionResult.get(MathUtil.findMaxIndex(distributionResult));
-            for(int j=0; j<distributionResult.size(); j++){
+            for (int j = 0; j < distributionResult.size(); j++) {
                 distributionResult.set(j, distributionResult.get(j) / maxValueOfDistribution);
             }
 
             isotopeDistList = distributionResult;
 
             double corr = 0.0d, m1 = 0.0d, m2 = 0.0d, s1 = 0.0d, s2 = 0.0d;
-            for(int j=0;j<isotopesIntList.size(); j++){
+            for (int j = 0; j < isotopesIntList.size(); j++) {
                 corr += isotopesIntList.get(j) * isotopeDistList.get(j);
                 m1 += isotopesIntList.get(j);
                 m2 += isotopeDistList.get(j);
@@ -202,12 +207,12 @@ public class DIAScorer {
             m2 /= isotopesIntList.size();
             s1 -= m1 * m1 * isotopesIntList.size();
             s2 -= m2 * m2 * isotopesIntList.size();
-            if(s1 < Math.pow(10,-12) || s2 < Math.pow(10,-12)){
+            if (s1 < Math.pow(10, -12) || s2 < Math.pow(10, -12)) {
                 continue;
-            }else {
-                if(s1 * s2 == 0){
+            } else {
+                if (s1 * s2 == 0) {
                     continue;
-                }else {
+                } else {
                     corr -= m1 * m2 * isotopesIntList.size();
                     corr /= Math.sqrt(s1 * s2);
                     isotopeCorr += relIntensity * corr;
@@ -218,23 +223,23 @@ public class DIAScorer {
             //get scores.isotope_overlap
             int nrOccurences = 0;
             double ratio;
-            for(int ch = 1; ch <= Constants.DIA_NR_CHARGES; ch ++){
-                double left = productMzArray.get(i) - Constants.C13C12_MASSDIFF_U/ch;
+            for (int ch = 1; ch <= Constants.DIA_NR_CHARGES; ch++) {
+                double left = productMzList.get(i) - Constants.C13C12_MASSDIFF_U / ch;
                 double right = left;
                 left -= Constants.DIA_EXTRACT_WINDOW / 2d;
-                right += Constants.DIA_EXTRACT_WINDOW/ 2d;
+                right += Constants.DIA_EXTRACT_WINDOW / 2d;
 
                 IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left, right);
-                if(mzIntensity.isSignalFound()){
-                    if(isotopesIntList.get(0)!=0){
+                if (mzIntensity.isSignalFound()) {
+                    if (isotopesIntList.get(0) != 0) {
                         ratio = mzIntensity.getIntensity() / isotopesIntList.get(0);
-                    }else {
+                    } else {
                         ratio = 0d;
                     }
                     //why 1.0 not Constants.C13C12_MASSDIFF_U
-                    double ddiffPpm = Math.abs(mzIntensity.getMz() - (productMzArray.get(i) - 1.0/ch)) * 1000000d / productMzArray.get(i);
-                    if(ratio > 1 && ddiffPpm < Constants.PEAK_BEFORE_MONO_MAX_PPM_DIFF){
-                        nrOccurences ++;
+                    double ddiffPpm = Math.abs(mzIntensity.getMz() - (productMzList.get(i) - 1.0 / ch)) * 1000000d / productMzList.get(i);
+                    if (ratio > 1 && ddiffPpm < Constants.PEAK_BEFORE_MONO_MAX_PPM_DIFF) {
+                        nrOccurences++;
                     }
                 }
             }
@@ -255,8 +260,9 @@ public class DIAScorer {
      * @param charge
      * @param scores
      */
-    public void calculateBYIonScore(List<Float> spectrumMzArray, List<Float> spectrumIntArray, HashMap<Integer, String> unimodHashMap, String sequence, int charge, FeatureScores scores){
+    public void calculateBYIonScore(List<Float> spectrumMzArray, List<Float> spectrumIntArray, HashMap<Integer, String> unimodHashMap, String sequence, int charge, FeatureScores scores) {
 
+        //计算理论值
         BYSeries bySeries = getBYSeries(unimodHashMap, sequence, charge);
         List<Double> bSeriesList = bySeries.getBSeries();
         int bSeriesScore = getSeriesScore(bSeriesList, spectrumMzArray, spectrumIntArray);
@@ -264,15 +270,14 @@ public class DIAScorer {
         List<Double> ySeriesList = bySeries.getYSeries();
         int ySeriesScore = getSeriesScore(ySeriesList, spectrumMzArray, spectrumIntArray);
 
-        scores.put(FeatureScores.ScoreType.BseriesScore, (double)bSeriesScore);
-        scores.put(FeatureScores.ScoreType.YseriesScore, (double)ySeriesScore);
+        scores.put(FeatureScores.ScoreType.BseriesScore, (double) bSeriesScore);
+        scores.put(FeatureScores.ScoreType.YseriesScore, (double) ySeriesScore);
     }
 
 
-
-    private List<Double> getIsotopePercent(List<String> isotopeLog){
+    private List<Double> getIsotopePercent(List<String> isotopeLog) {
         List<Double> isotopePercentList = new ArrayList<>();
-        for(String isotope : isotopeLog){
+        for (String isotope : isotopeLog) {
             isotopePercentList.add(Double.parseDouble(isotope.split(":")[0]) / 100d);
         }
 //        Collections.sort(isotopePercentList);
@@ -281,14 +286,13 @@ public class DIAScorer {
     }
 
     /**
-     *
      * @param distribution percent list of isotope
-     * @param factor number of predicted element
+     * @param factor       number of predicted element
      * @return
      */
-    private List<Double> convolvePow(List<Double> distribution, int factor){
+    private List<Double> convolvePow(List<Double> distribution, int factor) {
 
-        if(factor == 1){
+        if (factor == 1) {
             return distribution;
         }
         int maxIsotope = Constants.DIA_NR_ISOTOPES + 1;
@@ -296,66 +300,65 @@ public class DIAScorer {
         int log2n = MathUtil.log2n(factor);//>
 
         List<Double> distributionResult = new ArrayList<>();
-        if((factor & 1) == 1){
+        if ((factor & 1) == 1) {
             distributionResult = distribution;
-        }else {
+        } else {
             distributionResult.add(1.0d);
         }
 
         Double[] convolveSquared = convolveSquare(distribution, maxIsotope);
         List<Double> convolveSquaredList = Arrays.asList(convolveSquared);
-            for(int i=1;; i++){
-                if((factor & (1<<i)) == 1<<i){
-                    Double[] result = convolve(distributionResult, convolveSquaredList, maxIsotope);
-                    distributionResult = Arrays.asList(result);
-                }
-                if(i >= log2n){
-                    break;
-                }
-                convolveSquaredList = Arrays.asList(convolveSquare(convolveSquaredList, maxIsotope));
+        for (int i = 1; ; i++) {
+            if ((factor & (1 << i)) == 1 << i) {
+                Double[] result = convolve(distributionResult, convolveSquaredList, maxIsotope);
+                distributionResult = Arrays.asList(result);
             }
+            if (i >= log2n) {
+                break;
+            }
+            convolveSquaredList = Arrays.asList(convolveSquare(convolveSquaredList, maxIsotope));
+        }
         return distributionResult;
     }
 
     /**
-     *
      * @param isotopeDistribution percent list of isotope
-     * @param maxIsotope Constants.DIA_NR_ISOTOPES + 1 = 5
+     * @param maxIsotope          Constants.DIA_NR_ISOTOPES + 1 = 5
      * @return
      */
-    private Double[] convolveSquare(List<Double> isotopeDistribution, int maxIsotope){
+    private Double[] convolveSquare(List<Double> isotopeDistribution, int maxIsotope) {
 
         int rMax = 2 * isotopeDistribution.size() - 1;//3,5
-        if(maxIsotope != 0 && maxIsotope + 1< rMax){
+        if (maxIsotope != 0 && maxIsotope + 1 < rMax) {
             rMax = maxIsotope + 1;
         }
         Double[] result = new Double[rMax];//5
-        for(int i=0; i<rMax; i++){
+        for (int i = 0; i < rMax; i++) {
             result[i] = 0d;
         }
-        for(int i = isotopeDistribution.size() - 1; i>=0; i--){//each percent
-            for(int j=Math.min(rMax - i, isotopeDistribution.size())-1; j>=0; j--){
-                result[i+j] += isotopeDistribution.get(i) * isotopeDistribution.get(j);
+        for (int i = isotopeDistribution.size() - 1; i >= 0; i--) {//each percent
+            for (int j = Math.min(rMax - i, isotopeDistribution.size()) - 1; j >= 0; j--) {
+                result[i + j] += isotopeDistribution.get(i) * isotopeDistribution.get(j);
             }
         }
         return result;
     }
 
-    private Double[] convolve(List<Double> leftDistribution, List<Double> rightFormerResult, int maxIsotope){
+    private Double[] convolve(List<Double> leftDistribution, List<Double> rightFormerResult, int maxIsotope) {
         int rMax = leftDistribution.size() + rightFormerResult.size() - 1;
 //        Collections.sort(leftDistribution);
 //        Collections.reverse(leftDistribution);
 //        Collections.sort(rightFormerResult);
 //        Collections.reverse(rightFormerResult);
-        if(maxIsotope != 0 && rMax > maxIsotope){
+        if (maxIsotope != 0 && rMax > maxIsotope) {
             rMax = maxIsotope;
         }
         Double[] result = new Double[rMax];
-        for(int i=0; i<rMax; i++){
+        for (int i = 0; i < rMax; i++) {
             result[i] = 0d;
         }
-        for(int i = leftDistribution.size() - 1; i >= 0; i--){
-            for(int j = Math.min(rMax - i, rightFormerResult.size()) - 1; j >= 0; j--){
+        for (int i = leftDistribution.size() - 1; i >= 0; i--) {
+            for (int j = Math.min(rMax - i, rightFormerResult.size()) - 1; j >= 0; j--) {
                 result[i + j] += leftDistribution.get(i) * rightFormerResult.get(j);
             }
         }
@@ -363,27 +366,27 @@ public class DIAScorer {
     }
 
     //获得从B,Y开始的序列累加weight列表
-    private BYSeries getBYSeries(HashMap<Integer, String> unimodHashMap, String sequence, int charge){
+    private BYSeries getBYSeries(HashMap<Integer, String> unimodHashMap, String sequence, int charge) {
 
         BYSeries bySeries = new BYSeries();
 
         //bSeries 若要提高精度，提高json的精度
         List<Double> bSeries = new ArrayList<>();
         double monoWeight = Constants.PROTON_MASS_U * charge;
-        if(unimodHashMap.containsKey(0)){
+        if (unimodHashMap!= null && unimodHashMap.containsKey(0)) {
             Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(0));
-            if(unimod != null){
+            if (unimod != null) {
                 monoWeight += unimod.getMonoMass();
             }
         }
 
         char[] acidCodeArray = sequence.toCharArray();
-        for (int i=0; i<acidCodeArray.length - 1; i++) {
+        for (int i = 0; i < acidCodeArray.length - 1; i++) {
             AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCodeArray[i]));
             if (aa == null) {
                 continue;
             }
-            if(i == 0){
+            if (i == 0) {
                 monoWeight += aa.getMonoIsotopicMass();
                 continue;
             }
@@ -394,9 +397,9 @@ public class DIAScorer {
         //ySeries
         List<Double> ySeries = new ArrayList<>();
         monoWeight = Constants.PROTON_MASS_U * charge;
-        if(unimodHashMap.containsKey(acidCodeArray.length-1)){
-            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(acidCodeArray.length-1));
-            if(unimod != null){
+        if (unimodHashMap!= null && unimodHashMap.containsKey(acidCodeArray.length - 1)) {
+            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(acidCodeArray.length - 1));
+            if (unimod != null) {
                 monoWeight += unimod.getMonoMass();
             }
         }
@@ -420,23 +423,24 @@ public class DIAScorer {
 
     /**
      * score unit of BYSeries scores
-     * @param seriesList ySeriesList or bSeriesList
-     * @param spectrumMzArray mzArray of certain spectrum
+     *
+     * @param seriesList       ySeriesList or bSeriesList
+     * @param spectrumMzArray  mzArray of certain spectrum
      * @param spectrumIntArray intArray of certain spectrum
      * @return score of b or y
      */
-    private int getSeriesScore(List<Double> seriesList, List<Float> spectrumMzArray, List<Float> spectrumIntArray){
+    private int getSeriesScore(List<Double> seriesList, List<Float> spectrumMzArray, List<Float> spectrumIntArray) {
         int seriesScore = 0;
-        for(double seriesMz: seriesList){
+        for (double seriesMz : seriesList) {
             double left = seriesMz - Constants.DIA_EXTRACT_WINDOW / 2d;
-            double right = seriesMz + Constants.DIA_EXTRACT_WINDOW/ 2d;
+            double right = seriesMz + Constants.DIA_EXTRACT_WINDOW / 2d;
 
             IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left, right);
             double ppmDiff = Math.abs(seriesMz - mzIntensity.getMz()) * 1000000 / seriesMz;
-            if(mzIntensity.isSignalFound() &&
+            if (mzIntensity.isSignalFound() &&
                     ppmDiff < Constants.DIA_BYSERIES_PPM_DIFF &&
-                    mzIntensity.getIntensity() > Constants.DIA_BYSERIES_INTENSITY_MIN){
-                seriesScore ++;
+                    mzIntensity.getIntensity() > Constants.DIA_BYSERIES_INTENSITY_MIN) {
+                seriesScore++;
             }
         }
         return seriesScore;

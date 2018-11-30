@@ -9,7 +9,7 @@ import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.rtnormalizer.ChromatogramFilter;
-import com.westlake.air.pecs.rtnormalizer.RTNormalizerScorer;
+import com.westlake.air.pecs.rtnormalizer.RtNormalizerScorer;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.TaskService;
@@ -49,7 +49,7 @@ public class FeatureExtractor {
     @Autowired
     FeatureFinder featureFinder;
     @Autowired
-    RTNormalizerScorer RTNormalizerScorer;
+    RtNormalizerScorer RTNormalizerScorer;
     @Autowired
     TaskService taskService;
     @Autowired

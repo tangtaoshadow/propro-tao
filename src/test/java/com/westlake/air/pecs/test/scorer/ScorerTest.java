@@ -168,14 +168,14 @@ public class ScorerTest extends BaseTest {
         //List<Double> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Float> libraryIntensity, FeatureScores scores
         List<Float> spectrumMzArray = prepareDIAShiftedSpectrum().get(0);
         List<Float> spectrumIntArray = prepareDIAShiftedSpectrum().get(1);
-        List<Double> productMzArray = new ArrayList<>();
-        productMzArray.add(500d);
-        productMzArray.add(600d);
-        List<Float> libraryIntensity = new ArrayList<>();
-        libraryIntensity.add(0.7f);
-        libraryIntensity.add(0.3f);
+        HashMap<String, Double> productMzMap = new HashMap<>();
+        productMzMap.put("1",500d);
+        productMzMap.put("2",600d);
+        HashMap<String, Float> libraryIntensityMap = new HashMap<>();
+        libraryIntensityMap.put("1", 0.7f);
+        libraryIntensityMap.put("2", 0.3f);
         FeatureScores scores = new FeatureScores();
-        diaScorer.calculateDiaMassDiffScore(productMzArray, spectrumMzArray, spectrumIntArray, libraryIntensity, scores);
+        diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, libraryIntensityMap, scores);
 
         assert isSimilar(scores.get(FeatureScores.ScoreType.MassdevScore), 13.33d, Math.pow(10, -1));
         assert isSimilar(scores.get(FeatureScores.ScoreType.MassdevScoreWeighted), 7.38d, Math.pow(10, -1));

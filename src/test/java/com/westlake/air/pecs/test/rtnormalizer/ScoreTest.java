@@ -4,7 +4,7 @@ import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.feature.*;
-import com.westlake.air.pecs.rtnormalizer.RTNormalizerScorer;
+import com.westlake.air.pecs.rtnormalizer.RtNormalizerScorer;
 import com.westlake.air.pecs.test.BaseTest;
 import com.westlake.air.pecs.utils.FileUtil;
 import org.junit.Test;
@@ -33,7 +33,7 @@ public class ScoreTest extends BaseTest {
     @Autowired
     FeatureFinder featureFinder;
     @Autowired
-    RTNormalizerScorer rtNormalizerScorer;
+    RtNormalizerScorer rtNormalizerScorer;
 
     @Test
     public void scoreTest() throws IOException {

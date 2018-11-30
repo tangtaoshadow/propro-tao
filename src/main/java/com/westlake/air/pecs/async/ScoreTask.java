@@ -6,10 +6,7 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
-import com.westlake.air.pecs.domain.db.AnalyseDataDO;
-import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
-import com.westlake.air.pecs.domain.db.ScoreDistribution;
-import com.westlake.air.pecs.domain.db.TaskDO;
+import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.ScoresService;
@@ -34,7 +31,7 @@ public class ScoreTask extends BaseTask {
     AnalyseOverviewService analyseOverviewService;
 
     @Async(value = "scoreExecutor")
-    public void score(String overviewId, SlopeIntercept slopeIntercept, String libraryId, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
+    public void score(String overviewId, ExperimentDO experimentDO, SlopeIntercept slopeIntercept, String libraryId, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
         long start = System.currentTimeMillis();
         taskDO.addLog("开始查询所有卷积结果");
         taskDO.setStatus(TaskStatus.RUNNING.getName());
@@ -50,6 +47,7 @@ public class ScoreTask extends BaseTask {
         input.setSigmaSpacing(sigmaSpacing);
         input.setSlopeIntercept(slopeIntercept);
         input.setOverviewId(overviewId);
+        input.setExperimentDO(experimentDO);
 
         scoresService.score(dataList, input);
 

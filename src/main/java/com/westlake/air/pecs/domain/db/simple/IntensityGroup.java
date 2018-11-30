@@ -17,6 +17,13 @@ public class IntensityGroup {
 
     String peptideRef;
 
+    Float precursorMz;
+
+    /**
+     * 对应肽段序列,如果是伪肽段,则为对应的伪肽段的序列(不包含UniModId)
+     */
+    String sequence;
+
     //key为cutinfo
     HashMap<String, Float> intensityMap = new HashMap<>();
 

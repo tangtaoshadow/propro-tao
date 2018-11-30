@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.parser;
 
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.PositionType;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.bean.scanindex.Position;
@@ -56,15 +57,14 @@ public class AirdFileParser extends BaseParser {
 
     /**
      * 从aird文件中获取某一条记录
+     * 由于Aird文件采用的必然是32位,zlib压缩,因此不需要再传入压缩类型和压缩精度
      *
      * @param raf
      * @param mzPos
      * @param intPos
-     * @param compressionType
-     * @param precision
      * @return
      */
-    public MzIntensityPairs parseValue(RandomAccessFile raf, Position mzPos, Position intPos, String compressionType, String precision) {
+    public MzIntensityPairs parseValue(RandomAccessFile raf, Position mzPos, Position intPos) {
 
         try {
             raf.seek(mzPos.getStart());
@@ -74,7 +74,8 @@ public class AirdFileParser extends BaseParser {
             raf.seek(intPos.getStart());
             reader = new byte[intPos.getDelta().intValue()];
             raf.read(reader);
-            Float[] intensityArray = getValues(reader, Integer.parseInt(precision), "zlib".equalsIgnoreCase(compressionType), ByteOrder.BIG_ENDIAN);
+
+            Float[] intensityArray = getValues(reader, Constants.AIRD_PRECISION_32, true, ByteOrder.BIG_ENDIAN);
             return new MzIntensityPairs(mzArray, intensityArray);
         } catch (IOException e) {
             e.printStackTrace();

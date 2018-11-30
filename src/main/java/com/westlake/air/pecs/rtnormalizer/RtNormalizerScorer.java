@@ -13,8 +13,8 @@ import java.util.*;
  * Created by Nico Wang Ruimin
  * Time: 2018-08-05 17:18
  */
-@Component("peakScorer")
-public class RTNormalizerScorer {
+@Component("rtNormalizerScorer")
+public class RtNormalizerScorer {
 
     @Autowired
     ChromatographicScorer chromatographicScorer;

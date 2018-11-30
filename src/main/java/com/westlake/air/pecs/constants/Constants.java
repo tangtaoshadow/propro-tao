@@ -42,8 +42,6 @@ public class Constants {
     //Extractor
     public static final String TRAFO_INVERT_MODEL = "LINEAR";
     public static final double RT_EXTRACTION_WINDOW = 600.0d;
-    public static final float MZ_EXTRACTION_WINDOW = 0.05f;
-    public static final float EXTRA_RT_EXTRACTION_WINDOW = 0.0f;
 
     public static final double DIA_EXTRACT_WINDOW = 0.05d;
     public static final int DIA_NR_ISOTOPES = 4;
@@ -73,6 +71,6 @@ public class Constants {
     public static final String COMMA = ",";
 
     public static final String AIRD_COMPRESSION_TYPE_ZLIB = "zlib";
-    public static final String AIRD_PRECISION_32 = "32";
+    public static final int AIRD_PRECISION_32 = 32;
 
 }

@@ -83,7 +83,7 @@ public class ScanIndexController extends BaseController {
         if (rtEnd != null) {
             query.setRtEnd(rtEnd);
         }
-        if (rtStr != null) {
+        if (rtStr != null && !rtStr.isEmpty()) {
             query.setRtStr("PT"+rtStr+"S");
         }
         if(precursorMzStart != null){

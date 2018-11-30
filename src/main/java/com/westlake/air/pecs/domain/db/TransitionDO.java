@@ -82,7 +82,7 @@ public class TransitionDO extends BaseDO {
     Boolean isDecoy;
 
     /**
-     * 新字段,如果是伪肽段,则本字段为伪肽段对应的原始真肽段的Sequence
+     * 新字段,如果是伪肽段,则本字段为伪肽段对应的原始真肽段的Sequence(不包含UniModId)
      */
     String targetSequence;
 
