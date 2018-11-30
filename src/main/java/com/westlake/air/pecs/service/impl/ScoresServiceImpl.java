@@ -329,20 +329,9 @@ public class ScoresServiceImpl implements ScoresService {
                     productMzMap.put(dataDO.getCutInfo(), mz);
                     productMzList.add(mz);
                 }
-                //TODO  mrmFeature - peptideRef - ...
-                //数据格式见下面的new
-                //spectrum: get by peptideRef RT(nearest)
-                //productChargeList: product charge of found transition, list int
-                //unimodHashMap: unimod HashMap of peptide(get by peptideRef)
-                //sequence: sequence of peptide(get by peptideRef)
 
-//                ResultDO<MzIntensityPairs> getSpectrumResult = scanIndexService.getNearestSpectrumByRt(raf, exp, group.getRt());
-//                List<Float> spectrumMzArray = null;
-//                List<Float> spectrumIntArray = null;
-//                if (getSpectrumResult.isSuccess()) {
-//                    spectrumMzArray = Lists.newArrayList(getSpectrumResult.getModel().getMzArray());
-//                    spectrumIntArray = Lists.newArrayList(getSpectrumResult.getModel().getIntensityArray());
-//                }
+                HashMap<String, Float> intensityMap = ig.getIntensityMap();
+                intensityMap = MathUtil.normalizeSum(intensityMap);
 
                 List<Integer> productChargeList = new ArrayList<>();
                 for (AnalyseDataDO data : group.getDataMap().values()) {
@@ -377,17 +366,16 @@ public class ScoresServiceImpl implements ScoresService {
                         spectrumMzArray = Lists.newArrayList(getSpectrumResult.getModel().getMzArray());
                         spectrumIntArray = Lists.newArrayList(getSpectrumResult.getModel().getIntensityArray());
                     }
-                    //TODO @Nico charge from transition?
                     if (getSpectrumResult.isSuccess()) {
-                        try{
+                        try {
                             diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
-                            diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, ig.getIntensityMap(), featureScores);
+                            diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, intensityMap, featureScores);
                             diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
-//                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
+                    elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
                     libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
                     libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, featureScores);
                     libraryScorer.calculateNormRtScore(experimentFeatureList, input.getSlopeIntercept(), group.getRt(), featureScores);
@@ -551,7 +539,7 @@ public class ScoresServiceImpl implements ScoresService {
 
             NumberFormat nf = NumberFormat.getNumberInstance();
             nf.setMaximumFractionDigits(2);
-            double step = Double.valueOf(nf.format(stepOri).replace(",",""));
+            double step = Double.valueOf(nf.format(stepOri).replace(",", ""));
             String[] ranges = new String[Constants.SCORE_RANGE];
             Integer[] targetCount = new Integer[Constants.SCORE_RANGE];
             Integer[] decoyCount = new Integer[Constants.SCORE_RANGE];

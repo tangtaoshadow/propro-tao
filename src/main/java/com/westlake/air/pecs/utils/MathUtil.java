@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -264,6 +265,21 @@ public class MathUtil {
         meanVariance[1] = var(arrays, mean);
 
         return meanVariance;
+    }
+
+    /**
+     * Normalize a with a's mean and std.
+     */
+    public static HashMap<String, Float> normalizeSum(HashMap<String, Float> map) {
+        Float sum = 0f;
+        for(Float f : map.values()){
+            sum+=f;
+        }
+        for(String key : map.keySet()){
+            map.put(key, map.get(key)/sum);
+        }
+
+        return map;
     }
 
     /**

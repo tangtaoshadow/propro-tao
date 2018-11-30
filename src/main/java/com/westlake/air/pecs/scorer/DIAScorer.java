@@ -60,7 +60,6 @@ public class DIAScorer {
             double left = productMz - Constants.DIA_EXTRACT_WINDOW / 2d;
             double right = productMz + Constants.DIA_EXTRACT_WINDOW / 2d;
 
-            //integrate window
             try{
                 IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left, right);
                 if (mzIntensity.isSignalFound()) {
