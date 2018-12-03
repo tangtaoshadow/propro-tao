@@ -5,9 +5,15 @@ import lombok.Data;
 @Data
 public class IntegrateWindowMzIntensity {
 
-    double mz;
+    double mz = -1;
 
-    double intensity;
+    double intensity = 0;
 
-    boolean signalFound;
+    boolean signalFound = false;
+
+    public IntegrateWindowMzIntensity(){}
+
+    public IntegrateWindowMzIntensity(boolean signalFound){
+        this.signalFound = signalFound;
+    }
 }

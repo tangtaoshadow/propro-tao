@@ -122,9 +122,9 @@ public class ScorerTest extends BaseTest {
     @Test
     public void calcBYIonScoreTest(){
         //List<Float> spectrumMzArray, List<Float> spectrumIntArray, HashMap<Integer, String> unimodHashMap, String sequence, int charge, FeatureScores scores
-        List<List<Float>> spectrum = prepareBYIonScoreTestSpectrum();
-        List<Float> spectrumMz = spectrum.get(0);
-        List<Float> spectrumInt = spectrum.get(1);
+        List<Float[]> spectrum = prepareBYIonScoreTestSpectrum();
+        Float[] spectrumMz = spectrum.get(0);
+        Float[] spectrumInt = spectrum.get(1);
         String sequence = "SYVAWDR";
         int charge = 1;
         HashMap<Integer, String> unimodHashMap = new HashMap<>();
@@ -140,8 +140,8 @@ public class ScorerTest extends BaseTest {
     public void calcDiaIsotopeScoreTest(){
         //List<ExperimentFeature> experimentFeatures, List<Double> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Integer> productCharge, FeatureScores scores
         //List<ExperimentFeature> experimentFeatures = ;
-        List<Float> spectrumMzArray = prepareDIASpectrum().get(0);
-        List<Float> spectrumIntArray = prepareDIASpectrum().get(1);
+        Float[] spectrumMzArray = prepareDIASpectrum().get(0);
+        Float[] spectrumIntArray = prepareDIASpectrum().get(1);
         List<Double> productMzArray = new ArrayList<>();
         productMzArray.add(500d);
         productMzArray.add(600d);
@@ -166,8 +166,8 @@ public class ScorerTest extends BaseTest {
     @Test
     public void calcDiaMassDiffScore(){
         //List<Double> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Float> libraryIntensity, FeatureScores scores
-        List<Float> spectrumMzArray = prepareDIAShiftedSpectrum().get(0);
-        List<Float> spectrumIntArray = prepareDIAShiftedSpectrum().get(1);
+        Float[] spectrumMzArray = prepareDIAShiftedSpectrum().get(0);
+        Float[] spectrumIntArray = prepareDIAShiftedSpectrum().get(1);
         HashMap<String, Double> productMzMap = new HashMap<>();
         productMzMap.put("1",500d);
         productMzMap.put("2",600d);
@@ -250,7 +250,7 @@ public class ScorerTest extends BaseTest {
     }
 
     //getBYSeries Test Passed
-    private List<List<Float>> prepareDIASpectrum(){
+    private List<Float[]> prepareDIASpectrum(){
         Float[] intensity = {
                 10f, 20f, 50f, 100f, 50f, 20f, 10f, // peak at 499 -> 260-20 = 240 intensity within 0.05 Th
                 3f, 7f, 15f, 30f, 15f, 7f, 3f,      // peak at 500 -> 80-6 = 74 intensity within 0.05 Th
@@ -275,26 +275,24 @@ public class ScorerTest extends BaseTest {
                 601.97f, 601.98f, 601.99f, 602.0f, 602.01f, 602.02f, 602.03f,
                 602.99f, 603.0f, 603.01f
         };
-        List<Float> spectrumInt = Arrays.asList(intensity);
-        List<Float> spectrumMz = Arrays.asList(mz);
-        List<List<Float>> spectrum = new ArrayList<>();
-        spectrum.add(spectrumMz);
-        spectrum.add(spectrumInt);
+        List<Float[]> spectrum = new ArrayList<>();
+        spectrum.add(mz);
+        spectrum.add(intensity);
         return spectrum;
     }
 
-    private List<List<Float>> prepareDIAShiftedSpectrum(){
-        List<List<Float>> spectrum = prepareDIASpectrum();
-        for(int i=0; i<spectrum.get(0).size()/2; i++){
-            spectrum.get(0).set(i,spectrum.get(0).get(i) + spectrum.get(0).get(i)/1000000 * 15);
+    private List<Float[]> prepareDIAShiftedSpectrum(){
+        List<Float[]> spectrum = prepareDIASpectrum();
+        for(int i=0; i<spectrum.get(0).length/2; i++){
+            spectrum.get(0)[i] = spectrum.get(0)[i] + spectrum.get(0)[i]/1000000 * 15;
         }
-        for(int i= spectrum.get(0).size()/2; i< spectrum.get(0).size(); i++){
-            spectrum.get(0).set(i,spectrum.get(0).get(i) + spectrum.get(0).get(i)/1000000 * 10);
+        for(int i= spectrum.get(0).length/2; i< spectrum.get(0).length; i++){
+            spectrum.get(0)[i] = spectrum.get(0)[i] + spectrum.get(0)[i]/1000000 * 10;
         }
         return spectrum;
     }
 
-    private List<List<Float>> prepareBYIonScoreTestSpectrum() {
+    private List<Float[]> prepareBYIonScoreTestSpectrum() {
         Float[] intensity = {
                 100f, 100f, 100f, 100f,
                 100f, 100f, 100f
@@ -309,11 +307,9 @@ public class ScorerTest extends BaseTest {
                 646.33133f, // y
                 809.39466f + 79.9657f // y + P
         };
-        List<Float> spectrumInt = Arrays.asList(intensity);
-        List<Float> spectrumMz = Arrays.asList(mz);
-        List<List<Float>> spectrum = new ArrayList<>();
-        spectrum.add(spectrumMz);
-        spectrum.add(spectrumInt);
+        List<Float[]> spectrum = new ArrayList<>();
+        spectrum.add(mz);
+        spectrum.add(intensity);
         return spectrum;
     }
 

@@ -45,32 +45,31 @@ public class DIAScorer {
      * scores.massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比之和
      * scores.weighted_massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比按libraryIntensity加权之和
      *
-     * @param productMzArray   根据transitionGroup获得存在transition中的productMz，存成Float array
-     * @param spectrumMzArray  根据transitionGroup选取的RT选择的最近的Spectrum对应的mzArray
-     * @param spectrumIntArray 根据transitionGroup选取的RT选择的最近的Spectrum对应的intensityArray
+     * @param productMzArray      根据transitionGroup获得存在transition中的productMz，存成Float array
+     * @param spectrumMzArray     根据transitionGroup选取的RT选择的最近的Spectrum对应的mzArray
+     * @param spectrumIntArray    根据transitionGroup选取的RT选择的最近的Spectrum对应的intensityArray
      * @param libraryIntensityMap unNormalized library intensity(in transition)
-     * @param scores           score for JProphet
+     * @param scores              score for JProphet
      */
-    public void calculateDiaMassDiffScore(HashMap<String, Double> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, HashMap<String, Float> libraryIntensityMap, FeatureScores scores) {
+    public void calculateDiaMassDiffScore(HashMap<String, Double> productMzArray, Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<String, Float> libraryIntensityMap, FeatureScores scores) {
 
         double ppmScore = 0.0d;
         double ppmScoreWeighted = 0.0d;
         for (String key : productMzArray.keySet()) {
             double productMz = productMzArray.get(key);
-            double left = productMz - Constants.DIA_EXTRACT_WINDOW / 2d;
-            double right = productMz + Constants.DIA_EXTRACT_WINDOW / 2d;
+            Double left = productMz - Constants.DIA_EXTRACT_WINDOW / 2d;
+            Double right = productMz + Constants.DIA_EXTRACT_WINDOW / 2d;
 
-            try{
-                IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left, right);
+            try {
+                IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left.floatValue(), right.floatValue());
                 if (mzIntensity.isSignalFound()) {
                     double diffPpm = Math.abs(mzIntensity.getMz() - productMz) * 1000000d / productMz;
                     ppmScore += diffPpm;
                     ppmScoreWeighted += diffPpm * libraryIntensityMap.get(key);
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
         scores.put(FeatureScores.ScoreType.MassdevScore, ppmScore);
         scores.put(FeatureScores.ScoreType.MassdevScoreWeighted, ppmScoreWeighted);
@@ -82,13 +81,13 @@ public class DIAScorer {
      * scores.isotope_overlap //feature intensity加权的可能（带电量1-4）无法区分同位素峰值的平均发生次数之和
      *
      * @param experimentFeatures single mrmFeature
-     * @param productMzList       mz of transition
+     * @param productMzList      mz of transition
      * @param spectrumMzArray    mz array of selected Rt
      * @param spectrumIntArray   intensity array of selected Rt
      * @param productCharge      charge in transition
      * @param scores             score for JProphet
      */
-    public void calculateDiaIsotopeScores(List<ExperimentFeature> experimentFeatures, List<Double> productMzList, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Integer> productCharge, FeatureScores scores) {
+    public void calculateDiaIsotopeScores(List<ExperimentFeature> experimentFeatures, List<Double> productMzList, Float[] spectrumMzArray, Float[] spectrumIntArray, List<Integer> productCharge, FeatureScores scores) {
         double isotopeCorr = 0d;
         double isotopeOverlap = 0d;
 
@@ -110,13 +109,13 @@ public class DIAScorer {
             List<Double> isotopesIntList = new ArrayList<>();
             double maxIntensity = 0.0d;
             for (int iso = 0; iso <= Constants.DIA_NR_ISOTOPES; iso++) {
-                double left = productMzList.get(i) + iso * Constants.C13C12_MASSDIFF_U / putativeFragmentCharge;
-                double right = left;
+                Double left = productMzList.get(i) + iso * Constants.C13C12_MASSDIFF_U / putativeFragmentCharge;
+                Double right = left;
                 left -= Constants.DIA_EXTRACT_WINDOW / 2d;
                 right += Constants.DIA_EXTRACT_WINDOW / 2d;
 
                 //integrate window
-                IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left, right);
+                IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left.floatValue(), right.floatValue());
                 if (mzIntensity.getIntensity() > maxIntensity) {
                     maxIntensity = mzIntensity.getIntensity();
                 }
@@ -223,12 +222,12 @@ public class DIAScorer {
             int nrOccurences = 0;
             double ratio;
             for (int ch = 1; ch <= Constants.DIA_NR_CHARGES; ch++) {
-                double left = productMzList.get(i) - Constants.C13C12_MASSDIFF_U / ch;
-                double right = left;
+                Double left = productMzList.get(i) - Constants.C13C12_MASSDIFF_U / ch;
+                Double right = left;
                 left -= Constants.DIA_EXTRACT_WINDOW / 2d;
                 right += Constants.DIA_EXTRACT_WINDOW / 2d;
 
-                IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left, right);
+                IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left.floatValue(), right.floatValue());
                 if (mzIntensity.isSignalFound()) {
                     if (isotopesIntList.get(0) != 0) {
                         ratio = mzIntensity.getIntensity() / isotopesIntList.get(0);
@@ -236,8 +235,7 @@ public class DIAScorer {
                         ratio = 0d;
                     }
                     //why 1.0 not Constants.C13C12_MASSDIFF_U
-                    double ddiffPpm = Math.abs(mzIntensity.getMz() - (productMzList.get(i) - 1.0 / ch)) * 1000000d / productMzList.get(i);
-                    if (ratio > 1 && ddiffPpm < Constants.PEAK_BEFORE_MONO_MAX_PPM_DIFF) {
+                    if (ratio > 1 && (Math.abs(mzIntensity.getMz() - (productMzList.get(i) - 1.0 / ch)) * 1000000d / productMzList.get(i)) < Constants.PEAK_BEFORE_MONO_MAX_PPM_DIFF) {
                         nrOccurences++;
                     }
                 }
@@ -259,7 +257,7 @@ public class DIAScorer {
      * @param charge
      * @param scores
      */
-    public void calculateBYIonScore(List<Float> spectrumMzArray, List<Float> spectrumIntArray, HashMap<Integer, String> unimodHashMap, String sequence, int charge, FeatureScores scores) {
+    public void calculateBYIonScore(Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<Integer, String> unimodHashMap, String sequence, int charge, FeatureScores scores) {
 
         //计算理论值
         BYSeries bySeries = getBYSeries(unimodHashMap, sequence, charge);
@@ -372,7 +370,7 @@ public class DIAScorer {
         //bSeries 若要提高精度，提高json的精度
         List<Double> bSeries = new ArrayList<>();
         double monoWeight = Constants.PROTON_MASS_U * charge;
-        if (unimodHashMap!= null && unimodHashMap.containsKey(0)) {
+        if (unimodHashMap != null && unimodHashMap.containsKey(0)) {
             Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(0));
             if (unimod != null) {
                 monoWeight += unimod.getMonoMass();
@@ -396,7 +394,7 @@ public class DIAScorer {
         //ySeries
         List<Double> ySeries = new ArrayList<>();
         monoWeight = Constants.PROTON_MASS_U * charge;
-        if (unimodHashMap!= null && unimodHashMap.containsKey(acidCodeArray.length - 1)) {
+        if (unimodHashMap != null && unimodHashMap.containsKey(acidCodeArray.length - 1)) {
             Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(acidCodeArray.length - 1));
             if (unimod != null) {
                 monoWeight += unimod.getMonoMass();
@@ -428,16 +426,15 @@ public class DIAScorer {
      * @param spectrumIntArray intArray of certain spectrum
      * @return score of b or y
      */
-    private int getSeriesScore(List<Double> seriesList, List<Float> spectrumMzArray, List<Float> spectrumIntArray) {
+    private int getSeriesScore(List<Double> seriesList, Float[] spectrumMzArray, Float[] spectrumIntArray) {
         int seriesScore = 0;
         for (double seriesMz : seriesList) {
-            double left = seriesMz - Constants.DIA_EXTRACT_WINDOW / 2d;
-            double right = seriesMz + Constants.DIA_EXTRACT_WINDOW / 2d;
+            Double left = seriesMz - Constants.DIA_EXTRACT_WINDOW / 2d;
+            Double right = seriesMz + Constants.DIA_EXTRACT_WINDOW / 2d;
 
-            IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left, right);
-            double ppmDiff = Math.abs(seriesMz - mzIntensity.getMz()) * 1000000 / seriesMz;
+            IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left.floatValue(), right.floatValue());
             if (mzIntensity.isSignalFound() &&
-                    ppmDiff < Constants.DIA_BYSERIES_PPM_DIFF &&
+                    (Math.abs(seriesMz - mzIntensity.getMz()) * 1000000 / seriesMz) < Constants.DIA_BYSERIES_PPM_DIFF &&
                     mzIntensity.getIntensity() > Constants.DIA_BYSERIES_INTENSITY_MIN) {
                 seriesScore++;
             }

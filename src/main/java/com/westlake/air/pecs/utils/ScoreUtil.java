@@ -87,16 +87,19 @@ public class ScoreUtil {
      * @param right            right mz
      * @return float mz,intensity boolean signalFound
      */
-    public static IntegrateWindowMzIntensity integrateWindow(List<Float> spectrumMzArray, List<Float> spectrumIntArray, double left, double right) {
+    public static IntegrateWindowMzIntensity integrateWindow(Float[] spectrumMzArray, Float[] spectrumIntArray, float left, float right) {
         IntegrateWindowMzIntensity mzIntensity = new IntegrateWindowMzIntensity();
 
         double mz = 0d, intensity = 0d;
-        int leftIndex = MathUtil.bisection(spectrumMzArray, left).getHigh();
-        int rightIndex = MathUtil.bisection(spectrumMzArray, right).getLow();
+        int leftIndex = ConvolutionUtil.findIndex(spectrumMzArray, left, true);
+        int rightIndex = ConvolutionUtil.findIndex(spectrumMzArray, right, false);
 
+        if(leftIndex == -1 || rightIndex == -1){
+            return new IntegrateWindowMzIntensity(false);
+        }
         for (int index = leftIndex; index <= rightIndex; index++) {
-            intensity += spectrumIntArray.get(index);
-            mz += spectrumMzArray.get(index) * spectrumIntArray.get(index);
+            intensity += spectrumIntArray[index];
+            mz += spectrumMzArray[index] * spectrumIntArray[index];
         }
         if (intensity > 0f) {
             mz /= intensity;

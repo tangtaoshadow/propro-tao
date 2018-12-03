@@ -360,11 +360,11 @@ public class ScoresServiceImpl implements ScoresService {
 
                     //根据RT时间和前体MZ获取最近的一个原始谱图
                     ResultDO<MzIntensityPairs> getSpectrumResult = scanIndexService.getNearestSpectrumByRt(raf, exp, experimentFeatureList.get(0).getRt(), ig.getPrecursorMz());
-                    List<Float> spectrumMzArray = null;
-                    List<Float> spectrumIntArray = null;
+                    Float[] spectrumMzArray = null;
+                    Float[] spectrumIntArray = null;
                     if (getSpectrumResult.isSuccess()) {
-                        spectrumMzArray = Lists.newArrayList(getSpectrumResult.getModel().getMzArray());
-                        spectrumIntArray = Lists.newArrayList(getSpectrumResult.getModel().getIntensityArray());
+                        spectrumMzArray = getSpectrumResult.getModel().getMzArray();
+                        spectrumIntArray = getSpectrumResult.getModel().getIntensityArray();
                     }
                     if (getSpectrumResult.isSuccess()) {
                         try {
@@ -381,6 +381,7 @@ public class ScoresServiceImpl implements ScoresService {
                     libraryScorer.calculateNormRtScore(experimentFeatureList, input.getSlopeIntercept(), group.getRt(), featureScores);
                     swathLDAScorer.calculateSwathLdaPrescore(featureScores);
                     featureScores.setRt(experimentFeatureList.get(0).getRt());
+                    featureScores.setIntensitySum(experimentFeatureList.get(0).getIntensitySum());
                     featureScoresList.add(featureScores);
                 }
 

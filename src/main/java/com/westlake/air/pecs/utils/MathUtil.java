@@ -116,37 +116,6 @@ public class MathUtil {
         return bisectionLowHigh;
     }
 
-    /**
-     * 调用之前必须保证输入数据为升序
-     *
-     * @param x     输入数据
-     * @param value 目标数据
-     * @return left and right index of x
-     */
-    public static BisectionLowHigh bisection(List<Float> x, double value) {
-        BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
-        int high = x.size() - 1;
-        int low = 0;
-        int mid;
-        if (x.get(0) > value) {
-            high = 0;
-        } else if (x.get(x.size() - 1) < value) {
-            low = x.size() - 1;
-        } else {
-            while (high - low != 1) {
-                mid = low + (high - low + 1) / 2;
-                if (x.get(mid) < value) {
-                    low = mid;
-                } else {
-                    high = mid;
-                }
-            }
-        }
-        bisectionLowHigh.setLow(low);
-        bisectionLowHigh.setHigh(high);
-        return bisectionLowHigh;
-    }
-
     public static BisectionLowHigh bisection(RtIntensityPairsDouble x, double value) {
         BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
         int high = x.getRtArray().length - 1;

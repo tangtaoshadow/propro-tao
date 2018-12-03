@@ -44,6 +44,9 @@ public class FeatureScores {
 
     Double rt;
 
+    //定量值
+    Double intensitySum;
+
     HashMap<String, Double> scoresMap;
 
     Double finalScore;

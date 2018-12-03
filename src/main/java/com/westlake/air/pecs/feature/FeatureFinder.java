@@ -2,11 +2,9 @@ package com.westlake.air.pecs.feature;
 
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
-import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
-import com.westlake.air.pecs.service.impl.ExperimentServiceImpl;
+import com.westlake.air.pecs.utils.ConvolutionUtil;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,15 +29,16 @@ public class FeatureFinder {
      * 4）对每个chromatogram映射到masterChromatogram，得到usedChromatogram
      * 5）对usedChromatogram求feature
      * 6）同时累计所有chromatogram（isDetecting）的intensity为totalXIC
-     * @param chromatograms origin chromatogram
-     * @param pickedChroms maxPeaks picked and recalculated
+     *
+     * @param chromatograms      origin chromatogram
+     * @param pickedChroms       maxPeaks picked and recalculated
      * @param intensityLeftRight left right borders
-     * totalXic : intensity sum of all chromatogram of peptideRef(not rastered and all interval)
-     * HullPoints : rt intensity pairs of rastered chromatogram between rtLeft, rtRight;
-     * ExperimentFeature::intensity: intensity sum of hullPoints' intensity
+     *                           totalXic : intensity sum of all chromatogram of peptideRef(not rastered and all interval)
+     *                           HullPoints : rt intensity pairs of rastered chromatogram between rtLeft, rtRight;
+     *                           ExperimentFeature::intensity: intensity sum of hullPoints' intensity
      * @return list of mrmFeature (mrmFeature is list of chromatogram feature)
      */
-    public List<List<ExperimentFeature>> findFeatures(List<RtIntensityPairsDouble> chromatograms, List<RtIntensityPairsDouble> pickedChroms, List<IntensityRtLeftRtRightPairs> intensityLeftRight){
+    public List<List<ExperimentFeature>> findFeatures(List<RtIntensityPairsDouble> chromatograms, List<RtIntensityPairsDouble> pickedChroms, List<IntensityRtLeftRtRightPairs> intensityLeftRight) {
 
         int[] chrPeakIndex;
 
@@ -62,12 +61,12 @@ public class FeatureFinder {
                 break;
             }
 //TODO origin code error
-//            double bestLeft = intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]];
-//            double bestRight = intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]];
+//            double bestLeftRt = intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]];
+//            double bestRightRt = intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]];
             double peakApex = pickedChroms.get(chrPeakIndex[0]).getRtArray()[chrPeakIndex[1]];
 
-            double bestLeft = (double)(Float.parseFloat(Double.toString(intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]])));
-            double bestRight = (double)(Float.parseFloat(Double.toString(intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]])));
+            double bestLeft = (double) (Float.parseFloat(Double.toString(intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]])));
+            double bestRight = (double) (Float.parseFloat(Double.toString(intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]])));
 
             RtIntensityPairsDouble rtInt = pickedChroms.get(chrPeakIndex[0]);
             Double[] intensityArray = rtInt.getIntensityArray();
@@ -89,14 +88,14 @@ public class FeatureFinder {
                 sum += feature.getIntensity();
                 mrmFeature.add(feature);
             }
-            for(ExperimentFeature feature: mrmFeature){
+            for (ExperimentFeature feature : mrmFeature) {
                 feature.setTotalXic(totalXic);
                 feature.setIntensitySum(sum);
             }
-            if(sum > 0){
+            if (sum > 0) {
                 experimentFeatures.add(mrmFeature);
             }
-            if(sum > 0 && sum / totalXic < Constants.STOP_AFTER_INTENSITY_RATIO){
+            if (sum > 0 && sum / totalXic < Constants.STOP_AFTER_INTENSITY_RATIO) {
                 break;
             }
         }
@@ -107,17 +106,18 @@ public class FeatureFinder {
 
     /**
      * 从maxPeak list中选取最大peak对应的index
+     *
      * @param pickedChroms maxPeaks
      * @return list index, pairs index
      */
-    private int[] findLargestPeak(List<RtIntensityPairsDouble> pickedChroms){
+    private int[] findLargestPeak(List<RtIntensityPairsDouble> pickedChroms) {
         double largest = 0.0d;
         int[] chrPeakIndex = new int[2];
         chrPeakIndex[0] = -1;
         chrPeakIndex[1] = -1;
-        for(int i = 0; i < pickedChroms.size(); i++){
-            for(int j = 0; j < pickedChroms.get(i).getRtArray().length; j++){
-                if(pickedChroms.get(i).getIntensityArray()[j] > largest){
+        for (int i = 0; i < pickedChroms.size(); i++) {
+            for (int j = 0; j < pickedChroms.get(i).getRtArray().length; j++) {
+                if (pickedChroms.get(i).getIntensityArray()[j] > largest) {
                     largest = pickedChroms.get(i).getIntensityArray()[j];
                     chrPeakIndex[0] = i;
                     chrPeakIndex[1] = j;
@@ -130,48 +130,49 @@ public class FeatureFinder {
     /**
      * resampleChromatogram
      * 将chromatogram中的intensity按照masterChromatogram的rt进行分布
-     * @param chromatogram normal chromatogram
+     *
+     * @param chromatogram       normal chromatogram
      * @param masterChromatogram chromatogram with max peak
-     * @param leftBoundary bestLeft rt of max peak(constant to peptideRef)
-     * @param rightBoundary bestRight rt of max peak(constant to peptideRef)
+     * @param leftBoundary       bestLeftRt rt of max peak(constant to peptideRef)
+     * @param rightBoundary      bestRightRt rt of max peak(constant to peptideRef)
      * @return masterChromatogram with both rt and intensity
      */
-    private RtIntensityPairsDouble raster(RtIntensityPairsDouble chromatogram, RtIntensityPairsDouble masterChromatogram, double leftBoundary, double rightBoundary){
+    private RtIntensityPairsDouble raster(RtIntensityPairsDouble chromatogram, RtIntensityPairsDouble masterChromatogram, double leftBoundary, double rightBoundary) {
         int chromatogramLeft, chromatogramRight;
         int masterChromLeft, masterChromRight;
-        chromatogramLeft = MathUtil.bisection(chromatogram, leftBoundary).getLow();
-        chromatogramRight = MathUtil.bisection(chromatogram, rightBoundary).getHigh();
-        masterChromLeft = MathUtil.bisection(masterChromatogram, leftBoundary).getLow();
-        masterChromRight = MathUtil.bisection(masterChromatogram, rightBoundary).getHigh();
+        chromatogramLeft = ConvolutionUtil.findIndex(chromatogram.getRtArray(), leftBoundary, true);
+        chromatogramRight = ConvolutionUtil.findIndex(chromatogram.getRtArray(), rightBoundary, false);
+        masterChromLeft = ConvolutionUtil.findIndex(masterChromatogram.getRtArray(), leftBoundary, true);
+        masterChromRight = ConvolutionUtil.findIndex(masterChromatogram.getRtArray(), rightBoundary, false);
         int masterChromLeftStatic = masterChromLeft;
 
         Double[] rt = new Double[masterChromRight - masterChromLeft + 1];
         Double[] intensity = new Double[masterChromRight - masterChromLeft + 1];
         double distLeft, distRight;
 
-        for(int i=0; i<rt.length; i++){
+        for (int i = 0; i < rt.length; i++) {
             rt[i] = 0d;
             intensity[i] = 0d;
         }
 
         //set rt
-        for(int i=masterChromLeft; i<=masterChromRight; i++){
+        for (int i = masterChromLeft; i <= masterChromRight; i++) {
             rt[i - masterChromLeftStatic] = masterChromatogram.getRtArray()[i];
         }
 
         //set intensity
-        while(chromatogramLeft <= chromatogramRight && chromatogram.getRtArray()[chromatogramLeft] < masterChromatogram.getRtArray()[masterChromLeft]){
-            intensity[masterChromLeft-masterChromLeftStatic] += chromatogram.getIntensityArray()[chromatogramLeft];
-            chromatogramLeft ++;
+        while (chromatogramLeft <= chromatogramRight && chromatogram.getRtArray()[chromatogramLeft] < masterChromatogram.getRtArray()[masterChromLeft]) {
+            intensity[masterChromLeft - masterChromLeftStatic] += chromatogram.getIntensityArray()[chromatogramLeft];
+            chromatogramLeft++;
         }
-        while (chromatogramLeft <= chromatogramRight){
-            while (masterChromLeft <= masterChromRight && chromatogram.getRtArray()[chromatogramLeft] > masterChromatogram.getRtArray()[masterChromLeft]){
-                masterChromLeft ++;
+        while (chromatogramLeft <= chromatogramRight) {
+            while (masterChromLeft <= masterChromRight && chromatogram.getRtArray()[chromatogramLeft] > masterChromatogram.getRtArray()[masterChromLeft]) {
+                masterChromLeft++;
             }
-            if(masterChromLeft != masterChromLeftStatic){
+            if (masterChromLeft != masterChromLeftStatic) {
                 masterChromLeft--;
             }
-            if(masterChromLeft == masterChromRight){
+            if (masterChromLeft == masterChromRight) {
                 break;
             }
             distLeft = Math.abs(chromatogram.getRtArray()[chromatogramLeft] - masterChromatogram.getRtArray()[masterChromLeft]);
@@ -180,25 +181,24 @@ public class FeatureFinder {
             intensity[masterChromLeft - masterChromLeftStatic] += chromatogram.getIntensityArray()[chromatogramLeft] * distRight / (distRight + distLeft);
             intensity[masterChromLeft - masterChromLeftStatic + 1] += chromatogram.getIntensityArray()[chromatogramLeft] * distLeft / (distRight + distLeft);
 
-            chromatogramLeft ++;
+            chromatogramLeft++;
         }
-        while (chromatogramLeft <= chromatogramRight){
+        while (chromatogramLeft <= chromatogramRight) {
             intensity[masterChromLeft - masterChromLeftStatic] += chromatogram.getIntensityArray()[chromatogramLeft];
-            chromatogramLeft ++;
+            chromatogramLeft++;
         }
 
         return new RtIntensityPairsDouble(rt, intensity);
     }
 
     /**
-     *
      * @param chromatogram masterChromatogram(same rt)
-     * @param bestLeft bestLeft rt of max peak
-     * @param bestRight bestRight rt of max peak
-     * @param peakApexRt rt of max peak
+     * @param bestLeft     bestLeftRt rt of max peak
+     * @param bestRight    bestRightRt rt of max peak
+     * @param peakApexRt   rt of max peak
      * @return
      */
-    private ExperimentFeature calculatePeakApexInt(RtIntensityPairsDouble chromatogram, double bestLeft, double bestRight, double peakApexRt){
+    private ExperimentFeature calculatePeakApexInt(RtIntensityPairsDouble chromatogram, double bestLeft, double bestRight, double peakApexRt) {
         Double[] rtArray = chromatogram.getRtArray();
         Double[] intArray = chromatogram.getIntensityArray();
 
@@ -210,12 +210,12 @@ public class FeatureFinder {
         List<Double> hullRt = new ArrayList<>();
         List<Double> hullInt = new ArrayList<>();
         double intSum = 0.0d;
-        for(int i = 0; i<chromatogram.getRtArray().length; i++){
+        for (int i = 0; i < chromatogram.getRtArray().length; i++) {
             //TODO error in original code
-            if(rtArray[i] > bestLeft && rtArray[i] < bestRight){
+            if (rtArray[i] > bestLeft && rtArray[i] < bestRight) {
 //                if(peakNum == 0 && i != 0){
-//                    deltaRt = rtArray[i] - bestLeft;
-//                    interpolIntensity = linearInterpolate(bestLeft, rtArray[i-1], rtArray[i], intArray[i-1], intArray[i]);
+//                    deltaRt = rtArray[i] - bestLeftRt;
+//                    interpolIntensity = linearInterpolate(bestLeftRt, rtArray[i-1], rtArray[i], intArray[i-1], intArray[i]);
 //                    intensityIntegral += (interpolIntensity + intArray[i]) / 2.0f * deltaRt;
 //                }
 //                if(peakNum > 0){
@@ -224,16 +224,16 @@ public class FeatureFinder {
 //                }
                 hullRt.add(rtArray[i]);
                 hullInt.add(intArray[i]);
-                if(Math.abs(rtArray[i] - peakApexRt) <= peakApexDist){
+                if (Math.abs(rtArray[i] - peakApexRt) <= peakApexDist) {
                     peakApexDist = Math.abs(rtArray[i] - peakApexRt);
                     peakApexInt = intArray[i];
                 }
                 intSum += intArray[i];
 
-                peakNum ++;
+                peakNum++;
 //            }else if(peakNum > 0){
-//                deltaRt = bestRight - rtArray[i-1];
-//                interpolIntensity = linearInterpolate(bestRight, rtArray[i-1], rtArray[i], intArray[i-1], intArray[i]);
+//                deltaRt = bestRightRt - rtArray[i-1];
+//                interpolIntensity = linearInterpolate(bestRightRt, rtArray[i-1], rtArray[i], intArray[i-1], intArray[i]);
 //                intensityIntegral += (intArray[i-1] + interpolIntensity)/2.0 * deltaRt;
 //                break;
 //            }
@@ -243,8 +243,8 @@ public class FeatureFinder {
         feature.setRt(peakApexRt);
         feature.setIntensity(intSum);
         feature.setPeakApexInt(peakApexInt);
-        feature.setBestLeft(bestLeft);
-        feature.setBestRight(bestRight);
+        feature.setBestLeftRt(bestLeft);
+        feature.setBestRightRt(bestRight);
         feature.setHullRt(hullRt);
         feature.setHullInt(hullInt);
 
@@ -252,26 +252,26 @@ public class FeatureFinder {
     }
 
 
-    private float linearInterpolate(float x, float x0, float x1, float y0, float y1){
+    private float linearInterpolate(float x, float x0, float x1, float y0, float y1) {
 
         return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
     }
 
 
-    private void removeOverlappingFeatures(List<RtIntensityPairsDouble> pickedChroms, double bestLeft, double bestRight, List<IntensityRtLeftRtRightPairs> intensityLeftRight){
-        for(int i=0; i<pickedChroms.size(); i++){
+    private void removeOverlappingFeatures(List<RtIntensityPairsDouble> pickedChroms, double bestLeft, double bestRight, List<IntensityRtLeftRtRightPairs> intensityLeftRight) {
+        for (int i = 0; i < pickedChroms.size(); i++) {
             Double[] intensity = pickedChroms.get(i).getIntensityArray();
             Double[] rt = pickedChroms.get(i).getRtArray();
-            for(int j=0; j<intensity.length; j++){
-                if(intensity[j] <= 0d){
+            for (int j = 0; j < intensity.length; j++) {
+                if (intensity[j] <= 0d) {
                     continue;
                 }
-                if(rt[j] >= bestLeft && rt[j] <= bestRight){
+                if (rt[j] >= bestLeft && rt[j] <= bestRight) {
                     intensity[j] = 0d;
                 }
                 double left = intensityLeftRight.get(i).getRtLeftArray()[j];
                 double right = intensityLeftRight.get(i).getRtRightArray()[j];
-                if((left > bestLeft && left < bestRight) || (right > bestLeft && right < bestRight)){
+                if ((left > bestLeft && left < bestRight) || (right > bestLeft && right < bestRight)) {
                     intensity[j] = 0d;
                 }
             }
@@ -279,23 +279,23 @@ public class FeatureFinder {
     }
 
 
-
     /**
      * 从feature中移除rt覆盖重复的feature
+     *
      * @param experimentFeatures all mrmFeatures
      */
-    private void checkOverlappingFeatures(List<List<ExperimentFeature>> experimentFeatures){
+    private void checkOverlappingFeatures(List<List<ExperimentFeature>> experimentFeatures) {
         boolean skip;
         int i = 0;
-        while (i < experimentFeatures.size()){
+        while (i < experimentFeatures.size()) {
             skip = false;
-            for(int j=0; j<i; j++){
-                if(experimentFeatures.get(i).get(0).getBestLeft() >= experimentFeatures.get(j).get(0).getBestLeft() &&
-                        experimentFeatures.get(i).get(0).getBestRight() <= experimentFeatures.get(j).get(0).getBestRight()){
+            for (int j = 0; j < i; j++) {
+                if (experimentFeatures.get(i).get(0).getBestLeftRt() >= experimentFeatures.get(j).get(0).getBestLeftRt() &&
+                        experimentFeatures.get(i).get(0).getBestRightRt() <= experimentFeatures.get(j).get(0).getBestRightRt()) {
                     skip = true;
                 }
             }
-            if(skip){
+            if (skip) {
                 experimentFeatures.remove(i);
                 i--;
             }
