@@ -1,8 +1,8 @@
 package com.westlake.air.pecs.test.dao;
 
-import com.westlake.air.pecs.dao.TransitionDAO;
-import com.westlake.air.pecs.domain.db.TransitionDO;
-import com.westlake.air.pecs.domain.query.TransitionQuery;
+import com.westlake.air.pecs.dao.PeptideDAO;
+import com.westlake.air.pecs.domain.db.PeptideDO;
+import com.westlake.air.pecs.domain.query.PeptideQuery;
 import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,36 +13,28 @@ import java.util.List;
  * Created by James Lu MiaoShan
  * Time: 2018-08-08 19:07
  */
-public class TransitionDAOTest extends BaseTest {
+public class PeptideDAOTest extends BaseTest {
 
     @Autowired
-    TransitionDAO transitionDAO;
+    PeptideDAO peptideDAO;
 
     @Test
     public void getAllByLibraryIdTest() {
-        List<TransitionDO> list = transitionDAO.getAllByLibraryId("5b6712012ada5f2dc8de57d7");
-        assert true;
-    }
-
-    //TODO asw 类名改了,重新写一下测试用例
-    @Test
-    public void getTransitionCutInfosTest() {
-        List<String> result = transitionDAO.getTransitionCutInfos("5b67136d2ada5f15749a0140", "AGVETTTPSK_2");
-        List<TransitionDO> list = transitionDAO.getAllByLibraryId("5b6712012ada5f2dc8de57d7");
+        List<PeptideDO> list = peptideDAO.getAllByLibraryId("5b6712012ada5f2dc8de57d7");
         assert true;
     }
 
     @Test
     public void getAllByLibraryIdAndIsDecoy() {
-        List<TransitionDO> result = transitionDAO.getAllByLibraryIdAndIsDecoy("5b67136d2ada5f15749a0140", false);
+        List<PeptideDO> result = peptideDAO.getAllByLibraryIdAndIsDecoy("5b67136d2ada5f15749a0140", false);
         assert true;
     }
 
     @Test
     public void getListTest() {
-        TransitionDO transitionDO = getJsonFromFileTest();
-        TransitionQuery transitionQuery = new TransitionQuery();
-        List<TransitionDO> result = transitionDAO.getList(transitionQuery);
+        PeptideDO peptideDO = getJsonFromFileTest();
+        PeptideQuery peptideQuery = new PeptideQuery();
+        List<PeptideDO> result = peptideDAO.getList(peptideQuery);
         assert true;
     }
 

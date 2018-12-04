@@ -15,9 +15,9 @@ public class PageQuery implements Serializable {
     public static final int DEFAULT_PAGE_SIZE = 40;
     public static final String DEFAULT_SORT_COLUMN = "createDate";
 
-    protected int pageNo = 1;
+    protected long pageNo = 1;
     protected int pageSize = DEFAULT_PAGE_SIZE;
-    protected int start = 0;
+    protected long start = 0;
     //Sort.Direction.DESC
     protected Sort.Direction orderBy = null;
     protected String sortColumn = DEFAULT_SORT_COLUMN;
@@ -39,7 +39,7 @@ public class PageQuery implements Serializable {
         this.orderBy = direction;
     }
 
-    public int getPageNo() {
+    public long getPageNo() {
         return pageNo;
     }
 
@@ -59,19 +59,19 @@ public class PageQuery implements Serializable {
         this.pageSize = pageSize;
     }
 
-    public Integer getFirst() {
-        return (getPageNo() > 0 && getPageSize() > 0) ? ((getPageNo() - 1) * getPageSize() + 0) : 0;
+    public Long getFirst() {
+        return (getPageNo() > 0 && getPageSize() > 0) ? ((getPageNo() - 1) * getPageSize()) : 0;
         /*
          * maysql=Integer((pageNo - 1) * pageSize + 0); oralce=Integer((pageNo -
 		 * 1) * pageSize + 1);
 		 */
     }
 
-    public int getRowStart() {
+    public Long getRowStart() {
         return getFirst();
     }
 
-    public Integer getLast() {
+    public Long getLast() {
         return (getFirst() + getPageSize() - 1);
     }
 
@@ -83,7 +83,7 @@ public class PageQuery implements Serializable {
         this.totalNum = totalNum;
     }
 
-    public int getStart() {
+    public long getStart() {
         this.start = (this.pageNo - 1) * this.pageSize;
         return start;
     }

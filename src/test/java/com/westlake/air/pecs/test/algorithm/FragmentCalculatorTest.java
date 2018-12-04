@@ -6,8 +6,9 @@ import com.westlake.air.pecs.domain.bean.analyse.MzResult;
 import com.westlake.air.pecs.domain.bean.transition.AminoAcid;
 import com.westlake.air.pecs.domain.bean.transition.Fragment;
 import com.westlake.air.pecs.domain.bean.transition.FragmentResult;
-import com.westlake.air.pecs.domain.db.TransitionDO;
-import com.westlake.air.pecs.service.TransitionService;
+import com.westlake.air.pecs.domain.db.FragmentInfo;
+import com.westlake.air.pecs.domain.db.PeptideDO;
+import com.westlake.air.pecs.service.PeptideService;
 import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +24,15 @@ public class FragmentCalculatorTest extends BaseTest {
     @Autowired
     FragmentCalculator fragmentCalculator;
     @Autowired
-    TransitionService transitionService;
+    PeptideService peptideService;
     @Autowired
     FormulaCalculator formulaCalculator;
 
     @Test
     public void getFragmentsTest() {
-        TransitionDO transitionDO = getJsonFromFileTest();
-        Fragment result = fragmentCalculator.getFragment(transitionDO);
+        PeptideDO peptideDO = getJsonFromFileTest();
+        FragmentInfo fi = peptideDO.getFragmentMap().values().iterator().next();
+        Fragment result = fragmentCalculator.getFragment(peptideDO, fi);
         Fragment fragment = new Fragment();
         fragment.setSequence(fragmentCalculator.getFragmentSequence("AGVETTTPSK","y",7));
         fragment.setStart(3);
@@ -48,8 +50,9 @@ public class FragmentCalculatorTest extends BaseTest {
 
     @Test
     public void getFragmentsTest_1() {
-        TransitionDO transitionDO = getJsonFromFileTest1();
-        Fragment result = fragmentCalculator.getFragment(transitionDO);
+        PeptideDO peptideDO = getJsonFromFileTest1();
+        FragmentInfo fi = peptideDO.getFragmentMap().values().iterator().next();
+        Fragment result = fragmentCalculator.getFragment(peptideDO, fi);
         Fragment fragment = new Fragment();
         fragment.setSequence(fragmentCalculator.getFragmentSequence("YLYEIAR","b",3));
         fragment.setStart(0);
@@ -67,8 +70,9 @@ public class FragmentCalculatorTest extends BaseTest {
 
     @Test
     public void getFragmentsTest_2() {
-        TransitionDO transitionDO = getJsonFromFileTest2();
-        Fragment result = fragmentCalculator.getFragment(transitionDO);
+        PeptideDO peptideDO = getJsonFromFileTest2();
+        FragmentInfo fi = peptideDO.getFragmentMap().values().iterator().next();
+        Fragment result = fragmentCalculator.getFragment(peptideDO, fi);
         Fragment fragment = new Fragment();
         fragment.setSequence(fragmentCalculator.getFragmentSequence("KVPQVSTPTLVEVSR","y",5));
         fragment.setStart(10);
@@ -86,8 +90,9 @@ public class FragmentCalculatorTest extends BaseTest {
 
     @Test
     public void getFragmentsTest_3() {
-        TransitionDO transitionDO = getJsonFromFileTest3();
-        Fragment result = fragmentCalculator.getFragment(transitionDO);
+        PeptideDO peptideDO = getJsonFromFileTest3();
+        FragmentInfo fi = peptideDO.getFragmentMap().values().iterator().next();
+        Fragment result = fragmentCalculator.getFragment(peptideDO, fi);
         Fragment fragment = new Fragment();
         fragment.setSequence(fragmentCalculator.getFragmentSequence("VHTECCHGDLLECADDR","b",10));
         fragment.setStart(0);
@@ -100,14 +105,15 @@ public class FragmentCalculatorTest extends BaseTest {
         fragment.setCharge(2);
         fragment.setMonoMz(formulaCalculator.getMonoMz(fragment));
         fragment.setAverageMz(formulaCalculator.getAverageMz(fragment));
-        fragment.setUnimodMap(transitionDO.getUnimodMap());
+        fragment.setUnimodMap(peptideDO.getUnimodMap());
         assert (result.equals(fragment));
     }
 
     @Test
     public void getBaseFragmentsTest() {
-        TransitionDO transitionDO = getJsonFromFileTest();
-        Fragment result = fragmentCalculator.getBaseFragment(transitionDO);
+        PeptideDO peptideDO = getJsonFromFileTest();
+        FragmentInfo fi = peptideDO.getFragmentMap().values().iterator().next();
+        Fragment result = fragmentCalculator.getFragment(peptideDO, fi);
         Fragment fragment = new Fragment();
         fragment.setIsotope(false);
         fragment.setDeviation(0.0);
@@ -121,8 +127,9 @@ public class FragmentCalculatorTest extends BaseTest {
 
     @Test
     public void getBaseFragmentsTest_1() {
-        TransitionDO transitionDO = getJsonFromFileTest1();
-        Fragment result = fragmentCalculator.getBaseFragment(transitionDO);
+        PeptideDO peptideDO = getJsonFromFileTest1();
+        FragmentInfo fi = peptideDO.getFragmentMap().values().iterator().next();
+        Fragment result = fragmentCalculator.getFragment(peptideDO, fi);
         Fragment fragment = new Fragment();
         fragment.setIsotope(false);
         fragment.setDeviation(-0.0);
@@ -136,8 +143,9 @@ public class FragmentCalculatorTest extends BaseTest {
 
     @Test
     public void getBaseFragmentsTest_2() {
-        TransitionDO transitionDO = getJsonFromFileTest2();
-        Fragment result = fragmentCalculator.getBaseFragment(transitionDO);
+        PeptideDO peptideDO = getJsonFromFileTest2();
+        FragmentInfo fi = peptideDO.getFragmentMap().values().iterator().next();
+        Fragment result = fragmentCalculator.getFragment(peptideDO, fi);
         Fragment fragment = new Fragment();
         fragment.setIsotope(false);
         fragment.setDeviation(-0.0);
@@ -151,8 +159,9 @@ public class FragmentCalculatorTest extends BaseTest {
 
     @Test
     public void getBaseFragmentsTest_3() {
-        TransitionDO transitionDO = getJsonFromFileTest3();
-        Fragment result = fragmentCalculator.getBaseFragment(transitionDO);
+        PeptideDO peptideDO = getJsonFromFileTest3();
+        FragmentInfo fi = peptideDO.getFragmentMap().values().iterator().next();
+        Fragment result = fragmentCalculator.getFragment(peptideDO, fi);
         Fragment fragment = new Fragment();
         fragment.setIsotope(false);
         fragment.setDeviation(0.0);
@@ -166,8 +175,9 @@ public class FragmentCalculatorTest extends BaseTest {
 
     @Test
     public void getBaseFragmentsTest_4() {
-        TransitionDO transitionDO = getJsonFromFileTest4();
-        Fragment result = fragmentCalculator.getBaseFragment(transitionDO);
+        PeptideDO peptideDO = getJsonFromFileTest4();
+        FragmentInfo fi = peptideDO.getFragmentMap().values().iterator().next();
+        Fragment result = fragmentCalculator.getFragment(peptideDO, fi);
         Fragment fragment = new Fragment();
         fragment.setIsotope(false);
         fragment.setDeviation(-0.0);
@@ -182,39 +192,43 @@ public class FragmentCalculatorTest extends BaseTest {
 
     @Test
     public void getFragmentSequenceTest_1() {
-        TransitionDO transitionDO = getJsonFromFileTest();
-        String result = fragmentCalculator.getFragmentSequence(transitionDO.getSequence(), transitionDO.getAnnotation().getType(), transitionDO.getAnnotation().getLocation());
+        PeptideDO peptideDO = getJsonFromFileTest();
+        FragmentInfo fi = peptideDO.getFragmentMap().values().iterator().next();
+        String result = fragmentCalculator.getFragmentSequence(peptideDO.getSequence(), fi.getAnnotation().getType(), fi.getAnnotation().getLocation());
         String expect = "AGVETTTPSK".substring(3, 10);
         assert (result.equals(expect));
     }
 
     @Test
     public void getFragmentSequenceTest_2() {
-        TransitionDO transitionDO = getJsonFromFileTest3();
-        String result = fragmentCalculator.getFragmentSequence(transitionDO.getSequence(), transitionDO.getAnnotation().getType(), transitionDO.getAnnotation().getLocation());
+        PeptideDO peptideDO = getJsonFromFileTest3();
+        FragmentInfo fi = peptideDO.getFragmentMap().values().iterator().next();
+        String result = fragmentCalculator.getFragmentSequence(peptideDO.getSequence(), fi.getAnnotation().getType(), fi.getAnnotation().getLocation());
         String expect = "VHTECCHGDLLECADDR".substring(0, 10);
         assert (result.equals(expect));
     }
 
     @Test
     public void getFragmentSequenceTest_3() {
-        TransitionDO transitionDO = getJsonFromFileTest2();
-        String result = fragmentCalculator.getFragmentSequence(transitionDO.getSequence(), transitionDO.getAnnotation().getType(), transitionDO.getAnnotation().getLocation());
+        PeptideDO peptideDO = getJsonFromFileTest2();
+        FragmentInfo fi = peptideDO.getFragmentMap().values().iterator().next();
+        String result = fragmentCalculator.getFragmentSequence(peptideDO.getSequence(), fi.getAnnotation().getType(), fi.getAnnotation().getLocation());
         String expect = "KVPQVSTPTLVEVSR".substring(10, 15);
         assert (result.equals(expect));
     }
 
     @Test
     public void getFragmentSequenceTest_4() {
-        TransitionDO transitionDO = getJsonFromFileTest4();
-        String result = fragmentCalculator.getFragmentSequence(transitionDO.getSequence(), transitionDO.getAnnotation().getType(), transitionDO.getAnnotation().getLocation());
+        PeptideDO peptideDO = getJsonFromFileTest4();
+        FragmentInfo fi = peptideDO.getFragmentMap().values().iterator().next();
+        String result = fragmentCalculator.getFragmentSequence(peptideDO.getSequence(), fi.getAnnotation().getType(), fi.getAnnotation().getLocation());
         String expect = "TCVADESAENCDK".substring(2, 13);
         assert (result.equals(expect));
     }
 
     @Test
     public void decoyOverviewTest() {
-        TransitionDO transition = getJsonFromFileTest();
+        PeptideDO transition = getJsonFromFileTest();
         FragmentResult result = fragmentCalculator.decoyOverview("5b6712012ada5f2dc8de57d7");
         FragmentResult fragmentResult = new FragmentResult();
 
@@ -222,10 +236,10 @@ public class FragmentCalculatorTest extends BaseTest {
 
     @Test
     public void parseAminoAcidTest() {
-        TransitionDO transitionDO = getJsonFromFileTest();
-        List<AminoAcid> result = fragmentCalculator.parseAminoAcid(transitionDO.getSequence(), transitionDO.getUnimodMap());
+        PeptideDO peptideDO = getJsonFromFileTest();
+        List<AminoAcid> result = fragmentCalculator.parseAminoAcid(peptideDO.getSequence(), peptideDO.getUnimodMap());
         List<AminoAcid> expect = new ArrayList<>();
-        char[] temp = transitionDO.getSequence().toCharArray();
+        char[] temp = peptideDO.getSequence().toCharArray();
         for (int i = 0; i < 10; i++) {
             AminoAcid aa = new AminoAcid();
             aa.setName(String.valueOf(temp[i]));
@@ -236,10 +250,10 @@ public class FragmentCalculatorTest extends BaseTest {
 
     @Test
     public void parseAminoAcidTest_1() {
-        TransitionDO transitionDO = getJsonFromFileTest1();
-        List<AminoAcid> result = fragmentCalculator.parseAminoAcid(transitionDO.getSequence(), transitionDO.getUnimodMap());
+        PeptideDO peptideDO = getJsonFromFileTest1();
+        List<AminoAcid> result = fragmentCalculator.parseAminoAcid(peptideDO.getSequence(), peptideDO.getUnimodMap());
         List<AminoAcid> expect = new ArrayList<>();
-        char[] temp = transitionDO.getSequence().toCharArray();
+        char[] temp = peptideDO.getSequence().toCharArray();
         for (int i = 0; i < 7; i++) {
             AminoAcid aa = new AminoAcid();
             aa.setName(String.valueOf(temp[i]));
@@ -250,10 +264,10 @@ public class FragmentCalculatorTest extends BaseTest {
 
     @Test
     public void parseAminoAcidTest_2() {
-        TransitionDO transitionDO = getJsonFromFileTest2();
-        List<AminoAcid> result = fragmentCalculator.parseAminoAcid(transitionDO.getSequence(), transitionDO.getUnimodMap());
+        PeptideDO peptideDO = getJsonFromFileTest2();
+        List<AminoAcid> result = fragmentCalculator.parseAminoAcid(peptideDO.getSequence(), peptideDO.getUnimodMap());
         List<AminoAcid> expect = new ArrayList<>();
-        char[] temp = transitionDO.getSequence().toCharArray();
+        char[] temp = peptideDO.getSequence().toCharArray();
         for (int i = 0; i < 15; i++) {
             AminoAcid aa = new AminoAcid();
             aa.setName(String.valueOf(temp[i]));
@@ -264,14 +278,14 @@ public class FragmentCalculatorTest extends BaseTest {
 
     @Test
     public void parseAminoAcidTest_3() {
-        TransitionDO transitionDO = getJsonFromFileTest3();
-        List<AminoAcid> result = fragmentCalculator.parseAminoAcid(transitionDO.getSequence(), transitionDO.getUnimodMap());
+        PeptideDO peptideDO = getJsonFromFileTest3();
+        List<AminoAcid> result = fragmentCalculator.parseAminoAcid(peptideDO.getSequence(), peptideDO.getUnimodMap());
         List<AminoAcid> expect = new ArrayList<>();
-        char[] temp = transitionDO.getSequence().toCharArray();
+        char[] temp = peptideDO.getSequence().toCharArray();
         for (int i = 0; i < 17; i++) {
             AminoAcid aa = new AminoAcid();
             aa.setName(String.valueOf(temp[i]));
-            aa.setModId(transitionDO.getUnimodMap().get(i));
+            aa.setModId(peptideDO.getUnimodMap().get(i));
             expect.add(aa);
         }
         assert (result.equals(expect));
@@ -279,8 +293,8 @@ public class FragmentCalculatorTest extends BaseTest {
 
     @Test
     public void checkTest() {
-        TransitionDO transitionDO = getJsonFromFileTest();
-        List<MzResult> results = fragmentCalculator.check(transitionDO.getLibraryId(), null, false);
+        PeptideDO peptideDO = getJsonFromFileTest();
+        List<MzResult> results = fragmentCalculator.check(peptideDO.getLibraryId(), null, false);
 
     }
 

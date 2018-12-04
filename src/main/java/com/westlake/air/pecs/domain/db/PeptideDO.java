@@ -3,6 +3,7 @@ package com.westlake.air.pecs.domain.db;
 import com.westlake.air.pecs.domain.BaseDO;
 import com.westlake.air.pecs.domain.bean.transition.AminoAcid;
 import com.westlake.air.pecs.domain.bean.transition.Annotation;
+import com.westlake.air.pecs.domain.bean.transition.Fragment;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -17,8 +18,8 @@ import java.util.List;
  * Time: 2018-06-06 19:16
  */
 @Data
-@Document(collection = "transition")
-public class TransitionDO extends BaseDO {
+@Document(collection = "peptide")
+public class PeptideDO extends BaseDO {
 
     @Id
     String id;
@@ -30,51 +31,31 @@ public class TransitionDO extends BaseDO {
     String libraryId;
 
     /**
+     * 标准库名称
+     */
+    String libraryName;
+
+    /**
      * 对应蛋白质名称
      */
     @Indexed
     String proteinName;
 
     /**
-     * 肽段的唯一识别符,格式为 : fullName_precursorCharge
+     * 肽段的唯一识别符,格式为 : fullName_precursorCharge,如果是伪肽段,则本字段为对应的真肽段的PeptideRef
      */
     @Indexed
     String peptideRef;
 
-    boolean markPeptide = false;
-    boolean markProtein = false;
-
-    String libraryName;
-
     /**
      * 肽段的荷质比MZ
      */
-    Double precursorMz;
+    Double mz;
 
     /**
-     * 离子片段的荷质比MZ(Mono荷质比)
-     */
-    Double productMz;
-
-    /**
-     * 离子片段的带电量
-     */
-    Integer productCharge;
-    /**
-     * 归一化RT
+     * 肽段的归一化RT
      */
     Double rt;
-
-    /**
-     * 过渡态名称,如果是伪肽段,则为包含了原始肽段的属性
-     */
-    String name;
-
-    /**
-     * 离子强度
-     * library intensity
-     */
-    Double intensity;
 
     /**
      * 是否是伪肽段
@@ -82,7 +63,7 @@ public class TransitionDO extends BaseDO {
     Boolean isDecoy;
 
     /**
-     * 新字段,如果是伪肽段,则本字段为伪肽段对应的原始真肽段的Sequence(不包含UniModId)
+     * 对应肽段序列,如果是伪肽段,则本字段为伪肽段对应的原始真肽段的序列(不包含UniModId)
      */
     String targetSequence;
 
@@ -92,16 +73,6 @@ public class TransitionDO extends BaseDO {
     String sequence;
 
     /**
-     * 注释
-     */
-    String annotations;
-
-    /**
-     * 注释是否带有中括号,默认不带
-     */
-    boolean withBrackets = false;
-
-    /**
      * 完整版肽段名称(含修饰基团),如果是伪肽段则为原始的肽段的完整序列而不是伪肽段的完整序列
      */
     String fullName;
@@ -109,14 +80,7 @@ public class TransitionDO extends BaseDO {
     /**
      * 肽段带电量
      */
-    Integer precursorCharge;
-
-    /**
-     * 新字段,仅记录第一个
-     */
-    Annotation annotation;
-
-    String cutInfo;
+    Integer charge;
 
     /**
      * 如果是伪肽段,则本字段代表的是伪肽段中unimod的位置
@@ -134,12 +98,19 @@ public class TransitionDO extends BaseDO {
      */
     List<AminoAcid> decoyAcidList = new ArrayList<>();
 
-    Boolean detecting = true;
-    Boolean identifying = false;
-    Boolean quantifying = true;
+    /**
+     * 对应的肽段碎片的信息
+     */
+    HashMap<String, FragmentInfo> fragmentMap = new HashMap<>();
 
     String features;
 
+    public void putFragment(String cutInfo, FragmentInfo fi){
+        fragmentMap.put(cutInfo, fi);
+    }
 
+    public void removeFragment(String cutInfo){
+        fragmentMap.remove(cutInfo);
+    }
 
 }

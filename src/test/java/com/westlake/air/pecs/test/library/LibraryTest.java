@@ -3,10 +3,10 @@ package com.westlake.air.pecs.test.library;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
-import com.westlake.air.pecs.domain.db.TransitionDO;
-import com.westlake.air.pecs.parser.TransitionTraMLParser;
+import com.westlake.air.pecs.domain.db.PeptideDO;
+import com.westlake.air.pecs.parser.TraMLParser;
 import com.westlake.air.pecs.service.LibraryService;
-import com.westlake.air.pecs.service.TransitionService;
+import com.westlake.air.pecs.service.PeptideService;
 import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +22,11 @@ import java.util.List;
 public class LibraryTest extends BaseTest {
 
     @Autowired
-    TransitionTraMLParser traMLParser;
+    TraMLParser traMLParser;
     @Autowired
     LibraryService libraryService;
     @Autowired
-    TransitionService transitionService;
+    PeptideService peptideService;
 
     @Test
     public void extractor_tsv_parser_Test_1() throws Exception {
@@ -36,12 +36,12 @@ public class LibraryTest extends BaseTest {
         libraryService.insert(libraryDO);
         String filePath = getClass().getClassLoader().getResource("ChromatogramExtractor_input.tsv").getPath();
         File file = new File(filePath);
-        ResultDO resultDO = libraryService.parseAndInsert(libraryDO, new FileInputStream(file), filePath, true, new TaskDO());
+        ResultDO resultDO = libraryService.parseAndInsert(libraryDO, new FileInputStream(file), filePath, new TaskDO());
         assert resultDO.isSuccess();
-        List<TransitionDO> trans = transitionService.getAllByLibraryId(libraryDO.getId());
+        List<PeptideDO> trans = peptideService.getAllByLibraryId(libraryDO.getId());
         assert trans.size() == 3;
 
-        transitionService.deleteAllByLibraryId(libraryDO.getId());
+        peptideService.deleteAllByLibraryId(libraryDO.getId());
         libraryService.delete(libraryDO.getId());
     }
 

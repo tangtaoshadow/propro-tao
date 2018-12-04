@@ -43,17 +43,6 @@ public interface ScoresService {
     ScoresDO getByPeptideRefAndIsDecoy(String overviewId, String peptideRef, Boolean isDecoy);
 
     /**
-     * 从一个已经卷积完毕的数据集中求出iRT
-     *
-     * @param overviewId
-     * @param iRtLibraryId
-     * @param sigmaSpacing Sigma通常为30/8 = 6.25/Spacing通常为0.01
-     * @param taskDO
-     * @return
-     */
-    ResultDO<SlopeIntercept> computeIRt(String overviewId, String iRtLibraryId, SigmaSpacing sigmaSpacing, TaskDO taskDO);
-
-    /**
      * 从一个卷积结果列表中求出iRT
      *
      * @param dataList

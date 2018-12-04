@@ -7,7 +7,7 @@ import lombok.Data;
  * Time: 2018-06-06 19:16
  */
 @Data
-public class TransitionQuery extends PageQuery {
+public class PeptideQuery extends PageQuery {
 
     String id;
 
@@ -16,28 +16,12 @@ public class TransitionQuery extends PageQuery {
     /**
      * 前体的荷质比MZ
      */
-    Double precursorMz;
-
-    /**
-     * 本体的荷质比MZ
-     */
-    Double productMz;
+    Double mz;
 
     /**
      * 归一化RT
      */
     Double rt;
-
-    /**
-     * 过渡态名称
-     */
-    String name;
-
-    /**
-     * 离子强度
-     * library intensity
-     */
-    Double intensity;
 
     /**
      * 是否是伪肽段
@@ -63,23 +47,23 @@ public class TransitionQuery extends PageQuery {
      */
     String fullName;
 
-    Double precursorMzStart;
+    Double mzStart;
 
-    Double precursorMzEnd;
+    Double mzEnd;
 
-    public TransitionQuery() {
+    public PeptideQuery() {
     }
 
-    public TransitionQuery(String libraryId) {
+    public PeptideQuery(String libraryId) {
         this.libraryId = libraryId;
     }
 
-    public TransitionQuery(String libraryId, String peptideRef) {
+    public PeptideQuery(String libraryId, String peptideRef) {
         this.libraryId = libraryId;
         this.peptideRef = peptideRef;
     }
 
-    public TransitionQuery(int pageNo,int pageSize){
+    public PeptideQuery(int pageNo, int pageSize){
         super(pageNo, pageSize);
     }
 }

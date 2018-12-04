@@ -7,13 +7,12 @@ import com.westlake.air.pecs.domain.bean.score.FeatureByPep;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
-import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.rtnormalizer.ChromatogramFilter;
 import com.westlake.air.pecs.rtnormalizer.RtNormalizerScorer;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.TaskService;
-import com.westlake.air.pecs.service.TransitionService;
+import com.westlake.air.pecs.service.PeptideService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,7 @@ public class FeatureExtractor {
     @Autowired
     AnalyseOverviewService analyseOverviewService;
     @Autowired
-    TransitionService transitionService;
+    PeptideService peptideService;
     @Autowired
     GaussFilter gaussFilter;
     @Autowired
@@ -55,9 +54,9 @@ public class FeatureExtractor {
     @Autowired
     ChromatogramFilter chromatogramFilter;
 
-    public FeatureByPep getExperimentFeature(TransitionGroup group, IntensityGroup intensityGroupByPep, SigmaSpacing sigmaSpacing) {
+    public FeatureByPep getExperimentFeature(AnalyseDataDO dataDO, IntensityGroup intensityGroupByPep, SigmaSpacing sigmaSpacing) {
         boolean featureFound = true;
-        if (group.getDataMap() == null || group.getDataMap().size() == 0) {
+        if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() == 0) {
             featureFound = false;
         }
 
@@ -73,14 +72,14 @@ public class FeatureExtractor {
         List<double[]> noise1000List = new ArrayList<>();
         for (String cutInfo : intensityMap.keySet()) {
             //获取对应的卷积数据
-            AnalyseDataDO dataDO = group.getDataMap().get(cutInfo);
+           Float[] intensityArray = dataDO.getIntensityMap().get(cutInfo);
             //如果没有卷积到信号,dataDO为null
             if (dataDO == null || !dataDO.getIsHit()) {
                 continue;
             }
 
             //得到卷积后的chromatogram的RT,Intensity对
-            RtIntensityPairsDouble rtIntensityPairsOrigin = new RtIntensityPairsDouble(dataDO.getRtArray(), dataDO.getIntensityArray());
+            RtIntensityPairsDouble rtIntensityPairsOrigin = new RtIntensityPairsDouble(dataDO.getRtArray(), intensityArray);
 
             //进行高斯平滑,得到平滑后的chromatogram
             RtIntensityPairsDouble rtIntensityPairsAfterSmooth = gaussFilter.filter(rtIntensityPairsOrigin, sigmaSpacing);

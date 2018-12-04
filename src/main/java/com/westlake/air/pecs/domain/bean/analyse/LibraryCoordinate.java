@@ -1,6 +1,6 @@
 package com.westlake.air.pecs.domain.bean.analyse;
 
-import com.westlake.air.pecs.domain.db.simple.TargetTransition;
+import com.westlake.air.pecs.domain.db.simple.TargetPeptide;
 import lombok.Data;
 
 import java.util.List;
@@ -16,7 +16,7 @@ public class LibraryCoordinate {
 
     Float rtExtractionWindow;
 
-    List<TargetTransition> ms1List;
+    List<TargetPeptide> ms1List;
 
-    List<TargetTransition> ms2List;
+    List<TargetPeptide> ms2List;
 }

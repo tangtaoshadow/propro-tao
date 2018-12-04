@@ -11,7 +11,7 @@ public class Protein {
 
     String id;
 
-    String transitionId;
+    String peptideId;
 
     String libraryId;
 

@@ -28,28 +28,33 @@ public class AnalyseDataDO extends BaseDO {
     @Indexed
     String peptideRef;
 
+    //该肽段片段的理论rt值,从标准库中冗余所得
     Float rt;
 
-    String transitionId;
+    //对应的标准库的peptideId
+    String peptideId;
 
     String annotations;
 
-    String cutInfo;
-
-    Integer msLevel;
-
-    Float mz;
+    //排序后的rt
+    Float[] rtArray;
+    /**
+     * key为cutInfo, value为对应的intensity值
+     */
+    HashMap<String, Float[]> intensityMap = new HashMap<>();
+    /**
+     * key为cutInfo, value为对应的mz
+     */
+    HashMap<String, Float> mzMap = new HashMap<>();
+//    String cutInfo;
 
     //是否命中原始数据,如果原始数据中没有此Transition对应的数据则为false
     Boolean isHit = false;
 
     Boolean isDecoy = false;
 
-    //排序后的rt
-    Float[] rtArray;
-
     //一一映射rt的intensity数据
-    Float[] intensityArray;
+//    Float[] intensityArray;
 
     HashMap<Integer, String> unimodMap;
 }

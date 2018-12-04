@@ -7,12 +7,12 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.LibraryQuery;
-import com.westlake.air.pecs.domain.query.TransitionQuery;
-import com.westlake.air.pecs.parser.TransitionTraMLParser;
-import com.westlake.air.pecs.parser.TransitionTsvParser;
+import com.westlake.air.pecs.domain.query.PeptideQuery;
+import com.westlake.air.pecs.parser.TraMLParser;
+import com.westlake.air.pecs.parser.LibraryTsvParser;
 import com.westlake.air.pecs.service.LibraryService;
 import com.westlake.air.pecs.service.TaskService;
-import com.westlake.air.pecs.service.TransitionService;
+import com.westlake.air.pecs.service.PeptideService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +36,11 @@ public class LibraryServiceImpl implements LibraryService {
     @Autowired
     LibraryDAO libraryDAO;
     @Autowired
-    TransitionService transitionService;
+    PeptideService peptideService;
     @Autowired
-    TransitionTsvParser tsvParser;
+    LibraryTsvParser tsvParser;
     @Autowired
-    TransitionTraMLParser traMLParser;
+    TraMLParser traMLParser;
     @Autowired
     TaskService taskService;
 
@@ -166,14 +166,14 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public ResultDO parseAndInsert(LibraryDO library, InputStream in, String fileName, boolean justReal, TaskDO taskDO) {
+    public ResultDO parseAndInsert(LibraryDO library, InputStream in, String fileName, TaskDO taskDO) {
 
         ResultDO resultDO;
 
         if (fileName.toLowerCase().endsWith("tsv") || fileName.toLowerCase().endsWith("csv")) {
-            resultDO = tsvParser.parseAndInsert(in, library, justReal, taskDO);
+            resultDO = tsvParser.parseAndInsert(in, library, taskDO);
         } else if (fileName.toLowerCase().endsWith("traml")) {
-            resultDO = traMLParser.parseAndInsert(in, library, justReal, taskDO);
+            resultDO = traMLParser.parseAndInsert(in, library, taskDO);
         } else {
             return ResultDO.buildError(ResultCode.INPUT_FILE_TYPE_MUST_BE_TSV_OR_TRAML);
         }
@@ -184,16 +184,16 @@ public class LibraryServiceImpl implements LibraryService {
     @Override
     public void countAndUpdateForLibrary(LibraryDO library) {
         try {
-            library.setProteinCount(transitionService.countByProteinName(library.getId()));
-            library.setPeptideCount(transitionService.countByPeptideRef(library.getId()));
+            library.setProteinCount(peptideService.countByProteinName(library.getId()));
+            library.setPeptideCount(peptideService.countByPeptideRef(library.getId()));
 
-            TransitionQuery query = new TransitionQuery();
+            PeptideQuery query = new PeptideQuery();
             query.setLibraryId(library.getId());
-            library.setTotalCount(transitionService.count(query));
+            library.setTotalCount(peptideService.count(query));
             query.setIsDecoy(false);
-            library.setTotalTargetCount(transitionService.count(query));
+            library.setTotalTargetCount(peptideService.count(query));
             query.setIsDecoy(true);
-            library.setTotalDecoyCount(transitionService.count(query));
+            library.setTotalDecoyCount(peptideService.count(query));
 
             update(library);
         } catch (Exception e) {
@@ -202,9 +202,9 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public void uploadFile(LibraryDO library, InputStream in, String fileName, Boolean justReal, TaskDO taskDO) {
+    public void uploadFile(LibraryDO library, InputStream in, String fileName, TaskDO taskDO) {
         //先Parse文件,再作数据库的操作
-        ResultDO result = parseAndInsert(library, in, fileName, justReal, taskDO);
+        ResultDO result = parseAndInsert(library, in, fileName, taskDO);
         if (result.getErrorList() != null) {
             if (result.getErrorList().size() > errorListNumberLimit) {
                 taskDO.addLog("解析错误,错误的条数过多,这边只显示" + errorListNumberLimit + "条错误信息");

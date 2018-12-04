@@ -1,17 +1,14 @@
-var isDecoy;
-var overviewId;
-var peptideRef;
+var dataId;
 var useNoise1000;
+var isGaussFilter;
 
-function query(dataId, overviewId, peptideRef, cutInfo) {
+function query(dataId, cutInfo) {
     var datas = null;
     $.ajax({
         type: "POST",
         url: "/analyse/view",
         data: {
             dataId: dataId,
-            overviewId: overviewId,
-            peptideRef: peptideRef,
             cutInfo: cutInfo
         },
         dataType: "json",
@@ -29,6 +26,7 @@ function query(dataId, overviewId, peptideRef, cutInfo) {
         return;
     }
     var data_rt = datas.rt;
+    var peptideRef = datas.peptideRef;
     var data_intensity = datas.intensity;
     var intensity = 0;
     for (var i = 0; i < data_intensity.length; i++) {
@@ -83,35 +81,31 @@ function query(dataId, overviewId, peptideRef, cutInfo) {
     chart.setOption(option, true);
 }
 
-function queryGroup(isDecoy, overviewId, peptideRef, isGaussFilter, useNoise1000) {
-    if (isDecoy == null) {
-        isDecoy = this.isDecoy;
+function queryGroup(dataId, isGaussFilter, useNoise1000) {
+
+    if (dataId == null) {
+        dataId = this.dataId;
     } else {
-        this.isDecoy = isDecoy;
+        this.dataId = dataId;
     }
-    if (overviewId == null) {
-        overviewId = this.overviewId;
-    } else {
-        this.overviewId = overviewId;
-    }
-    if (peptideRef == null) {
-        peptideRef = this.peptideRef;
-    } else {
-        this.peptideRef = peptideRef;
-    }
+
     if (useNoise1000 == null) {
-        peptideRef = this.useNoise1000;
+        useNoise1000 = this.useNoise1000;
     } else {
         this.useNoise1000 = useNoise1000;
+    }
+
+    if (isGaussFilter == null) {
+        isGaussFilter = this.isGaussFilter;
+    } else {
+        this.isGaussFilter = isGaussFilter;
     }
     var datas = null;
     $.ajax({
         type: "POST",
         url: "/analyse/viewGroup",
         data: {
-            isDecoy: isDecoy,
-            overviewId: overviewId,
-            peptideRef: peptideRef,
+            dataId: dataId,
             isGaussFilter: isGaussFilter,
             useNoise1000: useNoise1000
         },
@@ -131,6 +125,7 @@ function queryGroup(isDecoy, overviewId, peptideRef, isGaussFilter, useNoise1000
         return;
     }
     var data_rt = datas.rt;
+    var peptideRef = datas.peptideRef;
     var cutinfo = datas.cutInfoArray;
     var intensity_arrays = datas.intensityArrays;
     var bestRt = datas.bestRt;

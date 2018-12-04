@@ -18,7 +18,7 @@ public class Scan {
     @XStreamImplicit(itemFieldName = "scanOrigin")
     List<ScanOrigin> scanOriginList;
 
-    @XStreamImplicit(itemFieldName = "precursorMz")
+    @XStreamImplicit(itemFieldName = "mz")
     List<PrecursorMz> precursorMzList;
 
     Maldi maldi;

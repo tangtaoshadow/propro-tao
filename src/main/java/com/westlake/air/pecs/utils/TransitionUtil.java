@@ -1,7 +1,7 @@
 package com.westlake.air.pecs.utils;
 
 import com.westlake.air.pecs.domain.bean.transition.AminoAcid;
-import com.westlake.air.pecs.domain.db.TransitionDO;
+import com.westlake.air.pecs.domain.db.PeptideDO;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public class TransitionUtil {
      * @param acidList
      * @return
      */
-    public static String toSequence(List<AminoAcid> acidList,boolean withUnimod) {
+    public static String toSequence(List<AminoAcid> acidList, boolean withUnimod) {
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < acidList.size(); i++) {
@@ -39,25 +39,22 @@ public class TransitionUtil {
      * 设置id为空
      * 设置ProductMz为空
      * 设置isDecoy为True
-     * @param transitionDO
+     *
+     * @param peptideDO
      * @return
      */
-    public static TransitionDO cloneForDecoy(TransitionDO transitionDO){
-        TransitionDO decoy = new TransitionDO();
-        decoy.setTargetSequence(transitionDO.getSequence());
-        decoy.setLibraryName(transitionDO.getLibraryName());
-        decoy.setWithBrackets(transitionDO.isWithBrackets());
-        decoy.setAnnotations(transitionDO.getAnnotations());
-        decoy.setAnnotation(transitionDO.getAnnotation());
-        decoy.setLibraryId(transitionDO.getLibraryId());
-        decoy.setPrecursorCharge(transitionDO.getPrecursorCharge());
-        decoy.setFullName(transitionDO.getFullName());
-        decoy.setProteinName(transitionDO.getProteinName());
+    public static PeptideDO cloneForDecoy(PeptideDO peptideDO) {
+        PeptideDO decoy = new PeptideDO();
+        decoy.setTargetSequence(peptideDO.getSequence());
+        decoy.setLibraryName(peptideDO.getLibraryName());
+        decoy.setLibraryId(peptideDO.getLibraryId());
+        decoy.setCharge(peptideDO.getCharge());
+        decoy.setFullName(peptideDO.getFullName());
+        decoy.setPeptideRef(peptideDO.getPeptideRef());
+        decoy.setProteinName(peptideDO.getProteinName());
         decoy.setIsDecoy(true);
-        decoy.setName(transitionDO.getName());
-        decoy.setRt(transitionDO.getRt());
-        decoy.setIntensity(transitionDO.getIntensity());
-        decoy.setPrecursorMz(transitionDO.getPrecursorMz());
+        decoy.setRt(peptideDO.getRt());
+        decoy.setMz(peptideDO.getMz());
 
         return decoy;
     }

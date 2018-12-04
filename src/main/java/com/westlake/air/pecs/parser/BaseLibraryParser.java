@@ -4,10 +4,10 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.transition.Annotation;
 import com.westlake.air.pecs.domain.db.LibraryDO;
+import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
-import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.parser.xml.AirXStream;
-import com.westlake.air.pecs.service.TransitionService;
+import com.westlake.air.pecs.service.PeptideService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,18 +22,18 @@ import java.util.regex.Pattern;
  * Created by James Lu MiaoShan
  * Time: 2018-07-26 21:13
  */
-public abstract class BaseTransitionParser {
+public abstract class BaseLibraryParser {
 
-    public final Logger logger = LoggerFactory.getLogger(BaseTransitionParser.class);
+    public final Logger logger = LoggerFactory.getLogger(BaseLibraryParser.class);
 
     @Autowired
     AirXStream airXStream;
     @Autowired
-    TransitionService transitionService;
+    PeptideService peptideService;
 
     public static final Pattern unimodPattern = Pattern.compile("([a-z])[\\(]unimod[\\:](\\d*)[\\)]");
 
-    public abstract ResultDO parseAndInsert(InputStream in, LibraryDO library, boolean justReal, TaskDO taskDO);
+    public abstract ResultDO parseAndInsert(InputStream in, LibraryDO library, TaskDO taskDO);
 
     protected ResultDO<Annotation> parseAnnotation(String annotations) {
         ResultDO<Annotation> resultDO = new ResultDO<>(true);
@@ -77,7 +77,7 @@ public abstract class BaseTransitionParser {
             String finalStr = forAdjust[0];
             //第一位必定是字母,代表fragment类型
             annotation.setType(finalStr.substring(0, 1));
-            String location = finalStr.substring(1, finalStr.length());
+            String location = finalStr.substring(1);
             if (!location.isEmpty()) {
                 annotation.setLocation(Integer.parseInt(location));
             }
@@ -95,11 +95,11 @@ public abstract class BaseTransitionParser {
     /**
      * 解析出Modification的位置
      *
-     * @param transitionDO
+     * @param peptideDO
      */
-    protected void parseModification(TransitionDO transitionDO) {
+    protected void parseModification(PeptideDO peptideDO) {
         //不论是真肽段还是伪肽段,fullUniModPeptideName字段都是真肽段的完整版
-        String peptide = transitionDO.getFullName();
+        String peptide = peptideDO.getFullName();
         peptide = peptide.toLowerCase();
         HashMap<Integer, String> unimodMap = new HashMap<>();
 
@@ -111,7 +111,7 @@ public abstract class BaseTransitionParser {
             }
         }
         if (unimodMap.size() > 0) {
-            transitionDO.setUnimodMap(unimodMap);
+            peptideDO.setUnimodMap(unimodMap);
         }
     }
 }

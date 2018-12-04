@@ -539,8 +539,8 @@ public class MzXMLParser extends BaseParser {
 
         String read = new String(readBytes);
         String precursorMz;
-        if (read.contains("precursorMz")) {
-            precursorMz = read.substring(read.indexOf("<precursorMz"), read.indexOf("</precursorMz>") + 14);
+        if (read.contains("mz")) {
+            precursorMz = read.substring(read.indexOf("<mz"), read.indexOf("</mz>") + 14);
             scanIndexDO.setPrecursorMz(Float.parseFloat(precursorMz.substring(precursorMz.indexOf(">") + 1, precursorMz.indexOf("</"))));
             String attributeForPrecursorMz = precursorMz.substring(0, precursorMz.indexOf(">"));
             String[] tmp = null;

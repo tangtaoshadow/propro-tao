@@ -5,11 +5,10 @@ import com.westlake.air.pecs.algorithm.FormulaCalculator;
 import com.westlake.air.pecs.algorithm.FragmentCalculator;
 import com.westlake.air.pecs.decoy.generator.ShuffleGenerator;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.db.TransitionDO;
-import com.westlake.air.pecs.domain.db.simple.Peptide;
+import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.domain.db.simple.Protein;
-import com.westlake.air.pecs.domain.query.TransitionQuery;
-import com.westlake.air.pecs.service.TransitionService;
+import com.westlake.air.pecs.domain.query.PeptideQuery;
+import com.westlake.air.pecs.service.PeptideService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,15 +25,15 @@ import java.util.List;
  * Time: 2018-06-12 12:19
  */
 @Controller
-@RequestMapping("transition")
-public class TransitionController extends BaseController {
+@RequestMapping("peptide")
+public class PeptideController extends BaseController {
 
     @Autowired
     FragmentCalculator fragmentCalculator;
     @Autowired
     FormulaCalculator formulaCalculator;
     @Autowired
-    TransitionService transitionService;
+    PeptideService peptideService;
     @Autowired
     ShuffleGenerator shuffleGenerator;
 
@@ -43,7 +42,6 @@ public class TransitionController extends BaseController {
                 @RequestParam(value = "libraryId", required = false) String libraryId,
                 @RequestParam(value = "proteinName", required = false) String proteinName,
                 @RequestParam(value = "peptideRef", required = false) String peptideRef,
-                @RequestParam(value = "name", required = false) String name,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "decoyFilter", required = false, defaultValue = "All") String decoyFilter,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
@@ -51,12 +49,11 @@ public class TransitionController extends BaseController {
         model.addAttribute("libraryId", libraryId);
         model.addAttribute("proteinName", proteinName);
         model.addAttribute("peptideRef", peptideRef);
-        model.addAttribute("name", name);
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("decoyFilter", decoyFilter);
         model.addAttribute("libraries",getLibraryList(null));
 
-        TransitionQuery query = new TransitionQuery();
+        PeptideQuery query = new PeptideQuery();
 
         if (libraryId != null && !libraryId.isEmpty()) {
             query.setLibraryId(libraryId);
@@ -66,9 +63,6 @@ public class TransitionController extends BaseController {
         }
         if (proteinName != null && !proteinName.isEmpty()) {
             query.setProteinName(proteinName);
-        }
-        if (name != null && !name.isEmpty()) {
-            query.setName(name);
         }
         if (!decoyFilter.equals("All")) {
             if(decoyFilter.equals("Yes")){
@@ -80,16 +74,16 @@ public class TransitionController extends BaseController {
 
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
-        ResultDO<List<TransitionDO>> resultDO = transitionService.getList(query);
+        ResultDO<List<PeptideDO>> resultDO = peptideService.getList(query);
 
-        model.addAttribute("transitionList", resultDO.getModel());
+        model.addAttribute("peptideList", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
         StringBuilder builder = new StringBuilder();
         builder.append("本次搜索耗时:").append(System.currentTimeMillis() - startTime).append("毫秒;包含搜索结果总计:")
                 .append(resultDO.getTotalNum()).append("条");
         model.addAttribute("searchResult", builder.toString());
-        return "transition/list";
+        return "peptide/list";
     }
 
     @RequestMapping(value = "/protein")
@@ -101,7 +95,7 @@ public class TransitionController extends BaseController {
         model.addAttribute("libraryId", libraryId);
         model.addAttribute("pageSize", pageSize);
 
-        TransitionQuery query = new TransitionQuery();
+        PeptideQuery query = new PeptideQuery();
 
         if (libraryId != null && !libraryId.isEmpty()) {
             query.setLibraryId(libraryId);
@@ -109,7 +103,7 @@ public class TransitionController extends BaseController {
 
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
-        ResultDO<List<Protein>> resultDO = transitionService.getProteinList(query);
+        ResultDO<List<Protein>> resultDO = peptideService.getProteinList(query);
 
         model.addAttribute("proteins", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
@@ -118,67 +112,38 @@ public class TransitionController extends BaseController {
         builder.append("本次搜索耗时:").append(System.currentTimeMillis() - startTime).append("毫秒;包含搜索结果总计:")
                 .append(resultDO.getTotalNum()).append("条");
         model.addAttribute("searchResult", builder.toString());
-        return "transition/protein";
-    }
-
-    @RequestMapping(value = "/peptide")
-    String peptide(Model model,
-                @RequestParam(value = "libraryId", required = false) String libraryId,
-                @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
-        long startTime = System.currentTimeMillis();
-        model.addAttribute("libraryId", libraryId);
-        model.addAttribute("pageSize", pageSize);
-
-        TransitionQuery query = new TransitionQuery();
-
-        if (libraryId != null && !libraryId.isEmpty()) {
-            query.setLibraryId(libraryId);
-        }
-
-        query.setPageSize(pageSize);
-        query.setPageNo(currentPage);
-        ResultDO<List<Peptide>> resultDO = transitionService.getPeptideList(query);
-
-        model.addAttribute("peptides", resultDO.getModel());
-        model.addAttribute("totalPage", resultDO.getTotalPage());
-        model.addAttribute("currentPage", currentPage);
-        StringBuilder builder = new StringBuilder();
-        builder.append("本次搜索耗时:").append(System.currentTimeMillis() - startTime).append("毫秒;包含搜索结果总计:")
-                .append(resultDO.getTotalNum()).append("条");
-        model.addAttribute("searchResult", builder.toString());
-        return "transition/peptide";
+        return "peptide/protein";
     }
 
     @RequestMapping(value = "/detail/{id}")
     String detail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
-        ResultDO<TransitionDO> resultDO = transitionService.getById(id);
+        ResultDO<PeptideDO> resultDO = peptideService.getById(id);
         if (resultDO.isSuccess()) {
-            model.addAttribute("transition", resultDO.getModel());
-            return "/transition/detail";
+            model.addAttribute("peptide", resultDO.getModel());
+            return "/peptide/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/transition/list";
+            return "redirect:/peptide/list";
         }
     }
 
     @RequestMapping(value = "/createdecoy/{id}")
     String generateDecoy(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
-        ResultDO<TransitionDO> resultDO = transitionService.getById(id);
+        ResultDO<PeptideDO> resultDO = peptideService.getById(id);
 
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/transition/list";
+            return "redirect:/peptide/list";
         }
 
-        TransitionDO transitionDO = shuffleGenerator.generate(resultDO.getModel());
-        if(transitionDO != null){
-            logger.info(JSON.toJSONString(transitionDO));
+        PeptideDO peptideDO = shuffleGenerator.generate(resultDO.getModel());
+        if(peptideDO != null){
+            logger.info(JSON.toJSONString(peptideDO));
         }else{
             logger.info("未能够生成伪肽段");
         }
-        model.addAttribute("transition", resultDO.getModel());
-        return "/transition/detail";
+        model.addAttribute("peptide", resultDO.getModel());
+        return "/peptide/detail";
     }
 
     @RequestMapping(value = "/calculator")
@@ -195,11 +160,11 @@ public class TransitionController extends BaseController {
         model.addAttribute("deviation", deviation);
         model.addAttribute("unimodIds", unimodIds);
         if (sequence == null || sequence.isEmpty()) {
-            return "/transition/calculator";
+            return "/peptide/calculator";
         }
 
         if (type == null || type.isEmpty()) {
-            return "/transition/calculator";
+            return "/peptide/calculator";
         }
 
         model.addAttribute("sequence", sequence);
@@ -217,7 +182,7 @@ public class TransitionController extends BaseController {
         model.addAttribute("monoMz", monoMz);
         model.addAttribute("averageMz", averageMz);
 
-        return "/transition/calculator";
+        return "/peptide/calculator";
     }
 
 }

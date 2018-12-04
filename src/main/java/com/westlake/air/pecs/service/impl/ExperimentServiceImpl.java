@@ -15,7 +15,7 @@ import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;
-import com.westlake.air.pecs.domain.db.simple.TargetTransition;
+import com.westlake.air.pecs.domain.db.simple.TargetPeptide;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.AirdFileParser;
@@ -48,7 +48,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     @Autowired
     ExperimentDAO experimentDAO;
     @Autowired
-    TransitionService transitionService;
+    PeptideService peptideService;
     @Autowired
     ScanIndexDAO scanIndexDAO;
     @Autowired
@@ -293,11 +293,11 @@ public class ExperimentServiceImpl implements ExperimentService {
             raf = new RandomAccessFile(file, "r");
             for (WindowRang rang : rangs) {
 
-                List<TargetTransition> coordinates;
+                List<TargetPeptide> coordinates;
                 //key为rt
                 TreeMap<Float, MzIntensityPairs> rtMap;
                 //Step2.获取标准库的目标肽段片段的坐标
-                coordinates = transitionService.buildMS2Coordinates(iRtLibraryId, SlopeIntercept.create(), -1, rang.getMzStart(), rang.getMzEnd());
+                coordinates = peptideService.buildMS2Coordinates(iRtLibraryId, SlopeIntercept.create(), -1, rang.getMzStart(), rang.getMzEnd());
                 if (coordinates.size() == 0) {
                     logger.warn("No Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
                     continue;
@@ -306,7 +306,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                 rtMap = airdFileParser.parseSwathBlockValues(raf, swathMap.get(rang.getMzStart()));
 
                 //Step4.卷积并且存储数据
-                convolute(finalList, coordinates, rtMap, null, mzExtractWindow, -1f, false);
+                convolute(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -345,7 +345,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     private void extractMS1(RandomAccessFile raf, String overviewId, SwathInput swathInput) {
 
         //Step1.获取标准库目标卷积片段
-        List<TargetTransition> coordinates = transitionService.buildMS1Coordinates(swathInput.getLibraryId(), swathInput.getSlopeIntercept(), swathInput.getRtExtractWindow());
+        List<TargetPeptide> coordinates = peptideService.buildMS1Coordinates(swathInput.getLibraryId(), swathInput.getSlopeIntercept(), swathInput.getRtExtractWindow());
         if (coordinates == null || coordinates.size() == 0) {
             return;
         }
@@ -429,10 +429,10 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     private List<AnalyseDataDO> processConv(RandomAccessFile raf, SwathInput swathInput, ScanIndexDO swathIndex, WindowRang rang, String overviewId) throws Exception {
-        List<TargetTransition> coordinates;
+        List<TargetPeptide> coordinates;
         TreeMap<Float, MzIntensityPairs> rtMap;
         //Step2.获取标准库的目标肽段片段的坐标
-        coordinates = transitionService.buildMS2Coordinates(swathInput.getLibraryId(), swathInput.getSlopeIntercept(), swathInput.getRtExtractWindow(), rang.getMzStart(), rang.getMzEnd());
+        coordinates = peptideService.buildMS2Coordinates(swathInput.getLibraryId(), swathInput.getSlopeIntercept(), swathInput.getRtExtractWindow(), rang.getMzStart(), rang.getMzEnd());
         if (coordinates.isEmpty()) {
             logger.warn("No Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
             return null;
@@ -467,10 +467,10 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @param isMS1
      * @return
      */
-    private List<AnalyseDataDO> convoluteAndInsert(List<TargetTransition> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow, boolean isMS1) {
+    private List<AnalyseDataDO> convoluteAndInsert(List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow, boolean isMS1) {
         List<AnalyseDataDO> dataList = new ArrayList<>();
-        for (TargetTransition ms : coordinates) {
-            AnalyseDataDO dataDO = convForOne(isMS1, ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
+        for (TargetPeptide ms : coordinates) {
+            AnalyseDataDO dataDO = convForOne(ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
             dataList.add(dataDO);
         }
         analyseDataDAO.insert(dataList);
@@ -487,78 +487,68 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @param overviewId
      * @param mzExtractWindow
      * @param rtExtractWindow
-     * @param isMS1
      */
-    private void convolute(List<AnalyseDataDO> finalList, List<TargetTransition> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float mzExtractWindow, Float rtExtractWindow, boolean isMS1) {
-        for (TargetTransition ms : coordinates) {
-            AnalyseDataDO dataDO = convForOne(isMS1, ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
+    private void convolute(List<AnalyseDataDO> finalList, List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float mzExtractWindow, Float rtExtractWindow) {
+        for (TargetPeptide ms : coordinates) {
+            AnalyseDataDO dataDO = convForOne(ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
             finalList.add(dataDO);
         }
     }
 
-    private AnalyseDataDO convForOne(boolean isMS1, TargetTransition ms, TreeMap<Float, MzIntensityPairs> rtMap, Float mzExtractWindow, Float rtExtractWindow, String overviewId) {
+    private AnalyseDataDO convForOne(TargetPeptide ms, TreeMap<Float, MzIntensityPairs> rtMap, Float mzExtractWindow, Float rtExtractWindow, String overviewId) {
         float mzStart = 0;
         float mzEnd = -1;
-        //设置mz卷积窗口
-        if (isMS1) {
-            mzStart = ms.getPrecursorMz() - mzExtractWindow / 2;
-            mzEnd = ms.getPrecursorMz() + mzExtractWindow / 2;
-        } else {
-            mzStart = ms.getProductMz() - mzExtractWindow / 2;
-            mzEnd = ms.getProductMz() + mzExtractWindow / 2;
-        }
 
+        //所有的碎片共享同一个RT数组
         ArrayList<Float> rtList = new ArrayList<>();
-        ArrayList<Float> intList = new ArrayList<>();
-
-        //本参数用于检测是否在全谱图上检测到信号
-        boolean isHit = false;
-        for (Float rt : rtMap.keySet()) {
+        for(Float rt : rtMap.keySet()){
             if (rtExtractWindow != -1 && rt > ms.getRtEnd()) {
                 break;
             }
             if (rtExtractWindow == -1 || (rt >= ms.getRtStart() && rt <= ms.getRtEnd())) {
-                MzIntensityPairs pairs = rtMap.get(rt);
-                Float[] pairMzArray = pairs.getMzArray();
-                Float[] pairIntensityArray = pairs.getIntensityArray();
-                Float acc = ConvolutionUtil.accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd);
-                if (acc != 0) {
-                    isHit = true; //如果本次的统计数据不为0,首先确认总信号是命中状态
-                }
                 rtList.add(rt);
-                intList.add(acc);
             }
         }
 
-        AnalyseDataDO dataDO = new AnalyseDataDO();
-        dataDO.setTransitionId(ms.getId());
-        if (isMS1) {
-            dataDO.setMz(ms.getPrecursorMz());
-            dataDO.setMsLevel(1);
-        } else {
-            dataDO.setMz(ms.getProductMz());
-            dataDO.setMsLevel(2);
-        }
-        if (isHit) {
-            Float[] rtArray = new Float[rtList.size()];
-            Float[] intArray = new Float[intList.size()];
-            rtList.toArray(rtArray);
-            intList.toArray(intArray);
-            dataDO.setRtArray(rtArray);
-            dataDO.setIntensityArray(intArray);
-            dataDO.setIsHit(true);
-        } else {
-            dataDO.setIsHit(false);
-        }
+        Float[] rtArray = new Float[rtList.size()];
+        rtList.toArray(rtArray);
 
+        AnalyseDataDO dataDO = new AnalyseDataDO();
+        dataDO.setPeptideId(ms.getId());
+        dataDO.setRtArray(rtArray);
         dataDO.setOverviewId(overviewId);
-        dataDO.setAnnotations(ms.getAnnotations());
-        dataDO.setCutInfo(ms.getCutInfo());
         dataDO.setPeptideRef(ms.getPeptideRef());
         dataDO.setProteinName(ms.getProteinName());
         dataDO.setIsDecoy(ms.getIsDecoy());
         dataDO.setRt(ms.getRt());
         dataDO.setUnimodMap(ms.getUnimodMap());
+
+        Boolean isHit = false;
+        for(FragmentInfo fi : ms.getFragmentMap().values()){
+            mzStart = fi.getMz().floatValue() - mzExtractWindow / 2;
+            mzEnd = fi.getMz().floatValue() + mzExtractWindow / 2;
+
+            ArrayList<Float> intList = new ArrayList<>();
+
+            for (Float rt : rtArray) {
+               MzIntensityPairs pairs = rtMap.get(rt);
+               Float[] pairMzArray = pairs.getMzArray();
+               Float[] pairIntensityArray = pairs.getIntensityArray();
+               Float acc = ConvolutionUtil.accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd);
+               intList.add(acc);
+            }
+
+            if(intList.size() != 0){
+                isHit = true;
+            }
+            dataDO.getMzMap().put(fi.getCutInfo(), fi.getMz().floatValue());
+
+            Float[] intArray = new Float[intList.size()];
+            intList.toArray(intArray);
+            dataDO.getIntensityMap().put(fi.getCutInfo(), intArray);
+        }
+
+        dataDO.setIsHit(isHit);
         return dataDO;
     }
 

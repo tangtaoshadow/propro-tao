@@ -2,7 +2,7 @@ package com.westlake.air.pecs.test;
 
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.PecsPlatformApplication;
-import com.westlake.air.pecs.domain.db.TransitionDO;
+import com.westlake.air.pecs.domain.db.PeptideDO;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,45 +28,45 @@ public class BaseTest {
         assert true;
     }
 
-    public TransitionDO getJsonFromFileTest(){
+    public PeptideDO getJsonFromFileTest(){
         try {
-            return getJsonFromFile("json/transition.json", TransitionDO.class);
+            return getJsonFromFile("json/transition.json", PeptideDO.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public TransitionDO getJsonFromFileTest1(){
+    public PeptideDO getJsonFromFileTest1(){
         try {
-            return getJsonFromFile("json/transition1.json", TransitionDO.class);
+            return getJsonFromFile("json/transition1.json", PeptideDO.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public TransitionDO getJsonFromFileTest2(){
+    public PeptideDO getJsonFromFileTest2(){
         try {
-            return getJsonFromFile("json/transition2.json", TransitionDO.class);
+            return getJsonFromFile("json/transition2.json", PeptideDO.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public TransitionDO getJsonFromFileTest3(){
+    public PeptideDO getJsonFromFileTest3(){
         try {
-            return getJsonFromFile("json/transition3.json", TransitionDO.class);
+            return getJsonFromFile("json/transition3.json", PeptideDO.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public TransitionDO getJsonFromFileTest4(){
+    public PeptideDO getJsonFromFileTest4(){
         try {
-            return getJsonFromFile("json/transition4.json", TransitionDO.class);
+            return getJsonFromFile("json/transition4.json", PeptideDO.class);
         } catch (Exception e) {
             e.printStackTrace();
         }

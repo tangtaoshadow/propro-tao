@@ -6,7 +6,8 @@ import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.decoy.BaseGenerator;
 import com.westlake.air.pecs.domain.bean.transition.AminoAcid;
 import com.westlake.air.pecs.domain.bean.transition.Annotation;
-import com.westlake.air.pecs.domain.db.TransitionDO;
+import com.westlake.air.pecs.domain.db.FragmentInfo;
+import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.utils.TransitionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,29 +34,19 @@ public class ShuffleGenerator extends BaseGenerator {
     @Autowired
     FragmentCalculator fragmentCalculator;
 
-    public List<TransitionDO> generate(List<TransitionDO> list) {
-        List<TransitionDO> decoys = new ArrayList<>();
-
-        HashMap<String, TransitionDO> realDecoyMap = new HashMap<>();
-        for (TransitionDO trans : list) {
-            TransitionDO existedDecoy = realDecoyMap.get(trans.getPeptideRef());
-            TransitionDO decoy = null;
-            if(existedDecoy == null){
-                decoy = generate(trans);
-                realDecoyMap.put(trans.getPeptideRef(), decoy);
-            }else{
-                decoy = generateDecoyFromExistedDecoy(existedDecoy, trans);
-            }
-
+    public List<PeptideDO> generate(List<PeptideDO> list) {
+        List<PeptideDO> decoys = new ArrayList<>();
+        for (PeptideDO trans : list) {
+            PeptideDO decoy = generate(trans);
             decoys.add(decoy);
         }
         return decoys;
     }
 
-    public TransitionDO generate(TransitionDO transitionDO) {
+    public PeptideDO generate(PeptideDO peptideDO) {
 
-        String sequence = transitionDO.getSequence();
-        HashMap<Integer, String> unimodMap = transitionDO.getUnimodMap();
+        String sequence = peptideDO.getSequence();
+        HashMap<Integer, String> unimodMap = peptideDO.getUnimodMap();
 
         List<AminoAcid> aminoAcids = new ArrayList<>();
 
@@ -75,7 +66,7 @@ public class ShuffleGenerator extends BaseGenerator {
             }
         }
 
-        aminoAcids = fragmentCalculator.parseAminoAcid(sequence,unimodMap);
+        aminoAcids = fragmentCalculator.parseAminoAcid(sequence, unimodMap);
 
         List<AminoAcid> bestDecoy = null;
         Double asi = null;
@@ -96,7 +87,7 @@ public class ShuffleGenerator extends BaseGenerator {
                     break;
                 }
             }
-            aminoAcids = fragmentCalculator.parseAminoAcid(sequence,unimodMap);
+            aminoAcids = fragmentCalculator.parseAminoAcid(sequence, unimodMap);
         }
 
         if (removeLastAcid) {
@@ -109,76 +100,41 @@ public class ShuffleGenerator extends BaseGenerator {
             }
         }
 
-        TransitionDO decoy = TransitionUtil.cloneForDecoy(transitionDO);
+        PeptideDO decoy = TransitionUtil.cloneForDecoy(peptideDO);
         decoy.setSequence(TransitionUtil.toSequence(bestDecoy, false));
         decoy.setUnimodMap(newUnimodMap);
         decoy.setDecoyAcidList(bestDecoy);
 
-        Annotation oneAnno = decoy.getAnnotation();
-
-        List<String> unimodIds = new ArrayList<>();
-        List<AminoAcid> acids = fragmentCalculator.getFragmentSequence(bestDecoy, oneAnno.getType(), oneAnno.getLocation());
-        for (AminoAcid aminoAcid : acids) {
-            if (aminoAcid.getModId() != null) {
-                unimodIds.add(aminoAcid.getModId());
+        for (String cutInfo : peptideDO.getFragmentMap().keySet()) {
+            FragmentInfo targetFi = peptideDO.getFragmentMap().get(cutInfo);
+            FragmentInfo decoyFi = new FragmentInfo();
+            decoyFi.setIntensity(targetFi.getIntensity());
+            decoyFi.setCharge(targetFi.getCharge());
+            decoyFi.setAnnotation(targetFi.getAnnotation());
+            decoyFi.setAnnotations(targetFi.getAnnotation().toAnnoInfo());
+            Annotation oneAnno = targetFi.getAnnotation();
+            List<String> unimodIds = new ArrayList<>();
+            List<AminoAcid> acids = fragmentCalculator.getFragmentSequence(bestDecoy, oneAnno.getType(), oneAnno.getLocation());
+            for (AminoAcid aminoAcid : acids) {
+                if (aminoAcid.getModId() != null) {
+                    unimodIds.add(aminoAcid.getModId());
+                }
             }
+
+            double productMz = formulaCalculator.getMonoMz(
+                    TransitionUtil.toSequence(acids, false),
+                    oneAnno.getType(),
+                    oneAnno.getCharge(),
+                    oneAnno.getAdjust(),
+                    oneAnno.getDeviation(),
+                    oneAnno.isIsotope(),
+                    unimodIds
+            );
+
+            decoyFi.setMz(productMz);
+            decoy.putFragment(cutInfo, decoyFi);
         }
 
-        double productMz = formulaCalculator.getMonoMz(
-                TransitionUtil.toSequence(acids, false),
-                oneAnno.getType(),
-                oneAnno.getCharge(),
-                oneAnno.getAdjust(),
-                oneAnno.getDeviation(),
-                oneAnno.isIsotope(),
-                unimodIds
-        );
-
-        decoy.setFeatures("计算的肽段:"+TransitionUtil.toSequence(acids, false));
-        decoy.setProductMz(productMz);
-        decoy.setPeptideRef(decoy.getFullName()+"_"+decoy.getPrecursorCharge());
-        decoy.setCutInfo(transitionDO.getCutInfo());
-        return decoy;
-    }
-
-    /**
-     * 从一个已经存在的Decoy生成另外一个Decoy,但是需要保持和已存在的Decoy的Sequence相同
-     * @param existedDecoy
-     * @param target
-     * @return
-     */
-    public TransitionDO generateDecoyFromExistedDecoy(TransitionDO existedDecoy, TransitionDO target) {
-
-        TransitionDO decoy = TransitionUtil.cloneForDecoy(existedDecoy);
-        decoy.setSequence(existedDecoy.getSequence());
-        decoy.setUnimodMap(existedDecoy.getUnimodMap());
-        decoy.setDecoyAcidList(existedDecoy.getDecoyAcidList());
-
-        Annotation oneAnno = decoy.getAnnotation();
-
-        List<String> unimodIds = new ArrayList<>();
-        List<AminoAcid> acids = fragmentCalculator.getFragmentSequence(decoy.getDecoyAcidList(), target.getAnnotation().getType(), target.getAnnotation().getLocation());
-        for (AminoAcid aminoAcid : acids) {
-            if (aminoAcid.getModId() != null) {
-                unimodIds.add(aminoAcid.getModId());
-            }
-        }
-
-        double productMz = formulaCalculator.getMonoMz(
-                TransitionUtil.toSequence(acids, false),
-                oneAnno.getType(),
-                oneAnno.getCharge(),
-                oneAnno.getAdjust(),
-                oneAnno.getDeviation(),
-                oneAnno.isIsotope(),
-                unimodIds
-        );
-
-        decoy.setFeatures("计算的肽段:"+TransitionUtil.toSequence(acids, false));
-        decoy.setProductMz(productMz);
-        decoy.setPeptideRef(decoy.getFullName()+"_"+decoy.getPrecursorCharge());
-        decoy.setCutInfo(target.getCutInfo());
-        decoy.setAnnotations(target.getAnnotations());
         return decoy;
     }
 }

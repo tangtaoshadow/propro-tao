@@ -118,7 +118,7 @@
                                 <div class="m-accordion__item-content">
                                     <a th:href="|/scores/list?overviewId=${overviewId}&peptideRef=${score?.peptideRef}|" class="btn btn-primary btn-sm">查看真伪肽段打分</a>
                                     <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#m_modal_group"
-                                            th:onclick="|queryGroup('${score.isDecoy}','${overviewId}','${score.peptideRef}', false, false)|">
+                                            th:onclick="|queryGroup('${score.analyseDataId}', false, false)|">
                                         查看卷积组谱图
                                     </button>
                                     <table class="table table-bordered table-hover" style="table-layout:fixed;">

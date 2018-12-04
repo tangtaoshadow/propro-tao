@@ -4,9 +4,10 @@ import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.transition.Annotation;
+import com.westlake.air.pecs.domain.db.FragmentInfo;
 import com.westlake.air.pecs.domain.db.LibraryDO;
+import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
-import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.parser.model.traml.*;
 import com.westlake.air.pecs.parser.xml.AirXStream;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Component("traMLParser")
-public class TransitionTraMLParser extends BaseTransitionParser{
+public class TraMLParser extends BaseLibraryParser {
 
     @Autowired
     AirXStream airXStream;
@@ -64,29 +65,27 @@ public class TransitionTraMLParser extends BaseTransitionParser{
         return peptideMap;
     }
 
-    public ResultDO<TransitionDO> parseTransition(Transition transition, HashMap<String, Peptide> peptideMap, LibraryDO library, boolean justReal) {
-        ResultDO<TransitionDO> resultDO = new ResultDO<>(true);
-        TransitionDO transitionDO = new TransitionDO();
-        transitionDO.setLibraryId(library.getId());
-        transitionDO.setLibraryName(library.getName());
+    public ResultDO<PeptideDO> parseTransition(Transition transition, HashMap<String, Peptide> peptideMap, LibraryDO library) {
+        ResultDO<PeptideDO> resultDO = new ResultDO<>(true);
+        PeptideDO peptideDO = new PeptideDO();
+        peptideDO.setLibraryId(library.getId());
+        peptideDO.setLibraryName(library.getName());
+
+        FragmentInfo fi = new FragmentInfo();
 
         // parse transition attribution
         boolean isDecoy = transition.getPeptideRef().toLowerCase().contains("decoy");
-        if (justReal && isDecoy) {
-            return null;
-        }
-        transitionDO.setIsDecoy(isDecoy);
-        // parse transition id to the name
-        transitionDO.setName(transition.getId());
+
+        peptideDO.setIsDecoy(isDecoy);
         // parse transition cvparams
         List<CvParam> listCvParams = transition.getCvParams();
         for (CvParam cvParam : listCvParams) {
             if (cvParam.getName().equals("product ion intensity")) {
-                transitionDO.setIntensity(Double.valueOf(cvParam.getValue()));
+                fi.setIntensity(Double.valueOf(cvParam.getValue()));
             } else if (cvParam.getName().equals("decoy SRM transition")) {
-                transitionDO.setIsDecoy(true);
+                peptideDO.setIsDecoy(true);
             } else if (cvParam.getName().equals("target SRM transition")) {
-                transitionDO.setIsDecoy(false);
+                peptideDO.setIsDecoy(false);
             }
         }
         // parse transition userparam
@@ -94,7 +93,7 @@ public class TransitionTraMLParser extends BaseTransitionParser{
         if(listUserParams != null){
             for (UserParam userParam : listUserParams) {
                 if (userParam.getName().equals("annotation")) {
-                    transitionDO.setAnnotations(userParam.getValue());
+                    fi.setAnnotations(userParam.getValue());
                 }
             }
         }
@@ -104,10 +103,10 @@ public class TransitionTraMLParser extends BaseTransitionParser{
         if(listCvParams != null){
             for (CvParam cvParam : listCvParams) {
                 if (cvParam.getName().equals("isolation window target m/z")) {
-                    transitionDO.setPrecursorMz(Double.valueOf(cvParam.getValue()));
+                    peptideDO.setMz(Double.valueOf(cvParam.getValue()));
                 }
                 if (cvParam.getName().equals("charge state")) {
-                    transitionDO.setPrecursorCharge(Integer.valueOf(cvParam.getValue()));
+                    peptideDO.setCharge(Integer.valueOf(cvParam.getValue()));
                 }
             }
         }
@@ -117,10 +116,10 @@ public class TransitionTraMLParser extends BaseTransitionParser{
         if(listCvParams != null){
             for (CvParam cvParam : listCvParams) {
                 if (cvParam.getName().equals("isolation window target m/z")) {
-                    transitionDO.setProductMz(Double.valueOf(cvParam.getValue()));
+                    fi.setMz(Double.valueOf(cvParam.getValue()));
                 }
                 if (cvParam.getName().equals("charge state")) {
-                    transitionDO.setProductCharge(Integer.valueOf(cvParam.getValue()));
+                    fi.setCharge(Integer.valueOf(cvParam.getValue()));
                 }
             }
         }
@@ -131,54 +130,55 @@ public class TransitionTraMLParser extends BaseTransitionParser{
         // parse rt, sequence, full name, protein name from peptideMap
         Peptide peptide = peptideMap.get(transition.getPeptideRef());
         String rt = peptide.getRetentionTimeList().get(0).getCvParams().get(0).getValue();
-        transitionDO.setRt(Double.valueOf(rt));
-        transitionDO.setSequence(peptide.getSequence());
-        transitionDO.setProteinName(peptide.getProteinRefList().get(0).getRef());
-        transitionDO.setFullName(peptide.getUserParams().get(0).getValue());
+        peptideDO.setRt(Double.valueOf(rt));
+        peptideDO.setSequence(peptide.getSequence());
+        peptideDO.setProteinName(peptide.getProteinRefList().get(0).getRef());
+        peptideDO.setFullName(peptide.getUserParams().get(0).getValue());
         for(CvParam cvParam : peptide.getCvParams()){
             if(cvParam.getName().equals("charge state")){
-                transitionDO.setPrecursorCharge(Integer.valueOf(cvParam.getValue()));
-                transitionDO.setPeptideRef(transitionDO.getFullName()+"_"+transitionDO.getPrecursorCharge());
+                peptideDO.setCharge(Integer.valueOf(cvParam.getValue()));
+                peptideDO.setPeptideRef(peptideDO.getFullName()+"_"+ peptideDO.getCharge());
             }
         }
 
         // parse annotations
-        String annotations = transitionDO.getAnnotations();
+        String annotations = fi.getAnnotations();
         if (annotations.contains("[")) {
-            transitionDO.setWithBrackets(true);
+            fi.setWithBrackets(true);
             annotations = annotations.replace("[", "").replace("]", "");
         }
-        transitionDO.setAnnotations(annotations);
+        fi.setAnnotations(annotations);
         try {
-            ResultDO<Annotation> annotationResult = parseAnnotation(transitionDO.getAnnotations());
+            ResultDO<Annotation> annotationResult = parseAnnotation(fi.getAnnotations());
             Annotation annotation = annotationResult.getModel();
-            transitionDO.setAnnotation(annotation);
-            transitionDO.setCutInfo(annotation.getType()+annotation.getLocation()+(annotation.getCharge()==1?"":("^"+annotation.getCharge())));
-            resultDO.setModel(transitionDO);
+            fi.setAnnotation(annotation);
+            fi.setCutInfo(annotation.getType()+annotation.getLocation()+(annotation.getCharge()==1?"":("^"+annotation.getCharge())));
+            peptideDO.putFragment(fi.getCutInfo(), fi);
+            resultDO.setModel(peptideDO);
         } catch (Exception e) {
             resultDO.setSuccess(false);
             resultDO.setMsgInfo("Line插入错误(Sequence未知)");
-            logger.error(transitionDO.getLibraryId() + ":" + transitionDO.getAnnotation(), e);
+            logger.error(peptideDO.getLibraryId() + ":" + fi.getAnnotation(), e);
             return resultDO;
         }
 
-        parseModification(transitionDO);
+        parseModification(peptideDO);
 
         return resultDO;
     }
 
     @Override
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library, boolean justReal, TaskDO taskDO) {
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, TaskDO taskDO) {
         TraML traML = parse(in);
         System.out.println(traML.getProteinList().size());
 
         HashMap<String, Peptide> peptideMap = makePeptideMap(traML.getCompoundList().getPeptideList());
-        ResultDO<List<TransitionDO>> tranResult = new ResultDO<>(true);
-        List<TransitionDO> transitions = new ArrayList<>();
+        ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
+        List<PeptideDO> transitions = new ArrayList<>();
 
         try {
             //开始插入前先清空原有的数据库数据
-            ResultDO resultDOTmp = transitionService.deleteAllByLibraryId(library.getId());
+            ResultDO resultDOTmp = peptideService.deleteAllByLibraryId(library.getId());
             logger.info("删除旧数据完毕");
 
             if (resultDOTmp.isFailed()) {
@@ -187,24 +187,31 @@ public class TransitionTraMLParser extends BaseTransitionParser{
             }
 
             int count = 0;
+            PeptideDO lastPeptide = null;
             for (Transition transition : traML.getTransitionList()) {
-                ResultDO<TransitionDO> resultDO = parseTransition(transition, peptideMap, library, justReal);
-                if (resultDO == null) {
-                    continue;
-                }
+                ResultDO<PeptideDO> resultDO = parseTransition(transition, peptideMap, library);
+
                 if (resultDO.isFailed()) {
                     tranResult.addErrorMsg(resultDO.getMsgInfo());
-                } else {
-                    transitions.add(resultDO.getModel());
+                    continue;
                 }
-                if (transitions.size() > Constants.MAX_INSERT_RECORD_FOR_TRANSITION) {
-                    count += Constants.MAX_INSERT_RECORD_FOR_TRANSITION;
-                    transitionService.insertAll(transitions, false);
-                    logger.info(count + "条数据插入成功");
-                    transitions = new ArrayList<>();
+
+                PeptideDO peptide = resultDO.getModel();
+                if (lastPeptide == null) {
+                    lastPeptide = peptide;
+                } else {
+                    //如果是同一个肽段下的不同离子片段
+                    if (lastPeptide.getPeptideRef().equals(peptide.getPeptideRef()) && lastPeptide.getIsDecoy().equals(peptide.getIsDecoy())) {
+                        for (String key : peptide.getFragmentMap().keySet()) {
+                            lastPeptide.putFragment(key, peptide.getFragmentMap().get(key));
+                        }
+                    } else {
+                        transitions.add(lastPeptide);
+                        lastPeptide = peptide;
+                    }
                 }
             }
-            transitionService.insertAll(transitions, false);
+            peptideService.insertAll(transitions, false);
             count += transitions.size();
             logger.info(count + "条数据插入成功");
         } catch (Exception e) {

@@ -34,7 +34,9 @@
     <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
     <div class="m-portlet__body">
         <div class="clearfix">
-            <form id="searchForm" method="post" role="form" class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed" action="/analyse/data/list">
+            <form id="searchForm" method="post" role="form"
+                  class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
+                  action="/analyse/data/list">
                 <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                 <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
                 <input id="overviewId" type="hidden" th:value="${overviewId}" class="form-control" name="overviewId">
@@ -48,18 +50,18 @@
                         <input type="text" class="form-control m-input" name="peptideRef" placeholder="肽段全称"
                                th:value="${peptideRef}">
                     </div>
-                    <div class="input-group col-lg-1">
-                        <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                MS等级:
-                            </button>
-                        </div>
-                        <select class="form-control m-input" id="msLevel" name="msLevel">
-                            <option th:text="All" th:value="All" th:selected="${msLevel}=='All'?true:false"></option>
-                            <option th:text="MS1" th:value="1" th:selected="${msLevel}==1?true:false"></option>
-                            <option th:text="MS2" th:value="2" th:selected="${msLevel}==2?true:false"></option>
-                        </select>
-                    </div>
+                    <!--<div class="input-group col-lg-1">-->
+                    <!--<div class="input-group-prepend">-->
+                    <!--<button class="btn btn-success" type="button">-->
+                    <!--MS等级:-->
+                    <!--</button>-->
+                    <!--</div>-->
+                    <!--<select class="form-control m-input" id="msLevel" name="msLevel">-->
+                    <!--<option th:text="All" th:value="All" th:selected="${msLevel}=='All'?true:false"></option>-->
+                    <!--<option th:text="MS1" th:value="1" th:selected="${msLevel}==1?true:false"></option>-->
+                    <!--<option th:text="MS2" th:value="2" th:selected="${msLevel}==2?true:false"></option>-->
+                    <!--</select>-->
+                    <!--</div>-->
 
                     <div class="input-group-append">
                         <button class="btn btn-primary" type="submit">
@@ -78,12 +80,9 @@
                     <th width="2%">No.</th>
                     <th width="25%">蛋白名称</th>
                     <th width="20%">肽段全称</th>
-                    <th width="8%">标记</th>
                     <th width="5%">肽段真伪</th>
-                    <th width="5%">切分标记</th>
-                    <th width="5%">MS等级</th>
-                    <th width="7%">MZ</th>
                     <th width="6%">RT</th>
+                    <th width="25%">片段</th>
                     <th width="17%">操作</th>
                 </tr>
                 </thead>
@@ -93,10 +92,9 @@
                     <td th:text="${data.proteinName}"></td>
                     <td>
                         <a target="_Blank"
-                           th:href="|/transition/list?libraryId=${overview?.libraryId}&peptideRef=${data.peptideRef}|"
+                           th:href="|/peptide/list?libraryId=${overview?.libraryId}&peptideRef=${data.peptideRef}|"
                            th:text="${data.peptideRef}"></a>
                     </td>
-                    <td th:text="${data.annotations}"></td>
                     <td th:if="${data.isDecoy}">
                         <span class="m-badge m-badge--danger m-badge--wide">
                             伪
@@ -107,19 +105,44 @@
                            真
                        </span>
                     </td>
-                    <td th:text="${data.cutInfo}"></td>
-                    <td th:text="${data.msLevel}"></td>
-                    <td th:text="${data.mz}"></td>
                     <td th:text="${data.rt}"></td>
+
                     <td>
-                        <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
-                                data-target="#m_modal_target"
-                                th:onclick="|query('${data.id}','${overviewId}','${data.peptideRef}','${data.cutInfo}')|">
-                            查看谱图
-                        </button>
+                        <table class="table table-bordered table-hover" style="table-layout:fixed;background-color: transparent;text-align: center;">
+                            <thead>
+                            <tr>
+                                <th width="30%">
+                                    CutInfo
+                                </th>
+                                <th width="30%">
+                                    碎片MZ
+                                </th>
+                                <th width="40%">
+                                    操作
+                                </th>
+
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="cutInfo:${data.mzMap.keySet()}">
+                                <td th:text="${cutInfo}"></td>
+                                <td th:text="${data.mzMap.get(cutInfo)}"></td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
+                                            data-target="#m_modal_target"
+                                            th:onclick="|query('${data.id}','${cutInfo}')|">
+                                        查看谱图
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+
+                    <td>
                         <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
                                 data-target="#m_modal_group"
-                                th:onclick="|queryGroup('${data.isDecoy}','${overviewId}','${data.peptideRef}', false, false)|">
+                                th:onclick="|queryGroup('${data.id}', false, false)|">
                             查看组谱图
                         </button>
                     </td>
@@ -262,19 +285,19 @@
                     <div class="modal-header">
                         <h5 class="modal-title">
                             <button type="button" class="btn btn-sm btn-warning"
-                                    th:onclick="|queryGroup(null,null,null,true,false)|">
+                                    th:onclick="|queryGroup(null,true,false)|">
                                 高斯平滑
                             </button>
                             <button type="button" class="btn btn-sm btn-info"
-                                    th:onclick="|queryGroup(null,null,null,true, true)|">
+                                    th:onclick="|queryGroup(null,true, true)|">
                                 平滑去噪
                             </button>
                             <button type="button" class="btn btn-sm btn-brand"
-                                    th:onclick="|queryGroup(null,null,null,false, false)|">
+                                    th:onclick="|queryGroup(null,false, false)|">
                                 原始数据
                             </button>
                             <button type="button" class="btn btn-sm btn-accent"
-                                    th:onclick="|queryGroup(null,null,null,false, true)|">
+                                    th:onclick="|queryGroup(null,false, true)|">
                                 原始去噪
                             </button>
 

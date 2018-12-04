@@ -10,9 +10,10 @@ import com.westlake.air.pecs.domain.bean.transition.AminoAcid;
 import com.westlake.air.pecs.domain.bean.transition.Annotation;
 import com.westlake.air.pecs.domain.bean.transition.Fragment;
 import com.westlake.air.pecs.domain.bean.transition.FragmentResult;
-import com.westlake.air.pecs.domain.db.TransitionDO;
-import com.westlake.air.pecs.domain.query.TransitionQuery;
-import com.westlake.air.pecs.service.TransitionService;
+import com.westlake.air.pecs.domain.db.FragmentInfo;
+import com.westlake.air.pecs.domain.db.PeptideDO;
+import com.westlake.air.pecs.domain.query.PeptideQuery;
+import com.westlake.air.pecs.service.PeptideService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,15 +36,15 @@ public class FragmentCalculator {
     public final Logger logger = LoggerFactory.getLogger(FragmentCalculator.class);
 
     @Autowired
-    TransitionService transitionService;
+    PeptideService peptideService;
     @Autowired
     FormulaCalculator formulaCalculator;
 
-    public Fragment getFragment(TransitionDO transitionDO) {
-        Fragment fragment = new Fragment(transitionDO.getId());
-        String sequence = transitionDO.getSequence();
-        Annotation annotation = transitionDO.getAnnotation();
-        fragment.setUnimodMap(transitionDO.getUnimodMap());
+    public Fragment getFragment(PeptideDO peptide, FragmentInfo fragmentInfo) {
+        Fragment fragment = new Fragment(peptide.getId());
+        String sequence = peptide.getSequence();
+        Annotation annotation = fragmentInfo.getAnnotation();
+        fragment.setUnimodMap(peptide.getUnimodMap());
 
         String fs = getFragmentSequence(sequence, annotation.getType(), annotation.getLocation());
 
@@ -75,14 +76,14 @@ public class FragmentCalculator {
     /**
      * 获取不包含计算分子质量数据的fragment,也不包含修饰基团
      *
-     * @param transitionDO
+     * @param peptideDO
      * @return
      */
-    public Fragment getBaseFragment(TransitionDO transitionDO) {
+    public Fragment getBaseFragment(PeptideDO peptideDO, FragmentInfo fragmentInfo) {
         Fragment fragment = new Fragment();
-        String sequence = transitionDO.getSequence();
-        Annotation annotation = transitionDO.getAnnotation();
-        fragment.setUnimodMap(transitionDO.getUnimodMap());
+        String sequence = peptideDO.getSequence();
+        Annotation annotation = fragmentInfo.getAnnotation();
+        fragment.setUnimodMap(peptideDO.getUnimodMap());
 
         String fs = getFragmentSequence(sequence, annotation.getType(), annotation.getLocation());
 
@@ -127,10 +128,10 @@ public class FragmentCalculator {
         FragmentResult result = new FragmentResult();
         logger.info("数据库读取数据");
 
-        TransitionQuery query = new TransitionQuery();
+        PeptideQuery query = new PeptideQuery();
         query.setLibraryId(libraryId);
         query.setPageSize(MAX_PAGE_SIZE_FOR_FRAGMENT);
-        long totalCount = transitionService.count(query);
+        long totalCount = peptideService.count(query);
         int totalPage = 1;
         if (totalCount > MAX_PAGE_SIZE_FOR_FRAGMENT) {
             totalPage = (int) (totalCount / MAX_PAGE_SIZE_FOR_FRAGMENT) + 1;
@@ -143,27 +144,28 @@ public class FragmentCalculator {
 
         for (int i = 1; i <= totalPage; i++) {
             query.setPageNo(i);
-            ResultDO<List<TransitionDO>> resultTmp = transitionService.getList(query);
+            ResultDO<List<PeptideDO>> resultTmp = peptideService.getList(query);
             logger.info("读取第" + i + "批数据,总计" + totalPage + "批");
-            List<TransitionDO> list = resultTmp.getModel();
+            List<PeptideDO> list = resultTmp.getModel();
 
-            for (TransitionDO transition : list) {
-                Fragment fragment = getBaseFragment(transition);
-                if (fragment != null) {
-
-                    if (transition.getIsDecoy()) {
-                        countDecoy++;
-                        if (decoyFragments.contains(fragment)) {
-                            fragment.count();
+            for (PeptideDO peptide : list) {
+                for (FragmentInfo fragmentInfo : peptide.getFragmentMap().values()) {
+                    Fragment fragment = getBaseFragment(peptide, fragmentInfo);
+                    if (fragment != null) {
+                        if (peptide.getIsDecoy()) {
+                            countDecoy++;
+                            if (decoyFragments.contains(fragment)) {
+                                fragment.count();
+                            } else {
+                                decoyFragments.add(fragment);
+                            }
                         } else {
-                            decoyFragments.add(fragment);
-                        }
-                    } else {
-                        countTarget++;
-                        if (targetFragments.contains(fragment)) {
-                            fragment.count();
-                        } else {
-                            targetFragments.add(fragment);
+                            countTarget++;
+                            if (targetFragments.contains(fragment)) {
+                                fragment.count();
+                            } else {
+                                targetFragments.add(fragment);
+                            }
                         }
                     }
                 }
@@ -247,11 +249,11 @@ public class FragmentCalculator {
         }
 
         logger.info("数据库读取数据");
-        TransitionQuery query = new TransitionQuery();
+        PeptideQuery query = new PeptideQuery();
         query.setLibraryId(libraryId);
         query.setIsDecoy(isDecoy);
         query.setPageSize(MAX_PAGE_SIZE_FOR_FRAGMENT);
-        long totalCount = transitionService.count(query);
+        long totalCount = peptideService.count(query);
         int totalPage = 1;
         if (totalCount > MAX_PAGE_SIZE_FOR_FRAGMENT) {
             totalPage = (int) (totalCount / MAX_PAGE_SIZE_FOR_FRAGMENT) + 1;
@@ -263,43 +265,45 @@ public class FragmentCalculator {
         int countForError = 0;
         for (int i = 1; i <= totalPage; i++) {
             query.setPageNo(i);
-            ResultDO<List<TransitionDO>> resultDO = transitionService.getList(query);
+            ResultDO<List<PeptideDO>> resultDO = peptideService.getList(query);
             logger.info("读取第" + i + "批数据,总计" + totalPage + "批");
-            List<TransitionDO> list = resultDO.getModel();
+            List<PeptideDO> list = resultDO.getModel();
 
-            for (TransitionDO transition : list) {
-                Fragment fragment = getFragment(transition);
-                if (fragment != null) {
-
-                    count++;
-                    if (!fragments.contains(fragment)) {
+            for (PeptideDO peptide : list) {
+                for (FragmentInfo fragmentInfo : peptide.getFragmentMap().values()) {
+                    Fragment fragment = getFragment(peptide, fragmentInfo);
+                    if (fragment != null) {
                         count++;
-                        fragments.add(fragment);
-                        double result = Math.abs(transition.getProductMz() - fragment.getMonoMz());
-                        if (result > threshold) {
-                            MzResult mzResult = new MzResult();
-                            mzResult.setOriginMz(transition.getProductMz());
-                            mzResult.setNewMz(fragment.getMonoMz());
-                            mzResult.setDelta(result);
-                            mzResult.setCharge(fragment.getCharge());
-                            mzResult.setSequence(transition.getSequence());
-                            mzResult.setType(fragment.getType());
-                            mzResult.setOriginSequence(transition.getFullName());
-                            mzResult.setFragmentSequence(fragment.getSequence());
-                            mzResult.setAnnotations(transition.getAnnotations());
-                            mzResult.setPrecursorCharge(transition.getPrecursorCharge());
-                            mzResult.setPrecursorMz(transition.getPrecursorMz());
-                            mzResult.setNewPrecursorMz(formulaCalculator.getMonoMz(transition));
-                            mzResult.setLocation(fragment.getLocation());
-                            if (Math.abs(transition.getPrecursorMz() - mzResult.getNewPrecursorMz()) > threshold) {
-                                mzResult.setDelatPrecursorMz(Math.abs(transition.getPrecursorMz() - mzResult.getNewPrecursorMz()));
-                            }
-                            mzResultList.add(mzResult);
+                        if (!fragments.contains(fragment)) {
+                            count++;
+                            fragments.add(fragment);
+                            double result = Math.abs(fragmentInfo.getMz() - fragment.getMonoMz());
+                            if (result > threshold) {
+                                MzResult mzResult = new MzResult();
+                                mzResult.setOriginMz(fragmentInfo.getMz());
+                                mzResult.setNewMz(fragment.getMonoMz());
+                                mzResult.setDelta(result);
+                                mzResult.setCharge(fragment.getCharge());
+                                mzResult.setSequence(peptide.getSequence());
+                                mzResult.setType(fragment.getType());
+                                mzResult.setOriginSequence(peptide.getFullName());
+                                mzResult.setFragmentSequence(fragment.getSequence());
+                                mzResult.setAnnotations(fragmentInfo.getAnnotations());
+                                mzResult.setPrecursorCharge(peptide.getCharge());
+                                mzResult.setPrecursorMz(peptide.getMz());
+                                mzResult.setNewPrecursorMz(formulaCalculator.getMonoMz(peptide));
+                                mzResult.setLocation(fragment.getLocation());
+                                if (Math.abs(peptide.getMz() - mzResult.getNewPrecursorMz()) > threshold) {
+                                    mzResult.setDelatPrecursorMz(Math.abs(peptide.getMz() - mzResult.getNewPrecursorMz()));
+                                }
+                                mzResultList.add(mzResult);
 
-                            countForError++;
+                                countForError++;
+                            }
                         }
                     }
                 }
+
             }
         }
         logger.info("总计Fragment条数:" + count + ";阈值为:" + threshold + ";其中超过阈值的有" + countForError + "条");

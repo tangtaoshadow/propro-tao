@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.domain.db.simple;
 
+import com.westlake.air.pecs.domain.db.FragmentInfo;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -9,7 +10,7 @@ import java.util.HashMap;
  * Time: 2018-07-17 10:16
  */
 @Data
-public class TargetTransition {
+public class TargetPeptide {
 
     //对应的transition的Id,如果是MS1的则为对应的第一条transition的Id(一个MS1会对应多条transition记录)
     String id;
@@ -19,14 +20,15 @@ public class TargetTransition {
     String peptideRef;
 
     //对应的MS1荷质比
-    float precursorMz;
+    float mz;
 
-    //对应的MS2荷质比
-    float productMz;
-
-    String annotations;
-
-    String cutInfo;
+    HashMap<String, FragmentInfo> fragmentMap;
+//    //对应的MS2荷质比
+//    float fragmentMz;
+//
+//    String annotations;
+//
+//    String cutInfo;
 
     Boolean isDecoy;
 
@@ -48,8 +50,8 @@ public class TargetTransition {
             return false;
         }
 
-        if (obj instanceof TargetTransition) {
-            TargetTransition target = (TargetTransition) obj;
+        if (obj instanceof TargetPeptide) {
+            TargetPeptide target = (TargetPeptide) obj;
             if (this.getPeptideRef().equals(target.getPeptideRef())) {
                 return true;
             }

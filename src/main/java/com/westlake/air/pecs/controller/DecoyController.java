@@ -6,9 +6,9 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.transition.FragmentResult;
 import com.westlake.air.pecs.domain.bean.analyse.MzResult;
 import com.westlake.air.pecs.domain.db.LibraryDO;
-import com.westlake.air.pecs.domain.db.TransitionDO;
-import com.westlake.air.pecs.domain.query.TransitionQuery;
-import com.westlake.air.pecs.service.TransitionService;
+import com.westlake.air.pecs.domain.db.PeptideDO;
+import com.westlake.air.pecs.domain.query.PeptideQuery;
+import com.westlake.air.pecs.service.PeptideService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-import static com.westlake.air.pecs.constants.Constants.MAX_INSERT_RECORD_FOR_TRANSITION;
+import static com.westlake.air.pecs.constants.Constants.MAX_INSERT_RECORD_FOR_PEPTIDE;
 
 /**
  * Created by James Lu MiaoShan
@@ -33,7 +33,7 @@ public class DecoyController extends BaseController {
     @Autowired
     ShuffleGenerator shuffleGenerator;
     @Autowired
-    TransitionService transitionService;
+    PeptideService peptideService;
 
     @RequestMapping(value = "/overview/{id}")
     String overview(Model model, @PathVariable("id") String id) {
@@ -64,7 +64,7 @@ public class DecoyController extends BaseController {
     @RequestMapping(value = "/delete")
     String delete(Model model,
                         @RequestParam(value = "id", required = true) String id) {
-        transitionService.deleteAllDecoyByLibraryId(id);
+        peptideService.deleteAllDecoyByLibraryId(id);
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
         LibraryDO library = resultDO.getModel();
         libraryService.countAndUpdateForLibrary(library);
@@ -77,21 +77,21 @@ public class DecoyController extends BaseController {
 
         logger.info("正在删除原有伪肽段");
         //删除原有的伪肽段
-        transitionService.deleteAllDecoyByLibraryId(id);
+        peptideService.deleteAllDecoyByLibraryId(id);
         logger.info("原有伪肽段删除完毕");
         //计算原始肽段数目
-        TransitionQuery query = new TransitionQuery();
+        PeptideQuery query = new PeptideQuery();
         query.setIsDecoy(false);
         query.setLibraryId(id);
-        long totalCount = transitionService.count(query);
-        int totalPage = (int) (totalCount / MAX_INSERT_RECORD_FOR_TRANSITION) + 1;
-        query.setPageSize(MAX_INSERT_RECORD_FOR_TRANSITION);
+        long totalCount = peptideService.count(query);
+        int totalPage = (int) (totalCount / MAX_INSERT_RECORD_FOR_PEPTIDE) + 1;
+        query.setPageSize(MAX_INSERT_RECORD_FOR_PEPTIDE);
         int countForInsert = 0;
         for (int i = 1; i <= totalPage; i++) {
             query.setPageNo(i);
-            ResultDO<List<TransitionDO>> resultDO = transitionService.getList(query);
-            List<TransitionDO> list = shuffleGenerator.generate(resultDO.getModel());
-            ResultDO resultTmp = transitionService.insertAll(list, false);
+            ResultDO<List<PeptideDO>> resultDO = peptideService.getList(query);
+            List<PeptideDO> list = shuffleGenerator.generate(resultDO.getModel());
+            ResultDO resultTmp = peptideService.insertAll(list, false);
             if (resultTmp.isSuccess()) {
                 countForInsert += list.size();
                 logger.info("插入新生成伪肽段" + countForInsert + "条");

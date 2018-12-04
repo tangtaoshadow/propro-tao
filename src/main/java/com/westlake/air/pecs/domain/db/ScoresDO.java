@@ -36,6 +36,8 @@ public class ScoresDO {
     @Indexed
     Boolean isIdentified = false;
 
+    String analyseDataId;
+
     List<FeatureScores> featureScoresList;
 
     Double bestRt;

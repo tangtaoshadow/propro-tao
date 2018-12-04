@@ -6,12 +6,11 @@ import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
-import com.westlake.air.pecs.domain.db.TransitionDO;
 import com.westlake.air.pecs.domain.query.LibraryQuery;
-import com.westlake.air.pecs.parser.TransitionTraMLParser;
-import com.westlake.air.pecs.parser.TransitionTsvParser;
+import com.westlake.air.pecs.parser.TraMLParser;
+import com.westlake.air.pecs.parser.LibraryTsvParser;
 import com.westlake.air.pecs.service.LibraryService;
-import com.westlake.air.pecs.service.TransitionService;
+import com.westlake.air.pecs.service.PeptideService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,13 +30,13 @@ import java.util.List;
 public class LibraryController extends BaseController {
 
     @Autowired
-    TransitionTsvParser tsvParser;
+    LibraryTsvParser tsvParser;
     @Autowired
-    TransitionTraMLParser traMLParser;
+    TraMLParser traMLParser;
     @Autowired
     LibraryService libraryService;
     @Autowired
-    TransitionService transitionService;
+    PeptideService peptideService;
 
     @RequestMapping(value = "/listStandard")
     String listStandard(Model model,
@@ -94,7 +93,6 @@ public class LibraryController extends BaseController {
                @RequestParam(value = "instrument", required = false) String instrument,
                @RequestParam(value = "type", required = true) Integer type,
                @RequestParam(value = "description", required = false) String description,
-               @RequestParam(value = "justReal", required = false) boolean justReal,
                @RequestParam(value = "file") MultipartFile file,
                RedirectAttributes redirectAttributes) {
 
@@ -120,7 +118,7 @@ public class LibraryController extends BaseController {
         taskService.insert(taskDO);
 
         try {
-            libraryTask.saveLibraryTask(library, file.getInputStream(), file.getOriginalFilename(), justReal, taskDO);
+            libraryTask.saveLibraryTask(library, file.getInputStream(), file.getOriginalFilename(), taskDO);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -159,7 +157,7 @@ public class LibraryController extends BaseController {
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
         if (resultDO.isSuccess()) {
             if (resultDO.getModel().getType().equals(LibraryDO.TYPE_IRT)) {
-                Double[] range = transitionService.getRTRange(id);
+                Double[] range = peptideService.getRTRange(id);
                 if (range != null && range.length == 2) {
                     model.addAttribute("minRt", range[0]);
                     model.addAttribute("maxRt", range[1]);
@@ -216,7 +214,7 @@ public class LibraryController extends BaseController {
         taskService.insert(taskDO);
 
         try {
-            libraryTask.saveLibraryTask(library, file.getInputStream(), file.getOriginalFilename(), justReal, taskDO);
+            libraryTask.saveLibraryTask(library, file.getInputStream(), file.getOriginalFilename(), taskDO);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -236,7 +234,7 @@ public class LibraryController extends BaseController {
         } else {
             redirectListUrl = "redirect:/library/listStandard";
         }
-        transitionService.deleteAllByLibraryId(id);
+        peptideService.deleteAllByLibraryId(id);
         if (resultDO.isSuccess()) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_LIBRARY_SUCCESS);
             return redirectListUrl;
@@ -244,15 +242,5 @@ public class LibraryController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return redirectListUrl;
         }
-    }
-
-    @RequestMapping(value = "/overview/{id}")
-    String overview(Model model, @PathVariable("id") String id,
-                  RedirectAttributes redirectAttributes) {
-
-        List<TransitionDO> transitions = transitionService.getAllByLibraryIdAndIsDecoy(id, false);
-        
-
-        return "";
     }
 }

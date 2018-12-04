@@ -103,7 +103,7 @@ public class AnalyseDataDAO {
             query.addCriteria(where("overviewId").is(analyseDataQuery.getOverviewId()));
         }
         if (analyseDataQuery.getTransitionId() != null) {
-            query.addCriteria(where("transitionId").is(analyseDataQuery.getTransitionId()));
+            query.addCriteria(where("peptideId").is(analyseDataQuery.getTransitionId()));
         }
         if (analyseDataQuery.getMsLevel() != null) {
             query.addCriteria(where("msLevel").is(analyseDataQuery.getMsLevel()));

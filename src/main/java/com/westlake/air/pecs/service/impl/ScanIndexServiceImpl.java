@@ -5,7 +5,6 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.ScanIndexDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
-import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
@@ -28,7 +27,7 @@ import java.util.List;
 @Service("scanIndexService")
 public class ScanIndexServiceImpl implements ScanIndexService {
 
-    public final Logger logger = LoggerFactory.getLogger(TransitionServiceImpl.class);
+    public final Logger logger = LoggerFactory.getLogger(PeptideServiceImpl.class);
 
     @Autowired
     ScanIndexDAO scanIndexDAO;

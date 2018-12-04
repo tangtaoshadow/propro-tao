@@ -1,7 +1,6 @@
 package com.westlake.air.pecs.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Lists;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.ConfigDAO;
@@ -15,7 +14,6 @@ import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
-import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.domain.query.ScoresQuery;
 import com.westlake.air.pecs.feature.*;
 import com.westlake.air.pecs.rtnormalizer.ChromatogramFilter;
@@ -54,7 +52,7 @@ public class ScoresServiceImpl implements ScoresService {
     @Autowired
     ScanIndexService scanIndexService;
     @Autowired
-    TransitionService transitionService;
+    PeptideService peptideService;
     @Autowired
     GaussFilter gaussFilter;
     @Autowired
@@ -202,67 +200,20 @@ public class ScoresServiceImpl implements ScoresService {
     }
 
     @Override
-    public ResultDO<SlopeIntercept> computeIRt(String overviewId, String iRtLibraryId, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
-
-        taskDO.addLog("开始获取肽段分组信息和强度信息");
-        taskService.update(taskDO);
-
-        List<TransitionGroup> groups = analyseDataService.getIrtTransitionGroup(overviewId, iRtLibraryId);
-        HashMap<String, IntensityGroup> intensityGroupMap = transitionService.getIntensityGroupMap(iRtLibraryId);
-
-        taskDO.addLog("分组信息获取完毕,开始处理数据");
-        taskService.update(taskDO);
-        List<List<ScoreRtPair>> scoreRtList = new ArrayList<>();
-        List<Double> compoundRt = new ArrayList<>();
-        ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
-        for (TransitionGroup group : groups) {
-            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupMap.get(group.getPeptideRef()), sigmaSpacing);
-            if (!featureByPep.isFeatureFound()) {
-                continue;
-            }
-            double groupRt = group.getRt();
-            List<ScoreRtPair> scoreRtPairs = rtNormalizerScorer.score(featureByPep.getRtIntensityPairsOriginList(), featureByPep.getExperimentFeatures(), featureByPep.getLibraryIntensityList(), featureByPep.getNoise1000List(), new SlopeIntercept(), groupRt);
-            scoreRtList.add(scoreRtPairs);
-            compoundRt.add(groupRt);
-        }
-        taskDO.addLog("开始搜索最优特征");
-        taskService.update(taskDO);
-        List<RtPair> pairs = simpleFindBestFeature(scoreRtList, compoundRt);
-        List<RtPair> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE);
-//        if(!computeBinnedCoverage( , pairsCorrected, Constants.RT_BINS, Constants.MIN_PEPTIDES_PER_BIN, Constants.MIN_BINS_FILLED)){
-//            System.out.println("There were not enough bins with the minimal number of peptides.");
-//        }
-        if (pairsCorrected == null || pairsCorrected.size() < 2) {
-            logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
-            resultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
-            return resultDO;
-        }
-        taskDO.addLog("最小二乘法线性拟合RTPairs");
-        taskService.update(taskDO);
-        SlopeIntercept slopeIntercept = fitRTPairs(pairsCorrected);
-        resultDO.setSuccess(true);
-        resultDO.setModel(slopeIntercept);
-        //TODO: dealing with RTNormalizer results(not knowing the accuracy of final result)
-
-        return resultDO;
-    }
-
-    @Override
     public ResultDO<SlopeIntercept> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing) {
 
-        List<TransitionGroup> groups = analyseDataService.getIrtTransitionGroup(dataList, iRtLibraryId);
-        HashMap<String, IntensityGroup> intensityGroupMap = transitionService.getIntensityGroupMap(iRtLibraryId);
+        HashMap<String, IntensityGroup> intensityGroupMap = peptideService.getIntensityGroupMap(iRtLibraryId);
 
         List<List<ScoreRtPair>> scoreRtList = new ArrayList<>();
         List<Double> compoundRt = new ArrayList<>();
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
-        for (TransitionGroup group : groups) {
+        for (AnalyseDataDO dataDO : dataList) {
             SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
-            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, intensityGroupMap.get(group.getPeptideRef() + "_" + group.getIsDecoy()), sigmaSpacing);
+            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(dataDO, intensityGroupMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()), sigmaSpacing);
             if (!featureByPep.isFeatureFound()) {
                 continue;
             }
-            double groupRt = group.getRt();
+            double groupRt = dataDO.getRt();
             List<ScoreRtPair> scoreRtPairs = rtNormalizerScorer.score(featureByPep.getRtIntensityPairsOriginList(), featureByPep.getExperimentFeatures(), featureByPep.getLibraryIntensityList(), featureByPep.getNoise1000List(), slopeIntercept, groupRt);
             scoreRtList.add(scoreRtPairs);
             compoundRt.add(groupRt);
@@ -295,10 +246,8 @@ public class ScoresServiceImpl implements ScoresService {
         //开始打分前先删除原有的打分数据
         scoresDAO.deleteAllByOverviewId(input.getOverviewId());
         logger.info("原有打分数据删除完毕");
-        //卷积结果按照PeptideRef分组
-        List<TransitionGroup> groups = analyseDataService.getTransitionGroup(dataList);
         //标准库按照PeptideRef分组
-        HashMap<String, IntensityGroup> intensityGroupMap = transitionService.getIntensityGroupMap(input.getLibraryId());
+        HashMap<String, IntensityGroup> intensityGroupMap = peptideService.getIntensityGroupMap(input.getLibraryId());
         List<ScoresDO> pecsScoreList = new ArrayList<>();
 
         int count = 0;
@@ -308,12 +257,12 @@ public class ScoresServiceImpl implements ScoresService {
         try {
             raf = new RandomAccessFile(exp.getAirdPath(), "r");
 
-            for (TransitionGroup group : groups) {
+            for (AnalyseDataDO dataDO : dataList) {
                 List<FeatureScores> featureScoresList = new ArrayList<>();
                 //获取标准库中对应的PeptideRef组
-                IntensityGroup ig = intensityGroupMap.get(group.getPeptideRef() + "_" + group.getIsDecoy());
+                IntensityGroup ig = intensityGroupMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy());
 
-                FeatureByPep featureByPep = featureExtractor.getExperimentFeature(group, ig, input.getSigmaSpacing());
+                FeatureByPep featureByPep = featureExtractor.getExperimentFeature(dataDO, ig, input.getSigmaSpacing());
 
                 if (!featureByPep.isFeatureFound()) {
                     continue;
@@ -324,18 +273,9 @@ public class ScoresServiceImpl implements ScoresService {
                 List<double[]> noise1000List = featureByPep.getNoise1000List();
                 HashMap<String, Double> productMzMap = new HashMap<>();
                 List<Double> productMzList = new ArrayList<>();
-                for (AnalyseDataDO dataDO : group.getDataMap().values()) {
-                    double mz = Double.parseDouble(Float.toString(dataDO.getMz()));
-                    productMzMap.put(dataDO.getCutInfo(), mz);
-                    productMzList.add(mz);
-                }
-
-                HashMap<String, Float> intensityMap = ig.getIntensityMap();
-                intensityMap = MathUtil.normalizeSum(intensityMap);
-
                 List<Integer> productChargeList = new ArrayList<>();
-                for (AnalyseDataDO data : group.getDataMap().values()) {
-                    String cutInfo = data.getCutInfo();
+
+                for (String cutInfo : dataDO.getMzMap().keySet()) {
                     try {
                         if (cutInfo.contains("^")) {
                             productChargeList.add(Integer.parseInt(cutInfo.split("\\^")[1]));
@@ -344,11 +284,18 @@ public class ScoresServiceImpl implements ScoresService {
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
-                        logger.info("cutInfo:" + cutInfo + ";data:" + JSON.toJSONString(data));
+                        logger.info("cutInfo:" + cutInfo + ";data:" + JSON.toJSONString(dataDO));
                     }
+
+                    double mz = Double.parseDouble(Float.toString(dataDO.getMzMap().get(cutInfo)));
+                    productMzMap.put(cutInfo, mz);
+                    productMzList.add(mz);
                 }
 
-                HashMap<Integer, String> unimodHashMap = group.getUnimodMap();
+                HashMap<String, Float> intensityMap = ig.getIntensityMap();
+                intensityMap = MathUtil.normalizeSum(intensityMap);
+
+                HashMap<Integer, String> unimodHashMap = dataDO.getUnimodMap();
                 String sequence = ig.getSequence();
                 //for each mrmFeature, calculate scores
 
@@ -359,7 +306,7 @@ public class ScoresServiceImpl implements ScoresService {
                     chromatographicScorer.calculateLogSnScore(chromatogramList, experimentFeatureList, noise1000List, featureScores);
 
                     //根据RT时间和前体MZ获取最近的一个原始谱图
-                    ResultDO<MzIntensityPairs> getSpectrumResult = scanIndexService.getNearestSpectrumByRt(raf, exp, experimentFeatureList.get(0).getRt(), ig.getPrecursorMz());
+                    ResultDO<MzIntensityPairs> getSpectrumResult = scanIndexService.getNearestSpectrumByRt(raf, exp, experimentFeatureList.get(0).getRt(), ig.getMz());
                     Float[] spectrumMzArray = null;
                     Float[] spectrumIntArray = null;
                     if (getSpectrumResult.isSuccess()) {
@@ -367,18 +314,15 @@ public class ScoresServiceImpl implements ScoresService {
                         spectrumIntArray = getSpectrumResult.getModel().getIntensityArray();
                     }
                     if (getSpectrumResult.isSuccess()) {
-                        try {
-                            diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
-                            diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, intensityMap, featureScores);
-                            diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+//                        diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
+                        diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, intensityMap, featureScores);
+                        diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
+
                     }
-                    elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
+//                    elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
                     libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
                     libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, featureScores);
-                    libraryScorer.calculateNormRtScore(experimentFeatureList, input.getSlopeIntercept(), group.getRt(), featureScores);
+                    libraryScorer.calculateNormRtScore(experimentFeatureList, input.getSlopeIntercept(), dataDO.getRt(), featureScores);
                     swathLDAScorer.calculateSwathLdaPrescore(featureScores);
                     featureScores.setRt(experimentFeatureList.get(0).getRt());
                     featureScores.setIntensitySum(experimentFeatureList.get(0).getIntensitySum());
@@ -387,8 +331,9 @@ public class ScoresServiceImpl implements ScoresService {
 
                 ScoresDO pecsScore = new ScoresDO();
                 pecsScore.setOverviewId(input.getOverviewId());
-                pecsScore.setPeptideRef(group.getPeptideRef());
-                pecsScore.setIsDecoy(group.getIsDecoy());
+                pecsScore.setPeptideRef(input.getOverviewId());
+                pecsScore.setAnalyseDataId(dataDO.getId());
+                pecsScore.setIsDecoy(dataDO.getIsDecoy());
                 pecsScore.setFeatureScoresList(featureScoresList);
                 pecsScore.setCreateDate(new Date());
                 pecsScore.setLastModifiedDate(new Date());
@@ -396,7 +341,7 @@ public class ScoresServiceImpl implements ScoresService {
 
                 count++;
                 if (count % 100 == 0) {
-                    logger.info(count + "个Group已经打分完毕,总共有" + groups.size() + "个Group");
+                    logger.info(count + "个Peptide已经打分完毕,总共有" + dataList.size() + "个Peptide");
                 }
             }
 

@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-06-12 10:40
- *
+ * <p>
  * for example
  * b22-18^2/-0.02
  * type=b
@@ -45,5 +45,7 @@ public class Annotation {
 
     boolean isIsotope = false;
 
-
+    public String toAnnoInfo() {
+        return type + location + (adjust != 0 ? adjust : "") + (charge != 1 ? ("^" + charge) : "") + (isIsotope ? "i" : "") + "/" + deviation;
+    }
 }

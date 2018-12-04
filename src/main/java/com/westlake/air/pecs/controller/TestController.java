@@ -8,12 +8,10 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathInput;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.airus.Params;
-import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
-import com.westlake.air.pecs.domain.db.simple.TransitionGroup;
 import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,22 +114,6 @@ public class TestController extends BaseController {
         scoresService.score(dataList, input);
         logger.info("耗时:" + (System.currentTimeMillis() - start));
         return dataList.size() + "";
-    }
-
-    @RequestMapping("test5")
-    @ResponseBody
-    String test5(Model model, RedirectAttributes redirectAttributes) throws IOException {
-        List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("D://convWithDecoy.json");
-        for (AnalyseDataDO data : dataList) {
-            if (data.getCutInfo() == null) {
-                logger.error("卷积数据异常:" + data.getPeptideRef());
-            }
-        }
-        logger.info("卷积数据大小:" + dataList.size());
-        long start = System.currentTimeMillis();
-        List<TransitionGroup> groups = analyseDataService.getTransitionGroup(dataList);
-        logger.info("获取Group耗时:" + (System.currentTimeMillis() - start));
-        return "卷积数据Group大小:" + groups.size();
     }
 
     @RequestMapping("test6")

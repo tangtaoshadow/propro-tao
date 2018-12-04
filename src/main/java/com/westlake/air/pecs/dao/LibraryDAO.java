@@ -84,7 +84,7 @@ public class LibraryDAO {
 //
 //    public void deleteAllByLibraryId(String libraryId) {
 //        Query query = new Query(where("libraryId").is(libraryId));
-//        mongoTemplate.remove(query, TransitionDO.class, CollectionName);
+//        mongoTemplate.remove(query, PeptideDO.class, CollectionName);
 //    }
 
     private Query buildQuery(LibraryQuery libraryQuery) {

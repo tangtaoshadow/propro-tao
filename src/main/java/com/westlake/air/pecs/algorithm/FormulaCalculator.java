@@ -4,7 +4,7 @@ import com.westlake.air.pecs.constants.ResidueType;
 import com.westlake.air.pecs.dao.AminoAcidDAO;
 import com.westlake.air.pecs.dao.ElementsDAO;
 import com.westlake.air.pecs.domain.bean.transition.Fragment;
-import com.westlake.air.pecs.domain.db.TransitionDO;
+import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.dao.UnimodDAO;
 import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
 import com.westlake.air.pecs.parser.model.chemistry.Unimod;
@@ -34,24 +34,24 @@ public class FormulaCalculator {
     @Autowired
     UnimodDAO unimodDAO;
 
-    public double getMonoMz(TransitionDO transitionDO) {
-        if (transitionDO == null){
+    public double getMonoMz(PeptideDO peptideDO) {
+        if (peptideDO == null){
             return 0;
         }
-        if (StringUtils.isEmpty(transitionDO.getSequence())) {
+        if (StringUtils.isEmpty(peptideDO.getSequence())) {
             return 0;
         }
-        return getMonoMz(transitionDO.getSequence(), ResidueType.Full, transitionDO.getPrecursorCharge(), 0, 0, false, parseUnimodIds(transitionDO));
+        return getMonoMz(peptideDO.getSequence(), ResidueType.Full, peptideDO.getCharge(), 0, 0, false, parseUnimodIds(peptideDO));
     }
 
-    public double getAverageMz(TransitionDO transitionDO) {
-        if (transitionDO == null){
+    public double getAverageMz(PeptideDO peptideDO) {
+        if (peptideDO == null){
             return 0;
         }
-        if (StringUtils.isEmpty(transitionDO.getSequence())) {
+        if (StringUtils.isEmpty(peptideDO.getSequence())) {
             return 0;
         }
-        return getAverageMz(transitionDO.getSequence(), ResidueType.Full, transitionDO.getPrecursorCharge(), 0, 0, false, parseUnimodIds(transitionDO));
+        return getAverageMz(peptideDO.getSequence(), ResidueType.Full, peptideDO.getCharge(), 0, 0, false, parseUnimodIds(peptideDO));
     }
 
     /**
@@ -265,9 +265,9 @@ public class FormulaCalculator {
         return unimodIds;
     }
 
-    private List<String> parseUnimodIds(TransitionDO transitionDO) {
+    private List<String> parseUnimodIds(PeptideDO peptideDO) {
         List<String> unimodIds = null;
-        HashMap<Integer, String> map = transitionDO.getUnimodMap();
+        HashMap<Integer, String> map = peptideDO.getUnimodMap();
         if (map != null) {
             unimodIds = new ArrayList<>();
             for (Integer key : map.keySet()) {

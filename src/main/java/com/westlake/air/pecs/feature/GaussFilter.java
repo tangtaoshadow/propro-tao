@@ -13,14 +13,14 @@ import org.springframework.stereotype.Component;
 @Component("gaussFilter")
 public class GaussFilter {
 
-    public Double[] filter(AnalyseDataDO dataDO) {
-        RtIntensityPairsDouble pairsDouble = new RtIntensityPairsDouble(dataDO.getRtArray(), dataDO.getIntensityArray());
+    public Double[] filter(Float[] rtArray, Float[] intArray) {
+        RtIntensityPairsDouble pairsDouble = new RtIntensityPairsDouble(rtArray, intArray);
         RtIntensityPairsDouble result = filter(pairsDouble, SigmaSpacing.create());
         return result.getIntensityArray();
     }
 
-    public Float[] filterForFloat(AnalyseDataDO dataDO) {
-        Double[] result = filter(dataDO);
+    public Float[] filterForFloat(Float[] rtArray, Float[] intArray) {
+        Double[] result = filter(rtArray, intArray);
         Float[] floatArray = new Float[result.length];
         for(int i=0;i<floatArray.length;i++){
             floatArray[i] = result[i].floatValue();

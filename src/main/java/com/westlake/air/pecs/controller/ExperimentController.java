@@ -36,7 +36,7 @@ public class ExperimentController extends BaseController {
     @Autowired
     LibraryService libraryService;
     @Autowired
-    TransitionService transitionService;
+    PeptideService peptideService;
     @Autowired
     ExperimentService experimentService;
     @Autowired

@@ -48,7 +48,7 @@ public class DIAScorer {
      * @param productMzArray      根据transitionGroup获得存在transition中的productMz，存成Float array
      * @param spectrumMzArray     根据transitionGroup选取的RT选择的最近的Spectrum对应的mzArray
      * @param spectrumIntArray    根据transitionGroup选取的RT选择的最近的Spectrum对应的intensityArray
-     * @param libraryIntensityMap unNormalized library intensity(in transition)
+     * @param libraryIntensityMap unNormalized library intensity(in peptidepeptide)
      * @param scores              score for JProphet
      */
     public void calculateDiaMassDiffScore(HashMap<String, Double> productMzArray, Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<String, Float> libraryIntensityMap, FeatureScores scores) {
@@ -81,10 +81,10 @@ public class DIAScorer {
      * scores.isotope_overlap //feature intensity加权的可能（带电量1-4）无法区分同位素峰值的平均发生次数之和
      *
      * @param experimentFeatures single mrmFeature
-     * @param productMzList      mz of transition
+     * @param productMzList      mz of fragment
      * @param spectrumMzArray    mz array of selected Rt
      * @param spectrumIntArray   intensity array of selected Rt
-     * @param productCharge      charge in transition
+     * @param productCharge      charge in peptide
      * @param scores             score for JProphet
      */
     public void calculateDiaIsotopeScores(List<ExperimentFeature> experimentFeatures, List<Double> productMzList, Float[] spectrumMzArray, Float[] spectrumIntArray, List<Integer> productCharge, FeatureScores scores) {
