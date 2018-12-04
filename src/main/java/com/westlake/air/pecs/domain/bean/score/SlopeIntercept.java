@@ -9,9 +9,9 @@ import lombok.Data;
 @Data
 public class SlopeIntercept {
 
-    double slope;
+    Double slope;
 
-    double intercept;
+    Double intercept;
 
     public SlopeIntercept(){}
 
@@ -22,8 +22,8 @@ public class SlopeIntercept {
 
     public static SlopeIntercept create(){
         SlopeIntercept si = new SlopeIntercept();
-        si.setIntercept(0);
-        si.setSlope(0);
+        si.setIntercept(0d);
+        si.setSlope(0d);
         return si;
     }
 

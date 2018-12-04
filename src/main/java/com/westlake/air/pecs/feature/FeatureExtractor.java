@@ -72,9 +72,9 @@ public class FeatureExtractor {
         List<double[]> noise1000List = new ArrayList<>();
         for (String cutInfo : intensityMap.keySet()) {
             //获取对应的卷积数据
-           Float[] intensityArray = dataDO.getIntensityMap().get(cutInfo);
+            Float[] intensityArray = dataDO.getIntensityMap().get(cutInfo);
             //如果没有卷积到信号,dataDO为null
-            if (dataDO == null || !dataDO.getIsHit()) {
+            if (!dataDO.getIsHit() || intensityArray == null) {
                 continue;
             }
 

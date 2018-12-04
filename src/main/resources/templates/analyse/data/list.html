@@ -50,19 +50,6 @@
                         <input type="text" class="form-control m-input" name="peptideRef" placeholder="肽段全称"
                                th:value="${peptideRef}">
                     </div>
-                    <!--<div class="input-group col-lg-1">-->
-                    <!--<div class="input-group-prepend">-->
-                    <!--<button class="btn btn-success" type="button">-->
-                    <!--MS等级:-->
-                    <!--</button>-->
-                    <!--</div>-->
-                    <!--<select class="form-control m-input" id="msLevel" name="msLevel">-->
-                    <!--<option th:text="All" th:value="All" th:selected="${msLevel}=='All'?true:false"></option>-->
-                    <!--<option th:text="MS1" th:value="1" th:selected="${msLevel}==1?true:false"></option>-->
-                    <!--<option th:text="MS2" th:value="2" th:selected="${msLevel}==2?true:false"></option>-->
-                    <!--</select>-->
-                    <!--</div>-->
-
                     <div class="input-group-append">
                         <button class="btn btn-primary" type="submit">
                             查找
@@ -108,7 +95,7 @@
                     <td th:text="${data.rt}"></td>
 
                     <td>
-                        <table class="table table-bordered table-hover" style="table-layout:fixed;background-color: transparent;text-align: center;">
+                        <table class="table table-bordered table-hover" style="table-layout:fixed;background-color: whitesmoke;text-align: center;">
                             <thead>
                             <tr>
                                 <th width="30%">

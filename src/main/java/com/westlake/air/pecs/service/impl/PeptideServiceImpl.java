@@ -185,8 +185,8 @@ public class PeptideServiceImpl implements PeptideService {
         List<TargetPeptide> targetList = peptideDAO.getTPAll(query);
 
         for (TargetPeptide targetPeptide : targetList) {
-            targetPeptide.setRtStart((targetPeptide.getRt() - (float) slopeIntercept.getIntercept()) / (float) slopeIntercept.getSlope() - rtExtractionWindows / 2.0f);
-            targetPeptide.setRtEnd((targetPeptide.getRt() - (float) slopeIntercept.getIntercept()) / (float) slopeIntercept.getSlope() + rtExtractionWindows / 2.0f);
+            targetPeptide.setRtStart((targetPeptide.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue() - rtExtractionWindows / 2.0f);
+            targetPeptide.setRtEnd((targetPeptide.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue() + rtExtractionWindows / 2.0f);
         }
         List<TargetPeptide> list = sortMS1Coordinates(targetList);
         return list;
@@ -205,7 +205,7 @@ public class PeptideServiceImpl implements PeptideService {
         start = System.currentTimeMillis();
         if (rtExtractionWindows != -1) {
             for (TargetPeptide targetPeptide : targetList) {
-                float iRt = (targetPeptide.getRt() - (float) slopeIntercept.getIntercept()) / (float) slopeIntercept.getSlope();
+                float iRt = (targetPeptide.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue();
                 targetPeptide.setRtStart(iRt - rtExtractionWindows / 2.0f);
                 targetPeptide.setRtEnd(iRt + rtExtractionWindows / 2.0f);
             }

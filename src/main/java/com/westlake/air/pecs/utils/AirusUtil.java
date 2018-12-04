@@ -179,6 +179,9 @@ public class AirusUtil {
         List<SimpleFeatureScores> bestFeatureScoresList = new ArrayList<>();
         for (SimpleScores score : scores) {
             SimpleFeatureScores bestFeatureScores = new SimpleFeatureScores(score.getPeptideRef(), score.getIsDecoy());
+            if(score.getFeatureScoresList() == null || score.getFeatureScoresList().size() == 0){
+                continue;
+            }
             for (FeatureScores featureScores : score.getFeatureScoresList()) {
                 if (bestFeatureScores.getMainScore() == null) {
                     bestFeatureScores.setMainScore(featureScores.get(scoreType));

@@ -40,6 +40,7 @@ public class ShuffleGenerator extends BaseGenerator {
             PeptideDO decoy = generate(trans);
             decoys.add(decoy);
         }
+        logger.info("伪肽段生成完毕,总计:"+decoys.size()+"个");
         return decoys;
     }
 
@@ -108,6 +109,7 @@ public class ShuffleGenerator extends BaseGenerator {
         for (String cutInfo : peptideDO.getFragmentMap().keySet()) {
             FragmentInfo targetFi = peptideDO.getFragmentMap().get(cutInfo);
             FragmentInfo decoyFi = new FragmentInfo();
+            decoyFi.setCutInfo(cutInfo);
             decoyFi.setIntensity(targetFi.getIntensity());
             decoyFi.setCharge(targetFi.getCharge());
             decoyFi.setAnnotation(targetFi.getAnnotation());

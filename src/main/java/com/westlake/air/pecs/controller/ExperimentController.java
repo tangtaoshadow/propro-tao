@@ -349,8 +349,8 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "libraryId", required = true) String libraryId,
                      @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "1200") Float rtExtractWindow,
                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
-                     @RequestParam(value = "slope", required = false) Float slope,
-                     @RequestParam(value = "intercept", required = false) Float intercept,
+                     @RequestParam(value = "slope", required = false) Double slope,
+                     @RequestParam(value = "intercept", required = false) Double intercept,
                      RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);

@@ -241,8 +241,8 @@ public class AnalyseController extends BaseController {
     @RequestMapping(value = "/overview/doscore")
     String doscore(Model model,
                    @RequestParam(value = "overviewId", required = true) String overviewId,
-                   @RequestParam(value = "slope", required = false) Float slope,
-                   @RequestParam(value = "intercept", required = false) Float intercept,
+                   @RequestParam(value = "slope", required = false) Double slope,
+                   @RequestParam(value = "intercept", required = false) Double intercept,
                    @RequestParam(value = "sigma", required = false) Float sigma,
                    @RequestParam(value = "spacing", required = false) Float spacing,
                    RedirectAttributes redirectAttributes) {
@@ -409,7 +409,7 @@ public class AnalyseController extends BaseController {
         long start = System.currentTimeMillis();
         Params params = new Params();
         params.setDebug(false);
-        params.setMainScore(FeatureScores.ScoreType.MainScore.getTypeName());
+        params.setMainScore(FeatureScores.ScoreType.XcorrShape.getTypeName());
         params.setTrainTimes(10);
         FinalResult finalResult = airus.doAirus(overviewId, params);
         logger.info("打分耗时:" + (System.currentTimeMillis() - start));

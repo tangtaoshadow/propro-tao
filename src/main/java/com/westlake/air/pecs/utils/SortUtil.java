@@ -27,7 +27,12 @@ public class SortUtil {
                 if (isDesc) {
                     return o2.getMainScore().compareTo(o1.getMainScore());
                 } else {
-                    return o1.getMainScore().compareTo(o2.getMainScore());
+                    try{
+                        return o1.getMainScore().compareTo(o2.getMainScore());
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        return 0;
+                    }
                 }
             }
         });

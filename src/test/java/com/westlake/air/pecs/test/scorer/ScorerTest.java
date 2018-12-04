@@ -110,7 +110,7 @@ public class ScorerTest extends BaseTest {
         List<ExperimentFeature> experimentFeatures1 = prepareNormRtTestFeature().get(0);
         List<ExperimentFeature> experimentFeatures2 = prepareNormRtTestFeature().get(1);
         SlopeIntercept slopeIntercept = new SlopeIntercept();
-        slopeIntercept.setSlope(1);
+        slopeIntercept.setSlope(1d);
         FeatureScores scores = new FeatureScores();
         libraryScorer.calculateNormRtScore(experimentFeatures1, slopeIntercept, 100, scores);
         assert isSimilar(scores.get(FeatureScores.ScoreType.NormRtScore), 0d, Math.pow(10, -6));

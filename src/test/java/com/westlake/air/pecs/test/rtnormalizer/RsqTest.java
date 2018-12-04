@@ -59,8 +59,8 @@ public class RsqTest extends BaseTest {
         PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
         double[] coeff = fitter.fit(obs.toList());
         SlopeIntercept slopeIntercept = new SlopeIntercept();
-        slopeIntercept.setSlope((float)coeff[1]);
-        slopeIntercept.setIntercept((float) coeff[0]);
+        slopeIntercept.setSlope(coeff[1]);
+        slopeIntercept.setIntercept(coeff[0]);
         return slopeIntercept;
     }
 }

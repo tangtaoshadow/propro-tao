@@ -258,6 +258,9 @@ public class ScoresServiceImpl implements ScoresService {
             raf = new RandomAccessFile(exp.getAirdPath(), "r");
 
             for (AnalyseDataDO dataDO : dataList) {
+                if(!dataDO.getIsHit()){
+                    continue;
+                }
                 List<FeatureScores> featureScoresList = new ArrayList<>();
                 //获取标准库中对应的PeptideRef组
                 IntensityGroup ig = intensityGroupMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy());
@@ -305,20 +308,20 @@ public class ScoresServiceImpl implements ScoresService {
                     chromatographicScorer.calculateChromatographicScores(experimentFeatureList, libraryIntensityList, featureScores);
                     chromatographicScorer.calculateLogSnScore(chromatogramList, experimentFeatureList, noise1000List, featureScores);
 
-                    //根据RT时间和前体MZ获取最近的一个原始谱图
-                    ResultDO<MzIntensityPairs> getSpectrumResult = scanIndexService.getNearestSpectrumByRt(raf, exp, experimentFeatureList.get(0).getRt(), ig.getMz());
-                    Float[] spectrumMzArray = null;
-                    Float[] spectrumIntArray = null;
-                    if (getSpectrumResult.isSuccess()) {
-                        spectrumMzArray = getSpectrumResult.getModel().getMzArray();
-                        spectrumIntArray = getSpectrumResult.getModel().getIntensityArray();
-                    }
-                    if (getSpectrumResult.isSuccess()) {
+//                    根据RT时间和前体MZ获取最近的一个原始谱图
+//                    ResultDO<MzIntensityPairs> getSpectrumResult = scanIndexService.getNearestSpectrumByRt(raf, exp, experimentFeatureList.get(0).getRt(), ig.getMz());
+//                    Float[] spectrumMzArray = null;
+//                    Float[] spectrumIntArray = null;
+//                    if (getSpectrumResult.isSuccess()) {
+//                        spectrumMzArray = getSpectrumResult.getModel().getMzArray();
+//                        spectrumIntArray = getSpectrumResult.getModel().getIntensityArray();
+//                    }
+//                    if (getSpectrumResult.isSuccess()) {
 //                        diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
-                        diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, intensityMap, featureScores);
-                        diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
+//                        diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, intensityMap, featureScores);
+//                        diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
 
-                    }
+//                    }
 //                    elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
                     libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
                     libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, featureScores);
@@ -331,7 +334,7 @@ public class ScoresServiceImpl implements ScoresService {
 
                 ScoresDO pecsScore = new ScoresDO();
                 pecsScore.setOverviewId(input.getOverviewId());
-                pecsScore.setPeptideRef(input.getOverviewId());
+                pecsScore.setPeptideRef(dataDO.getPeptideRef());
                 pecsScore.setAnalyseDataId(dataDO.getId());
                 pecsScore.setIsDecoy(dataDO.getIsDecoy());
                 pecsScore.setFeatureScoresList(featureScoresList);
@@ -651,8 +654,8 @@ public class ScoresServiceImpl implements ScoresService {
         PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
         double[] coeff = fitter.fit(obs.toList());
         SlopeIntercept slopeIntercept = new SlopeIntercept();
-        slopeIntercept.setSlope((float) coeff[1]);
-        slopeIntercept.setIntercept((float) coeff[0]);
+        slopeIntercept.setSlope(coeff[1]);
+        slopeIntercept.setIntercept(coeff[0]);
         return slopeIntercept;
     }
 }

@@ -37,7 +37,7 @@ public class SemiSupervised {
             //第一次训练数据集使用MainScore进行训练
             TrainPeaks trainPeaks = selectTrainPeaks(trainData, params.getMainScore(), params);
             HashMap<String, Double> weightsMap = ldaLearner.learn(trainPeaks, params.getMainScore());
-            logger.info("Train1:"+ JSONArray.toJSONString(weightsMap));
+            logger.info("Train Weight:"+ JSONArray.toJSONString(weightsMap));
             //根据weightsMap计算子分数的加权总分
             ldaLearner.score(trainData, weightsMap);
             for (int times = 0; times < params.getXevalNumIter(); times++) {
