@@ -1,8 +1,8 @@
 package com.westlake.air.pecs.algorithm;
 
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.airus.AirusParams;
 import com.westlake.air.pecs.domain.bean.airus.ErrorStat;
-import com.westlake.air.pecs.domain.bean.airus.Params;
 import com.westlake.air.pecs.domain.bean.airus.Pi0Est;
 import com.westlake.air.pecs.domain.bean.airus.StatMetrics;
 import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
@@ -10,7 +10,6 @@ import com.westlake.air.pecs.utils.AirusUtil;
 import com.westlake.air.pecs.utils.ArrayUtil;
 import com.westlake.air.pecs.utils.MathUtil;
 import com.westlake.air.pecs.utils.SortUtil;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -247,7 +246,7 @@ public class Stats {
      * Estimate final results.
      * TODO 没有实现 pep(lfdr);
      */
-    public ErrorStat errorStatistics(List<SimpleFeatureScores> scores, Params params) {
+    public ErrorStat errorStatistics(List<SimpleFeatureScores> scores, AirusParams airusParams) {
 
         List<SimpleFeatureScores> targets = new ArrayList<>();
         List<SimpleFeatureScores> decoys = new ArrayList<>();
@@ -259,35 +258,35 @@ public class Stats {
             }
         }
 
-        return errorStatistics(targets, decoys, params);
+        return errorStatistics(targets, decoys, airusParams);
     }
 
     /**
      * Estimate final results.
      * TODO 没有实现 pep(lfdr);
      */
-    public ErrorStat errorStatistics(List<SimpleFeatureScores> targets, List<SimpleFeatureScores> decoys, Params params) {
+    public ErrorStat errorStatistics(List<SimpleFeatureScores> targets, List<SimpleFeatureScores> decoys, AirusParams airusParams) {
 
         ErrorStat errorStat = new ErrorStat();
         List<SimpleFeatureScores> sortedTargets = SortUtil.sortByMainScore(targets, false);
         List<SimpleFeatureScores> sortedDecoys = SortUtil.sortByMainScore(decoys, false);
 
         //compute p-values using decoy scores;
-        if (params.isParametric()) {
+        if (airusParams.isParametric()) {
             pNormalizer(sortedTargets, sortedDecoys);
         } else {
             pEmpirical(sortedTargets, sortedDecoys);
         }
 
         //estimate pi0;
-        Pi0Est pi0Est = pi0Est(sortedTargets, params.getPi0Lambda(), params.getPi0Method(), params.isPi0SmoothLogPi0());
+        Pi0Est pi0Est = pi0Est(sortedTargets, airusParams.getPi0Lambda(), airusParams.getPi0Method(), airusParams.isPi0SmoothLogPi0());
         if (pi0Est == null) {
             return null;
         }
         //compute q-value;
-        qvalue(sortedTargets, pi0Est.getPi0(), params.isPFdr());
+        qvalue(sortedTargets, pi0Est.getPi0(), airusParams.isPFdr());
         //compute other metrics;
-        StatMetrics statMetrics = statMetrics(sortedTargets, pi0Est.getPi0(), params.isPFdr());
+        StatMetrics statMetrics = statMetrics(sortedTargets, pi0Est.getPi0(), airusParams.isPFdr());
 
         errorStat.setBestFeatureScoresList(targets);
         errorStat.setStatMetrics(statMetrics);
@@ -299,13 +298,13 @@ public class Stats {
     /**
      * Finds cut-off target score for specified false discovery rate(fdr).
      */
-    public Double findCutoff(List<SimpleFeatureScores> topTargets, List<SimpleFeatureScores> topDecoys, Params params) {
-        ErrorStat errorStat = errorStatistics(topTargets, topDecoys, params);
+    public Double findCutoff(List<SimpleFeatureScores> topTargets, List<SimpleFeatureScores> topDecoys, AirusParams airusParams) {
+        ErrorStat errorStat = errorStatistics(topTargets, topDecoys, airusParams);
 
         List<SimpleFeatureScores> bestScores = errorStat.getBestFeatureScoresList();
         double[] qvalue_CutoffAbs = new double[bestScores.size()];
         for (int i = 0; i < bestScores.size(); i++) {
-            qvalue_CutoffAbs[i] = Math.abs(bestScores.get(i).getQValue() - params.getSsInitialFdr());
+            qvalue_CutoffAbs[i] = Math.abs(bestScores.get(i).getQValue() - airusParams.getSsInitialFdr());
         }
         int i0 = MathUtil.argmin(qvalue_CutoffAbs);
         return bestScores.get(i0).getMainScore();

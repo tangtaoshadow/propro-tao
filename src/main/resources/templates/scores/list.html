@@ -108,7 +108,7 @@
 
                                 <span th:if="${!score.isDecoy&&score.isIdentified}" class="m-accordion__item-icon"><i class="fa fa-check"></i></span>
                                 <span th:if="${!score.isDecoy&&!score.isIdentified}" class="m-accordion__item-icon"><i class="fa fa-close"></i></span>
-                                <span class="m-accordion__item-title" th:text="|(${score?.featureScoresList?.size()})${score.isDecoy?'伪肽段':'肽段'}:${score?.peptideRef}[${#dates.format(score?.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}]|"></span>
+                                <span class="m-accordion__item-title" th:text="|(${score?.featureScoresList?.size()})[预测RT:${score?.rt}]${score.isDecoy?'伪肽段':'肽段'}:${score?.peptideRef}[${#dates.format(score?.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}]|"></span>
                                 <span class="m-accordion__item-mode"></span>
                             </div>
                             <div class="m-accordion__item-body collapse"

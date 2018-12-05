@@ -2,17 +2,16 @@ package com.westlake.air.pecs.async;
 
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.compressor.Compressor;
-import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.SwathInput;
+import com.westlake.air.pecs.domain.bean.SwathParams;
+import com.westlake.air.pecs.domain.bean.airus.AirusParams;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
-import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.ScoresService;
@@ -40,7 +39,7 @@ public class ExperimentTask extends BaseTask {
     @Autowired
     Compressor compressor;
 
-    @Async(value="uploadFileExecutor")
+    @Async(value = "uploadFileExecutor")
     public void saveExperimentTask(ExperimentDO experimentDO, File file, TaskDO taskDO) {
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
@@ -56,7 +55,7 @@ public class ExperimentTask extends BaseTask {
         taskService.update(taskDO);
         long start = System.currentTimeMillis();
         compressor.doCompress(experimentDO);
-        taskDO.addLog("压缩转换完毕,总耗时:"+(System.currentTimeMillis() - start));
+        taskDO.addLog("压缩转换完毕,总耗时:" + (System.currentTimeMillis() - start));
         taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
     }
@@ -67,7 +66,7 @@ public class ExperimentTask extends BaseTask {
         taskService.update(taskDO);
         long start = System.currentTimeMillis();
         compressor.doCompressToLMS(experimentDO);
-        taskDO.addLog("压缩转换完毕,总耗时:"+(System.currentTimeMillis() - start));
+        taskDO.addLog("压缩转换完毕,总耗时:" + (System.currentTimeMillis() - start));
         taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
     }
@@ -85,7 +84,7 @@ public class ExperimentTask extends BaseTask {
     public void extract(ExperimentDO experimentDO, String libraryId, SlopeIntercept slopeIntercept, String creator, float rtExtractWindow, float mzExtractWindow, TaskDO taskDO) {
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
-        SwathInput input = new SwathInput();
+        SwathParams input = new SwathParams();
         input.setExperimentDO(experimentDO);
         input.setLibraryId(libraryId);
         input.setSlopeIntercept(slopeIntercept);
@@ -93,14 +92,14 @@ public class ExperimentTask extends BaseTask {
         input.setRtExtractWindow(rtExtractWindow);
         input.setMzExtractWindow(mzExtractWindow);
 
-        taskDO.addLog("录入有斜率:"+slopeIntercept.getSlope()+"截距:"+slopeIntercept.getIntercept());
-        taskDO.addLog("使用标准库ID:"+libraryId);
+        taskDO.addLog("录入有斜率:" + slopeIntercept.getSlope() + "截距:" + slopeIntercept.getIntercept());
+        taskDO.addLog("使用标准库ID:" + libraryId);
         taskDO.addLog("入参准备完毕,开始卷积,时间可能较长");
         taskService.update(taskDO);
         long start = System.currentTimeMillis();
         experimentService.extract(input);
 
-        taskDO.addLog("卷积完毕,总耗时:"+(System.currentTimeMillis() - start));
+        taskDO.addLog("卷积完毕,总耗时:" + (System.currentTimeMillis() - start));
         taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
     }
@@ -112,8 +111,8 @@ public class ExperimentTask extends BaseTask {
         taskService.update(taskDO);
 
         ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(experimentDO, iRtLibraryId, mzExtractWindow, sigmaSpacing);
-        if(resultDO.isFailed()){
-            taskDO.addLog(resultDO.getMsgInfo()+":"+resultDO.getMsgInfo());
+        if (resultDO.isFailed()) {
+            taskDO.addLog(resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
             taskDO.finish(TaskStatus.SUCCESS.getName());
             taskService.update(taskDO);
             return;
@@ -131,37 +130,39 @@ public class ExperimentTask extends BaseTask {
     }
 
     @Async(value = "extractorExecutor")
-    public void swath(SwathInput input, TaskDO taskDO) {
+    public void swath(SwathParams swathParams, TaskDO taskDO) {
         long startAll = System.currentTimeMillis();
         long start = System.currentTimeMillis();
-        ExperimentDO experimentDO = input.getExperimentDO();
+        ExperimentDO experimentDO = swathParams.getExperimentDO();
 
         taskDO.addLog("开始创建Aird压缩文件");
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         compressor.doCompress(experimentDO);
 
-        taskDO.addLog("文件压缩完毕,耗时"+(System.currentTimeMillis() - start)+"开始卷积IRT校准库并且计算iRT值");
+        taskDO.addLog("文件压缩完毕,耗时" + (System.currentTimeMillis() - start) + "开始卷积IRT校准库并且计算iRT值");
         taskService.update(taskDO);
         start = System.currentTimeMillis();
 
-        ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(experimentDO, input.getIRtLibraryId(), input.getMzExtractWindow(), input.getSigmaSpacing());
+        ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(experimentDO, swathParams.getIRtLibraryId(), swathParams.getMzExtractWindow(), swathParams.getSigmaSpacing());
         SlopeIntercept slopeIntercept = resultDO.getModel();
 
+        //此步可以获取iRT的SlopeIntercept
         experimentDO.setSlope(slopeIntercept.getSlope());
         experimentDO.setIntercept(slopeIntercept.getIntercept());
         experimentService.update(experimentDO);
 
-        taskDO.addLog("iRT计算完毕,耗时:"+(System.currentTimeMillis() - start)+"毫秒,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept() + ",开始卷积原始数据");
+        taskDO.addLog("iRT计算完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept() + ",开始卷积原始数据");
         taskService.update(taskDO);
 
         start = System.currentTimeMillis();
         //将irt的计算结果加入到下一个步骤的入参中
-        input.setSlopeIntercept(slopeIntercept);
-        ResultDO<List<AnalyseDataDO>> originDataListResult = experimentService.extract(input);
+        swathParams.setSlopeIntercept(slopeIntercept);
+        //此步可以获得overviewId,并且存储于swathParams中
+        ResultDO<List<AnalyseDataDO>> originDataListResult = experimentService.extract(swathParams);
 
-        if(originDataListResult.isFailed() || originDataListResult.getModel() == null || originDataListResult.getModel().size() == 0){
-            taskDO.addLog("卷积失败:"+originDataListResult.getMsgInfo());
+        if (originDataListResult.isFailed() || originDataListResult.getModel() == null || originDataListResult.getModel().size() == 0) {
+            taskDO.addLog("卷积失败:" + originDataListResult.getMsgInfo());
             taskDO.finish(TaskStatus.FAILED.getName());
             taskService.update(taskDO);
         }
@@ -171,20 +172,20 @@ public class ExperimentTask extends BaseTask {
 
         start = System.currentTimeMillis();
         List<AnalyseDataDO> dataList = originDataListResult.getModel();
-        List<ScoresDO> scores = scoresService.score(dataList, input);
+        scoresService.score(dataList, swathParams);
 
         taskDO.addLog("子分数打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",开始生成子分数分布图");
         taskService.update(taskDO);
 
         start = System.currentTimeMillis();
-        scoresService.buildScoreDistributions(input.getOverviewId());
+        scoresService.buildScoreDistributions(swathParams.getOverviewId());
         taskDO.addLog("生成子分数总览图完毕,耗时:" + (System.currentTimeMillis() - start));
 
-//        start = System.currentTimeMillis();
-//        FinalResult finalResult = airus.doAirus(scores);
-//
-//        int count = AirusUtil.checkFdr(finalResult);
-//        taskDO.addLog("合并打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为"+count);
+        start = System.currentTimeMillis();
+        FinalResult finalResult = airus.doAirus(swathParams.getOverviewId(), new AirusParams());
+
+        int count = AirusUtil.checkFdr(finalResult);
+        taskDO.addLog("合并打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为" + count);
         taskDO.addLog("Swath流程总计耗时:" + (System.currentTimeMillis() - startAll));
         taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);

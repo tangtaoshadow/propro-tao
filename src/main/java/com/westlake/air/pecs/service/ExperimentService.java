@@ -1,7 +1,7 @@
 package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.SwathInput;
+import com.westlake.air.pecs.domain.bean.SwathParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
@@ -11,8 +11,6 @@ import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.List;
 
 
@@ -50,10 +48,10 @@ public interface ExperimentService {
     /**
      * 卷积完毕后所有卷积结果加在到内存中并且返回
      * 目前先只支持MS2的卷积
-     * @param swathInput
+     * @param swathParams
      * @return
      */
-    ResultDO<List<AnalyseDataDO>> extract(SwathInput swathInput);
+    ResultDO<List<AnalyseDataDO>> extract(SwathParams swathParams);
 
     /**
      * 卷积iRT校准库的数据

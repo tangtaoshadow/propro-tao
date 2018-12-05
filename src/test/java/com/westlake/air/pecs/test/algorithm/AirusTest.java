@@ -1,20 +1,13 @@
 package com.westlake.air.pecs.test.algorithm;
 
-import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.algorithm.Airus;
-import com.westlake.air.pecs.domain.bean.airus.FinalResult;
-import com.westlake.air.pecs.domain.bean.airus.Params;
-import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
-import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.service.ScoresService;
 import com.westlake.air.pecs.test.BaseTest;
-import com.westlake.air.pecs.utils.AirusUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**

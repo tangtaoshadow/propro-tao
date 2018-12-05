@@ -6,8 +6,10 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.*;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
+import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
+import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.ScoresService;
 import com.westlake.air.pecs.utils.AirusUtil;
 import com.westlake.air.pecs.utils.ArrayUtil;
@@ -39,8 +41,10 @@ public class Airus {
     Stats stats;
     @Autowired
     ScoresService scoresService;
+    @Autowired
+    AnalyseOverviewService analyseOverviewService;
 
-    public FinalResult doAirus(String overviewId, Params params) {
+    public FinalResult doAirus(String overviewId, AirusParams airusParams) {
         FinalResult finalResult = new FinalResult();
         logger.info("开始获取打分数据");
         List<SimpleScores> scores = scoresService.getSimpleAllByOverviewId(overviewId);
@@ -49,18 +53,14 @@ public class Airus {
             finalResult.setErrorInfo(resultDO.getMsgInfo());
             return finalResult;
         }
-        logger.info("开始检查数据是否健康");
-        for (SimpleScores score : scores) {
-            score.setGroupId(score.getIsDecoy() ? ("DECOY_" + score.getPeptideRef()) : score.getPeptideRef());
-        }
 
         logger.info("开始训练学习数据权重");
-        HashMap<String, Double> weightsMap = learn(scores, params);
+        HashMap<String, Double> weightsMap = learn(scores, airusParams);
         logger.info("开始计算合并打分");
         ldaLearner.score(scores, weightsMap);
         List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
 
-        ErrorStat errorStat = stats.errorStatistics(featureScoresList, params);
+        ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
 
         finalResult.setAllInfo(errorStat);
         finalResult.setWeightsMap(weightsMap);
@@ -73,6 +73,16 @@ public class Airus {
                 scoresDO.setIsIdentified(simpleFeatureScores.getFdr() <= 0.01);
             }
             scoresService.update(scoresDO);
+        }
+
+        int count = AirusUtil.checkFdr(finalResult);
+        finalResult.setMatchPeptideCount(count);
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        if(overviewResult.isSuccess()){
+            AnalyseOverviewDO overviewDO = overviewResult.getModel();
+            overviewDO.setWeights(weightsMap);
+            overviewDO.setMatchPeptideCount(count);
+            analyseOverviewService.update(overviewDO);
         }
         logger.info("合并打分完成");
         return finalResult;
@@ -97,23 +107,23 @@ public class Airus {
         return new ResultDO(true);
     }
 
-    public HashMap<String, Double> learn(List<SimpleScores> scores, Params params) {
-        int neval = params.getTrainTimes();
+    public HashMap<String, Double> learn(List<SimpleScores> scores, AirusParams airusParams) {
+        int neval = airusParams.getTrainTimes();
         List<HashMap<String, Double>> weightsMapList = new ArrayList<>();
         for (int i = 0; i < neval; i++) {
             logger.info("开始第" + i + "轮尝试");
-            LDALearnData ldaLearnData = semiSupervised.learnRandomized(scores, params);
+            LDALearnData ldaLearnData = semiSupervised.learnRandomized(scores, airusParams);
 
             ldaLearner.score(scores, ldaLearnData.getWeightsMap());
             List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
-            ErrorStat errorStat = stats.errorStatistics(featureScoresList, params);
+            ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
             int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
             if (count > 0) {
                 logger.info("本轮尝试有效果:检测结果:" + count + "个");
             }
 
             weightsMapList.add(ldaLearnData.getWeightsMap());
-            if (params.isDebug()) {
+            if (airusParams.isDebug()) {
                 break;
             }
         }
@@ -122,7 +132,7 @@ public class Airus {
     }
 
 
-    private ErrorStat finalErrorTable(ErrorStat errorStat, Params params) {
+    private ErrorStat finalErrorTable(ErrorStat errorStat, AirusParams airusParams) {
 
         StatMetrics statMetrics = errorStat.getStatMetrics();
         Double[] cutOffs = errorStat.getCutoff();
@@ -131,8 +141,8 @@ public class Airus {
         double minCutOff = cutOffsSort[0];
         double maxCutOff = cutOffsSort[cutOffs.length - 1];
         double margin = (maxCutOff - minCutOff) * 0.05;
-        Double[] sampledCutoffs = MathUtil.linspace(minCutOff - margin, maxCutOff - margin, params.getNumCutOffs());
-        Integer[] ix = MathUtil.findNearestMatches(cutOffs, sampledCutoffs, params.getUseSortOrders());
+        Double[] sampledCutoffs = MathUtil.linspace(minCutOff - margin, maxCutOff - margin, airusParams.getNumCutOffs());
+        Integer[] ix = MathUtil.findNearestMatches(cutOffs, sampledCutoffs, airusParams.getUseSortOrders());
 
         ErrorStat sampleErrorStat = new ErrorStat();
         sampleErrorStat.setCutoff(sampledCutoffs);
@@ -154,10 +164,10 @@ public class Airus {
         return sampleErrorStat;
     }
 
-    private ErrorStat summaryErrorTable(ErrorStat errorStat, Params params) {
+    private ErrorStat summaryErrorTable(ErrorStat errorStat, AirusParams airusParams) {
         StatMetrics statMetrics = errorStat.getStatMetrics();
-        Double[] qvalues = params.getQvalues();
-        Integer[] ix = MathUtil.findNearestMatches(errorStat.getQvalue(), qvalues, params.getUseSortOrders());
+        Double[] qvalues = airusParams.getQvalues();
+        Integer[] ix = MathUtil.findNearestMatches(errorStat.getQvalue(), qvalues, airusParams.getUseSortOrders());
 
         ErrorStat subErrorStat = new ErrorStat();
         subErrorStat.setCutoff(ArrayUtil.extractRow(errorStat.getCutoff(), ix));

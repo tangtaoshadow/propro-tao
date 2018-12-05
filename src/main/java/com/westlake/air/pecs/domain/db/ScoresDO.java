@@ -38,6 +38,9 @@ public class ScoresDO {
 
     String analyseDataId;
 
+    //该肽段片段的理论rt值,从标准库中冗余所得
+    Float rt;
+
     List<FeatureScores> featureScoresList;
 
     Double bestRt;
@@ -45,7 +48,4 @@ public class ScoresDO {
     Date createDate;
 
     Date lastModifiedDate;
-
-    //本字段仅在排序的时候使用,不保存在数据库中
-    String groupId;
 }

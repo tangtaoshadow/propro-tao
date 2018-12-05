@@ -9,7 +9,7 @@ import lombok.Data;
  */
 
 @Data
-public class Params {
+public class AirusParams {
 
     double trainTestRatio = 0.5;
 
@@ -54,7 +54,7 @@ public class Params {
 
     Double[] qvalues = {0.0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5};
 
-    boolean isDebug = true;
+    boolean isDebug = false;
 
     //首批训练时默认作为主分数的分数类型
     String mainScore = FeatureScores.ScoreType.MainScore.getTypeName();

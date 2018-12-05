@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.algorithm.Airus;
+import com.westlake.air.pecs.async.AirusTask;
 import com.westlake.air.pecs.async.ScoreTask;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
@@ -11,8 +12,8 @@ import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.airus.AirusParams;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
-import com.westlake.air.pecs.domain.bean.airus.Params;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
@@ -70,6 +71,8 @@ public class AnalyseController extends BaseController {
     SignalToNoiseEstimator signalToNoiseEstimator;
     @Autowired
     ConfigDAO configDAO;
+    @Autowired
+    AirusTask airusTask;
 
     @RequestMapping(value = "/overview/list")
     String overviewList(Model model,
@@ -402,26 +405,15 @@ public class AnalyseController extends BaseController {
     }
 
     @RequestMapping(value = "/overview/airus/{overviewId}")
-    @ResponseBody
     String airus(Model model, @PathVariable("overviewId") String overviewId) {
 
-        long start = System.currentTimeMillis();
-        Params params = new Params();
-        params.setDebug(false);
-        params.setMainScore(FeatureScores.ScoreType.XcorrShape.getTypeName());
-        params.setTrainTimes(10);
-        FinalResult finalResult = airus.doAirus(overviewId, params);
-        logger.info("打分耗时:" + (System.currentTimeMillis() - start));
-        int count = AirusUtil.checkFdr(finalResult);
+        TaskDO taskDO = new TaskDO(TaskTemplate.AIRUS, overviewId);
+        taskService.insert(taskDO);
 
-        logger.info(JSON.toJSONString(finalResult.getAllInfo().getStatMetrics().getFdr()));
-        JSONObject object = new JSONObject();
-        object.put("是否测试", params.isDebug());
-        object.put("主分数类型", params.getMainScore());
-        object.put("子分数种类", finalResult.getWeightsMap().size());
-        object.put("权重", finalResult.getWeightsMap());
-        object.put("识别肽段数目", count);
-        object.put("打分耗时", (System.currentTimeMillis() - start));
-        return object.toJSONString();
+        AirusParams airusParams = new AirusParams();
+        airusParams.setMainScore(FeatureScores.ScoreType.MainScore.getTypeName());
+        airusTask.airus(overviewId, airusParams, taskDO);
+
+        return "redirect:/task/detail/" + taskDO.getId();
     }
 }

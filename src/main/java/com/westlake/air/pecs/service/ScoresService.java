@@ -1,13 +1,12 @@
 package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.SwathInput;
+import com.westlake.air.pecs.domain.bean.SwathParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ScoreDistribution;
 import com.westlake.air.pecs.domain.db.ScoresDO;
-import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.domain.query.ScoresQuery;
 
@@ -62,7 +61,7 @@ public interface ScoresService {
      *                 sigmaSpacing Sigma通常为30/8 = 6.25/Spacing通常为0.01
      *                 overviewId
      */
-    List<ScoresDO> score(List<AnalyseDataDO> dataList, SwathInput input);
+    List<ScoresDO> score(List<AnalyseDataDO> dataList, SwathParams input);
 
     /**
      * Generate the tsv format file for pyprophet

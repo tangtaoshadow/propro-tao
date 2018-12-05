@@ -6,7 +6,7 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.dao.ScoresDAO;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.SwathInput;
+import com.westlake.air.pecs.domain.bean.SwathParams;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
@@ -20,7 +20,6 @@ import com.westlake.air.pecs.rtnormalizer.ChromatogramFilter;
 import com.westlake.air.pecs.rtnormalizer.RtNormalizerScorer;
 import com.westlake.air.pecs.scorer.*;
 import com.westlake.air.pecs.service.*;
-import com.westlake.air.pecs.utils.CompressUtil;
 import com.westlake.air.pecs.utils.FileUtil;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
@@ -237,7 +236,7 @@ public class ScoresServiceImpl implements ScoresService {
     }
 
     @Override
-    public List<ScoresDO> score(List<AnalyseDataDO> dataList, SwathInput input) {
+    public List<ScoresDO> score(List<AnalyseDataDO> dataList, SwathParams input) {
 
         if (dataList == null || dataList.size() == 0) {
             return null;
@@ -337,6 +336,8 @@ public class ScoresServiceImpl implements ScoresService {
                 }
 
                 ScoresDO pecsScore = new ScoresDO();
+
+                pecsScore.setRt(dataDO.getRt());
                 pecsScore.setOverviewId(input.getOverviewId());
                 pecsScore.setPeptideRef(dataDO.getPeptideRef());
                 pecsScore.setAnalyseDataId(dataDO.getId());

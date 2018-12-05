@@ -66,6 +66,20 @@ public class TaskExecutor {
         return executor;
     }
 
+    @Bean(name = "airusExecutor")
+    public Executor airusExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(100);
+        executor.setKeepAliveSeconds(5);
+        executor.setThreadNamePrefix("airusExecutor-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(60);
+        return executor;
+    }
+
     @Bean(name = "commonExecutor")
     public Executor commonExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

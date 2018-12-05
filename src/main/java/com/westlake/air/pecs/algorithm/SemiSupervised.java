@@ -29,19 +29,19 @@ public class SemiSupervised {
     @Autowired
     LDALearner ldaLearner;
 
-    public LDALearnData learnRandomized(List<SimpleScores> scores, Params params) {
+    public LDALearnData learnRandomized(List<SimpleScores> scores, AirusParams airusParams) {
         LDALearnData ldaLearnData = new LDALearnData();
         try {
             //Get part of scores as train input.
-            TrainData trainData = AirusUtil.split(scores, params.getTrainTestRatio(), params.isDebug());
+            TrainData trainData = AirusUtil.split(scores, airusParams.getTrainTestRatio(), airusParams.isDebug());
             //第一次训练数据集使用MainScore进行训练
-            TrainPeaks trainPeaks = selectTrainPeaks(trainData, params.getMainScore(), params);
-            HashMap<String, Double> weightsMap = ldaLearner.learn(trainPeaks, params.getMainScore());
+            TrainPeaks trainPeaks = selectTrainPeaks(trainData, airusParams.getMainScore(), airusParams);
+            HashMap<String, Double> weightsMap = ldaLearner.learn(trainPeaks, airusParams.getMainScore());
             logger.info("Train Weight:"+ JSONArray.toJSONString(weightsMap));
             //根据weightsMap计算子分数的加权总分
             ldaLearner.score(trainData, weightsMap);
-            for (int times = 0; times < params.getXevalNumIter(); times++) {
-                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, FeatureScores.ScoreType.WeightedTotalScore.getTypeName(), params);
+            for (int times = 0; times < airusParams.getXevalNumIter(); times++) {
+                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, FeatureScores.ScoreType.WeightedTotalScore.getTypeName(), airusParams);
                 weightsMap = ldaLearner.learn(trainPeaksTemp, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
                 ldaLearner.score(trainData, weightsMap);
             }
@@ -57,13 +57,13 @@ public class SemiSupervised {
 
     }
 
-    private TrainPeaks selectTrainPeaks(TrainData trainData, String usedScoreType, Params params) {
+    private TrainPeaks selectTrainPeaks(TrainData trainData, String usedScoreType, AirusParams airusParams) {
 
         List<SimpleFeatureScores> topTargetPeaks = AirusUtil.findTopFeatureScores(trainData.getTargets(), usedScoreType);
         List<SimpleFeatureScores> topDecoyPeaks = AirusUtil.findTopFeatureScores(trainData.getDecoys(), usedScoreType);
 
         // find cutoff fdr from scores and only use best target peaks:
-        Double cutoff = stats.findCutoff(topTargetPeaks, topDecoyPeaks, params);
+        Double cutoff = stats.findCutoff(topTargetPeaks, topDecoyPeaks, airusParams);
         List<SimpleFeatureScores> bestTargetPeaks = AirusUtil.peaksFilter(topTargetPeaks, cutoff);
 
         TrainPeaks trainPeaks = new TrainPeaks();

@@ -102,6 +102,38 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
+                            <label class="col-2 col-form-label">合并打分权重</label>
+                            <div class="col-10">
+                                <label class="col-form-label" th:text="|总计使用打分种类:${overview.weights.size()}种|"></label>
+                                <table class="table table-bordered table-hover" style="table-layout:fixed;">
+                                    <thead>
+                                    <tr>
+                                        <th width="20%">
+                                            打分类型
+                                        </th>
+                                        <th width="20%">
+                                            打分权重
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="scoreType:${overview.weights.keySet()}">
+                                        <td th:text="${scoreType}"></td>
+                                        <td th:text="${overview.weights.get(scoreType)}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="matchPeptide" class="col-2 col-form-label">肽段识别状况</label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="matchPeptide" name="matchPeptide"
+                                       readonly
+                                       th:value="|${overview.matchPeptideCount}/${overview.totalPeptideCount}|">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
                             <label for="createDate" class="col-2 col-form-label">创建时间</label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="createDate" name="createDate"

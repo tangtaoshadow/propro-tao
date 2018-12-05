@@ -37,6 +37,11 @@ public enum TaskTemplate {
     SCORE("SCORE", ""),
 
     /**
+     * compute sub scores
+     */
+    AIRUS("AIRUS", ""),
+
+    /**
      * the whole workflow for swath including(irt -> extractor -> sub scores -> final score)
      */
     SWATH_WORKFLOW("SWATH_WORKFLOW", ""),

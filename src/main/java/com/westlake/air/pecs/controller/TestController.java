@@ -5,13 +5,15 @@ import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.SwathInput;
+import com.westlake.air.pecs.domain.bean.SwathParams;
+import com.westlake.air.pecs.domain.bean.airus.AirusParams;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
-import com.westlake.air.pecs.domain.bean.airus.Params;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
+import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
+import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
 import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,8 @@ public class TestController extends BaseController {
     @Autowired
     AnalyseDataDAO analyseDataDAO;
     @Autowired
+    AnalyseOverviewService analyseOverviewService;
+    @Autowired
     ScoresService scoresService;
     @Autowired
     Airus airus;
@@ -69,14 +73,13 @@ public class TestController extends BaseController {
         }
         SlopeIntercept slopeIntercept = resultDO.getModel();
         long start = System.currentTimeMillis();
-        SwathInput input = new SwathInput();
+        SwathParams input = new SwathParams();
         input.setExperimentDO(experimentDO);
         input.setLibraryId("5b88feb758487f13f05f7083");
         input.setSlopeIntercept(slopeIntercept);
         input.setCreator("陆妙善");
         input.setRtExtractWindow(RT_EXTRACT_WINDOW);
         input.setMzExtractWindow(MZ_EXTRACT_WINDOW);
-        input.setBuildType(2);
         ResultDO finalRes = experimentService.extract(input);
         logger.info("卷积耗时总计:" + (System.currentTimeMillis() - start));
         return JSON.toJSONString(finalRes);
@@ -87,14 +90,13 @@ public class TestController extends BaseController {
     String test3(Model model, RedirectAttributes redirectAttributes) {
         ExperimentDO experimentDO = experimentService.getById("5b738f19e63cc81c44325169").getModel();
 
-        SwathInput input = new SwathInput();
+        SwathParams input = new SwathParams();
         input.setExperimentDO(experimentDO);
         input.setIRtLibraryId("5b67136d2ada5f15749a0140");
         input.setLibraryId("5b84bc9c58487f1060fa0c23");
         input.setCreator("陆妙善");
         input.setRtExtractWindow(RT_EXTRACT_WINDOW);
         input.setMzExtractWindow(MZ_EXTRACT_WINDOW);
-        input.setBuildType(2);
 
         TaskDO taskDO = new TaskDO(TaskTemplate.TEST, "LMS-TEMP2");
         taskService.insert(taskDO);
@@ -107,7 +109,7 @@ public class TestController extends BaseController {
     String test4(Model model, RedirectAttributes redirectAttributes) throws IOException {
         List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("D://convWithDecoy.json");
         long start = System.currentTimeMillis();
-        SwathInput input = new SwathInput();
+        SwathParams input = new SwathParams();
         input.setLibraryId("5b88feb758487f13f05f7083");
         input.setSlopeIntercept(new SlopeIntercept(0.0633584d, -64.7064d));
         input.setSigmaSpacing(SigmaSpacing.create());
@@ -120,7 +122,7 @@ public class TestController extends BaseController {
     @ResponseBody
     String test6(Model model, RedirectAttributes redirectAttributes) throws IOException {
         long start = System.currentTimeMillis();
-        FinalResult finalResult = airus.doAirus("5b967e5fcbaa7e2940fc6537",new Params());
+        FinalResult finalResult = airus.doAirus("5b967e5fcbaa7e2940fc6537",new AirusParams());
         logger.info("打分耗时:" + (System.currentTimeMillis() - start));
         return JSON.toJSONString(finalResult);
     }
@@ -132,5 +134,22 @@ public class TestController extends BaseController {
         long start = System.currentTimeMillis();
         TrainAndTest tt = JSON.parseObject(trainAndTestContent, TrainAndTest.class);
         return tt.getTestData().length + "/" + tt.getTrainData().length + "/" + tt.getTestId().length + "/" + tt.getTrainId().length;
+    }
+
+    @RequestMapping("test8")
+    @ResponseBody
+    String test8(Model model, RedirectAttributes redirectAttributes) throws IOException {
+        ResultDO<List<AnalyseOverviewDO>> resultDO = analyseOverviewService.getList(new AnalyseOverviewQuery());
+        if(resultDO.isSuccess()){
+            List<AnalyseOverviewDO> overviews = resultDO.getModel();
+            for(AnalyseOverviewDO ov : overviews){
+                AnalyseDataQuery query = new AnalyseDataQuery();
+                query.setOverviewId(ov.getId());
+                long count = analyseDataDAO.count(query);
+                ov.setTotalPeptideCount((int)count);
+                analyseOverviewService.update(ov);
+            }
+        }
+        return "success";
     }
 }

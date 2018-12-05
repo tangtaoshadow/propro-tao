@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.compressor.Compressor;
 import com.westlake.air.pecs.constants.*;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.SwathInput;
+import com.westlake.air.pecs.domain.bean.SwathParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
@@ -310,17 +310,16 @@ public class ExperimentController extends BaseController {
         TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_WORKFLOW, "expId:" + expId + ";libId:" + libraryId + ";iRtLib:" + iRtLibraryId);
         taskService.insert(taskDO);
 
-        SwathInput input = new SwathInput();
-        input.setExperimentDO(exp);
-        input.setIRtLibraryId(iRtLibraryId);
-        input.setLibraryId(libraryId);
-        input.setCreator("Admin");
-        input.setRtExtractWindow(rtExtractWindow);
-        input.setMzExtractWindow(mzExtractWindow);
-        input.setBuildType(2);
-        input.setSigmaSpacing(new SigmaSpacing(sigma, spacing));
+        SwathParams swathParams = new SwathParams();
+        swathParams.setExperimentDO(exp);
+        swathParams.setIRtLibraryId(iRtLibraryId);
+        swathParams.setLibraryId(libraryId);
+        swathParams.setCreator("Admin");
+        swathParams.setRtExtractWindow(rtExtractWindow);
+        swathParams.setMzExtractWindow(mzExtractWindow);
+        swathParams.setSigmaSpacing(new SigmaSpacing(sigma, spacing));
 
-        experimentTask.swath(input, taskDO);
+        experimentTask.swath(swathParams, taskDO);
         return "redirect:/task/detail/" + taskDO.getId();
     }
 

@@ -3,7 +3,7 @@ package com.westlake.air.pecs.async;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.SwathInput;
+import com.westlake.air.pecs.domain.bean.SwathParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
@@ -42,7 +42,7 @@ public class ScoreTask extends BaseTask {
         taskService.update(taskDO);
 
         start = System.currentTimeMillis();
-        SwathInput input = new SwathInput();
+        SwathParams input = new SwathParams();
         input.setLibraryId(libraryId);
         input.setSigmaSpacing(sigmaSpacing);
         input.setSlopeIntercept(slopeIntercept);

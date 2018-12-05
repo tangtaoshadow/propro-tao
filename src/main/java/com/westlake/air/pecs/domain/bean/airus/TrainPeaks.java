@@ -12,10 +12,6 @@ import java.util.List;
 @Data
 public class TrainPeaks {
 
-    Double[][] topDecoyPeaks;
-
-    Double[][] bestTargetPeaks;
-
     List<SimpleFeatureScores> bestTargets;
 
     List<SimpleFeatureScores> topDecoys;
