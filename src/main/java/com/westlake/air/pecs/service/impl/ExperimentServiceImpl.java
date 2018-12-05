@@ -19,8 +19,10 @@ import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.AirdFileParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
 import com.westlake.air.pecs.service.*;
+import com.westlake.air.pecs.utils.CompressUtil;
 import com.westlake.air.pecs.utils.ConvolutionUtil;
 import com.westlake.air.pecs.utils.FileUtil;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -438,21 +440,28 @@ public class ExperimentServiceImpl implements ExperimentService {
      */
     private List<AnalyseDataDO> convoluteAndInsert(List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow, boolean isMS1) {
         List<AnalyseDataDO> dataList = new ArrayList<>();
+//        int count = 0;
         for (TargetPeptide ms : coordinates) {
-            AnalyseDataDO dataDO = convForOne(ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
+            AnalyseDataDO dataDO = convForOne(ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId, true);
             if(dataDO == null){
                 continue;
             }
             dataList.add(dataDO);
+//            count++;
+//            if(count >= 1000){
+//                analyseDataService.insertAll(dataList, false);
+//                dataList.clear();
+//                count = 0;
+//            }
         }
         analyseDataService.insertAll(dataList, false);
-
         return dataList;
     }
 
     /**
      * 需要传入最终结果集的List对象
      * 最终的卷积结果存储在内存中不落盘,一般用于iRT的计算
+     * 由于是直接在内存中的,所以卷积的结果不进行压缩
      *
      * @param finalList
      * @param coordinates
@@ -463,7 +472,7 @@ public class ExperimentServiceImpl implements ExperimentService {
      */
     private void convolute(List<AnalyseDataDO> finalList, List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float mzExtractWindow, Float rtExtractWindow) {
         for (TargetPeptide ms : coordinates) {
-            AnalyseDataDO dataDO = convForOne(ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
+            AnalyseDataDO dataDO = convForOne(ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId, false);
             if(dataDO == null){
                 continue;
             }
@@ -471,7 +480,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         }
     }
 
-    private AnalyseDataDO convForOne(TargetPeptide ms, TreeMap<Float, MzIntensityPairs> rtMap, Float mzExtractWindow, Float rtExtractWindow, String overviewId) {
+    private AnalyseDataDO convForOne(TargetPeptide ms, TreeMap<Float, MzIntensityPairs> rtMap, Float mzExtractWindow, Float rtExtractWindow, String overviewId, boolean needCompress) {
         float mzStart = 0;
         float mzEnd = -1;
 
@@ -491,7 +500,12 @@ public class ExperimentServiceImpl implements ExperimentService {
 
         AnalyseDataDO dataDO = new AnalyseDataDO();
         dataDO.setPeptideId(ms.getId());
-        dataDO.setRtArray(rtArray);
+        if(needCompress){
+            dataDO.setConvRtArray(CompressUtil.zlibCompress(CompressUtil.transToByte(ArrayUtils.toPrimitive(rtArray))));
+        }else{
+            dataDO.setRtArray(rtArray);
+        }
+
         dataDO.setOverviewId(overviewId);
         dataDO.setPeptideRef(ms.getPeptideRef());
         dataDO.setProteinName(ms.getProteinName());
@@ -520,12 +534,22 @@ public class ExperimentServiceImpl implements ExperimentService {
 
             dataDO.getMzMap().put(fi.getCutInfo(), fi.getMz().floatValue());
             if (isAllZero) {
-                dataDO.getIntensityMap().put(fi.getCutInfo(), null);
+                if(needCompress){
+                    dataDO.getConvIntensityMap().put(fi.getCutInfo(), null);
+                }else{
+                    dataDO.getIntensityMap().put(fi.getCutInfo(), null);
+                }
+
             } else {
                 isHit = true;
                 Float[] intArray = new Float[intList.size()];
                 intList.toArray(intArray);
-                dataDO.getIntensityMap().put(fi.getCutInfo(), intArray);
+                if(needCompress){
+                    dataDO.getConvIntensityMap().put(fi.getCutInfo(), CompressUtil.zlibCompress(CompressUtil.transToByte(ArrayUtils.toPrimitive(intArray))));
+                }else{
+                    dataDO.getIntensityMap().put(fi.getCutInfo(), intArray);
+                }
+
             }
         }
 

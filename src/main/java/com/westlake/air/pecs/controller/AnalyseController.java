@@ -24,6 +24,7 @@ import com.westlake.air.pecs.feature.GaussFilter;
 import com.westlake.air.pecs.feature.SignalToNoiseEstimator;
 import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.AirusUtil;
+import com.westlake.air.pecs.utils.CompressUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -306,8 +307,9 @@ public class AnalyseController extends BaseController {
         JSONArray rtArray = new JSONArray();
         JSONArray intensityArray = new JSONArray();
 
-        Float[] pairRtArray = dataDO.getRtArray();
-        Float[] pairIntensityArray = dataDO.getIntensityMap().get(cutInfo);
+        Float[] pairRtArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(dataDO.getConvRtArray()));
+        Float[] pairIntensityArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(dataDO.getConvIntensityMap().get(cutInfo)));
+
         for (int n = 0; n < pairRtArray.length; n++) {
             rtArray.add(pairRtArray[n]);
             if(pairIntensityArray != null){
@@ -327,8 +329,7 @@ public class AnalyseController extends BaseController {
     ResultDO<JSONObject> viewGroup(Model model,
                                    @RequestParam(value = "dataId", required = false) String dataId,
                                    @RequestParam(value = "isGaussFilter", required = false, defaultValue = "false") Boolean isGaussFilter,
-                                   @RequestParam(value = "useNoise1000", required = false, defaultValue = "false") Boolean useNoise1000
-    ) {
+                                   @RequestParam(value = "useNoise1000", required = false, defaultValue = "false") Boolean useNoise1000) {
         ResultDO<AnalyseDataDO> dataResult = null;
         if (dataId != null && !dataId.isEmpty() && !dataId.equals("null")) {
             dataResult = analyseDataService.getById(dataId);
@@ -351,18 +352,16 @@ public class AnalyseController extends BaseController {
         //同一组的rt坐标是相同的
         Float[] pairRtArray = null;
 
-        for (String cutInfo : data.getIntensityMap().keySet()) {
-            if (!data.getIsHit()) {
+        for (String cutInfo : data.getConvIntensityMap().keySet()) {
+            if (!data.getIsHit() || data.getConvIntensityMap().get(cutInfo) == null) {
                 continue;
             }
             if (pairRtArray == null) {
-                pairRtArray = data.getRtArray();
+                pairRtArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvRtArray()));
             }
-            Float[] pairIntensityArray = null;
+            Float[] pairIntensityArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvIntensityMap().get(cutInfo)));
             if (isGaussFilter) {
-                pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, data.getIntensityMap().get(cutInfo));
-            } else {
-                pairIntensityArray = data.getIntensityMap().get(cutInfo);
+                pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, pairIntensityArray);
             }
 
             if (useNoise1000) {

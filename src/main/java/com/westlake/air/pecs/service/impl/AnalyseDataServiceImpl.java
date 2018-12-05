@@ -11,6 +11,7 @@ import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
+import com.westlake.air.pecs.utils.CompressUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,5 +163,20 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
         resultDO.setSuccess(true);
         resultDO.setModel(dataList.get(0));
         return resultDO;
+    }
+
+    @Override
+    public void decompress(AnalyseDataDO dataDO) {
+        dataDO.setRtArray(CompressUtil.transToFloat(CompressUtil.zlibDecompress(dataDO.getConvRtArray())));
+        dataDO.setConvRtArray(null);
+
+        for(String cutInfo : dataDO.getConvIntensityMap().keySet()){
+            byte[] values = dataDO.getConvIntensityMap().get(cutInfo);
+            if(values == null){
+                continue;
+            }
+            dataDO.getIntensityMap().put(cutInfo, CompressUtil.transToFloat(CompressUtil.zlibDecompress(values)));
+        }
+        dataDO.setConvIntensityMap(null);
     }
 }

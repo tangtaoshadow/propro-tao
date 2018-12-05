@@ -20,6 +20,7 @@ import com.westlake.air.pecs.rtnormalizer.ChromatogramFilter;
 import com.westlake.air.pecs.rtnormalizer.RtNormalizerScorer;
 import com.westlake.air.pecs.scorer.*;
 import com.westlake.air.pecs.service.*;
+import com.westlake.air.pecs.utils.CompressUtil;
 import com.westlake.air.pecs.utils.FileUtil;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
@@ -261,6 +262,9 @@ public class ScoresServiceImpl implements ScoresService {
                 if(!dataDO.getIsHit()){
                     continue;
                 }
+
+                analyseDataService.decompress(dataDO);
+
                 List<FeatureScores> featureScoresList = new ArrayList<>();
                 //获取标准库中对应的PeptideRef组
                 IntensityGroup ig = intensityGroupMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy());
@@ -309,19 +313,19 @@ public class ScoresServiceImpl implements ScoresService {
                     chromatographicScorer.calculateLogSnScore(chromatogramList, experimentFeatureList, noise1000List, featureScores);
 
 //                    根据RT时间和前体MZ获取最近的一个原始谱图
-//                    ResultDO<MzIntensityPairs> getSpectrumResult = scanIndexService.getNearestSpectrumByRt(raf, exp, experimentFeatureList.get(0).getRt(), ig.getMz());
-//                    Float[] spectrumMzArray = null;
-//                    Float[] spectrumIntArray = null;
-//                    if (getSpectrumResult.isSuccess()) {
-//                        spectrumMzArray = getSpectrumResult.getModel().getMzArray();
-//                        spectrumIntArray = getSpectrumResult.getModel().getIntensityArray();
-//                    }
-//                    if (getSpectrumResult.isSuccess()) {
+                    ResultDO<MzIntensityPairs> getSpectrumResult = scanIndexService.getNearestSpectrumByRt(raf, exp, experimentFeatureList.get(0).getRt(), ig.getMz());
+                    Float[] spectrumMzArray = null;
+                    Float[] spectrumIntArray = null;
+                    if (getSpectrumResult.isSuccess()) {
+                        spectrumMzArray = getSpectrumResult.getModel().getMzArray();
+                        spectrumIntArray = getSpectrumResult.getModel().getIntensityArray();
+                    }
+                    if (getSpectrumResult.isSuccess()) {
 //                        diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
-//                        diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, intensityMap, featureScores);
-//                        diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
+                        diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, intensityMap, featureScores);
+                        diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
 
-//                    }
+                    }
 //                    elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
                     libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
                     libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, featureScores);

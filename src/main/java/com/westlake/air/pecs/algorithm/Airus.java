@@ -74,6 +74,7 @@ public class Airus {
             }
             scoresService.update(scoresDO);
         }
+        logger.info("合并打分完成");
         return finalResult;
     }
 

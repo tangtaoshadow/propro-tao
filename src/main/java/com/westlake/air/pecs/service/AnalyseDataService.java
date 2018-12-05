@@ -47,4 +47,5 @@ public interface AnalyseDataService {
      */
     ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String peptideRef, Boolean isDecoy);
 
+    void decompress(AnalyseDataDO analyseDataDO);
 }

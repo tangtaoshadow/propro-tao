@@ -7,6 +7,7 @@ import org.apache.commons.codec.binary.Base64;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
@@ -101,37 +102,6 @@ public class CompressUtil {
         return recovered;
     }
 
-    /**
-     * 效果并不是很好的功能函数
-     * @param target
-     * @return
-     */
-    public static int[] compressForUnsortedInt(int[] target) {
-        IntegerCODEC codec =  new Composition(new FastPFOR(), new VariableByte());
-        // output vector should be large enough...
-        int[] compressed = new int[target.length + 1024];
-        IntWrapper inputoffset = new IntWrapper(0);
-        IntWrapper outputoffset = new IntWrapper(0);
-        codec.compress(target,inputoffset,target.length,compressed,outputoffset);
-        compressed[0] = target.length;
-        compressed = Arrays.copyOf(compressed, outputoffset.intValue());
-        return compressed;
-    }
-
-    /**
-     * 效果并不是很好的功能函数
-     * @param compressed
-     * @return
-     */
-    public static int[] decompressForUnsortedInt(int[] compressed) {
-        IntegerCODEC codec =  new Composition(new FastPFOR(), new VariableByte());
-        int[] recovered = new int[compressed[0]];
-        IntWrapper recoffset = new IntWrapper(0);
-        codec.uncompress(compressed,new IntWrapper(0),compressed.length,recovered,recoffset);
-
-        return recovered;
-    }
-
     public static String transToString(float[] target) {
         FloatBuffer fbTarget = FloatBuffer.wrap(target);
         ByteBuffer bbTarget = ByteBuffer.allocate(fbTarget.capacity() * 4);
@@ -168,6 +138,36 @@ public class CompressUtil {
         byte[] targetArray = bbTarget.array();
         byte[] compressedArray = CompressUtil.zlibCompress(targetArray);
         return compressedArray;
+    }
+
+//    public static float[] transTofloat(byte[] value){
+//        ByteBuffer byteBuffer = ByteBuffer.wrap(value);
+//        byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(byteBuffer.array()));
+//        byteBuffer.order(ByteOrder.BIG_ENDIAN);
+//
+//        FloatBuffer floats = byteBuffer.asFloatBuffer();
+//        float[] floatValues = new float[floats.capacity()];
+//        for (int i = 0; i < floats.capacity(); i++) {
+//            floatValues[i] = floats.get(i);
+//        }
+//
+//        byteBuffer.clear();
+//        return floatValues;
+//    }
+
+    public static Float[] transToFloat(byte[] value){
+        ByteBuffer byteBuffer = ByteBuffer.wrap(value);
+        byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(byteBuffer.array()));
+        byteBuffer.order(ByteOrder.BIG_ENDIAN);
+
+        FloatBuffer floats = byteBuffer.asFloatBuffer();
+        Float[] floatValues = new Float[floats.capacity()];
+        for (int i = 0; i < floats.capacity(); i++) {
+            floatValues[i] = floats.get(i);
+        }
+
+        byteBuffer.clear();
+        return floatValues;
     }
 
 }
