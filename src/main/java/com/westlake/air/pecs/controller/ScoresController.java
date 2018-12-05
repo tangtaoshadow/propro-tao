@@ -71,8 +71,10 @@ public class ScoresController extends BaseController {
             return "redirect:/analyse/overview/list";
         }
         query.setOverviewId(overviewId);
-        query.setPageSize(pageSize);
+        query.setPageSize(30);
         query.setPageNo(currentPage);
+        query.setIsDecoy(false);
+        query.setSortColumn("rt");
         ResultDO<List<ScoresDO>> resultDO = scoresService.getList(query);
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);

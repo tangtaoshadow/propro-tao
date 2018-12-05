@@ -37,7 +37,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">实验数据概述详情页</h3>
+                            <h3 class="m-portlet__head-text">实验数据概述基础信息</h3>
                         </div>
                     </div>
                 </div>
@@ -48,57 +48,66 @@
                             <label for="id" class="col-2 col-form-label">
                                 ID
                             </label>
-                            <div class="col-10">
+                            <div class="col-4">
                                 <input type="text" class="form-control m-input" id="id" name="id" readonly
                                        th:value="${overview?.id}">
                             </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="id" class="col-2 col-form-label">原始实验ID</label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="expId" name="expId" readonly
-                                       th:value="${overview?.expId}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
                             <label for="id" class="col-2 col-form-label">卷积代号</label>
-                            <div class="col-10">
+                            <div class="col-4">
                                 <input type="text" class="form-control m-input" id="name" name="name" readonly
                                        th:value="${overview?.name}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
+                            <label for="id" class="col-2 col-form-label">原始实验ID</label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="expId" name="expId" readonly
+                                       th:value="${overview?.expId}">
+                            </div>
                             <label for="library" class="col-2 col-form-label">关联标准库</label>
-                            <div class="col-10">
+                            <div class="col-4">
                                 <input type="text" class="form-control m-input" id="library" readonly
                                        th:value="|${overview?.libraryName}(${overview?.libraryId})|">
                             </div>
                         </div>
+
                         <div class="form-group m-form__group row">
                             <label for="ExtractWindow" class="col-2 col-form-label">RT/MZ卷积窗口</label>
-                            <div class="col-10">
+                            <div class="col-4">
                                 <input type="text" class="form-control m-input" id="ExtractWindow" readonly
                                        th:value="|${overview?.rtExtractWindow}/${overview?.mzExtractWindow}|">
                             </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="rate" class="col-2 col-form-label">伪肽段卷积数/真实肽段卷积数/标准库目标数</label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="rate" readonly th:value="|${rate}|">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
                             <label for="slopeIntercept" class="col-2 col-form-label">斜率/截距</label>
-                            <div class="col-10">
+                            <div class="col-4">
                                 <input type="text" class="form-control m-input" id="slopeIntercept" readonly
                                        th:value="|${slopeIntercept}|">
                             </div>
                         </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="rate" class="col-2 col-form-label">伪肽段卷积数/真实肽段卷积数/标准库目标数</label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="rate" readonly th:value="|${rate}|">
+                            </div>
+                            <label for="matchPeptide" class="col-2 col-form-label">肽段识别状况</label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="matchPeptide" name="matchPeptide"
+                                       readonly
+                                       th:value="|${overview.matchPeptideCount}/${overview.totalPeptideCount}|">
+                            </div>
+                        </div>
+
                         <div class="form-group m-form__group row">
                             <label for="creator" class="col-2 col-form-label">创建人</label>
-                            <div class="col-10">
+                            <div class="col-4">
                                 <input type="text" class="form-control m-input" id="creator" readonly
                                        th:value="|${overview?.creator}|">
+                            </div>
+                            <label for="createDate" class="col-2 col-form-label">创建时间</label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="createDate" name="createDate"
+                                       readonly
+                                       th:value="${#dates.format(overview?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -125,22 +134,7 @@
                                 </table>
                             </div>
                         </div>
-                        <div class="form-group m-form__group row">
-                            <label for="matchPeptide" class="col-2 col-form-label">肽段识别状况</label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="matchPeptide" name="matchPeptide"
-                                       readonly
-                                       th:value="|${overview.matchPeptideCount}/${overview.totalPeptideCount}|">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="createDate" class="col-2 col-form-label">创建时间</label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="createDate" name="createDate"
-                                       readonly
-                                       th:value="${#dates.format(overview?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
-                            </div>
-                        </div>
+
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
@@ -160,15 +154,13 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">数据卷积操作</h3>
+                            <h3 class="m-portlet__head-text">数据卷积操作面板</h3>
                         </div>
                     </div>
                 </div>
                 <div class="m-portlet__body">
                     <a th:href="|/analyse/data/list?overviewId=${overview.id}|" class="btn btn-info btn-sm">查看卷积数据</a>
                     <a th:href="|/scores/list?overviewId=${overview.id}|" class="btn btn-brand btn-sm">查看打分数据</a>
-                    <a th:href="|/analyse/data/group?overviewId=${overview.id}&isIrt=true|" class="btn btn-warning btn-sm">查看iRT卷积组</a>
-                    <a th:href="|/analyse/data/irtliblist?overviewId=${overview.id}|" class="btn btn-info btn-sm">查看校准库卷积数据</a>
                 </div>
             </div>
         </div>
