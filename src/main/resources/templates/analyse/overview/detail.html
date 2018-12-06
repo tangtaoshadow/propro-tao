@@ -37,7 +37,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">实验数据概述基础信息</h3>
+                            <h3 class="m-portlet__head-text">分析报告 <span th:if="${overview.matchPeptideCount}" th:text="|最终识别肽段:${overview.matchPeptideCount}|"></span></h3>
                         </div>
                     </div>
                 </div>
@@ -93,7 +93,7 @@
                             <div class="col-4">
                                 <input type="text" class="form-control m-input" id="matchPeptide" name="matchPeptide"
                                        readonly
-                                       th:value="|${overview.matchPeptideCount}/${overview.totalPeptideCount}|">
+                                       th:value="|${overview.matchedPeptideCount}/${overview.totalPeptideCount}|">
                             </div>
                         </div>
 
@@ -108,30 +108,6 @@
                                 <input type="text" class="form-control m-input" id="createDate" name="createDate"
                                        readonly
                                        th:value="${#dates.format(overview?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label class="col-2 col-form-label">合并打分权重</label>
-                            <div class="col-10">
-                                <label class="col-form-label" th:text="|总计使用打分种类:${overview.weights.size()}种|"></label>
-                                <table class="table table-bordered table-hover" style="table-layout:fixed;">
-                                    <thead>
-                                    <tr>
-                                        <th width="20%">
-                                            打分类型
-                                        </th>
-                                        <th width="20%">
-                                            打分权重
-                                        </th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr th:each="scoreType:${overview.weights.keySet()}">
-                                        <td th:text="${scoreType}"></td>
-                                        <td th:text="${overview.weights.get(scoreType)}"></td>
-                                    </tr>
-                                    </tbody>
-                                </table>
                             </div>
                         </div>
 
@@ -161,6 +137,43 @@
                 <div class="m-portlet__body">
                     <a th:href="|/analyse/data/list?overviewId=${overview.id}|" class="btn btn-info btn-sm">查看卷积数据</a>
                     <a th:href="|/scores/list?overviewId=${overview.id}|" class="btn btn-brand btn-sm">查看打分数据</a>
+                </div>
+            </div>
+            <div class="m-portlet m-portlet--tab">
+                <div class="m-portlet__head">
+                    <div class="m-portlet__head-caption">
+                        <div class="m-portlet__head-title">
+                            <span class="m-portlet__head-icon m--hide">
+                                <i class="la la-gear"></i>
+                            </span>
+                            <h3 class="m-portlet__head-text">子分数分布权重--<label class="col-form-label" th:text="|总计使用打分种类:${overview.weights.size()}种|"></label></h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="m-portlet__body">
+                    <div class="form-group m-form__group row">
+                        <div class="col-12">
+
+                            <table class="table table-bordered table-hover" style="table-layout:fixed;">
+                                <thead>
+                                <tr>
+                                    <th width="20%">
+                                        打分类型
+                                    </th>
+                                    <th width="20%">
+                                        打分权重
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="scoreType:${overview.weights.keySet()}">
+                                    <td th:text="${scoreType}"></td>
+                                    <td th:text="${overview.weights.get(scoreType)}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -3,16 +3,19 @@ package com.westlake.air.pecs.service.impl;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.analyse.ComparisonResult;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
+import com.westlake.air.pecs.domain.db.simple.MatchedPeptide;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
+import com.westlake.air.pecs.service.ScoresService;
+import com.westlake.air.pecs.utils.SortUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by James Lu MiaoShan
@@ -25,6 +28,8 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
 
     @Autowired
     AnalyseOverviewDAO analyseOverviewDAO;
+    @Autowired
+    ScoresService scoresService;
 
     @Override
     public List<AnalyseOverviewDO> getAllByExpId(String expId) {
@@ -134,5 +139,34 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
         } catch (Exception e) {
             return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
+    }
+
+    @Override
+    public ComparisonResult comparison(HashSet<String> overviewIds) {
+        ComparisonResult resultMap = new ComparisonResult();
+
+        HashMap<String, List<MatchedPeptide>> map = new HashMap<>();
+        for (String overviewId : overviewIds) {
+            AnalyseOverviewDO temp = analyseOverviewDAO.getById(overviewId);
+            if (temp != null) {
+                //如果MatchPeptideCount为空,则表明分析还没有完成,无法参与横向比对
+                if (temp.getMatchedPeptideCount() != null) {
+                    List<MatchedPeptide> peptides = scoresService.getAllMatchedPeptides(overviewId);
+                    map.put(temp.getId(), peptides);
+                }
+            }
+        }
+        //所有的需要比对的肽段取并集
+        HashSet<MatchedPeptide> totalPeptides = new HashSet<>();
+        for(List<MatchedPeptide> peptides : map.values()){
+            totalPeptides.addAll(peptides);
+        }
+
+        HashSet<MatchedPeptide> samePeptides = new HashSet<>();
+        HashSet<MatchedPeptide> diffPeptides = new HashSet<>();
+        HashMap<String, List<Boolean>> identifiesMap = new HashMap<>();
+
+
+        return resultMap;
     }
 }

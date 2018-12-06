@@ -29,9 +29,8 @@ public class AnalyseDataQuery extends PageQuery{
 
     public AnalyseDataQuery(){}
 
-    public AnalyseDataQuery(String overviewId, Integer msLevel){
+    public AnalyseDataQuery(String overviewId){
         this.overviewId = overviewId;
-        this.msLevel = msLevel;
     }
 
     public AnalyseDataQuery(int pageNo,int pageSize){

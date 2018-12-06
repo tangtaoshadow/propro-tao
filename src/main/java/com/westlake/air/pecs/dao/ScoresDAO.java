@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.dao;
 
 import com.westlake.air.pecs.domain.db.ScoresDO;
+import com.westlake.air.pecs.domain.db.simple.MatchedPeptide;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.domain.query.ScoresQuery;
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +25,14 @@ public class ScoresDAO {
 
     public List<ScoresDO> getList(ScoresQuery scoresQuery) {
         return mongoTemplate.find(buildQuery(scoresQuery), ScoresDO.class, CollectionName);
+    }
+
+    public List<MatchedPeptide> getAllMatchedPeptides(String overviewId) {
+        ScoresQuery query = new ScoresQuery();
+        query.setOverviewId(overviewId);
+        query.setIsDecoy(false);
+        query.setIsIdentified(true);
+        return mongoTemplate.find(buildQueryWithoutPage(query), MatchedPeptide.class, CollectionName);
     }
 
     public long count(ScoresQuery query) {

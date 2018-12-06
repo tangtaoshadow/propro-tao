@@ -2,6 +2,7 @@ package com.westlake.air.pecs.utils;
 
 import com.google.common.collect.Ordering;
 import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
+import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 
 import java.util.Comparator;
@@ -58,6 +59,26 @@ public class SortUtil {
         });
 
         return ordering.sortedCopy(scores);
+    }
+
+    /**
+     * @param overviews
+     * @param isDesc 是否降序排序
+     * @return
+     */
+    public static List<AnalyseOverviewDO> sortByMatchPeptideCount(List<AnalyseOverviewDO> overviews, boolean isDesc) {
+        Ordering<AnalyseOverviewDO> ordering = Ordering.from(new Comparator<AnalyseOverviewDO>() {
+            @Override
+            public int compare(AnalyseOverviewDO o1, AnalyseOverviewDO o2) {
+                if (isDesc) {
+                    return o2.getMatchedPeptideCount().compareTo(o1.getMatchedPeptideCount());
+                } else {
+                    return o1.getMatchedPeptideCount().compareTo(o2.getMatchedPeptideCount());
+                }
+            }
+        });
+
+        return ordering.sortedCopy(overviews);
     }
 
 }

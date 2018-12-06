@@ -1,10 +1,8 @@
 package com.westlake.air.pecs.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.algorithm.Airus;
-import com.westlake.air.pecs.async.AirusTask;
 import com.westlake.air.pecs.async.ScoreTask;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
@@ -12,8 +10,7 @@ import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.airus.AirusParams;
-import com.westlake.air.pecs.domain.bean.airus.FinalResult;
+import com.westlake.air.pecs.domain.bean.analyse.ComparisonResult;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
@@ -24,7 +21,6 @@ import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
 import com.westlake.air.pecs.feature.GaussFilter;
 import com.westlake.air.pecs.feature.SignalToNoiseEstimator;
 import com.westlake.air.pecs.service.*;
-import com.westlake.air.pecs.utils.AirusUtil;
 import com.westlake.air.pecs.utils.CompressUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +36,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by James Lu MiaoShan
@@ -71,8 +66,6 @@ public class AnalyseController extends BaseController {
     SignalToNoiseEstimator signalToNoiseEstimator;
     @Autowired
     ConfigDAO configDAO;
-    @Autowired
-    AirusTask airusTask;
 
     @RequestMapping(value = "/overview/list")
     String overviewList(Model model,
@@ -113,7 +106,7 @@ public class AnalyseController extends BaseController {
 
         if (resultDO.isSuccess()) {
             model.addAttribute("overview", resultDO.getModel());
-            AnalyseDataQuery query = new AnalyseDataQuery(id, 2);
+            AnalyseDataQuery query = new AnalyseDataQuery(id);
             query.setIsDecoy(true);
             Long decoyCount = analyseDataService.count(query);
             query.setIsDecoy(false);
@@ -138,7 +131,7 @@ public class AnalyseController extends BaseController {
     String overviewExport(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) throws IOException {
 
         int pageSize = 100;
-        AnalyseDataQuery query = new AnalyseDataQuery(id, 2);
+        AnalyseDataQuery query = new AnalyseDataQuery(id);
         int count = analyseDataService.count(query).intValue();
         int totalPage = count % pageSize == 0 ? count / pageSize : (count / pageSize + 1);
 
@@ -170,11 +163,54 @@ public class AnalyseController extends BaseController {
 
     @RequestMapping(value = "/overview/delete/{id}")
     String overviewDelete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
-
         analyseOverviewService.delete(id);
         analyseDataService.deleteAllByOverviewId(id);
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
         return "redirect:/analyse/overview/list";
+    }
+
+    @RequestMapping(value = "/overview/select")
+    String overviewSelect(Model model, RedirectAttributes redirectAttributes) {
+        return "/analyse/overview/select";
+    }
+
+    @RequestMapping(value = "/overview/comparison")
+    String overviewComparison(Model model,
+                              @RequestParam(value = "overviewIdA", required = false) String overviewIdA,
+                              @RequestParam(value = "overviewIdB", required = false) String overviewIdB,
+                              @RequestParam(value = "overviewIdC", required = false) String overviewIdC,
+                              @RequestParam(value = "overviewIdD", required = false) String overviewIdD,
+                              RedirectAttributes redirectAttributes) {
+
+        HashSet<String> overviewIds = new HashSet<>();
+        if (StringUtils.isNotEmpty(overviewIdA)) {
+            model.addAttribute("overviewIdA", overviewIdA);
+            overviewIds.add(overviewIdA);
+        }
+        if (StringUtils.isNotEmpty(overviewIdB)) {
+            model.addAttribute("overviewIdB", overviewIdB);
+            overviewIds.add(overviewIdB);
+        }
+        if (StringUtils.isNotEmpty(overviewIdC)) {
+            model.addAttribute("overviewIdC", overviewIdC);
+            overviewIds.add(overviewIdC);
+        }
+        if (StringUtils.isNotEmpty(overviewIdD)) {
+            model.addAttribute("overviewIdD", overviewIdD);
+            overviewIds.add(overviewIdD);
+        }
+
+        if (overviewIds.size() <= 1) {
+            Map<String, Object> map = model.asMap();
+            for(String key : map.keySet()){
+                redirectAttributes.addFlashAttribute(key, map.get(key));
+                redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.COMPARISON_OVERVIEW_IDS_MUST_BIGGER_THAN_TWO.getMessage());
+            }
+            return "redirect:/analyse/overview/select";
+        }
+
+        ComparisonResult result = analyseOverviewService.comparison(overviewIds);
+        return "/analyse/overview/comparison";
     }
 
     @RequestMapping(value = "/data/list")
@@ -315,7 +351,7 @@ public class AnalyseController extends BaseController {
 
         for (int n = 0; n < pairRtArray.length; n++) {
             rtArray.add(pairRtArray[n]);
-            if(pairIntensityArray != null){
+            if (pairIntensityArray != null) {
                 intensityArray.add(pairIntensityArray[n]);
             }
         }
@@ -402,18 +438,5 @@ public class AnalyseController extends BaseController {
 
         resultDO.setModel(res);
         return resultDO;
-    }
-
-    @RequestMapping(value = "/overview/airus/{overviewId}")
-    String airus(Model model, @PathVariable("overviewId") String overviewId) {
-
-        TaskDO taskDO = new TaskDO(TaskTemplate.AIRUS, overviewId);
-        taskService.insert(taskDO);
-
-        AirusParams airusParams = new AirusParams();
-        airusParams.setMainScore(FeatureScores.ScoreType.MainScore.getTypeName());
-        airusTask.airus(overviewId, airusParams, taskDO);
-
-        return "redirect:/task/detail/" + taskDO.getId();
     }
 }

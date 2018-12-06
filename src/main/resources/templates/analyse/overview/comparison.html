@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="/layouts/layout">
+<!-- begin::Head -->
+<head>
+    <title>欢迎登陆西湖大学PECS分析平台</title>
+    <link th:href="|${url}/assets/css/pagination.css|" rel="stylesheet" type="text/css"/>
+</head>
+<!-- end::Head -->
+<!-- end::Body -->
+<body>
+<div class="m-content" layout:fragment="content">
+
+    <div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>
+    <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
+    <div class="m-portlet__body">
+        <!--begin: Datatable -->
+        <div>
+            <table class="table table-bordered table-hover" style="table-layout:fixed;">
+                <thead>
+                <tr>
+                    <th width="30%">
+                        肽段名称
+                    </th>
+                    <th width="70%">
+                        操作
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="score:${scores}">
+                    <td th:text="${score.peptideRef}"></td>
+                    <td>
+                        <!--<a th:href="|/analyse/overview/detail/${overview.id}|" class="btn btn-success btn-sm">查看分析报告</a>-->
+
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <p id="pagination"></p>
+        <!--end: Datatable -->
+    </div>
+</div>
+<th:block layout:fragment="script">
+
+    <script th:inline="javascript">
+
+    </script>
+</th:block>
+
+</body>
+
+<!-- end::Body -->
+</html>

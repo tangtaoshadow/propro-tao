@@ -2,11 +2,13 @@ package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.westlake.air.pecs.async.AirusTask;
 import com.westlake.air.pecs.async.ScoreTask;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.airus.AirusParams;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.ScoreDistribution;
@@ -42,6 +44,8 @@ public class ScoresController extends BaseController {
     AnalyseOverviewService analyseOverviewService;
     @Autowired
     ScoreTask scoreTask;
+    @Autowired
+    AirusTask airusTask;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -150,6 +154,19 @@ public class ScoresController extends BaseController {
         TaskDO taskDO = new TaskDO(TaskTemplate.EXPORT_SUBSCORES_TSV_FILE_FOR_PYPROPHET, "OverviewId" + ":" + overviewId);
         taskService.insert(taskDO);
         scoreTask.exportForPyProphet(overviewId, taskDO);
+
+        return "redirect:/task/detail/" + taskDO.getId();
+    }
+
+    @RequestMapping(value = "/airus/{overviewId}")
+    String airus(Model model, @PathVariable("overviewId") String overviewId) {
+
+        TaskDO taskDO = new TaskDO(TaskTemplate.AIRUS, overviewId);
+        taskService.insert(taskDO);
+
+        AirusParams airusParams = new AirusParams();
+        airusParams.setMainScore(FeatureScores.ScoreType.MainScore.getTypeName());
+        airusTask.airus(overviewId, airusParams, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }

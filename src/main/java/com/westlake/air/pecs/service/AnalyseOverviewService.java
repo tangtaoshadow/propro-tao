@@ -1,9 +1,12 @@
 package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.analyse.ComparisonResult;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -29,4 +32,6 @@ public interface AnalyseOverviewService {
     ResultDO<AnalyseOverviewDO> getById(String id);
 
     ResultDO<AnalyseOverviewDO> getFirstByExpId(String expId);
+
+    ComparisonResult comparison(HashSet<String> overviewIds);
 }

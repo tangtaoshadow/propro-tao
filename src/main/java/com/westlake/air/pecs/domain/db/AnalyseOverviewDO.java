@@ -1,7 +1,6 @@
 package com.westlake.air.pecs.domain.db;
 
 import com.westlake.air.pecs.domain.BaseDO;
-import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -54,7 +53,7 @@ public class AnalyseOverviewDO extends BaseDO {
 
     HashMap<String, Double> weights = new HashMap<>();
 
-    Integer matchPeptideCount;
+    Integer matchedPeptideCount;
 
     Integer totalPeptideCount;
 }

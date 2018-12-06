@@ -81,7 +81,7 @@ public class Airus {
         if(overviewResult.isSuccess()){
             AnalyseOverviewDO overviewDO = overviewResult.getModel();
             overviewDO.setWeights(weightsMap);
-            overviewDO.setMatchPeptideCount(count);
+            overviewDO.setMatchedPeptideCount(count);
             analyseOverviewService.update(overviewDO);
         }
         logger.info("合并打分完成");

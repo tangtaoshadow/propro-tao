@@ -19,10 +19,13 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="10%">
+                    <th width="12%">
+                        分析ID
+                    </th>
+                    <th width="8%">
                         实验名称
                     </th>
-                    <th width="10%">
+                    <th width="5%">
                         标准库名称
                     </th>
                     <th width="5%">
@@ -31,7 +34,7 @@
                     <th width="10%">
                         创建时间
                     </th>
-                    <th width="15%">
+                    <th width="10%">
                         iRT参数
                     </th>
                     <th width="5%">
@@ -47,21 +50,20 @@
                 </thead>
                 <tbody>
                 <tr th:each="overview:${overviews}">
-                    <!--<td th:text="${overview.name}"></td>-->
+                    <td th:text="${overview.id}"></td>
                     <td th:text="${overview.expName}"></td>
                     <td th:text="${overview.libraryName}"></td>
                     <td th:text="|${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></td>
                     <td th:text="${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="|${overview.slope}/${overview.intercept}|"></td>
-                    <td th:text="|${overview.matchPeptideCount}/${overview.totalPeptideCount}|"></td>
+                    <td th:text="|${overview.matchedPeptideCount}/${overview.totalPeptideCount}|"></td>
                     <td th:text="${overview.creator}"></td>
                     <td>
-                        <a th:href="|/analyse/overview/detail/${overview.id}|" class="btn btn-success btn-sm">详情</a>
+                        <a th:href="|/analyse/overview/detail/${overview.id}|" class="btn btn-success btn-sm">查看分析报告</a>
                         <a th:href="|/analyse/data/list?overviewId=${overview.id}|"
                            class="btn btn-info btn-sm">查看卷积数据</a>
                         <a th:href="|/scores/list?overviewId=${overview.id}|" class="btn btn-brand btn-sm">查看子分数</a>
-                        <!--<a th:href="|/analyse/overview/export/${overview.id}|" class="btn btn-warning btn-sm">导出卷积数据</a>-->
-                        <a th:href="|/scores/export/${overview.id}|" class="btn btn-danger btn-sm">导出子分数</a>
+                        <a th:href="|/analyse/overview/export/${overview.id}|" class="btn btn-warning btn-sm">导出卷积数据</a>
                         <div class="btn-group dropright" role="group">
                             <button id="scoresBtnGroup" type="button" class="btn btn-sm dropdown-toggle"
                                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -70,7 +72,7 @@
                             <div class="dropdown-menu" aria-labelledby="scoresBtn">
                                 <a class="dropdown-item" th:href="|/analyse/overview/score?overviewId=${overview.id}|">开始子分数打分</a>
                                 <a class="dropdown-item" th:href="|/scores/buildDistribution?overviewId=${overview.id}|">生成子分数总览</a>
-                                <a class="dropdown-item" th:href="|/analyse/overview/airus/${overview.id}|">Airus合并打分</a>
+                                <a class="dropdown-item" th:href="|/scores/airus/${overview.id}|">Airus合并打分</a>
                                 <a class="dropdown-item" th:href="|/scores/export/${overview.id}|">导出子分数</a>
                             </div>
                         </div>

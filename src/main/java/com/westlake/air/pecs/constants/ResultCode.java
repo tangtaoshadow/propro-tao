@@ -72,7 +72,7 @@ public enum ResultCode implements Serializable {
 
     /**
      * ******
-     * Evolution Data
+     * Convolution Data
      * *******
      */
     EVOLUTION_DATA_NOT_EXISTED("EVOLUTION_DATA_NOT_EXISTED","卷积数据不存在,请到详细页面进行卷积操作"),
@@ -98,6 +98,13 @@ public enum ResultCode implements Serializable {
      * *******
      */
     NOT_ENOUGH_IRT_PEPTIDES("NOT_ENOUGH_IRT_PEPTIDES","There are less than 2 iRT peptides, not enough for an RT correction"),
+
+    /**
+     * ******
+     * Analyse
+     * *******
+     */
+    COMPARISON_OVERVIEW_IDS_MUST_BIGGER_THAN_TWO("COMPARISON_OVERVIEW_IDS_MUST_BIGGER_THAN_TWO","需要需要两个不同的卷积ID才可以开始比对"),
 
     /**
      * ******

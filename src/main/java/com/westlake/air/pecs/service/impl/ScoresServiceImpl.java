@@ -13,6 +13,7 @@ import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
+import com.westlake.air.pecs.domain.db.simple.MatchedPeptide;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.domain.query.ScoresQuery;
 import com.westlake.air.pecs.feature.*;
@@ -101,6 +102,11 @@ public class ScoresServiceImpl implements ScoresService {
         resultDO.setPageSize(targetQuery.getPageSize());
 
         return resultDO;
+    }
+
+    @Override
+    public List<MatchedPeptide> getAllMatchedPeptides(String overviewId) {
+        return scoresDAO.getAllMatchedPeptides(overviewId);
     }
 
     @Override
