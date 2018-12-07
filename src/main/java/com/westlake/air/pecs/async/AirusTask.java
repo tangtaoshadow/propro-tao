@@ -22,7 +22,7 @@ public class AirusTask {
     public void airus(String overviewId, AirusParams airusParams, TaskDO taskDO) {
         long start = System.currentTimeMillis();
         FinalResult result = airus.doAirus(overviewId, airusParams);
-        taskDO.addLog("合并打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为" + result.getMatchPeptideCount());
+        taskDO.addLog("合并打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为" + result.getMatchedPeptideCount());
         taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
     }

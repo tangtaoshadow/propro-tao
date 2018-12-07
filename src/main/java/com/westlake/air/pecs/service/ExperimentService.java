@@ -7,6 +7,7 @@ import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
+import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 
@@ -52,6 +53,14 @@ public interface ExperimentService {
      * @return
      */
     ResultDO<List<AnalyseDataDO>> extract(SwathParams swathParams);
+
+    /**
+     * 实时卷积某一个PeptideRef的图谱,卷积的rtWindows默认为-1,即全时间段卷积
+     * @param exp
+     * @param peptide
+     * @return
+     */
+    ResultDO<AnalyseDataDO> extractOne(ExperimentDO exp, PeptideDO peptide);
 
     /**
      * 卷积iRT校准库的数据

@@ -10,6 +10,7 @@ import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.parser.model.traml.*;
 import com.westlake.air.pecs.parser.xml.AirXStream;
+import com.westlake.air.pecs.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,8 @@ public class TraMLParser extends BaseLibraryParser {
 
     @Autowired
     AirXStream airXStream;
+    @Autowired
+    TaskService taskService;
 
     public Class<?>[] classes = new Class[]{
             Compound.class, CompoundList.class, Configuration.class, Contact.class, Cv.class, CvParam.class,
@@ -75,7 +78,6 @@ public class TraMLParser extends BaseLibraryParser {
 
         // parse transition attribution
         boolean isDecoy = transition.getPeptideRef().toLowerCase().contains("decoy");
-
         peptideDO.setIsDecoy(isDecoy);
         // parse transition cvparams
         List<CvParam> listCvParams = transition.getCvParams();
@@ -143,16 +145,12 @@ public class TraMLParser extends BaseLibraryParser {
 
         // parse annotations
         String annotations = fi.getAnnotations();
-        if (annotations.contains("[")) {
-            fi.setWithBrackets(true);
-            annotations = annotations.replace("[", "").replace("]", "");
-        }
         fi.setAnnotations(annotations);
         try {
             ResultDO<Annotation> annotationResult = parseAnnotation(fi.getAnnotations());
             Annotation annotation = annotationResult.getModel();
             fi.setAnnotation(annotation);
-            fi.setCutInfo(annotation.getType()+annotation.getLocation()+(annotation.getCharge()==1?"":("^"+annotation.getCharge())));
+            fi.setCutInfo(annotation.toCutInfo());
             peptideDO.putFragment(fi.getCutInfo(), fi);
             resultDO.setModel(peptideDO);
         } catch (Exception e) {
@@ -170,11 +168,9 @@ public class TraMLParser extends BaseLibraryParser {
     @Override
     public ResultDO parseAndInsert(InputStream in, LibraryDO library, TaskDO taskDO) {
         TraML traML = parse(in);
-        System.out.println(traML.getProteinList().size());
 
         HashMap<String, Peptide> peptideMap = makePeptideMap(traML.getCompoundList().getPeptideList());
         ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
-        List<PeptideDO> transitions = new ArrayList<>();
 
         try {
             //开始插入前先清空原有的数据库数据
@@ -186,8 +182,7 @@ public class TraMLParser extends BaseLibraryParser {
                 return ResultDO.buildError(ResultCode.DELETE_ERROR);
             }
 
-            int count = 0;
-            PeptideDO lastPeptide = null;
+            HashMap<String, PeptideDO> map = new HashMap<>();
             for (Transition transition : traML.getTransitionList()) {
                 ResultDO<PeptideDO> resultDO = parseTransition(transition, peptideMap, library);
 
@@ -197,27 +192,36 @@ public class TraMLParser extends BaseLibraryParser {
                 }
 
                 PeptideDO peptide = resultDO.getModel();
-                if (lastPeptide == null) {
-                    lastPeptide = peptide;
-                } else {
-                    //如果是同一个肽段下的不同离子片段
-                    if (lastPeptide.getPeptideRef().equals(peptide.getPeptideRef()) && lastPeptide.getIsDecoy().equals(peptide.getIsDecoy())) {
-                        for (String key : peptide.getFragmentMap().keySet()) {
-                            lastPeptide.putFragment(key, peptide.getFragmentMap().get(key));
-                        }
-                    } else {
-                        transitions.add(lastPeptide);
-                        lastPeptide = peptide;
+                PeptideDO existedPeptide = map.get(peptide.getPeptideRef()+"_"+peptide.getIsDecoy());
+                if(existedPeptide == null){
+                    map.put(peptide.getPeptideRef()+"_"+peptide.getIsDecoy(), peptide);
+                }else{
+                    for (String key : peptide.getFragmentMap().keySet()) {
+                        existedPeptide.putFragment(key, peptide.getFragmentMap().get(key));
                     }
                 }
             }
-            peptideService.insertAll(transitions, false);
-            count += transitions.size();
-            logger.info(count + "条数据插入成功");
+            ArrayList<PeptideDO> totalList = new ArrayList<PeptideDO>(map.values());
+            int decoyCount = 0;
+            int targetCount = 0;
+            for(PeptideDO pt : totalList){
+                if(pt.getIsDecoy()){
+                    decoyCount++;
+                }else{
+                    targetCount++;
+                }
+            }
+            logger.info("伪肽段:"+decoyCount);
+            logger.info("真实肽段:"+targetCount);
+            peptideService.insertAll(totalList, false);
+            tranResult.setModel(totalList);
+            taskDO.addLog(totalList.size() + "条数据插入成功");
+            taskService.update(taskDO);
+            logger.info(map.values().size() + "条数据插入成功");
         } catch (Exception e) {
             e.printStackTrace();
         }
-        tranResult.setModel(transitions);
+
         return tranResult;
     }
 }

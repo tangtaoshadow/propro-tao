@@ -145,27 +145,54 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
     public ComparisonResult comparison(HashSet<String> overviewIds) {
         ComparisonResult resultMap = new ComparisonResult();
 
-        HashMap<String, List<MatchedPeptide>> map = new HashMap<>();
+        HashMap<String, HashSet<MatchedPeptide>> map = new HashMap<>();
+        HashMap<String, AnalyseOverviewDO> overviewMap = new HashMap<>();
+        HashMap<AnalyseOverviewDO, List<Boolean>> identifiesMap = new HashMap<>();
+
         for (String overviewId : overviewIds) {
             AnalyseOverviewDO temp = analyseOverviewDAO.getById(overviewId);
             if (temp != null) {
-                //如果MatchPeptideCount为空,则表明分析还没有完成,无法参与横向比对
+                //如果MatchedPeptideCount为空,则表明分析还没有完成,无法参与横向比对
                 if (temp.getMatchedPeptideCount() != null) {
+                    overviewMap.put(temp.getId(), temp);
                     List<MatchedPeptide> peptides = scoresService.getAllMatchedPeptides(overviewId);
-                    map.put(temp.getId(), peptides);
+                    map.put(temp.getId(), new HashSet<>(peptides));
+                    identifiesMap.put(temp, new ArrayList<Boolean>());
                 }
             }
         }
+        List<MatchedPeptide> samePeptides = new ArrayList<>();
+        List<MatchedPeptide> diffPeptides = new ArrayList<>();
         //所有的需要比对的肽段取并集
         HashSet<MatchedPeptide> totalPeptides = new HashSet<>();
-        for(List<MatchedPeptide> peptides : map.values()){
+        for(HashSet<MatchedPeptide> peptides : map.values()){
             totalPeptides.addAll(peptides);
         }
 
-        HashSet<MatchedPeptide> samePeptides = new HashSet<>();
-        HashSet<MatchedPeptide> diffPeptides = new HashSet<>();
-        HashMap<String, List<Boolean>> identifiesMap = new HashMap<>();
+        for(MatchedPeptide mp : totalPeptides){
+            boolean isAllContained = true;
+            HashMap<String, Boolean> containedMap = new HashMap<>();
+            for(String id : map.keySet()){
+                boolean isContained = map.get(id).contains(mp);
+                if(!isContained){
+                    isAllContained = false;
+                }
+                containedMap.put(id, isContained);
+            }
 
+            if(isAllContained){
+                samePeptides.add(mp);
+            }else{
+                diffPeptides.add(mp);
+                for(Map.Entry<String, Boolean> entry : containedMap.entrySet()){
+                    identifiesMap.get(overviewMap.get(entry.getKey())).add(entry.getValue());
+                }
+            }
+        }
+
+        resultMap.setSamePeptides(samePeptides);
+        resultMap.setDiffPeptides(diffPeptides);
+        resultMap.setIdentifiesMap(identifiesMap);
 
         return resultMap;
     }

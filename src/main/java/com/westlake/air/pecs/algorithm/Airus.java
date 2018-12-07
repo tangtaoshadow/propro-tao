@@ -46,6 +46,15 @@ public class Airus {
 
     public FinalResult doAirus(String overviewId, AirusParams airusParams) {
         FinalResult finalResult = new FinalResult();
+        logger.info("清理已识别的肽段数目");
+        ResultDO<AnalyseOverviewDO> overviewDOResultDO = analyseOverviewService.getById(overviewId);
+        if(overviewDOResultDO.isSuccess()){
+            AnalyseOverviewDO overviewDO = overviewDOResultDO.getModel();
+            if(overviewDO.getMatchedPeptideCount() != null){
+                overviewDO.setMatchedPeptideCount(null);
+                analyseOverviewService.update(overviewDO);
+            }
+        }
         logger.info("开始获取打分数据");
         List<SimpleScores> scores = scoresService.getSimpleAllByOverviewId(overviewId);
         ResultDO resultDO = checkData(scores);
@@ -76,7 +85,7 @@ public class Airus {
         }
 
         int count = AirusUtil.checkFdr(finalResult);
-        finalResult.setMatchPeptideCount(count);
+        finalResult.setMatchedPeptideCount(count);
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         if(overviewResult.isSuccess()){
             AnalyseOverviewDO overviewDO = overviewResult.getModel();

@@ -1087,7 +1087,7 @@ pre {
     vertical-align: middle;
     border-top: 1px solid #f4f5f8; }
   .table thead th {
-    vertical-align: bottom;
+    vertical-align: center;
     border-bottom: 2px solid #f4f5f8; }
   .table tbody + tbody {
     border-top: 2px solid #f4f5f8; }
@@ -3753,7 +3753,7 @@ button.close {
 
 @media (min-width: 992px) {
   .modal-lg {
-    max-width: 1200px; } }
+    max-width: 60%; } }
 
 .tooltip {
   position: absolute;

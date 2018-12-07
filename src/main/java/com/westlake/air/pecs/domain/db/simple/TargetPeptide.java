@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.domain.db.simple;
 
 import com.westlake.air.pecs.domain.db.FragmentInfo;
+import com.westlake.air.pecs.domain.db.PeptideDO;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import java.util.HashMap;
 @Data
 public class TargetPeptide {
 
-    //对应的transition的Id,如果是MS1的则为对应的第一条transition的Id(一个MS1会对应多条transition记录)
+    //对应的peptide的Id,如果是MS1的则为对应的第一条transition的Id(一个MS1会对应多条transition记录)
     String id;
 
     String proteinName;
@@ -23,12 +24,6 @@ public class TargetPeptide {
     float mz;
 
     HashMap<String, FragmentInfo> fragmentMap;
-//    //对应的MS2荷质比
-//    float fragmentMz;
-//
-//    String annotations;
-//
-//    String cutInfo;
 
     Boolean isDecoy;
 
@@ -44,6 +39,18 @@ public class TargetPeptide {
      */
     HashMap<Integer, String> unimodMap;
 
+    public TargetPeptide(){}
+
+    public TargetPeptide(PeptideDO peptide){
+        this.id = peptide.getId();
+        this.proteinName = peptide.getProteinName();
+        this.peptideRef = peptide.getPeptideRef();
+        this.mz = peptide.getMz().floatValue();
+        this.fragmentMap = peptide.getFragmentMap();
+        this.isDecoy = peptide.getIsDecoy();
+        this.rt = peptide.getRt().floatValue();
+
+    }
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {

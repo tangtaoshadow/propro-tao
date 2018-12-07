@@ -66,7 +66,7 @@ public class SortUtil {
      * @param isDesc 是否降序排序
      * @return
      */
-    public static List<AnalyseOverviewDO> sortByMatchPeptideCount(List<AnalyseOverviewDO> overviews, boolean isDesc) {
+    public static List<AnalyseOverviewDO> sortByMatchedPeptideCount(List<AnalyseOverviewDO> overviews, boolean isDesc) {
         Ordering<AnalyseOverviewDO> ordering = Ordering.from(new Comparator<AnalyseOverviewDO>() {
             @Override
             public int compare(AnalyseOverviewDO o1, AnalyseOverviewDO o2) {

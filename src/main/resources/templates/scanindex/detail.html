@@ -86,7 +86,7 @@
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="mzxmlStart" name="mzxmlStart"
-                                               readonly th:value="|${scanIndex?.positionMap?.get('mzxml')?.start} -> ${scanIndex?.positionMap?.get('mzxml')?.end}|">
+                                               readonly th:value="|${scanIndex?.positionMap?.get('mzxml')?.start} -> ${scanIndex?.positionMap?.get('mzxml')?.delta}|">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
@@ -95,7 +95,7 @@
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="airdStart" name="airdStart"
-                                               readonly th:value="|${scanIndex?.positionMap?.get('aird')?.start} -> ${scanIndex?.positionMap?.get('aird')?.end}|">
+                                               readonly th:value="|${scanIndex?.positionMap?.get('aird')?.start} -> ${scanIndex?.positionMap?.get('aird')?.delta}|">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
@@ -104,7 +104,7 @@
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="airdBinStart" name="airdBinStart"
-                                               readonly th:value="|${scanIndex?.positionMap?.get('aird')?.start} -> ${scanIndex?.positionMap?.get('aird')?.end}|">
+                                               readonly th:value="|${scanIndex?.positionMap?.get('aird')?.start} -> ${scanIndex?.positionMap?.get('aird')?.delta}|">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
@@ -147,7 +147,7 @@
                                         Aird-RTs
                                     </label>
                                     <div class="col-10">
-                                        <input type="text" class="form-control m-input" id="rts" name="rts" readonly th:value="|${scanIndex?.rts.size()}组|">
+                                        <input type="text" class="form-control m-input" id="rts" name="rts" readonly th:value="|${scanIndex?.rts?.size()}组|">
                                     </div>
                                 </div>
                             </div>

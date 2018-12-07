@@ -41,7 +41,8 @@ public class Constants {
 
     //Extractor
     public static final String TRAFO_INVERT_MODEL = "LINEAR";
-    public static final double RT_EXTRACTION_WINDOW = 600.0d;
+    public static final double DEFAULT_RT_EXTRACTION_WINDOW = 600.0d;
+    public static final float DEFAULT_MZ_EXTRACTION_WINDOW = 0.05f;
 
     public static final double DIA_EXTRACT_WINDOW = 0.05d;
     public static final int DIA_NR_ISOTOPES = 4;

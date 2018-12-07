@@ -47,6 +47,11 @@ public class PeptideServiceImpl implements PeptideService {
     }
 
     @Override
+    public PeptideDO getByLibraryIdAndPeptideRefAndIsDecoy(String libraryId, String peptideRef, boolean isDecoy) {
+        return peptideDAO.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, isDecoy);
+    }
+
+    @Override
     public List<PeptideDO> getAllByLibraryIdAndIsDecoy(String libraryId, boolean isDecoy) {
         return peptideDAO.getAllByLibraryIdAndIsDecoy(libraryId, isDecoy);
     }
@@ -97,6 +102,7 @@ public class PeptideServiceImpl implements PeptideService {
             peptideDAO.insert(peptides);
             return new ResultDO(true);
         } catch (Exception e) {
+            logger.error(e.getMessage());
             return ResultDO.buildError(ResultCode.INSERT_ERROR);
         }
     }
@@ -216,7 +222,6 @@ public class PeptideServiceImpl implements PeptideService {
             }
         }
 
-//        List<TargetPeptide> list = sortMS2Coordinates(targetList);
         logger.info("构建卷积MS2坐标,读取数据库耗时:" + readDB + "构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
         return targetList;
     }

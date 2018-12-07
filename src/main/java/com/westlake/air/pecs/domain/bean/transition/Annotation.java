@@ -45,7 +45,20 @@ public class Annotation {
 
     boolean isIsotope = false;
 
+    /**
+     * 对应处理中括号的一种方式,当同一个肽段下有相同的离子但是不同的荷质比的时候,使用此字段进行标记
+     */
+    Boolean isBrotherIcon = false;
+
     public String toAnnoInfo() {
-        return type + location + (adjust != 0 ? adjust : "") + (charge != 1 ? ("^" + charge) : "") + (isIsotope ? "i" : "") + "/" + deviation;
+        if (isBrotherIcon) {
+            return "[" + type + location + (adjust != 0 ? adjust : "") + (charge != 1 ? ("^" + charge) : "") + (isIsotope ? "i" : "") + "/" + deviation + "]";
+        } else {
+            return type + location + (adjust != 0 ? adjust : "") + (charge != 1 ? ("^" + charge) : "") + (isIsotope ? "i" : "") + "/" + deviation;
+        }
+    }
+
+    public String toCutInfo() {
+        return type + location + (charge == 1 ? "" : ("^" + charge))+(isBrotherIcon ? ("[" + (int)(deviation*100000) + "]") : "");
     }
 }

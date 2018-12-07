@@ -1,6 +1,5 @@
 package com.westlake.air.pecs.parser;
 
-import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.transition.Annotation;
@@ -20,7 +19,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -52,7 +50,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
 
     @Override
     public ResultDO parseAndInsert(InputStream in, LibraryDO library, TaskDO taskDO) {
-        List<PeptideDO> transitions = new ArrayList<>();
+
         ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
         try {
             InputStreamReader isr = new InputStreamReader(in, "UTF-8");
@@ -74,7 +72,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
             }
 
             int count = 0;
-            PeptideDO lastPeptide = null;
+            HashMap<String, PeptideDO> map = new HashMap<>();
             while ((line = reader.readLine()) != null) {
                 ResultDO<PeptideDO> resultDO = parseTransition(line, columnMap, library);
 
@@ -84,28 +82,24 @@ public class LibraryTsvParser extends BaseLibraryParser {
                 }
 
                 PeptideDO peptide = resultDO.getModel();
-                if (lastPeptide == null) {
-                    lastPeptide = peptide;
-                } else {
-                    //如果是同一个肽段下的不同离子片段
-                    if (lastPeptide.getPeptideRef().equals(peptide.getPeptideRef()) && lastPeptide.getIsDecoy().equals(peptide.getIsDecoy())) {
-                        for (String key : peptide.getFragmentMap().keySet()) {
-                            lastPeptide.putFragment(key, peptide.getFragmentMap().get(key));
-                        }
-                    } else {
-                        transitions.add(lastPeptide);
-                        lastPeptide = peptide;
+                PeptideDO existedPeptide = map.get(peptide.getPeptideRef()+"_"+peptide.getIsDecoy());
+                if(existedPeptide == null){
+                    map.put(peptide.getPeptideRef()+"_"+peptide.getIsDecoy(), peptide);
+                }else{
+                    for (String key : peptide.getFragmentMap().keySet()) {
+                        existedPeptide.putFragment(key, peptide.getFragmentMap().get(key));
                     }
                 }
             }
-            peptideService.insertAll(transitions, false);
-            count += transitions.size();
-            taskDO.addLog(count + "条数据插入成功");
+            List<PeptideDO> peptides = new ArrayList<>(map.values());
+            peptideService.insertAll(peptides, false);
+            tranResult.setModel(peptides);
+            taskDO.addLog(map.values().size() + "条数据插入成功");
             taskService.update(taskDO);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        tranResult.setModel(transitions);
+
         return tranResult;
     }
 
@@ -145,10 +139,6 @@ public class LibraryTsvParser extends BaseLibraryParser {
         peptideDO.setProteinName(row[columnMap.get(ProteinName)]);
 
         String annotations = row[columnMap.get(Annotation)].replaceAll("\"", "");
-        if (annotations.contains("[")) {
-            fi.setWithBrackets(true);
-            annotations = annotations.replace("[", "").replace("]", "");
-        }
         fi.setAnnotations(annotations);
         String fullName = row[columnMap.get(FullUniModPeptideName)];
         if (fullName == null) {
@@ -168,7 +158,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
             Annotation annotation = annotationResult.getModel();
             fi.setAnnotation(annotation);
             fi.setCharge(annotation.getCharge());
-            fi.setCutInfo(annotation.getType() + annotation.getLocation() + (annotation.getCharge() == 1 ? "" : ("^" + annotation.getCharge())));
+            fi.setCutInfo(annotation.toCutInfo());
             peptideDO.putFragment(fi.getCutInfo(), fi);
             resultDO.setModel(peptideDO);
         } catch (Exception e) {

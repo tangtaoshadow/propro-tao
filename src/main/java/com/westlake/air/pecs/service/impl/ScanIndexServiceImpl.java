@@ -179,4 +179,13 @@ public class ScanIndexServiceImpl implements ScanIndexService {
         }
         return map;
     }
+
+    @Override
+    public ScanIndexDO getSwathIndex(String expId, Float targetPrecursorMz) {
+        ScanIndexQuery query = new ScanIndexQuery(expId, 0);
+        query.setTargetPrecursorMz(targetPrecursorMz);
+        ScanIndexDO index = scanIndexDAO.getOne(query);
+
+        return index;
+    }
 }

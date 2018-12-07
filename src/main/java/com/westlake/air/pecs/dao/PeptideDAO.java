@@ -47,6 +47,13 @@ public class PeptideDAO {
         return mongoTemplate.find(query, PeptideDO.class, CollectionName);
     }
 
+    public PeptideDO getByLibraryIdAndPeptideRefAndIsDecoy(String libraryId, String peptideRef, boolean isDecoy) {
+        Query query = new Query(where("libraryId").is(libraryId));
+        query.addCriteria(where("isDecoy").is(isDecoy));
+        query.addCriteria(where("peptideRef").is(peptideRef));
+        return mongoTemplate.findOne(query, PeptideDO.class, CollectionName);
+    }
+
     public List<PeptideDO> getList(PeptideQuery query) {
         return mongoTemplate.find(buildQuery(query), PeptideDO.class, CollectionName);
     }
@@ -68,9 +75,9 @@ public class PeptideDAO {
         return peptideDO;
     }
 
-    public List<PeptideDO> insert(List<PeptideDO> transitions) {
-        mongoTemplate.insert(transitions, CollectionName);
-        return transitions;
+    public List<PeptideDO> insert(List<PeptideDO> peptides) {
+        mongoTemplate.insert(peptides, CollectionName);
+        return peptides;
     }
 
     public PeptideDO update(PeptideDO peptideDO) {

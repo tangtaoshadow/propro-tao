@@ -15,6 +15,8 @@ public interface AnalyseDataService {
 
     List<AnalyseDataDO> getAllByOverviewId(String overviewId);
 
+    AnalyseDataDO getByOverviewIdAndPeptideRefAndIsDecoy(String overviewId,String peptideRef,Boolean isDecoy);
+
     Long count(AnalyseDataQuery query);
 
     ResultDO<List<AnalyseDataDO>> getList(AnalyseDataQuery query);

@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.compressor.Compressor;
@@ -368,6 +369,22 @@ public class ExperimentController extends BaseController {
         experimentTask.extract(resultDO.getModel(), libraryId, si, creator, rtExtractWindow, mzExtractWindow, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
+    }
+
+    @RequestMapping(value = "/doextractone")
+    @ResponseBody
+    String doExtractOne(Model model,
+                     @RequestParam(value = "expId", required = true) String expId,
+                     @RequestParam(value = "libraryId", required = true) String libraryId,
+                     @RequestParam(value = "peptideRef", required = true) String peptideRef) {
+
+        ResultDO<ExperimentDO> resultDO = experimentService.getById(expId);
+        PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, false);
+
+
+        ResultDO<AnalyseDataDO> analyseData = experimentService.extractOne(resultDO.getModel(), peptide);
+
+        return JSON.toJSONString(analyseData);
     }
 
     @RequestMapping(value = "/irt")

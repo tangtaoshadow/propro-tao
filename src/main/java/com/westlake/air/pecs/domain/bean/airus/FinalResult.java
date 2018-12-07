@@ -20,7 +20,7 @@ public class FinalResult {
 
     ErrorStat allInfo;
 
-    Integer matchPeptideCount;
+    Integer matchedPeptideCount;
 
     String errorInfo;
 }

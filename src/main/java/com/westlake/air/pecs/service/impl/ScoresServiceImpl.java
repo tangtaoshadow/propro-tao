@@ -264,7 +264,11 @@ public class ScoresServiceImpl implements ScoresService {
             raf = new RandomAccessFile(exp.getAirdPath(), "r");
 
             for (AnalyseDataDO dataDO : dataList) {
-                if(!dataDO.getIsHit()){
+                if (!dataDO.getIsHit()) {
+                    continue;
+                }
+                if (dataDO.getMzMap().size() < 3) {
+                    logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
                     continue;
                 }
 
@@ -290,7 +294,11 @@ public class ScoresServiceImpl implements ScoresService {
                 for (String cutInfo : dataDO.getMzMap().keySet()) {
                     try {
                         if (cutInfo.contains("^")) {
-                            productChargeList.add(Integer.parseInt(cutInfo.split("\\^")[1]));
+                            String temp = cutInfo;
+                            if (cutInfo.contains("[")) {
+                                temp = cutInfo.substring(0, cutInfo.indexOf("["));
+                            }
+                            productChargeList.add(Integer.parseInt(temp.split("\\^")[1]));
                         } else {
                             productChargeList.add(1);
                         }
@@ -346,6 +354,7 @@ public class ScoresServiceImpl implements ScoresService {
                 pecsScore.setRt(dataDO.getRt());
                 pecsScore.setOverviewId(input.getOverviewId());
                 pecsScore.setPeptideRef(dataDO.getPeptideRef());
+                pecsScore.setProteinName(dataDO.getProteinName());
                 pecsScore.setAnalyseDataId(dataDO.getId());
                 pecsScore.setIsDecoy(dataDO.getIsDecoy());
                 pecsScore.setFeatureScoresList(featureScoresList);

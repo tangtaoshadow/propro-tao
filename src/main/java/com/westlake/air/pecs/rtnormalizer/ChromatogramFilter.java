@@ -1,10 +1,8 @@
 package com.westlake.air.pecs.rtnormalizer;
 
 import com.westlake.air.pecs.constants.Constants;
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
-import com.westlake.air.pecs.utils.MathUtil;
 import com.westlake.air.pecs.utils.ScoreUtil;
 import org.springframework.stereotype.Component;
 
@@ -21,8 +19,8 @@ public class ChromatogramFilter {
     public RtIntensityPairsDouble pickChromatogramByRt(RtIntensityPairsDouble chromatogram, double pepRefRt, SlopeIntercept slopeIntercept){
         SlopeIntercept invertedSlopeIntercept = ScoreUtil.trafoInverter(slopeIntercept);
         double normalizedExperimentRt = ScoreUtil.trafoApplier(invertedSlopeIntercept, pepRefRt);
-        double rtMax = normalizedExperimentRt + Constants.RT_EXTRACTION_WINDOW;
-        double rtMin = normalizedExperimentRt - Constants.RT_EXTRACTION_WINDOW;
+        double rtMax = normalizedExperimentRt + Constants.DEFAULT_RT_EXTRACTION_WINDOW;
+        double rtMin = normalizedExperimentRt - Constants.DEFAULT_RT_EXTRACTION_WINDOW;
         Double[] rtArray = chromatogram.getRtArray();
         Double[] intArray = chromatogram.getIntensityArray();
         List<Double> rtListPicked = new ArrayList<>();

@@ -46,6 +46,20 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     @Override
+    public AnalyseDataDO getByOverviewIdAndPeptideRefAndIsDecoy(String overviewId, String peptideRef, Boolean isDecoy) {
+        AnalyseDataQuery query = new AnalyseDataQuery();
+        query.setOverviewId(overviewId);
+        query.setPeptideRef(peptideRef);
+        query.setIsDecoy(isDecoy);
+        List<AnalyseDataDO> datas = analyseDataDAO.getAll(query);
+        if (datas.size() == 1) {
+            return datas.get(0);
+        }else{
+            return null;
+        }
+    }
+
+    @Override
     public Long count(AnalyseDataQuery query) {
         return analyseDataDAO.count(query);
     }
@@ -170,9 +184,9 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
         dataDO.setRtArray(CompressUtil.transToFloat(CompressUtil.zlibDecompress(dataDO.getConvRtArray())));
         dataDO.setConvRtArray(null);
 
-        for(String cutInfo : dataDO.getConvIntensityMap().keySet()){
+        for (String cutInfo : dataDO.getConvIntensityMap().keySet()) {
             byte[] values = dataDO.getConvIntensityMap().get(cutInfo);
-            if(values == null){
+            if (values == null) {
                 continue;
             }
             dataDO.getIntensityMap().put(cutInfo, CompressUtil.transToFloat(CompressUtil.zlibDecompress(values)));

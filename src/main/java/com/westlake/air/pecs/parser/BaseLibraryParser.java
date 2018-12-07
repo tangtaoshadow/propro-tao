@@ -42,6 +42,11 @@ public abstract class BaseLibraryParser {
 
         try {
             String annotationStr = annotationStrs[0];
+            if(StringUtils.startsWith(annotationStr,"[")){
+                annotation.setIsBrotherIcon(true);
+                annotationStr = annotationStr.replace("[","");
+                annotationStr = annotationStr.replace("]","");
+            }
             String[] forDeviation = annotationStr.split("/");
             if (forDeviation.length > 1) {
                 annotation.setDeviation(Double.parseDouble(forDeviation[1]));
@@ -81,8 +86,6 @@ public abstract class BaseLibraryParser {
             if (!location.isEmpty()) {
                 annotation.setLocation(Integer.parseInt(location));
             }
-
-
         } catch (Exception e) {
             resultDO.setSuccess(false);
             resultDO.setErrorResult(ResultCode.PARSE_ERROR.getCode(), "解析Annotation错误,Annotation:" + annotations);

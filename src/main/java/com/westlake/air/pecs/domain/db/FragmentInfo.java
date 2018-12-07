@@ -26,13 +26,8 @@ public class FragmentInfo {
     Annotation annotation;
 
     /**
-     * 注释
+     * 注释,see http://tools.proteomecenter.org/wiki/index.php?title=Software:SpectraST#Annotation_syntax:
      */
     String annotations;
-
-    /**
-     * 注释是否带有中括号,默认不带
-     */
-    boolean withBrackets = false;
 
 }

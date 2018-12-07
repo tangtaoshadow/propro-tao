@@ -19,10 +19,13 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="12%">
+                    <th width="10%">
                         分析ID
                     </th>
-                    <th width="8%">
+                    <th width="10%">
+                        分析代号
+                    </th>
+                    <th width="5%">
                         实验名称
                     </th>
                     <th width="5%">
@@ -51,6 +54,7 @@
                 <tbody>
                 <tr th:each="overview:${overviews}">
                     <td th:text="${overview.id}"></td>
+                    <td th:text="${overview.name}"></td>
                     <td th:text="${overview.expName}"></td>
                     <td th:text="${overview.libraryName}"></td>
                     <td th:text="|${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></td>

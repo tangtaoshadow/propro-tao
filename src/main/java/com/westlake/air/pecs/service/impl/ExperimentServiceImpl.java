@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.service.impl;
 
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.PositionType;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.TaskStatus;
@@ -271,6 +272,38 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     @Override
+    public ResultDO<AnalyseDataDO> extractOne(ExperimentDO exp, PeptideDO peptide) {
+        ResultDO checkResult = ConvolutionUtil.checkExperiment(exp);
+        if (checkResult.isFailed()) {
+            logger.error("条件检查失败:" + checkResult.getMsgInfo());
+            return checkResult;
+        }
+
+        File file = (File) checkResult.getModel();
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(file, "r");
+            //Step1.获取窗口信息.
+            logger.info("获取Swath窗口信息");
+            ScanIndexDO scanIndexDO = scanIndexService.getSwathIndex(exp.getId(), peptide.getMz().floatValue());
+            //Step2.获取该窗口内的谱图Map,key值代表了RT
+            TreeMap<Float, MzIntensityPairs> rtMap = airdFileParser.parseSwathBlockValues(raf, scanIndexDO);
+            TargetPeptide tp = new TargetPeptide(peptide);
+            tp.setRtStart(-1);
+            tp.setRtEnd(99999);
+            AnalyseDataDO dataDO = convForOne(tp, rtMap, Constants.DEFAULT_MZ_EXTRACTION_WINDOW, -1f, null, false);
+            ResultDO<AnalyseDataDO> resultDO = new ResultDO<AnalyseDataDO>(true);
+            resultDO.setModel(dataDO);
+            return resultDO;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        } finally {
+            FileUtil.close(raf);
+        }
+        return null;
+    }
+
+    @Override
     public List<AnalyseDataDO> extractIrt(ExperimentDO exp, String iRtLibraryId, float mzExtractWindow) {
 
         ResultDO checkResult = ConvolutionUtil.checkExperiment(exp);
@@ -290,12 +323,10 @@ public class ExperimentServiceImpl implements ExperimentService {
         try {
             raf = new RandomAccessFile(file, "r");
             for (WindowRang rang : rangs) {
-
-                List<TargetPeptide> coordinates;
+                //Step2.获取标准库的目标肽段片段的坐标
                 //key为rt
                 TreeMap<Float, MzIntensityPairs> rtMap;
-                //Step2.获取标准库的目标肽段片段的坐标
-                coordinates = peptideService.buildMS2Coordinates(iRtLibraryId, SlopeIntercept.create(), -1, rang.getMzStart(), rang.getMzEnd());
+                List<TargetPeptide> coordinates = peptideService.buildMS2Coordinates(iRtLibraryId, SlopeIntercept.create(), -1, rang.getMzStart(), rang.getMzEnd());
                 if (coordinates.size() == 0) {
                     logger.warn("No Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
                     continue;
@@ -359,7 +390,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                     continue;
                 }
                 totalList.addAll(dataList);
-                logger.info("第" + count + "轮数据卷积完毕,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
+                logger.info("第" + count + "轮数据卷积完毕,扫描肽段:"+dataList.size()+"个,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
                 count++;
             }
         } catch (Exception e) {
@@ -441,6 +472,7 @@ public class ExperimentServiceImpl implements ExperimentService {
      */
     private List<AnalyseDataDO> convoluteAndInsert(List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow, boolean isMS1) {
         List<AnalyseDataDO> dataList = new ArrayList<>();
+        long start = System.currentTimeMillis();
         for (TargetPeptide ms : coordinates) {
             AnalyseDataDO dataDO = convForOne(ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId, true);
             if (dataDO == null) {
@@ -448,6 +480,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             }
             dataList.add(dataDO);
         }
+        logger.info("纯卷积耗时:"+(System.currentTimeMillis() - start));
         analyseDataService.insertAll(dataList, false);
         return dataList;
     }

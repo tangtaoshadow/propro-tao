@@ -45,5 +45,18 @@ public interface ScanIndexService {
 
     ResultDO<ScanIndexDO> getById(String id);
 
+    /**
+     * 获取某一个实验的所有SwathScanIndex的Map,SwathIndex是一种特殊的索引,每一个SwathScanIndex中存储了一个同一个Swath窗口(比如前体Mz是400-425)中的所有时间段的卷积图谱.
+     * @param expId
+     * @return key为前体的mz左区间,即mzStart
+     */
     HashMap<Float, ScanIndexDO> getSwathIndexList(String expId);
+
+    /**
+     * 获取某一个指定前体mz所属的Swath窗口的索引信息
+     * @param expId
+     * @param targetPrecursorMz
+     * @return
+     */
+    ScanIndexDO getSwathIndex(String expId, Float targetPrecursorMz);
 }

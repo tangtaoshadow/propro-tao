@@ -1,4 +1,6 @@
 var dataId;
+var overviewIds = "";
+var peptideRef;
 var useNoise1000;
 var isGaussFilter;
 
@@ -80,8 +82,8 @@ function query(dataId, cutInfo) {
 
     chart.setOption(option, true);
 }
-
 function queryGroup(dataId, isGaussFilter, useNoise1000) {
+
 
     if (dataId == null) {
         dataId = this.dataId;
@@ -189,5 +191,118 @@ function queryGroup(dataId, isGaussFilter, useNoise1000) {
     };
 
     chartGroup.setOption(option, true);
+
+}
+
+function queryMultiGroup(peptideRef, isGaussFilter, useNoise1000) {
+
+    if(peptideRef == null){
+        peptideRef = this.peptideRef;
+    }else{
+        this.peptideRef = peptideRef;
+    }
+
+    if (useNoise1000 == null) {
+        useNoise1000 = this.useNoise1000;
+    } else {
+        this.useNoise1000 = useNoise1000;
+    }
+
+    if (isGaussFilter == null) {
+        isGaussFilter = this.isGaussFilter;
+    } else {
+        this.isGaussFilter = isGaussFilter;
+    }
+    var groups = null;
+    $.ajax({
+        type: "POST",
+        url: "/analyse/viewMultiGroup",
+        data: {
+            peptideRef: peptideRef,
+            overviewIds: overviewIds,
+            isGaussFilter: isGaussFilter,
+            useNoise1000: useNoise1000
+        },
+
+        dataType: "json",
+        async: false,
+        success: function (result) {
+            if (result.success) {
+                groups = result.model;
+            } else {
+                for(i in chartMap){
+                    chartMap[i].clear();
+                }
+            }
+        }
+
+    });
+    if (groups == null) {
+        return;
+    }
+    var label = document.getElementById("peptideLabel");
+    label.innerText = peptideRef;
+    var count = 0;
+    for(i in chartMap){
+        var group = groups[count];
+        count++;
+        var element = chartMap[i];
+        var data_rt = group.rt;
+        var peptideRefTmp = group.peptideRef;
+        var cutinfo = group.cutInfoArray;
+        var intensity_arrays = group.intensityArrays;
+        var bestRt = group.bestRt;
+
+        var intensity_series = [];
+        for (var i = 0; i < intensity_arrays.length; i++) {
+            intensity_series.push({
+                name: cutinfo[i],
+                type: 'line',
+                smooth: true,
+                data: intensity_arrays[i],
+            });
+        }
+
+        var textLabel = element.getDom().getAttribute("data");
+        if (bestRt != null) {
+            textLabel = textLabel + "最佳RT:" + bestRt;
+        }
+        option = {
+            title: {
+                text: textLabel,
+                left: 10
+            },
+            legend: {
+                data: ['rt/intensity'],
+                align: 'left'
+            },
+            dataZoom: [{
+                type: 'inside',
+                filterMode: 'empty',
+                start: (element.getModel() && element.getModel().getOption().dataZoom[0].start) ? element.getModel().getOption().dataZoom[0].start : 0,
+                end: (element.getModel() && element.getModel().getOption().dataZoom[0].end) ? element.getModel().getOption().dataZoom[0].end : 100
+            }, {
+                type: 'slider'
+            }],
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                    type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                }
+            },
+            xAxis: {
+                data: data_rt,
+                silent: false,
+                splitLine: {
+                    show: false
+                }
+            },
+            yAxis: {},
+            series: intensity_series
+        };
+
+        element.setOption(option, true);
+    }
+
 
 }

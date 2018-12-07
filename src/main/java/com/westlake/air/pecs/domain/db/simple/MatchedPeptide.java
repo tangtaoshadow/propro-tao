@@ -27,6 +27,10 @@ public class MatchedPeptide {
         } else {
             return false;
         }
+    }
 
+    @Override
+    public int hashCode() {
+        return this.getPeptideRef().hashCode();
     }
 }
