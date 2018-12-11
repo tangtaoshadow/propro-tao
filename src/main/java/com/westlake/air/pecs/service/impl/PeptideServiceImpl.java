@@ -232,7 +232,7 @@ public class PeptideServiceImpl implements PeptideService {
             }
         }
 
-        logger.info("构建卷积MS2坐标,读取数据库耗时:" + readDB);
+        logger.info("构建卷积MS2坐标,读取标准库耗时:" + readDB);
         return targetList;
     }
 

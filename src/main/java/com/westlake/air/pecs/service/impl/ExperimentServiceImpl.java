@@ -195,7 +195,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         }
 
         List<WindowRang> windowRangs = new ArrayList<>();
-        float ms2Interval = ms2Indexes.get(1).getRt() - ms2Indexes.get(0).getRt();
+        float ms2Interval = Math.round((ms2Indexes.get(1).getRt() - ms2Indexes.get(0).getRt()) * 100000) / 100000f;
         for (int i = 0; i < ms2Indexes.size(); i++) {
             WindowRang rang = new WindowRang();
             rang.setMzStart(ms2Indexes.get(i).getPrecursorMzStart());
@@ -410,6 +410,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     /**
      * 返回卷积到的数目
+     *
      * @param raf
      * @param swathParams
      * @param swathIndex
@@ -469,7 +470,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             dataList.add(dataDO);
         }
         logger.info("纯卷积耗时:" + (System.currentTimeMillis() - start));
-        analyseDataService.insertAll(dataList, false);
+//        analyseDataService.insertAll(dataList, false);
         return dataList.size();
     }
 

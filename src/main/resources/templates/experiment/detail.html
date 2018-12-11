@@ -155,6 +155,15 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
+                            <label for="windowRangsSize" class="col-2 col-form-label">
+                                Swath窗口数
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="windowRangsSize" readonly
+                                       th:value="${experiment?.windowRangs?.size()}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
                             <label for="windowRangs" class="col-2 col-form-label">
                                 Swath窗口
                             </label>
