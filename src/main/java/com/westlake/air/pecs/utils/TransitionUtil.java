@@ -1,7 +1,7 @@
 package com.westlake.air.pecs.utils;
 
-import com.westlake.air.pecs.domain.bean.transition.AminoAcid;
 import com.westlake.air.pecs.domain.db.PeptideDO;
+import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
 
 import java.util.List;
 

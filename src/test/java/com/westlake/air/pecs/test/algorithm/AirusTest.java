@@ -1,12 +1,19 @@
 package com.westlake.air.pecs.test.algorithm;
 
 import com.westlake.air.pecs.algorithm.Airus;
+import com.westlake.air.pecs.constants.ResultCode;
+import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
+import com.westlake.air.pecs.domain.db.LibraryDO;
+import com.westlake.air.pecs.domain.db.PeptideDO;
+import com.westlake.air.pecs.service.LibraryService;
+import com.westlake.air.pecs.service.PeptideService;
 import com.westlake.air.pecs.service.ScoresService;
 import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +28,10 @@ public class AirusTest extends BaseTest {
     Airus airus;
     @Autowired
     ScoresService scoresService;
+    @Autowired
+    PeptideService peptideService;
+    @Autowired
+    LibraryService libraryService;
 
     private boolean isSimilar(Double[] array1, Double[] array2, Double tolerance) {
         if (array1.length != array2.length) return false;
@@ -45,19 +56,49 @@ public class AirusTest extends BaseTest {
     }
 
     @Test
-    public void test() {
-        List<RtIntensityPairsDouble> list = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            RtIntensityPairsDouble rtIntensityPairsDouble = new RtIntensityPairsDouble();
-            Double[] rt = {(double) i};
-            rtIntensityPairsDouble.setRtArray(rt);
-            rtIntensityPairsDouble.setIntensityArray(rt);
-            list.add(rtIntensityPairsDouble);
+    public void test2() {
+        List<PeptideDO> peptides = peptideService.getAllByLibraryId("5c093e20fc6f9e5a6c2d77a9");
+        for (PeptideDO peptideDO : peptides) {
+            PeptideDO humanLibPeptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy("5c0a3669fc6f9e1d441ae71f", peptideDO.getPeptideRef(), false);
+            peptideDO.setRt(humanLibPeptide.getRt());
+            peptideService.update(peptideDO);
         }
-        System.out.println("list ready");
-        RtIntensityPairsDouble rtInt = list.get(1);
-        Double[] intensity = {0d};
-        rtInt.setIntensityArray(intensity);
-        System.out.println("what now");
+    }
+
+    @Test
+    public void test() throws IOException {
+        File file = new File("D:/001.txt");
+        InputStream in = new FileInputStream(file);
+        InputStreamReader isr = new InputStreamReader(in, "UTF-8");
+        BufferedReader reader = new BufferedReader(isr);
+        String line = reader.readLine();
+        List<String> peptides = new ArrayList<>();
+        while (line != null) {
+            String[] three = line.split(" ");
+            if (Double.parseDouble(three[2]) <= 0.01) {
+                if (three[0].split("_").length == 4) {
+                    peptides.add(three[0].split("_")[1] + "_" + three[0].split("_")[2]);
+                } else {
+                    peptides.add(three[0].split("_")[1]);
+                }
+            }
+            line = reader.readLine();
+        }
+
+        int count = 0;
+        int count1 = 0;
+        for (String peptide : peptides) {
+            PeptideDO peptideDO = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy("5c0a237efc6f9e3c5048a6bc", peptide, false);
+            if (peptideDO == null) {
+                count1++;
+                continue;
+            }
+            if (peptideDO.getFragmentMap().size() <= 3) {
+                count++;
+            }
+        }
+
+        System.out.println(count);
+        System.out.println(count1);
     }
 }

@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.scorer;
 
+import com.westlake.air.pecs.algorithm.FragmentFactory;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.dao.AminoAcidDAO;
 import com.westlake.air.pecs.dao.ElementsDAO;
@@ -8,9 +9,7 @@ import com.westlake.air.pecs.domain.bean.score.BYSeries;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.IntegrateWindowMzIntensity;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
-import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
 import com.westlake.air.pecs.parser.model.chemistry.Element;
-import com.westlake.air.pecs.parser.model.chemistry.Unimod;
 import com.westlake.air.pecs.utils.MathUtil;
 import com.westlake.air.pecs.utils.ScoreUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +39,8 @@ public class DIAScorer {
     ElementsDAO elementsDAO;
     @Autowired
     AminoAcidDAO aminoAcidDAO;
+    @Autowired
+    FragmentFactory fragmentFactory;
 
     /**
      * scores.massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比之和
@@ -262,7 +263,7 @@ public class DIAScorer {
     public void calculateBYIonScore(Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<Integer, String> unimodHashMap, String sequence, int charge, FeatureScores scores) {
 
         //计算理论值
-        BYSeries bySeries = getBYSeries(unimodHashMap, sequence, charge);
+        BYSeries bySeries = fragmentFactory.getBYSeries(unimodHashMap, sequence, charge);
         List<Double> bSeriesList = bySeries.getBSeries();
         int bSeriesScore = getSeriesScore(bSeriesList, spectrumMzArray, spectrumIntArray);
 
@@ -363,62 +364,6 @@ public class DIAScorer {
         }
         return result;
     }
-
-    //获得从B,Y开始的序列累加weight列表
-    private BYSeries getBYSeries(HashMap<Integer, String> unimodHashMap, String sequence, int charge) {
-
-        BYSeries bySeries = new BYSeries();
-
-        //bSeries 若要提高精度，提高json的精度
-        List<Double> bSeries = new ArrayList<>();
-        double monoWeight = Constants.PROTON_MASS_U * charge;
-        if (unimodHashMap != null && unimodHashMap.containsKey(0)) {
-            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(0));
-            if (unimod != null) {
-                monoWeight += unimod.getMonoMass();
-            }
-        }
-
-        char[] acidCodeArray = sequence.toCharArray();
-        for (int i = 0; i < acidCodeArray.length - 1; i++) {
-            AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCodeArray[i]));
-            if (aa == null) {
-                continue;
-            }
-            if (i == 0) {
-                monoWeight += aa.getMonoIsotopicMass();
-                continue;
-            }
-            monoWeight += aa.getMonoIsotopicMass();
-            bSeries.add(monoWeight);
-        }
-
-        //ySeries
-        List<Double> ySeries = new ArrayList<>();
-        monoWeight = Constants.PROTON_MASS_U * charge;
-        if (unimodHashMap != null && unimodHashMap.containsKey(acidCodeArray.length - 1)) {
-            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(acidCodeArray.length - 1));
-            if (unimod != null) {
-                monoWeight += unimod.getMonoMass();
-            }
-        }
-
-        double h2oWeight = elementsDAO.getMonoWeight(ElementsDAO.H2O);
-        for (int i = acidCodeArray.length - 1; i > 0; i--) {
-            AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCodeArray[i]));
-            if (aa == null) {
-                continue;
-            }
-            monoWeight += aa.getMonoIsotopicMass();
-            ySeries.add(monoWeight + h2oWeight);
-        }
-
-        bySeries.setBSeries(bSeries);
-        bySeries.setYSeries(ySeries);
-
-        return bySeries;
-    }
-
 
     /**
      * score unit of BYSeries scores

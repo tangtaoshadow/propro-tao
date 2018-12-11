@@ -3,16 +3,22 @@ package com.westlake.air.pecs.algorithm;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Ordering;
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResidueType;
+import com.westlake.air.pecs.dao.AminoAcidDAO;
+import com.westlake.air.pecs.dao.ElementsDAO;
+import com.westlake.air.pecs.dao.UnimodDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.MzResult;
-import com.westlake.air.pecs.domain.bean.transition.AminoAcid;
-import com.westlake.air.pecs.domain.bean.transition.Annotation;
-import com.westlake.air.pecs.domain.bean.transition.Fragment;
-import com.westlake.air.pecs.domain.bean.transition.FragmentResult;
+import com.westlake.air.pecs.domain.bean.score.BYSeries;
+import com.westlake.air.pecs.domain.bean.peptide.Annotation;
+import com.westlake.air.pecs.domain.bean.peptide.Fragment;
+import com.westlake.air.pecs.domain.bean.peptide.FragmentResult;
 import com.westlake.air.pecs.domain.db.FragmentInfo;
 import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.domain.query.PeptideQuery;
+import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
+import com.westlake.air.pecs.parser.model.chemistry.Unimod;
 import com.westlake.air.pecs.service.PeptideService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,14 +37,101 @@ import static com.westlake.air.pecs.constants.Constants.MAX_PAGE_SIZE_FOR_FRAGME
  * Time: 2018-06-12 10:32
  */
 @Component
-public class FragmentCalculator {
+public class FragmentFactory {
 
-    public final Logger logger = LoggerFactory.getLogger(FragmentCalculator.class);
+    public final Logger logger = LoggerFactory.getLogger(FragmentFactory.class);
 
     @Autowired
     PeptideService peptideService;
     @Autowired
     FormulaCalculator formulaCalculator;
+    @Autowired
+    UnimodDAO unimodDAO;
+    @Autowired
+    AminoAcidDAO aminoAcidDAO;
+    @Autowired
+    ElementsDAO elementsDAO;
+
+    //根据UnimodMap,肽段的序列以及带电量获取该肽段所有B,Y类型的排列组合的离子MZ列表
+    public BYSeries getBYSeries(HashMap<Integer, String> unimodHashMap, String sequence, int charge) {
+
+        BYSeries bySeries = new BYSeries();
+
+        //bSeries 若要提高精度，提高json的精度
+        List<Double> bSeries = new ArrayList<>();
+        double monoWeight = Constants.PROTON_MASS_U * charge;
+        if (unimodHashMap != null && unimodHashMap.containsKey(0)) {
+            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(0));
+            if (unimod != null) {
+                monoWeight += unimod.getMonoMass();
+            }
+        }
+
+        char[] acidCodeArray = sequence.toCharArray();
+        for (int i = 0; i < acidCodeArray.length - 1; i++) {
+            AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCodeArray[i]));
+            if (aa == null) {
+                continue;
+            }
+            if (i == 0) {
+                monoWeight += aa.getMonoIsotopicMass();
+                continue;
+            }
+            monoWeight += aa.getMonoIsotopicMass();
+            bSeries.add(monoWeight);
+        }
+
+        //ySeries
+        List<Double> ySeries = new ArrayList<>();
+        monoWeight = Constants.PROTON_MASS_U * charge;
+        if (unimodHashMap != null && unimodHashMap.containsKey(acidCodeArray.length - 1)) {
+            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(acidCodeArray.length - 1));
+            if (unimod != null) {
+                monoWeight += unimod.getMonoMass();
+            }
+        }
+
+        double h2oWeight = elementsDAO.getMonoWeight(ElementsDAO.H2O);
+        for (int i = acidCodeArray.length - 1; i > 0; i--) {
+            com.westlake.air.pecs.parser.model.chemistry.AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCodeArray[i]));
+            if (aa == null) {
+                continue;
+            }
+            monoWeight += aa.getMonoIsotopicMass();
+            ySeries.add(monoWeight + h2oWeight);
+        }
+
+        bySeries.setBSeries(bSeries);
+        bySeries.setYSeries(ySeries);
+
+        return bySeries;
+    }
+
+    /**
+     * 标准库中的PeptideDO对象生成该肽段所有B,Y类型的排列组合的离子MZ的Map,key为cutInfo
+     *
+     * @param peptideDO   标准库中的PeptideDO对象
+     * @param limitLength 生成的B,Y离子的最小长度
+     * @return
+     */
+    public HashMap<String, Double> getBYSeriesMap(PeptideDO peptideDO, int limitLength) {
+        HashMap<String, Double> bySeriesMap = new HashMap<>();
+        String sequence = peptideDO.getSequence();
+        int length = sequence.length();
+        if (length < limitLength) {
+            return null;
+        }
+        for (int c = 1; c <= peptideDO.getCharge(); c++) {
+            for (int i = limitLength; i < length; i++) {
+                Double bMz = formulaCalculator.getMonoMz(sequence.substring(0, i), ResidueType.BIon, c, 0, 0, false, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i));
+                bySeriesMap.put("b" + i + "^" + peptideDO.getCharge(), bMz);
+                Double yMz = formulaCalculator.getMonoMz(sequence.substring(i + 1, length), ResidueType.YIon, c, 0, 0, false, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), i + 1, length));
+                bySeriesMap.put("y" + i + "^" + peptideDO.getCharge(), yMz);
+            }
+        }
+
+        return bySeriesMap;
+    }
 
     public Fragment getFragment(PeptideDO peptide, FragmentInfo fragmentInfo) {
         Fragment fragment = new Fragment(peptide.getId());

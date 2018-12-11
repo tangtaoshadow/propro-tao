@@ -29,6 +29,8 @@ public interface PeptideService {
 
     ResultDO insert(PeptideDO peptideDO);
 
+    ResultDO update(PeptideDO peptideDO);
+
     ResultDO insertAll(List<PeptideDO> peptides, boolean isDeleteOld);
 
     ResultDO deleteAllByLibraryId(String libraryId);

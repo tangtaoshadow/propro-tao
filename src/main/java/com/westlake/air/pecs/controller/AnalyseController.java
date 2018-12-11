@@ -3,6 +3,7 @@ package com.westlake.air.pecs.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.algorithm.Airus;
+import com.westlake.air.pecs.algorithm.FragmentFactory;
 import com.westlake.air.pecs.async.ScoreTask;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
@@ -66,6 +67,8 @@ public class AnalyseController extends BaseController {
     SignalToNoiseEstimator signalToNoiseEstimator;
     @Autowired
     ConfigDAO configDAO;
+    @Autowired
+    FragmentFactory fragmentFactory;
 
     @RequestMapping(value = "/overview/list")
     String overviewList(Model model,
@@ -203,7 +206,7 @@ public class AnalyseController extends BaseController {
 
         if (overviewIds.size() <= 1) {
             Map<String, Object> map = model.asMap();
-            for(String key : map.keySet()){
+            for (String key : map.keySet()) {
                 redirectAttributes.addFlashAttribute(key, map.get(key));
                 redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.COMPARISON_OVERVIEW_IDS_MUST_BIGGER_THAN_TWO.getMessage());
             }
@@ -441,21 +444,121 @@ public class AnalyseController extends BaseController {
         return resultDO;
     }
 
+    @RequestMapping(value = "/allRtConv")
+    @ResponseBody
+    ResultDO<JSONObject> allRtConv(Model model,
+                                   @RequestParam(value = "dataId", required = false) String dataId,
+                                   @RequestParam(value = "isGaussFilter", required = false, defaultValue = "false") Boolean isGaussFilter,
+                                   @RequestParam(value = "useNoise1000", required = false, defaultValue = "false") Boolean useNoise1000) {
+        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
+        ResultDO<AnalyseDataDO> dataResult = null;
+        ResultDO<AnalyseOverviewDO> overviewResult = null;
+        ResultDO<ExperimentDO> experimentResult = null;
+        if (dataId != null && !dataId.isEmpty()) {
+            dataResult = analyseDataService.getById(dataId);
+            if (dataResult.isFailed() || dataResult.getModel() == null) {
+                resultDO.setErrorResult(ResultCode.ANALYSE_DATA_NOT_EXISTED);
+                return resultDO;
+            }
+            overviewResult = analyseOverviewService.getById(dataResult.getModel().getOverviewId());
+            if (overviewResult.isFailed()) {
+                resultDO.setErrorResult(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
+                return resultDO;
+            }
+            experimentResult = experimentService.getById(overviewResult.getModel().getExpId());
+            if (experimentResult.isFailed()) {
+                resultDO.setErrorResult(ResultCode.EXPERIMENT_NOT_EXISTED);
+                return resultDO;
+            }
+        } else {
+            resultDO.setErrorResult(ResultCode.DATA_ID_CANNOT_BE_EMPTY);
+            return resultDO;
+        }
+
+        AnalyseDataDO data = dataResult.getModel();
+        AnalyseOverviewDO overviewDO = overviewResult.getModel();
+        ExperimentDO experimentDO = experimentResult.getModel();
+        PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(overviewDO.getLibraryId(), data.getPeptideRef(), false);
+        //准备该肽段的其他互补离子
+        HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, 4);
+        peptide.getFragmentMap().clear();
+        for (String cutInfo : bySeriesMap.keySet()) {
+            if(peptide.getFragmentMap().get(cutInfo) == null){
+                peptide.getFragmentMap().put(cutInfo, new FragmentInfo(cutInfo, bySeriesMap.get(cutInfo), 0d, peptide.getCharge()));
+            }
+        }
+        ResultDO<AnalyseDataDO> dataRealResult = experimentService.extractOne(experimentDO, peptide, 800f);
+        if(dataRealResult.isFailed()){
+            resultDO.setErrorResult(ResultCode.CONVOLUTION_DATA_NOT_EXISTED);
+            return resultDO;
+        }
+        AnalyseDataDO dataDO = dataRealResult.getModel();
+        JSONObject res = new JSONObject();
+        JSONArray rtArray = new JSONArray();
+        JSONArray intensityArrays = new JSONArray();
+        JSONArray cutInfoArray = new JSONArray();
+
+        //同一组的rt坐标是相同的
+        Float[] pairRtArray = dataDO.getRtArray();
+        for (String cutInfo : dataDO.getIntensityMap().keySet()) {
+            if (!data.getIsHit() || dataDO.getIntensityMap().get(cutInfo) == null) {
+                continue;
+            }
+
+            Float[] pairIntensityArray = dataDO.getIntensityMap().get(cutInfo);
+            if (isGaussFilter) {
+                pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, pairIntensityArray);
+            }
+
+            if (useNoise1000) {
+                double[] noisePairIntensityArray = signalToNoiseEstimator.computeSTN(new RtIntensityPairsDouble(pairRtArray, pairIntensityArray), 1000, 30);
+                JSONArray noiseIntensityArray = new JSONArray();
+                for (int i = 0; i < noisePairIntensityArray.length; i++) {
+                    if (noisePairIntensityArray[i] >= Constants.SIGNAL_TO_NOISE_LIMIT) {
+                        noiseIntensityArray.add(pairIntensityArray[i]);
+                    } else {
+                        noiseIntensityArray.add(0);
+                    }
+                }
+                cutInfoArray.add(cutInfo);
+                intensityArrays.add(noiseIntensityArray);
+            } else {
+                JSONArray intensityArray = new JSONArray();
+                intensityArray.addAll(Arrays.asList(pairIntensityArray));
+                cutInfoArray.add(cutInfo);
+                intensityArrays.add(intensityArray);
+            }
+        }
+
+        if (pairRtArray != null) {
+            rtArray.addAll(Arrays.asList(pairRtArray));
+        } else {
+            logger.error("No AnalyseData Has RtArray!!!");
+        }
+        res.put("rt", rtArray);
+        res.put("peptideRef", data.getPeptideRef());
+        res.put("cutInfoArray", cutInfoArray);
+        res.put("intensityArrays", intensityArrays);
+
+        resultDO.setModel(res);
+        return resultDO;
+    }
+
     @RequestMapping(value = "/viewMultiGroup")
     @ResponseBody
     ResultDO<JSONObject> viewMultiGroup(Model model,
-                                   @RequestParam(value = "overviewIds", required = true) String overviewIds,
-                                   @RequestParam(value = "peptideRef", required = true) String peptideRef,
-                                   @RequestParam(value = "isGaussFilter", required = false, defaultValue = "false") Boolean isGaussFilter,
-                                   @RequestParam(value = "useNoise1000", required = false, defaultValue = "false") Boolean useNoise1000) {
+                                        @RequestParam(value = "overviewIds", required = true) String overviewIds,
+                                        @RequestParam(value = "peptideRef", required = true) String peptideRef,
+                                        @RequestParam(value = "isGaussFilter", required = false, defaultValue = "false") Boolean isGaussFilter,
+                                        @RequestParam(value = "useNoise1000", required = false, defaultValue = "false") Boolean useNoise1000) {
 
         ResultDO resultDO = new ResultDO(true);
         JSONArray groups = new JSONArray();
 
         String[] analyseOverviewIdArray = overviewIds.split(",");
-        for(String overviewId : analyseOverviewIdArray){
+        for (String overviewId : analyseOverviewIdArray) {
             JSONObject group = new JSONObject();
-            if(overviewId == null || overviewId.isEmpty()){
+            if (overviewId == null || overviewId.isEmpty()) {
                 continue;
             }
             AnalyseDataDO data = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, peptideRef, true);

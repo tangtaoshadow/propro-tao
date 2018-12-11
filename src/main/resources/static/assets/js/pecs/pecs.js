@@ -83,8 +83,6 @@ function query(dataId, cutInfo) {
     chart.setOption(option, true);
 }
 function queryGroup(dataId, isGaussFilter, useNoise1000) {
-
-
     if (dataId == null) {
         dataId = this.dataId;
     } else {
@@ -193,7 +191,6 @@ function queryGroup(dataId, isGaussFilter, useNoise1000) {
     chartGroup.setOption(option, true);
 
 }
-
 function queryMultiGroup(peptideRef, isGaussFilter, useNoise1000) {
 
     if(peptideRef == null){
@@ -305,4 +302,114 @@ function queryMultiGroup(peptideRef, isGaussFilter, useNoise1000) {
     }
 
 
+}
+
+function allRtConv(dataId, isGaussFilter, useNoise1000){
+
+    if (dataId == null) {
+        dataId = this.dataId;
+    } else {
+        this.dataId = dataId;
+    }
+
+    if (useNoise1000 == null) {
+        useNoise1000 = this.useNoise1000;
+    } else {
+        this.useNoise1000 = useNoise1000;
+    }
+
+    if (isGaussFilter == null) {
+        isGaussFilter = this.isGaussFilter;
+    } else {
+        this.isGaussFilter = isGaussFilter;
+    }
+    var datas = null;
+
+    $.ajax({
+        type: "POST",
+        url: "/analyse/allRtConv",
+        data: {
+            dataId: dataId,
+            isGaussFilter: isGaussFilter,
+            useNoise1000: useNoise1000
+        },
+        dataType: "json",
+        async: false,
+        success: function (result) {
+            if (result.success) {
+                datas = result.model;
+            } else {
+                chartGroup.clear();
+            }
+        }
+    });
+
+    if (datas == null) {
+        return;
+    }
+    var data_rt = datas.rt;
+    var peptideRef = datas.peptideRef;
+    var cutinfo = datas.cutInfoArray;
+    var intensity_arrays = datas.intensityArrays;
+    var bestRt = datas.bestRt;
+
+    var intensity_series = [];
+    for (var i = 0; i < intensity_arrays.length; i++) {
+        intensity_series.push({
+            name: cutinfo[i],
+            type: 'line',
+            smooth: true,
+            data: intensity_arrays[i],
+        });
+    }
+
+    var textLabel = peptideRef + ":" + intensity_arrays.length + "个MS2碎片;";
+    if (bestRt != null) {
+        textLabel = textLabel + "最佳峰RT:" + bestRt;
+    }
+    option = {
+        title: {
+            text: textLabel,
+            left: 10
+        },
+        legend: {
+            data: ['rt/intensity'],
+            align: 'left'
+        },
+        toolbox: {
+            // y: 'bottom',
+            feature: {
+                dataView: {},
+                saveAsImage: {
+                    pixelRatio: 2
+                }
+
+            }
+        },
+        dataZoom: [{
+            type: 'inside',
+            filterMode: 'empty',
+            start: (chartGroup.getModel() && chartGroup.getModel().getOption().dataZoom[0].start) ? chartGroup.getModel().getOption().dataZoom[0].start : 0,
+            end: (chartGroup.getModel() && chartGroup.getModel().getOption().dataZoom[0].end) ? chartGroup.getModel().getOption().dataZoom[0].end : 100
+        }, {
+            type: 'slider'
+        }],
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            }
+        },
+        xAxis: {
+            data: data_rt,
+            silent: false,
+            splitLine: {
+                show: false
+            }
+        },
+        yAxis: {},
+        series: intensity_series
+    };
+
+    chartGroup.setOption(option, true);
 }

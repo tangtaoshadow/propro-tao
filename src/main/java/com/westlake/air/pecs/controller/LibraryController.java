@@ -5,6 +5,7 @@ import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
+import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.LibraryQuery;
 import com.westlake.air.pecs.parser.TraMLParser;
@@ -62,9 +63,9 @@ public class LibraryController extends BaseController {
 
     @RequestMapping(value = "/listIrt")
     String listIrt(Model model,
-                      @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                      @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
-                      @RequestParam(value = "searchName", required = false) String searchName) {
+                   @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+                   @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
+                   @RequestParam(value = "searchName", required = false) String searchName) {
         model.addAttribute("searchName", searchName);
         model.addAttribute("pageSize", pageSize);
         LibraryQuery query = new LibraryQuery();
@@ -155,6 +156,7 @@ public class LibraryController extends BaseController {
     @RequestMapping(value = "/detail/{id}")
     String detail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
+
         if (resultDO.isSuccess()) {
             if (resultDO.getModel().getType().equals(LibraryDO.TYPE_IRT)) {
                 Double[] range = peptideService.getRTRange(id);
@@ -242,5 +244,18 @@ public class LibraryController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return redirectListUrl;
         }
+    }
+
+    @RequestMapping(value = "overview/{id}")
+    @ResponseBody
+    String overview(Model model, @PathVariable("id") String id) {
+        List<PeptideDO> peptides = peptideService.getAllByLibraryId(id);
+        int count = 0;
+        for (PeptideDO peptide : peptides) {
+            if (peptide.getFragmentMap().size() <= 3) {
+                count++;
+            }
+        }
+        return count+"个不符合要求的离子";
     }
 }

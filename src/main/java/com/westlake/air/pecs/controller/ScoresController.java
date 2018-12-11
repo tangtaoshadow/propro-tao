@@ -53,11 +53,15 @@ public class ScoresController extends BaseController {
                 @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
                 @RequestParam(value = "overviewId", required = false) String overviewId,
                 @RequestParam(value = "peptideRef", required = false) String peptideRef,
+                @RequestParam(value = "fdrStart", required = false) Double fdrStart,
+                @RequestParam(value = "fdrEnd", required = false) Double fdrEnd,
                 @RequestParam(value = "isIdentified", required = false) String isIdentified,
                 RedirectAttributes redirectAttributes) {
         model.addAttribute("overviewId", overviewId);
         model.addAttribute("peptideRef", peptideRef);
         model.addAttribute("pageSize", pageSize);
+        model.addAttribute("fdrStart", fdrStart);
+        model.addAttribute("fdrEnd", fdrEnd);
         model.addAttribute("isIdentified", isIdentified);
         ScoresQuery query = new ScoresQuery();
         if (peptideRef != null && !peptideRef.isEmpty()) {
@@ -70,6 +74,12 @@ public class ScoresController extends BaseController {
             query.setIsIdentified(false);
             query.setIsDecoy(false);
         }
+        if(fdrStart != null){
+            query.setFdrStart(fdrStart);
+        }
+        if(fdrEnd != null){
+            query.setFdrEnd(fdrEnd);
+        }
         if (overviewId == null) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_ID_CAN_NOT_BE_EMPTY.getMessage());
             return "redirect:/analyse/overview/list";
@@ -78,7 +88,7 @@ public class ScoresController extends BaseController {
         query.setPageSize(30);
         query.setPageNo(currentPage);
         query.setIsDecoy(false);
-        query.setSortColumn("rt");
+        query.setSortColumn("fdr");
         ResultDO<List<ScoresDO>> resultDO = scoresService.getList(query);
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);

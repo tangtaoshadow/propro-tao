@@ -14,4 +14,8 @@ public class ScoresQuery extends PageQuery{
     Boolean isDecoy;
 
     Boolean isIdentified;
+
+    Double fdrStart;
+
+    Double fdrEnd;
 }

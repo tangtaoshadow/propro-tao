@@ -11,8 +11,11 @@ import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
+import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
+import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
+import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.ExperimentService;
 import com.westlake.air.pecs.service.ScoresService;
 import com.westlake.air.pecs.utils.AirusUtil;
@@ -32,6 +35,8 @@ public class ExperimentTask extends BaseTask {
 
     @Autowired
     ExperimentService experimentService;
+    @Autowired
+    AnalyseDataService analyseDataService;
     @Autowired
     ScoresService scoresService;
     @Autowired
@@ -100,6 +105,7 @@ public class ExperimentTask extends BaseTask {
         experimentService.extract(input);
 
         taskDO.addLog("卷积完毕,总耗时:" + (System.currentTimeMillis() - start));
+        logger.info("卷积完毕,总耗时:" + (System.currentTimeMillis() - start));
         taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
     }
@@ -159,20 +165,22 @@ public class ExperimentTask extends BaseTask {
         //将irt的计算结果加入到下一个步骤的入参中
         swathParams.setSlopeIntercept(slopeIntercept);
         //此步可以获得overviewId,并且存储于swathParams中
-        ResultDO<List<AnalyseDataDO>> originDataListResult = experimentService.extract(swathParams);
+        ResultDO<AnalyseOverviewDO> extractResult = experimentService.extract(swathParams);
 
-        if (originDataListResult.isFailed() || originDataListResult.getModel() == null || originDataListResult.getModel().size() == 0) {
-            taskDO.addLog("卷积失败:" + originDataListResult.getMsgInfo());
+        if (extractResult.isFailed()) {
+            taskDO.addLog("卷积失败:" + extractResult.getMsgInfo());
             taskDO.finish(TaskStatus.FAILED.getName());
             taskService.update(taskDO);
         }
 
-        taskDO.addLog("卷积完毕,耗时:" + (System.currentTimeMillis() - start) + ",开始打分");
+        taskDO.addLog("卷积完毕,耗时:" + (System.currentTimeMillis() - start) + ",开始打分,首先删除原有打分数据");
         taskService.update(taskDO);
 
         start = System.currentTimeMillis();
-        List<AnalyseDataDO> dataList = originDataListResult.getModel();
-        scoresService.score(dataList, swathParams);
+        AnalyseOverviewDO overviewDO = extractResult.getModel();
+
+        score(overviewDO.getId(), swathParams, taskDO);
+
 
         taskDO.addLog("子分数打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",开始生成子分数分布图");
         taskService.update(taskDO);
@@ -184,8 +192,8 @@ public class ExperimentTask extends BaseTask {
         start = System.currentTimeMillis();
         FinalResult finalResult = airus.doAirus(swathParams.getOverviewId(), new AirusParams());
 
-        int count = AirusUtil.checkFdr(finalResult);
-        taskDO.addLog("合并打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为" + count);
+        int matchedPeptideCount = AirusUtil.checkFdr(finalResult);
+        taskDO.addLog("合并打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为" + matchedPeptideCount);
         taskDO.addLog("Swath流程总计耗时:" + (System.currentTimeMillis() - startAll));
         taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);

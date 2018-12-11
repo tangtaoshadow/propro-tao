@@ -1,7 +1,6 @@
 package com.westlake.air.pecs.domain.bean.airus;
 
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
-import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import lombok.Data;
 

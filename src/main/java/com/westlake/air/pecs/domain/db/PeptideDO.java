@@ -1,9 +1,7 @@
 package com.westlake.air.pecs.domain.db;
 
 import com.westlake.air.pecs.domain.BaseDO;
-import com.westlake.air.pecs.domain.bean.transition.AminoAcid;
-import com.westlake.air.pecs.domain.bean.transition.Annotation;
-import com.westlake.air.pecs.domain.bean.transition.Fragment;
+import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;

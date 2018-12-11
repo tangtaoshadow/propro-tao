@@ -1,13 +1,13 @@
 package com.westlake.air.pecs.decoy.generator;
 
 import com.westlake.air.pecs.algorithm.FormulaCalculator;
-import com.westlake.air.pecs.algorithm.FragmentCalculator;
+import com.westlake.air.pecs.algorithm.FragmentFactory;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.decoy.BaseGenerator;
-import com.westlake.air.pecs.domain.bean.transition.AminoAcid;
-import com.westlake.air.pecs.domain.bean.transition.Annotation;
+import com.westlake.air.pecs.domain.bean.peptide.Annotation;
 import com.westlake.air.pecs.domain.db.FragmentInfo;
 import com.westlake.air.pecs.domain.db.PeptideDO;
+import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
 import com.westlake.air.pecs.utils.TransitionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class ShuffleGenerator extends BaseGenerator {
     FormulaCalculator formulaCalculator;
 
     @Autowired
-    FragmentCalculator fragmentCalculator;
+    FragmentFactory fragmentFactory;
 
     public List<PeptideDO> generate(List<PeptideDO> list) {
         List<PeptideDO> decoys = new ArrayList<>();
@@ -67,7 +67,7 @@ public class ShuffleGenerator extends BaseGenerator {
             }
         }
 
-        aminoAcids = fragmentCalculator.parseAminoAcid(sequence, unimodMap);
+        aminoAcids = fragmentFactory.parseAminoAcid(sequence, unimodMap);
 
         List<AminoAcid> bestDecoy = null;
         Double asi = null;
@@ -88,7 +88,7 @@ public class ShuffleGenerator extends BaseGenerator {
                     break;
                 }
             }
-            aminoAcids = fragmentCalculator.parseAminoAcid(sequence, unimodMap);
+            aminoAcids = fragmentFactory.parseAminoAcid(sequence, unimodMap);
         }
 
         if (removeLastAcid) {
@@ -116,7 +116,7 @@ public class ShuffleGenerator extends BaseGenerator {
             decoyFi.setAnnotations(targetFi.getAnnotation().toAnnoInfo());
             Annotation oneAnno = targetFi.getAnnotation();
             List<String> unimodIds = new ArrayList<>();
-            List<AminoAcid> acids = fragmentCalculator.getFragmentSequence(bestDecoy, oneAnno.getType(), oneAnno.getLocation());
+            List<AminoAcid> acids = fragmentFactory.getFragmentSequence(bestDecoy, oneAnno.getType(), oneAnno.getLocation());
             for (AminoAcid aminoAcid : acids) {
                 if (aminoAcid.getModId() != null) {
                     unimodIds.add(aminoAcid.getModId());

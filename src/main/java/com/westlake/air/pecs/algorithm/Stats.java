@@ -298,13 +298,13 @@ public class Stats {
     /**
      * Finds cut-off target score for specified false discovery rate(fdr).
      */
-    public Double findCutoff(List<SimpleFeatureScores> topTargets, List<SimpleFeatureScores> topDecoys, AirusParams airusParams) {
+    public Double findCutoff(List<SimpleFeatureScores> topTargets, List<SimpleFeatureScores> topDecoys, AirusParams airusParams, Double cutoff) {
         ErrorStat errorStat = errorStatistics(topTargets, topDecoys, airusParams);
 
         List<SimpleFeatureScores> bestScores = errorStat.getBestFeatureScoresList();
         double[] qvalue_CutoffAbs = new double[bestScores.size()];
         for (int i = 0; i < bestScores.size(); i++) {
-            qvalue_CutoffAbs[i] = Math.abs(bestScores.get(i).getQValue() - airusParams.getSsInitialFdr());
+            qvalue_CutoffAbs[i] = Math.abs(bestScores.get(i).getQValue() - cutoff);
         }
         int i0 = MathUtil.argmin(qvalue_CutoffAbs);
         return bestScores.get(i0).getMainScore();

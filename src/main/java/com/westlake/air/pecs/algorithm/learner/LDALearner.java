@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.algorithm.learner;
 
+import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.domain.bean.airus.TrainPeaks;
 import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
 import org.apache.commons.math3.linear.*;
@@ -25,6 +26,7 @@ public class LDALearner extends Learner{
     public HashMap<String, Double> learn(TrainPeaks trainPeaks, String skipScoreType) {
 
         int totalLength = trainPeaks.getBestTargets().size() + trainPeaks.getTopDecoys().size();
+
         HashMap<String, Double> scoreMapSample = trainPeaks.getBestTargets().get(0).getScoresMap();
         int scoreTypes = 0;
         Set<String> keySet = scoreMapSample.keySet();
@@ -76,6 +78,13 @@ public class LDALearner extends Learner{
             }
             weightsMap.put(key, realVector.getEntry(tempJ));
             tempJ++;
+        }
+
+        for(Double value: weightsMap.values()){
+            if(value == null || Double.isNaN(value)){
+                logger.info("本轮训练一坨屎:"+ JSON.toJSONString(weightsMap));
+                return null;
+            }
         }
         return weightsMap;
     }

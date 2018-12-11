@@ -54,7 +54,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
         List<AnalyseDataDO> datas = analyseDataDAO.getAll(query);
         if (datas.size() == 1) {
             return datas.get(0);
-        }else{
+        } else {
             return null;
         }
     }
@@ -181,12 +181,15 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
 
     @Override
     public void decompress(AnalyseDataDO dataDO) {
-        dataDO.setRtArray(CompressUtil.transToFloat(CompressUtil.zlibDecompress(dataDO.getConvRtArray())));
-        dataDO.setConvRtArray(null);
+        if (dataDO.getConvRtArray() != null && dataDO.getConvRtArray().length > 0) {
+            dataDO.setRtArray(CompressUtil.transToFloat(CompressUtil.zlibDecompress(dataDO.getConvRtArray())));
+            dataDO.setConvRtArray(null);
+        }
 
         for (String cutInfo : dataDO.getConvIntensityMap().keySet()) {
             byte[] values = dataDO.getConvIntensityMap().get(cutInfo);
             if (values == null) {
+                dataDO.getIntensityMap().put(cutInfo, null);
                 continue;
             }
             dataDO.getIntensityMap().put(cutInfo, CompressUtil.transToFloat(CompressUtil.zlibDecompress(values)));

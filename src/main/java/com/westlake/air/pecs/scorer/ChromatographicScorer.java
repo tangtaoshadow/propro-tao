@@ -120,7 +120,7 @@ public class ChromatographicScorer {
      *
      * @param experimentFeatures features in mrmFeature
      *                           HullInt: redistributed chromatogram in range of (peptideRef constant) leftRt and rightRt
-     * @return Table<Integer       ,               Integer       ,               Float       [       ]> xcorrMatrix
+     * @return Table<Integer,Integer,Float[]> xcorrMatrix
      */
     private Table<Integer, Integer, Double[]> initializeXCorrMatrix(List<ExperimentFeature> experimentFeatures) {
         int listLength = experimentFeatures.size();

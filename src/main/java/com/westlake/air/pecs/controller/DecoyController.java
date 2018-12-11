@@ -1,9 +1,9 @@
 package com.westlake.air.pecs.controller;
 
-import com.westlake.air.pecs.algorithm.FragmentCalculator;
+import com.westlake.air.pecs.algorithm.FragmentFactory;
 import com.westlake.air.pecs.decoy.generator.ShuffleGenerator;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.transition.FragmentResult;
+import com.westlake.air.pecs.domain.bean.peptide.FragmentResult;
 import com.westlake.air.pecs.domain.bean.analyse.MzResult;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.PeptideDO;
@@ -29,7 +29,7 @@ import static com.westlake.air.pecs.constants.Constants.MAX_INSERT_RECORD_FOR_PE
 public class DecoyController extends BaseController {
 
     @Autowired
-    FragmentCalculator fragmentCalculator;
+    FragmentFactory fragmentFactory;
     @Autowired
     ShuffleGenerator shuffleGenerator;
     @Autowired
@@ -37,7 +37,7 @@ public class DecoyController extends BaseController {
 
     @RequestMapping(value = "/overview/{id}")
     String overview(Model model, @PathVariable("id") String id) {
-        FragmentResult result = fragmentCalculator.decoyOverview(id);
+        FragmentResult result = fragmentFactory.decoyOverview(id);
 
         model.addAttribute(SUCCESS_MSG, result.getMsgInfo());
         model.addAttribute("overlapList", result.getOverlapList());
@@ -50,7 +50,7 @@ public class DecoyController extends BaseController {
     String check(Model model,
                  @RequestParam(value = "id", required = true) String id,
                  @RequestParam(value = "isDecoy", required = false) boolean isDecoy) {
-        List<MzResult> result = fragmentCalculator.check(id, 0.1, isDecoy);
+        List<MzResult> result = fragmentFactory.check(id, 0.1, isDecoy);
         model.addAttribute("resultList", result.size() > 100 ? result.subList(0, 100) : result);
         return "/decoy/check";
     }

@@ -5,10 +5,7 @@ import com.westlake.air.pecs.domain.bean.SwathParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
-import com.westlake.air.pecs.domain.db.AnalyseDataDO;
-import com.westlake.air.pecs.domain.db.ExperimentDO;
-import com.westlake.air.pecs.domain.db.PeptideDO;
-import com.westlake.air.pecs.domain.db.TaskDO;
+import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 
 import java.io.File;
@@ -47,12 +44,12 @@ public interface ExperimentService {
     void uploadFile(ExperimentDO experimentDO, File file, TaskDO taskDO);
 
     /**
-     * 卷积完毕后所有卷积结果加在到内存中并且返回
-     * 目前先只支持MS2的卷积
+     * 卷积的核心函数,最终返回卷积到的Peptide数目
+     * 目前只支持MS2的卷积
      * @param swathParams
      * @return
      */
-    ResultDO<List<AnalyseDataDO>> extract(SwathParams swathParams);
+    ResultDO<AnalyseOverviewDO> extract(SwathParams swathParams);
 
     /**
      * 实时卷积某一个PeptideRef的图谱,卷积的rtWindows默认为-1,即全时间段卷积
@@ -60,7 +57,7 @@ public interface ExperimentService {
      * @param peptide
      * @return
      */
-    ResultDO<AnalyseDataDO> extractOne(ExperimentDO exp, PeptideDO peptide);
+    ResultDO<AnalyseDataDO> extractOne(ExperimentDO exp, PeptideDO peptide, Float rtExtractorWindow);
 
     /**
      * 卷积iRT校准库的数据

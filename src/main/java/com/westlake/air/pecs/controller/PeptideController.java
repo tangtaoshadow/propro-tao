@@ -2,7 +2,7 @@ package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.algorithm.FormulaCalculator;
-import com.westlake.air.pecs.algorithm.FragmentCalculator;
+import com.westlake.air.pecs.algorithm.FragmentFactory;
 import com.westlake.air.pecs.decoy.generator.ShuffleGenerator;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.PeptideDO;
@@ -29,7 +29,7 @@ import java.util.List;
 public class PeptideController extends BaseController {
 
     @Autowired
-    FragmentCalculator fragmentCalculator;
+    FragmentFactory fragmentFactory;
     @Autowired
     FormulaCalculator formulaCalculator;
     @Autowired

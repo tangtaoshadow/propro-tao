@@ -57,10 +57,31 @@
                                 </button>
                             </div>
                             <select class="form-control m-input" id="isIdentified" name="isIdentified">
-                                <option th:text="All" th:value="All" th:selected="${isIdentified}=='All'?true:false"></option>
-                                <option th:text="Yes" th:value="Yes" th:selected="${isIdentified}=='Yes'?true:false"></option>
-                                <option th:text="No" th:value="No" th:selected="${isIdentified}=='No'?true:false"></option>
+                                <option th:text="All" th:value="All"
+                                        th:selected="${isIdentified}=='All'?true:false"></option>
+                                <option th:text="Yes" th:value="Yes"
+                                        th:selected="${isIdentified}=='Yes'?true:false"></option>
+                                <option th:text="No" th:value="No"
+                                        th:selected="${isIdentified}=='No'?true:false"></option>
                             </select>
+                        </div>
+                        <div class="input-group col-lg-2">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-success" type="button">
+                                    FDR-Start:
+                                </button>
+                            </div>
+                            <input type="text" class="form-control m-input" name="fdrStart" placeholder="fdrStart"
+                                   th:value="${fdrStart}">
+                        </div>
+                        <div class="input-group col-lg-2">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-success" type="button">
+                                    FDR-End:
+                                </button>
+                            </div>
+                            <input type="text" class="form-control m-input" name="fdrEnd" placeholder="fdrEnd"
+                                   th:value="${fdrEnd}">
                         </div>
                         <div class="input-group col-lg-3">
                             <div class="input-group-prepend">
@@ -89,7 +110,8 @@
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
                             <h3 class="m-portlet__head-text">
-                                卷积代号:<span th:text="${overview.name}"></span></br>总计有 <span th:text="${totalNum}"></span> 组打分
+                                卷积代号:<span th:text="${overview.name}"></span></br>总计有 <span
+                                    th:text="${totalNum}"></span> 组打分
                             </h3>
                         </div>
                     </div>
@@ -104,21 +126,32 @@
                                  data-toggle="collapse" th:href="|#${score.peptideRef}_${score.isDecoy?'decoy':''}|"
                                  aria-expanded="false">
                                 <!--<span th:if="${score.isDecoy}" class="m-accordion__item-icon"><i class="fa fa-bomb"></i></span>-->
-                                <span th:if="${!score.isDecoy}" class="m-accordion__item-icon"><i class="fa fa-diamond"></i></span>
+                                <span th:if="${!score.isDecoy}" class="m-accordion__item-icon"><i
+                                        class="fa fa-diamond"></i></span>
 
-                                <span th:if="${!score.isDecoy&&score.isIdentified}" class="m-accordion__item-icon"><i class="fa fa-check"></i></span>
-                                <span th:if="${!score.isDecoy&&!score.isIdentified}" class="m-accordion__item-icon"><i class="fa fa-close"></i></span>
-                                <span class="m-accordion__item-title" th:text="|(${score?.featureScoresList?.size()})[预测RT:${score?.rt}]${score.isDecoy?'伪肽段':'肽段'}:${score?.peptideRef}[${#dates.format(score?.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}]|"></span>
+                                <span th:if="${!score.isDecoy&&score.isIdentified}" class="m-accordion__item-icon"><i
+                                        class="fa fa-check"></i></span>
+                                <span th:if="${!score.isDecoy&&!score.isIdentified}" class="m-accordion__item-icon"><i
+                                        class="fa fa-close"></i></span>
+                                <span class="m-accordion__item-title"
+                                      th:text="|(${score?.featureScoresList?.size()})[预测RT:${score?.rt}][FRD:${score?.fdr}]${score.isDecoy?'伪肽段':'肽段'}:${score?.peptideRef}[${#dates.format(score?.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}]|"></span>
                                 <span class="m-accordion__item-mode"></span>
                             </div>
                             <div class="m-accordion__item-body collapse"
                                  th:id="|${score?.peptideRef}_${score.isDecoy?'decoy':''}|" role="tabpanel"
                                  aria-labelledby="m_accordion_7_item_1_head" data-parent="#m_accordion_7">
                                 <div class="m-accordion__item-content">
-                                    <a th:href="|/scores/list?overviewId=${overviewId}&peptideRef=${score?.peptideRef}|" class="btn btn-primary btn-sm">查看真伪肽段打分</a>
-                                    <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#m_modal_group"
+                                    <a th:href="|/scores/list?overviewId=${overviewId}&peptideRef=${score?.peptideRef}|"
+                                       class="btn btn-primary btn-sm">查看真伪肽段打分</a>
+                                    <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
+                                            data-target="#m_modal_group"
                                             th:onclick="|queryGroup('${score.analyseDataId}', false, false)|">
                                         查看卷积组谱图
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" data-toggle="modal"
+                                            data-target="#m_modal_group"
+                                            th:onclick="|allRtConv('${score.analyseDataId}',false, false)|">
+                                        全Fragment卷积
                                     </button>
                                     <table class="table table-bordered table-hover" style="table-layout:fixed;">
                                         <thead>

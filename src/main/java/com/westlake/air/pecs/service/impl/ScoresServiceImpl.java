@@ -214,7 +214,7 @@ public class ScoresServiceImpl implements ScoresService {
         List<Double> compoundRt = new ArrayList<>();
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
         for (AnalyseDataDO dataDO : dataList) {
-            SlopeIntercept slopeIntercept = new SlopeIntercept();//void parameter
+            SlopeIntercept slopeIntercept = new SlopeIntercept();
             FeatureByPep featureByPep = featureExtractor.getExperimentFeature(dataDO, intensityGroupMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()), sigmaSpacing);
             if (!featureByPep.isFeatureFound()) {
                 continue;
@@ -249,9 +249,6 @@ public class ScoresServiceImpl implements ScoresService {
         }
         input.setOverviewId(dataList.get(0).getOverviewId());//取一个AnalyseDataDO的OverviewId
 
-        //开始打分前先删除原有的打分数据
-        scoresDAO.deleteAllByOverviewId(input.getOverviewId());
-        logger.info("原有打分数据删除完毕");
         //标准库按照PeptideRef分组
         HashMap<String, IntensityGroup> intensityGroupMap = peptideService.getIntensityGroupMap(input.getLibraryId());
         List<ScoresDO> pecsScoreList = new ArrayList<>();
@@ -267,13 +264,12 @@ public class ScoresServiceImpl implements ScoresService {
                 if (!dataDO.getIsHit()) {
                     continue;
                 }
-                if (dataDO.getMzMap().size() < 3) {
+                if (dataDO.getConvIntensityMap() == null || dataDO.getConvIntensityMap().size() < 3) {
                     logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
                     continue;
                 }
 
                 analyseDataService.decompress(dataDO);
-
                 List<FeatureScores> featureScoresList = new ArrayList<>();
                 //获取标准库中对应的PeptideRef组
                 IntensityGroup ig = intensityGroupMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy());
@@ -349,6 +345,9 @@ public class ScoresServiceImpl implements ScoresService {
                     featureScoresList.add(featureScores);
                 }
 
+                if(featureScoresList.size() == 0){
+                    continue;
+                }
                 ScoresDO pecsScore = new ScoresDO();
 
                 pecsScore.setRt(dataDO.getRt());
@@ -363,8 +362,10 @@ public class ScoresServiceImpl implements ScoresService {
                 pecsScoreList.add(pecsScore);
 
                 count++;
-                if (count % 100 == 0) {
+                if (count % 1000 == 0) {
                     logger.info(count + "个Peptide已经打分完毕,总共有" + dataList.size() + "个Peptide");
+                    scoresDAO.insert(pecsScoreList);
+                    pecsScoreList.clear();
                 }
             }
 

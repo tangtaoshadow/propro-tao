@@ -117,6 +117,10 @@ public class ScoresDAO {
         if (targetQuery.getIsIdentified() != null) {
             query.addCriteria(where("isIdentified").is(targetQuery.getIsIdentified()));
         }
+        if (targetQuery.getFdrStart() != null || targetQuery.getFdrEnd() != null) {
+            query.addCriteria(where("fdr").gte(targetQuery.getFdrStart()==null?0:targetQuery.getFdrStart()).lte(targetQuery.getFdrEnd()==null?1:targetQuery.getFdrEnd()));
+        }
+
 
         return query;
     }

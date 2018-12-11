@@ -364,6 +364,13 @@ public class AirusUtil {
      */
     public static TrainData split(List<SimpleScores> scores, double fraction, boolean isDebug) {
 
+        //每一轮开始前将上一轮的加权总分去掉
+        for (SimpleScores ss : scores) {
+            for (FeatureScores sft : ss.getFeatureScoresList()) {
+                sft.getScoresMap().remove(FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+            }
+        }
+
         List<SimpleScores> targets = new ArrayList<>();
         List<SimpleScores> decoys = new ArrayList<>();
         //按照是否是伪肽段分为两个数组

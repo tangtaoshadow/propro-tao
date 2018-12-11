@@ -94,6 +94,7 @@ public class FeatureExtractor {
 
             //根据信噪比和最高峰选择谱图
             if(maxPeakPairs == null){
+                logger.info("Error: MaxPeakPairs were null!");
                 continue;
             }
             IntensityRtLeftRtRightPairs intensityRtLeftRtRightPairs = chromatogramPicker.pickChromatogram(rtIntensityPairsOrigin, rtIntensityPairsAfterSmooth, noisesOri1000, maxPeakPairs);
@@ -103,6 +104,7 @@ public class FeatureExtractor {
             libraryIntensityList.add(Double.parseDouble(Float.toString(intensityMap.get(cutInfo))));
             noise1000List.add(noisesOri1000);
         }
+
         if (rtIntensityPairsOriginList.size() == 0) {
             featureFound = false;
         }

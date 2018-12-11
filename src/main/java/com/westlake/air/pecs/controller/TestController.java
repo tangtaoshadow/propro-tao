@@ -50,6 +50,8 @@ public class TestController extends BaseController {
     ScoresService scoresService;
     @Autowired
     Airus airus;
+    @Autowired
+    PeptideService peptideService;
 
     public static float MZ_EXTRACT_WINDOW = 0.05f;
     public static float RT_EXTRACT_WINDOW = 1200f;
@@ -139,15 +141,11 @@ public class TestController extends BaseController {
     @RequestMapping("test8")
     @ResponseBody
     String test8(Model model, RedirectAttributes redirectAttributes) throws IOException {
-        ResultDO<List<AnalyseOverviewDO>> resultDO = analyseOverviewService.getList(new AnalyseOverviewQuery());
-        if(resultDO.isSuccess()){
-            List<AnalyseOverviewDO> overviews = resultDO.getModel();
-            for(AnalyseOverviewDO ov : overviews){
-                AnalyseDataQuery query = new AnalyseDataQuery();
-                query.setOverviewId(ov.getId());
-                long count = analyseDataDAO.count(query);
-                ov.setTotalPeptideCount((int)count);
-                analyseOverviewService.update(ov);
+        List<PeptideDO> peptides = peptideService.getAllByLibraryId("5c0a237efc6f9e3c5048a6bc");
+        int count = 0;
+        for (PeptideDO peptide : peptides) {
+            if (peptide.getFragmentMap().size() <= 3) {
+                count++;
             }
         }
         return "success";

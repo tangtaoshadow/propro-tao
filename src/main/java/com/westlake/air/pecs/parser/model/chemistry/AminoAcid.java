@@ -17,6 +17,9 @@ public class AminoAcid {
 
     String formula;
 
+    //修饰基团的基团ModId
+    String modId;
+
     double monoIsotopicMass;
 
     double averageMass;

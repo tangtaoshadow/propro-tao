@@ -33,15 +33,6 @@ public class ScoreTask extends BaseTask {
     @Async(value = "scoreExecutor")
     public void score(String overviewId, ExperimentDO experimentDO, SlopeIntercept slopeIntercept, String libraryId, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
         long start = System.currentTimeMillis();
-        taskDO.addLog("开始查询所有卷积结果");
-        taskDO.setStatus(TaskStatus.RUNNING.getName());
-        taskService.update(taskDO);
-        List<AnalyseDataDO> dataList = analyseDataService.getAllByOverviewId(overviewId);
-
-        taskDO.addLog("卷积结果获取完毕,耗时:" + (System.currentTimeMillis() - start) + ".开始进行打分");
-        taskService.update(taskDO);
-
-        start = System.currentTimeMillis();
         SwathParams input = new SwathParams();
         input.setLibraryId(libraryId);
         input.setSigmaSpacing(sigmaSpacing);
@@ -49,14 +40,20 @@ public class ScoreTask extends BaseTask {
         input.setOverviewId(overviewId);
         input.setExperimentDO(experimentDO);
 
-        scoresService.score(dataList, input);
+        logger.info("首先删除所有旧打分数据");
+        scoresService.deleteAllByOverviewId(input.getOverviewId());
 
-        taskDO.addLog("子分数打分成功,耗时:" + (System.currentTimeMillis() - start) + ".开始清理子分数总览图");
+        taskDO.addLog("删除旧打分结果完毕,开始准备新打分");
+        taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
 
-        start = System.currentTimeMillis();
-        scoresService.buildScoreDistributions(overviewId);
-        taskDO.addLog("生成子分数总览图完毕,流程结束,耗时:" + (System.currentTimeMillis() - start));
+        score(overviewId, input, taskDO);
+
+        taskDO.addLog("子分数打分成功,耗时:" + (System.currentTimeMillis() - start));
+//        taskService.update(taskDO);
+//        start = System.currentTimeMillis();
+//        scoresService.buildScoreDistributions(overviewId);
+//        taskDO.addLog("生成子分数总览图完毕,流程结束,耗时:" + (System.currentTimeMillis() - start));
         taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
 

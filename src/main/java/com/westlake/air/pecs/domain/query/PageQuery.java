@@ -23,7 +23,7 @@ public class PageQuery implements Serializable {
     protected String sortColumn = DEFAULT_SORT_COLUMN;
     protected long totalNum = 0;
 
-    protected int totalPage = 0 ;
+    protected long totalPage = 0 ;
 
     protected PageQuery() {}
 

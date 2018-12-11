@@ -55,7 +55,7 @@ public interface ScoresService {
     ResultDO<SlopeIntercept> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing);
 
     /**
-     * 打分
+     * 打分,调用本函数前最好确认是否已经删除了已有的打分数据,一份分析报告中只对应一份打分数据
      *
      * @param dataList 卷积后的数据
      * @param input    入参,必填参数包括

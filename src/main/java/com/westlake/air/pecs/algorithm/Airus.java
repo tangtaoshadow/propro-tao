@@ -46,11 +46,11 @@ public class Airus {
 
     public FinalResult doAirus(String overviewId, AirusParams airusParams) {
         FinalResult finalResult = new FinalResult();
-        logger.info("清理已识别的肽段数目");
+        logger.info("开始清理已识别的肽段数目");
         ResultDO<AnalyseOverviewDO> overviewDOResultDO = analyseOverviewService.getById(overviewId);
-        if(overviewDOResultDO.isSuccess()){
+        if (overviewDOResultDO.isSuccess()) {
             AnalyseOverviewDO overviewDO = overviewDOResultDO.getModel();
-            if(overviewDO.getMatchedPeptideCount() != null){
+            if (overviewDO.getMatchedPeptideCount() != null) {
                 overviewDO.setMatchedPeptideCount(null);
                 analyseOverviewService.update(overviewDO);
             }
@@ -78,16 +78,17 @@ public class Airus {
         for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
             ScoresDO scoresDO = scoresService.getByPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
             scoresDO.setBestRt(simpleFeatureScores.getRt());
+            scoresDO.setFdr(simpleFeatureScores.getFdr());
             if (!simpleFeatureScores.getIsDecoy()) {
                 scoresDO.setIsIdentified(simpleFeatureScores.getFdr() <= 0.01);
             }
             scoresService.update(scoresDO);
         }
-
+        logger.info("打分反馈更新完毕");
         int count = AirusUtil.checkFdr(finalResult);
         finalResult.setMatchedPeptideCount(count);
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
-        if(overviewResult.isSuccess()){
+        if (overviewResult.isSuccess()) {
             AnalyseOverviewDO overviewDO = overviewResult.getModel();
             overviewDO.setWeights(weightsMap);
             overviewDO.setMatchedPeptideCount(count);
@@ -122,7 +123,10 @@ public class Airus {
         for (int i = 0; i < neval; i++) {
             logger.info("开始第" + i + "轮尝试");
             LDALearnData ldaLearnData = semiSupervised.learnRandomized(scores, airusParams);
-
+            if(ldaLearnData == null){
+                logger.info("跳过本轮训练");
+                continue;
+            }
             ldaLearner.score(scores, ldaLearnData.getWeightsMap());
             List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
             ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);

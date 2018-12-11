@@ -358,7 +358,12 @@ public class ExperimentController extends BaseController {
             return "redirect:/extractor?id=" + id;
         }
 
-        TaskDO taskDO = new TaskDO(TaskTemplate.EXTRACTOR, resultDO.getModel().getName() + ":" + libraryId);
+        ResultDO<LibraryDO> libResult = libraryService.getById(libraryId);
+        if (libResult.isFailed()) {
+            return "redirect:/extractor?id=" + id;
+        }
+
+        TaskDO taskDO = new TaskDO(TaskTemplate.EXTRACTOR, resultDO.getModel().getName() + ":" + libResult.getModel().getName() + "(" + libraryId + ")");
         taskService.insert(taskDO);
         SlopeIntercept si = SlopeIntercept.create();
         if (slope != null && intercept != null) {
@@ -374,15 +379,15 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/doextractone")
     @ResponseBody
     String doExtractOne(Model model,
-                     @RequestParam(value = "expId", required = true) String expId,
-                     @RequestParam(value = "libraryId", required = true) String libraryId,
-                     @RequestParam(value = "peptideRef", required = true) String peptideRef) {
+                        @RequestParam(value = "expId", required = true) String expId,
+                        @RequestParam(value = "libraryId", required = true) String libraryId,
+                        @RequestParam(value = "peptideRef", required = true) String peptideRef) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(expId);
         PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, false);
 
 
-        ResultDO<AnalyseDataDO> analyseData = experimentService.extractOne(resultDO.getModel(), peptide);
+        ResultDO<AnalyseDataDO> analyseData = experimentService.extractOne(resultDO.getModel(), peptide, -1f);
 
         return JSON.toJSONString(analyseData);
     }
@@ -454,8 +459,8 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/compress")
     String compress(Model model,
-                       @RequestParam(value = "expId", required = true) String expId,
-                       RedirectAttributes redirectAttributes) {
+                    @RequestParam(value = "expId", required = true) String expId,
+                    RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(expId);
         if (resultDO.isFailed()) {
@@ -472,8 +477,8 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/compressToLMS")
     String compressToLMS(Model model,
-                    @RequestParam(value = "expId", required = true) String expId,
-                    RedirectAttributes redirectAttributes) {
+                         @RequestParam(value = "expId", required = true) String expId,
+                         RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(expId);
         if (resultDO.isFailed()) {

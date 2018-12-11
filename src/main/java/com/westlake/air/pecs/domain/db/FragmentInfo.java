@@ -1,6 +1,6 @@
 package com.westlake.air.pecs.domain.db;
 
-import com.westlake.air.pecs.domain.bean.transition.Annotation;
+import com.westlake.air.pecs.domain.bean.peptide.Annotation;
 import lombok.Data;
 
 @Data
@@ -29,5 +29,13 @@ public class FragmentInfo {
      * 注释,see http://tools.proteomecenter.org/wiki/index.php?title=Software:SpectraST#Annotation_syntax:
      */
     String annotations;
+
+    public FragmentInfo(){}
+    public FragmentInfo(String cutInfo, Double mz, Double intensity, Integer charge){
+        this.cutInfo = cutInfo;
+        this.mz = mz;
+        this.intensity = intensity;
+        this.charge = charge;
+    }
 
 }

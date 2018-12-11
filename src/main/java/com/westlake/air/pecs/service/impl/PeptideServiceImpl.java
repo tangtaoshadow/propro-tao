@@ -83,6 +83,17 @@ public class PeptideServiceImpl implements PeptideService {
         }
     }
 
+    @Override
+    public ResultDO update(PeptideDO peptideDO) {
+        try {
+            peptideDAO.update(peptideDO);
+            return ResultDO.build(peptideDO);
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            return ResultDO.buildError(ResultCode.UPDATE_ERROR);
+        }
+    }
+
     /**
      * 这边的代码由于时间问题写的比较简陋,先删除原有的关联数据,再插入新的关联数据,未做事务处理
      *
@@ -208,7 +219,6 @@ public class PeptideServiceImpl implements PeptideService {
 
         List<TargetPeptide> targetList = peptideDAO.getTPAll(query);
         long readDB = System.currentTimeMillis() - start;
-        start = System.currentTimeMillis();
         if (rtExtractionWindows != -1) {
             for (TargetPeptide targetPeptide : targetList) {
                 float iRt = (targetPeptide.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue();
@@ -222,7 +232,7 @@ public class PeptideServiceImpl implements PeptideService {
             }
         }
 
-        logger.info("构建卷积MS2坐标,读取数据库耗时:" + readDB + "构建卷积坐标耗时:" + (System.currentTimeMillis() - start));
+        logger.info("构建卷积MS2坐标,读取数据库耗时:" + readDB);
         return targetList;
     }
 

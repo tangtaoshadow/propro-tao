@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.algorithm;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.westlake.air.pecs.algorithm.learner.LDALearner;
 import com.westlake.air.pecs.domain.bean.airus.*;
@@ -34,19 +35,28 @@ public class SemiSupervised {
         try {
             //Get part of scores as train input.
             TrainData trainData = AirusUtil.split(scores, airusParams.getTrainTestRatio(), airusParams.isDebug());
-            //第一次训练数据集使用MainScore进行训练
-            TrainPeaks trainPeaks = selectTrainPeaks(trainData, airusParams.getMainScore(), airusParams);
+
+            //第一次训练数据集使用指定的主分数(默认为MainScore)进行训练
+            TrainPeaks trainPeaks = selectTrainPeaks(trainData, airusParams.getMainScore(), airusParams, airusParams.getSsInitialFdr());
+
             HashMap<String, Double> weightsMap = ldaLearner.learn(trainPeaks, airusParams.getMainScore());
-            logger.info("Train Weight:"+ JSONArray.toJSONString(weightsMap));
+            logger.info("Train Weight:" + JSONArray.toJSONString(weightsMap));
+
             //根据weightsMap计算子分数的加权总分
             ldaLearner.score(trainData, weightsMap);
             for (int times = 0; times < airusParams.getXevalNumIter(); times++) {
-                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, FeatureScores.ScoreType.WeightedTotalScore.getTypeName(), airusParams);
+                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, FeatureScores.ScoreType.WeightedTotalScore.getTypeName(), airusParams, airusParams.getSsIterationFdr());
                 weightsMap = ldaLearner.learn(trainPeaksTemp, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+                for(Double value: weightsMap.values()){
+                    if(value == null || Double.isNaN(value)){
+                        logger.info("本轮训练一坨屎:"+ JSON.toJSONString(weightsMap));
+                        continue;
+                    }
+                }
                 ldaLearner.score(trainData, weightsMap);
             }
             //每一轮结束后要将这一轮打出的加权总分删除掉,以免影响下一轮打分
-            trainData.removeWeightedTotalScore();
+//            trainData.removeWeightedTotalScore();
             ldaLearnData.setWeightsMap(weightsMap);
             return ldaLearnData;
         } catch (Exception e) {
@@ -57,14 +67,14 @@ public class SemiSupervised {
 
     }
 
-    private TrainPeaks selectTrainPeaks(TrainData trainData, String usedScoreType, AirusParams airusParams) {
+    private TrainPeaks selectTrainPeaks(TrainData trainData, String usedScoreType, AirusParams airusParams, Double cutoff) {
 
         List<SimpleFeatureScores> topTargetPeaks = AirusUtil.findTopFeatureScores(trainData.getTargets(), usedScoreType);
         List<SimpleFeatureScores> topDecoyPeaks = AirusUtil.findTopFeatureScores(trainData.getDecoys(), usedScoreType);
 
         // find cutoff fdr from scores and only use best target peaks:
-        Double cutoff = stats.findCutoff(topTargetPeaks, topDecoyPeaks, airusParams);
-        List<SimpleFeatureScores> bestTargetPeaks = AirusUtil.peaksFilter(topTargetPeaks, cutoff);
+        Double cutoffNew = stats.findCutoff(topTargetPeaks, topDecoyPeaks, airusParams, cutoff);
+        List<SimpleFeatureScores> bestTargetPeaks = AirusUtil.peaksFilter(topTargetPeaks, cutoffNew);
 
         TrainPeaks trainPeaks = new TrainPeaks();
         trainPeaks.setBestTargets(bestTargetPeaks);

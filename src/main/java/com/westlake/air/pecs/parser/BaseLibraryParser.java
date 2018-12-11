@@ -2,7 +2,7 @@ package com.westlake.air.pecs.parser;
 
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.transition.Annotation;
+import com.westlake.air.pecs.domain.bean.peptide.Annotation;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.domain.db.TaskDO;

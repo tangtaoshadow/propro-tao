@@ -3,7 +3,7 @@ package com.westlake.air.pecs.algorithm;
 import com.westlake.air.pecs.constants.ResidueType;
 import com.westlake.air.pecs.dao.AminoAcidDAO;
 import com.westlake.air.pecs.dao.ElementsDAO;
-import com.westlake.air.pecs.domain.bean.transition.Fragment;
+import com.westlake.air.pecs.domain.bean.peptide.Fragment;
 import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.dao.UnimodDAO;
 import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
@@ -35,7 +35,7 @@ public class FormulaCalculator {
     UnimodDAO unimodDAO;
 
     public double getMonoMz(PeptideDO peptideDO) {
-        if (peptideDO == null){
+        if (peptideDO == null) {
             return 0;
         }
         if (StringUtils.isEmpty(peptideDO.getSequence())) {
@@ -45,7 +45,7 @@ public class FormulaCalculator {
     }
 
     public double getAverageMz(PeptideDO peptideDO) {
-        if (peptideDO == null){
+        if (peptideDO == null) {
             return 0;
         }
         if (StringUtils.isEmpty(peptideDO.getSequence())) {
@@ -136,6 +136,19 @@ public class FormulaCalculator {
             default:
                 return 0;
         }
+    }
+
+    public List<String> parseUnimodIds(HashMap<Integer, String> map, int start, int end) {
+        List<String> unimodIds = null;
+        if (map != null) {
+            unimodIds = new ArrayList<>();
+            for (Integer key : map.keySet()) {
+                if (key >= start && key <= end) {
+                    unimodIds.add(map.get(key));
+                }
+            }
+        }
+        return unimodIds;
     }
 
     private double getMonoHWeight(int charge) {

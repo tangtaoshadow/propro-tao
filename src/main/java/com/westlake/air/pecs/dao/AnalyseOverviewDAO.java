@@ -51,8 +51,6 @@ public class AnalyseOverviewDAO {
         return mongoTemplate.findById(id, AnalyseOverviewDO.class, CollectionName);
     }
 
-
-
     public AnalyseOverviewDO insert(AnalyseOverviewDO overviewDO) {
         mongoTemplate.insert(overviewDO, CollectionName);
         return overviewDO;

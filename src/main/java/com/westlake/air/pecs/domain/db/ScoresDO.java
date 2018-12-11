@@ -33,6 +33,8 @@ public class ScoresDO {
     @Indexed
     Boolean isDecoy = false;
 
+    Double fdr;
+
     @Indexed
     Boolean isIdentified = false;
 
