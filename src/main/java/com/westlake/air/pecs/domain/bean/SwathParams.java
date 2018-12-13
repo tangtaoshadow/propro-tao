@@ -1,9 +1,12 @@
 package com.westlake.air.pecs.domain.bean;
 
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import lombok.Data;
+
+import java.util.HashSet;
 
 /**
  * Created by James Lu MiaoShan
@@ -35,5 +38,28 @@ public class SwathParams {
      * 流程的创建人
      */
     String creator;
+
+    HashSet<String> scoreTypes = new HashSet<>();
+
+    boolean usedDIAScores = false;
+
+    public SwathParams(){
+        scoreTypes.add(FeatureScores.ScoreType.IntensityScore.getTypeName());
+        scoreTypes.add(FeatureScores.ScoreType.LibraryCorr.getTypeName());
+        scoreTypes.add(FeatureScores.ScoreType.LibraryRsmd.getTypeName());
+        scoreTypes.add(FeatureScores.ScoreType.LogSnScore.getTypeName());
+        scoreTypes.add(FeatureScores.ScoreType.MassdevScore.getTypeName());
+        scoreTypes.add(FeatureScores.ScoreType.MassdevScoreWeighted.getTypeName());
+        scoreTypes.add(FeatureScores.ScoreType.XcorrShape.getTypeName());
+        scoreTypes.add(FeatureScores.ScoreType.XcorrShapeWeighted.getTypeName());
+        scoreTypes.add(FeatureScores.ScoreType.LibraryDotprod.getTypeName());
+        scoreTypes.add(FeatureScores.ScoreType.LibraryManhattan.getTypeName());
+        scoreTypes.add(FeatureScores.ScoreType.LibrarySangle.getTypeName());
+        scoreTypes.add(FeatureScores.ScoreType.LibraryRootmeansquare.getTypeName());
+        scoreTypes.add(FeatureScores.ScoreType.ManhattScore.getTypeName());
+        scoreTypes.add(FeatureScores.ScoreType.NormRtScore.getTypeName());
+        scoreTypes.add(FeatureScores.ScoreType.XcorrCoelution.getTypeName());
+        scoreTypes.add(FeatureScores.ScoreType.XcorrCoelutionWeighted.getTypeName());
+    }
 
 }

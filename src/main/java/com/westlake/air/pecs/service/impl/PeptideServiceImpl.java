@@ -237,8 +237,8 @@ public class PeptideServiceImpl implements PeptideService {
     }
 
     @Override
-    public HashMap<String, IntensityGroup> getIntensityGroupMap(String libraryId) {
-        return peptideDAO.getIntensityGroupMap(libraryId);
+    public HashMap<String, IntensityGroup> getIntensityGroupMap(PeptideQuery query) {
+        return peptideDAO.getIntensityGroupMap(query);
     }
 
     private List<TargetPeptide> sortMS1Coordinates(List<TargetPeptide> targetList) {

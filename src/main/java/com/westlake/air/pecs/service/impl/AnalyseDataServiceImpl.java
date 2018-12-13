@@ -76,6 +76,11 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     @Override
+    public List<AnalyseDataDO> getAll(AnalyseDataQuery query) {
+        return analyseDataDAO.getAll(query);
+    }
+
+    @Override
     public ResultDO insert(AnalyseDataDO dataDO) {
         try {
             analyseDataDAO.insert(dataDO);

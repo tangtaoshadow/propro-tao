@@ -25,13 +25,13 @@ public class SignalToNoiseEstimator {
      * @param binCount
      * @return
      */
-    public double[] computeSTN(RtIntensityPairsDouble rtIntensity, double windowLength, int binCount) {
+    public double[] computeSTN(Double[] rtArray, Double[] rtIntensity, double windowLength, int binCount) {
 
         //final result
-        double[] stnResults = new double[rtIntensity.getRtArray().length];
+        double[] stnResults = new double[rtArray.length];
 
         //get mean and variance
-        double[] meanVariance = MathUtil.getMeanVariance(rtIntensity.getIntensityArray());
+        double[] meanVariance = MathUtil.getMeanVariance(rtIntensity);
 
         //get max intensity
         double maxIntensity = meanVariance[0] + Math.sqrt(meanVariance[1]) * Constants.AUTO_MAX_STDEV_FACTOR;
@@ -53,7 +53,7 @@ public class SignalToNoiseEstimator {
         int windowCount = 0;// number of windows
         int elementsInWindowHalf;// number of elements where we find the median
         double noise;// noise value of a data point
-        int windowsOverall = rtIntensity.getRtArray().length;// determine how many elements we need to estimate (for progress estimation)
+        int windowsOverall = rtArray.length;// determine how many elements we need to estimate (for progress estimation)
         float sparseWindowPercent = 0, histogramOobPercent = 0;
 
         //Main loop
@@ -63,14 +63,14 @@ public class SignalToNoiseEstimator {
         while (positionCenter < windowsOverall) {
 //            elementsInWindow = 0;
             //get left/right borders
-            while (rtIntensity.getRtArray()[left] < rtIntensity.getRtArray()[positionCenter] - windowHalfSize) {
-                toBin = Math.max(Math.min((int) (rtIntensity.getIntensityArray()[left] / binSize), binCount - 1), 0);
+            while (rtArray[left] < rtArray[positionCenter] - windowHalfSize) {
+                toBin = Math.max(Math.min((int) (rtIntensity[left] / binSize), binCount - 1), 0);
                 histogram[toBin]--;
                 elementsInWindow--;
                 left++;
             }
-            while (right < windowsOverall && rtIntensity.getRtArray()[right] <= rtIntensity.getRtArray()[positionCenter] + windowHalfSize) {
-                toBin = Math.max(Math.min((int) (rtIntensity.getIntensityArray()[right] / binSize), binCount - 1), 0);
+            while (right < windowsOverall && rtArray[right] <= rtArray[positionCenter] + windowHalfSize) {
+                toBin = Math.max(Math.min((int) (rtIntensity[right] / binSize), binCount - 1), 0);
                 histogram[toBin]++;
                 elementsInWindow++;
                 right++;
@@ -93,7 +93,7 @@ public class SignalToNoiseEstimator {
                 }
                 noise = Math.max(1.0d, binValue[medianBin]);
             }
-            stnResults[positionCenter] = rtIntensity.getIntensityArray()[positionCenter] / noise;
+            stnResults[positionCenter] = rtIntensity[positionCenter] / noise;
             positionCenter++;
             windowCount++;
         }

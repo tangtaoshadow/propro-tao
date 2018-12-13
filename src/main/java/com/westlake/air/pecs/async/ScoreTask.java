@@ -39,7 +39,7 @@ public class ScoreTask extends BaseTask {
         input.setSlopeIntercept(slopeIntercept);
         input.setOverviewId(overviewId);
         input.setExperimentDO(experimentDO);
-
+        input.setUsedDIAScores(true);
         logger.info("首先删除所有旧打分数据");
         scoresService.deleteAllByOverviewId(input.getOverviewId());
 

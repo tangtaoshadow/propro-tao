@@ -12,6 +12,8 @@ public class SigmaSpacing {
 
     Integer rightNum;
 
+    Double rightNumSpacing;
+
     public static SigmaSpacing create() {
         SigmaSpacing sigmaSpacing = new SigmaSpacing();
         sigmaSpacing.setSigma(6.25f);
@@ -31,6 +33,13 @@ public class SigmaSpacing {
             sigma = 6.25f;
         }
         return sigma;
+    }
+
+    public Double getRightNumSpacing(){
+        if(rightNumSpacing == null){
+            rightNumSpacing = getRightNum()*getSpacingDouble();
+        }
+        return rightNumSpacing;
     }
 
     public Double getSigmaDouble() {
@@ -82,10 +91,13 @@ public class SigmaSpacing {
     }
 
     private double[] getCoeffs(double sigma, double spacing, int coeffSize) {
-        double[] coeffs = new double[coeffSize];
-        for (int i = 0; i < coeffSize; i++) {
-            coeffs[i] = (1.0 / (sigma * Math.sqrt(2.0 * Math.PI)) * Math.exp(-((i * spacing) * (i * spacing)) / (2 * sigma * sigma)));
+        if(coeffs == null){
+            coeffs = new double[coeffSize];
+            for (int i = 0; i < coeffSize; i++) {
+                coeffs[i] = (1.0 / (sigma * Math.sqrt(2.0 * Math.PI)) * Math.exp(-((i * spacing) * (i * spacing)) / (2 * sigma * sigma)));
+            }
         }
+
         return coeffs;
     }
 

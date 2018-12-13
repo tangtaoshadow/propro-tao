@@ -106,6 +106,7 @@ public class PeakSpline {
             d[j] = (c[j + 1] - c[j]) / (3 * h[j]);
         }
     }
+
     public void initBD(Float[] rt, Float[] intensity, int leftBoundary, int rightBoundary){
         int maxIndex = rightBoundary - leftBoundary;
         xBD = new ArrayList<>();

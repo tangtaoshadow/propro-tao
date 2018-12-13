@@ -31,6 +31,9 @@ public class AnalyseDataDO extends BaseDO {
     //该肽段片段的理论rt值,从标准库中冗余所得
     Float rt;
 
+    //该肽段的前体mz,从标准库中冗余所得
+    Float mz;
+
     //对应的标准库的peptideId
     String peptideId;
 

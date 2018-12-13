@@ -175,7 +175,6 @@ public class ScoresController extends BaseController {
         taskService.insert(taskDO);
 
         AirusParams airusParams = new AirusParams();
-        airusParams.setMainScore(FeatureScores.ScoreType.MainScore.getTypeName());
         airusTask.airus(overviewId, airusParams, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();

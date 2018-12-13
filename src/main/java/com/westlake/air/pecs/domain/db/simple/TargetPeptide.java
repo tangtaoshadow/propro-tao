@@ -20,6 +20,11 @@ public class TargetPeptide {
 
     String peptideRef;
 
+    /**
+     * 对应肽段序列,如果是伪肽段,则为对应的伪肽段的序列(不包含UniModId)
+     */
+    String sequence;
+
     //对应的MS1荷质比
     float mz;
 

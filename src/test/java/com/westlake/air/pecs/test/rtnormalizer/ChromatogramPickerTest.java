@@ -11,6 +11,8 @@ import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
+
 /**
  * Created by Nico Wang Ruimin
  * Time: 2018-09-02 05:00
@@ -36,14 +38,16 @@ public class ChromatogramPickerTest extends BaseTest {
 
         RtIntensityPairsDouble rtIntensityPairsDouble = new RtIntensityPairsDouble(rtData1, intData1);
 
-        RtIntensityPairsDouble gaussFilterResult = gaussFilter.filter(rtIntensityPairsDouble, new SigmaSpacing(6.25f, 0.01f));
+        HashMap<String, Double[]> map = new HashMap<>();
+        map.put("temp", intData1);
+        HashMap<String, Double[]> gaussFilterResult = gaussFilter.filter(rtData1,map, new SigmaSpacing(6.25f, 0.01f));
 
-        double[] stn200 = signalToNoiseEstimator.computeSTN(gaussFilterResult, 200, 30);
-        double[] stnOrigin = signalToNoiseEstimator.computeSTN(rtIntensityPairsDouble, 1000, 30);
+        double[] stn200 = signalToNoiseEstimator.computeSTN(rtData1, gaussFilterResult.get("temp"), 200, 30);
+        double[] stnOrigin = signalToNoiseEstimator.computeSTN(rtData1, intData1, 1000, 30);
 
-        RtIntensityPairsDouble peakPickerResult = peakPicker.pickMaxPeak(gaussFilterResult, stn200);
+        RtIntensityPairsDouble peakPickerResult = peakPicker.pickMaxPeak(rtData1, gaussFilterResult.get("temp"), stn200);
 
-        IntensityRtLeftRtRightPairs chromatogramPickerResult = chromatogramPicker.pickChromatogram(rtIntensityPairsDouble, rtIntensityPairsDouble, stnOrigin, peakPickerResult);
+        IntensityRtLeftRtRightPairs chromatogramPickerResult = chromatogramPicker.pickChromatogram(rtData1, intData1, gaussFilterResult.get("temp"), stnOrigin, peakPickerResult);
 
         System.out.printf("Chromatogram Picker Test finished.");
 

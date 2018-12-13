@@ -8,6 +8,8 @@ import com.westlake.air.pecs.feature.GaussFilter;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
+
 /**
  * Created by Song Jian
  * Time: 2018-08-09 14-31
@@ -19,50 +21,54 @@ public class GauseFilterTest extends BaseTest {
 
     @Test
     public void filterTest_1() {
-        Float[] rtArray = new Float[5];
-        Float[] intensityArray = new Float[5];
+        Double[] rtArray = new Double[5];
+        Double[] intensityArray = new Double[5];
         for (int i = 0; i < 5; i++) {
-             intensityArray[i] = 1.0F;
-             rtArray[i]= 500.0F + 0.2F * i;
+             intensityArray[i] = 1.0d;
+             rtArray[i]= 500.0d + 0.2d * i;
         }
 
         RtIntensityPairsDouble input = new RtIntensityPairsDouble(rtArray, intensityArray);
-        RtIntensityPairsDouble output = null;
-        output = gauseFilter.filter(input, new SigmaSpacing(1.0f/8, 0.01f));
+        HashMap<String, Double[]> result = null;
+        HashMap<String, Double[]> map = new HashMap<>();
+        map.put("temp", intensityArray);
+        result = gauseFilter.filter(rtArray, map, new SigmaSpacing(1.0f/8, 0.01f));
         for (int i = 0; i < 5; i++) {
-            assert isSimilar(output.getIntensityArray()[0], 1.0F, 1e-5F);
+            assert isSimilar(result.get("temp")[0], 1.0F, 1e-5F);
         }
     }
 
     @Test
     public void filterTest_2() {
-        Float[] rtArray = new Float[9];
-        Float[] intensityArray = new Float[9];
+        Double[] rtArray = new Double[9];
+        Double[] intensityArray = new Double[9];
         for (int i = 0; i < 9; i++) {
-            intensityArray[i] = 0.0F;
-            rtArray[i]= 500.0F + 0.03F * i;
+            intensityArray[i] = 0.0d;
+            rtArray[i]= 500.0D + 0.03d * i;
             if (i == 3) {
-                intensityArray[i] = 1.0F;
+                intensityArray[i] = 1.0d;
             }
             if (i == 4) {
-                intensityArray[i] = 0.8F;
+                intensityArray[i] = 0.8d;
             }
             if (i == 5) {
-                intensityArray[i] = 1.2F;
+                intensityArray[i] = 1.2d;
             }
         }
         RtIntensityPairsDouble input = new RtIntensityPairsDouble(rtArray, intensityArray);
-        RtIntensityPairsDouble output = null;
-        output = gauseFilter.filter(input, new SigmaSpacing(0.2f/8, 0.01f));
-        assert isSimilar(output.getIntensityArray()[0], 0.000734827F, 0.01F);
-        assert isSimilar(output.getIntensityArray()[1], 0.0543746F, 1e-2F);
-        assert isSimilar(output.getIntensityArray()[2], 0.298025F, 1e-2F);
-        assert isSimilar(output.getIntensityArray()[3], 0.707691F, 1e-2F);
-        assert isSimilar(output.getIntensityArray()[4], 0.8963F, 1e-2F);
-        assert isSimilar(output.getIntensityArray()[5], 0.799397F, 1e-2F);
-        assert isSimilar(output.getIntensityArray()[6], 0.352416F, 1e-2F);
-        assert isSimilar(output.getIntensityArray()[7], 0.065132F, 1e-2F);
-        assert isSimilar(output.getIntensityArray()[8], 0.000881793F, 1e-2F);
+        HashMap<String, Double[]> result = null;
+        HashMap<String, Double[]> map = new HashMap<>();
+        map.put("temp", intensityArray);
+        result = gauseFilter.filter(rtArray, map, new SigmaSpacing(0.2f/8, 0.01f));
+        assert isSimilar(result.get("temp")[0], 0.000734827F, 0.01F);
+        assert isSimilar(result.get("temp")[1], 0.0543746F, 1e-2F);
+        assert isSimilar(result.get("temp")[2], 0.298025F, 1e-2F);
+        assert isSimilar(result.get("temp")[3], 0.707691F, 1e-2F);
+        assert isSimilar(result.get("temp")[4], 0.8963F, 1e-2F);
+        assert isSimilar(result.get("temp")[5], 0.799397F, 1e-2F);
+        assert isSimilar(result.get("temp")[6], 0.352416F, 1e-2F);
+        assert isSimilar(result.get("temp")[7], 0.065132F, 1e-2F);
+        assert isSimilar(result.get("temp")[8], 0.000881793F, 1e-2F);
     }
 
     private boolean isSimilar(Double a, Float b, Float tolerance ) {

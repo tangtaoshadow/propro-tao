@@ -1,8 +1,10 @@
 package com.westlake.air.pecs.utils;
 
 import com.google.common.collect.Ordering;
+import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
+import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 
 import java.util.Comparator;
@@ -79,6 +81,46 @@ public class SortUtil {
         });
 
         return ordering.sortedCopy(overviews);
+    }
+
+    /**
+     * @param peptides
+     * @param isDesc 是否降序排序
+     * @return
+     */
+    public static List<PeptideDO> sortByMz(List<PeptideDO> peptides, boolean isDesc) {
+        Ordering<PeptideDO> ordering = Ordering.from(new Comparator<PeptideDO>() {
+            @Override
+            public int compare(PeptideDO o1, PeptideDO o2) {
+                if (isDesc) {
+                    return o2.getMz().compareTo(o1.getMz());
+                } else {
+                    return o1.getMz().compareTo(o2.getMz());
+                }
+            }
+        });
+
+        return ordering.sortedCopy(peptides);
+    }
+
+    /**
+     * @param rangs
+     * @param isDesc 是否降序排序
+     * @return
+     */
+    public static List<WindowRang> sortByMzStart(List<WindowRang> rangs, boolean isDesc) {
+        Ordering<WindowRang> ordering = Ordering.from(new Comparator<WindowRang>() {
+            @Override
+            public int compare(WindowRang o1, WindowRang o2) {
+                if (isDesc) {
+                    return o2.getMzStart().compareTo(o1.getMzStart());
+                } else {
+                    return o1.getMzStart().compareTo(o2.getMzStart());
+                }
+            }
+        });
+
+        return ordering.sortedCopy(rangs);
     }
 
 }

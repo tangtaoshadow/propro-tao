@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.domain.db;
 
 import com.westlake.air.pecs.domain.BaseDO;
+import com.westlake.air.pecs.domain.db.simple.TargetPeptide;
 import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -111,4 +112,15 @@ public class PeptideDO extends BaseDO {
         fragmentMap.remove(cutInfo);
     }
 
+    public TargetPeptide toTargetPeptide(){
+        TargetPeptide tp = new TargetPeptide();
+        tp.setPeptideRef(getPeptideRef());
+        tp.setRt(getRt().floatValue());
+        tp.setFragmentMap(getFragmentMap());
+        tp.setIsDecoy(getIsDecoy());
+        tp.setMz(getMz().floatValue());
+        tp.setProteinName(getProteinName());
+        tp.setUnimodMap(getUnimodMap());
+        return tp;
+    }
 }

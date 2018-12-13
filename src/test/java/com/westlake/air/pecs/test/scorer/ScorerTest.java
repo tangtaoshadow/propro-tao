@@ -43,7 +43,7 @@ public class ScorerTest extends BaseTest {
         List<double[]> signalToNoiseList = new ArrayList<>();
         FeatureScores scores = new FeatureScores();
 
-        chromatographicScorer.calculateChromatographicScores(experimentFeatures, libraryIntensity, scores);
+        chromatographicScorer.calculateChromatographicScores(experimentFeatures, libraryIntensity, scores, null);
         assert isSimilar(scores.get(FeatureScores.ScoreType.XcorrCoelution), 1d + Math.sqrt(3.0d), Math.pow(10, -6));
         System.out.println("XcorrCoelution Test PASSED.");
         assert isSimilar(scores.get(FeatureScores.ScoreType.XcorrCoelutionWeighted), 1.5, Math.pow(10, -6));
@@ -67,7 +67,7 @@ public class ScorerTest extends BaseTest {
 
         FeatureScores scores = new FeatureScores();
 
-        libraryScorer.calculateLibraryScores(experimentFeatures, libraryIntensity, scores);
+        libraryScorer.calculateLibraryScores(experimentFeatures, libraryIntensity, scores, null);
         assert isSimilar(scores.get(FeatureScores.ScoreType.LibraryCorr), -0.654591316, Math.pow(10, -6));
         System.out.println("LibraryCorr Test PASSED.");
         assert isSimilar(scores.get(FeatureScores.ScoreType.LibraryRsmd), 0.5800337593, Math.pow(10, -6));

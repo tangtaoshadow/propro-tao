@@ -3,8 +3,10 @@ package com.westlake.air.pecs.service;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
+import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
+import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.db.ScoreDistribution;
 import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.domain.db.simple.MatchedPeptide;
@@ -57,14 +59,15 @@ public interface ScoresService {
     /**
      * 打分,调用本函数前最好确认是否已经删除了已有的打分数据,一份分析报告中只对应一份打分数据
      *
-     * @param dataList 卷积后的数据
+     * @param dataList 卷积后的数据,使用本函数时必须保证传入的dataList的前体的mz均在同一个Swath窗口内,否则会报错
+     * @param rang 卷积数据对应的window rang
      * @param input    入参,必填参数包括
      *                 slopeIntercept iRT计算出的斜率和截距
      *                 libraryId 标准库ID
      *                 sigmaSpacing Sigma通常为30/8 = 6.25/Spacing通常为0.01
      *                 overviewId
      */
-    List<ScoresDO> score(List<AnalyseDataDO> dataList, SwathParams input);
+    List<ScoresDO> score(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, SwathParams input);
 
     /**
      * Generate the tsv format file for pyprophet

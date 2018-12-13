@@ -304,7 +304,7 @@ function queryMultiGroup(peptideRef, isGaussFilter, useNoise1000) {
 
 }
 
-function allRtConv(dataId, isGaussFilter, useNoise1000){
+function allFragmentConv(dataId, isGaussFilter, useNoise1000){
 
     if (dataId == null) {
         dataId = this.dataId;
@@ -327,7 +327,7 @@ function allRtConv(dataId, isGaussFilter, useNoise1000){
 
     $.ajax({
         type: "POST",
-        url: "/analyse/allRtConv",
+        url: "/analyse/allFragmentConv",
         data: {
             dataId: dataId,
             isGaussFilter: isGaussFilter,

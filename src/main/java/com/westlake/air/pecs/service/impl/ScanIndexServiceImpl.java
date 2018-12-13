@@ -11,6 +11,7 @@ import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.AirdFileParser;
 import com.westlake.air.pecs.service.ScanIndexService;
+import com.westlake.air.pecs.utils.ConvolutionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 /**
  * Created by James Lu MiaoShan
@@ -56,25 +58,20 @@ public class ScanIndexServiceImpl implements ScanIndexService {
     }
 
     @Override
-    public ResultDO<MzIntensityPairs> getNearestSpectrumByRt(RandomAccessFile raf, ExperimentDO exp, Double rt, Float precursorMz) {
-        ScanIndexQuery query = new ScanIndexQuery();
-        query.setExperimentId(exp.getId());
-//        double realRt = (rt - exp.getIntercept()) / exp.getSlope();
-        query.setRtStart(rt - 0.1d);
-        query.setPageSize(1);
-        query.setTargetPrecursorMz(precursorMz);
-        List<ScanIndexDO> scanIndexes = scanIndexDAO.getList(query);
-        ScanIndexDO index = null;
-        if (scanIndexes.size() == 1) {
-            index = scanIndexes.get(0);
-        } else {
-            return ResultDO.buildError(ResultCode.SPECTRUM_NOT_EXISTED);
+    public MzIntensityPairs getNearestSpectrumByRt(TreeMap<Float, MzIntensityPairs> rtMap, Double rt) {
+        Float[] fArray = new Float[rtMap.keySet().size()];
+        rtMap.keySet().toArray(fArray);
+        int leftIndex = ConvolutionUtil.findLeftIndex(fArray, rt.floatValue());
+        int finalIndex = leftIndex;
+        try{
+            if((fArray[leftIndex] - rt) > (fArray[leftIndex+1] - rt)){
+                finalIndex = leftIndex + 1;
+            }
+        }catch (Exception e){
+            //leftIndex == fArray.length-1的时候数组溢出,直接返回finalIndex
+            return rtMap.get(fArray[finalIndex]);
         }
-
-        MzIntensityPairs mzIntensityPairs = airdFileParser.parseValue(raf, index.getPositionMap().get(PositionType.AIRD_MZ), index.getPositionMap().get(PositionType.AIRD_INTENSITY));
-        ResultDO<MzIntensityPairs> resultDO = new ResultDO(true);
-        resultDO.setModel(mzIntensityPairs);
-        return resultDO;
+        return rtMap.get(fArray[finalIndex]);
     }
 
     @Override

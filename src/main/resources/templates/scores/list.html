@@ -128,7 +128,6 @@
                                 <!--<span th:if="${score.isDecoy}" class="m-accordion__item-icon"><i class="fa fa-bomb"></i></span>-->
                                 <span th:if="${!score.isDecoy}" class="m-accordion__item-icon"><i
                                         class="fa fa-diamond"></i></span>
-
                                 <span th:if="${!score.isDecoy&&score.isIdentified}" class="m-accordion__item-icon"><i
                                         class="fa fa-check"></i></span>
                                 <span th:if="${!score.isDecoy&&!score.isIdentified}" class="m-accordion__item-icon"><i
@@ -150,7 +149,7 @@
                                     </button>
                                     <button type="button" class="btn btn-sm btn-danger" data-toggle="modal"
                                             data-target="#m_modal_group"
-                                            th:onclick="|allRtConv('${score.analyseDataId}',false, false)|">
+                                            th:onclick="|allFragmentConv('${score.analyseDataId}',false, false)|">
                                         全Fragment卷积
                                     </button>
                                     <table class="table table-bordered table-hover" style="table-layout:fixed;">

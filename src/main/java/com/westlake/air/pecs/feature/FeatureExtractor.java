@@ -1,5 +1,7 @@
 package com.westlake.air.pecs.feature;
 
+import com.google.common.collect.Lists;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensitiesDouble;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
@@ -70,6 +72,9 @@ public class FeatureExtractor {
 
         //对每一个chromatogram进行运算,dataDO中不含有ms1
         List<double[]> noise1000List = new ArrayList<>();
+        HashMap<String, Double[]> intensitiesMap = new HashMap<>();
+
+        //将没有卷积到信号的CutInfo过滤掉,同时将Float类型的参数调整为Double类型进行计算
         for (String cutInfo : intensityMap.keySet()) {
             //获取对应的卷积数据
             Float[] intensityArray = dataDO.getIntensityMap().get(cutInfo);
@@ -77,41 +82,51 @@ public class FeatureExtractor {
             if (!dataDO.getIsHit() || intensityArray == null) {
                 continue;
             }
+            Double[] intensityDoubleArray = new Double[intensityArray.length];
+            for (int k = 0; k < intensityArray.length; k++) {
+                intensityDoubleArray[k] = Double.parseDouble(intensityArray[k].toString());
+            }
+            intensitiesMap.put(cutInfo, intensityDoubleArray);
+        }
 
-            //得到卷积后的chromatogram的RT,Intensity对
-            RtIntensityPairsDouble rtIntensityPairsOrigin = new RtIntensityPairsDouble(dataDO.getRtArray(), intensityArray);
+        if (intensitiesMap.size() == 0) {
+            return new FeatureByPep(false);
+        }
 
-            //进行高斯平滑,得到平滑后的chromatogram
-            RtIntensityPairsDouble rtIntensityPairsAfterSmooth = gaussFilter.filter(rtIntensityPairsOrigin, sigmaSpacing);
+        //计算GaussFilter
+        Double[] rtDoubleArray = new Double[dataDO.getRtArray().length];
+        for (int k = 0; k < rtDoubleArray.length; k++) {
+            rtDoubleArray[k] = Double.parseDouble(dataDO.getRtArray()[k].toString());
+        }
+
+        HashMap<String, Double[]> smoothIntensitiesMap = gaussFilter.filter(rtDoubleArray, intensitiesMap, sigmaSpacing);
+
+        for (String cutInfo : intensitiesMap.keySet()) {
             //计算两个信噪比
-            //@Nico parameter configured
-            //TODO legacy or corrected noise1000 is not the same
-            double[] noises200 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 200, 30);
-//            double[] noises1000 = signalToNoiseEstimator.computeSTN(rtIntensityPairsAfterSmooth, 1000, 30);
-            double[] noisesOri1000 = signalToNoiseEstimator.computeSTN(rtIntensityPairsOrigin, 1000, 30);
-            //根据信噪比和峰值形状选择最高峰
-            RtIntensityPairsDouble maxPeakPairs = peakPicker.pickMaxPeak(rtIntensityPairsAfterSmooth, noises200);
+            double[] noises200 = signalToNoiseEstimator.computeSTN(rtDoubleArray, smoothIntensitiesMap.get(cutInfo), 200, 30);
+            double[] noisesOri1000 = signalToNoiseEstimator.computeSTN(rtDoubleArray, intensitiesMap.get(cutInfo), 1000, 30);
+            //根据信噪比和峰值形状选择最高峰,用降噪200及平滑过后的图去挑选Peak峰
+            RtIntensityPairsDouble maxPeakPairs = peakPicker.pickMaxPeak(rtDoubleArray, smoothIntensitiesMap.get(cutInfo), noises200);
 
             //根据信噪比和最高峰选择谱图
-            if(maxPeakPairs == null){
+            if (maxPeakPairs == null) {
                 logger.info("Error: MaxPeakPairs were null!");
                 continue;
             }
-            IntensityRtLeftRtRightPairs intensityRtLeftRtRightPairs = chromatogramPicker.pickChromatogram(rtIntensityPairsOrigin, rtIntensityPairsAfterSmooth, noisesOri1000, maxPeakPairs);
-            rtIntensityPairsOriginList.add(rtIntensityPairsOrigin);
+            IntensityRtLeftRtRightPairs intensityRtLeftRtRightPairs = chromatogramPicker.pickChromatogram(rtDoubleArray, intensitiesMap.get(cutInfo), smoothIntensitiesMap.get(cutInfo), noisesOri1000, maxPeakPairs);
             maxRtIntensityPairsList.add(maxPeakPairs);
+            rtIntensityPairsOriginList.add(new RtIntensityPairsDouble(rtDoubleArray, intensitiesMap.get(cutInfo)));
             intensityRtLeftRtRightPairsList.add(intensityRtLeftRtRightPairs);
             libraryIntensityList.add(Double.parseDouble(Float.toString(intensityMap.get(cutInfo))));
             noise1000List.add(noisesOri1000);
         }
 
         if (rtIntensityPairsOriginList.size() == 0) {
-            featureFound = false;
+            return new FeatureByPep(false);
         }
         List<List<ExperimentFeature>> experimentFeatures = featureFinder.findFeatures(rtIntensityPairsOriginList, maxRtIntensityPairsList, intensityRtLeftRtRightPairsList);
 
-        FeatureByPep featureResult = new FeatureByPep();
-        featureResult.setFeatureFound(featureFound);
+        FeatureByPep featureResult = new FeatureByPep(featureFound);
         featureResult.setExperimentFeatures(experimentFeatures);
         featureResult.setLibraryIntensityList(libraryIntensityList);
         featureResult.setRtIntensityPairsOriginList(rtIntensityPairsOriginList);

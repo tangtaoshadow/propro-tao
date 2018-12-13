@@ -398,31 +398,21 @@ public class AnalyseController extends BaseController {
         //同一组的rt坐标是相同的
         Float[] pairRtArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvRtArray()));
         for (String cutInfo : data.getConvIntensityMap().keySet()) {
-            if (!data.getIsHit() || data.getConvIntensityMap().get(cutInfo) == null) {
+            if (!data.getIsHit() || data.getConvIntensityMap().get(cutInfo) == null || cutInfo.equals("b5")) {
                 continue;
             }
 
             Float[] pairIntensityArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvIntensityMap().get(cutInfo)));
             if (isGaussFilter) {
-                pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, pairIntensityArray);
+                pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, cutInfo, pairIntensityArray);
             }
 
+            cutInfoArray.add(cutInfo);
             if (useNoise1000) {
-                double[] noisePairIntensityArray = signalToNoiseEstimator.computeSTN(new RtIntensityPairsDouble(pairRtArray, pairIntensityArray), 1000, 30);
-                JSONArray noiseIntensityArray = new JSONArray();
-                for (int i = 0; i < noisePairIntensityArray.length; i++) {
-                    if (noisePairIntensityArray[i] >= Constants.SIGNAL_TO_NOISE_LIMIT) {
-                        noiseIntensityArray.add(pairIntensityArray[i]);
-                    } else {
-                        noiseIntensityArray.add(0);
-                    }
-                }
-                cutInfoArray.add(cutInfo);
-                intensityArrays.add(noiseIntensityArray);
+                intensityArrays = noise1000(pairRtArray, pairIntensityArray);
             } else {
                 JSONArray intensityArray = new JSONArray();
                 intensityArray.addAll(Arrays.asList(pairIntensityArray));
-                cutInfoArray.add(cutInfo);
                 intensityArrays.add(intensityArray);
             }
         }
@@ -444,9 +434,9 @@ public class AnalyseController extends BaseController {
         return resultDO;
     }
 
-    @RequestMapping(value = "/allRtConv")
+    @RequestMapping(value = "/allFragmentConv")
     @ResponseBody
-    ResultDO<JSONObject> allRtConv(Model model,
+    ResultDO<JSONObject> allFragmentConv(Model model,
                                    @RequestParam(value = "dataId", required = false) String dataId,
                                    @RequestParam(value = "isGaussFilter", required = false, defaultValue = "false") Boolean isGaussFilter,
                                    @RequestParam(value = "useNoise1000", required = false, defaultValue = "false") Boolean useNoise1000) {
@@ -480,15 +470,15 @@ public class AnalyseController extends BaseController {
         ExperimentDO experimentDO = experimentResult.getModel();
         PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(overviewDO.getLibraryId(), data.getPeptideRef(), false);
         //准备该肽段的其他互补离子
-        HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, 4);
-        peptide.getFragmentMap().clear();
+        HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, 2);
+//        peptide.getFragmentMap().clear();
         for (String cutInfo : bySeriesMap.keySet()) {
-            if(peptide.getFragmentMap().get(cutInfo) == null){
+            if (peptide.getFragmentMap().get(cutInfo) == null) {
                 peptide.getFragmentMap().put(cutInfo, new FragmentInfo(cutInfo, bySeriesMap.get(cutInfo), 0d, peptide.getCharge()));
             }
         }
         ResultDO<AnalyseDataDO> dataRealResult = experimentService.extractOne(experimentDO, peptide, 800f);
-        if(dataRealResult.isFailed()){
+        if (dataRealResult.isFailed()) {
             resultDO.setErrorResult(ResultCode.CONVOLUTION_DATA_NOT_EXISTED);
             return resultDO;
         }
@@ -501,31 +491,21 @@ public class AnalyseController extends BaseController {
         //同一组的rt坐标是相同的
         Float[] pairRtArray = dataDO.getRtArray();
         for (String cutInfo : dataDO.getIntensityMap().keySet()) {
-            if (!data.getIsHit() || dataDO.getIntensityMap().get(cutInfo) == null) {
+            if (!data.getIsHit() || dataDO.getIntensityMap().get(cutInfo) == null || cutInfo.equals("y8")) {
                 continue;
             }
 
             Float[] pairIntensityArray = dataDO.getIntensityMap().get(cutInfo);
             if (isGaussFilter) {
-                pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, pairIntensityArray);
+                pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, cutInfo, pairIntensityArray);
             }
 
+            cutInfoArray.add(cutInfo);
             if (useNoise1000) {
-                double[] noisePairIntensityArray = signalToNoiseEstimator.computeSTN(new RtIntensityPairsDouble(pairRtArray, pairIntensityArray), 1000, 30);
-                JSONArray noiseIntensityArray = new JSONArray();
-                for (int i = 0; i < noisePairIntensityArray.length; i++) {
-                    if (noisePairIntensityArray[i] >= Constants.SIGNAL_TO_NOISE_LIMIT) {
-                        noiseIntensityArray.add(pairIntensityArray[i]);
-                    } else {
-                        noiseIntensityArray.add(0);
-                    }
-                }
-                cutInfoArray.add(cutInfo);
-                intensityArrays.add(noiseIntensityArray);
+                intensityArrays = noise1000(pairRtArray, pairIntensityArray);
             } else {
                 JSONArray intensityArray = new JSONArray();
                 intensityArray.addAll(Arrays.asList(pairIntensityArray));
-                cutInfoArray.add(cutInfo);
                 intensityArrays.add(intensityArray);
             }
         }
@@ -561,7 +541,7 @@ public class AnalyseController extends BaseController {
             if (overviewId == null || overviewId.isEmpty()) {
                 continue;
             }
-            AnalyseDataDO data = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, peptideRef, true);
+            AnalyseDataDO data = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, peptideRef, false);
             ScoresDO scoresDO = scoresService.getByPeptideRefAndIsDecoy(data.getOverviewId(), data.getPeptideRef(), data.getIsDecoy());
             JSONArray rtArray = new JSONArray();
             JSONArray intensityArrays = new JSONArray();
@@ -576,25 +556,14 @@ public class AnalyseController extends BaseController {
                 }
                 Float[] pairIntensityArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvIntensityMap().get(cutInfo)));
                 if (isGaussFilter) {
-                    pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, pairIntensityArray);
+                    pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, cutInfo, pairIntensityArray);
                 }
-
+                cutInfoArray.add(cutInfo);
                 if (useNoise1000) {
-                    double[] noisePairIntensityArray = signalToNoiseEstimator.computeSTN(new RtIntensityPairsDouble(pairRtArray, pairIntensityArray), 1000, 30);
-                    JSONArray noiseIntensityArray = new JSONArray();
-                    for (int i = 0; i < noisePairIntensityArray.length; i++) {
-                        if (noisePairIntensityArray[i] >= Constants.SIGNAL_TO_NOISE_LIMIT) {
-                            noiseIntensityArray.add(pairIntensityArray[i]);
-                        } else {
-                            noiseIntensityArray.add(0);
-                        }
-                    }
-                    cutInfoArray.add(cutInfo);
-                    intensityArrays.add(noiseIntensityArray);
+                    intensityArrays = noise1000(pairRtArray, pairIntensityArray);
                 } else {
                     JSONArray intensityArray = new JSONArray();
                     intensityArray.addAll(Arrays.asList(pairIntensityArray));
-                    cutInfoArray.add(cutInfo);
                     intensityArrays.add(intensityArray);
                 }
             }
@@ -616,5 +585,27 @@ public class AnalyseController extends BaseController {
 
         resultDO.setModel(groups);
         return resultDO;
+    }
+
+    private JSONArray noise1000(Float[] pairRtArray, Float[] pairIntensityArray) {
+
+        Double[] rts = new Double[pairRtArray.length];
+        Double[] ints = new Double[pairIntensityArray.length];
+        for (int i = 0; i < rts.length; i++) {
+            rts[i] = Double.parseDouble(pairRtArray[i].toString());
+            ints[i] = Double.parseDouble(pairIntensityArray[i].toString());
+        }
+        double[] noisePairIntensityArray = signalToNoiseEstimator.computeSTN(rts, ints, 1000, 30);
+        JSONArray noiseIntensityArray = new JSONArray();
+        for (int i = 0; i < noisePairIntensityArray.length; i++) {
+            if (noisePairIntensityArray[i] >= Constants.SIGNAL_TO_NOISE_LIMIT) {
+                noiseIntensityArray.add(pairIntensityArray[i]);
+            } else {
+                noiseIntensityArray.add(0);
+            }
+        }
+        JSONArray intensityArrays = new JSONArray();
+        intensityArrays.add(noiseIntensityArray);
+        return intensityArrays;
     }
 }

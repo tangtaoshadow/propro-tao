@@ -94,7 +94,7 @@ public class Airus {
             overviewDO.setMatchedPeptideCount(count);
             analyseOverviewService.update(overviewDO);
         }
-        logger.info("合并打分完成");
+        logger.info("合并打分完成,共找到新肽段"+count+"个");
         return finalResult;
     }
 
@@ -123,7 +123,7 @@ public class Airus {
         for (int i = 0; i < neval; i++) {
             logger.info("开始第" + i + "轮尝试");
             LDALearnData ldaLearnData = semiSupervised.learnRandomized(scores, airusParams);
-            if(ldaLearnData == null){
+            if (ldaLearnData == null) {
                 logger.info("跳过本轮训练");
                 continue;
             }

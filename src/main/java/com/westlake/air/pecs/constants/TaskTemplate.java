@@ -47,6 +47,11 @@ public enum TaskTemplate {
     SWATH_WORKFLOW("SWATH_WORKFLOW", ""),
 
     /**
+     *
+     */
+    SWATH_RECONV_WORKFLOW("SWATH_RECONV_WORKFLOW", ""),
+
+    /**
      * compress the mzxml and sort the mzxml scan for swath
      */
     COMPRESSOR_AND_SORT("COMPRESSOR_AND_SORT", ""),

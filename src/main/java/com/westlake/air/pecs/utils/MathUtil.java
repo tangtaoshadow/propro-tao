@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.utils;
 
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
@@ -627,5 +628,15 @@ public class MathUtil {
             sum = 0;
         }
         return averagedW;
+    }
+
+    /**
+     * 对一个Double类型保留小数点后的尾数
+     * @param d 原double值
+     * @param keepLength 10^要保留的位数,比如要保留两位,就传入100
+     * @return
+     */
+    public static double keepLength(double d, int keepLength){
+        return (double)(Math.round(d * keepLength) / keepLength);
     }
 }

@@ -11,6 +11,7 @@ import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 
 /**
@@ -25,7 +26,7 @@ public interface ScanIndexService {
 
     ResultDO<List<ScanIndexDO>> getList(ScanIndexQuery query);
 
-    ResultDO<MzIntensityPairs> getNearestSpectrumByRt(RandomAccessFile raf, ExperimentDO exp, Double rt, Float precursorMz);
+    MzIntensityPairs getNearestSpectrumByRt(TreeMap<Float, MzIntensityPairs> rtMap, Double rt);
 
     List<ScanIndexDO> getAll(ScanIndexQuery query);
 

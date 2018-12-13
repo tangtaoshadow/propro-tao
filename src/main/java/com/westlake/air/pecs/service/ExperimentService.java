@@ -47,6 +47,7 @@ public interface ExperimentService {
      * 卷积的核心函数,最终返回卷积到的Peptide数目
      * 目前只支持MS2的卷积
      * @param swathParams
+     * 需要experimentDO,libraryId,rtExtractionWindow,mzExtractionWindow,SlopeIntercept
      * @return
      */
     ResultDO<AnalyseOverviewDO> extract(SwathParams swathParams);

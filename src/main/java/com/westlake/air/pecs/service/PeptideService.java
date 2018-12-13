@@ -86,11 +86,10 @@ public interface PeptideService {
     List<TargetPeptide> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd);
 
     /**
-     * 根据LibraryId获取按照PeptideRef+IsDecoy进行分组的Intensity Map
-     *
-     * @param libraryId
+     * 根据限制条件获取按照PeptideRef+IsDecoy进行分组的Intensity Map
+     * @param query
      * @return
      */
-    HashMap<String, IntensityGroup> getIntensityGroupMap(String libraryId);
+    HashMap<String, IntensityGroup> getIntensityGroupMap(PeptideQuery query);
 }
 

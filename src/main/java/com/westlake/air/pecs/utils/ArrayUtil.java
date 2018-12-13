@@ -3,6 +3,9 @@ package com.westlake.air.pecs.utils;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.IndexValue;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
+import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
+import com.westlake.air.pecs.domain.db.PeptideDO;
+import com.westlake.air.pecs.domain.db.simple.TargetPeptide;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -436,7 +439,6 @@ public class ArrayUtil {
     /**
      * count number of times corresponding to unique sorted array.
      * 将数组转置,然后计算每一个数字出现的次数
-     *
      */
     public static int[] countSort(Double[] array) {
         Double[] aSort = array.clone();
@@ -527,5 +529,22 @@ public class ArrayUtil {
                 }
             }
         }
+    }
+
+    public static List<TargetPeptide> toTargetPeptideList(List<PeptideDO> peptides, SlopeIntercept slopeIntercept, Float rtExtractionWindows){
+        List<TargetPeptide> tps = new ArrayList<>();
+        for(PeptideDO peptide : peptides){
+            TargetPeptide tp = peptide.toTargetPeptide();
+            if (rtExtractionWindows != -1) {
+                float iRt = (tp.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue();
+                tp.setRtStart(iRt - rtExtractionWindows / 2.0f);
+                tp.setRtEnd(iRt + rtExtractionWindows / 2.0f);
+            } else {
+                tp.setRtStart(-1);
+                tp.setRtEnd(99999);
+            }
+            tps.add(tp);
+        }
+        return tps;
     }
 }

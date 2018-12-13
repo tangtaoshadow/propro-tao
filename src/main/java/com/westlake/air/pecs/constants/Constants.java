@@ -10,7 +10,7 @@ public class Constants {
     public static final int MAX_PAGE_SIZE_FOR_FRAGMENT = 100000;
     public static final int DECOY_GENERATOR_TRY_TIMES = 10;
     public static final int MAX_INSERT_RECORD_FOR_PEPTIDE = 100000;
-    public static final double MATH_ROUND_PRECISION = 1000000d;
+    public static final int PRECISION = 1000000;
 
     //RT Normalizer
     public static final boolean CHECK_SPACINGS = true;

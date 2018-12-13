@@ -20,4 +20,11 @@ public class FeatureByPep {
     List<Double> libraryIntensityList;
 
     List<double[]> noise1000List;
+
+    public FeatureByPep() {
+    }
+
+    public FeatureByPep(boolean isFeatureFound) {
+        this.featureFound = isFeatureFound;
+    }
 }

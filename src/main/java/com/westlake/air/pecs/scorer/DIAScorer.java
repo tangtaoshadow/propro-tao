@@ -257,9 +257,7 @@ public class DIAScorer {
      * @param sequence
      * @param charge
      * @param scores
-     * @deprecated 用处不大
      */
-    @Deprecated
     public void calculateBYIonScore(Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<Integer, String> unimodHashMap, String sequence, int charge, FeatureScores scores) {
 
         //计算理论值
@@ -269,6 +267,7 @@ public class DIAScorer {
 
         List<Double> ySeriesList = bySeries.getYSeries();
         int ySeriesScore = getSeriesScore(ySeriesList, spectrumMzArray, spectrumIntArray);
+
 
         scores.put(FeatureScores.ScoreType.BseriesScore, (double) bSeriesScore);
         scores.put(FeatureScores.ScoreType.YseriesScore, (double) ySeriesScore);

@@ -43,9 +43,9 @@ public class PeakPickerTest extends BaseTest {
         BufferedReader readerResult = new BufferedReader(new FileReader(fileResult));
         RtIntensityPairsDouble rtIntensityPairsDoubleResult = FileUtil.txtReader(readerResult,"\t", 1, 2);
 
-        double[] signalToNoise200 = signalToNoiseEstimator.computeSTN(rtIntensityPairsDoubleTest, 200, 30);
+        double[] signalToNoise200 = signalToNoiseEstimator.computeSTN(rtIntensityPairsDoubleTest.getRtArray(), rtIntensityPairsDoubleTest.getIntensityArray(), 200, 30);
 
-        RtIntensityPairsDouble pickResult = peakPicker.pickMaxPeak(rtIntensityPairsDoubleTest, signalToNoise200);
+        RtIntensityPairsDouble pickResult = peakPicker.pickMaxPeak(rtIntensityPairsDoubleTest.getRtArray(), rtIntensityPairsDoubleTest.getIntensityArray(), signalToNoise200);
         for(int i=0; i<pickResult.getIntensityArray().length; i++){
 //            if(!isSimilar(pickResult.getRtArray()[i], rtIntensityPairsDoubleResult.getRtArray()[i], Math.pow(10, -4))){
 //                System.out.println(i + "\trt\t"+ pickResult.getRtArray()[i] +"\t" + rtIntensityPairsDoubleResult.getRtArray()[i]);

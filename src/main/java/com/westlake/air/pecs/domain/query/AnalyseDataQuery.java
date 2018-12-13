@@ -27,6 +27,10 @@ public class AnalyseDataQuery extends PageQuery{
 
     Boolean isDecoy;
 
+    Float mzStart;
+
+    Float mzEnd;
+
     public AnalyseDataQuery(){}
 
     public AnalyseDataQuery(String overviewId){

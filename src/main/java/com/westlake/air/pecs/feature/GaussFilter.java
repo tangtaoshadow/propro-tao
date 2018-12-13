@@ -1,10 +1,16 @@
 package com.westlake.air.pecs.feature;
 
 import com.westlake.air.pecs.constants.Constants;
+import com.westlake.air.pecs.domain.bean.analyse.RtIntensitiesDouble;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
+import com.westlake.air.pecs.utils.MathUtil;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by Nico Wang Ruimin
@@ -13,44 +19,54 @@ import org.springframework.stereotype.Component;
 @Component("gaussFilter")
 public class GaussFilter {
 
-    public Double[] filter(Float[] rtArray, Float[] intArray) {
-        RtIntensityPairsDouble pairsDouble = new RtIntensityPairsDouble(rtArray, intArray);
-        RtIntensityPairsDouble result = filter(pairsDouble, SigmaSpacing.create());
-        return result.getIntensityArray();
+    public Double[] filter(Float[] rtArray, String cutInfo, Float[] intArray) {
+        Double[] rts = new Double[rtArray.length];
+        Double[] ints = new Double[intArray.length];
+        for (int i = 0; i < rts.length; i++) {
+            rts[i] = Double.parseDouble(rtArray[i].toString());
+            ints[i] = Double.parseDouble(intArray[i].toString());
+        }
+        HashMap<String, Double[]> intensitiesMap = new HashMap<>();
+        intensitiesMap.put(cutInfo, ints);
+
+        HashMap<String, Double[]> resultMap = filter(rts, intensitiesMap, SigmaSpacing.create());
+        return resultMap.values().iterator().next();
     }
 
-    public Float[] filterForFloat(Float[] rtArray, Float[] intArray) {
-        Double[] result = filter(rtArray, intArray);
+    public Float[] filterForFloat(Float[] rtArray, String cutInfo, Float[] intArray) {
+        Double[] result = filter(rtArray, cutInfo, intArray);
         Float[] floatArray = new Float[result.length];
-        for(int i=0;i<floatArray.length;i++){
+        for (int i = 0; i < floatArray.length; i++) {
             floatArray[i] = result[i].floatValue();
         }
         return floatArray;
     }
 
     /**
-     * @param pairs
+     * @param rtArray
+     * @param intensitiesMap
      * @param sigmaSpacing
      * @return
      */
-    public RtIntensityPairsDouble filter(RtIntensityPairsDouble pairs, SigmaSpacing sigmaSpacing) {
+    public HashMap<String, Double[]> filter(Double[] rtArray, HashMap<String, Double[]> intensitiesMap, SigmaSpacing sigmaSpacing) {
 
         Double spacing = sigmaSpacing.getSpacingDouble();
         //coeffs: 以0为中心，sigma为标准差的正态分布参数
         double[] coeffs = sigmaSpacing.getCoeffs();
-
-        //startPosition & endPosition
         int middle = sigmaSpacing.getRightNum();
-        int listSize = pairs.getRtArray().length;
+        double middleSpacing = sigmaSpacing.getRightNumSpacing();
+
+        int rtLength = rtArray.length;
         double startPosition, endPosition;
-        double minRt = pairs.getRtArray()[0];
-        double maxRt = pairs.getRtArray()[listSize - 1];
+        double minRt = rtArray[0];
+        double maxRt = rtArray[rtLength - 1];
 
         //begin integrate
-        RtIntensityPairsDouble pairsFiltered = new RtIntensityPairsDouble(pairs);
-        Double[] rtArray = pairsFiltered.getRtArray();
-        Double[] intArray = pairsFiltered.getIntensityArray();
-        Double[] newIntArray = new Double[intArray.length];
+        HashMap<String, Double[]> newIntensitiesMap = new HashMap<String, Double[]>();
+        for (String cutInfo : intensitiesMap.keySet()) {
+            newIntensitiesMap.put(cutInfo, new Double[rtArray.length]);
+        }
+
         Double distanceInGaussian;
         int leftPosition;
         int rightPosition;
@@ -58,22 +74,23 @@ public class GaussFilter {
         double coeffRight;
         double coeffLeft;
         double norm = 0;
-        double v = 0;
 
-        for (int i = 0; i < listSize; i++) {
-
+        for (int i = 0; i < rtLength; i++) {
+            HashMap<String, Double> vMap = new HashMap<>();
+            for (String cutInfo : intensitiesMap.keySet()) {
+                vMap.put(cutInfo, 0d);
+            }
             norm = 0;
-            v = 0;
             //startPosition
-            if ((rtArray[i] - middle * spacing) > minRt) {
-                startPosition = Math.round((rtArray[i] - middle * spacing) * Constants.MATH_ROUND_PRECISION) / Constants.MATH_ROUND_PRECISION;
+            if ((rtArray[i] - middleSpacing) > minRt) {
+                startPosition = MathUtil.keepLength(rtArray[i] - middleSpacing, Constants.PRECISION);
             } else {
                 startPosition = minRt;
             }
 
             //endPostion
             if ((rtArray[i] + middle * spacing) < maxRt) {
-                endPosition = Math.round((rtArray[i] + middle * spacing) * Constants.MATH_ROUND_PRECISION) / Constants.MATH_ROUND_PRECISION;
+                endPosition = MathUtil.keepLength(rtArray[i] + middleSpacing, Constants.PRECISION);
             } else {
                 endPosition = maxRt;
             }
@@ -82,11 +99,9 @@ public class GaussFilter {
             int j = i;
 
             // left side of i
-            while (j > 0 && rtArray[j-1] > startPosition) {
-
-//                distanceInGaussian = Math.abs(rtArray[i] - rtArray[j]);
-                distanceInGaussian = Math.round((rtArray[i] - rtArray[j]) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION;
-                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION);
+            while (j > 0 && rtArray[j - 1] > startPosition) {
+                distanceInGaussian = MathUtil.keepLength(rtArray[i] - rtArray[j], Constants.PRECISION);
+                leftPosition = (int) MathUtil.keepLength(distanceInGaussian / spacing, Constants.PRECISION);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing) - distanceInGaussian) / spacing;
                 if (rightPosition < middle) {
@@ -95,9 +110,8 @@ public class GaussFilter {
                     coeffRight = coeffs[leftPosition];
                 }
 
-
-                distanceInGaussian = Math.round((rtArray[i] - rtArray[j-1]) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION;
-                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION);
+                distanceInGaussian = MathUtil.keepLength(rtArray[i] - rtArray[j - 1], Constants.PRECISION);
+                leftPosition = (int) MathUtil.keepLength((distanceInGaussian / spacing), Constants.PRECISION);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing - distanceInGaussian)) / spacing;
                 if (rightPosition < middle) {
@@ -106,21 +120,23 @@ public class GaussFilter {
                     coeffLeft = coeffs[leftPosition];
                 }
 
-                norm += Math.abs(rtArray[j-1] - rtArray[j]) * (coeffRight + coeffLeft) / 2.0;
-                v += Math.abs(rtArray[j-1] - rtArray[j]) * (intArray[j-1] * coeffLeft + intArray[j] * coeffRight) / 2.0;
+                norm += Math.abs(rtArray[j - 1] - rtArray[j]) * (coeffRight + coeffLeft) / 2.0;
+
+                for (String cutInfo : vMap.keySet()) {
+                    double t = vMap.get(cutInfo);
+                    t += Math.abs(rtArray[j - 1] - rtArray[j]) * (intensitiesMap.get(cutInfo)[j - 1] * coeffLeft + intensitiesMap.get(cutInfo)[j] * coeffRight) / 2.0;
+                    vMap.put(cutInfo, t);
+                }
 
                 j--;
 
             }
 
             j = i;
-
             // right side of i
-            while (j < listSize - 1 && rtArray[j + 1] < endPosition) {
-//                distanceInGaussianFloat = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j]) * 10000)) / 10000;
-//                distanceInGaussian = Double.parseDouble(distanceInGaussianFloat.toString());
-                distanceInGaussian = Math.round((rtArray[j] - rtArray[i]) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION;
-                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION);
+            while (j < rtLength - 1 && rtArray[j + 1] < endPosition) {
+                distanceInGaussian = MathUtil.keepLength(rtArray[j] - rtArray[i], Constants.PRECISION);
+                leftPosition = (int) MathUtil.keepLength(distanceInGaussian / spacing, Constants.PRECISION);
                 rightPosition = leftPosition + 1;
                 residualPercent = (Math.abs(leftPosition * spacing) - distanceInGaussian) / spacing;
                 if (rightPosition < middle) {
@@ -129,11 +145,8 @@ public class GaussFilter {
                     coeffLeft = coeffs[leftPosition];
                 }
 
-                //(float)(Math.round(a*100))/100
-//                distanceInGaussianFloat = (float)(Math.round(Math.abs(rtArray[i]  - rtArray[j+1]) * 10000)) / 10000;
-//                distanceInGaussian = Double.parseDouble(distanceInGaussianFloat.toString());
-                distanceInGaussian = Math.round((rtArray[j+1] - rtArray[i]) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION;
-                leftPosition = (int)(Math.round((distanceInGaussian / spacing) * Constants.MATH_ROUND_PRECISION)/Constants.MATH_ROUND_PRECISION);
+                distanceInGaussian = MathUtil.keepLength(rtArray[j + 1] - rtArray[i], Constants.PRECISION);
+                leftPosition = (int) MathUtil.keepLength(distanceInGaussian / spacing, Constants.PRECISION);
                 rightPosition = leftPosition + 1;
 
                 residualPercent = (Math.abs(leftPosition * spacing - distanceInGaussian)) / spacing;
@@ -143,22 +156,25 @@ public class GaussFilter {
                     coeffRight = coeffs[leftPosition];
                 }
 
-                norm += Math.abs(rtArray[j+1] - rtArray[j]) * (coeffLeft + coeffRight) / 2.0;
-                v += Math.abs(rtArray[j+1] - rtArray[j] ) * (intArray[j] * coeffLeft + intArray[j+1] * coeffRight) / 2.0;
-
+                norm += Math.abs(rtArray[j + 1] - rtArray[j]) * (coeffLeft + coeffRight) / 2.0;
+                for (String cutInfo : vMap.keySet()) {
+                    double t = vMap.get(cutInfo);
+                    t += Math.abs(rtArray[j + 1] - rtArray[j]) * (intensitiesMap.get(cutInfo)[j] * coeffLeft + intensitiesMap.get(cutInfo)[j + 1] * coeffRight) / 2.0;
+                    vMap.put(cutInfo, t);
+                }
                 j++;
 
             }
 
-            if (v > 0) {
-                newIntArray[i] = v / norm;
-            } else {
-                newIntArray[i] = 0d;
+            for (String cutInfo : vMap.keySet()) {
+                if (vMap.get(cutInfo) > 0) {
+                    newIntensitiesMap.get(cutInfo)[i] = vMap.get(cutInfo) / norm;
+                } else {
+                    newIntensitiesMap.get(cutInfo)[i] = 0d;
+                }
             }
 
-
         }
-        pairsFiltered.setIntensityArray(newIntArray);
-        return pairsFiltered;
+        return newIntensitiesMap;
     }
 }

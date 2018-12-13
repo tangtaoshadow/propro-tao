@@ -26,6 +26,7 @@ public class AnalyseOverviewDO extends BaseDO {
 
     String name;
 
+    String label;
     /**
      * 标准库ID
      */

@@ -11,6 +11,7 @@ import com.westlake.air.pecs.utils.ScoreUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -31,7 +32,7 @@ public class ChromatographicScorer {
     /**
      * @param experimentFeatures list of features in selected mrmfeature
      */
-    public void calculateChromatographicScores(List<ExperimentFeature> experimentFeatures, List<Double> libraryIntensity, FeatureScores scores) {
+    public void calculateChromatographicScores(List<ExperimentFeature> experimentFeatures, List<Double> libraryIntensity, FeatureScores scores, HashSet<String> scoreTypes) {
         Table<Integer, Integer, Double[]> xcorrMatrix = initializeXCorrMatrix(experimentFeatures);
 
         //xcorrCoelutionScore
@@ -79,10 +80,18 @@ public class ChromatographicScorer {
         if (deltas.size() != 1) {
             stdDelta = Math.sqrt(sumDelta / (deltas.size() - 1));
         }
-        scores.put(FeatureScores.ScoreType.XcorrCoelution, meanDelta + stdDelta); //时间偏差
-        scores.put(FeatureScores.ScoreType.XcorrCoelutionWeighted, sumDeltaWeighted);
-        scores.put(FeatureScores.ScoreType.XcorrShape, meanIntensity); // 平均的吻合程度--> 新的吻合系数
-        scores.put(FeatureScores.ScoreType.XcorrShapeWeighted, sumIntensityWeighted);
+        if(scoreTypes == null || scoreTypes.contains(FeatureScores.ScoreType.XcorrCoelution.getTypeName())){
+            scores.put(FeatureScores.ScoreType.XcorrCoelution, meanDelta + stdDelta); //时间偏差
+        }
+        if(scoreTypes == null || scoreTypes.contains(FeatureScores.ScoreType.XcorrCoelutionWeighted.getTypeName())){
+            scores.put(FeatureScores.ScoreType.XcorrCoelutionWeighted, sumDeltaWeighted);
+        }
+        if(scoreTypes == null || scoreTypes.contains(FeatureScores.ScoreType.XcorrShape.getTypeName())){
+            scores.put(FeatureScores.ScoreType.XcorrShape, meanIntensity); // 平均的吻合程度--> 新的吻合系数
+        }
+        if(scoreTypes == null || scoreTypes.contains(FeatureScores.ScoreType.XcorrShapeWeighted.getTypeName())){
+            scores.put(FeatureScores.ScoreType.XcorrShapeWeighted, sumIntensityWeighted);
+        }
     }
 
     public void calculateLogSnScore(List<RtIntensityPairsDouble> chromatograms, List<ExperimentFeature> experimentFeatures, List<double[]> signalToNoiseList, FeatureScores scores) {

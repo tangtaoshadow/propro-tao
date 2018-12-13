@@ -20,9 +20,7 @@ import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.AirdFileParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
 import com.westlake.air.pecs.service.*;
-import com.westlake.air.pecs.utils.CompressUtil;
-import com.westlake.air.pecs.utils.ConvolutionUtil;
-import com.westlake.air.pecs.utils.FileUtil;
+import com.westlake.air.pecs.utils.*;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -285,7 +283,6 @@ public class ExperimentServiceImpl implements ExperimentService {
         try {
             raf = new RandomAccessFile(file, "r");
             //Step1.获取窗口信息.
-            logger.info("获取Swath窗口信息");
             ScanIndexDO scanIndexDO = scanIndexService.getSwathIndex(exp.getId(), peptide.getMz().floatValue());
             //Step2.获取该窗口内的谱图Map,key值代表了RT
             TreeMap<Float, MzIntensityPairs> rtMap = airdFileParser.parseSwathBlockValues(raf, scanIndexDO);
@@ -431,7 +428,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         //Step3.提取指定原始谱图
         rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex);
 
-        return convoluteAndInsert(coordinates, rtMap, overviewId, swathParams.getRtExtractWindow(), swathParams.getMzExtractWindow(), false);
+        return convoluteAndInsert(coordinates, rtMap, overviewId, swathParams.getRtExtractWindow(), swathParams.getMzExtractWindow());
     }
 
     private TreeMap<Float, MzIntensityPairs> parseSpectrum(RandomAccessFile raf, List<SimpleScanIndex> indexes, ExperimentDO experimentDO) {
@@ -456,10 +453,9 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @param overviewId
      * @param rtExtractWindow
      * @param mzExtractWindow
-     * @param isMS1
      * @return
      */
-    private int convoluteAndInsert(List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow, boolean isMS1) {
+    private int convoluteAndInsert(List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow) {
         List<AnalyseDataDO> dataList = new ArrayList<>();
         long start = System.currentTimeMillis();
         for (TargetPeptide ms : coordinates) {
@@ -470,7 +466,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             dataList.add(dataDO);
         }
         logger.info("纯卷积耗时:" + (System.currentTimeMillis() - start));
-//        analyseDataService.insertAll(dataList, false);
+        analyseDataService.insertAll(dataList, false);
         return dataList.size();
     }
 
@@ -494,6 +490,23 @@ public class ExperimentServiceImpl implements ExperimentService {
             }
             finalList.add(dataDO);
         }
+    }
+
+    private AnalyseDataDO convForOne(PeptideDO peptide, TreeMap<Float, MzIntensityPairs> rtMap, SwathParams swathParams, String overviewId, boolean needCompress) {
+
+        TargetPeptide tp = peptide.toTargetPeptide();
+        SlopeIntercept slopeIntercept = swathParams.getSlopeIntercept();
+
+        if (swathParams.getRtExtractWindow() != -1) {
+            float iRt = (tp.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue();
+            tp.setRtStart(iRt - swathParams.getRtExtractWindow() / 2.0f);
+            tp.setRtEnd(iRt + swathParams.getRtExtractWindow() / 2.0f);
+        } else {
+            tp.setRtStart(-1);
+            tp.setRtEnd(99999);
+        }
+
+        return convForOne(tp, rtMap, swathParams.getMzExtractWindow(), swathParams.getRtExtractWindow(), overviewId, needCompress);
     }
 
     private AnalyseDataDO convForOne(TargetPeptide ms, TreeMap<Float, MzIntensityPairs> rtMap, Float mzExtractWindow, Float rtExtractWindow, String overviewId, boolean needCompress) {
@@ -527,6 +540,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         dataDO.setProteinName(ms.getProteinName());
         dataDO.setIsDecoy(ms.getIsDecoy());
         dataDO.setRt(ms.getRt());
+        dataDO.setMz(ms.getMz());
         dataDO.setUnimodMap(ms.getUnimodMap());
 
         Boolean isHit = false;
@@ -588,12 +602,43 @@ public class ExperimentServiceImpl implements ExperimentService {
     private AnalyseOverviewDO createOverview(SwathParams input) {
         //创建实验初始化概览数据
         AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
-        String name = libraryService.getNameById(input.getLibraryId());
         overviewDO.setExpId(input.getExperimentDO().getId());
-        overviewDO.setName(input.getExperimentDO().getName() + "-" + name + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
         overviewDO.setExpName(input.getExperimentDO().getName());
-        overviewDO.setLibraryId(input.getLibraryId());
-        overviewDO.setLibraryName(name);
+
+        if (input.getLibraryId() != null) {
+            String name = libraryService.getNameById(input.getLibraryId());
+            overviewDO.setLibraryId(input.getLibraryId());
+            overviewDO.setLibraryName(name);
+            overviewDO.setName(input.getExperimentDO().getName() + "-" + name + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
+        }
+
+        overviewDO.setCreator(input.getCreator());
+        overviewDO.setCreateDate(new Date());
+        overviewDO.setRtExtractWindow(input.getRtExtractWindow());
+        overviewDO.setMzExtractWindow(input.getMzExtractWindow());
+        if (input.getSlopeIntercept() != null) {
+            overviewDO.setSlope(input.getSlopeIntercept().getSlope());
+            overviewDO.setIntercept(input.getSlopeIntercept().getIntercept());
+        }
+
+        return overviewDO;
+    }
+
+    private AnalyseOverviewDO createOverview(SwathParams input, String fatherOverviewId) {
+        //创建实验初始化概览数据
+        AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
+        overviewDO.setExpId(input.getExperimentDO().getId());
+        overviewDO.setExpName(input.getExperimentDO().getName());
+
+        if (input.getLibraryId() != null) {
+            String name = libraryService.getNameById(input.getLibraryId());
+            overviewDO.setLibraryId(input.getLibraryId());
+            overviewDO.setLibraryName(name);
+            overviewDO.setName(input.getExperimentDO().getName() + "-" + name + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
+        } else {
+            overviewDO.setName(input.getExperimentDO().getName() + "- Farther Overview Id:" + fatherOverviewId + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
+        }
+
         overviewDO.setCreator(input.getCreator());
         overviewDO.setCreateDate(new Date());
         overviewDO.setRtExtractWindow(input.getRtExtractWindow());

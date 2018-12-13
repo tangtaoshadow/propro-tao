@@ -75,13 +75,13 @@
                             </button>
                             <div class="dropdown-menu" aria-labelledby="scoresBtn">
                                 <a class="dropdown-item" th:href="|/analyse/overview/score?overviewId=${overview.id}|">开始子分数打分</a>
-                                <a class="dropdown-item" th:href="|/scores/buildDistribution?overviewId=${overview.id}|">生成子分数总览</a>
+                                <!--<a class="dropdown-item" th:href="|/scores/buildDistribution?overviewId=${overview.id}|">生成子分数总览</a>-->
                                 <a class="dropdown-item" th:href="|/scores/airus/${overview.id}|">Airus合并打分</a>
                                 <a class="dropdown-item" th:href="|/scores/export/${overview.id}|">导出子分数</a>
                             </div>
                         </div>
-                        <a th:if="${overview.scoreDistributions}" th:href="|/scores/detail?overviewId=${overview.id}|"
-                           class="btn btn-warning btn-sm">子分数总览</a>
+                        <!--<a th:if="${overview.scoreDistributions}" th:href="|/scores/detail?overviewId=${overview.id}|"-->
+                           <!--class="btn btn-warning btn-sm">子分数总览</a>-->
                     </td>
                 </tr>
                 </tbody>

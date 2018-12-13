@@ -2,6 +2,8 @@ package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.algorithm.Airus;
+import com.westlake.air.pecs.algorithm.FragmentFactory;
+import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.domain.ResultDO;
@@ -10,10 +12,14 @@ import com.westlake.air.pecs.domain.bean.airus.AirusParams;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
+import com.westlake.air.pecs.domain.db.simple.MatchedPeptide;
+import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
+import com.westlake.air.pecs.domain.query.ScoresQuery;
 import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +30,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -52,6 +61,8 @@ public class TestController extends BaseController {
     Airus airus;
     @Autowired
     PeptideService peptideService;
+    @Autowired
+    FragmentFactory fragmentFactory;
 
     public static float MZ_EXTRACT_WINDOW = 0.05f;
     public static float RT_EXTRACT_WINDOW = 1200f;
@@ -106,48 +117,25 @@ public class TestController extends BaseController {
         return "OK";
     }
 
-    @RequestMapping("test4")
-    @ResponseBody
-    String test4(Model model, RedirectAttributes redirectAttributes) throws IOException {
-        List<AnalyseDataDO> dataList = FileUtil.readAnalyseDataFromJsonFile("D://convWithDecoy.json");
-        long start = System.currentTimeMillis();
-        SwathParams input = new SwathParams();
-        input.setLibraryId("5b88feb758487f13f05f7083");
-        input.setSlopeIntercept(new SlopeIntercept(0.0633584d, -64.7064d));
-        input.setSigmaSpacing(SigmaSpacing.create());
-        scoresService.score(dataList, input);
-        logger.info("耗时:" + (System.currentTimeMillis() - start));
-        return dataList.size() + "";
-    }
-
     @RequestMapping("test6")
     @ResponseBody
     String test6(Model model, RedirectAttributes redirectAttributes) throws IOException {
         long start = System.currentTimeMillis();
-        FinalResult finalResult = airus.doAirus("5b967e5fcbaa7e2940fc6537",new AirusParams());
+        FinalResult finalResult = airus.doAirus("5b967e5fcbaa7e2940fc6537", new AirusParams());
         logger.info("打分耗时:" + (System.currentTimeMillis() - start));
         return JSON.toJSONString(finalResult);
-    }
-
-    @RequestMapping("test7")
-    @ResponseBody
-    String test7(Model model, RedirectAttributes redirectAttributes) throws IOException {
-        String trainAndTestContent = FileUtil.readFile("D://trainAndTest.json");
-        long start = System.currentTimeMillis();
-        TrainAndTest tt = JSON.parseObject(trainAndTestContent, TrainAndTest.class);
-        return tt.getTestData().length + "/" + tt.getTrainData().length + "/" + tt.getTestId().length + "/" + tt.getTrainId().length;
     }
 
     @RequestMapping("test8")
     @ResponseBody
     String test8(Model model, RedirectAttributes redirectAttributes) throws IOException {
-        List<PeptideDO> peptides = peptideService.getAllByLibraryId("5c0a237efc6f9e3c5048a6bc");
-        int count = 0;
-        for (PeptideDO peptide : peptides) {
-            if (peptide.getFragmentMap().size() <= 3) {
-                count++;
-            }
-        }
+
+        logger.info("开始重新卷积并且打分");
+        TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_RECONV_WORKFLOW, "OverviewId:5c10e7f8cb15b6176029bbef");
+        taskService.insert(taskDO);
+
+        experimentTask.swathForReconv("5c10e7f8cb15b6176029bbef", taskDO);
+
         return "success";
     }
 }

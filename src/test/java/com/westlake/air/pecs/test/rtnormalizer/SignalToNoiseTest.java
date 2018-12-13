@@ -31,7 +31,7 @@ public class SignalToNoiseTest extends BaseTest {
         BufferedReader readerResult = new BufferedReader(new FileReader(fileResult));
         RtIntensityPairsDouble rtIntensityPairsDoubleResult = FileUtil.txtReader(readerResult, " ",0,1);
 
-        double[] result = signalToNoiseEstimator.computeSTN(rtIntensityPairsDoubleTest, 40, 30);
+        double[] result = signalToNoiseEstimator.computeSTN(rtIntensityPairsDoubleTest.getRtArray(), rtIntensityPairsDoubleTest.getIntensityArray(), 40, 30);
 
         for(int i=0; i<result.length; i++){
             assert isSimilar(rtIntensityPairsDoubleResult.getIntensityArray()[i], result[i], Math.pow(10, -4));

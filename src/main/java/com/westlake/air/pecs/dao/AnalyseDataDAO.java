@@ -117,6 +117,9 @@ public class AnalyseDataDAO {
         if (analyseDataQuery.getIsDecoy() != null) {
             query.addCriteria(where("isDecoy").is(analyseDataQuery.getIsDecoy()));
         }
+        if (analyseDataQuery.getMzStart() != null && analyseDataQuery.getMzEnd() != null) {
+            query.addCriteria(where("mz").gte(analyseDataQuery.getMzStart()).lt(analyseDataQuery.getMzEnd()));
+        }
         return query;
     }
 
