@@ -1,6 +1,8 @@
 package com.westlake.air.pecs.algorithm;
 
 import com.westlake.air.pecs.algorithm.learner.LDALearner;
+import com.westlake.air.pecs.algorithm.learner.Learner;
+import com.westlake.air.pecs.algorithm.learner.XGBoostLearner;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.*;
@@ -14,6 +16,7 @@ import com.westlake.air.pecs.service.ScoresService;
 import com.westlake.air.pecs.utils.AirusUtil;
 import com.westlake.air.pecs.utils.ArrayUtil;
 import com.westlake.air.pecs.utils.MathUtil;
+import ml.dmlc.xgboost4j.java.Booster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +46,8 @@ public class Airus {
     ScoresService scoresService;
     @Autowired
     AnalyseOverviewService analyseOverviewService;
+    @Autowired
+    XGBoostLearner xgBoostLearner;
 
     public FinalResult doAirus(String overviewId, AirusParams airusParams) {
         FinalResult finalResult = new FinalResult();
@@ -62,17 +67,22 @@ public class Airus {
             finalResult.setErrorInfo(resultDO.getMsgInfo());
             return finalResult;
         }
-
-        logger.info("开始训练学习数据权重");
-        HashMap<String, Double> weightsMap = learn(scores, airusParams);
-        logger.info("开始计算合并打分");
-        ldaLearner.score(scores, weightsMap);
+        HashMap<String, Double> weightsMap = new HashMap<>();
+        if(airusParams.getLearner().equals(Learner.learner.LdaLearner)) {
+            logger.info("开始训练学习数据权重");
+            weightsMap = LDALearn(scores, airusParams);
+            logger.info("开始计算合并打分");
+            ldaLearner.score(scores, weightsMap);
+            finalResult.setWeightsMap(weightsMap);
+        }else if(airusParams.getLearner().equals(Learner.learner.XgbLearner)){
+//            logger.info("开始训练XGBooster");
+            XGBLearn(scores, airusParams);
+        }
         List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
 
         ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
 
         finalResult.setAllInfo(errorStat);
-        finalResult.setWeightsMap(weightsMap);
 
         //对于最终的打分结果和选峰结果保存到数据库中
         for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
@@ -117,7 +127,7 @@ public class Airus {
         return new ResultDO(true);
     }
 
-    public HashMap<String, Double> learn(List<SimpleScores> scores, AirusParams airusParams) {
+    public HashMap<String, Double> LDALearn(List<SimpleScores> scores, AirusParams airusParams) {
         int neval = airusParams.getTrainTimes();
         List<HashMap<String, Double>> weightsMapList = new ArrayList<>();
         for (int i = 0; i < neval; i++) {
@@ -142,6 +152,24 @@ public class Airus {
         }
 
         return AirusUtil.averagedWeights(weightsMapList);
+    }
+
+    public void XGBLearn(List<SimpleScores> scores, AirusParams airusParams){
+        logger.info("开始训练Booster");
+        Booster booster = semiSupervised.learnRandomizedXGB(scores, airusParams);
+        try {
+            logger.info("开始最终打分");
+            xgBoostLearner.predictAll(booster, scores, FeatureScores.ScoreType.MainScore.getTypeName());
+        }catch (Exception e){
+            logger.error("XGBooster Predict All Fail.\n");
+            e.printStackTrace();
+        }
+        List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+        ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
+        int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
+        if (count > 0) {
+            logger.info("XGBooster:检测结果:" + count + "个.");
+        }
     }
 
 

@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.domain.bean.airus;
 
+import com.westlake.air.pecs.algorithm.learner.Learner;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import lombok.Data;
 
@@ -11,6 +12,9 @@ import lombok.Data;
 @Data
 public class AirusParams {
 
+    Learner.learner learner = Learner.learner.XgbLearner;
+//    Learner.learner learner = Learner.learner.LdaLearner;
+
     double trainTestRatio = 0.5;
 
     int xevalNumIter = 10;
@@ -18,6 +22,8 @@ public class AirusParams {
     double ssInitialFdr = 0.15;
 
     double ssIterationFdr = 0.05;
+
+    double xgbIterationFdr = 0.008;
 
     //训练数据集的次数
     int trainTimes = 10;

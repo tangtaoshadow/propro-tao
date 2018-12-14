@@ -3,11 +3,13 @@ package com.westlake.air.pecs.algorithm;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.westlake.air.pecs.algorithm.learner.LDALearner;
+import com.westlake.air.pecs.algorithm.learner.XGBoostLearner;
 import com.westlake.air.pecs.domain.bean.airus.*;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.utils.AirusUtil;
+import ml.dmlc.xgboost4j.java.Booster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,8 @@ public class SemiSupervised {
     Stats stats;
     @Autowired
     LDALearner ldaLearner;
+    @Autowired
+    XGBoostLearner xgBoostLearner;
 
     public LDALearnData learnRandomized(List<SimpleScores> scores, AirusParams airusParams) {
         LDALearnData ldaLearnData = new LDALearnData();
@@ -65,6 +69,36 @@ public class SemiSupervised {
             return null;
         }
 
+    }
+
+    public Booster learnRandomizedXGB(List<SimpleScores> scores, AirusParams airusParams){
+        try{
+            //Get part of scores as train input.
+            TrainData trainData = AirusUtil.split(scores, airusParams.getTrainTestRatio(), airusParams.isDebug());
+            //第一次训练数据集使用MainScore进行训练
+            long startTime = System.currentTimeMillis();
+            TrainPeaks trainPeaks = selectTrainPeaks(trainData, airusParams.getMainScore(), airusParams, airusParams.getSsInitialFdr());
+            logger.info("高可信Target个数："+ trainPeaks.getBestTargets().size());
+            Booster booster = xgBoostLearner.train(trainPeaks, airusParams.getMainScore());
+            xgBoostLearner.predict(booster, trainData, airusParams.getMainScore());
+            for(int times = 0; times < airusParams.getXevalNumIter(); times++){
+                logger.info("开始第"+ times +"轮训练");
+                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, FeatureScores.ScoreType.WeightedTotalScore.getTypeName(), airusParams, airusParams.getXgbIterationFdr());
+                logger.info("高可信Target个数："+ trainPeaksTemp.getBestTargets().size());
+                booster = xgBoostLearner.train(trainPeaksTemp, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+                xgBoostLearner.predict(booster, trainData, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+            }
+            logger.info("总时间：" +(System.currentTimeMillis()-startTime));
+            List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+            ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
+            int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
+            logger.info("Train count:" + count);
+            return booster;
+        } catch (Exception e) {
+            logger.error("learnRandomizedXGB Fail.\n");
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private TrainPeaks selectTrainPeaks(TrainData trainData, String usedScoreType, AirusParams airusParams, Double cutoff) {
