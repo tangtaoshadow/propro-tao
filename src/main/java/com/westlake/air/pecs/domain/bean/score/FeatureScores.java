@@ -173,7 +173,7 @@ public class FeatureScores {
                 false, true),
         ManhattScore("ManhattScore", "var_ManhattScore",
                 "",
-                null, false),
+                null, true),
         YseriesScore("YseriesScore", "var_YseriesScore",
                 "peptideRt对应的spectrumArray中，检测到的y离子的数量",
                 true, true),
@@ -217,7 +217,7 @@ public class FeatureScores {
             return pyProphetName;
         }
 
-        public boolean isUsed() {
+        public boolean getIsUsed() {
             return isUsed;
         }
 

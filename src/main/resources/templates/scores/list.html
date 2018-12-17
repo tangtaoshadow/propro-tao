@@ -117,13 +117,11 @@
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
                             <h3 class="m-portlet__head-text">
-
                                 卷积ID <span th:text="${overview.id}"></span>
                                 </br>
                                 卷积代号:<span th:text="${overview.name}"></span>
                                 </br>
                                 总计有 <span th:text="${totalNum}"></span> 组打分
-
                             </h3>
                         </div>
                     </div>
@@ -365,7 +363,9 @@
                                 th:onclick="|queryGroup(null,false, true)|">
                             原始去噪
                         </button>
+                        <span class="m-badge m-badge--success m-badge--wide" id="peptideLabel">
 
+                        </span>
                     </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">&times;</span></button>

@@ -12,7 +12,6 @@ import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.ComparisonResult;
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
@@ -282,6 +281,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("overview", overviewDO);
         model.addAttribute("slope", overviewDO.getSlope());
         model.addAttribute("intercept", overviewDO.getIntercept());
+        model.addAttribute("scoreTypes", FeatureScores.ScoreType.values());
         return "/analyse/overview/score";
     }
 
@@ -382,7 +382,7 @@ public class AnalyseController extends BaseController {
         }
 
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
-        if (dataResult.isFailed()) {
+        if (dataResult == null || dataResult.isFailed()) {
             resultDO.setErrorResult(ResultCode.ANALYSE_DATA_NOT_EXISTED);
             return resultDO;
         }
@@ -408,10 +408,11 @@ public class AnalyseController extends BaseController {
             }
 
             cutInfoArray.add(cutInfo);
+            JSONArray intensityArray = new JSONArray();
             if (useNoise1000) {
-                intensityArrays = noise1000(pairRtArray, pairIntensityArray);
+                intensityArray = noise1000(pairRtArray, pairIntensityArray);
+                intensityArrays.add(intensityArray);
             } else {
-                JSONArray intensityArray = new JSONArray();
                 intensityArray.addAll(Arrays.asList(pairIntensityArray));
                 intensityArrays.add(intensityArray);
             }
@@ -501,10 +502,12 @@ public class AnalyseController extends BaseController {
             }
 
             cutInfoArray.add(cutInfo);
+            JSONArray intensityArray = new JSONArray();
             if (useNoise1000) {
-                intensityArrays = noise1000(pairRtArray, pairIntensityArray);
+                intensityArray = noise1000(pairRtArray, pairIntensityArray);
+                intensityArrays.add(intensityArray);
             } else {
-                JSONArray intensityArray = new JSONArray();
+
                 intensityArray.addAll(Arrays.asList(pairIntensityArray));
                 intensityArrays.add(intensityArray);
             }
@@ -559,10 +562,12 @@ public class AnalyseController extends BaseController {
                     pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, cutInfo, pairIntensityArray);
                 }
                 cutInfoArray.add(cutInfo);
+                JSONArray intensityArray = new JSONArray();
                 if (useNoise1000) {
-                    intensityArrays = noise1000(pairRtArray, pairIntensityArray);
+                    intensityArray = noise1000(pairRtArray, pairIntensityArray);
+                    intensityArrays.add(intensityArray);
                 } else {
-                    JSONArray intensityArray = new JSONArray();
+
                     intensityArray.addAll(Arrays.asList(pairIntensityArray));
                     intensityArrays.add(intensityArray);
                 }
@@ -605,7 +610,7 @@ public class AnalyseController extends BaseController {
             }
         }
         JSONArray intensityArrays = new JSONArray();
-        intensityArrays.add(noiseIntensityArray);
+        intensityArrays.addAll(noiseIntensityArray);
         return intensityArrays;
     }
 }

@@ -2,6 +2,7 @@ package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.westlake.air.pecs.algorithm.learner.Learner;
 import com.westlake.air.pecs.async.AirusTask;
 import com.westlake.air.pecs.async.ScoreTask;
 import com.westlake.air.pecs.constants.ResultCode;
@@ -172,13 +173,20 @@ public class ScoresController extends BaseController {
         return "redirect:/task/detail/" + taskDO.getId();
     }
 
-    @RequestMapping(value = "/airus/{overviewId}")
-    String airus(Model model, @PathVariable("overviewId") String overviewId) {
+    @RequestMapping(value = "/airus")
+    String airus(Model model,
+                 @RequestParam(value = "overviewId", required = true) String overviewId,
+                 @RequestParam(value = "classifier", required = true) String classifier) {
 
         TaskDO taskDO = new TaskDO(TaskTemplate.AIRUS, overviewId);
         taskService.insert(taskDO);
-
         AirusParams airusParams = new AirusParams();
+        if(classifier.equals("xgboost")){
+            airusParams.setLearner(Learner.learner.XgbLearner);
+        }else{
+            airusParams.setLearner(Learner.learner.LdaLearner);
+        }
+
         airusTask.airus(overviewId, airusParams, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();

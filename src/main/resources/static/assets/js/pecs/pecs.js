@@ -139,7 +139,8 @@ function queryGroup(dataId, isGaussFilter, useNoise1000) {
             data: intensity_arrays[i],
         });
     }
-
+    var label = document.getElementById("peptideLabel");
+    label.innerText = peptideRef;
     var textLabel = peptideRef + ":" + intensity_arrays.length + "个MS2碎片;";
     if (bestRt != null) {
         textLabel = textLabel + "最佳峰RT:" + bestRt;
