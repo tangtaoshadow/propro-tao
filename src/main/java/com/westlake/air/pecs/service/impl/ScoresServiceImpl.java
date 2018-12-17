@@ -343,7 +343,7 @@ public class ScoresServiceImpl implements ScoresService {
                         chromatographicScorer.calculateLogSnScore(chromatogramList, experimentFeatureList, noise1000List, featureScores);
                     }
 
-//                    根据RT时间和前体MZ获取最近的一个原始谱图
+                    //根据RT时间和前体MZ获取最近的一个原始谱图
                     if(input.isUsedDIAScores()){
                         MzIntensityPairs mzIntensityPairs = scanIndexService.getNearestSpectrumByRt(rtMap, experimentFeatureList.get(0).getRt());
                         if (mzIntensityPairs != null) {

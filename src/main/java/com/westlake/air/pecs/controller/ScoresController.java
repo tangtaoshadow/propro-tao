@@ -56,6 +56,7 @@ public class ScoresController extends BaseController {
                 @RequestParam(value = "fdrStart", required = false) Double fdrStart,
                 @RequestParam(value = "fdrEnd", required = false) Double fdrEnd,
                 @RequestParam(value = "isIdentified", required = false) String isIdentified,
+                @RequestParam(value = "isDecoy", required = false) String isDecoy,
                 RedirectAttributes redirectAttributes) {
         model.addAttribute("overviewId", overviewId);
         model.addAttribute("peptideRef", peptideRef);
@@ -63,15 +64,19 @@ public class ScoresController extends BaseController {
         model.addAttribute("fdrStart", fdrStart);
         model.addAttribute("fdrEnd", fdrEnd);
         model.addAttribute("isIdentified", isIdentified);
+        model.addAttribute("isDecoy", isDecoy);
         ScoresQuery query = new ScoresQuery();
         if (peptideRef != null && !peptideRef.isEmpty()) {
             query.setPeptideRef(peptideRef);
         }
         if (isIdentified != null && isIdentified.equals("Yes")) {
             query.setIsIdentified(true);
-            query.setIsDecoy(false);
         } else if (isIdentified != null && isIdentified.equals("No")) {
             query.setIsIdentified(false);
+        }
+        if (isDecoy != null && isDecoy.equals("Yes")) {
+            query.setIsDecoy(true);
+        } else if (isDecoy != null && isDecoy.equals("No")) {
             query.setIsDecoy(false);
         }
         if(fdrStart != null){
@@ -87,7 +92,6 @@ public class ScoresController extends BaseController {
         query.setOverviewId(overviewId);
         query.setPageSize(30);
         query.setPageNo(currentPage);
-        query.setIsDecoy(false);
         query.setSortColumn("fdr");
         ResultDO<List<ScoresDO>> resultDO = scoresService.getList(query);
 

@@ -185,7 +185,6 @@ public class LibraryServiceImpl implements LibraryService {
     public void countAndUpdateForLibrary(LibraryDO library) {
         try {
             library.setProteinCount(peptideService.countByProteinName(library.getId()));
-            library.setPeptideCount(peptideService.countByPeptideRef(library.getId()));
 
             PeptideQuery query = new PeptideQuery();
             query.setLibraryId(library.getId());

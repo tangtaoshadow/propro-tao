@@ -39,17 +39,9 @@
                       action="/scores/list">
                     <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                     <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
+                    <input id="overviewId" type="hidden" th:value="${overview.id}" class="form-control" name="overviewId">
 
                     <div class="form-group m-form__group row">
-                        <div class="input-group col-lg-3">
-                            <div class="input-group-prepend">
-                                <button class="btn btn-success" type="button">
-                                    卷积概览ID:
-                                </button>
-                            </div>
-                            <input type="text" class="form-control m-input" name="overviewId" placeholder="overviewId"
-                                   th:value="${overviewId}">
-                        </div>
                         <div class="input-group col-lg-2">
                             <div class="input-group-prepend">
                                 <button class="btn btn-success" type="button">
@@ -63,6 +55,21 @@
                                         th:selected="${isIdentified}=='Yes'?true:false"></option>
                                 <option th:text="No" th:value="No"
                                         th:selected="${isIdentified}=='No'?true:false"></option>
+                            </select>
+                        </div>
+                        <div class="input-group col-lg-2">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-success" type="button">
+                                    是否是伪肽段:
+                                </button>
+                            </div>
+                            <select class="form-control m-input" id="isDecoy" name="isDecoy">
+                                <option th:text="All" th:value="All"
+                                        th:selected="${isDecoy}=='All'?true:false"></option>
+                                <option th:text="Yes" th:value="Yes"
+                                        th:selected="${isDecoy}=='Yes'?true:false"></option>
+                                <option th:text="No" th:value="No"
+                                        th:selected="${isDecoy}=='No'?true:false"></option>
                             </select>
                         </div>
                         <div class="input-group col-lg-2">
@@ -110,8 +117,13 @@
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
                             <h3 class="m-portlet__head-text">
-                                卷积代号:<span th:text="${overview.name}"></span></br>总计有 <span
-                                    th:text="${totalNum}"></span> 组打分
+
+                                卷积ID <span th:text="${overview.id}"></span>
+                                </br>
+                                卷积代号:<span th:text="${overview.name}"></span>
+                                </br>
+                                总计有 <span th:text="${totalNum}"></span> 组打分
+
                             </h3>
                         </div>
                     </div>

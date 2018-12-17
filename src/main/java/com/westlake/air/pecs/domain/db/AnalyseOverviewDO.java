@@ -57,4 +57,6 @@ public class AnalyseOverviewDO extends BaseDO {
     Integer matchedPeptideCount;
 
     Integer totalPeptideCount;
+    Integer targetPeptideCount;
+    Integer libraryPeptideCount;
 }

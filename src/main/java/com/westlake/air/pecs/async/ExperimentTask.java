@@ -244,6 +244,7 @@ public class ExperimentTask extends BaseTask {
         List<PeptideDO> nextPeptides = new ArrayList<>();
         for (PeptideDO peptide : peptides) {
             if (!matchedNames.contains(peptide.getPeptideRef())) {
+                //人体蛋白质库
                 PeptideDO peptideDO = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy("5c0a3669fc6f9e1d441ae71f", peptide.getPeptideRef(), peptide.getIsDecoy());
                 if (peptideDO == null) {
                     HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, 4);

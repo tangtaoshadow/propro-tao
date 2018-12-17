@@ -15,6 +15,7 @@ import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.pecs.domain.db.simple.TargetPeptide;
+import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.AirdFileParser;
@@ -252,13 +253,20 @@ public class ExperimentServiceImpl implements ExperimentService {
             return ResultDO.buildError(ResultCode.LIBRARY_NOT_EXISTED);
         }
         AnalyseOverviewDO overviewDO = createOverview(swathParams);
+        overviewDO.setLibraryPeptideCount(libRes.getModel().getTotalTargetCount().intValue());
         analyseOverviewService.insert(overviewDO);
         swathParams.setOverviewId(overviewDO.getId());
-        int number = 0;
+        int totalNumber = 0;
+        Long targetNumber = 0L;
         try {
             raf = new RandomAccessFile(file, "r");
-            number = extractMS2(raf, overviewDO.getId(), swathParams);
-            overviewDO.setTotalPeptideCount(number);
+            totalNumber = extractMS2(raf, overviewDO.getId(), swathParams);
+            overviewDO.setTotalPeptideCount(totalNumber);
+            AnalyseDataQuery query = new AnalyseDataQuery(overviewDO.getId());
+            query.setIsDecoy(true);
+            query.setIsHit(true);
+            targetNumber = analyseDataService.count(query);
+            overviewDO.setTargetPeptideCount(targetNumber.intValue());
         } catch (Exception e) {
             logger.error(e.getMessage());
         } finally {
@@ -426,8 +434,9 @@ public class ExperimentServiceImpl implements ExperimentService {
             return 0;
         }
         //Step3.提取指定原始谱图
+        long start = System.currentTimeMillis();
         rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex);
-
+        logger.info("IO及解码耗时:"+(System.currentTimeMillis() - start));
         return convoluteAndInsert(coordinates, rtMap, overviewId, swathParams.getRtExtractWindow(), swathParams.getMzExtractWindow());
     }
 

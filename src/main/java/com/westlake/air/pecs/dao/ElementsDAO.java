@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.dao;
 
 import com.alibaba.fastjson.JSONObject;
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.parser.model.chemistry.Element;
 import com.westlake.air.pecs.utils.ElementUtil;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ public class ElementsDAO {
     String elementsStr = "";
     List<Element> elementList = new ArrayList<>();
     HashMap<String, Element> symbolElementsMap = new HashMap<>();
+    Double avgTotal = null;
 
     public static String H2O = "H:2,O:1";
     public static String H = "H:1";
@@ -49,6 +51,19 @@ public class ElementsDAO {
                 countWeight(element);
                 symbolElementsMap.put(element.getSymbol(), element);
             }
+
+            double averageWeightC = getElementBySymbol(Element.C).getAverageWeight();
+            double averageWeightH = getElementBySymbol(Element.H).getAverageWeight();
+            double averageWeightN = getElementBySymbol(Element.N).getAverageWeight();
+            double averageWeightO = getElementBySymbol(Element.O).getAverageWeight();
+            double averageWeightS = getElementBySymbol(Element.S).getAverageWeight();
+            double averageWeightP = getElementBySymbol(Element.P).getAverageWeight();
+            avgTotal = Constants.C * averageWeightC +
+                    Constants.H * averageWeightH +
+                    Constants.N * averageWeightN +
+                    Constants.O * averageWeightO +
+                    Constants.S * averageWeightS +
+                    Constants.P * averageWeightP;
             logger.info("Init Element Database file success!!!");
         } catch (IOException e) {
             logger.error("Init Element Database file failed!!!");
@@ -96,6 +111,10 @@ public class ElementsDAO {
             averageWeight += getElementBySymbol(key).getAverageWeight() * elementMap.get(key);
         }
         return averageWeight;
+    }
+
+    public double getAvgTotal(){
+        return avgTotal;
     }
 
     /**

@@ -46,16 +46,13 @@
                         蛋白质数目
                     </th>
                     <th width="5%">
-                        肽段数目
+                        总肽段数目
                     </th>
                     <th width="5%">
-                        总肽段片段数目
+                        真肽段数目
                     </th>
                     <th width="5%">
-                        真肽段片段数目
-                    </th>
-                    <th width="5%">
-                        伪肽段片段数目
+                        伪肽段数目
                     </th>
                     <th width="15%">
                         创建时间
@@ -72,7 +69,6 @@
                 <tr th:each="library:${libraryList}">
                     <td th:text="|${library.name}(${library.id})|"></td>
                     <td th:text="${library.proteinCount}"></td>
-                    <td th:text="${library.peptideCount}"></td>
                     <td th:text="${library.totalCount}"></td>
                     <td th:text="${library.totalTargetCount}"></td>
                     <td th:text="${library.totalDecoyCount}"></td>

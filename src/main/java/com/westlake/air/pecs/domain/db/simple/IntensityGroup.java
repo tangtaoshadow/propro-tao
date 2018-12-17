@@ -28,7 +28,7 @@ public class IntensityGroup {
     String sequence;
 
     /**
-     * key为cutinfo, value为对应的fragment的intensity值
+     * key为cutInfo, value为对应的fragment的intensity值
      */
     HashMap<String, Float> intensityMap = new HashMap<>();
 

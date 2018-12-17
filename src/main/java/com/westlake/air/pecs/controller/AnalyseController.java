@@ -398,7 +398,7 @@ public class AnalyseController extends BaseController {
         //同一组的rt坐标是相同的
         Float[] pairRtArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvRtArray()));
         for (String cutInfo : data.getConvIntensityMap().keySet()) {
-            if (!data.getIsHit() || data.getConvIntensityMap().get(cutInfo) == null || cutInfo.equals("b5")) {
+            if (!data.getIsHit() || data.getConvIntensityMap().get(cutInfo) == null) {
                 continue;
             }
 
@@ -491,7 +491,7 @@ public class AnalyseController extends BaseController {
         //同一组的rt坐标是相同的
         Float[] pairRtArray = dataDO.getRtArray();
         for (String cutInfo : dataDO.getIntensityMap().keySet()) {
-            if (!data.getIsHit() || dataDO.getIntensityMap().get(cutInfo) == null || cutInfo.equals("y8")) {
+            if (!data.getIsHit() || dataDO.getIntensityMap().get(cutInfo) == null) {
                 continue;
             }
 

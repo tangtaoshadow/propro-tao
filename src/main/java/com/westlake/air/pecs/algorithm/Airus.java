@@ -92,7 +92,10 @@ public class Airus {
             if (!simpleFeatureScores.getIsDecoy()) {
                 scoresDO.setIsIdentified(simpleFeatureScores.getFdr() <= 0.01);
             }
-            scoresService.update(scoresDO);
+            ResultDO r = scoresService.update(scoresDO);
+            if(r.isFailed()){
+                logger.error(r.getMsgInfo());
+            }
         }
         logger.info("打分反馈更新完毕");
         int count = AirusUtil.checkFdr(finalResult);
@@ -103,6 +106,8 @@ public class Airus {
             overviewDO.setWeights(weightsMap);
             overviewDO.setMatchedPeptideCount(count);
             analyseOverviewService.update(overviewDO);
+        }else{
+            logger.error(overviewResult.getMsgInfo());
         }
         logger.info("合并打分完成,共找到新肽段"+count+"个");
         return finalResult;

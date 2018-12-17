@@ -50,7 +50,7 @@ public class DIAScorer {
      * @param spectrumMzArray     根据transitionGroup选取的RT选择的最近的Spectrum对应的mzArray
      * @param spectrumIntArray    根据transitionGroup选取的RT选择的最近的Spectrum对应的intensityArray
      * @param libraryIntensityMap unNormalized library intensity(in peptidepeptide)
-     * @param scores              score for JProphet
+     * @param scores              score for Airus
      */
     public void calculateDiaMassDiffScore(HashMap<String, Double> productMzArray, Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<String, Float> libraryIntensityMap, FeatureScores scores) {
 

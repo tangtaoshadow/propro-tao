@@ -11,5 +11,9 @@ public interface ApiService {
     FinalResult doAirus(String overviewId);
     FinalResult doAirus(String overviewId, AirusParams airusParams);
 
+    //卷积
+
+    //Aird压缩
+
 
 }

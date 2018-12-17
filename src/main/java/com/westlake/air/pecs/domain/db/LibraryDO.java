@@ -38,11 +38,11 @@ public class LibraryDO extends BaseDO {
 
     //蛋白总数目
     Long proteinCount;
+//
+//    //真肽段数目
+//    Long peptideCount;
 
-    //真肽段数目
-    Long peptideCount;
-
-    //肽段片段总数目
+    //肽段总数目
     Long totalCount;
 
     //真肽段片段总数目
