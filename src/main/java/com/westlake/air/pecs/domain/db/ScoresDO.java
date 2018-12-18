@@ -46,8 +46,4 @@ public class ScoresDO {
     List<FeatureScores> featureScoresList;
 
     Double bestRt;
-
-    Date createDate;
-
-    Date lastModifiedDate;
 }

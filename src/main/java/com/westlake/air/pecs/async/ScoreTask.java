@@ -3,9 +3,8 @@ package com.westlake.air.pecs.async;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.SwathParams;
+import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.service.AnalyseDataService;
@@ -38,7 +37,7 @@ public class ScoreTask extends BaseTask {
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
 
-        SwathParams input = new SwathParams();
+        LumsParams input = new LumsParams();
         input.setLibraryId(libraryId);
         input.setSigmaSpacing(sigmaSpacing);
         input.setSlopeIntercept(slopeIntercept);

@@ -3,10 +3,11 @@ package com.westlake.air.pecs.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.westlake.air.pecs.async.LumsTask;
 import com.westlake.air.pecs.compressor.Compressor;
 import com.westlake.air.pecs.constants.*;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.SwathParams;
+import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
@@ -50,6 +51,8 @@ public class ExperimentController extends BaseController {
     ScanIndexService scanIndexService;
     @Autowired
     Compressor compressor;
+    @Autowired
+    LumsTask lumsTask;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -311,16 +314,16 @@ public class ExperimentController extends BaseController {
         TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_WORKFLOW, "expId:" + expId + ";libId:" + libraryId + ";iRtLib:" + iRtLibraryId);
         taskService.insert(taskDO);
 
-        SwathParams swathParams = new SwathParams();
-        swathParams.setExperimentDO(exp);
-        swathParams.setIRtLibraryId(iRtLibraryId);
-        swathParams.setLibraryId(libraryId);
-        swathParams.setCreator("Admin");
-        swathParams.setRtExtractWindow(rtExtractWindow);
-        swathParams.setMzExtractWindow(mzExtractWindow);
-        swathParams.setSigmaSpacing(new SigmaSpacing(sigma, spacing));
+        LumsParams lumsParams = new LumsParams();
+        lumsParams.setExperimentDO(exp);
+        lumsParams.setIRtLibraryId(iRtLibraryId);
+        lumsParams.setLibraryId(libraryId);
+        lumsParams.setCreator("Admin");
+        lumsParams.setRtExtractWindow(rtExtractWindow);
+        lumsParams.setMzExtractWindow(mzExtractWindow);
+        lumsParams.setSigmaSpacing(new SigmaSpacing(sigma, spacing));
 
-        experimentTask.swath(swathParams, taskDO);
+        lumsTask.swath(lumsParams, taskDO);
         return "redirect:/task/detail/" + taskDO.getId();
     }
 
@@ -387,7 +390,7 @@ public class ExperimentController extends BaseController {
         PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, false);
 
 
-        ResultDO<AnalyseDataDO> analyseData = experimentService.extractOne(resultDO.getModel(), peptide, -1f);
+        ResultDO<AnalyseDataDO> analyseData = experimentService.extractOne(resultDO.getModel(), peptide, -1f, 0.05f);
 
         return JSON.toJSONString(analyseData);
     }

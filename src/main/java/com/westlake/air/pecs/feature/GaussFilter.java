@@ -19,7 +19,7 @@ import java.util.List;
 @Component("gaussFilter")
 public class GaussFilter {
 
-    public Double[] filter(Float[] rtArray, String cutInfo, Float[] intArray) {
+    public Double[] filter(Float[] rtArray, String cutInfo, Float[] intArray, SigmaSpacing ss) {
         Double[] rts = new Double[rtArray.length];
         Double[] ints = new Double[intArray.length];
         for (int i = 0; i < rts.length; i++) {
@@ -29,12 +29,16 @@ public class GaussFilter {
         HashMap<String, Double[]> intensitiesMap = new HashMap<>();
         intensitiesMap.put(cutInfo, ints);
 
-        HashMap<String, Double[]> resultMap = filter(rts, intensitiesMap, SigmaSpacing.create());
+        HashMap<String, Double[]> resultMap = filter(rts, intensitiesMap, ss);
         return resultMap.values().iterator().next();
     }
 
     public Float[] filterForFloat(Float[] rtArray, String cutInfo, Float[] intArray) {
-        Double[] result = filter(rtArray, cutInfo, intArray);
+        return filterForFloat(rtArray, cutInfo, intArray, SigmaSpacing.create());
+    }
+
+    public Float[] filterForFloat(Float[] rtArray, String cutInfo, Float[] intArray, SigmaSpacing ss) {
+        Double[] result = filter(rtArray, cutInfo, intArray, ss);
         Float[] floatArray = new Float[result.length];
         for (int i = 0; i < floatArray.length; i++) {
             floatArray[i] = result[i].floatValue();

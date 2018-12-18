@@ -90,6 +90,6 @@ public interface PeptideService {
      * @param query
      * @return
      */
-    HashMap<String, IntensityGroup> getIntensityGroupMap(PeptideQuery query);
+    HashMap<String, TargetPeptide> getTPMap(PeptideQuery query);
 }
 

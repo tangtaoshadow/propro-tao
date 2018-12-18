@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="/layouts/layout">
+<!-- begin::Head -->
+<head>
+    <title>
+        欢迎登陆西湖大学PECS分析平台
+    </title>
+
+    <link th:href="|${url}/assets/css/pagination.css|" rel="stylesheet" type="text/css"/>
+
+</head>
+<!-- end::Head -->
+<!-- end::Body -->
+<body>
+
+<div class="m-subheader ">
+    <div class="d-flex align-items-center">
+        <div class="mr-auto">
+            <h3 class="m-subheader__title m-subheader__title--separator">
+                肽段检测会诊工具
+            </h3>
+        </div>
+    </div>
+</div>
+
+<div class="m-content" layout:fragment="content">
+
+    <div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>
+    <div th:if="${errorList}" th:each="arrayS:${errorList}">
+        <div class="alert alert-danger" role="alert" th:text="${arrayS}"></div>
+    </div>
+
+    <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="m-portlet__body">
+                <div class="clearfix">
+                    <form id="searchForm" method="post" role="form"
+                          class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
+                          action="/analyse/consultation">
+                        <input id="dataId" type="hidden" th:value="${dataId}" class="form-control"
+                               name="dataId">
+                        <div class="form-group m-form__group row">
+                            <div class="input-group col-lg-6">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        MzExtractWindow:
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control m-input" name="mzExtractWindow"
+                                       th:value="${mzExtractWindow}">
+                            </div>
+                            <div class="input-group col-lg-6">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        RtExtractWindow:
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control m-input" name="rtExtractWindow"
+                                       th:value="${rtExtractWindow}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <div class="input-group col-lg-4">
+                                <div class="m-checkbox-list">
+                                    <label class="m-checkbox">
+                                        <input type="checkbox" class="form-control m-input" name="useGaussFilter"
+                                               th:checked="${useGaussFilter}">
+                                        是否使用高斯平滑
+                                        <span></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="input-group col-lg-4">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        Sigma:
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control m-input" name="sigma"
+                                       th:value="${sigma}">
+                            </div>
+                            <div class="input-group col-lg-4">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        Spacing:
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control m-input" name="spacing"
+                                       th:value="${spacing}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <div class="input-group col-lg-4">
+                                <div class="m-checkbox-list">
+                                    <label class="m-checkbox">
+                                        <input type="checkbox" class="form-control m-input" name="useNoise"
+                                               th:checked="${useNoise}">
+                                        是否使用降噪处理
+                                        <span></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="input-group col-lg-4">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        Noise:
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control m-input" name="noise"
+                                       th:value="${noise}">
+                            </div>
+                            <div class="input-group col-lg-4">
+                                <div class="m-checkbox-list">
+                                    <label class="m-checkbox">
+                                        <input type="checkbox" class="form-control m-input" name="allCutInfo"
+                                               th:checked="${allCutInfo}">
+                                        每一次都重新计算所有片段
+                                        <span></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-2 row">
+                                <div class="col-lg-12">
+                                    <label>
+                                        标准库片段
+                                    </label>
+                                    <div class="m-checkbox-list" th:each="dicCutInfo:${cutInfoFromDic}">
+                                        <label class="m-checkbox m-checkbox--state-success">
+                                            <input type="checkbox"
+                                                   th:if="${usedCutInfos==null || usedCutInfos.contains(dicCutInfo)}"
+                                                   th:checked="checked" th:name="|CUTINFO_${dicCutInfo}|"
+                                                   th:text="${dicCutInfo}">
+                                            <input type="checkbox"
+                                                   th:unless="${usedCutInfos==null || usedCutInfos.contains(dicCutInfo)}"
+                                                   th:name="|CUTINFO_${dicCutInfo}|" th:text="${dicCutInfo}">
+                                            <span></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label>
+                                        算法生成且命中片段
+                                    </label>
+                                    <div class="m-checkbox-inline" th:each="genCutInfo:${cutInfoFromGuessAndHit}">
+                                        <label class="m-checkbox m-checkbox--state-success">
+                                            <input type="checkbox"
+                                                   th:if="${usedCutInfos==null || usedCutInfos.contains(genCutInfo)}"
+                                                   th:checked="checked" th:name="|CUTINFO_${genCutInfo}|"
+                                                   th:text="${genCutInfo}">
+                                            <input type="checkbox"
+                                                   th:unless="${usedCutInfos==null ||usedCutInfos.contains(genCutInfo)}"
+                                                   th:name="|CUTINFO_${genCutInfo}|" th:text="${genCutInfo}">
+                                            <span></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-10" id="chart" style="height: 1000px;">
+
+                            </div>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit">
+                                分析
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <!--begin::Portlet-->
+            <div class="m-portlet m-portlet--tab">
+                <div class="m-portlet__head">
+                    <div class="m-portlet__head-caption">
+                        <div class="m-portlet__head-title">
+                            <span class="m-portlet__head-icon m--hide">
+                                <i class="la la-gear"></i>
+                            </span>
+                            <h3 class="m-portlet__head-text">诊断肽段: <span th:text="${peptideRef}"></span></h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="m-form m-form--fit m-form--label-align-right">
+                    <div class="m-portlet__body">
+                        <div class="form-group m-form__group row">
+                            <label for="id" class="col-3 col-form-label">
+                                ID
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="id" name="id" readonly
+                                       th:value="${overview?.id}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="id" class="col-3 col-form-label">卷积代号</label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="name" name="name" readonly
+                                       th:value="${overview?.name}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="id" class="col-3 col-form-label">原始实验ID</label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="expId" name="expId" readonly
+                                       th:value="${overview?.expId}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="library" class="col-3 col-form-label">关联标准库</label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="library" readonly
+                                       th:value="|${overview?.libraryName}(${overview?.libraryId})|">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="ExtractWindow" class="col-3 col-form-label">原始RT/MZ卷积窗口</label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="ExtractWindow" readonly
+                                       th:value="|${overview?.rtExtractWindow}/${overview?.mzExtractWindow}|">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="slopeIntercept" class="col-3 col-form-label">斜率/截距</label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="slopeIntercept" readonly
+                                       th:value="|${slopeIntercept}|">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="slopeIntercept" class="col-12 col-form-label" style="text-align: center;">
+                                算法生成但未命中的片段</label>
+                            <div class="m-checkbox-list" th:each="genCutInfo:${cutInfoFromGuess}">
+                                <a class="m-checkbox m-checkbox--state-success" th:text="${genCutInfo}"></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!--end::Portlet-->
+        </div>
+    </div>
+
+</div>
+
+
+</body>
+
+<th:block layout:fragment="script">
+    <script th:src="|${url}/assets/js/echarts/echarts.min.js|" type="text/javascript"></script>
+    <script th:src="|${url}/assets/js/echarts/dark.js|" type="text/javascript"></script>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var data_rt = [[${rt}]];
+        var peptideRef = [[${peptideRef}]];
+        var cutinfo = [[${totalCutInfos}]];
+        var intensity_arrays = [[${intensitiesList}]];
+        var intensity_arrays = [[${intensitiesList}]];
+        /*]]>*/
+        var chart;
+
+        $(document).ready(function () {
+            chart = echarts.init(document.getElementById('chart'));
+
+            var intensity_series = [];
+            for (var i = 0; i < intensity_arrays.length; i++) {
+                intensity_series.push({
+                    name: cutinfo[i],
+                    type: 'line',
+                    smooth: true,
+                    data: intensity_arrays[i],
+                });
+            }
+
+            var textLabel = peptideRef + ":" + intensity_arrays.length + "个MS2碎片;";
+            option = {
+                title: {
+                    text: textLabel,
+                    left: 10
+                },
+                legend: {
+                    data: ['rt/intensity'],
+                    align: 'left'
+                },
+                toolbox: {
+                    // y: 'bottom',
+                    feature: {
+                        dataView: {},
+                        saveAsImage: {
+                            pixelRatio: 2
+                        }
+
+                    }
+                },
+                dataZoom: [{
+                    type: 'inside',
+                    filterMode: 'empty',
+                    start: (chart.getModel() && chart.getModel().getOption().dataZoom[0].start) ? chart.getModel().getOption().dataZoom[0].start : 0,
+                    end: (chart.getModel() && chart.getModel().getOption().dataZoom[0].end) ? chart.getModel().getOption().dataZoom[0].end : 100
+                }, {
+                    type: 'slider'
+                }],
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                xAxis: {
+                    data: data_rt,
+                    silent: false,
+                    splitLine: {
+                        show: false
+                    }
+                },
+                yAxis: {},
+                series: intensity_series
+            };
+
+            chart.setOption(option, true);
+        });
+    </script>
+</th:block>
+
+<!-- end::Body -->
+</html>

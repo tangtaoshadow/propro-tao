@@ -118,43 +118,6 @@ public class PeptideDAO {
         return a.getMappedResults();
     }
 
-    public HashMap<String, IntensityGroup> getIntensityGroupMap(PeptideQuery query) {
-
-        List<TargetPeptide> tps = getTPAll(query);
-//        Document queryDoc = new Document();
-//        if (libraryId != null) {
-//            queryDoc.put("libraryId", libraryId);
-//        }
-//
-//        Document fieldsDoc = new Document();
-//        fieldsDoc.put("peptideRef", true);
-//        fieldsDoc.put("proteinName", true);
-//        fieldsDoc.put("intensity", true);
-//        fieldsDoc.put("fragmentMap", true);
-//        fieldsDoc.put("isDecoy", true);
-//        fieldsDoc.put("mz", true);
-//        fieldsDoc.put("sequence", true);
-//
-//        Query query = new BasicQuery(queryDoc, fieldsDoc);
-//
-//        List<PeptideDO> list = mongoTemplate.find(query, PeptideDO.class, CollectionName);
-        HashMap<String, IntensityGroup> hashMap = new HashMap<>();
-        for (TargetPeptide peptide : tps) {
-            IntensityGroup group = new IntensityGroup();
-            group.setPeptideRef(peptide.getPeptideRef());
-            group.setProteinName(peptide.getProteinName());
-            group.setMz(peptide.getMz());
-            group.setSequence(peptide.getSequence());
-            for(FragmentInfo fi : peptide.getFragmentMap().values()){
-                group.getIntensityMap().put(fi.getCutInfo(), Float.parseFloat(fi.getIntensity().toString()));
-            }
-
-            hashMap.put(peptide.getPeptideRef() + "_" + peptide.getIsDecoy(), group);
-        }
-
-        return hashMap;
-    }
-
     public long countByProteinName(String libraryId) {
         AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(

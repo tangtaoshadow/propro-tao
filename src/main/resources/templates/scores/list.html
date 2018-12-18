@@ -143,7 +143,7 @@
                                 <span th:if="${!score.isDecoy&&!score.isIdentified}" class="m-accordion__item-icon"><i
                                         class="fa fa-close"></i></span>
                                 <span class="m-accordion__item-title"
-                                      th:text="|(${score?.featureScoresList?.size()})[预测RT:${score?.rt}][FRD:${score?.fdr}]${score.isDecoy?'伪肽段':'肽段'}:${score?.peptideRef}[${#dates.format(score?.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}]|"></span>
+                                      th:text="|(${score?.featureScoresList?.size()})[预测RT:${score?.rt}][FDR:${score?.fdr}]${score.isDecoy?'伪肽段':'肽段'}:${score?.peptideRef}|"></span>
                                 <span class="m-accordion__item-mode"></span>
                             </div>
                             <div class="m-accordion__item-body collapse"
@@ -157,11 +157,8 @@
                                             th:onclick="|queryGroup('${score.analyseDataId}', false, false)|">
                                         查看卷积组谱图
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-danger" data-toggle="modal"
-                                            data-target="#m_modal_group"
-                                            th:onclick="|allFragmentConv('${score.analyseDataId}',false, false)|">
-                                        全Fragment卷积
-                                    </button>
+                                    <a th:if="${!score.isDecoy}" th:href="|/analyse/consultation?dataId=${score.analyseDataId}&allCutInfo=true|"
+                                       class="btn btn-primary btn-sm">高级诊断</a>
                                     <table class="table table-bordered table-hover" style="table-layout:fixed;">
                                         <thead>
                                         <tr>

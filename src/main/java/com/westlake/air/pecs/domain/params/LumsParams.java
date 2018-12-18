@@ -1,4 +1,4 @@
-package com.westlake.air.pecs.domain.bean;
+package com.westlake.air.pecs.domain.params;
 
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
@@ -13,7 +13,7 @@ import java.util.HashSet;
  * Time: 2018-08-29 13:55
  */
 @Data
-public class SwathParams {
+public class LumsParams {
 
     ExperimentDO experimentDO;
 
@@ -42,8 +42,13 @@ public class SwathParams {
     HashSet<String> scoreTypes = new HashSet<>();
 
     boolean usedDIAScores = false;
+    /**
+     * 是否在卷积的时候同时完成选峰和打分
+     * epps: extract, peakpick, score
+     */
+    boolean useEpps = false;
 
-    public SwathParams(){
+    public LumsParams(){
         scoreTypes.add(FeatureScores.ScoreType.IntensityScore.getTypeName());
         scoreTypes.add(FeatureScores.ScoreType.LibraryCorr.getTypeName());
         scoreTypes.add(FeatureScores.ScoreType.LibraryRsmd.getTypeName());

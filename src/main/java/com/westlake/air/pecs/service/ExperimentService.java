@@ -1,7 +1,7 @@
 package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.SwathParams;
+import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
@@ -46,11 +46,12 @@ public interface ExperimentService {
     /**
      * 卷积的核心函数,最终返回卷积到的Peptide数目
      * 目前只支持MS2的卷积
-     * @param swathParams
+     * @param lumsParams
+     * useEpps: true: 将卷积,选峰及打分合并在一个步骤中执行,可以完整的省去一次IO读取及解析,大大提升分析速度
      * 需要experimentDO,libraryId,rtExtractionWindow,mzExtractionWindow,SlopeIntercept
      * @return
      */
-    ResultDO<AnalyseOverviewDO> extract(SwathParams swathParams);
+    ResultDO<AnalyseOverviewDO> extract(LumsParams lumsParams);
 
     /**
      * 实时卷积某一个PeptideRef的图谱,卷积的rtWindows默认为-1,即全时间段卷积
@@ -58,7 +59,7 @@ public interface ExperimentService {
      * @param peptide
      * @return
      */
-    ResultDO<AnalyseDataDO> extractOne(ExperimentDO exp, PeptideDO peptide, Float rtExtractorWindow);
+    ResultDO<AnalyseDataDO> extractOne(ExperimentDO exp, PeptideDO peptide, Float rtExtractorWindow, Float mzExtractorWindow);
 
     /**
      * 卷积iRT校准库的数据

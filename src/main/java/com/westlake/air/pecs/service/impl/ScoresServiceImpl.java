@@ -6,14 +6,14 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.dao.ScoresDAO;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.SwathParams;
+import com.westlake.air.pecs.domain.db.simple.TargetPeptide;
+import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.domain.db.*;
-import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.domain.db.simple.MatchedPeptide;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.domain.query.PeptideQuery;
@@ -138,9 +138,19 @@ public class ScoresServiceImpl implements ScoresService {
     @Override
     public ResultDO insert(ScoresDO scoresDO) {
         try {
-            scoresDO.setCreateDate(new Date());
             scoresDAO.insert(scoresDO);
             return ResultDO.build(scoresDO);
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO insertAll(List<ScoresDO> scoresList) {
+        try {
+            scoresDAO.insert(scoresList);
+            return ResultDO.build(scoresList);
         } catch (Exception e) {
             logger.warn(e.getMessage());
             return ResultDO.buildError(ResultCode.INSERT_ERROR);
@@ -152,9 +162,7 @@ public class ScoresServiceImpl implements ScoresService {
         if (scoresDO.getId() == null || scoresDO.getId().isEmpty()) {
             return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
         }
-
         try {
-            scoresDO.setLastModifiedDate(new Date());
             scoresDAO.update(scoresDO);
             return ResultDO.build(scoresDO);
         } catch (Exception e) {
@@ -213,14 +221,14 @@ public class ScoresServiceImpl implements ScoresService {
     @Override
     public ResultDO<SlopeIntercept> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing) {
 
-        HashMap<String, IntensityGroup> intensityGroupMap = peptideService.getIntensityGroupMap(new PeptideQuery(iRtLibraryId));
+        HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(new PeptideQuery(iRtLibraryId));
 
         List<List<ScoreRtPair>> scoreRtList = new ArrayList<>();
         List<Double> compoundRt = new ArrayList<>();
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
         for (AnalyseDataDO dataDO : dataList) {
             SlopeIntercept slopeIntercept = new SlopeIntercept();
-            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(dataDO, intensityGroupMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()), sigmaSpacing);
+            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(dataDO, ttMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()).buildIntensityMap(), sigmaSpacing);
             if (!featureByPep.isFeatureFound()) {
                 continue;
             }
@@ -247,7 +255,7 @@ public class ScoresServiceImpl implements ScoresService {
     }
 
     @Override
-    public List<ScoresDO> score(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, SwathParams input) {
+    public List<ScoresDO> score(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, LumsParams input) {
 
         if (dataList == null || dataList.size() == 0) {
             return null;
@@ -258,8 +266,8 @@ public class ScoresServiceImpl implements ScoresService {
         PeptideQuery query = new PeptideQuery(input.getLibraryId());
         query.setMzStart(Double.parseDouble(rang.getMzStart().toString()));
         query.setMzEnd(Double.parseDouble(rang.getMzEnd().toString()));
-        HashMap<String, IntensityGroup> intensityGroupMap = peptideService.getIntensityGroupMap(query);
-        List<ScoresDO> pecsScoreList = new ArrayList<>();
+        HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(query);
+        List<ScoresDO> scoreList = new ArrayList<>();
 
         int count = 0;
         //为每一组PeptideRef卷积结果打分
@@ -269,131 +277,21 @@ public class ScoresServiceImpl implements ScoresService {
             raf = new RandomAccessFile(exp.getAirdPath(), "r");
 
             TreeMap<Float, MzIntensityPairs> rtMap = null;
-            if(input.isUsedDIAScores()){
+            if (input.isUsedDIAScores()) {
                 rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex);
             }
 
             for (AnalyseDataDO dataDO : dataList) {
-                if (!dataDO.getIsHit()) {
+                ScoresDO scoresDO = scoreForOne(dataDO, ttMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()), rtMap, input);
+                if (scoresDO == null) {
                     continue;
                 }
-                if (dataDO.getConvIntensityMap() == null || dataDO.getConvIntensityMap().size() < 3) {
-                    logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
-                    continue;
-                }
-
-                analyseDataService.decompress(dataDO);
-                List<FeatureScores> featureScoresList = new ArrayList<>();
-                //获取标准库中对应的PeptideRef组
-                IntensityGroup ig = intensityGroupMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy());
-
-                if(ig == null){
-                    logger.error("IntensityGroup获取异常"+dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy());
-                    continue;
-                }
-                FeatureByPep featureByPep = featureExtractor.getExperimentFeature(dataDO, ig, input.getSigmaSpacing());
-
-                if (!featureByPep.isFeatureFound()) {
-                    continue;
-                }
-                List<List<ExperimentFeature>> experimentFeatures = featureByPep.getExperimentFeatures();
-                List<RtIntensityPairsDouble> chromatogramList = featureByPep.getRtIntensityPairsOriginList();
-                List<Double> libraryIntensityList = featureByPep.getLibraryIntensityList();
-                List<double[]> noise1000List = featureByPep.getNoise1000List();
-                HashMap<String, Double> productMzMap = new HashMap<>();
-                List<Double> productMzList = new ArrayList<>();
-                List<Integer> productChargeList = new ArrayList<>();
-
-                for (String cutInfo : dataDO.getMzMap().keySet()) {
-                    try {
-                        if (cutInfo.contains("^")) {
-                            String temp = cutInfo;
-                            if (cutInfo.contains("[")) {
-                                temp = cutInfo.substring(0, cutInfo.indexOf("["));
-                            }
-                            if(temp.contains("i")){
-                                temp = temp.replace("i","");
-                            }
-                            productChargeList.add(Integer.parseInt(temp.split("\\^")[1]));
-                        } else {
-                            productChargeList.add(1);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        logger.info("cutInfo:" + cutInfo + ";data:" + JSON.toJSONString(dataDO));
-                    }
-
-                    double mz = Double.parseDouble(Float.toString(dataDO.getMzMap().get(cutInfo)));
-                    productMzMap.put(cutInfo, mz);
-                    productMzList.add(mz);
-                }
-
-                HashMap<String, Float> intensityMap = ig.getIntensityMap();
-                intensityMap = MathUtil.normalizeSum(intensityMap);
-
-                HashMap<Integer, String> unimodHashMap = dataDO.getUnimodMap();
-                String sequence = ig.getSequence();
-                //for each mrmFeature, calculate scores
-
-                for (List<ExperimentFeature> experimentFeatureList : experimentFeatures) {
-
-                    FeatureScores featureScores = new FeatureScores();
-                    chromatographicScorer.calculateChromatographicScores(experimentFeatureList, libraryIntensityList, featureScores, input.getScoreTypes());
-                    if(input.getScoreTypes().contains(FeatureScores.ScoreType.LogSnScore.getTypeName())){
-                        chromatographicScorer.calculateLogSnScore(chromatogramList, experimentFeatureList, noise1000List, featureScores);
-                    }
-
-                    //根据RT时间和前体MZ获取最近的一个原始谱图
-                    if(input.isUsedDIAScores()){
-                        MzIntensityPairs mzIntensityPairs = scanIndexService.getNearestSpectrumByRt(rtMap, experimentFeatureList.get(0).getRt());
-                        if (mzIntensityPairs != null) {
-                            Float[] spectrumMzArray = mzIntensityPairs.getMzArray();
-                            Float[] spectrumIntArray = mzIntensityPairs.getIntensityArray();
-                            diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
-                            diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, intensityMap, featureScores);
-                            diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
-                        }
-                    }
-
-                    if(input.getScoreTypes().contains(FeatureScores.ScoreType.ElutionModelFitScore.getTypeName())){
-                        elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
-                    }
-
-                    if(input.getScoreTypes().contains(FeatureScores.ScoreType.IntensityScore.getTypeName())){
-                        libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
-                    }
-
-                    libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, featureScores, input.getScoreTypes());
-                    if(input.getScoreTypes().contains(FeatureScores.ScoreType.NormRtScore.getTypeName())){
-                        libraryScorer.calculateNormRtScore(experimentFeatureList, input.getSlopeIntercept(), dataDO.getRt(), featureScores);
-                    }
-                    swathLDAScorer.calculateSwathLdaPrescore(featureScores);
-                    featureScores.setRt(experimentFeatureList.get(0).getRt());
-                    featureScores.setIntensitySum(experimentFeatureList.get(0).getIntensitySum());
-                    featureScoresList.add(featureScores);
-                }
-
-                if(featureScoresList.size() == 0){
-                    continue;
-                }
-                ScoresDO pecsScore = new ScoresDO();
-
-                pecsScore.setRt(dataDO.getRt());
-                pecsScore.setOverviewId(input.getOverviewId());
-                pecsScore.setPeptideRef(dataDO.getPeptideRef());
-                pecsScore.setProteinName(dataDO.getProteinName());
-                pecsScore.setAnalyseDataId(dataDO.getId());
-                pecsScore.setIsDecoy(dataDO.getIsDecoy());
-                pecsScore.setFeatureScoresList(featureScoresList);
-                pecsScore.setCreateDate(new Date());
-                pecsScore.setLastModifiedDate(new Date());
-                pecsScoreList.add(pecsScore);
-
+                scoreList.add(scoresDO);
                 count++;
                 if (count % 1000 == 0) {
                     logger.info(count + "个Peptide已经打分完毕,总共有" + dataList.size() + "个Peptide");
-                    scoresDAO.insert(pecsScoreList);
-                    pecsScoreList.clear();
+                    scoresDAO.insert(scoreList);
+                    scoreList.clear();
                 }
             }
 
@@ -402,9 +300,10 @@ public class ScoresServiceImpl implements ScoresService {
         } finally {
             FileUtil.close(raf);
         }
-        scoresDAO.insert(pecsScoreList);
-        return pecsScoreList;
+        scoresDAO.insert(scoreList);
+        return scoreList;
     }
+
 
     @Override
     public ResultDO exportForPyProphet(String overviewId, String spliter) {
@@ -508,6 +407,116 @@ public class ScoresServiceImpl implements ScoresService {
 
         resultDO.setModel(distributions);
         return resultDO;
+    }
+
+    @Override
+    public ScoresDO scoreForOne(AnalyseDataDO dataDO, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input) {
+        if (!dataDO.getIsHit()) {
+            return null;
+        }
+        if (dataDO.getConvIntensityMap() == null || dataDO.getConvIntensityMap().size() < 3) {
+            logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
+            return null;
+        }
+
+        analyseDataService.decompress(dataDO);
+        List<FeatureScores> featureScoresList = new ArrayList<>();
+        //获取标准库中对应的PeptideRef组
+        HashMap<String, Float> intensityMap = peptide.buildIntensityMap();
+        //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
+        FeatureByPep featureByPep = featureExtractor.getExperimentFeature(dataDO, intensityMap, input.getSigmaSpacing());
+        if (!featureByPep.isFeatureFound()) {
+            return null;
+        }
+
+        List<List<ExperimentFeature>> experimentFeatures = featureByPep.getExperimentFeatures();
+        List<RtIntensityPairsDouble> chromatogramList = featureByPep.getRtIntensityPairsOriginList();
+        List<Double> libraryIntensityList = featureByPep.getLibraryIntensityList();
+        List<double[]> noise1000List = featureByPep.getNoise1000List();
+        HashMap<String, Double> productMzMap = new HashMap<>();
+        List<Double> productMzList = new ArrayList<>();
+        List<Integer> productChargeList = new ArrayList<>();
+
+        for (String cutInfo : dataDO.getMzMap().keySet()) {
+            try {
+                if (cutInfo.contains("^")) {
+                    String temp = cutInfo;
+                    if (cutInfo.contains("[")) {
+                        temp = cutInfo.substring(0, cutInfo.indexOf("["));
+                    }
+                    if (temp.contains("i")) {
+                        temp = temp.replace("i", "");
+                    }
+                    productChargeList.add(Integer.parseInt(temp.split("\\^")[1]));
+                } else {
+                    productChargeList.add(1);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.info("cutInfo:" + cutInfo + ";data:" + JSON.toJSONString(dataDO));
+            }
+
+            double mz = Double.parseDouble(Float.toString(dataDO.getMzMap().get(cutInfo)));
+            productMzMap.put(cutInfo, mz);
+            productMzList.add(mz);
+        }
+
+        MathUtil.normalizeSum(intensityMap);
+        HashMap<Integer, String> unimodHashMap = dataDO.getUnimodMap();
+        String sequence = peptide.getSequence();
+        //for each mrmFeature, calculate scores
+
+        for (List<ExperimentFeature> experimentFeatureList : experimentFeatures) {
+
+            FeatureScores featureScores = new FeatureScores();
+            chromatographicScorer.calculateChromatographicScores(experimentFeatureList, libraryIntensityList, featureScores, input.getScoreTypes());
+            if (input.getScoreTypes().contains(FeatureScores.ScoreType.LogSnScore.getTypeName())) {
+                chromatographicScorer.calculateLogSnScore(chromatogramList, experimentFeatureList, noise1000List, featureScores);
+            }
+
+            //根据RT时间和前体MZ获取最近的一个原始谱图
+            if (input.isUsedDIAScores()) {
+                MzIntensityPairs mzIntensityPairs = scanIndexService.getNearestSpectrumByRt(rtMap, experimentFeatureList.get(0).getRt());
+                if (mzIntensityPairs != null) {
+                    Float[] spectrumMzArray = mzIntensityPairs.getMzArray();
+                    Float[] spectrumIntArray = mzIntensityPairs.getIntensityArray();
+                    diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
+                    diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, intensityMap, featureScores);
+                    diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
+                }
+            }
+
+            if (input.getScoreTypes().contains(FeatureScores.ScoreType.ElutionModelFitScore.getTypeName())) {
+                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
+            }
+
+            if (input.getScoreTypes().contains(FeatureScores.ScoreType.IntensityScore.getTypeName())) {
+                libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
+            }
+
+            libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, featureScores, input.getScoreTypes());
+            if (input.getScoreTypes().contains(FeatureScores.ScoreType.NormRtScore.getTypeName())) {
+                libraryScorer.calculateNormRtScore(experimentFeatureList, input.getSlopeIntercept(), dataDO.getRt(), featureScores);
+            }
+            swathLDAScorer.calculateSwathLdaPrescore(featureScores);
+            featureScores.setRt(experimentFeatureList.get(0).getRt());
+            featureScores.setIntensitySum(experimentFeatureList.get(0).getIntensitySum());
+            featureScoresList.add(featureScores);
+        }
+
+        if (featureScoresList.size() == 0) {
+            return null;
+        }
+        ScoresDO score = new ScoresDO();
+
+        score.setRt(dataDO.getRt());
+        score.setOverviewId(input.getOverviewId());
+        score.setPeptideRef(dataDO.getPeptideRef());
+        score.setProteinName(dataDO.getProteinName());
+        score.setAnalyseDataId(dataDO.getId());
+        score.setIsDecoy(dataDO.getIsDecoy());
+        score.setFeatureScoresList(featureScoresList);
+        return score;
     }
 
     /**
@@ -665,8 +674,7 @@ public class ScoresServiceImpl implements ScoresService {
      * @param minBinsFilled     需要满足↑条件的bin的数量
      * @return boolean 是否覆盖
      */
-    private boolean computeBinnedCoverage(double[] rtRange, List<RtPair> pairsCorrected, int rtBins,
-                                          int minPeptidesPerBin, int minBinsFilled) {
+    private boolean computeBinnedCoverage(double[] rtRange, List<RtPair> pairsCorrected, int rtBins, int minPeptidesPerBin, int minBinsFilled) {
         int[] binCounter = new int[rtBins];
         double rtDistance = rtRange[1] - rtRange[0];
 

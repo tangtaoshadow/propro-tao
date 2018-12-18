@@ -1,20 +1,20 @@
 package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.SwathParams;
+import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
+import com.westlake.air.pecs.domain.db.*;
+import com.westlake.air.pecs.domain.db.simple.TargetPeptide;
+import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
-import com.westlake.air.pecs.domain.db.AnalyseDataDO;
-import com.westlake.air.pecs.domain.db.ScanIndexDO;
-import com.westlake.air.pecs.domain.db.ScoreDistribution;
-import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.domain.db.simple.MatchedPeptide;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.domain.query.ScoresQuery;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 /**
  * Created by James Lu MiaoShan
@@ -35,6 +35,8 @@ public interface ScoresService {
     HashMap<String, ScoresDO> getAllMapByOverviewId(String overviewId);
 
     ResultDO insert(ScoresDO scoresDO);
+
+    ResultDO insertAll(List<ScoresDO> scoresList);
 
     ResultDO update(ScoresDO scoresDO);
 
@@ -67,7 +69,9 @@ public interface ScoresService {
      *                 sigmaSpacing Sigma通常为30/8 = 6.25/Spacing通常为0.01
      *                 overviewId
      */
-    List<ScoresDO> score(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, SwathParams input);
+    List<ScoresDO> score(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, LumsParams input);
+
+    ScoresDO scoreForOne(AnalyseDataDO data, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input);
 
     /**
      * Generate the tsv format file for pyprophet

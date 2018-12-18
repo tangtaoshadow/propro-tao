@@ -124,13 +124,13 @@ public class FragmentFactory {
         for (int c = 1; c <= peptideDO.getCharge(); c++) {
             for (int i = limitLength; i < length; i++) {
                 Double bMz = formulaCalculator.getMonoMz(sequence.substring(0, i), ResidueType.BIon, c, 0, 0, false, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i));
-                bySeriesMap.put("b" + i + "^" + peptideDO.getCharge(), bMz);
+                bySeriesMap.put("b" + i + (c == 1 ? "" : ("^" + c)), bMz);
                 Double bMz1 = formulaCalculator.getMonoMz(sequence.substring(0, i), ResidueType.BIon, c, 0, 0, true, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i));
-                bySeriesMap.put("b" + i + "^" + peptideDO.getCharge()+"i", bMz1);
+                bySeriesMap.put("b" + i + (c == 1 ? "" : ("^" + c)) + "i", bMz1);
                 Double yMz = formulaCalculator.getMonoMz(sequence.substring(i + 1, length), ResidueType.YIon, c, 0, 0, false, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), i + 1, length));
-                bySeriesMap.put("y" + i + "^" + peptideDO.getCharge(), yMz);
+                bySeriesMap.put("y" + i + (c == 1 ? "" : ("^" + c)), yMz);
                 Double yMz1 = formulaCalculator.getMonoMz(sequence.substring(i + 1, length), ResidueType.YIon, c, 0, 0, true, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), i + 1, length));
-                bySeriesMap.put("y" + i + "^" + peptideDO.getCharge()+"i", yMz1);
+                bySeriesMap.put("y" + i + (c == 1 ? "" : ("^" + c)) + "i", yMz1);
             }
         }
 

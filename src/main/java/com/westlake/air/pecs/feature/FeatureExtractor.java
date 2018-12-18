@@ -56,7 +56,14 @@ public class FeatureExtractor {
     @Autowired
     ChromatogramFilter chromatogramFilter;
 
-    public FeatureByPep getExperimentFeature(AnalyseDataDO dataDO, IntensityGroup intensityGroupByPep, SigmaSpacing sigmaSpacing) {
+    /**
+     *
+     * @param dataDO 卷积后的数据对象
+     * @param intensityMap 得到标准库中peptideRef对应的碎片和强度的键值对
+     * @param sigmaSpacing
+     * @return
+     */
+    public FeatureByPep getExperimentFeature(AnalyseDataDO dataDO, HashMap<String, Float> intensityMap, SigmaSpacing sigmaSpacing) {
         boolean featureFound = true;
         if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() == 0) {
             featureFound = false;
@@ -67,8 +74,6 @@ public class FeatureExtractor {
         List<IntensityRtLeftRtRightPairs> intensityRtLeftRtRightPairsList = new ArrayList<>();
 
         List<Double> libraryIntensityList = new ArrayList<>();
-        //得到标准库中peptideRef对应的碎片和强度的键值对
-        HashMap<String, Float> intensityMap = intensityGroupByPep.getIntensityMap();
 
         //对每一个chromatogram进行运算,dataDO中不含有ms1
         List<double[]> noise1000List = new ArrayList<>();
@@ -101,6 +106,7 @@ public class FeatureExtractor {
 
         HashMap<String, Double[]> smoothIntensitiesMap = gaussFilter.filter(rtDoubleArray, intensitiesMap, sigmaSpacing);
 
+        //对每一个片段离子选峰
         for (String cutInfo : intensitiesMap.keySet()) {
             //计算两个信噪比
             double[] noises200 = signalToNoiseEstimator.computeSTN(rtDoubleArray, smoothIntensitiesMap.get(cutInfo), 200, 30);

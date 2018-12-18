@@ -1,6 +1,6 @@
 package com.westlake.air.pecs.test.experiment;
 
-import com.westlake.air.pecs.domain.bean.SwathParams;
+import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
@@ -68,7 +68,7 @@ public class ExperimentTest extends BaseTest {
         File fileMZXML = new File(filePathMZXML);
         experimentService.uploadFile(experimentDO, fileMZXML, new TaskDO());
 
-        SwathParams input = new SwathParams();
+        LumsParams input = new LumsParams();
         input.setExperimentDO(experimentDO);
         input.setLibraryId(libraryDO.getId());
         input.setSlopeIntercept(SlopeIntercept.create());

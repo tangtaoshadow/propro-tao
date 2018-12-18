@@ -240,7 +240,7 @@ public class MathUtil {
     /**
      * Normalize a with a's mean and std.
      */
-    public static HashMap<String, Float> normalizeSum(HashMap<String, Float> map) {
+    public static void normalizeSum(HashMap<String, Float> map) {
         Float sum = 0f;
         for(Float f : map.values()){
             sum+=f;
@@ -248,8 +248,6 @@ public class MathUtil {
         for(String key : map.keySet()){
             map.put(key, map.get(key)/sum);
         }
-
-        return map;
     }
 
     /**

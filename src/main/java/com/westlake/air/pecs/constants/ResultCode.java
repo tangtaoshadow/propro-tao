@@ -83,6 +83,7 @@ public enum ResultCode implements Serializable {
     ANALYSE_OVERVIEW_ID_CAN_NOT_BE_EMPTY("ANALYSE_OVERVIEW_ID_CAN_NOT_BE_EMPTY","卷积数据概览ID不能为空"),
     ONLY_SUPPORT_VERIFY_LIBRARY_SEARCH("ONLY_SUPPORT_VERIFY_LIBRARY_SEARCH","本接口只支持校准库的数据聚合查询"),
     DATA_ID_CANNOT_BE_EMPTY("DATA_ID_CANNOT_BE_EMPTY","DataId不能为空"),
+    FRAGMENT_CANNOT_BE_EMPTY_ALL("FRAGMENT_CANNOT_BE_EMPTY_ALL","肽段碎片不能全部为空"),
 
     /**
      * ******

@@ -54,8 +54,16 @@ public class TargetPeptide {
         this.fragmentMap = peptide.getFragmentMap();
         this.isDecoy = peptide.getIsDecoy();
         this.rt = peptide.getRt().floatValue();
-
     }
+
+    public HashMap<String, Float> buildIntensityMap(){
+        HashMap<String, Float> intensityMap = new HashMap<>();
+        for(String cutInfo : fragmentMap.keySet()){
+            intensityMap.put(cutInfo, fragmentMap.get(cutInfo).getIntensity().floatValue());
+        }
+        return intensityMap;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {

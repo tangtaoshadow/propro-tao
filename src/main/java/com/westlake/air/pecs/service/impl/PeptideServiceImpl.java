@@ -237,8 +237,14 @@ public class PeptideServiceImpl implements PeptideService {
     }
 
     @Override
-    public HashMap<String, IntensityGroup> getIntensityGroupMap(PeptideQuery query) {
-        return peptideDAO.getIntensityGroupMap(query);
+    public HashMap<String, TargetPeptide> getTPMap(PeptideQuery query) {
+        List<TargetPeptide> tps = peptideDAO.getTPAll(query);
+        HashMap<String, TargetPeptide> hashMap = new HashMap<>();
+        for (TargetPeptide peptide : tps) {
+            hashMap.put(peptide.getPeptideRef() + "_" + peptide.getIsDecoy(), peptide);
+        }
+
+        return hashMap;
     }
 
     private List<TargetPeptide> sortMS1Coordinates(List<TargetPeptide> targetList) {
