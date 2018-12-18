@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -281,7 +282,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("overview", overviewDO);
         model.addAttribute("slope", overviewDO.getSlope());
         model.addAttribute("intercept", overviewDO.getIntercept());
-        model.addAttribute("scoreTypes", FeatureScores.ScoreType.values());
+        model.addAttribute("scoreTypes", FeatureScores.ScoreType.getShownTypes());
         return "/analyse/overview/score";
     }
 
@@ -292,6 +293,7 @@ public class AnalyseController extends BaseController {
                    @RequestParam(value = "intercept", required = false) Double intercept,
                    @RequestParam(value = "sigma", required = false) Float sigma,
                    @RequestParam(value = "spacing", required = false) Float spacing,
+                   HttpServletRequest request,
                    RedirectAttributes redirectAttributes) {
 
         model.addAttribute("overviewId", overviewId);
@@ -300,6 +302,13 @@ public class AnalyseController extends BaseController {
         model.addAttribute("slope", slope);
         model.addAttribute("intercept", intercept);
 
+        HashSet<String> scoreTypes = new HashSet<>();
+        for (FeatureScores.ScoreType type : FeatureScores.ScoreType.values()) {
+            String typeParam = request.getParameter(type.getTypeName());
+            if(typeParam !=null && typeParam.equals("on")){
+                scoreTypes.add(type.getTypeName());
+            }
+        }
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         if (overviewResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
@@ -325,7 +334,8 @@ public class AnalyseController extends BaseController {
             si.setSlope(slope);
             si.setIntercept(intercept);
         }
-        scoreTask.score(overviewId, expResult.getModel(), si, overviewDO.getLibraryId(), new SigmaSpacing(sigma, spacing), taskDO);
+
+        scoreTask.score(overviewId, expResult.getModel(), si, overviewDO.getLibraryId(), new SigmaSpacing(sigma, spacing), scoreTypes, taskDO);
         return "redirect:/task/detail/" + taskDO.getId();
     }
 
@@ -438,9 +448,9 @@ public class AnalyseController extends BaseController {
     @RequestMapping(value = "/allFragmentConv")
     @ResponseBody
     ResultDO<JSONObject> allFragmentConv(Model model,
-                                   @RequestParam(value = "dataId", required = false) String dataId,
-                                   @RequestParam(value = "isGaussFilter", required = false, defaultValue = "false") Boolean isGaussFilter,
-                                   @RequestParam(value = "useNoise1000", required = false, defaultValue = "false") Boolean useNoise1000) {
+                                         @RequestParam(value = "dataId", required = false) String dataId,
+                                         @RequestParam(value = "isGaussFilter", required = false, defaultValue = "false") Boolean isGaussFilter,
+                                         @RequestParam(value = "useNoise1000", required = false, defaultValue = "false") Boolean useNoise1000) {
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
         ResultDO<AnalyseDataDO> dataResult = null;
         ResultDO<AnalyseOverviewDO> overviewResult = null;

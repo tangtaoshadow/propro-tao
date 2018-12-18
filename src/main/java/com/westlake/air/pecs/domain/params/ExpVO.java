@@ -5,13 +5,13 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class ExpModel {
+public class ExpVO {
 
     List<Exp> exps;
 
-    public ExpModel(){}
+    public ExpVO(){}
 
-    public ExpModel(List<Exp> exps){
+    public ExpVO(List<Exp> exps){
         this.exps = exps;
     }
 }

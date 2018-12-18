@@ -149,7 +149,7 @@ public class ExperimentTask extends BaseTask {
 
         taskDO.addLog("开始创建Aird压缩文件");
         taskDO.setStatus(TaskStatus.RUNNING.getName());
-        if(experimentDO.getAirdPath() == null){
+        if(experimentDO.getAirdPath() == null || !(new File(experimentDO.getAirdPath()).exists())){
             taskService.update(taskDO);
             compressor.doCompress(experimentDO);
             taskDO.addLog("文件压缩完毕,耗时" + (System.currentTimeMillis() - start) + "开始卷积IRT校准库并且计算iRT值");

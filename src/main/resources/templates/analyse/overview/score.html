@@ -51,8 +51,8 @@
                                     </label>
                                     <div class="m-checkbox-list" th:each="scoreType:${scoreTypes}">
                                         <label class="m-checkbox m-checkbox--state-success">
-                                            <input type="checkbox" th:if="${scoreType.isUsed}" th:checked="checked" th:text="${scoreType.typeName}">
-                                            <input type="checkbox" th:unless="${scoreType.isUsed}" th:text="${scoreType.typeName}">
+                                            <input type="checkbox" th:if="${scoreType.isUsed}" th:checked="checked" th:name="${scoreType.typeName}" th:text="${scoreType.typeName}">
+                                            <input type="checkbox" th:unless="${scoreType.isUsed}" th:name="${scoreType.typeName}" th:text="${scoreType.typeName}">
                                             <span></span>
                                         </label>
                                     </div>

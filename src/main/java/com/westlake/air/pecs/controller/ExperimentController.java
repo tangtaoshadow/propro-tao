@@ -12,7 +12,7 @@ import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.params.Exp;
-import com.westlake.air.pecs.domain.params.ExpModel;
+import com.westlake.air.pecs.domain.params.ExpVO;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.MzXMLParser;
@@ -127,7 +127,7 @@ public class ExperimentController extends BaseController {
     }
 
     @RequestMapping(value = "/batchadd", method = {RequestMethod.POST})
-    String batchAdd(Model model, ExpModel exps, RedirectAttributes redirectAttributes) {
+    String batchAdd(Model model, ExpVO exps, RedirectAttributes redirectAttributes) {
 
         String errorInfo = "";
         List<Exp> expList = exps.getExps();

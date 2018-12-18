@@ -5,6 +5,7 @@ import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.SwathParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.service.AnalyseDataService;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -31,14 +33,20 @@ public class ScoreTask extends BaseTask {
     AnalyseOverviewService analyseOverviewService;
 
     @Async(value = "scoreExecutor")
-    public void score(String overviewId, ExperimentDO experimentDO, SlopeIntercept slopeIntercept, String libraryId, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
+    public void score(String overviewId, ExperimentDO experimentDO, SlopeIntercept slopeIntercept, String libraryId, SigmaSpacing sigmaSpacing, HashSet<String> scoreTypes, TaskDO taskDO) {
         long start = System.currentTimeMillis();
+        taskDO.setStatus(TaskStatus.RUNNING.getName());
+        taskService.update(taskDO);
+
         SwathParams input = new SwathParams();
         input.setLibraryId(libraryId);
         input.setSigmaSpacing(sigmaSpacing);
         input.setSlopeIntercept(slopeIntercept);
         input.setOverviewId(overviewId);
         input.setExperimentDO(experimentDO);
+        if(scoreTypes != null){
+            input.setScoreTypes(scoreTypes);
+        }
         input.setUsedDIAScores(true);
         logger.info("首先删除所有旧打分数据");
         scoresService.deleteAllByOverviewId(input.getOverviewId());

@@ -580,7 +580,6 @@ public class ExperimentServiceImpl implements ExperimentService {
                 } else {
                     intArray[i] = acc;
                 }
-
             }
 
             dataDO.getMzMap().put(fi.getCutInfo(), fi.getMz().floatValue());

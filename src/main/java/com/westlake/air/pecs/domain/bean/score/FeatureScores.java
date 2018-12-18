@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.domain.bean.score;
 
+import com.google.common.collect.Lists;
 import com.westlake.air.pecs.constants.Constants;
 import lombok.Data;
 
@@ -236,6 +237,13 @@ public class FeatureScores {
                     types.add(type);
                 }
             }
+            return types;
+        }
+
+        public static List<ScoreType> getShownTypes() {
+            List<ScoreType> types = Lists.newArrayList(values());
+            types.remove(ScoreType.WeightedTotalScore);
+            types.remove(ScoreType.MainScore);
             return types;
         }
 
