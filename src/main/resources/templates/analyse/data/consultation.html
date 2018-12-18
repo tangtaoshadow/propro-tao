@@ -42,7 +42,7 @@
                         <input id="dataId" type="hidden" th:value="${dataId}" class="form-control"
                                name="dataId">
                         <div class="form-group m-form__group row">
-                            <div class="input-group col-lg-6">
+                            <div class="input-group col-lg-2">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-success" type="button">
                                         MzExtractWindow:
@@ -51,7 +51,7 @@
                                 <input type="text" class="form-control m-input" name="mzExtractWindow"
                                        th:value="${mzExtractWindow}">
                             </div>
-                            <div class="input-group col-lg-6">
+                            <div class="input-group col-lg-2">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-success" type="button">
                                         RtExtractWindow:
@@ -60,9 +60,45 @@
                                 <input type="text" class="form-control m-input" name="rtExtractWindow"
                                        th:value="${rtExtractWindow}">
                             </div>
+                            <div class="input-group col-lg-2">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        碎片最小长度:
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control m-input" name="limitLength"
+                                       th:value="${limitLength}">
+                            </div>
+                            <div class="input-group col-lg-2">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        Sigma:
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control m-input" name="sigma"
+                                       th:value="${sigma}">
+                            </div>
+                            <div class="input-group col-lg-2">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        Spacing:
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control m-input" name="spacing"
+                                       th:value="${spacing}">
+                            </div>
+                            <div class="input-group col-lg-2">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        Noise:
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control m-input" name="noise"
+                                       th:value="${noise}">
+                            </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <div class="input-group col-lg-4">
+                            <div class="input-group col-lg-2">
                                 <div class="m-checkbox-list">
                                     <label class="m-checkbox">
                                         <input type="checkbox" class="form-control m-input" name="useGaussFilter"
@@ -72,27 +108,8 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="input-group col-lg-4">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-success" type="button">
-                                        Sigma:
-                                    </button>
-                                </div>
-                                <input type="text" class="form-control m-input" name="sigma"
-                                       th:value="${sigma}">
-                            </div>
-                            <div class="input-group col-lg-4">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-success" type="button">
-                                        Spacing:
-                                    </button>
-                                </div>
-                                <input type="text" class="form-control m-input" name="spacing"
-                                       th:value="${spacing}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <div class="input-group col-lg-4">
+
+                            <div class="input-group col-lg-2">
                                 <div class="m-checkbox-list">
                                     <label class="m-checkbox">
                                         <input type="checkbox" class="form-control m-input" name="useNoise"
@@ -102,16 +119,48 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="input-group col-lg-4">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-success" type="button">
-                                        Noise:
-                                    </button>
+                            <div class="input-group col-lg-2">
+                                <div class="m-checkbox-list">
+                                    <label class="m-checkbox">
+                                        <input type="checkbox" class="form-control m-input" name="noUseForFill"
+                                               th:checked="${noUseForFill}">
+                                        不使用算法生成
+                                        <span></span>
+                                    </label>
                                 </div>
-                                <input type="text" class="form-control m-input" name="noise"
-                                       th:value="${noise}">
                             </div>
-                            <div class="input-group col-lg-4">
+                            <div class="input-group col-lg-2">
+                                <div class="m-checkbox-list">
+                                    <label class="m-checkbox">
+                                        <input type="checkbox" class="form-control m-input" name="noUseForLib"
+                                               th:checked="${noUseForLib}">
+                                        不使用标准库
+                                        <span></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="input-group col-lg-2">
+                                <div class="m-checkbox-list">
+                                    <label class="m-checkbox">
+                                        <input type="checkbox" class="form-control m-input" name="useIsotope"
+                                               th:checked="${useIsotope}">
+                                        算法生成包含同位素
+                                        <span></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="input-group col-lg-2">
+                                <div class="m-checkbox-list">
+                                    <label class="m-checkbox">
+                                        <input type="checkbox" class="form-control m-input" name="onlyIsotope"
+                                               th:checked="${onlyIsotope}">
+                                        算法生成只包含同位素
+                                        <span></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="input-group col-lg-2">
                                 <div class="m-checkbox-list">
                                     <label class="m-checkbox">
                                         <input type="checkbox" class="form-control m-input" name="allCutInfo"
@@ -121,6 +170,9 @@
                                     </label>
                                 </div>
                             </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+
                         </div>
                         <div class="row">
                             <div class="col-2 row">

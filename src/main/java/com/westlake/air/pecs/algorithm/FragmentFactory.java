@@ -114,7 +114,7 @@ public class FragmentFactory {
      * @param limitLength 生成的B,Y离子的最小长度
      * @return
      */
-    public HashMap<String, Double> getBYSeriesMap(PeptideDO peptideDO, int limitLength) {
+    public HashMap<String, Double> getBYSeriesMap(PeptideDO peptideDO, int limitLength, boolean useIsotope, boolean onlyIsotope) {
         HashMap<String, Double> bySeriesMap = new HashMap<>();
         String sequence = peptideDO.getSequence();
         int length = sequence.length();
@@ -123,14 +123,18 @@ public class FragmentFactory {
         }
         for (int c = 1; c <= peptideDO.getCharge(); c++) {
             for (int i = limitLength; i < length; i++) {
-                Double bMz = formulaCalculator.getMonoMz(sequence.substring(0, i), ResidueType.BIon, c, 0, 0, false, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i));
-                bySeriesMap.put("b" + i + (c == 1 ? "" : ("^" + c)), bMz);
-                Double bMz1 = formulaCalculator.getMonoMz(sequence.substring(0, i), ResidueType.BIon, c, 0, 0, true, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i));
-                bySeriesMap.put("b" + i + (c == 1 ? "" : ("^" + c)) + "i", bMz1);
-                Double yMz = formulaCalculator.getMonoMz(sequence.substring(i + 1, length), ResidueType.YIon, c, 0, 0, false, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), i + 1, length));
-                bySeriesMap.put("y" + i + (c == 1 ? "" : ("^" + c)), yMz);
-                Double yMz1 = formulaCalculator.getMonoMz(sequence.substring(i + 1, length), ResidueType.YIon, c, 0, 0, true, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), i + 1, length));
-                bySeriesMap.put("y" + i + (c == 1 ? "" : ("^" + c)) + "i", yMz1);
+                if(!onlyIsotope){
+                    Double bMz = formulaCalculator.getMonoMz(sequence.substring(0, i), ResidueType.BIon, c, 0, 0, false, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i));
+                    bySeriesMap.put("b" + i + (c == 1 ? "" : ("^" + c)), bMz);
+                    Double yMz = formulaCalculator.getMonoMz(sequence.substring(i + 1, length), ResidueType.YIon, c, 0, 0, false, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), i + 1, length));
+                    bySeriesMap.put("y" + i + (c == 1 ? "" : ("^" + c)), yMz);
+                }
+                if(useIsotope){
+                    Double bMzi = formulaCalculator.getMonoMz(sequence.substring(0, i), ResidueType.BIon, c, 0, 0, true, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i));
+                    bySeriesMap.put("b" + i + (c == 1 ? "" : ("^" + c)) + "i", bMzi);
+                    Double yMzi = formulaCalculator.getMonoMz(sequence.substring(i + 1, length), ResidueType.YIon, c, 0, 0, true, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), i + 1, length));
+                    bySeriesMap.put("y" + i + (c == 1 ? "" : ("^" + c)) + "i", yMzi);
+                }
             }
         }
 

@@ -457,6 +457,11 @@ public class AnalyseController extends BaseController {
                         @RequestParam(value = "mzExtractWindow", required = false, defaultValue = "0.05") Float mzExtractWindow,
                         @RequestParam(value = "rtExtractWindow", required = false, defaultValue = "800") Float rtExtractWindow,
                         @RequestParam(value = "allCutInfo", required = false,defaultValue = "false") Boolean allCutInfo,
+                        @RequestParam(value = "useIsotope", required = false,defaultValue = "false") Boolean useIsotope,
+                        @RequestParam(value = "onlyIsotope", required = false,defaultValue = "false") Boolean onlyIsotope,
+                        @RequestParam(value = "noUseForFill", required = false,defaultValue = "false") Boolean noUseForFill,
+                        @RequestParam(value = "noUseForLib", required = false,defaultValue = "false") Boolean noUseForLib,
+                        @RequestParam(value = "limitLength", required = false,defaultValue = "3") Integer limitLength,
                         HttpServletRequest request) {
 
         model.addAttribute("dataId", dataId);
@@ -468,6 +473,11 @@ public class AnalyseController extends BaseController {
         model.addAttribute("mzExtractWindow", mzExtractWindow);
         model.addAttribute("rtExtractWindow", rtExtractWindow);
         model.addAttribute("allCutInfo", allCutInfo);
+        model.addAttribute("useIsotope", useIsotope);
+        model.addAttribute("onlyIsotope", onlyIsotope);
+        model.addAttribute("noUseForFill", noUseForFill);
+        model.addAttribute("noUseForLib", noUseForLib);
+        model.addAttribute("limitLength", limitLength);
         AnalyseDataDO data = null;
         ResultDO<AnalyseOverviewDO> overviewResult = null;
         ResultDO<ExperimentDO> experimentResult = null;
@@ -479,6 +489,8 @@ public class AnalyseController extends BaseController {
                 return "/analyse/data/consultation";
             }
             data = dataResult.getModel();
+            model.addAttribute("limitLength", limitLength);
+
             overviewResult = analyseOverviewService.getById(data.getOverviewId());
             if (overviewResult.isFailed()) {
                 model.addAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
@@ -504,20 +516,26 @@ public class AnalyseController extends BaseController {
         AnalyseOverviewDO overviewDO = overviewResult.getModel();
         ExperimentDO experimentDO = experimentResult.getModel();
         PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(overviewDO.getLibraryId(), data.getPeptideRef(), false);
-
         List<String> cutInfoFromGuess = new ArrayList<>();
         List<String> cutInfoFromGuessAndHit = new ArrayList<>();
         List<Float[]> intensitiesList = new ArrayList<Float[]>();
         List<String> cutInfoFromDic = new ArrayList<>(peptide.getFragmentMap().keySet());
         //准备该肽段的其他互补离子
-        HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, 2);
 
-        for (String cutInfo : bySeriesMap.keySet()) {
-            if (peptide.getFragmentMap().get(cutInfo) == null) {
-                peptide.getFragmentMap().put(cutInfo, new FragmentInfo(cutInfo, bySeriesMap.get(cutInfo), 0d, peptide.getCharge()));
+        if(!noUseForFill){
+            HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, limitLength, useIsotope, onlyIsotope);
+
+            if(noUseForLib){
+                peptide.getFragmentMap().clear();
             }
-            cutInfoFromGuess.add(cutInfo);
+            for (String cutInfo : bySeriesMap.keySet()) {
+                if (peptide.getFragmentMap().get(cutInfo) == null) {
+                    peptide.getFragmentMap().put(cutInfo, new FragmentInfo(cutInfo, bySeriesMap.get(cutInfo), 0d, peptide.getCharge()));
+                }
+                cutInfoFromGuess.add(cutInfo);
+            }
         }
+
 
         ResultDO<AnalyseDataDO> dataRealResult = experimentService.extractOne(experimentDO, peptide, rtExtractWindow, mzExtractWindow);
         if (dataRealResult.isFailed()) {
