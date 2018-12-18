@@ -1,13 +1,18 @@
 package com.westlake.air.pecs.controller;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.SuccessMsg;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
+import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.LibraryQuery;
+import com.westlake.air.pecs.domain.query.PeptideQuery;
 import com.westlake.air.pecs.parser.TraMLParser;
 import com.westlake.air.pecs.parser.LibraryTsvParser;
 import com.westlake.air.pecs.service.LibraryService;
@@ -246,6 +251,50 @@ public class LibraryController extends BaseController {
         }
     }
 
+    @RequestMapping(value = "/search")
+    @ResponseBody
+    ResultDO<JSONObject> search(Model model,
+                                @RequestParam(value = "fragmentSequence", required = false) String fragmentSequence,
+                                @RequestParam(value = "precursorMz", required = false) Float precursorMz,
+                                @RequestParam(value = "experimentId", required = false) String experimentId,
+                                @RequestParam(value = "libraryId", required = false) String libraryId) {
+
+        if (fragmentSequence.length() <= 4) {
+            return ResultDO.buildError(ResultCode.SEARCH_FRAGMENT_LENGTH_MUST_BIGGER_THAN_3);
+        }
+
+        ResultDO<ExperimentDO> expResult = experimentService.getById(experimentId);
+        if (expResult.isFailed()) {
+            return ResultDO.buildError(ResultCode.EXPERIMENT_NOT_EXISTED);
+        }
+        ExperimentDO exp = expResult.getModel();
+        List<WindowRang> rangs = exp.getWindowRangs();
+        WindowRang targetRang = null;
+        for (WindowRang rang : rangs) {
+            if (precursorMz >= rang.getMzStart() && precursorMz < rang.getMzEnd()) {
+                targetRang = rang;
+                break;
+            }
+        }
+        PeptideQuery query = new PeptideQuery();
+        query.setLibraryId(libraryId);
+        query.setLikeSequence(fragmentSequence);
+        query.setIsDecoy(false);
+        if (targetRang != null) {
+            query.setMzStart(Double.parseDouble(targetRang.getMzStart().toString()));
+            query.setMzEnd(Double.parseDouble(targetRang.getMzEnd().toString()));
+        }
+
+        List<PeptideDO> peptides = peptideService.getAll(query);
+
+        JSONArray peptidesArray = JSONArray.parseArray(JSONArray.toJSONString(peptides));
+        JSONObject res = new JSONObject();
+        res.put("peptides", peptidesArray);
+        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
+        resultDO.setModel(res);
+        return resultDO;
+    }
+
     @RequestMapping(value = "overview/{id}")
     @ResponseBody
     String overview(Model model, @PathVariable("id") String id) {
@@ -256,6 +305,6 @@ public class LibraryController extends BaseController {
                 count++;
             }
         }
-        return count+"个不符合要求的离子";
+        return count + "个不符合要求的离子";
     }
 }

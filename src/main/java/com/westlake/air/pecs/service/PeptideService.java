@@ -27,6 +27,8 @@ public interface PeptideService {
 
     ResultDO<List<PeptideDO>> getList(PeptideQuery peptideQuery);
 
+    List<PeptideDO> getAll(PeptideQuery peptideQuery);
+
     ResultDO insert(PeptideDO peptideDO);
 
     ResultDO update(PeptideDO peptideDO);

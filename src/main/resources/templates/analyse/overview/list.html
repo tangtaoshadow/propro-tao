@@ -66,7 +66,7 @@
                         <a th:href="|/analyse/overview/detail/${overview.id}|" class="btn btn-success btn-sm">查看分析报告</a>
                         <a th:href="|/analyse/data/list?overviewId=${overview.id}|"
                            class="btn btn-info btn-sm">查看卷积数据</a>
-                        <a th:href="|/scores/list?overviewId=${overview.id}|" class="btn btn-brand btn-sm">查看子分数</a>
+                        <a th:href="|/scores/list?overviewId=${overview.id}&isDecoy=No|" class="btn btn-brand btn-sm">查看子分数</a>
                         <a th:href="|/analyse/overview/export/${overview.id}|" class="btn btn-warning btn-sm">导出卷积数据</a>
                         <div class="btn-group dropright" role="group">
                             <button id="scoresBtnGroup" type="button" class="btn btn-sm dropdown-toggle"

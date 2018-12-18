@@ -74,6 +74,12 @@ public class PeptideServiceImpl implements PeptideService {
     }
 
     @Override
+    public List<PeptideDO> getAll(PeptideQuery query) {
+        List<PeptideDO> peptides = peptideDAO.getAll(query);
+        return peptides;
+    }
+
+    @Override
     public ResultDO insert(PeptideDO peptideDO) {
         try {
             peptideDAO.insert(peptideDO);

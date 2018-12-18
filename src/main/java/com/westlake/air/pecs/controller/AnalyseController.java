@@ -2,7 +2,6 @@ package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Lists;
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.algorithm.FragmentFactory;
 import com.westlake.air.pecs.async.ScoreTask;
@@ -489,18 +488,22 @@ public class AnalyseController extends BaseController {
                 return "/analyse/data/consultation";
             }
             data = dataResult.getModel();
-            model.addAttribute("limitLength", limitLength);
+            model.addAttribute("precursorMz", data.getMz());
+
 
             overviewResult = analyseOverviewService.getById(data.getOverviewId());
             if (overviewResult.isFailed()) {
                 model.addAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
                 return "/analyse/data/consultation";
             }
+            model.addAttribute("libraryId",overviewResult.getModel().getLibraryId());
+            model.addAttribute("expId", overviewResult.getModel().getExpId());
             experimentResult = experimentService.getById(overviewResult.getModel().getExpId());
             if (experimentResult.isFailed()) {
                 model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
                 return "/analyse/data/consultation";
             }
+            model.addAttribute("exp",experimentResult.getModel());
             if (!allCutInfo) {
                 for (String cutInfoOri : request.getParameterMap().keySet()) {
                     if (cutInfoOri.contains(Constants.CUTINFO_PREFIX) && request.getParameter(cutInfoOri).equals("on")) {
@@ -516,6 +519,7 @@ public class AnalyseController extends BaseController {
         AnalyseOverviewDO overviewDO = overviewResult.getModel();
         ExperimentDO experimentDO = experimentResult.getModel();
         PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(overviewDO.getLibraryId(), data.getPeptideRef(), false);
+        model.addAttribute("peptide",peptide);
         List<String> cutInfoFromGuess = new ArrayList<>();
         List<String> cutInfoFromGuessAndHit = new ArrayList<>();
         List<Float[]> intensitiesList = new ArrayList<Float[]>();
@@ -530,7 +534,8 @@ public class AnalyseController extends BaseController {
             }
             for (String cutInfo : bySeriesMap.keySet()) {
                 if (peptide.getFragmentMap().get(cutInfo) == null) {
-                    peptide.getFragmentMap().put(cutInfo, new FragmentInfo(cutInfo, bySeriesMap.get(cutInfo), 0d, peptide.getCharge()));
+                    String cutInfoTemp = cutInfo.replace("i","");
+                    peptide.getFragmentMap().put(cutInfo, new FragmentInfo(cutInfo, bySeriesMap.get(cutInfo), 0d, cutInfoTemp.contains("^")?Integer.parseInt(cutInfoTemp.split("\\^")[1]):1));
                 }
                 cutInfoFromGuess.add(cutInfo);
             }

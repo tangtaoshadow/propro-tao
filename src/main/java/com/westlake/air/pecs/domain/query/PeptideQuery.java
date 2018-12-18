@@ -33,6 +33,8 @@ public class PeptideQuery extends PageQuery {
      */
     String sequence;
 
+    String likeSequence;
+
     /**
      * 对应蛋白质名称
      */

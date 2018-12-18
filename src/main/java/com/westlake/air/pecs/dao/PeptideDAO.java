@@ -187,6 +187,9 @@ public class PeptideDAO {
         if (peptideQuery.getMzStart() != null) {
             query.addCriteria(where("mz").gte(peptideQuery.getMzStart()).lt(peptideQuery.getMzEnd()));
         }
+        if (peptideQuery.getLikeSequence() != null) {
+            query.addCriteria(where("sequence").regex(peptideQuery.getLikeSequence(), "i"));
+        }
         return query;
     }
 
