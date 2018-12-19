@@ -28,7 +28,7 @@ public class RtNormalizerScorer {
 //    private float rtNormalizationFactor = 1.0f;
 //    private int addUpSpectra = 1;
 //    private float spacingForSpectraResampling = 0.005f;
-//    //score use params
+//    //scoreForAll use params
 
 
     /**
@@ -69,10 +69,10 @@ public class RtNormalizerScorer {
 
 
     /**
-     * The score that is really matter to final pairs selection.
+     * The scoreForAll that is really matter to final pairs selection.
      *
      * @param scores pre-calculated
-     * @return final score
+     * @return final scoreForAll
      */
     private double calculateLdaPrescore(FeatureScores scores) {
         return scores.get(FeatureScores.ScoreType.LibraryCorr) * -0.34664267d +

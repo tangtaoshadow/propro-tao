@@ -123,16 +123,20 @@ public class FragmentFactory {
         }
         for (int c = 1; c <= peptideDO.getCharge(); c++) {
             for (int i = limitLength; i < length; i++) {
-                if(!onlyIsotope){
-                    Double bMz = formulaCalculator.getMonoMz(sequence.substring(0, i), ResidueType.BIon, c, 0, 0, false, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i));
+                String bSubstring = sequence.substring(0, i);
+                String ySubstring = sequence.substring(length - i, length);
+                List<String> bUnimodIds = formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i);
+                List<String> yUnimodIds = formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), length - i, length);
+                if (!onlyIsotope) {
+                    Double bMz = formulaCalculator.getMonoMz(bSubstring, ResidueType.BIon, c, 0, 0, false, bUnimodIds);
                     bySeriesMap.put("b" + i + (c == 1 ? "" : ("^" + c)), bMz);
-                    Double yMz = formulaCalculator.getMonoMz(sequence.substring(length-i, length), ResidueType.YIon, c, 0, 0, false, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), length-i, length));
+                    Double yMz = formulaCalculator.getMonoMz(ySubstring, ResidueType.YIon, c, 0, 0, false, yUnimodIds);
                     bySeriesMap.put("y" + i + (c == 1 ? "" : ("^" + c)), yMz);
                 }
-                if(useIsotope){
-                    Double bMzi = formulaCalculator.getMonoMz(sequence.substring(0, i), ResidueType.BIon, c, 0, 0, true, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i));
+                if (useIsotope) {
+                    Double bMzi = formulaCalculator.getMonoMz(bSubstring, ResidueType.BIon, c, 0, 0, true, bUnimodIds);
                     bySeriesMap.put("b" + i + (c == 1 ? "" : ("^" + c)) + "i", bMzi);
-                    Double yMzi = formulaCalculator.getMonoMz(sequence.substring(length-i, length), ResidueType.YIon, c, 0, 0, true, formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), length-i, length));
+                    Double yMzi = formulaCalculator.getMonoMz(ySubstring, ResidueType.YIon, c, 0, 0, true, yUnimodIds);
                     bySeriesMap.put("y" + i + (c == 1 ? "" : ("^" + c)) + "i", yMzi);
                 }
             }

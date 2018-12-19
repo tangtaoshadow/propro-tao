@@ -19,5 +19,23 @@ public class AnalyseDataUtil {
             }
         }
         data.setIntensityMap(null);
+        data.setCompressed(true);
+    }
+
+    public static void decompress(AnalyseDataDO data) {
+        if (data.getConvRtArray() != null) {
+            data.setRtArray(CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvRtArray())));
+            data.setConvRtArray(null);
+        }
+        for (String cutInfo : data.getConvIntensityMap().keySet()) {
+            byte[] intensities = data.getConvIntensityMap().get(cutInfo);
+            if (intensities != null) {
+                data.getIntensityMap().put(cutInfo, CompressUtil.transToFloat(CompressUtil.zlibDecompress(intensities)));
+            } else {
+                data.getIntensityMap().put(cutInfo, null);
+            }
+        }
+        data.setConvIntensityMap(null);
+        data.setCompressed(false);
     }
 }

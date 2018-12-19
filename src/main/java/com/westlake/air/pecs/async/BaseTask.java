@@ -55,7 +55,7 @@ public class BaseTask {
             start = System.currentTimeMillis();
             lumsParams.setUsedDIAScores(true);
 
-            scoresService.score(datas, rangs.get(i), swathMap.get(rangs.get(i).getMzStart()), lumsParams);
+            scoresService.scoreForAll(datas, rangs.get(i), swathMap.get(rangs.get(i).getMzStart()), lumsParams);
             taskDO.addLog("第" + (i+1) + "批打分结束,本批次打分总计耗时(不包含读取数据库时间):" + (System.currentTimeMillis() - start) + "毫秒");
             logger.info("第" + (i+1) + "批打分结束,本批次打分总计耗时(不包含读取数据库时间):" + (System.currentTimeMillis() - start) + "毫秒");
             taskService.update(taskDO);

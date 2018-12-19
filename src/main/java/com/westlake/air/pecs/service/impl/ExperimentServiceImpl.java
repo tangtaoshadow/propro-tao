@@ -505,12 +505,12 @@ public class ExperimentServiceImpl implements ExperimentService {
             if (dataDO == null) {
                 continue;
             }
+            //Step2. 常规选峰及打分
             ScoresDO scoresDO = scoresService.scoreForOne(dataDO, tp, rtMap, lumsParams);
             if(scoresDO != null){
                 scoreList.add(scoresDO);
             }
             dataList.add(dataDO);
-
         }
         logger.info("纯卷积耗时:" + (System.currentTimeMillis() - start));
         analyseDataService.insertAll(dataList, false);

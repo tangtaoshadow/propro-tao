@@ -42,6 +42,7 @@ public class PeptideController extends BaseController {
                 @RequestParam(value = "libraryId", required = false) String libraryId,
                 @RequestParam(value = "proteinName", required = false) String proteinName,
                 @RequestParam(value = "peptideRef", required = false) String peptideRef,
+                @RequestParam(value = "sequence", required = false) String sequence,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "decoyFilter", required = false, defaultValue = "All") String decoyFilter,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
@@ -52,6 +53,7 @@ public class PeptideController extends BaseController {
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("decoyFilter", decoyFilter);
         model.addAttribute("libraries",getLibraryList(null));
+        model.addAttribute("sequence",sequence);
 
         PeptideQuery query = new PeptideQuery();
 
@@ -63,6 +65,9 @@ public class PeptideController extends BaseController {
         }
         if (proteinName != null && !proteinName.isEmpty()) {
             query.setProteinName(proteinName);
+        }
+        if(sequence != null && !sequence.isEmpty()){
+            query.setLikeSequence(sequence);
         }
         if (!decoyFilter.equals("All")) {
             if(decoyFilter.equals("Yes")){

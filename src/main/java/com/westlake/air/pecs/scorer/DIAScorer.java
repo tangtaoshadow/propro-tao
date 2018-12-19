@@ -50,7 +50,7 @@ public class DIAScorer {
      * @param spectrumMzArray     根据transitionGroup选取的RT选择的最近的Spectrum对应的mzArray
      * @param spectrumIntArray    根据transitionGroup选取的RT选择的最近的Spectrum对应的intensityArray
      * @param libraryIntensityMap unNormalized library intensity(in peptidepeptide)
-     * @param scores              score for Airus
+     * @param scores              scoreForAll for Airus
      */
     public void calculateDiaMassDiffScore(HashMap<String, Double> productMzArray, Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<String, Float> libraryIntensityMap, FeatureScores scores) {
 
@@ -86,7 +86,7 @@ public class DIAScorer {
      * @param spectrumMzArray    mz array of selected Rt
      * @param spectrumIntArray   intensity array of selected Rt
      * @param productCharge      charge in peptide
-     * @param scores             score for JProphet
+     * @param scores             scoreForAll for JProphet
      */
     public void calculateDiaIsotopeScores(List<ExperimentFeature> experimentFeatures, List<Double> productMzList, Float[] spectrumMzArray, Float[] spectrumIntArray, List<Integer> productCharge, FeatureScores scores) {
         double isotopeCorr = 0d;
@@ -365,12 +365,12 @@ public class DIAScorer {
     }
 
     /**
-     * score unit of BYSeries scores
+     * scoreForAll unit of BYSeries scores
      *
      * @param seriesList       ySeriesList or bSeriesList
      * @param spectrumMzArray  mzArray of certain spectrum
      * @param spectrumIntArray intArray of certain spectrum
-     * @return score of b or y
+     * @return scoreForAll of b or y
      */
     private int getSeriesScore(List<Double> seriesList, Float[] spectrumMzArray, Float[] spectrumIntArray) {
         int seriesScore = 0;

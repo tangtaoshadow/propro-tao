@@ -58,6 +58,11 @@ public class AnalyseDataDO extends BaseDO {
     //是否是伪肽段
     Boolean isDecoy = false;
 
+    /**
+     * 是否处于压缩状态
+     */
+    boolean compressed = false;
+
     //修饰基团的位置和基团编号
     HashMap<Integer, String> unimodMap;
 

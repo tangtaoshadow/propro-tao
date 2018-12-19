@@ -4,7 +4,6 @@ import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.springframework.stereotype.Component;
 

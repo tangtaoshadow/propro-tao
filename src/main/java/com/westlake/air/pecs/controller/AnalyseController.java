@@ -262,7 +262,7 @@ public class AnalyseController extends BaseController {
         return "/analyse/data/list";
     }
 
-    @RequestMapping(value = "/overview/score")
+    @RequestMapping(value = "/overview/scoreForAll")
     String score(Model model,
                  @RequestParam(value = "overviewId", required = true) String overviewId,
                  @RequestParam(value = "sigma", required = false) Float sigma,
@@ -283,7 +283,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("slope", overviewDO.getSlope());
         model.addAttribute("intercept", overviewDO.getIntercept());
         model.addAttribute("scoreTypes", FeatureScores.ScoreType.getShownTypes());
-        return "/analyse/overview/score";
+        return "/analyse/overview/scoreForAll";
     }
 
     @RequestMapping(value = "/overview/doscore")

@@ -255,7 +255,7 @@ public class ScoresServiceImpl implements ScoresService {
     }
 
     @Override
-    public List<ScoresDO> score(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, LumsParams input) {
+    public List<ScoresDO> scoreForAll(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, LumsParams input) {
 
         if (dataList == null || dataList.size() == 0) {
             return null;
@@ -302,6 +302,136 @@ public class ScoresServiceImpl implements ScoresService {
         }
         scoresDAO.insert(scoreList);
         return scoreList;
+    }
+
+
+    @Override
+    public FeatureByPep selectPeak(AnalyseDataDO dataDO, HashMap<String, Float> intensityMap, SigmaSpacing ss){
+        if (!dataDO.getIsHit()) {
+            return null;
+        }
+        if (dataDO.getConvIntensityMap() == null || dataDO.getConvIntensityMap().size() < 3) {
+            logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
+            return null;
+        }
+        analyseDataService.decompress(dataDO);
+        List<FeatureScores> featureScoresList = new ArrayList<>();
+
+        //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
+        FeatureByPep featureByPep = featureExtractor.getExperimentFeature(dataDO, intensityMap, ss);
+        if (!featureByPep.isFeatureFound()) {
+            return null;
+        }else{
+            return featureByPep;
+        }
+    }
+
+    @Override
+    public ScoresDO scoreForOne(AnalyseDataDO dataDO, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input) {
+        if (!dataDO.getIsHit()) {
+            return null;
+        }
+        if (dataDO.getConvIntensityMap() == null || dataDO.getConvIntensityMap().size() < 3) {
+            logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
+            return null;
+        }
+        analyseDataService.decompress(dataDO);
+        //获取标准库中对应的PeptideRef组
+        HashMap<String, Float> intensityMap = peptide.buildIntensityMap();
+        //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
+        FeatureByPep featureByPep = featureExtractor.getExperimentFeature(dataDO, intensityMap, input.getSigmaSpacing());
+        if (!featureByPep.isFeatureFound()) {
+            return null;
+        }
+        List<FeatureScores> featureScoresList = new ArrayList<>();
+        List<List<ExperimentFeature>> experimentFeatures = featureByPep.getExperimentFeatures();
+        List<RtIntensityPairsDouble> chromatogramList = featureByPep.getRtIntensityPairsOriginList();
+        List<Double> libraryIntensityList = featureByPep.getLibraryIntensityList();
+        List<double[]> noise1000List = featureByPep.getNoise1000List();
+        HashMap<String, Double> productMzMap = new HashMap<>();
+        List<Double> productMzList = new ArrayList<>();
+        List<Integer> productChargeList = new ArrayList<>();
+
+        for (String cutInfo : dataDO.getMzMap().keySet()) {
+            try {
+                if (cutInfo.contains("^")) {
+                    String temp = cutInfo;
+                    if (cutInfo.contains("[")) {
+                        temp = cutInfo.substring(0, cutInfo.indexOf("["));
+                    }
+                    if (temp.contains("i")) {
+                        temp = temp.replace("i", "");
+                    }
+                    productChargeList.add(Integer.parseInt(temp.split("\\^")[1]));
+                } else {
+                    productChargeList.add(1);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.info("cutInfo:" + cutInfo + ";data:" + JSON.toJSONString(dataDO));
+            }
+
+            double mz = Double.parseDouble(Float.toString(dataDO.getMzMap().get(cutInfo)));
+            productMzMap.put(cutInfo, mz);
+            productMzList.add(mz);
+        }
+
+        MathUtil.normalizeSum(intensityMap);
+        HashMap<Integer, String> unimodHashMap = dataDO.getUnimodMap();
+        String sequence = peptide.getSequence();
+        //for each mrmFeature, calculate scores
+
+        for (List<ExperimentFeature> experimentFeatureList : experimentFeatures) {
+
+            FeatureScores featureScores = new FeatureScores();
+            chromatographicScorer.calculateChromatographicScores(experimentFeatureList, libraryIntensityList, featureScores, input.getScoreTypes());
+            if (input.getScoreTypes().contains(FeatureScores.ScoreType.LogSnScore.getTypeName())) {
+                chromatographicScorer.calculateLogSnScore(chromatogramList, experimentFeatureList, noise1000List, featureScores);
+            }
+
+            //根据RT时间和前体MZ获取最近的一个原始谱图
+            if (input.isUsedDIAScores()) {
+                MzIntensityPairs mzIntensityPairs = scanIndexService.getNearestSpectrumByRt(rtMap, experimentFeatureList.get(0).getRt());
+                if (mzIntensityPairs != null) {
+                    Float[] spectrumMzArray = mzIntensityPairs.getMzArray();
+                    Float[] spectrumIntArray = mzIntensityPairs.getIntensityArray();
+                    diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
+                    diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, intensityMap, featureScores);
+                    diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
+                }
+            }
+
+            if (input.getScoreTypes().contains(FeatureScores.ScoreType.ElutionModelFitScore.getTypeName())) {
+                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
+            }
+
+            if (input.getScoreTypes().contains(FeatureScores.ScoreType.IntensityScore.getTypeName())) {
+                libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
+            }
+
+            libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, featureScores, input.getScoreTypes());
+            if (input.getScoreTypes().contains(FeatureScores.ScoreType.NormRtScore.getTypeName())) {
+                libraryScorer.calculateNormRtScore(experimentFeatureList, input.getSlopeIntercept(), dataDO.getRt(), featureScores);
+            }
+            swathLDAScorer.calculateSwathLdaPrescore(featureScores);
+            featureScores.setRt(experimentFeatureList.get(0).getRt());
+            featureScores.setIntensitySum(experimentFeatureList.get(0).getIntensitySum());
+            featureScoresList.add(featureScores);
+        }
+
+        if (featureScoresList.size() == 0) {
+            return null;
+        }
+        ScoresDO score = new ScoresDO();
+
+        score.setRt(dataDO.getRt());
+        score.setOverviewId(input.getOverviewId());
+        score.setPeptideRef(dataDO.getPeptideRef());
+        score.setProteinName(dataDO.getProteinName());
+        score.setAnalyseDataId(dataDO.getId());
+        score.setIsDecoy(dataDO.getIsDecoy());
+        score.setFeatureScoresList(featureScoresList);
+        return score;
     }
 
 
@@ -409,116 +539,6 @@ public class ScoresServiceImpl implements ScoresService {
         return resultDO;
     }
 
-    @Override
-    public ScoresDO scoreForOne(AnalyseDataDO dataDO, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input) {
-        if (!dataDO.getIsHit()) {
-            return null;
-        }
-        if (dataDO.getConvIntensityMap() == null || dataDO.getConvIntensityMap().size() < 3) {
-            logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
-            return null;
-        }
-
-        analyseDataService.decompress(dataDO);
-        List<FeatureScores> featureScoresList = new ArrayList<>();
-        //获取标准库中对应的PeptideRef组
-        HashMap<String, Float> intensityMap = peptide.buildIntensityMap();
-        //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
-        FeatureByPep featureByPep = featureExtractor.getExperimentFeature(dataDO, intensityMap, input.getSigmaSpacing());
-        if (!featureByPep.isFeatureFound()) {
-            return null;
-        }
-
-        List<List<ExperimentFeature>> experimentFeatures = featureByPep.getExperimentFeatures();
-        List<RtIntensityPairsDouble> chromatogramList = featureByPep.getRtIntensityPairsOriginList();
-        List<Double> libraryIntensityList = featureByPep.getLibraryIntensityList();
-        List<double[]> noise1000List = featureByPep.getNoise1000List();
-        HashMap<String, Double> productMzMap = new HashMap<>();
-        List<Double> productMzList = new ArrayList<>();
-        List<Integer> productChargeList = new ArrayList<>();
-
-        for (String cutInfo : dataDO.getMzMap().keySet()) {
-            try {
-                if (cutInfo.contains("^")) {
-                    String temp = cutInfo;
-                    if (cutInfo.contains("[")) {
-                        temp = cutInfo.substring(0, cutInfo.indexOf("["));
-                    }
-                    if (temp.contains("i")) {
-                        temp = temp.replace("i", "");
-                    }
-                    productChargeList.add(Integer.parseInt(temp.split("\\^")[1]));
-                } else {
-                    productChargeList.add(1);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                logger.info("cutInfo:" + cutInfo + ";data:" + JSON.toJSONString(dataDO));
-            }
-
-            double mz = Double.parseDouble(Float.toString(dataDO.getMzMap().get(cutInfo)));
-            productMzMap.put(cutInfo, mz);
-            productMzList.add(mz);
-        }
-
-        MathUtil.normalizeSum(intensityMap);
-        HashMap<Integer, String> unimodHashMap = dataDO.getUnimodMap();
-        String sequence = peptide.getSequence();
-        //for each mrmFeature, calculate scores
-
-        for (List<ExperimentFeature> experimentFeatureList : experimentFeatures) {
-
-            FeatureScores featureScores = new FeatureScores();
-            chromatographicScorer.calculateChromatographicScores(experimentFeatureList, libraryIntensityList, featureScores, input.getScoreTypes());
-            if (input.getScoreTypes().contains(FeatureScores.ScoreType.LogSnScore.getTypeName())) {
-                chromatographicScorer.calculateLogSnScore(chromatogramList, experimentFeatureList, noise1000List, featureScores);
-            }
-
-            //根据RT时间和前体MZ获取最近的一个原始谱图
-            if (input.isUsedDIAScores()) {
-                MzIntensityPairs mzIntensityPairs = scanIndexService.getNearestSpectrumByRt(rtMap, experimentFeatureList.get(0).getRt());
-                if (mzIntensityPairs != null) {
-                    Float[] spectrumMzArray = mzIntensityPairs.getMzArray();
-                    Float[] spectrumIntArray = mzIntensityPairs.getIntensityArray();
-                    diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
-                    diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, intensityMap, featureScores);
-                    diaScorer.calculateDiaIsotopeScores(experimentFeatureList, productMzList, spectrumMzArray, spectrumIntArray, productChargeList, featureScores);
-                }
-            }
-
-            if (input.getScoreTypes().contains(FeatureScores.ScoreType.ElutionModelFitScore.getTypeName())) {
-                elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
-            }
-
-            if (input.getScoreTypes().contains(FeatureScores.ScoreType.IntensityScore.getTypeName())) {
-                libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
-            }
-
-            libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, featureScores, input.getScoreTypes());
-            if (input.getScoreTypes().contains(FeatureScores.ScoreType.NormRtScore.getTypeName())) {
-                libraryScorer.calculateNormRtScore(experimentFeatureList, input.getSlopeIntercept(), dataDO.getRt(), featureScores);
-            }
-            swathLDAScorer.calculateSwathLdaPrescore(featureScores);
-            featureScores.setRt(experimentFeatureList.get(0).getRt());
-            featureScores.setIntensitySum(experimentFeatureList.get(0).getIntensitySum());
-            featureScoresList.add(featureScores);
-        }
-
-        if (featureScoresList.size() == 0) {
-            return null;
-        }
-        ScoresDO score = new ScoresDO();
-
-        score.setRt(dataDO.getRt());
-        score.setOverviewId(input.getOverviewId());
-        score.setPeptideRef(dataDO.getPeptideRef());
-        score.setProteinName(dataDO.getProteinName());
-        score.setAnalyseDataId(dataDO.getId());
-        score.setIsDecoy(dataDO.getIsDecoy());
-        score.setFeatureScoresList(featureScoresList);
-        return score;
-    }
-
     /**
      * 根据分数的分布情况,对所有的分数进行分组,总共分为Constants.SCORE_RANGE组,如果所有分数都相同,那么不分组
      *
@@ -596,7 +616,7 @@ public class ScoresServiceImpl implements ScoresService {
             List<ScoreRtPair> scores = scoresList.get(i);
             double max = Double.MIN_VALUE;
             RtPair rtPair = new RtPair();
-            //find max score's rt
+            //find max scoreForAll's rt
             for (int j = 0; j < scores.size(); j++) {
                 if (scores.get(j).getScore() > max) {
                     max = scores.get(j).getScore();

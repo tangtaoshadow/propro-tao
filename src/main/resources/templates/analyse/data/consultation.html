@@ -210,7 +210,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-10" id="chart" style="height: 800px;">
+                            <div class="col-10" id="chart" style="height: 1000px;">
 
                             </div>
                         </div>
@@ -225,7 +225,7 @@
         </div>
         <div class="col-md-4">
             <div class="col-12 row">
-                <div class="m-portlet m-portlet--tab">
+                <div class="m-portlet m-portlet--tab col-12">
                     <div class="m-portlet__head">
                         <div class="m-portlet__head-caption">
                             <div class="m-portlet__head-title">
@@ -307,7 +307,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                                <h3 class="m-portlet__head-text">按片段搜索相似肽段(不包含Unimod)</span></h3>
+                                <h3 class="m-portlet__head-text">按片段搜索相似肽段(不包含Unimod,长度不能小于4)</span></h3>
                             </div>
                         </div>
                     </div>
@@ -329,6 +329,12 @@
                                 搜索
                             </button>
                         </div>
+                        <div class="form-group m-form__group row">
+                            <label for="slopeIntercept" class="col-12 col-form-label" style="text-align: center">搜索结果</label>
+                            <div class="col-12" id="searchResult">
+
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -349,6 +355,8 @@
 
         function search(){
             var peptides;
+            var searchResult = document.getElementById("searchResult");
+            searchResult.innerText = "";
             var fragmentSequence = document.getElementById("fragmentSequence").value;
             var libraryId = document.getElementById("libraryId").value;
             var precursorMz = document.getElementById("precursorMz").value;
@@ -367,8 +375,15 @@
                 success: function (result) {
                     if (result.success) {
                         peptides = result.model.peptides;
-                    } else {
-                        chartGroup.clear();
+                        if(peptides == null || peptides.length === 0){
+                            searchResult.innerText ="No Similar Peptide";
+                        }else{
+                            var result = "";
+                            for (var i = 0; i < peptides.length; i++) {
+                                result += "<label>"+peptides[i]+"</label><br>";
+                            }
+                            searchResult.innerHTML = result;
+                        }
                     }
                 }
             });

@@ -2,6 +2,7 @@ package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
+import com.westlake.air.pecs.domain.bean.score.FeatureByPep;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.TargetPeptide;
 import com.westlake.air.pecs.domain.params.LumsParams;
@@ -69,7 +70,16 @@ public interface ScoresService {
      *                 sigmaSpacing Sigma通常为30/8 = 6.25/Spacing通常为0.01
      *                 overviewId
      */
-    List<ScoresDO> score(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, LumsParams input);
+    List<ScoresDO> scoreForAll(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, LumsParams input);
+
+    /**
+     *
+     * @param data
+     * @param intensityMap 标准库中对应的PeptideRef组
+     * @param ss
+     * @return
+     */
+    FeatureByPep selectPeak(AnalyseDataDO data, HashMap<String, Float> intensityMap, SigmaSpacing ss);
 
     ScoresDO scoreForOne(AnalyseDataDO data, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input);
 

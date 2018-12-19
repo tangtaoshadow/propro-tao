@@ -296,7 +296,7 @@ public class Stats {
     }
 
     /**
-     * Finds cut-off target score for specified false discovery rate(fdr).
+     * Finds cut-off target scoreForAll for specified false discovery rate(fdr).
      */
     public Double findCutoff(List<SimpleFeatureScores> topTargets, List<SimpleFeatureScores> topDecoys, AirusParams airusParams, Double cutoff) {
         ErrorStat errorStat = errorStatistics(topTargets, topDecoys, airusParams);

@@ -259,7 +259,7 @@ public class LibraryController extends BaseController {
                                 @RequestParam(value = "experimentId", required = false) String experimentId,
                                 @RequestParam(value = "libraryId", required = false) String libraryId) {
 
-        if (fragmentSequence.length() <= 4) {
+        if (fragmentSequence.length() < 3) {
             return ResultDO.buildError(ResultCode.SEARCH_FRAGMENT_LENGTH_MUST_BIGGER_THAN_3);
         }
 
@@ -287,7 +287,10 @@ public class LibraryController extends BaseController {
 
         List<PeptideDO> peptides = peptideService.getAll(query);
 
-        JSONArray peptidesArray = JSONArray.parseArray(JSONArray.toJSONString(peptides));
+        JSONArray peptidesArray = new JSONArray();
+        for(PeptideDO peptide : peptides){
+            peptidesArray.add(peptide.getPeptideRef());
+        }
         JSONObject res = new JSONObject();
         res.put("peptides", peptidesArray);
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);

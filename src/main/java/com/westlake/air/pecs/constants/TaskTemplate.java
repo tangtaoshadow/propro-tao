@@ -42,7 +42,7 @@ public enum TaskTemplate {
     AIRUS("AIRUS", ""),
 
     /**
-     * the whole workflow for swath including(irt -> extractor -> sub scores -> final score)
+     * the whole workflow for swath including(irt -> extractor -> sub scores -> final scoreForAll)
      */
     SWATH_WORKFLOW("SWATH_WORKFLOW", ""),
 
@@ -67,7 +67,7 @@ public enum TaskTemplate {
     EXPORT_SUBSCORES_TSV_FILE_FOR_PYPROPHET("EXPORT_SUBSCORES_TSV_FILE_FOR_PYPROPHET", ""),
 
     /**
-     * generate all the score types' distribute map
+     * generate all the scoreForAll types' distribute map
      */
     BUILD_SCORE_DISTRIBUTE("BUILD_SCORE_DISTRIBUTE", ""),
 

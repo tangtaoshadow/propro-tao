@@ -44,7 +44,7 @@ public class LumsParams {
     boolean usedDIAScores = false;
     /**
      * 是否在卷积的时候同时完成选峰和打分
-     * epps: extract, peakpick, score
+     * epps: extract, peakpick, scoreForAll
      */
     boolean useEpps = false;
 
