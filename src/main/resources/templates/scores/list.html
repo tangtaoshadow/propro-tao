@@ -36,7 +36,7 @@
             <div class="clearfix">
                 <form id="searchForm" method="post" role="form"
                       class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
-                      th:action="${/scores/list}">
+                      th:action="@{/scores/list}">
                     <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                     <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
                     <input id="overviewId" type="hidden" th:value="${overview.id}" class="form-control" name="overviewId">
