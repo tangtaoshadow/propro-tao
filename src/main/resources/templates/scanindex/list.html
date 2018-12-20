@@ -21,7 +21,7 @@
         <div class="clearfix">
             <form id="searchForm" method="post" role="form"
                   class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
-                  action="/scanindex/list">
+                  th:action="${/scanindex/list}">
                 <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                 <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
 
