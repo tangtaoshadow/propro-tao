@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
-      layout:decorator="/layouts/layout">
+      layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
     <title>
@@ -415,7 +415,7 @@
                     left: 10
                 },
                 legend: {
-                    data: ['rt/intensity'],
+                    data: cutinfo,
                     align: 'left'
                 },
                 toolbox: {
@@ -438,6 +438,20 @@
                 }],
                 tooltip: {
                     trigger: 'axis',
+                    // formatter: function (params) {
+                    //     console.log(params);
+                    //     var showHtm="";
+                    //     for(var i=0;i<params.length;i++){
+                    //         //x轴名称
+                    //         var name = params[i][1];
+                    //         //名称
+                    //         var text = params[i][3];
+                    //         //值
+                    //         var value = params[i][2];
+                    //         showHtm+= text+ '--' + name + ' 得分：' + value+'<br>'
+                    //     }
+                    //     return showHtm;
+                    // },
                     axisPointer: {
                         type: 'shadow'
                     }

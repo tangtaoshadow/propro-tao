@@ -7,6 +7,7 @@ import com.westlake.air.pecs.async.LumsTask;
 import com.westlake.air.pecs.compressor.Compressor;
 import com.westlake.air.pecs.constants.*;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
@@ -24,7 +25,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -342,6 +345,8 @@ public class ExperimentController extends BaseController {
 
         model.addAttribute("libraries", getLibraryList(0));
         model.addAttribute("experiment", resultDO.getModel());
+        model.addAttribute("scoreTypes", FeatureScores.ScoreType.getShownTypes());
+
         return "/experiment/extractor";
     }
 
@@ -354,6 +359,11 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
                      @RequestParam(value = "slope", required = false) Double slope,
                      @RequestParam(value = "intercept", required = false) Double intercept,
+                     //打分相关的入参
+                     @RequestParam(value = "sigma", required = false) Float sigma,
+                     @RequestParam(value = "spacing", required = false) Float spacing,
+                     @RequestParam(value = "useEpps", required = false) Boolean useEpps,
+                     HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
@@ -366,7 +376,15 @@ public class ExperimentController extends BaseController {
             return "redirect:/extractor?id=" + id;
         }
 
-        TaskDO taskDO = new TaskDO(TaskTemplate.EXTRACTOR, resultDO.getModel().getName() + ":" + libResult.getModel().getName() + "(" + libraryId + ")");
+        HashSet<String> scoreTypes = new HashSet<>();
+        for (FeatureScores.ScoreType type : FeatureScores.ScoreType.values()) {
+            String typeParam = request.getParameter(type.getTypeName());
+            if (typeParam != null && typeParam.equals("on")) {
+                scoreTypes.add(type.getTypeName());
+            }
+        }
+
+        TaskDO taskDO = new TaskDO(useEpps ? TaskTemplate.EXTRACT_PEAKPICK_SCORE : TaskTemplate.EXTRACTOR, resultDO.getModel().getName() + ":" + libResult.getModel().getName() + "(" + libraryId + ")");
         taskService.insert(taskDO);
         SlopeIntercept si = SlopeIntercept.create();
         if (slope != null && intercept != null) {
@@ -374,7 +392,7 @@ public class ExperimentController extends BaseController {
             si.setIntercept(intercept);
         }
 
-        experimentTask.extract(resultDO.getModel(), libraryId, si, creator, rtExtractWindow, mzExtractWindow, taskDO);
+        experimentTask.extract(resultDO.getModel(), libraryId, si, creator, rtExtractWindow, mzExtractWindow, useEpps, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }

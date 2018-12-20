@@ -45,14 +45,6 @@ public class LumsTask extends BaseTask{
     AnalyseOverviewService analyseOverviewService;
 
     @Async(value = "extractorExecutor")
-    public void lums(LumsParams lumsParams, TaskDO taskDO){
-        taskDO.addLog("开始卷积,选峰和打分");
-        taskDO.setStatus(TaskStatus.RUNNING.getName());
-        lumsParams.setUseEpps(true);
-        experimentService.extract(lumsParams);
-    }
-
-    @Async(value = "extractorExecutor")
     public void swath(LumsParams lumsParams, TaskDO taskDO) {
         long startAll = System.currentTimeMillis();
         long start = System.currentTimeMillis();

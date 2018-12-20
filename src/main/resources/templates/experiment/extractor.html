@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
-      layout:decorator="/layouts/layout">
+      layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
     <title>欢迎登陆西湖大学PECS分析平台</title>
@@ -27,7 +27,7 @@
 
     <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="m-portlet m-portlet--tab">
                 <div class="m-portlet__head">
                     <div class="m-portlet__head-caption">
@@ -41,91 +41,132 @@
                 </div>
                 <!--begin::Form-->
                 <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/experiment/doextract}">
-                    <div class="m-portlet__body">
+                    <div class="m-portlet__body row">
                         <input type="text" name="id" hidden="hidden" th:value="${experiment?.id}">
-                        <div class="form-group m-form__group row">
-                            <label for="name" class="col-2 col-form-label">
-                                实验
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="name" readonly name="name"
-                                       th:value="|${experiment?.name}(${experiment?.filePath})|">
+                        <div class="col-md-7">
+                            <div class="form-group m-form__group row">
+                                <label for="name" class="col-2 col-form-label">
+                                    实验
+                                </label>
+                                <div class="col-10">
+                                    <input type="text" class="form-control m-input" id="name" readonly name="name"
+                                           th:value="|${experiment?.name}(${experiment?.filePath})|">
+                                </div>
+                            </div>
+                            <div class="form-group m-form__group row">
+                                <label for="library" class="col-2 col-form-label">
+                                    关联标准库名称及ID
+                                </label>
+                                <div class="col-10">
+                                    <select class="form-control m-input" id="library" name="libraryId">
+                                        <option th:each="library:${libraries}" th:value="${library.id}"
+                                                th:text="|${library.name}(${library.id})|"
+                                                th:selected="${libraryId}==${library.id}?true:false"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group m-form__group row">
+                                <label for="rtExtractWindow" class="col-2 col-form-label">
+                                    RT卷积窗口
+                                </label>
+                                <div class="col-10">
+                                    <input type="text" class="form-control m-input" id="rtExtractWindow"
+                                           name="rtExtractWindow" th:value="${rtExtractWindow}">
+                                    <span class="m-form__help">默认为1200</span>
+                                </div>
+                            </div>
+                            <div class="form-group m-form__group row">
+                                <label for="mzExtractWindow" class="col-2 col-form-label">
+                                    MZ卷积窗口
+                                </label>
+                                <div class="col-10">
+                                    <input type="text" class="form-control m-input" id="mzExtractWindow"
+                                           name="mzExtractWindow"
+                                           th:value="${mzExtractWindow}">
+                                    <span class="m-form__help">默认为0.05</span>
+                                </div>
+                            </div>
+                            <div class="form-group m-form__group row">
+                                <label for="slope" class="col-2 col-form-label">
+                                    Slope斜率
+                                </label>
+                                <div class="col-10">
+                                    <input type="text" class="form-control m-input" id="slope" name="slope"
+                                           th:value="${experiment?.slope}">
+                                </div>
+                            </div>
+                            <div class="form-group m-form__group row">
+                                <label for="intercept" class="col-2 col-form-label">
+                                    intercept截距
+                                </label>
+                                <div class="col-10">
+                                    <input type="text" class="form-control m-input" id="intercept" name="intercept"
+                                           th:value="${experiment?.intercept}">
+                                </div>
+                            </div>
+                            <div class="form-group m-form__group row">
+                                <label for="creator" class="col-2 col-form-label">
+                                    操作人
+                                </label>
+                                <div class="col-10">
+                                    <input type="text" class="form-control m-input" id="creator" name="creator"
+                                           th:value="${creator}">
+                                    <span class="m-form__help"></span>
+                                </div>
                             </div>
                         </div>
-                        <div class="form-group m-form__group row">
-                            <label for="library" class="col-2 col-form-label">
-                                关联标准库名称及ID
-                            </label>
-                            <div class="col-10">
-                                <select class="form-control m-input" id="library" name="libraryId">
-                                    <option th:each="library:${libraries}" th:value="${library.id}"
-                                            th:text="|${library.name}(${library.id})|"
-                                            th:selected="${libraryId}==${library.id}?true:false"></option>
-                                </select>
+                        <div class="col-md-5">
+                            <div class="form-group m-form__group row">
+                                <label class="col-2 col-form-label">
+                                    额外执行步骤
+                                </label>
+                                <div class="m-form__group form-group col-10">
+                                    <div class="m-checkbox-list">
+                                        <label class="m-checkbox m-checkbox--state-success">
+                                            <input type="checkbox" name="useEpps" th:checked="${useEpps}" th:text="是否执行后续的完整流程">
+                                            <span></span>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="rtExtractWindow" class="col-2 col-form-label">
-                                RT卷积窗口
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="rtExtractWindow"
-                                       name="rtExtractWindow" th:value="${rtExtractWindow}">
-                                <span class="m-form__help">默认为1200</span>
+                            <div class="form-group m-form__group row">
+                                <label for="sigma" class="col-2 col-form-label">
+                                    Sigma
+                                </label>
+                                <div class="col-10">
+                                    <input type="text" class="form-control m-input" id="sigma" name="sigma"
+                                           th:value="${sigma}">
+                                    <span class="m-form__help">如果要打分,请设定,默认为6.25</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="mzExtractWindow" class="col-2 col-form-label">
-                                MZ卷积窗口
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="mzExtractWindow"
-                                       name="mzExtractWindow"
-                                       th:value="${mzExtractWindow}">
-                                <span class="m-form__help">默认为0.05</span>
+                            <div class="form-group m-form__group row">
+                                <label for="spacing" class="col-2 col-form-label">
+                                    spacing
+                                </label>
+                                <div class="col-10">
+                                    <input type="text" class="form-control m-input" id="spacing" name="spacing"
+                                           th:value="${spacing}">
+                                    <span class="m-form__help">如果要打分,请设定,默认为0.01</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="slope" class="col-2 col-form-label">
-                                Slope斜率
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="slope" name="slope" th:value="${experiment?.slope}">
+                            <div class="m-form__group form-group row">
+                                <label>
+                                    选择你需要的子分数打分算法
+                                </label>
+                                <div class="col-md-3">
+                                    <div class="m-checkbox-list" th:each="scoreType:${scoreTypes}">
+                                        <label class="m-checkbox m-checkbox--state-success">
+                                            <input type="checkbox" th:if="${scoreType.isUsed}" th:checked="checked"
+                                                   th:name="${scoreType.typeName}" th:text="${scoreType.typeName}">
+                                            <input type="checkbox" th:unless="${scoreType.isUsed}"
+                                                   th:name="${scoreType.typeName}" th:text="${scoreType.typeName}">
+                                            <span></span>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
+
                         </div>
-                        <div class="form-group m-form__group row">
-                            <label for="intercept" class="col-2 col-form-label">
-                                intercept截距
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="intercept" name="intercept" th:value="${experiment?.intercept}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="creator" class="col-2 col-form-label">
-                                操作人
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="creator" name="creator"
-                                       th:value="${creator}">
-                                <span class="m-form__help"></span>
-                            </div>
-                        </div>
-                        <!--<div class="form-group m-form__group row">-->
-                            <!--<label for="buildType" class="col-2 col-form-label">-->
-                                <!--卷积类型-->
-                            <!--</label>-->
-                            <!--<div class="col-10">-->
-                                <!--<select class="form-control m-input" id="buildType" name="buildType">-->
-                                    <!--<option th:if="${buildType}==2" th:selected="true" value="2">MS2</option>-->
-                                    <!--<option th:unless="${buildType}==2" value="2">MS2</option>-->
-                                    <!--<option th:if="${buildType}==0" th:selected="true" value="0">MS1和MS2</option>-->
-                                    <!--<option th:unless="${buildType}==0" value="0">MS1和MS2</option>-->
-                                    <!--<option th:if="${buildType}==1" th:selected="true" value="1">MS1</option>-->
-                                    <!--<option th:unless="${buildType}==1" value="1">MS1</option>-->
-                                <!--</select>-->
-                            <!--</div>-->
-                        <!--</div>-->
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">

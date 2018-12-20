@@ -87,7 +87,7 @@ public class ExperimentTask extends BaseTask {
      * @return
      */
     @Async(value = "extractorExecutor")
-    public void extract(ExperimentDO experimentDO, String libraryId, SlopeIntercept slopeIntercept, String creator, float rtExtractWindow, float mzExtractWindow, TaskDO taskDO) {
+    public void extract(ExperimentDO experimentDO, String libraryId, SlopeIntercept slopeIntercept, String creator, float rtExtractWindow, float mzExtractWindow,boolean useEpps, TaskDO taskDO) {
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         LumsParams input = new LumsParams();
