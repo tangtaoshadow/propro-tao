@@ -456,8 +456,6 @@ public class AnalyseController extends BaseController {
                         @RequestParam(value = "mzExtractWindow", required = false, defaultValue = "0.05") Float mzExtractWindow,
                         @RequestParam(value = "rtExtractWindow", required = false, defaultValue = "800") Float rtExtractWindow,
                         @RequestParam(value = "allCutInfo", required = false,defaultValue = "false") Boolean allCutInfo,
-                        @RequestParam(value = "useIsotope", required = false,defaultValue = "false") Boolean useIsotope,
-                        @RequestParam(value = "onlyIsotope", required = false,defaultValue = "false") Boolean onlyIsotope,
                         @RequestParam(value = "noUseForFill", required = false,defaultValue = "false") Boolean noUseForFill,
                         @RequestParam(value = "noUseForLib", required = false,defaultValue = "false") Boolean noUseForLib,
                         @RequestParam(value = "limitLength", required = false,defaultValue = "3") Integer limitLength,
@@ -472,8 +470,6 @@ public class AnalyseController extends BaseController {
         model.addAttribute("mzExtractWindow", mzExtractWindow);
         model.addAttribute("rtExtractWindow", rtExtractWindow);
         model.addAttribute("allCutInfo", allCutInfo);
-        model.addAttribute("useIsotope", useIsotope);
-        model.addAttribute("onlyIsotope", onlyIsotope);
         model.addAttribute("noUseForFill", noUseForFill);
         model.addAttribute("noUseForLib", noUseForLib);
         model.addAttribute("limitLength", limitLength);
@@ -525,10 +521,8 @@ public class AnalyseController extends BaseController {
         List<Float[]> intensitiesList = new ArrayList<Float[]>();
         List<String> cutInfoFromDic = new ArrayList<>(peptide.getFragmentMap().keySet());
         //准备该肽段的其他互补离子
-
         if(!noUseForFill){
-            HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, limitLength, useIsotope, onlyIsotope);
-
+            HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, limitLength);
             if(noUseForLib){
                 peptide.getFragmentMap().clear();
             }
@@ -540,7 +534,6 @@ public class AnalyseController extends BaseController {
                 cutInfoFromGuess.add(cutInfo);
             }
         }
-
 
         ResultDO<AnalyseDataDO> dataRealResult = experimentService.extractOne(experimentDO, peptide, rtExtractWindow, mzExtractWindow);
         if (dataRealResult.isFailed()) {

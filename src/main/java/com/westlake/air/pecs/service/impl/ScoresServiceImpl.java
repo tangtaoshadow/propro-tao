@@ -24,6 +24,7 @@ import com.westlake.air.pecs.rtnormalizer.ChromatogramFilter;
 import com.westlake.air.pecs.rtnormalizer.RtNormalizerScorer;
 import com.westlake.air.pecs.scorer.*;
 import com.westlake.air.pecs.service.*;
+import com.westlake.air.pecs.utils.AnalyseDataUtil;
 import com.westlake.air.pecs.utils.FileUtil;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
@@ -282,6 +283,7 @@ public class ScoresServiceImpl implements ScoresService {
             }
 
             for (AnalyseDataDO dataDO : dataList) {
+                AnalyseDataUtil.decompress(dataDO);
                 ScoresDO scoresDO = scoreForOne(dataDO, ttMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()), rtMap, input);
                 if (scoresDO == null) {
                     continue;
@@ -306,22 +308,27 @@ public class ScoresServiceImpl implements ScoresService {
 
 
     @Override
-    public FeatureByPep selectPeak(AnalyseDataDO dataDO, HashMap<String, Float> intensityMap, SigmaSpacing ss){
+    public FeatureByPep selectPeak(AnalyseDataDO dataDO, HashMap<String, Float> intensityMap, SigmaSpacing ss) {
         if (!dataDO.getIsHit()) {
             return null;
         }
-        if (dataDO.getConvIntensityMap() == null || dataDO.getConvIntensityMap().size() < 3) {
+
+        if (dataDO.isCompressed()) {
+            logger.warn("进入本函数前的AnalyseDataDO需要提前被解压缩!!!!!");
+            AnalyseDataUtil.decompress(dataDO);
+        }
+
+        if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() < 3) {
             logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
             return null;
         }
-        analyseDataService.decompress(dataDO);
         List<FeatureScores> featureScoresList = new ArrayList<>();
 
         //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
         FeatureByPep featureByPep = featureExtractor.getExperimentFeature(dataDO, intensityMap, ss);
         if (!featureByPep.isFeatureFound()) {
             return null;
-        }else{
+        } else {
             return featureByPep;
         }
     }
@@ -331,11 +338,17 @@ public class ScoresServiceImpl implements ScoresService {
         if (!dataDO.getIsHit()) {
             return null;
         }
-        if (dataDO.getConvIntensityMap() == null || dataDO.getConvIntensityMap().size() < 3) {
+
+        if (dataDO.isCompressed()) {
+            logger.warn("进入本函数前的AnalyseDataDO需要提前被解压缩!!!!!");
+            AnalyseDataUtil.decompress(dataDO);
+        }
+
+        if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() < 3) {
             logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
             return null;
         }
-        analyseDataService.decompress(dataDO);
+
         //获取标准库中对应的PeptideRef组
         HashMap<String, Float> intensityMap = peptide.buildIntensityMap();
         //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善

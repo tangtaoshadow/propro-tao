@@ -392,7 +392,7 @@ public class ExperimentController extends BaseController {
             si.setIntercept(intercept);
         }
 
-        experimentTask.extract(resultDO.getModel(), libraryId, si, creator, rtExtractWindow, mzExtractWindow, useEpps, taskDO);
+        experimentTask.extract(resultDO.getModel(), libraryId, si, creator, rtExtractWindow, mzExtractWindow, useEpps,scoreTypes, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }

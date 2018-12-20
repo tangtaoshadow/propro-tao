@@ -50,10 +50,4 @@ public interface AnalyseDataService {
      * @return
      */
     ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String peptideRef, Boolean isDecoy);
-
-    /**
-     * 将压缩的RtArray和IntensityArray解压缩出来,同时会删除原有的压缩数据,如果压缩数据为空则不进行操作
-     * @param analyseDataDO
-     */
-    void decompress(AnalyseDataDO analyseDataDO);
 }

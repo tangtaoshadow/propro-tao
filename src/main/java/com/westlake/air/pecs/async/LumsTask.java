@@ -145,7 +145,7 @@ public class LumsTask extends BaseTask{
                 //人体蛋白质库
                 PeptideDO peptideDO = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy("5c0a3669fc6f9e1d441ae71f", peptide.getPeptideRef(), peptide.getIsDecoy());
                 if (peptideDO == null) {
-                    HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, 4, false, false);
+                    HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, 4);
                     for (String cutInfo : bySeriesMap.keySet()) {
                         if (peptide.getFragmentMap().get(cutInfo) == null) {
                             peptide.getFragmentMap().put(cutInfo, new FragmentInfo(cutInfo, bySeriesMap.get(cutInfo), 0d, peptide.getCharge()));

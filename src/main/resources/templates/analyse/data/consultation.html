@@ -138,26 +138,26 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="input-group col-lg-2">
-                                <div class="m-checkbox-list">
-                                    <label class="m-checkbox">
-                                        <input type="checkbox" class="form-control m-input" name="useIsotope"
-                                               th:checked="${useIsotope}">
-                                        算法生成包含同位素
-                                        <span></span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="input-group col-lg-2">
-                                <div class="m-checkbox-list">
-                                    <label class="m-checkbox">
-                                        <input type="checkbox" class="form-control m-input" name="onlyIsotope"
-                                               th:checked="${onlyIsotope}">
-                                        算法生成只包含同位素
-                                        <span></span>
-                                    </label>
-                                </div>
-                            </div>
+                            <!--<div class="input-group col-lg-2">-->
+                                <!--<div class="m-checkbox-list">-->
+                                    <!--<label class="m-checkbox">-->
+                                        <!--<input type="checkbox" class="form-control m-input" name="useIsotope"-->
+                                               <!--th:checked="${useIsotope}">-->
+                                        <!--算法生成包含同位素-->
+                                        <!--<span></span>-->
+                                    <!--</label>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                            <!--<div class="input-group col-lg-2">-->
+                                <!--<div class="m-checkbox-list">-->
+                                    <!--<label class="m-checkbox">-->
+                                        <!--<input type="checkbox" class="form-control m-input" name="onlyIsotope"-->
+                                               <!--th:checked="${onlyIsotope}">-->
+                                        <!--算法生成只包含同位素-->
+                                        <!--<span></span>-->
+                                    <!--</label>-->
+                                <!--</div>-->
+                            <!--</div>-->
 
                             <div class="input-group col-lg-2">
                                 <div class="m-checkbox-list">
@@ -174,10 +174,10 @@
 
                         </div>
                         <div class="row">
-                            <div class="col-2 row">
+                            <div class="col-1 row">
                                 <div class="col-lg-12">
                                     <label>
-                                        标准库片段
+                                        标准库
                                     </label>
                                     <div class="m-checkbox-list" th:each="dicCutInfo:${cutInfoFromDic}">
                                         <label class="m-checkbox m-checkbox--state-success">
@@ -192,25 +192,25 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="col-12">
-                                    <label>
-                                        算法生成且命中片段
-                                    </label>
-                                    <div class="m-checkbox-inline" th:each="genCutInfo:${cutInfoFromGuessAndHit}">
-                                        <label class="m-checkbox m-checkbox--state-success">
-                                            <input type="checkbox"
-                                                   th:if="${usedCutInfos==null || usedCutInfos.contains(genCutInfo)}"
-                                                   th:checked="checked" th:name="|CUTINFO_${genCutInfo}|"
-                                                   th:text="${genCutInfo}">
-                                            <input type="checkbox"
-                                                   th:unless="${usedCutInfos==null ||usedCutInfos.contains(genCutInfo)}"
-                                                   th:name="|CUTINFO_${genCutInfo}|" th:text="${genCutInfo}">
-                                            <span></span>
-                                        </label>
-                                    </div>
-                                </div>
+                                <!--<div class="col-12">-->
+                                <!--<label>-->
+                                <!--算法生成且命中片段-->
+                                <!--</label>-->
+                                <!--<div class="m-checkbox-inline" th:each="genCutInfo:${cutInfoFromGuessAndHit}">-->
+                                <!--<label class="m-checkbox m-checkbox&#45;&#45;state-success">-->
+                                <!--<input type="checkbox"-->
+                                <!--th:if="${usedCutInfos==null || usedCutInfos.contains(genCutInfo)}"-->
+                                <!--th:checked="checked" th:name="|CUTINFO_${genCutInfo}|"-->
+                                <!--th:text="${genCutInfo}">-->
+                                <!--<input type="checkbox"-->
+                                <!--th:unless="${usedCutInfos==null ||usedCutInfos.contains(genCutInfo)}"-->
+                                <!--th:name="|CUTINFO_${genCutInfo}|" th:text="${genCutInfo}">-->
+                                <!--<span></span>-->
+                                <!--</label>-->
+                                <!--</div>-->
+                                <!--</div>-->
                             </div>
-                            <div class="col-10" id="chart" style="height: 1000px;">
+                            <div class="col-11" id="chart" style="height: 1000px;">
 
                             </div>
                         </div>
@@ -313,15 +313,18 @@
                     </div>
 
                     <div class="m-portlet__body">
-                        <input id="libraryId" type="hidden" th:value="${libraryId}" class="form-control" name="libraryId">
-                        <input id="precursorMz" type="hidden" th:value="${precursorMz}" class="form-control" name="precursorMz">
+                        <input id="libraryId" type="hidden" th:value="${libraryId}" class="form-control"
+                               name="libraryId">
+                        <input id="precursorMz" type="hidden" th:value="${precursorMz}" class="form-control"
+                               name="precursorMz">
                         <input id="experimentId" type="hidden" th:value="${expId}" class="form-control" name="expId">
                         <div class="form-group m-form__group row">
                             <label for="id" class="col-3 col-form-label">
                                 肽段片段
                             </label>
                             <div class="col-9">
-                                <input type="text" class="form-control m-input" id="fragmentSequence" name="fragmentSequence">
+                                <input type="text" class="form-control m-input" id="fragmentSequence"
+                                       name="fragmentSequence">
                             </div>
                         </div>
                         <div class="input-group-append">
@@ -330,7 +333,8 @@
                             </button>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="slopeIntercept" class="col-12 col-form-label" style="text-align: center">搜索结果</label>
+                            <label for="slopeIntercept" class="col-12 col-form-label"
+                                   style="text-align: center">搜索结果</label>
                             <div class="col-12" id="searchResult">
 
                             </div>
@@ -353,7 +357,7 @@
 
     <script th:inline="javascript">
 
-        function search(){
+        function search() {
             var peptides;
             var searchResult = document.getElementById("searchResult");
             searchResult.innerText = "";
@@ -375,12 +379,12 @@
                 success: function (result) {
                     if (result.success) {
                         peptides = result.model.peptides;
-                        if(peptides == null || peptides.length === 0){
-                            searchResult.innerText ="No Similar Peptide";
-                        }else{
+                        if (peptides == null || peptides.length === 0) {
+                            searchResult.innerText = "No Similar Peptide";
+                        } else {
                             var result = "";
                             for (var i = 0; i < peptides.length; i++) {
-                                result += "<label>"+peptides[i]+"</label><br>";
+                                result += "<label>" + peptides[i] + "</label><br>";
                             }
                             searchResult.innerHTML = result;
                         }
@@ -391,7 +395,6 @@
 
         /*<![CDATA[*/
         var data_rt = [[${rt}]];
-        var peptideRef = [[${peptideRef}]];
         var cutinfo = [[${totalCutInfos}]];
         var intensity_arrays = [[${intensitiesList}]];
         /*]]>*/
@@ -405,28 +408,13 @@
                     name: cutinfo[i],
                     type: 'line',
                     smooth: true,
-                    data: intensity_arrays[i],
+                    data: intensity_arrays[i]
                 });
             }
-            var textLabel = peptideRef + ":" + intensity_arrays.length + "个MS2碎片;";
             option = {
-                title: {
-                    text: textLabel,
-                    left: 10
-                },
                 legend: {
-                    data: cutinfo,
+                    data: cutinfo.sort(),
                     align: 'left'
-                },
-                toolbox: {
-                    // y: 'bottom',
-                    feature: {
-                        dataView: {},
-                        saveAsImage: {
-                            pixelRatio: 2
-                        }
-
-                    }
                 },
                 dataZoom: [{
                     type: 'inside',
@@ -438,20 +426,26 @@
                 }],
                 tooltip: {
                     trigger: 'axis',
-                    // formatter: function (params) {
-                    //     console.log(params);
-                    //     var showHtm="";
-                    //     for(var i=0;i<params.length;i++){
-                    //         //x轴名称
-                    //         var name = params[i][1];
-                    //         //名称
-                    //         var text = params[i][3];
-                    //         //值
-                    //         var value = params[i][2];
-                    //         showHtm+= text+ '--' + name + ' 得分：' + value+'<br>'
-                    //     }
-                    //     return showHtm;
-                    // },
+                    formatter: function (params) {
+                        var showBion = "";
+                        var showYion = "";
+                        params = params.sort(function (m, n) {
+                            if (m.data < n.data) return -1;
+                            else if (m.data > n.data) return 1;
+                            else return 0
+                        });
+
+                        for (var i = 0; i < params.length; i++) {
+                            if (params[i].data !== 0) {
+                                if(params[i].seriesName.slice(0,1) === "b"){
+                                    showBion += params[i].marker + params[i].seriesName + ':' + params[i].data + '<br>'
+                                }else{
+                                    showYion += params[i].marker + params[i].seriesName + ':' + params[i].data + '<br>'
+                                }
+                            }
+                        }
+                        return "<div class='row'><div class='col-6'>"+showBion+"</div><div class='col-6'>"+showYion+"</div></div>";
+                    },
                     axisPointer: {
                         type: 'shadow'
                     }

@@ -98,6 +98,9 @@
                         <a th:href="|/experiment/extractor?id=${experiment.id}|"
                            class="btn btn-brand btn-sm">开始卷积
                         </a>
+                        <!--<a th:href="|/experiment/extractor?id=${experiment.id}&|"-->
+                           <!--class="btn btn-default btn-sm">一条龙卷积-->
+                        <!--</a>-->
                         <a th:href="|/experiment/irt?id=${experiment.id}|"
                            class="btn btn-accent btn-sm">计算IRT
                         </a>
@@ -107,9 +110,7 @@
                         <a th:href="|/experiment/compress?expId=${experiment.id}|"
                            class="btn btn-danger btn-sm">Aird压缩
                         </a>
-                        <a th:href="|/experiment/compressToLMS?expId=${experiment.id}|"
-                           class="btn btn-default btn-sm">LMS压缩
-                        </a>
+
                         <a th:href="|/analyse/overview/list?expId=${experiment.id}|"
                            class="btn btn-warning btn-sm">查看卷积实验
                         </a>

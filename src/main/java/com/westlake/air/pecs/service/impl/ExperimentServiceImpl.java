@@ -510,9 +510,10 @@ public class ExperimentServiceImpl implements ExperimentService {
             if(scoresDO != null){
                 scoreList.add(scoresDO);
             }
+            AnalyseDataUtil.compress(dataDO);
             dataList.add(dataDO);
         }
-        logger.info("纯卷积耗时:" + (System.currentTimeMillis() - start));
+        logger.info("卷积+选峰+打分耗时:" + (System.currentTimeMillis() - start));
         analyseDataService.insertAll(dataList, false);
         scoresService.insertAll(scoreList);
         return dataList.size();

@@ -14,6 +14,7 @@
 
     <div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>
     <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
+    <div class="alert alert-info" role="alert" th:text="${task.name}"></div>
 
     <div class="row">
         <div class="col-md-12" th:if="${task}">

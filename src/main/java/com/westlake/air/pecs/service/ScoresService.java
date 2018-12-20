@@ -73,7 +73,7 @@ public interface ScoresService {
     List<ScoresDO> scoreForAll(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, LumsParams input);
 
     /**
-     *
+     * 请确保调用本函数时传入的AnalyseDataDO已经解压缩
      * @param data
      * @param intensityMap 标准库中对应的PeptideRef组
      * @param ss
@@ -81,6 +81,14 @@ public interface ScoresService {
      */
     FeatureByPep selectPeak(AnalyseDataDO data, HashMap<String, Float> intensityMap, SigmaSpacing ss);
 
+    /**
+     * 请确保调用本函数时传入的AnalyseDataDO已经解压缩
+     * @param data
+     * @param peptide
+     * @param rtMap
+     * @param input
+     * @return
+     */
     ScoresDO scoreForOne(AnalyseDataDO data, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input);
 
     /**

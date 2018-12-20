@@ -114,7 +114,7 @@ public class FragmentFactory {
      * @param limitLength 生成的B,Y离子的最小长度
      * @return
      */
-    public HashMap<String, Double> getBYSeriesMap(PeptideDO peptideDO, int limitLength, boolean useIsotope, boolean onlyIsotope) {
+    public HashMap<String, Double> getBYSeriesMap(PeptideDO peptideDO, int limitLength) {
         HashMap<String, Double> bySeriesMap = new HashMap<>();
         String sequence = peptideDO.getSequence();
         int length = sequence.length();
@@ -127,18 +127,11 @@ public class FragmentFactory {
                 String ySubstring = sequence.substring(length - i, length);
                 List<String> bUnimodIds = formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i);
                 List<String> yUnimodIds = formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), length - i, length);
-                if (!onlyIsotope) {
-                    Double bMz = formulaCalculator.getMonoMz(bSubstring, ResidueType.BIon, c, 0, 0, false, bUnimodIds);
-                    bySeriesMap.put("b" + i + (c == 1 ? "" : ("^" + c)), bMz);
-                    Double yMz = formulaCalculator.getMonoMz(ySubstring, ResidueType.YIon, c, 0, 0, false, yUnimodIds);
-                    bySeriesMap.put("y" + i + (c == 1 ? "" : ("^" + c)), yMz);
-                }
-                if (useIsotope) {
-                    Double bMzi = formulaCalculator.getMonoMz(bSubstring, ResidueType.BIon, c, 0, 0, true, bUnimodIds);
-                    bySeriesMap.put("b" + i + (c == 1 ? "" : ("^" + c)) + "i", bMzi);
-                    Double yMzi = formulaCalculator.getMonoMz(ySubstring, ResidueType.YIon, c, 0, 0, true, yUnimodIds);
-                    bySeriesMap.put("y" + i + (c == 1 ? "" : ("^" + c)) + "i", yMzi);
-                }
+
+                Double bMz = formulaCalculator.getMonoMz(bSubstring, ResidueType.BIon, c, 0, 0, false, bUnimodIds);
+                bySeriesMap.put("b" + i + (c == 1 ? "" : ("^" + c)), bMz);
+                Double yMz = formulaCalculator.getMonoMz(ySubstring, ResidueType.YIon, c, 0, 0, false, yUnimodIds);
+                bySeriesMap.put("y" + i + (c == 1 ? "" : ("^" + c)), yMz);
             }
         }
 

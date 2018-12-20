@@ -41,7 +41,7 @@ public class LumsParams {
 
     HashSet<String> scoreTypes = new HashSet<>();
 
-    boolean usedDIAScores = false;
+    boolean usedDIAScores = true;
     /**
      * 是否在卷积的时候同时完成选峰和打分
      * epps: extract, peakpick, scoreForAll
