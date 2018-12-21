@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.airus.ScoreData;
 import com.westlake.air.pecs.domain.bean.airus.TrainAndTest;
@@ -367,7 +368,7 @@ public class AirusUtil {
         //每一轮开始前将上一轮的加权总分去掉
         for (SimpleScores ss : scores) {
             for (FeatureScores sft : ss.getFeatureScoresList()) {
-                sft.getScoresMap().remove(FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+                sft.getScoresMap().remove(ScoreType.WeightedTotalScore.getTypeName());
             }
         }
 

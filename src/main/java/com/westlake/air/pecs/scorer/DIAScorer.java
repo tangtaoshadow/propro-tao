@@ -2,6 +2,7 @@ package com.westlake.air.pecs.scorer;
 
 import com.westlake.air.pecs.algorithm.FragmentFactory;
 import com.westlake.air.pecs.constants.Constants;
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.dao.AminoAcidDAO;
 import com.westlake.air.pecs.dao.ElementsDAO;
 import com.westlake.air.pecs.dao.UnimodDAO;
@@ -72,8 +73,8 @@ public class DIAScorer {
                 e.printStackTrace();
             }
         }
-        scores.put(FeatureScores.ScoreType.MassdevScore, ppmScore);
-        scores.put(FeatureScores.ScoreType.MassdevScoreWeighted, ppmScoreWeighted);
+        scores.put(ScoreType.MassdevScore, ppmScore);
+        scores.put(ScoreType.MassdevScoreWeighted, ppmScoreWeighted);
     }
 
 
@@ -243,8 +244,8 @@ public class DIAScorer {
             }
             isotopeOverlap += nrOccurences * relIntensity;
         }
-        scores.put(FeatureScores.ScoreType.IsotopeCorrelationScore, isotopeCorr);
-        scores.put(FeatureScores.ScoreType.IsotopeOverlapScore, isotopeOverlap);
+        scores.put(ScoreType.IsotopeCorrelationScore, isotopeCorr);
+        scores.put(ScoreType.IsotopeOverlapScore, isotopeOverlap);
     }
 
     /**
@@ -269,8 +270,8 @@ public class DIAScorer {
         int ySeriesScore = getSeriesScore(ySeriesList, spectrumMzArray, spectrumIntArray);
 
 
-        scores.put(FeatureScores.ScoreType.BseriesScore, (double) bSeriesScore);
-        scores.put(FeatureScores.ScoreType.YseriesScore, (double) ySeriesScore);
+        scores.put(ScoreType.BseriesScore, (double) bSeriesScore);
+        scores.put(ScoreType.YseriesScore, (double) ySeriesScore);
     }
 
 

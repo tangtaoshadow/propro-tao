@@ -84,7 +84,7 @@ public class FeatureExtractor {
             //获取对应的卷积数据
             Float[] intensityArray = dataDO.getIntensityMap().get(cutInfo);
             //如果没有卷积到信号,dataDO为null
-            if (!dataDO.getIsHit() || intensityArray == null) {
+            if (intensityArray == null) {
                 continue;
             }
             Double[] intensityDoubleArray = new Double[intensityArray.length];

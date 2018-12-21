@@ -6,25 +6,24 @@ import com.westlake.air.pecs.algorithm.learner.Learner;
 import com.westlake.air.pecs.async.AirusTask;
 import com.westlake.air.pecs.async.ScoreTask;
 import com.westlake.air.pecs.constants.ResultCode;
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.AirusParams;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
+import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
-import com.westlake.air.pecs.domain.db.ScoreDistribution;
-import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
-import com.westlake.air.pecs.domain.query.ScoresQuery;
+import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
+import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
-import com.westlake.air.pecs.service.ScoresService;
+import com.westlake.air.pecs.service.ScoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -34,15 +33,17 @@ import java.util.List;
  * Time: 2018-08-14 16:02
  */
 @Controller
-@RequestMapping("/scores")
-public class ScoresController extends BaseController {
+@RequestMapping("/score")
+public class ScoreController extends BaseController {
 
     @Autowired
-    ScoresService scoresService;
+    ScoreService scoreService;
     @Autowired
     ConfigDAO configDAO;
     @Autowired
     AnalyseOverviewService analyseOverviewService;
+    @Autowired
+    AnalyseDataService analyseDataService;
     @Autowired
     ScoreTask scoreTask;
     @Autowired
@@ -66,24 +67,25 @@ public class ScoresController extends BaseController {
         model.addAttribute("fdrEnd", fdrEnd);
         model.addAttribute("isIdentified", isIdentified);
         model.addAttribute("isDecoy", isDecoy);
-        ScoresQuery query = new ScoresQuery();
+        AnalyseDataQuery query = new AnalyseDataQuery();
         if (peptideRef != null && !peptideRef.isEmpty()) {
             query.setPeptideRef(peptideRef);
         }
         if (isIdentified != null && isIdentified.equals("Yes")) {
-            query.setIsIdentified(true);
+            query.addIndentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS);
         } else if (isIdentified != null && isIdentified.equals("No")) {
-            query.setIsIdentified(false);
+            query.addIndentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
+            query.addIndentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
         }
         if (isDecoy != null && isDecoy.equals("Yes")) {
             query.setIsDecoy(true);
         } else if (isDecoy != null && isDecoy.equals("No")) {
             query.setIsDecoy(false);
         }
-        if(fdrStart != null){
+        if (fdrStart != null) {
             query.setFdrStart(fdrStart);
         }
-        if(fdrEnd != null){
+        if (fdrEnd != null) {
             query.setFdrEnd(fdrEnd);
         }
         if (overviewId == null) {
@@ -94,7 +96,7 @@ public class ScoresController extends BaseController {
         query.setPageSize(30);
         query.setPageNo(currentPage);
         query.setSortColumn("fdr");
-        ResultDO<List<ScoresDO>> resultDO = scoresService.getList(query);
+        ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         if (overviewResult.isFailed()) {
@@ -109,22 +111,6 @@ public class ScoresController extends BaseController {
         return "scores/list";
     }
 
-    @RequestMapping(value = "/buildDistribution")
-    String buildDistribution(Model model, @RequestParam(value = "overviewId", required = true) String overviewId, RedirectAttributes redirectAttributes) {
-        model.addAttribute("overviewId", overviewId);
-        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
-        if (overviewResult.isFailed()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-            return "redirect:/analyse/overview/list";
-        }
-        AnalyseOverviewDO overviewDO = overviewResult.getModel();
-
-        TaskDO taskDO = TaskDO.create(TaskTemplate.BUILD_SCORE_DISTRIBUTE, overviewDO.getExpName() + "-" + overviewId);
-        taskService.insert(taskDO);
-        scoreTask.buildScoreDistributions(overviewId, taskDO);
-        return "redirect:/task/detail/" + taskDO.getId();
-    }
-
     @RequestMapping(value = "/detail")
     String detail(Model model, @RequestParam(value = "overviewId", required = true) String overviewId, RedirectAttributes redirectAttributes) {
 
@@ -133,57 +119,29 @@ public class ScoresController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
             return "redirect:/analyse/overview/list";
         }
-        model.addAttribute("scoreTypes", FeatureScores.ScoreType.getUsedTypes());
-        model.addAttribute("scoreTypeArray", JSONArray.parseArray(JSON.toJSONString(FeatureScores.ScoreType.getUsedTypes())));
+        model.addAttribute("scoreTypes", ScoreType.getUsedTypes());
+        model.addAttribute("scoreTypeArray", JSONArray.parseArray(JSON.toJSONString(ScoreType.getUsedTypes())));
         model.addAttribute("overview", overviewResult.getModel());
         return "scores/detail";
-    }
-
-    @RequestMapping(value = "/distributions")
-    @ResponseBody
-    ResultDO<JSONArray> getDistributions(Model model, @RequestParam(value = "overviewId", required = false) String overviewId) {
-        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
-        if (overviewResult.isFailed()) {
-            ResultDO resultDO = new ResultDO();
-            resultDO.setErrorResult(overviewResult.getMsgCode(), overviewResult.getMsgInfo());
-            return resultDO;
-        }
-        AnalyseOverviewDO overviewDO = overviewResult.getModel();
-
-        if (overviewDO.getScoreDistributions() == null || overviewDO.getScoreDistributions().size() == 0) {
-            return ResultDO.buildError(ResultCode.SCORE_DISTRIBUTION_NOT_GENERATED_YET);
-        }
-
-        List<ScoreDistribution> distributions = overviewDO.getScoreDistributions();
-
-        ResultDO<JSONArray> resultDO = new ResultDO(true);
-        JSONArray array = JSON.parseArray(JSON.toJSONString(distributions));
-
-        resultDO.setModel(array);
-        return resultDO;
-    }
-
-    @RequestMapping(value = "/export/{overviewId}")
-    String export(Model model, @PathVariable("overviewId") String overviewId) {
-
-        TaskDO taskDO = new TaskDO(TaskTemplate.EXPORT_SUBSCORES_TSV_FILE_FOR_PYPROPHET, "OverviewId" + ":" + overviewId);
-        taskService.insert(taskDO);
-        scoreTask.exportForPyProphet(overviewId, taskDO);
-
-        return "redirect:/task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/airus")
     String airus(Model model,
                  @RequestParam(value = "overviewId", required = true) String overviewId,
-                 @RequestParam(value = "classifier", required = true) String classifier) {
+                 @RequestParam(value = "classifier", required = true) String classifier,
+                 RedirectAttributes redirectAttributes) {
 
-        TaskDO taskDO = new TaskDO(TaskTemplate.AIRUS, overviewId);
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        if (overviewResult.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
+            return "redirect:/analyse/overview/list";
+        }
+        TaskDO taskDO = new TaskDO(TaskTemplate.AIRUS, overviewResult.getModel().getName() + "(" + overviewResult.getModel().getId() + ")-classifier:" + classifier);
         taskService.insert(taskDO);
         AirusParams airusParams = new AirusParams();
-        if(classifier.equals("xgboost")){
+        if (classifier.equals("xgboost")) {
             airusParams.setLearner(Learner.learner.XgbLearner);
-        }else{
+        } else {
             airusParams.setLearner(Learner.learner.LdaLearner);
         }
 

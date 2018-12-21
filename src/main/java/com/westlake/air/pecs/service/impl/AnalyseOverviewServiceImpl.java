@@ -7,9 +7,9 @@ import com.westlake.air.pecs.domain.bean.analyse.ComparisonResult;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.simple.MatchedPeptide;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
+import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
-import com.westlake.air.pecs.service.ScoresService;
-import com.westlake.air.pecs.utils.SortUtil;
+import com.westlake.air.pecs.service.ScoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,9 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
     @Autowired
     AnalyseOverviewDAO analyseOverviewDAO;
     @Autowired
-    ScoresService scoresService;
+    ScoreService scoreService;
+    @Autowired
+    AnalyseDataService analyseDataService;
 
     @Override
     public List<AnalyseOverviewDO> getAllByExpId(String expId) {
@@ -155,7 +157,7 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
                 //如果MatchedPeptideCount为空,则表明分析还没有完成,无法参与横向比对
                 if (temp.getMatchedPeptideCount() != null) {
                     overviewMap.put(temp.getId(), temp);
-                    List<MatchedPeptide> peptides = scoresService.getAllMatchedPeptides(overviewId);
+                    List<MatchedPeptide> peptides = analyseDataService.getAllSuccessMatchedPeptides(overviewId);
                     map.put(temp.getId(), new HashSet<>(peptides));
                     identifiesMap.put(temp, new ArrayList<Boolean>());
                 }

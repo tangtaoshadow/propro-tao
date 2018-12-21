@@ -3,8 +3,8 @@ package com.westlake.air.pecs.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.dao.ConfigDAO;
-import com.westlake.air.pecs.dao.ScoresDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.simple.TargetPeptide;
 import com.westlake.air.pecs.domain.params.LumsParams;
@@ -14,10 +14,7 @@ import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.domain.db.*;
-import com.westlake.air.pecs.domain.db.simple.MatchedPeptide;
-import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.domain.query.PeptideQuery;
-import com.westlake.air.pecs.domain.query.ScoresQuery;
 import com.westlake.air.pecs.feature.*;
 import com.westlake.air.pecs.parser.AirdFileParser;
 import com.westlake.air.pecs.rtnormalizer.ChromatogramFilter;
@@ -34,9 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.text.NumberFormat;
 import java.util.*;
 
 /**
@@ -44,12 +39,10 @@ import java.util.*;
  * Time: 2018-08-15 10:05
  */
 @Service("scoresService")
-public class ScoresServiceImpl implements ScoresService {
+public class ScoreServiceImpl implements ScoreService {
 
-    public final Logger logger = LoggerFactory.getLogger(ScoresServiceImpl.class);
+    public final Logger logger = LoggerFactory.getLogger(ScoreServiceImpl.class);
 
-    @Autowired
-    ScoresDAO scoresDAO;
     @Autowired
     AnalyseDataService analyseDataService;
     @Autowired
@@ -94,132 +87,6 @@ public class ScoresServiceImpl implements ScoresService {
     AirdFileParser airdFileParser;
 
     @Override
-    public Long count(ScoresQuery query) {
-        return scoresDAO.count(query);
-    }
-
-    @Override
-    public ResultDO<List<ScoresDO>> getList(ScoresQuery targetQuery) {
-        List<ScoresDO> scoresList = scoresDAO.getList(targetQuery);
-        long totalCount = scoresDAO.count(targetQuery);
-        ResultDO<List<ScoresDO>> resultDO = new ResultDO<>(true);
-        resultDO.setModel(scoresList);
-        resultDO.setTotalNum(totalCount);
-        resultDO.setPageSize(targetQuery.getPageSize());
-
-        return resultDO;
-    }
-
-    @Override
-    public List<MatchedPeptide> getAllMatchedPeptides(String overviewId) {
-        return scoresDAO.getAllMatchedPeptides(overviewId);
-    }
-
-    @Override
-    public List<ScoresDO> getAllByOverviewId(String overviewId) {
-        return scoresDAO.getAllByOverviewId(overviewId);
-    }
-
-    @Override
-    public List<SimpleScores> getSimpleAllByOverviewId(String overviewId) {
-        return scoresDAO.getSimpleAllByOverviewId(overviewId);
-    }
-
-    @Override
-    public HashMap<String, ScoresDO> getAllMapByOverviewId(String overviewId) {
-        List<ScoresDO> scoresList = scoresDAO.getAllByOverviewId(overviewId);
-        HashMap<String, ScoresDO> map = new HashMap<>();
-        for (ScoresDO scoresDO : scoresList) {
-            String key = scoresDO.getIsDecoy() + "_" + scoresDO.getPeptideRef();
-            map.put(key, scoresDO);
-        }
-        return map;
-    }
-
-    @Override
-    public ResultDO insert(ScoresDO scoresDO) {
-        try {
-            scoresDAO.insert(scoresDO);
-            return ResultDO.build(scoresDO);
-        } catch (Exception e) {
-            logger.warn(e.getMessage());
-            return ResultDO.buildError(ResultCode.INSERT_ERROR);
-        }
-    }
-
-    @Override
-    public ResultDO insertAll(List<ScoresDO> scoresList) {
-        try {
-            scoresDAO.insert(scoresList);
-            return ResultDO.build(scoresList);
-        } catch (Exception e) {
-            logger.warn(e.getMessage());
-            return ResultDO.buildError(ResultCode.INSERT_ERROR);
-        }
-    }
-
-    @Override
-    public ResultDO update(ScoresDO scoresDO) {
-        if (scoresDO.getId() == null || scoresDO.getId().isEmpty()) {
-            return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
-        }
-        try {
-            scoresDAO.update(scoresDO);
-            return ResultDO.build(scoresDO);
-        } catch (Exception e) {
-            logger.warn(e.getMessage());
-            return ResultDO.buildError(ResultCode.UPDATE_ERROR);
-        }
-    }
-
-    @Override
-    public ResultDO delete(String id) {
-        if (id == null || id.isEmpty()) {
-            return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
-        }
-        try {
-            scoresDAO.delete(id);
-            return new ResultDO(true);
-        } catch (Exception e) {
-            logger.warn(e.getMessage());
-            return ResultDO.buildError(ResultCode.DELETE_ERROR);
-        }
-    }
-
-    @Override
-    public ResultDO deleteAllByOverviewId(String overviewId) {
-        if (overviewId == null || overviewId.isEmpty()) {
-            return ResultDO.buildError(ResultCode.ANALYSE_OVERVIEW_ID_CAN_NOT_BE_EMPTY);
-        }
-        try {
-            scoresDAO.deleteAllByOverviewId(overviewId);
-            return new ResultDO(true);
-        } catch (Exception e) {
-            logger.warn(e.getMessage());
-            return ResultDO.buildError(ResultCode.DELETE_ERROR);
-        }
-    }
-
-    @Override
-    public ResultDO<ScoresDO> getById(String id) {
-        try {
-            ScoresDO scoresDO = scoresDAO.getById(id);
-            if (scoresDO == null) {
-                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
-            } else {
-                return ResultDO.build(scoresDO);
-            }
-        } catch (Exception e) {
-            return ResultDO.buildError(ResultCode.QUERY_ERROR);
-        }
-    }
-
-    @Override
-    public ScoresDO getByPeptideRefAndIsDecoy(String overviewId, String peptideRef, Boolean isDecoy) {
-        return scoresDAO.getByPeptideRefAndIsDecoy(overviewId, peptideRef, isDecoy);
-    }
-
-    @Override
     public ResultDO<SlopeIntercept> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing) {
 
         HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(new PeptideQuery(iRtLibraryId));
@@ -256,10 +123,10 @@ public class ScoresServiceImpl implements ScoresService {
     }
 
     @Override
-    public List<ScoresDO> scoreForAll(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, LumsParams input) {
+    public void scoreForAll(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, LumsParams input) {
 
         if (dataList == null || dataList.size() == 0) {
-            return null;
+            return;
         }
         input.setOverviewId(dataList.get(0).getOverviewId());//取一个AnalyseDataDO的OverviewId
 
@@ -268,7 +135,6 @@ public class ScoresServiceImpl implements ScoresService {
         query.setMzStart(Double.parseDouble(rang.getMzStart().toString()));
         query.setMzEnd(Double.parseDouble(rang.getMzEnd().toString()));
         HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(query);
-        List<ScoresDO> scoreList = new ArrayList<>();
 
         int count = 0;
         //为每一组PeptideRef卷积结果打分
@@ -284,34 +150,19 @@ public class ScoresServiceImpl implements ScoresService {
 
             for (AnalyseDataDO dataDO : dataList) {
                 AnalyseDataUtil.decompress(dataDO);
-                ScoresDO scoresDO = scoreForOne(dataDO, ttMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()), rtMap, input);
-                if (scoresDO == null) {
-                    continue;
-                }
-                scoreList.add(scoresDO);
-                count++;
-                if (count % 1000 == 0) {
-                    logger.info(count + "个Peptide已经打分完毕,总共有" + dataList.size() + "个Peptide");
-                    scoresDAO.insert(scoreList);
-                    scoreList.clear();
-                }
+                scoreForOne(dataDO, ttMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()), rtMap, input);
+                analyseDataService.update(dataDO);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             FileUtil.close(raf);
         }
-        scoresDAO.insert(scoreList);
-        return scoreList;
     }
 
 
     @Override
     public FeatureByPep selectPeak(AnalyseDataDO dataDO, HashMap<String, Float> intensityMap, SigmaSpacing ss) {
-        if (!dataDO.getIsHit()) {
-            return null;
-        }
 
         if (dataDO.isCompressed()) {
             logger.warn("进入本函数前的AnalyseDataDO需要提前被解压缩!!!!!");
@@ -334,10 +185,7 @@ public class ScoresServiceImpl implements ScoresService {
     }
 
     @Override
-    public ScoresDO scoreForOne(AnalyseDataDO dataDO, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input) {
-        if (!dataDO.getIsHit()) {
-            return null;
-        }
+    public void scoreForOne(AnalyseDataDO dataDO, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input) {
 
         if (dataDO.isCompressed()) {
             logger.warn("进入本函数前的AnalyseDataDO需要提前被解压缩!!!!!");
@@ -346,7 +194,8 @@ public class ScoresServiceImpl implements ScoresService {
 
         if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() < 3) {
             logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
-            return null;
+            dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
+            return;
         }
 
         //获取标准库中对应的PeptideRef组
@@ -354,7 +203,8 @@ public class ScoresServiceImpl implements ScoresService {
         //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
         FeatureByPep featureByPep = featureExtractor.getExperimentFeature(dataDO, intensityMap, input.getSigmaSpacing());
         if (!featureByPep.isFeatureFound()) {
-            return null;
+            dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
+            return;
         }
         List<FeatureScores> featureScoresList = new ArrayList<>();
         List<List<ExperimentFeature>> experimentFeatures = featureByPep.getExperimentFeatures();
@@ -390,15 +240,13 @@ public class ScoresServiceImpl implements ScoresService {
         }
 
         MathUtil.normalizeSum(intensityMap);
-        HashMap<Integer, String> unimodHashMap = dataDO.getUnimodMap();
+        HashMap<Integer, String> unimodHashMap = peptide.getUnimodMap();
         String sequence = peptide.getSequence();
-        //for each mrmFeature, calculate scores
-
         for (List<ExperimentFeature> experimentFeatureList : experimentFeatures) {
 
             FeatureScores featureScores = new FeatureScores();
             chromatographicScorer.calculateChromatographicScores(experimentFeatureList, libraryIntensityList, featureScores, input.getScoreTypes());
-            if (input.getScoreTypes().contains(FeatureScores.ScoreType.LogSnScore.getTypeName())) {
+            if (input.getScoreTypes().contains(ScoreType.LogSnScore.getTypeName())) {
                 chromatographicScorer.calculateLogSnScore(chromatogramList, experimentFeatureList, noise1000List, featureScores);
             }
 
@@ -414,16 +262,16 @@ public class ScoresServiceImpl implements ScoresService {
                 }
             }
 
-            if (input.getScoreTypes().contains(FeatureScores.ScoreType.ElutionModelFitScore.getTypeName())) {
+            if (input.getScoreTypes().contains(ScoreType.ElutionModelFitScore.getTypeName())) {
                 elutionScorer.calculateElutionModelScore(experimentFeatureList, featureScores);
             }
 
-            if (input.getScoreTypes().contains(FeatureScores.ScoreType.IntensityScore.getTypeName())) {
+            if (input.getScoreTypes().contains(ScoreType.IntensityScore.getTypeName())) {
                 libraryScorer.calculateIntensityScore(experimentFeatureList, featureScores);
             }
 
             libraryScorer.calculateLibraryScores(experimentFeatureList, libraryIntensityList, featureScores, input.getScoreTypes());
-            if (input.getScoreTypes().contains(FeatureScores.ScoreType.NormRtScore.getTypeName())) {
+            if (input.getScoreTypes().contains(ScoreType.NormRtScore.getTypeName())) {
                 libraryScorer.calculateNormRtScore(experimentFeatureList, input.getSlopeIntercept(), dataDO.getRt(), featureScores);
             }
             swathLDAScorer.calculateSwathLdaPrescore(featureScores);
@@ -433,185 +281,11 @@ public class ScoresServiceImpl implements ScoresService {
         }
 
         if (featureScoresList.size() == 0) {
-            return null;
-        }
-        ScoresDO score = new ScoresDO();
-
-        score.setRt(dataDO.getRt());
-        score.setOverviewId(input.getOverviewId());
-        score.setPeptideRef(dataDO.getPeptideRef());
-        score.setProteinName(dataDO.getProteinName());
-        score.setAnalyseDataId(dataDO.getId());
-        score.setIsDecoy(dataDO.getIsDecoy());
-        score.setFeatureScoresList(featureScoresList);
-        return score;
-    }
-
-
-    @Override
-    public ResultDO exportForPyProphet(String overviewId, String spliter) {
-
-        ConfigDO configDO = configDAO.getConfig();
-        String exportPath = configDO.getExportScoresFilePath();
-        ResultDO<AnalyseOverviewDO> result = analyseOverviewService.getById(overviewId);
-        if (result.isFailed()) {
-            return ResultDO.buildError(ResultCode.SCORES_NOT_EXISTED);
+            dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
+            return;
         }
 
-        AnalyseOverviewDO overviewDO = result.getModel();
-        String outputFileName = exportPath + "/" + overviewDO.getExpName() + "-" + overviewDO.getLibraryName() + "-" + overviewId + ".tsv";
-
-        //Generate the txt for pyprophet
-        List<ScoresDO> scores = getAllByOverviewId(overviewId);
-        String pyprophetColumns = "transition_group_id" + spliter + "run_id" + spliter + "decoy" + spliter + FeatureScores.ScoreType.getPyProphetScoresColumns(spliter);
-        StringBuilder sb = new StringBuilder(pyprophetColumns);
-        List<FeatureScores.ScoreType> scoreTypes = FeatureScores.ScoreType.getUsedTypes();
-        for (ScoresDO score : scores) {
-            for (FeatureScores fs : score.getFeatureScoresList()) {
-                sb.append((score.getIsDecoy() ? "DECOY_" : "") + score.getPeptideRef()).append(spliter);
-                sb.append(0).append(spliter);
-                sb.append(score.getIsDecoy() ? 1 : 0).append(spliter);
-                for (int i = 0; i < scoreTypes.size(); i++) {
-                    if (i == scoreTypes.size() - 1) {
-                        sb.append(fs.get(scoreTypes.get(i))).append(Constants.CHANGE_LINE);
-                    } else {
-                        sb.append(fs.get(scoreTypes.get(i))).append(spliter);
-                    }
-                }
-            }
-        }
-
-        try {
-            FileUtil.writeFile(outputFileName, sb.toString(), true);
-        } catch (IOException e) {
-            return ResultDO.buildError(ResultCode.IO_EXCEPTION);
-        }
-
-        return new ResultDO(true);
-    }
-
-    @Override
-    public ResultDO<List<ScoreDistribution>> buildScoreDistributions(String overviewId) {
-        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
-        if (overviewResult.isFailed()) {
-            return ResultDO.buildError(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
-        }
-
-        List<ScoresDO> scores = scoresDAO.getAllByOverviewId(overviewId);
-        if (scores == null || scores.isEmpty()) {
-            return ResultDO.buildError(ResultCode.SCORES_NOT_EXISTED);
-        }
-        List<FeatureScores.ScoreType> scoreTypes = FeatureScores.ScoreType.getUsedTypes();
-
-        ResultDO<List<ScoreDistribution>> resultDO = new ResultDO<>(true);
-
-        HashMap<String, List<Double>> resultMap = new HashMap<>();
-        HashMap<String, List<Double>> resultDecoyMap = new HashMap<>();
-        for (ScoresDO score : scores) {
-            HashMap<String, Double> bestScoreMap = new HashMap<>();
-            //计算最优分数
-            for (FeatureScores fs : score.getFeatureScoresList()) {
-                for (FeatureScores.ScoreType scoreType : scoreTypes) {
-                    if (bestScoreMap.get(scoreType.getTypeName()) == null) {
-                        bestScoreMap.put(scoreType.getTypeName(), fs.get(scoreType));
-                        continue;
-                    }
-
-                    if (scoreType.getBiggerIsBetter() && fs.get(scoreType) > bestScoreMap.get(scoreType.getTypeName())) {
-                        bestScoreMap.put(scoreType.getTypeName(), fs.get(scoreType));
-                        continue;
-                    }
-
-                    if (!scoreType.getBiggerIsBetter() && fs.get(scoreType) < bestScoreMap.get(scoreType.getTypeName())) {
-                        bestScoreMap.put(scoreType.getTypeName(), fs.get(scoreType));
-                        continue;
-                    }
-                }
-            }
-            if (score.getIsDecoy()) {
-                for (String key : bestScoreMap.keySet()) {
-                    resultDecoyMap.computeIfAbsent(key, k -> new ArrayList<>());
-                    resultDecoyMap.get(key).add(bestScoreMap.get(key));
-                }
-            } else {
-                for (String key : bestScoreMap.keySet()) {
-                    resultMap.computeIfAbsent(key, k -> new ArrayList<>());
-                    resultMap.get(key).add(bestScoreMap.get(key));
-                }
-            }
-        }
-
-        List<ScoreDistribution> distributions = new ArrayList<>();
-
-        buildScoreDisList(resultMap, resultDecoyMap, distributions);
-        AnalyseOverviewDO overviewDO = overviewResult.getModel();
-        overviewDO.setScoreDistributions(distributions);
-        analyseOverviewService.update(overviewDO);
-
-        resultDO.setModel(distributions);
-        return resultDO;
-    }
-
-    /**
-     * 根据分数的分布情况,对所有的分数进行分组,总共分为Constants.SCORE_RANGE组,如果所有分数都相同,那么不分组
-     *
-     * @param scoreMap
-     * @return
-     */
-    private void buildScoreDisList(HashMap<String, List<Double>> scoreMap, HashMap<String, List<Double>> decoyScoreMap, List<ScoreDistribution> distributions) {
-
-        for (String key : scoreMap.keySet()) {
-            ScoreDistribution sd = new ScoreDistribution(key);
-            List<Double> oneScores = scoreMap.get(key);
-            List<Double> decoyOneScores = decoyScoreMap.get(key);
-            Collections.sort(oneScores);
-            Collections.sort(decoyOneScores);
-
-            double min = Math.floor(oneScores.get(0) > decoyOneScores.get(0) ? decoyOneScores.get(0) : oneScores.get(0));
-            double max = Math.ceil(oneScores.get(oneScores.size() - 1) > decoyOneScores.get(decoyOneScores.size() - 1) ? oneScores.get(oneScores.size() - 1) : decoyOneScores.get(decoyOneScores.size() - 1));
-            double range = max - min;
-            if (range == 0) {
-                distributions.add(sd);
-                continue;
-            }
-            double stepOri = range / Constants.SCORE_RANGE;
-
-            NumberFormat nf = NumberFormat.getNumberInstance();
-            nf.setMaximumFractionDigits(2);
-            double step = Double.valueOf(nf.format(stepOri).replace(",", ""));
-            String[] ranges = new String[Constants.SCORE_RANGE];
-            Integer[] targetCount = new Integer[Constants.SCORE_RANGE];
-            Integer[] decoyCount = new Integer[Constants.SCORE_RANGE];
-            for (int i = 0; i < Constants.SCORE_RANGE; i++) {
-                targetCount[i] = 0;
-                decoyCount[i] = 0;
-                if (i != (Constants.SCORE_RANGE - 1)) {
-                    ranges[i] = nf.format(min + step * (i)) + "~" + nf.format(min + step * (i + 1));
-                } else {
-                    ranges[i] = nf.format(min + step * (i)) + "~" + nf.format(max);
-                }
-            }
-            for (Double d : oneScores) {
-                int count = (int) Math.ceil((d - min) / step);
-                //如果count为0,则直接调整到第一个区间范围内
-                if (count == 0) {
-                    count = 1;
-                }
-                targetCount[count - 1] = targetCount[count - 1] + 1;
-            }
-
-            for (Double d : decoyOneScores) {
-                int count = (int) Math.ceil((d - min) / step);
-                //如果count为0,则直接调整到第一个区间范围内
-                if (count == 0) {
-                    count = 1;
-                }
-                decoyCount[count - 1] = decoyCount[count - 1] + 1;
-            }
-            sd.buildData(ranges, targetCount, decoyCount);
-            distributions.add(sd);
-        }
-
+        dataDO.setFeatureScoresList(featureScoresList);
     }
 
     /**

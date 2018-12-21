@@ -5,10 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.algorithm.FragmentFactory;
 import com.westlake.air.pecs.async.ScoreTask;
-import com.westlake.air.pecs.constants.Constants;
-import com.westlake.air.pecs.constants.ResultCode;
-import com.westlake.air.pecs.constants.SuccessMsg;
-import com.westlake.air.pecs.constants.TaskTemplate;
+import com.westlake.air.pecs.constants.*;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.ComparisonResult;
@@ -56,7 +53,7 @@ public class AnalyseController extends BaseController {
     @Autowired
     ExperimentService experimentService;
     @Autowired
-    ScoresService scoresService;
+    ScoreService scoreService;
     @Autowired
     ScoreTask scoreTask;
     @Autowired
@@ -98,7 +95,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("overviews", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
-        model.addAttribute("scores", FeatureScores.ScoreType.getUsedTypes());
+        model.addAttribute("scores", ScoreType.getUsedTypes());
         return "/analyse/overview/list";
     }
 
@@ -168,7 +165,6 @@ public class AnalyseController extends BaseController {
     String overviewDelete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         analyseOverviewService.delete(id);
         analyseDataService.deleteAllByOverviewId(id);
-        scoresService.deleteAllByOverviewId(id);
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
         return "redirect:/analyse/overview/list";
     }
@@ -282,7 +278,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("overview", overviewDO);
         model.addAttribute("slope", overviewDO.getSlope());
         model.addAttribute("intercept", overviewDO.getIntercept());
-        model.addAttribute("scoreTypes", FeatureScores.ScoreType.getShownTypes());
+        model.addAttribute("scoreTypes", ScoreType.getShownTypes());
         return "/analyse/overview/score";
     }
 
@@ -303,7 +299,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("intercept", intercept);
 
         HashSet<String> scoreTypes = new HashSet<>();
-        for (FeatureScores.ScoreType type : FeatureScores.ScoreType.values()) {
+        for (ScoreType type : ScoreType.values()) {
             String typeParam = request.getParameter(type.getTypeName());
             if (typeParam != null && typeParam.equals("on")) {
                 scoreTypes.add(type.getTypeName());
@@ -356,9 +352,6 @@ public class AnalyseController extends BaseController {
         }
 
         AnalyseDataDO dataDO = dataResult.getModel();
-        if (!dataDO.getIsHit()) {
-            return ResultDO.buildError(ResultCode.ANALYSE_DATA_NOT_EXISTED, 201);
-        }
         JSONObject res = new JSONObject();
         JSONArray rtArray = new JSONArray();
         JSONArray intensityArray = new JSONArray();
@@ -398,7 +391,6 @@ public class AnalyseController extends BaseController {
         }
 
         AnalyseDataDO data = dataResult.getModel();
-        ScoresDO scoresDO = scoresService.getByPeptideRefAndIsDecoy(data.getOverviewId(), data.getPeptideRef(), data.getIsDecoy());
 
         JSONObject res = new JSONObject();
         JSONArray rtArray = new JSONArray();
@@ -408,7 +400,7 @@ public class AnalyseController extends BaseController {
         //同一组的rt坐标是相同的
         Float[] pairRtArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvRtArray()));
         for (String cutInfo : data.getConvIntensityMap().keySet()) {
-            if (!data.getIsHit() || data.getConvIntensityMap().get(cutInfo) == null) {
+            if (data.getConvIntensityMap().get(cutInfo) == null) {
                 continue;
             }
 
@@ -437,8 +429,8 @@ public class AnalyseController extends BaseController {
         res.put("peptideRef", data.getPeptideRef());
         res.put("cutInfoArray", cutInfoArray);
         res.put("intensityArrays", intensityArrays);
-        if (scoresDO != null && scoresDO.getBestRt() != null) {
-            res.put("bestRt", (double) Math.round(scoresDO.getBestRt() * 100) / 100);
+        if (data.getBestRt() != null) {
+            res.put("bestRt", (double) Math.round(data.getBestRt() * 100) / 100);
         }
 
         resultDO.setModel(res);
@@ -546,7 +538,7 @@ public class AnalyseController extends BaseController {
         Float[] rtArray = newDataDO.getRtArray();
         List<String> totalCutInfoList = new ArrayList<>();
         for (String cutInfo : newDataDO.getIntensityMap().keySet()) {
-            if (!newDataDO.getIsHit() || newDataDO.getIntensityMap().get(cutInfo) == null || (usedCutInfos.size() != 0 && !usedCutInfos.contains(cutInfo))) {
+            if (newDataDO.getIntensityMap().get(cutInfo) == null || (usedCutInfos.size() != 0 && !usedCutInfos.contains(cutInfo))) {
                 continue;
             }
 
@@ -601,7 +593,6 @@ public class AnalyseController extends BaseController {
                 continue;
             }
             AnalyseDataDO data = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, peptideRef, false);
-            ScoresDO scoresDO = scoresService.getByPeptideRefAndIsDecoy(data.getOverviewId(), data.getPeptideRef(), data.getIsDecoy());
             JSONArray rtArray = new JSONArray();
             JSONArray intensityArrays = new JSONArray();
             JSONArray cutInfoArray = new JSONArray();
@@ -610,7 +601,7 @@ public class AnalyseController extends BaseController {
             Float[] pairRtArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvRtArray()));
 
             for (String cutInfo : data.getConvIntensityMap().keySet()) {
-                if (!data.getIsHit() || data.getConvIntensityMap().get(cutInfo) == null) {
+                if (data.getConvIntensityMap().get(cutInfo) == null) {
                     continue;
                 }
                 Float[] pairIntensityArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvIntensityMap().get(cutInfo)));
@@ -638,8 +629,8 @@ public class AnalyseController extends BaseController {
             group.put("peptideRef", data.getPeptideRef());
             group.put("cutInfoArray", cutInfoArray);
             group.put("intensityArrays", intensityArrays);
-            if (scoresDO != null && scoresDO.getBestRt() != null) {
-                group.put("bestRt", (double) Math.round(scoresDO.getBestRt() * 100) / 100);
+            if (data.getBestRt() != null) {
+                group.put("bestRt", (double) Math.round(data.getBestRt() * 100) / 100);
             }
             groups.add(group);
         }

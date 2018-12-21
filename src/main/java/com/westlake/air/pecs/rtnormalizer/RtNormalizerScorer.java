@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.rtnormalizer;
 
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.scorer.ChromatographicScorer;
@@ -75,11 +76,11 @@ public class RtNormalizerScorer {
      * @return final scoreForAll
      */
     private double calculateLdaPrescore(FeatureScores scores) {
-        return scores.get(FeatureScores.ScoreType.LibraryCorr) * -0.34664267d +
-                scores.get(FeatureScores.ScoreType.LibraryRsmd) * 2.98700722d +
-                scores.get(FeatureScores.ScoreType.XcorrCoelution) * 0.09445371d +
-                scores.get(FeatureScores.ScoreType.XcorrShape) * -5.71823862d +
-                scores.get(FeatureScores.ScoreType.LogSnScore) * -0.72989582d;
+        return scores.get(ScoreType.LibraryCorr) * -0.34664267d +
+                scores.get(ScoreType.LibraryRsmd) * 2.98700722d +
+                scores.get(ScoreType.XcorrCoelution) * 0.09445371d +
+                scores.get(ScoreType.XcorrShape) * -5.71823862d +
+                scores.get(ScoreType.LogSnScore) * -0.72989582d;
     }
 
 

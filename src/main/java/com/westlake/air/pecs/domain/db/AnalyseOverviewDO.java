@@ -46,8 +46,6 @@ public class AnalyseOverviewDO extends BaseDO {
 
     String creator = "Admin";
 
-    List<ScoreDistribution> scoreDistributions;
-
     Date createDate;
 
     Date lastModifiedDate;
@@ -57,6 +55,6 @@ public class AnalyseOverviewDO extends BaseDO {
     Integer matchedPeptideCount;
 
     Integer totalPeptideCount;
-    Integer targetPeptideCount;
+
     Integer libraryPeptideCount;
 }

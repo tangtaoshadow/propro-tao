@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.domain.bean.airus;
 
 import com.westlake.air.pecs.algorithm.learner.Learner;
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import lombok.Data;
 
@@ -63,5 +64,5 @@ public class AirusParams {
     boolean isDebug = false;
 
     //首批训练时默认作为主分数的分数类型
-    String mainScore = FeatureScores.ScoreType.MainScore.getTypeName();
+    String mainScore = ScoreType.MainScore.getTypeName();
 }

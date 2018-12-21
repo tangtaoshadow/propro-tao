@@ -32,7 +32,7 @@ public class ExperimentTask extends BaseTask {
     @Autowired
     AnalyseDataService analyseDataService;
     @Autowired
-    ScoresService scoresService;
+    ScoreService scoreService;
     @Autowired
     Airus airus;
     @Autowired

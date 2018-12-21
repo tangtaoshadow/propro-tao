@@ -9,6 +9,8 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.PeptideDO;
+import com.westlake.air.pecs.domain.db.simple.MatchedPeptide;
+import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.utils.CompressUtil;
@@ -43,6 +45,18 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     @Override
     public List<AnalyseDataDO> getAllByOverviewId(String overviewId) {
         return analyseDataDAO.getAllByOverviewId(overviewId);
+    }
+
+    @Override
+    public List<SimpleScores> getSimpleScoresByOverviewId(String overviewId) {
+        return analyseDataDAO.getSimpleScoresByOverviewId(overviewId);
+    }
+
+    @Override
+    public List<MatchedPeptide> getAllSuccessMatchedPeptides(String overviewId) {
+        AnalyseDataQuery query = new AnalyseDataQuery(overviewId);
+        query.addIndentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS);
+        return analyseDataDAO.getAllMatchedPeptide(query);
     }
 
     @Override
@@ -103,6 +117,21 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             analyseDataDAO.insert(dataList);
             return new ResultDO(true);
         } catch (Exception e) {
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO update(AnalyseDataDO dataDO) {
+        if (dataDO.getId() == null) {
+            return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
+        }
+
+        try {
+            analyseDataDAO.update(dataDO);
+            return ResultDO.build(dataDO);
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
             return ResultDO.buildError(ResultCode.INSERT_ERROR);
         }
     }

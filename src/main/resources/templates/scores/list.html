@@ -36,7 +36,7 @@
             <div class="clearfix">
                 <form id="searchForm" method="post" role="form"
                       class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
-                      th:action="@{/scores/list}">
+                      th:action="@{/score/list}">
                     <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                     <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
                     <input id="overviewId" type="hidden" th:value="${overview.id}" class="form-control" name="overviewId">
@@ -138,9 +138,9 @@
                                 <!--<span th:if="${scoreForAll.isDecoy}" class="m-accordion__item-icon"><i class="fa fa-bomb"></i></span>-->
                                 <span th:if="${!score.isDecoy}" class="m-accordion__item-icon"><i
                                         class="fa fa-diamond"></i></span>
-                                <span th:if="${!score.isDecoy&&score.isIdentified}" class="m-accordion__item-icon"><i
+                                <span th:if="${!score.isDecoy&&score.identifiedStatus==0}" class="m-accordion__item-icon"><i
                                         class="fa fa-check"></i></span>
-                                <span th:if="${!score.isDecoy&&!score.isIdentified}" class="m-accordion__item-icon"><i
+                                <span th:if="${!score.isDecoy&&score.identifiedStatus!=0}" class="m-accordion__item-icon"><i
                                         class="fa fa-close"></i></span>
                                 <span class="m-accordion__item-title"
                                       th:text="|(${score?.featureScoresList?.size()})[预测RT:${score?.rt}][FDR:${score?.fdr}]${score.isDecoy?'伪肽段':'肽段'}:${score?.peptideRef}|"></span>
@@ -150,14 +150,14 @@
                                  th:id="|${score?.peptideRef}_${score.isDecoy?'decoy':''}|" role="tabpanel"
                                  aria-labelledby="m_accordion_7_item_1_head" data-parent="#m_accordion_7">
                                 <div class="m-accordion__item-content">
-                                    <a th:href="|/scores/list?overviewId=${overviewId}&peptideRef=${score?.peptideRef}|"
+                                    <a th:href="|/score/list?overviewId=${overviewId}&peptideRef=${score?.peptideRef}|"
                                        class="btn btn-primary btn-sm">查看真伪肽段打分</a>
                                     <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
                                             data-target="#m_modal_group"
-                                            th:onclick="|queryGroup('${score.analyseDataId}', false, false)|">
+                                            th:onclick="|queryGroup('${score.id}', false, false)|">
                                         查看卷积组谱图
                                     </button>
-                                    <a th:if="${!score.isDecoy}" target="_blank" th:href="|/analyse/consultation?dataId=${score.analyseDataId}&allCutInfo=true|"
+                                    <a th:if="${!score.isDecoy}" target="_blank" th:href="|/analyse/consultation?dataId=${score.id}&allCutInfo=true|"
                                        class="btn btn-danger btn-sm">高级诊断</a>
                                     <table class="table table-bordered table-hover" style="table-layout:fixed;">
                                         <thead>

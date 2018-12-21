@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.scorer;
 
 import com.westlake.air.pecs.constants.Constants;
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.EmgModelParams;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
@@ -88,7 +89,7 @@ public class ElutionScorer {
         }
         avgScore /= experimentFeatures.size();
 
-        scores.put(FeatureScores.ScoreType.ElutionModelFitScore, avgScore);
+        scores.put(ScoreType.ElutionModelFitScore, avgScore);
     }
     /**
      * prepareFit_

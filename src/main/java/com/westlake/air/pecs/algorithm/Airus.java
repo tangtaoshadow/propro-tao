@@ -4,15 +4,17 @@ import com.westlake.air.pecs.algorithm.learner.LDALearner;
 import com.westlake.air.pecs.algorithm.learner.Learner;
 import com.westlake.air.pecs.algorithm.learner.XGBoostLearner;
 import com.westlake.air.pecs.constants.ResultCode;
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.*;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
+import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
-import com.westlake.air.pecs.domain.db.ScoresDO;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
+import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
-import com.westlake.air.pecs.service.ScoresService;
+import com.westlake.air.pecs.service.ScoreService;
 import com.westlake.air.pecs.utils.AirusUtil;
 import com.westlake.air.pecs.utils.ArrayUtil;
 import com.westlake.air.pecs.utils.MathUtil;
@@ -43,7 +45,9 @@ public class Airus {
     @Autowired
     Stats stats;
     @Autowired
-    ScoresService scoresService;
+    ScoreService scoreService;
+    @Autowired
+    AnalyseDataService analyseDataService;
     @Autowired
     AnalyseOverviewService analyseOverviewService;
     @Autowired
@@ -61,7 +65,7 @@ public class Airus {
             }
         }
         logger.info("开始获取打分数据");
-        List<SimpleScores> scores = scoresService.getSimpleAllByOverviewId(overviewId);
+        List<SimpleScores> scores = analyseDataService.getSimpleScoresByOverviewId(overviewId);
         ResultDO resultDO = checkData(scores);
         if (resultDO.isFailed()) {
             finalResult.setErrorInfo(resultDO.getMsgInfo());
@@ -78,7 +82,7 @@ public class Airus {
 //            logger.info("开始训练XGBooster");
             XGBLearn(scores, airusParams);
         }
-        List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+        List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName());
 
         ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
 
@@ -86,13 +90,13 @@ public class Airus {
 
         //对于最终的打分结果和选峰结果保存到数据库中
         for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
-            ScoresDO scoresDO = scoresService.getByPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
-            scoresDO.setBestRt(simpleFeatureScores.getRt());
-            scoresDO.setFdr(simpleFeatureScores.getFdr());
+            AnalyseDataDO dataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
+            dataDO.setBestRt(simpleFeatureScores.getRt());
+            dataDO.setFdr(simpleFeatureScores.getFdr());
             if (!simpleFeatureScores.getIsDecoy()) {
-                scoresDO.setIsIdentified(simpleFeatureScores.getFdr() <= 0.01);
+                dataDO.setIdentifiedStatus(simpleFeatureScores.getFdr() <= 0.01 ? AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS:AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
             }
-            ResultDO r = scoresService.update(scoresDO);
+            ResultDO r = analyseDataService.update(dataDO);
             if(r.isFailed()){
                 logger.error(r.getMsgInfo());
             }
@@ -143,7 +147,7 @@ public class Airus {
                 continue;
             }
             ldaLearner.score(scores, ldaLearnData.getWeightsMap());
-            List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+            List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName());
             ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
             int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
             if (count > 0) {
@@ -164,12 +168,12 @@ public class Airus {
         Booster booster = semiSupervised.learnRandomizedXGB(scores, airusParams);
         try {
             logger.info("开始最终打分");
-            xgBoostLearner.predictAll(booster, scores, FeatureScores.ScoreType.MainScore.getTypeName());
+            xgBoostLearner.predictAll(booster, scores, ScoreType.MainScore.getTypeName());
         }catch (Exception e){
             logger.error("XGBooster Predict All Fail.\n");
             e.printStackTrace();
         }
-        List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+        List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName());
         ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
         int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
         if (count > 0) {

@@ -30,7 +30,7 @@ public class LumsTask extends BaseTask{
     @Autowired
     AnalyseDataService analyseDataService;
     @Autowired
-    ScoresService scoresService;
+    ScoreService scoreService;
     @Autowired
     Airus airus;
     @Autowired
@@ -129,7 +129,7 @@ public class LumsTask extends BaseTask{
         ExperimentDO exp = experimentResult.getModel();
         String fatherLibraryId = fatherOverview.getLibraryId();
         //Step1.搜索所有已经识别的肽段并且从标准库中去除这些已经识别的肽段
-        List<MatchedPeptide> mps = scoresService.getAllMatchedPeptides(fatherOverviewId);
+        List<MatchedPeptide> mps = analyseDataService.getAllSuccessMatchedPeptides(fatherOverviewId);
         List<String> matchedNames = new ArrayList<>();
         for (MatchedPeptide mp : mps) {
             matchedNames.add(mp.getPeptideRef());

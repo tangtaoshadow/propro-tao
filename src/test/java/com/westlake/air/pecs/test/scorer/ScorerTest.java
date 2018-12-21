@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.test.scorer;
 
 
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
@@ -44,13 +45,13 @@ public class ScorerTest extends BaseTest {
         FeatureScores scores = new FeatureScores();
 
         chromatographicScorer.calculateChromatographicScores(experimentFeatures, libraryIntensity, scores, null);
-        assert isSimilar(scores.get(FeatureScores.ScoreType.XcorrCoelution), 1d + Math.sqrt(3.0d), Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.XcorrCoelution), 1d + Math.sqrt(3.0d), Math.pow(10, -6));
         System.out.println("XcorrCoelution Test PASSED.");
-        assert isSimilar(scores.get(FeatureScores.ScoreType.XcorrCoelutionWeighted), 1.5, Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.XcorrCoelutionWeighted), 1.5, Math.pow(10, -6));
         System.out.println("XcorrCoelutionWeighted Test PASSED.");
-        assert isSimilar(scores.get(FeatureScores.ScoreType.XcorrShape), (1.0 + 0.3969832 + 1.0)/3.0, Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.XcorrShape), (1.0 + 0.3969832 + 1.0)/3.0, Math.pow(10, -6));
         System.out.println("XcorrShape Test PASSED.");
-        assert isSimilar(scores.get(FeatureScores.ScoreType.XcorrShapeWeighted), 0.6984916, Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.XcorrShapeWeighted), 0.6984916, Math.pow(10, -6));
         System.out.println("XcorrShapeWeighted Test PASSED.");
     }
 
@@ -68,17 +69,17 @@ public class ScorerTest extends BaseTest {
         FeatureScores scores = new FeatureScores();
 
         libraryScorer.calculateLibraryScores(experimentFeatures, libraryIntensity, scores, null);
-        assert isSimilar(scores.get(FeatureScores.ScoreType.LibraryCorr), -0.654591316, Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.LibraryCorr), -0.654591316, Math.pow(10, -6));
         System.out.println("LibraryCorr Test PASSED.");
-        assert isSimilar(scores.get(FeatureScores.ScoreType.LibraryRsmd), 0.5800337593, Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.LibraryRsmd), 0.5800337593, Math.pow(10, -6));
         System.out.println("LibraryRsmd Test PASSED.");
-        assert isSimilar(scores.get(FeatureScores.ScoreType.LibraryDotprod), 0.34514801, Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.LibraryDotprod), 0.34514801, Math.pow(10, -6));
         System.out.println("LibraryDotprod Test PASSED.");
-        assert isSimilar(scores.get(FeatureScores.ScoreType.LibraryManhattan), 1.279644714, Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.LibraryManhattan), 1.279644714, Math.pow(10, -6));
         System.out.println("LibraryManhattan Test PASSED.");
-        assert isSimilar(scores.get(FeatureScores.ScoreType.LibrarySangle), 1.483262, Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.LibrarySangle), 1.483262, Math.pow(10, -6));
         System.out.println("LibrarySangle Test PASSED.");
-        assert isSimilar(scores.get(FeatureScores.ScoreType.LibraryRootmeansquare), 0.6727226674, Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.LibraryRootmeansquare), 0.6727226674, Math.pow(10, -6));
         System.out.println("LibraryRootmeansquare Test PASSED.");
     }
 
@@ -100,7 +101,7 @@ public class ScorerTest extends BaseTest {
         List<ExperimentFeature> experimentFeatures = prepareLogSnScoreTestFeature();
         FeatureScores scores = new FeatureScores();
         chromatographicScorer.calculateLogSnScore(chromatogram, experimentFeatures, signalToNoiseList, scores);
-        assert isSimilar(scores.get(FeatureScores.ScoreType.LogSnScore), Math.log(1000), Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.LogSnScore), Math.log(1000), Math.pow(10, -6));
         System.out.println("LogSnScore Test PASSED.");
     }
 
@@ -113,9 +114,9 @@ public class ScorerTest extends BaseTest {
         slopeIntercept.setSlope(1d);
         FeatureScores scores = new FeatureScores();
         libraryScorer.calculateNormRtScore(experimentFeatures1, slopeIntercept, 100, scores);
-        assert isSimilar(scores.get(FeatureScores.ScoreType.NormRtScore), 0d, Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.NormRtScore), 0d, Math.pow(10, -6));
         libraryScorer.calculateNormRtScore(experimentFeatures2, slopeIntercept, 100, scores);
-        assert isSimilar(scores.get(FeatureScores.ScoreType.NormRtScore), 100d, Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.NormRtScore), 100d, Math.pow(10, -6));
         System.out.println("NormRtScore Test PASSED.");
     }
 
@@ -131,8 +132,8 @@ public class ScorerTest extends BaseTest {
         FeatureScores scores = new FeatureScores();
 //        Constants.IS_TEST = true;
         diaScorer.calculateBYIonScore(spectrumMz, spectrumInt, unimodHashMap, sequence, charge, scores);
-        assert isSimilar(scores.get(FeatureScores.ScoreType.BseriesScore), 0d, Math.pow(10, -6));
-        assert isSimilar(scores.get(FeatureScores.ScoreType.YseriesScore), 0d, Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.BseriesScore), 0d, Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.YseriesScore), 0d, Math.pow(10, -6));
         System.out.println("VarBYseriesScore Test PASSED.");
     }
 
@@ -158,8 +159,8 @@ public class ScorerTest extends BaseTest {
         FeatureScores scores = new FeatureScores();
         diaScorer.calculateDiaIsotopeScores(experimentFeatures, productMzArray, spectrumMzArray, spectrumIntArray, productCharge, scores);
 
-        assert isSimilar(scores.get(FeatureScores.ScoreType.IsotopeCorrelationScore), 0.995335798317618 * 0.7 +  0.959692139694113 * 0.3, Math.pow(10, -3));
-        assert isSimilar(scores.get(FeatureScores.ScoreType.IsotopeOverlapScore), 0.3, Math.pow(10, -6));
+        assert isSimilar(scores.get(ScoreType.IsotopeCorrelationScore), 0.995335798317618 * 0.7 +  0.959692139694113 * 0.3, Math.pow(10, -3));
+        assert isSimilar(scores.get(ScoreType.IsotopeOverlapScore), 0.3, Math.pow(10, -6));
         System.out.println("VarIsotopeScore Test PASSED.");
     }
 
@@ -177,8 +178,8 @@ public class ScorerTest extends BaseTest {
         FeatureScores scores = new FeatureScores();
         diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, libraryIntensityMap, scores);
 
-        assert isSimilar(scores.get(FeatureScores.ScoreType.MassdevScore), 13.33d, Math.pow(10, -1));
-        assert isSimilar(scores.get(FeatureScores.ScoreType.MassdevScoreWeighted), 7.38d, Math.pow(10, -1));
+        assert isSimilar(scores.get(ScoreType.MassdevScore), 13.33d, Math.pow(10, -1));
+        assert isSimilar(scores.get(ScoreType.MassdevScoreWeighted), 7.38d, Math.pow(10, -1));
         System.out.println("MassdevScore Test PASSED.");
     }
 
@@ -187,9 +188,8 @@ public class ScorerTest extends BaseTest {
         List<ExperimentFeature> experimentFeatures = prepareElutionScoreTestFeature();
         FeatureScores scores = new FeatureScores();
         elutionScorer.calculateElutionModelScore(experimentFeatures, scores);
-        assert isSimilar(scores.get(FeatureScores.ScoreType.ElutionModelFitScore), 0.92436583836873376, Math.pow(10, -5));
+        assert isSimilar(scores.get(ScoreType.ElutionModelFitScore), 0.92436583836873376, Math.pow(10, -5));
     }
-
 
     private List<ExperimentFeature> prepareChromatogramTestFeature(){
         Double[] arr1 = {

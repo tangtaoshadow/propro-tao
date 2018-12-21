@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.algorithm.learner;
 
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.airus.TrainData;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
@@ -36,7 +37,7 @@ public abstract class Learner {
                 for (Map.Entry<String, Double> entry : entries) {
                     addedScore += featureScores.getScoresMap().get(entry.getKey()) * entry.getValue();
                 }
-                featureScores.put(FeatureScores.ScoreType.WeightedTotalScore.getTypeName(), addedScore);
+                featureScores.put(ScoreType.WeightedTotalScore.getTypeName(), addedScore);
             }
         }
     }

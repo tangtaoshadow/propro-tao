@@ -44,7 +44,7 @@ public class TestController extends BaseController {
     @Autowired
     AnalyseOverviewService analyseOverviewService;
     @Autowired
-    ScoresService scoresService;
+    ScoreService scoreService;
     @Autowired
     Airus airus;
     @Autowired

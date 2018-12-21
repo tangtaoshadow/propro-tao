@@ -1,6 +1,5 @@
 package com.westlake.air.pecs.service.impl;
 
-import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.PositionType;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.TaskStatus;
@@ -22,7 +21,6 @@ import com.westlake.air.pecs.parser.AirdFileParser;
 import com.westlake.air.pecs.parser.MzXMLParser;
 import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.*;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +61,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     @Autowired
     LibraryService libraryService;
     @Autowired
-    ScoresService scoresService;
+    ScoreService scoreService;
 
     @Override
     public List<ExperimentDO> getAll() {
@@ -257,16 +255,10 @@ public class ExperimentServiceImpl implements ExperimentService {
         analyseOverviewService.insert(overviewDO);
         lumsParams.setOverviewId(overviewDO.getId());
         int totalNumber = 0;
-        Long targetNumber = 0L;
         try {
             raf = new RandomAccessFile(file, "r");
             totalNumber = extract(raf, overviewDO.getId(), lumsParams);
             overviewDO.setTotalPeptideCount(totalNumber);
-            AnalyseDataQuery query = new AnalyseDataQuery(overviewDO.getId());
-            query.setIsDecoy(true);
-            query.setIsHit(true);
-            targetNumber = analyseDataService.count(query);
-            overviewDO.setTargetPeptideCount(targetNumber.intValue());
         } catch (Exception e) {
             logger.error(e.getMessage());
         } finally {
@@ -301,8 +293,8 @@ public class ExperimentServiceImpl implements ExperimentService {
                 tp.setRtEnd(99999);
             } else {
                 Double targetRt = (rt - exp.getIntercept()) / exp.getSlope();
-                tp.setRtStart(targetRt.floatValue() - rtExtractorWindow/2);
-                tp.setRtEnd(targetRt.floatValue() + rtExtractorWindow/2);
+                tp.setRtStart(targetRt.floatValue() - rtExtractorWindow / 2);
+                tp.setRtEnd(targetRt.floatValue() + rtExtractorWindow / 2);
             }
 
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, mzExtractorWindow, rtExtractorWindow, null);
@@ -372,7 +364,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
             logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
             start = System.currentTimeMillis();
-            ResultDO resultDO = scoresService.computeIRt(dataList, iRtLibraryId, sigmaSpacing);
+            ResultDO resultDO = scoreService.computeIRt(dataList, iRtLibraryId, sigmaSpacing);
             logger.info("计算完毕,耗时:" + (System.currentTimeMillis() - start));
             return resultDO;
         } catch (Exception e) {
@@ -436,10 +428,10 @@ public class ExperimentServiceImpl implements ExperimentService {
         //Step3.提取指定原始谱图
         long start = System.currentTimeMillis();
         rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex);
-        logger.info("IO及解码耗时:"+(System.currentTimeMillis() - start));
-        if(lumsParams.isUseEpps()){
+        logger.info("IO及解码耗时:" + (System.currentTimeMillis() - start));
+        if (lumsParams.isUseEpps()) {
             return eppsAndInsert(coordinates, rtMap, overviewId, lumsParams);
-        }else{
+        } else {
             return extractAndInsert(coordinates, rtMap, overviewId, lumsParams.getRtExtractWindow(), lumsParams.getMzExtractWindow());
         }
     }
@@ -496,7 +488,6 @@ public class ExperimentServiceImpl implements ExperimentService {
      */
     private int eppsAndInsert(List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, LumsParams lumsParams) {
         List<AnalyseDataDO> dataList = new ArrayList<>();
-        List<ScoresDO> scoreList = new ArrayList<>();
         long start = System.currentTimeMillis();
 
         for (TargetPeptide tp : coordinates) {
@@ -506,16 +497,12 @@ public class ExperimentServiceImpl implements ExperimentService {
                 continue;
             }
             //Step2. 常规选峰及打分
-            ScoresDO scoresDO = scoresService.scoreForOne(dataDO, tp, rtMap, lumsParams);
-            if(scoresDO != null){
-                scoreList.add(scoresDO);
-            }
+            scoreService.scoreForOne(dataDO, tp, rtMap, lumsParams);
             AnalyseDataUtil.compress(dataDO);
             dataList.add(dataDO);
         }
         logger.info("卷积+选峰+打分耗时:" + (System.currentTimeMillis() - start));
         analyseDataService.insertAll(dataList, false);
-        scoresService.insertAll(scoreList);
         return dataList.size();
     }
 
@@ -585,7 +572,6 @@ public class ExperimentServiceImpl implements ExperimentService {
         dataDO.setIsDecoy(tp.getIsDecoy());
         dataDO.setRt(tp.getRt());
         dataDO.setMz(tp.getMz());
-        dataDO.setUnimodMap(tp.getUnimodMap());
 
         boolean isHit = false;
         for (FragmentInfo fi : tp.getFragmentMap().values()) {
@@ -608,7 +594,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
             dataDO.getMzMap().put(fi.getCutInfo(), fi.getMz().floatValue());
             if (isAllZero) {
-               dataDO.getIntensityMap().put(fi.getCutInfo(), null);
+                dataDO.getIntensityMap().put(fi.getCutInfo(), null);
             } else {
                 isHit = true;
                 dataDO.getIntensityMap().put(fi.getCutInfo(), intArray);
@@ -619,7 +605,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         if (!isHit) {
             return null;
         }
-        dataDO.setIsHit(isHit);
+
         return dataDO;
     }
 

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.westlake.air.pecs.algorithm.learner.LDALearner;
 import com.westlake.air.pecs.algorithm.learner.XGBoostLearner;
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.airus.*;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
@@ -49,8 +50,8 @@ public class SemiSupervised {
             //根据weightsMap计算子分数的加权总分
             ldaLearner.score(trainData, weightsMap);
             for (int times = 0; times < airusParams.getXevalNumIter(); times++) {
-                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, FeatureScores.ScoreType.WeightedTotalScore.getTypeName(), airusParams, airusParams.getSsIterationFdr());
-                weightsMap = ldaLearner.learn(trainPeaksTemp, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, ScoreType.WeightedTotalScore.getTypeName(), airusParams, airusParams.getSsIterationFdr());
+                weightsMap = ldaLearner.learn(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName());
                 for(Double value: weightsMap.values()){
                     if(value == null || Double.isNaN(value)){
                         logger.info("本轮训练一坨屎:"+ JSON.toJSONString(weightsMap));
@@ -83,13 +84,13 @@ public class SemiSupervised {
             xgBoostLearner.predict(booster, trainData, airusParams.getMainScore());
             for(int times = 0; times < airusParams.getXevalNumIter(); times++){
                 logger.info("开始第"+ times +"轮训练");
-                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, FeatureScores.ScoreType.WeightedTotalScore.getTypeName(), airusParams, airusParams.getXgbIterationFdr());
+                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, ScoreType.WeightedTotalScore.getTypeName(), airusParams, airusParams.getXgbIterationFdr());
                 logger.info("高可信Target个数："+ trainPeaksTemp.getBestTargets().size());
-                booster = xgBoostLearner.train(trainPeaksTemp, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
-                xgBoostLearner.predict(booster, trainData, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+                booster = xgBoostLearner.train(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName());
+                xgBoostLearner.predict(booster, trainData, ScoreType.WeightedTotalScore.getTypeName());
             }
             logger.info("总时间：" +(System.currentTimeMillis()-startTime));
-            List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+            List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName());
             ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
             int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
             logger.info("Train count:" + count);

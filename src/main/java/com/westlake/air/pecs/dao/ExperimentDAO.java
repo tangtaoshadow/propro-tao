@@ -83,7 +83,9 @@ public class ExperimentDAO {
         Query query = buildQueryWithoutPage(experimentQuery);
         query.skip((experimentQuery.getPageNo() - 1) * experimentQuery.getPageSize());
         query.limit(experimentQuery.getPageSize());
-        query.with(new Sort(experimentQuery.getOrderBy(), experimentQuery.getSortColumn()));
+        if(experimentQuery.getSortColumn() != null){
+            query.with(new Sort(experimentQuery.getOrderBy(), experimentQuery.getSortColumn()));
+        }
         return query;
     }
 

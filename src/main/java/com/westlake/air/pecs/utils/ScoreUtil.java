@@ -1,7 +1,5 @@
 package com.westlake.air.pecs.utils;
 
-import com.westlake.air.pecs.domain.bean.score.FeatureScores;
-import com.westlake.air.pecs.domain.bean.score.FeatureScores.ScoreType;
 import com.westlake.air.pecs.domain.bean.score.IntegrateWindowMzIntensity;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import org.slf4j.Logger;

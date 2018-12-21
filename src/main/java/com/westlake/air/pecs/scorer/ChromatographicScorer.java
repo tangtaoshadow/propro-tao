@@ -2,6 +2,7 @@ package com.westlake.air.pecs.scorer;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
@@ -80,17 +81,17 @@ public class ChromatographicScorer {
         if (deltas.size() != 1) {
             stdDelta = Math.sqrt(sumDelta / (deltas.size() - 1));
         }
-        if(scoreTypes == null || scoreTypes.contains(FeatureScores.ScoreType.XcorrCoelution.getTypeName())){
-            scores.put(FeatureScores.ScoreType.XcorrCoelution, meanDelta + stdDelta); //时间偏差
+        if(scoreTypes == null || scoreTypes.contains(ScoreType.XcorrCoelution.getTypeName())){
+            scores.put(ScoreType.XcorrCoelution, meanDelta + stdDelta); //时间偏差
         }
-        if(scoreTypes == null || scoreTypes.contains(FeatureScores.ScoreType.XcorrCoelutionWeighted.getTypeName())){
-            scores.put(FeatureScores.ScoreType.XcorrCoelutionWeighted, sumDeltaWeighted);
+        if(scoreTypes == null || scoreTypes.contains(ScoreType.XcorrCoelutionWeighted.getTypeName())){
+            scores.put(ScoreType.XcorrCoelutionWeighted, sumDeltaWeighted);
         }
-        if(scoreTypes == null || scoreTypes.contains(FeatureScores.ScoreType.XcorrShape.getTypeName())){
-            scores.put(FeatureScores.ScoreType.XcorrShape, meanIntensity); // 平均的吻合程度--> 新的吻合系数
+        if(scoreTypes == null || scoreTypes.contains(ScoreType.XcorrShape.getTypeName())){
+            scores.put(ScoreType.XcorrShape, meanIntensity); // 平均的吻合程度--> 新的吻合系数
         }
-        if(scoreTypes == null || scoreTypes.contains(FeatureScores.ScoreType.XcorrShapeWeighted.getTypeName())){
-            scores.put(FeatureScores.ScoreType.XcorrShapeWeighted, sumIntensityWeighted);
+        if(scoreTypes == null || scoreTypes.contains(ScoreType.XcorrShapeWeighted.getTypeName())){
+            scores.put(ScoreType.XcorrShapeWeighted, sumIntensityWeighted);
         }
     }
 
@@ -116,9 +117,9 @@ public class ChromatographicScorer {
         }
         snScore /= signalToNoiseList.size();
         if (snScore < 1) {
-            scores.put(FeatureScores.ScoreType.LogSnScore, 0d);
+            scores.put(ScoreType.LogSnScore, 0d);
         } else {
-            scores.put(FeatureScores.ScoreType.LogSnScore, Math.log(snScore));
+            scores.put(ScoreType.LogSnScore, Math.log(snScore));
         }
     }
 

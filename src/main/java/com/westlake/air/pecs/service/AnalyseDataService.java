@@ -1,8 +1,9 @@
 package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
+import com.westlake.air.pecs.domain.db.simple.MatchedPeptide;
+import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 
 import java.util.List;
@@ -15,6 +16,10 @@ public interface AnalyseDataService {
 
     List<AnalyseDataDO> getAllByOverviewId(String overviewId);
 
+    List<SimpleScores> getSimpleScoresByOverviewId(String overviewId);
+
+    List<MatchedPeptide> getAllSuccessMatchedPeptides(String overviewId);
+
     AnalyseDataDO getByOverviewIdAndPeptideRefAndIsDecoy(String overviewId,String peptideRef,Boolean isDecoy);
 
     Long count(AnalyseDataQuery query);
@@ -26,6 +31,8 @@ public interface AnalyseDataService {
     ResultDO insert(AnalyseDataDO dataDO);
 
     ResultDO insertAll(List<AnalyseDataDO> convList, boolean isDeleteOld);
+
+    ResultDO update(AnalyseDataDO dataDO);
 
     ResultDO delete(String id);
 

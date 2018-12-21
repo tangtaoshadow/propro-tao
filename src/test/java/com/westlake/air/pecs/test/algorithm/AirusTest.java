@@ -1,14 +1,10 @@
 package com.westlake.air.pecs.test.algorithm;
 
 import com.westlake.air.pecs.algorithm.Airus;
-import com.westlake.air.pecs.constants.ResultCode;
-import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
-import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.service.LibraryService;
 import com.westlake.air.pecs.service.PeptideService;
-import com.westlake.air.pecs.service.ScoresService;
+import com.westlake.air.pecs.service.ScoreService;
 import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +23,7 @@ public class AirusTest extends BaseTest {
     @Autowired
     Airus airus;
     @Autowired
-    ScoresService scoresService;
+    ScoreService scoreService;
     @Autowired
     PeptideService peptideService;
     @Autowired

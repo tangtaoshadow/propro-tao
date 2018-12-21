@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.scorer;
 
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import org.springframework.stereotype.Component;
 
@@ -17,16 +18,16 @@ public class SwathLDAScorer {
      * @return
      */
     public void calculateSwathLdaPrescore(FeatureScores scores) {
-        scores.put(FeatureScores.ScoreType.MainScore,
-                scores.get(FeatureScores.ScoreType.LibraryCorr) * 0.19011762 +
-                        scores.get(FeatureScores.ScoreType.LibraryRsmd) * -2.47298914 +
-                        scores.get(FeatureScores.ScoreType.NormRtScore) * -5.63906731 +
-                        scores.get(FeatureScores.ScoreType.IsotopeCorrelationScore) * 0.62640133 +
-                        scores.get(FeatureScores.ScoreType.IsotopeOverlapScore) * -0.36006925 +
-                        scores.get(FeatureScores.ScoreType.MassdevScore) * -0.08814003 +
-                        scores.get(FeatureScores.ScoreType.XcorrCoelution) * -0.13978311 +
-                        scores.get(FeatureScores.ScoreType.XcorrShape) * 1.16475032 +
-                        scores.get(FeatureScores.ScoreType.YseriesScore) * 0.19267813 +
-                        scores.get(FeatureScores.ScoreType.LogSnScore) * 0.61712054);
+        scores.put(ScoreType.MainScore,
+                scores.get(ScoreType.LibraryCorr) * 0.19011762 +
+                        scores.get(ScoreType.LibraryRsmd) * -2.47298914 +
+                        scores.get(ScoreType.NormRtScore) * -5.63906731 +
+                        scores.get(ScoreType.IsotopeCorrelationScore) * 0.62640133 +
+                        scores.get(ScoreType.IsotopeOverlapScore) * -0.36006925 +
+                        scores.get(ScoreType.MassdevScore) * -0.08814003 +
+                        scores.get(ScoreType.XcorrCoelution) * -0.13978311 +
+                        scores.get(ScoreType.XcorrShape) * 1.16475032 +
+                        scores.get(ScoreType.YseriesScore) * 0.19267813 +
+                        scores.get(ScoreType.LogSnScore) * 0.61712054);
     }
 }

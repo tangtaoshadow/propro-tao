@@ -20,7 +20,7 @@ public class PageQuery implements Serializable {
     protected long start = 0;
     //Sort.Direction.DESC
     protected Sort.Direction orderBy = null;
-    protected String sortColumn = DEFAULT_SORT_COLUMN;
+    protected String sortColumn = null;
     protected long totalNum = 0;
 
     protected long totalPage = 0 ;

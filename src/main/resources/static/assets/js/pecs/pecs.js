@@ -100,6 +100,7 @@ function queryGroup(dataId, isGaussFilter, useNoise1000) {
     } else {
         this.isGaussFilter = isGaussFilter;
     }
+
     var datas = null;
     $.ajax({
         type: "POST",

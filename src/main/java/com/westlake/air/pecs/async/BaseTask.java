@@ -8,7 +8,7 @@ import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.ScanIndexService;
-import com.westlake.air.pecs.service.ScoresService;
+import com.westlake.air.pecs.service.ScoreService;
 import com.westlake.air.pecs.service.TaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class BaseTask {
     @Autowired
     AnalyseDataService analyseDataService;
     @Autowired
-    ScoresService scoresService;
+    ScoreService scoreService;
     @Autowired
     ScanIndexService scanIndexService;
 
@@ -39,7 +39,6 @@ public class BaseTask {
         List<WindowRang> rangs = lumsParams.getExperimentDO().getWindowRangs();
         HashMap<Float, ScanIndexDO> swathMap = scanIndexService.getSwathIndexList(lumsParams.getExperimentDO().getId());
         AnalyseDataQuery query = new AnalyseDataQuery(overviewId);
-        query.setIsHit(true);
 
         for (int i = 0; i < rangs.size(); i++) {
             long start = System.currentTimeMillis();
@@ -55,7 +54,7 @@ public class BaseTask {
             start = System.currentTimeMillis();
             lumsParams.setUsedDIAScores(true);
 
-            scoresService.scoreForAll(datas, rangs.get(i), swathMap.get(rangs.get(i).getMzStart()), lumsParams);
+            scoreService.scoreForAll(datas, rangs.get(i), swathMap.get(rangs.get(i).getMzStart()), lumsParams);
             taskDO.addLog("第" + (i+1) + "批打分结束,本批次打分总计耗时(不包含读取数据库时间):" + (System.currentTimeMillis() - start) + "毫秒");
             logger.info("第" + (i+1) + "批打分结束,本批次打分总计耗时(不包含读取数据库时间):" + (System.currentTimeMillis() - start) + "毫秒");
             taskService.update(taskDO);

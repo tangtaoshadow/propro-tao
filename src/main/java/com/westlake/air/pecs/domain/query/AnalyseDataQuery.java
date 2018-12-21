@@ -2,6 +2,9 @@ package com.westlake.air.pecs.domain.query;
 
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-07-19 15:55
@@ -23,13 +26,17 @@ public class AnalyseDataQuery extends PageQuery{
 
     String peptideRef;
 
-    Boolean isHit;
-
     Boolean isDecoy;
 
     Float mzStart;
 
     Float mzEnd;
+
+    List<Integer> identifiedStatus;
+
+    Double fdrStart;
+
+    Double fdrEnd;
 
     public AnalyseDataQuery(){}
 
@@ -39,5 +46,12 @@ public class AnalyseDataQuery extends PageQuery{
 
     public AnalyseDataQuery(int pageNo,int pageSize){
         super(pageNo, pageSize);
+    }
+
+    public void addIndentifiedStatus(Integer status){
+        if(identifiedStatus == null){
+            identifiedStatus = new ArrayList<>();
+        }
+        identifiedStatus.add(status);
     }
 }

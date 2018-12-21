@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.scorer;
 
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
@@ -47,8 +48,8 @@ public class LibraryScorer {
         for (int i = 0; i < x.length; i++) {
             sum += Math.abs(x[i] - y[i]);
         }
-        if(scoreTypes == null || scoreTypes.contains(FeatureScores.ScoreType.LibraryRsmd.getTypeName())){
-            scores.put(FeatureScores.ScoreType.LibraryRsmd,sum / x.length);
+        if(scoreTypes == null || scoreTypes.contains(ScoreType.LibraryRsmd.getTypeName())){
+            scores.put(ScoreType.LibraryRsmd,sum / x.length);
         }
 
         //library_corr
@@ -66,15 +67,15 @@ public class LibraryScorer {
         s1 -= m1 * m1 * libraryIntensity.size();
         s2 -= m2 * m2 * libraryIntensity.size();
         if (s1 < Math.pow(10, -12) || s2 < Math.pow(10, -12)) {
-            if(scoreTypes == null || scoreTypes.contains(FeatureScores.ScoreType.LibraryCorr.getTypeName())){
-                scores.put(FeatureScores.ScoreType.LibraryCorr,0.0d);
+            if(scoreTypes == null || scoreTypes.contains(ScoreType.LibraryCorr.getTypeName())){
+                scores.put(ScoreType.LibraryCorr,0.0d);
             }
 
         } else {
             corr -= m1 * m2 * libraryIntensity.size();
             corr /= Math.sqrt(s1 * s2);
-            if(scoreTypes == null || scoreTypes.contains(FeatureScores.ScoreType.LibraryCorr.getTypeName())){
-                scores.put(FeatureScores.ScoreType.LibraryCorr,corr);
+            if(scoreTypes == null || scoreTypes.contains(ScoreType.LibraryCorr.getTypeName())){
+                scores.put(ScoreType.LibraryCorr,corr);
             }
         }
 
@@ -95,8 +96,8 @@ public class LibraryScorer {
         for (int i = 0; i < expIntSqrt.length; i++) {
             sumOfMult += expIntSqrtDivided[i] * libIntSqrtDivided[i];
         }
-        if(scoreTypes == null || scoreTypes.contains(FeatureScores.ScoreType.LibraryDotprod.getTypeName())){
-            scores.put(FeatureScores.ScoreType.LibraryDotprod, sumOfMult);
+        if(scoreTypes == null || scoreTypes.contains(ScoreType.LibraryDotprod.getTypeName())){
+            scores.put(ScoreType.LibraryDotprod, sumOfMult);
         }
 
         //manhattan
@@ -108,8 +109,8 @@ public class LibraryScorer {
         for (int i = 0; i < expIntSqrt.length; i++) {
             sumOfDivide += Math.abs(expIntSqrtDivided[i] - libIntSqrtDivided[i]);
         }
-        if(scoreTypes == null ||scoreTypes.contains(FeatureScores.ScoreType.LibraryManhattan.getTypeName())){
-            scores.put(FeatureScores.ScoreType.LibraryManhattan, sumOfDivide);
+        if(scoreTypes == null ||scoreTypes.contains(ScoreType.LibraryManhattan.getTypeName())){
+            scores.put(ScoreType.LibraryManhattan, sumOfDivide);
         }
 
         //spectral angle
@@ -120,14 +121,14 @@ public class LibraryScorer {
             yLen += libraryIntensity.get(i) * libraryIntensity.get(i);
         }
         double spectralAngle = Math.acos(dotprod / (Math.sqrt(xLen) * Math.sqrt(yLen)));
-        if(scoreTypes == null ||scoreTypes.contains(FeatureScores.ScoreType.LibrarySangle.getTypeName())){
-            scores.put(FeatureScores.ScoreType.LibrarySangle, spectralAngle);
+        if(scoreTypes == null ||scoreTypes.contains(ScoreType.LibrarySangle.getTypeName())){
+            scores.put(ScoreType.LibrarySangle, spectralAngle);
         }
 
         //root mean square
         if (x.length == 0) {
-            if(scoreTypes == null ||scoreTypes.contains(FeatureScores.ScoreType.LibraryRootmeansquare.getTypeName())){
-                scores.put(FeatureScores.ScoreType.LibraryRootmeansquare, 0d);
+            if(scoreTypes == null ||scoreTypes.contains(ScoreType.LibraryRootmeansquare.getTypeName())){
+                scores.put(ScoreType.LibraryRootmeansquare, 0d);
             }
         } else {
             double rms = 0;
@@ -135,8 +136,8 @@ public class LibraryScorer {
                 rms += (x[i] - y[i]) * (x[i] - y[i]);
             }
             rms = Math.sqrt(rms / x.length);
-            if(scoreTypes == null ||scoreTypes.contains(FeatureScores.ScoreType.LibraryRootmeansquare.getTypeName())){
-                scores.put(FeatureScores.ScoreType.LibraryRootmeansquare, rms);
+            if(scoreTypes == null ||scoreTypes.contains(ScoreType.LibraryRootmeansquare.getTypeName())){
+                scores.put(ScoreType.LibraryRootmeansquare, rms);
             }
         }
 
@@ -148,9 +149,9 @@ public class LibraryScorer {
         double experimentalRt = experimentFeatures.get(0).getRt();
         double normalizedExperimentalRt = ScoreUtil.trafoApplier(slopeIntercept, experimentalRt);
         if (groupRt <= -1000d) {
-            scores.put(FeatureScores.ScoreType.NormRtScore, 0d);
+            scores.put(ScoreType.NormRtScore, 0d);
         } else {
-            scores.put(FeatureScores.ScoreType.NormRtScore, Math.abs(normalizedExperimentalRt - groupRt));
+            scores.put(ScoreType.NormRtScore, Math.abs(normalizedExperimentalRt - groupRt));
         }
     }
 
@@ -162,7 +163,7 @@ public class LibraryScorer {
     public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores) {
         double intensitySum = experimentFeatures.get(0).getIntensitySum();
         double totalXic = experimentFeatures.get(0).getTotalXic();
-        scores.put(FeatureScores.ScoreType.IntensityScore,(intensitySum / totalXic));
+        scores.put(ScoreType.IntensityScore,(intensitySum / totalXic));
     }
 
     private double norm(double[] array) {

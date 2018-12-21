@@ -345,7 +345,7 @@ public class ExperimentController extends BaseController {
 
         model.addAttribute("libraries", getLibraryList(0));
         model.addAttribute("experiment", resultDO.getModel());
-        model.addAttribute("scoreTypes", FeatureScores.ScoreType.getShownTypes());
+        model.addAttribute("scoreTypes", ScoreType.getShownTypes());
 
         return "/experiment/extractor";
     }
@@ -377,7 +377,7 @@ public class ExperimentController extends BaseController {
         }
 
         HashSet<String> scoreTypes = new HashSet<>();
-        for (FeatureScores.ScoreType type : FeatureScores.ScoreType.values()) {
+        for (ScoreType type : ScoreType.values()) {
             String typeParam = request.getParameter(type.getTypeName());
             if (typeParam != null && typeParam.equals("on")) {
                 scoreTypes.add(type.getTypeName());

@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.domain.bean.airus;
 
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import lombok.Data;
@@ -27,7 +28,7 @@ public class TrainData {
         if(targets!=null){
             for (SimpleScores ss : targets) {
                 for (FeatureScores sft : ss.getFeatureScoresList()) {
-                    sft.getScoresMap().remove(FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+                    sft.getScoresMap().remove(ScoreType.WeightedTotalScore.getTypeName());
                 }
             }
         }
@@ -35,7 +36,7 @@ public class TrainData {
         if(decoys != null){
             for (SimpleScores ss : decoys) {
                 for (FeatureScores sft : ss.getFeatureScoresList()) {
-                    sft.getScoresMap().remove(FeatureScores.ScoreType.WeightedTotalScore.getTypeName());
+                    sft.getScoresMap().remove(ScoreType.WeightedTotalScore.getTypeName());
                 }
             }
         }

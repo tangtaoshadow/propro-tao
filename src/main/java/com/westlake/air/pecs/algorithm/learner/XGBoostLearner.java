@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.algorithm.learner;
 
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.airus.TrainData;
 import com.westlake.air.pecs.domain.bean.airus.TrainPeaks;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
@@ -58,7 +59,7 @@ public class XGBoostLearner extends Learner {
     public void predictAll(Booster booster, List<SimpleScores> scores, String skipScoreType) throws XGBoostError{
         Set<String> keySet = scores.get(0).getFeatureScoresList().get(0).getScoresMap().keySet();
         int scoreTypes = keySet.size();
-        if(skipScoreType.equals(FeatureScores.ScoreType.MainScore.getTypeName())){
+        if(skipScoreType.equals(ScoreType.MainScore.getTypeName())){
             scoreTypes -= 1;
         }else{
             scoreTypes -= 2;
@@ -70,7 +71,7 @@ public class XGBoostLearner extends Learner {
                 float[] testData = new float[scoreTypes];
                 int tempIndex = 0;
                 for (String scoreName : keySet) {
-                    if (scoreName.equals(FeatureScores.ScoreType.WeightedTotalScore.getTypeName()) || scoreName.equals(FeatureScores.ScoreType.MainScore.getTypeName())) {
+                    if (scoreName.equals(ScoreType.WeightedTotalScore.getTypeName()) || scoreName.equals(ScoreType.MainScore.getTypeName())) {
                         continue;
                     }
                     testData[tempIndex] = scoreMap.get(scoreName).floatValue();
@@ -79,7 +80,7 @@ public class XGBoostLearner extends Learner {
                 DMatrix dMatrix = new DMatrix(testData, 1,scoreTypes);
                 float[][] predicts = booster.predict(dMatrix);
                 double score = predicts[0][0];
-                featureScores.put(FeatureScores.ScoreType.WeightedTotalScore.getTypeName(), score);
+                featureScores.put(ScoreType.WeightedTotalScore.getTypeName(), score);
             }
         }
     }
@@ -91,7 +92,7 @@ public class XGBoostLearner extends Learner {
         HashMap<String, Double> scoreMapSample = trainPeaks.getBestTargets().get(0).getScoresMap();
         Set<String> keySet = scoreMapSample.keySet();
         int scoreTypes = keySet.size();
-        if(skipScoreType.equals(FeatureScores.ScoreType.MainScore.getTypeName())){
+        if(skipScoreType.equals(ScoreType.MainScore.getTypeName())){
             scoreTypes -= 1;
         }else{
             scoreTypes -= 2;
@@ -102,7 +103,7 @@ public class XGBoostLearner extends Learner {
         int dataIndex = 0, labelIndex = 0;
         for(SimpleFeatureScores sample: trainPeaks.getBestTargets()){
             for (String scoreName : keySet) {
-                if(scoreName.equals(skipScoreType) || scoreName.equals(FeatureScores.ScoreType.MainScore.getTypeName())){
+                if(scoreName.equals(skipScoreType) || scoreName.equals(ScoreType.MainScore.getTypeName())){
                     continue;
                 }
                 trainData[dataIndex] = sample.getScoresMap().get(scoreName).floatValue();
@@ -113,7 +114,7 @@ public class XGBoostLearner extends Learner {
         }
         for(SimpleFeatureScores sample: trainPeaks.getTopDecoys()){
             for (String scoreName : keySet) {
-                if(scoreName.equals(skipScoreType) || scoreName.equals(FeatureScores.ScoreType.MainScore.getTypeName())){
+                if(scoreName.equals(skipScoreType) || scoreName.equals(ScoreType.MainScore.getTypeName())){
                     continue;
                 }
                 trainData[dataIndex] = sample.getScoresMap().get(scoreName).floatValue();

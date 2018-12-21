@@ -9,9 +9,6 @@ import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
-import com.westlake.air.pecs.domain.db.simple.MatchedPeptide;
-import com.westlake.air.pecs.domain.db.simple.SimpleScores;
-import com.westlake.air.pecs.domain.query.ScoresQuery;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,33 +18,7 @@ import java.util.TreeMap;
  * Created by James Lu MiaoShan
  * Time: 2018-08-15 10:05
  */
-public interface ScoresService {
-
-    Long count(ScoresQuery query);
-
-    ResultDO<List<ScoresDO>> getList(ScoresQuery targetQuery);
-
-    List<MatchedPeptide> getAllMatchedPeptides(String overviewId);
-
-    List<ScoresDO> getAllByOverviewId(String overviewId);
-
-    List<SimpleScores> getSimpleAllByOverviewId(String overviewId);
-
-    HashMap<String, ScoresDO> getAllMapByOverviewId(String overviewId);
-
-    ResultDO insert(ScoresDO scoresDO);
-
-    ResultDO insertAll(List<ScoresDO> scoresList);
-
-    ResultDO update(ScoresDO scoresDO);
-
-    ResultDO delete(String id);
-
-    ResultDO deleteAllByOverviewId(String overviewId);
-
-    ResultDO<ScoresDO> getById(String id);
-
-    ScoresDO getByPeptideRefAndIsDecoy(String overviewId, String peptideRef, Boolean isDecoy);
+public interface ScoreService {
 
     /**
      * 从一个卷积结果列表中求出iRT
@@ -70,7 +41,7 @@ public interface ScoresService {
      *                 sigmaSpacing Sigma通常为30/8 = 6.25/Spacing通常为0.01
      *                 overviewId
      */
-    List<ScoresDO> scoreForAll(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, LumsParams input);
+    void scoreForAll(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, LumsParams input);
 
     /**
      * 请确保调用本函数时传入的AnalyseDataDO已经解压缩
@@ -89,21 +60,5 @@ public interface ScoresService {
      * @param input
      * @return
      */
-    ScoresDO scoreForOne(AnalyseDataDO data, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input);
-
-    /**
-     * Generate the tsv format file for pyprophet
-     *
-     * @param overviewId
-     * @return
-     */
-    ResultDO exportForPyProphet(String overviewId, String spliter);
-
-    /**
-     * 生成某个ScoreType的子分数分布范围,包含分布区间和命中个数,命中个数按PeptideRef进行统计,取每一个PeptideRef的下属于该ScoreType的最高分
-     *
-     * @param overviewId
-     * @return
-     */
-    ResultDO<List<ScoreDistribution>> buildScoreDistributions(String overviewId);
+    void scoreForOne(AnalyseDataDO data, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input);
 }
