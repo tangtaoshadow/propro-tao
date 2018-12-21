@@ -32,6 +32,9 @@ public abstract class Learner {
     public void score(List<SimpleScores> scores, HashMap<String, Double> weightsMap) {
         Set<Map.Entry<String, Double>> entries = weightsMap.entrySet();
         for (SimpleScores score : scores) {
+            if(score.getFeatureScoresList() == null){
+                continue;
+            }
             for (FeatureScores featureScores : score.getFeatureScoresList()) {
                 double addedScore = 0;
                 for (Map.Entry<String, Double> entry : entries) {

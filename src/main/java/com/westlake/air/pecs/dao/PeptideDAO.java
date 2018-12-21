@@ -59,7 +59,9 @@ public class PeptideDAO {
     }
 
     public List<TargetPeptide> getTPAll(PeptideQuery query) {
-        return mongoTemplate.find(buildQueryWithoutPage(query), TargetPeptide.class, CollectionName);
+        Query q = buildQueryWithoutPage(query);
+        q.with(new Sort(Sort.Direction.ASC, "isDecoy"));
+        return mongoTemplate.find(q, TargetPeptide.class, CollectionName);
     }
 
     public long count(PeptideQuery query) {

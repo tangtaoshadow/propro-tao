@@ -246,6 +246,9 @@ public class ScoreServiceImpl implements ScoreService {
 
             FeatureScores featureScores = new FeatureScores();
             chromatographicScorer.calculateChromatographicScores(experimentFeatureList, libraryIntensityList, featureScores, input.getScoreTypes());
+            if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.XcorrShape) != null && featureScores.get(ScoreType.XcorrShape) < Constants.XCORRE_SHAPE_THRESHOLD){
+                continue;
+            }
             if (input.getScoreTypes().contains(ScoreType.LogSnScore.getTypeName())) {
                 chromatographicScorer.calculateLogSnScore(chromatogramList, experimentFeatureList, noise1000List, featureScores);
             }
@@ -281,7 +284,7 @@ public class ScoreServiceImpl implements ScoreService {
         }
 
         if (featureScoresList.size() == 0) {
-            dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
+            dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
             return;
         }
 

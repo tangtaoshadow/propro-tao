@@ -46,6 +46,10 @@ public class AnalyseOverviewDO extends BaseDO {
 
     String creator = "Admin";
 
+    Float sigma;
+
+    Float spacing;
+
     Date createDate;
 
     Date lastModifiedDate;

@@ -251,7 +251,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             return ResultDO.buildError(ResultCode.LIBRARY_NOT_EXISTED);
         }
         AnalyseOverviewDO overviewDO = createOverview(lumsParams);
-        overviewDO.setLibraryPeptideCount(libRes.getModel().getTotalTargetCount().intValue());
+        overviewDO.setLibraryPeptideCount(libRes.getModel().getTotalCount().intValue());
         analyseOverviewService.insert(overviewDO);
         lumsParams.setOverviewId(overviewDO.getId());
         int totalNumber = 0;
@@ -490,7 +490,13 @@ public class ExperimentServiceImpl implements ExperimentService {
         List<AnalyseDataDO> dataList = new ArrayList<>();
         long start = System.currentTimeMillis();
 
+        HashSet<String> targetIgnorePeptides = new HashSet<>();
+        //传入的coordinates是经过了排序处理的,前面是真肽段,后面是伪肽段
         for (TargetPeptide tp : coordinates) {
+            //如果是伪肽段并且在忽略列表里面,那么直接忽略
+            if(tp.getIsDecoy() && targetIgnorePeptides.contains(tp.getPeptideRef())){
+                continue;
+            }
             //Step1. 常规卷积,卷积结果不进行压缩处理
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, lumsParams.getMzExtractWindow(), lumsParams.getRtExtractWindow(), overviewId);
             if (dataDO == null) {
@@ -498,6 +504,11 @@ public class ExperimentServiceImpl implements ExperimentService {
             }
             //Step2. 常规选峰及打分
             scoreService.scoreForOne(dataDO, tp, rtMap, lumsParams);
+            if(!dataDO.getIsDecoy() && dataDO.getFeatureScoresList() == null){
+                logger.info("未满足基础条件,直接忽略:"+dataDO.getPeptideRef());
+                targetIgnorePeptides.add(dataDO.getPeptideRef());
+                continue;
+            }
             AnalyseDataUtil.compress(dataDO);
             dataList.add(dataDO);
         }
@@ -626,6 +637,8 @@ public class ExperimentServiceImpl implements ExperimentService {
         overviewDO.setCreateDate(new Date());
         overviewDO.setRtExtractWindow(input.getRtExtractWindow());
         overviewDO.setMzExtractWindow(input.getMzExtractWindow());
+        overviewDO.setSigma(input.getSigmaSpacing().getSigma());
+        overviewDO.setSpacing(input.getSigmaSpacing().getSpacing());
         if (input.getSlopeIntercept() != null) {
             overviewDO.setSlope(input.getSlopeIntercept().getSlope());
             overviewDO.setIntercept(input.getSlopeIntercept().getIntercept());

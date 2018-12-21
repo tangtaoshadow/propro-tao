@@ -4,15 +4,20 @@ import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.algorithm.FragmentFactory;
 import com.westlake.air.pecs.async.LumsTask;
+import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
+import com.westlake.air.pecs.domain.db.simple.MatchedPeptide;
+import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.domain.bean.airus.AirusParams;
 import com.westlake.air.pecs.domain.bean.airus.FinalResult;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
+import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,6 +27,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -110,10 +116,26 @@ public class TestController extends BaseController {
     @RequestMapping("test6")
     @ResponseBody
     String test6(Model model, RedirectAttributes redirectAttributes) throws IOException {
-        long start = System.currentTimeMillis();
-        FinalResult finalResult = airus.doAirus("5b967e5fcbaa7e2940fc6537", new AirusParams());
-        logger.info("打分耗时:" + (System.currentTimeMillis() - start));
-        return JSON.toJSONString(finalResult);
+        AnalyseDataQuery query = new AnalyseDataQuery("5c1ba15dcb15b6e1c4f20c63");
+        query.setFdrEnd(0.01);
+        query.setIsDecoy(false);
+        List<AnalyseDataDO> dataList = analyseDataService.getAll(query);
+        logger.info("总计识别肽段:"+dataList.size()+"个");
+        int count = 0;
+        for(AnalyseDataDO data : dataList){
+            for(FeatureScores featureScores : data.getFeatureScoresList()){
+                if(featureScores.getRt().equals(data.getBestRt())){
+                    if(featureScores.get(ScoreType.XcorrShape) < 0.4){
+                        logger.info("该肽段异常:"+data.getPeptideRef());
+                        count++;
+                    }
+                    break;
+                }
+            }
+        }
+
+        return count+"";
+
     }
 
     @RequestMapping("test8")

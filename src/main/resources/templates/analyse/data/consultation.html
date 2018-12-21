@@ -435,6 +435,7 @@
                             else return 0
                         });
 
+                        var rt="";
                         for (var i = 0; i < params.length; i++) {
                             if (params[i].data !== 0) {
                                 if(params[i].seriesName.slice(0,1) === "b"){
@@ -443,8 +444,13 @@
                                     showYion += params[i].marker + params[i].seriesName + ':' + params[i].data + '<br>'
                                 }
                             }
+                            rt = params[i].axisValue;
                         }
-                        return "<div class='row'><div class='col-6'>"+showBion+"</div><div class='col-6'>"+showYion+"</div></div>";
+                        if(showBion === ""){
+                            return "<div class='row' style='width: 400px;'><div class='col-12'>RT:"+rt+"</div><div class='col-6'>"+showYion+"</div></div>";
+                        }else{
+                            return "<div class='row' style='width: 400px;'><div class='col-12'>RT:"+rt+"</div><div class='col-6'>"+showBion+"</div><div class='col-6'>"+showYion+"</div></div>";
+                        }
                     },
                     axisPointer: {
                         type: 'shadow'

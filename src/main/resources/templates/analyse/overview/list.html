@@ -40,13 +40,13 @@
                     <th width="10%">
                         iRT参数
                     </th>
-                    <th width="5%">
-                        识别数/总卷积数
+                    <th width="10%">
+                        识别数/卷积数/标准库数
                     </th>
                     <th width="5%">
                         创建人
                     </th>
-                    <th width="35%">
+                    <th width="30%">
                         操作
                     </th>
                 </tr>
@@ -60,7 +60,7 @@
                     <td th:text="|${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></td>
                     <td th:text="${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="|${overview.slope}/${overview.intercept}|"></td>
-                    <td th:text="|${overview.matchedPeptideCount}/${overview.libraryPeptideCount}|"></td>
+                    <td th:text="|${overview.matchedPeptideCount}/${overview.totalPeptideCount}/${overview.libraryPeptideCount}|"></td>
                     <td th:text="${overview.creator}"></td>
                     <td>
                         <a th:href="|/analyse/overview/detail/${overview.id}|" class="btn btn-success btn-sm">查看分析报告</a>

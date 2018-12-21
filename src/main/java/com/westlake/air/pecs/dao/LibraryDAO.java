@@ -91,7 +91,9 @@ public class LibraryDAO {
         Query query = buildQueryWithoutPage(libraryQuery);
         query.skip((libraryQuery.getPageNo() - 1) * libraryQuery.getPageSize());
         query.limit(libraryQuery.getPageSize());
-        query.with(new Sort(libraryQuery.getOrderBy(), libraryQuery.getSortColumn()));
+        if(libraryQuery.getSortColumn() != null){
+            query.with(new Sort(libraryQuery.getOrderBy(), libraryQuery.getSortColumn()));
+        }
         return query;
     }
 

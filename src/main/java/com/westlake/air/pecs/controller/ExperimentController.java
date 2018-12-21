@@ -360,8 +360,8 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "slope", required = false) Double slope,
                      @RequestParam(value = "intercept", required = false) Double intercept,
                      //打分相关的入参
-                     @RequestParam(value = "sigma", required = false) Float sigma,
-                     @RequestParam(value = "spacing", required = false) Float spacing,
+                     @RequestParam(value = "sigma", required = false, defaultValue = "6.25") Float sigma,
+                     @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
                      @RequestParam(value = "useEpps", required = false) Boolean useEpps,
                      HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
@@ -391,8 +391,8 @@ public class ExperimentController extends BaseController {
             si.setSlope(slope);
             si.setIntercept(intercept);
         }
-
-        experimentTask.extract(resultDO.getModel(), libraryId, si, creator, rtExtractWindow, mzExtractWindow, useEpps,scoreTypes, taskDO);
+        SigmaSpacing ss = new SigmaSpacing(sigma, spacing);
+        experimentTask.extract(resultDO.getModel(), libraryId, si, ss, creator, rtExtractWindow, mzExtractWindow, useEpps, scoreTypes, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }

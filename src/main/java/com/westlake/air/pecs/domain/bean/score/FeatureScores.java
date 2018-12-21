@@ -38,6 +38,7 @@ public class FeatureScores {
      * scores.weighted_massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比按libraryIntensity加权之和
      */
 
+    //检测出的该峰的峰顶的rt时间
     Double rt;
 
     //定量值
