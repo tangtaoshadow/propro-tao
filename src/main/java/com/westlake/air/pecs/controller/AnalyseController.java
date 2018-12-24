@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.algorithm.Airus;
@@ -10,13 +11,18 @@ import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.ComparisonResult;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
+import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
+import com.westlake.air.pecs.domain.bean.score.FeatureByPep;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
+import com.westlake.air.pecs.domain.db.simple.TargetPeptide;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
+import com.westlake.air.pecs.feature.FeatureExtractor;
 import com.westlake.air.pecs.feature.GaussFilter;
 import com.westlake.air.pecs.feature.SignalToNoiseEstimator;
+import com.westlake.air.pecs.scorer.ChromatographicScorer;
 import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.CompressUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -66,6 +72,10 @@ public class AnalyseController extends BaseController {
     ConfigDAO configDAO;
     @Autowired
     FragmentFactory fragmentFactory;
+    @Autowired
+    FeatureExtractor featureExtractor;
+    @Autowired
+    ChromatographicScorer chromatographicScorer;
 
     @RequestMapping(value = "/overview/list")
     String overviewList(Model model,
@@ -440,6 +450,9 @@ public class AnalyseController extends BaseController {
     @RequestMapping(value = "/consultation")
     String consultation(Model model,
                         @RequestParam(value = "dataId", required = false) String dataId,
+                        @RequestParam(value = "peptideRef", required = false) String peptideRef,
+                        @RequestParam(value = "expId", required = false) String expId,
+                        @RequestParam(value = "libraryId", required = false) String libraryId,
                         @RequestParam(value = "useGaussFilter", required = false, defaultValue = "false") Boolean useGaussFilter,
                         @RequestParam(value = "sigma", required = false, defaultValue = "6.25") Float sigma,
                         @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
@@ -447,13 +460,16 @@ public class AnalyseController extends BaseController {
                         @RequestParam(value = "noise", required = false, defaultValue = "1000") Integer noise,
                         @RequestParam(value = "mzExtractWindow", required = false, defaultValue = "0.05") Float mzExtractWindow,
                         @RequestParam(value = "rtExtractWindow", required = false, defaultValue = "800") Float rtExtractWindow,
-                        @RequestParam(value = "allCutInfo", required = false,defaultValue = "false") Boolean allCutInfo,
-                        @RequestParam(value = "noUseForFill", required = false,defaultValue = "false") Boolean noUseForFill,
-                        @RequestParam(value = "noUseForLib", required = false,defaultValue = "false") Boolean noUseForLib,
-                        @RequestParam(value = "limitLength", required = false,defaultValue = "3") Integer limitLength,
+                        @RequestParam(value = "allCutInfo", required = false, defaultValue = "false") Boolean allCutInfo,
+                        @RequestParam(value = "noUseForFill", required = false, defaultValue = "false") Boolean noUseForFill,
+                        @RequestParam(value = "noUseForLib", required = false, defaultValue = "false") Boolean noUseForLib,
+                        @RequestParam(value = "limitLength", required = false, defaultValue = "3") Integer limitLength,
                         HttpServletRequest request) {
 
         model.addAttribute("dataId", dataId);
+        model.addAttribute("peptideRef", peptideRef);
+        model.addAttribute("expId", expId);
+        model.addAttribute("libraryId", libraryId);
         model.addAttribute("useGaussFilter", useGaussFilter);
         model.addAttribute("sigma", sigma);
         model.addAttribute("spacing", spacing);
@@ -468,7 +484,13 @@ public class AnalyseController extends BaseController {
         AnalyseDataDO data = null;
         ResultDO<AnalyseOverviewDO> overviewResult = null;
         ResultDO<ExperimentDO> experimentResult = null;
+        ResultDO<LibraryDO> libraryResult = null;
         HashSet<String> usedCutInfos = new HashSet<>();
+
+        String targetExpId = null;
+        String targetLibraryId = null;
+        String targetPeptideRef = null;
+        //如果dataId不为空,则优先使用dataId作为查询参数
         if (dataId != null && !dataId.isEmpty()) {
             ResultDO<AnalyseDataDO> dataResult = analyseDataService.getById(dataId);
             if (dataResult.isFailed()) {
@@ -476,52 +498,80 @@ public class AnalyseController extends BaseController {
                 return "/analyse/data/consultation";
             }
             data = dataResult.getModel();
-            model.addAttribute("precursorMz", data.getMz());
-
-
             overviewResult = analyseOverviewService.getById(data.getOverviewId());
             if (overviewResult.isFailed()) {
                 model.addAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
                 return "/analyse/data/consultation";
             }
-            model.addAttribute("libraryId",overviewResult.getModel().getLibraryId());
+            targetExpId = overviewResult.getModel().getExpId();
+            targetLibraryId = overviewResult.getModel().getLibraryId();
+            targetPeptideRef = data.getPeptideRef();
+            model.addAttribute("libraryId", overviewResult.getModel().getLibraryId());
             model.addAttribute("expId", overviewResult.getModel().getExpId());
-            experimentResult = experimentService.getById(overviewResult.getModel().getExpId());
-            if (experimentResult.isFailed()) {
-                model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
-                return "/analyse/data/consultation";
-            }
-            model.addAttribute("exp",experimentResult.getModel());
-            if (!allCutInfo) {
-                for (String cutInfoOri : request.getParameterMap().keySet()) {
-                    if (cutInfoOri.contains(Constants.CUTINFO_PREFIX) && request.getParameter(cutInfoOri).equals("on")) {
-                        usedCutInfos.add(cutInfoOri.replace(Constants.CUTINFO_PREFIX, ""));
-                    }
-                }
-            }
+        } else if (StringUtils.isNotEmpty(peptideRef) && StringUtils.isNotEmpty(expId) && StringUtils.isNotEmpty(libraryId)) {
+            //如果dataId为空,则使用peptideRef,expId,libraryId作为查询条件
+            targetExpId = expId;
+            targetLibraryId = libraryId;
+            targetPeptideRef = peptideRef;
         } else {
-            model.addAttribute(ERROR_MSG, ResultCode.DATA_ID_CANNOT_BE_EMPTY.getMessage());
+            model.addAttribute(ERROR_MSG, ResultCode.PARAMS_NOT_ENOUGH.getMessage());
             return "/analyse/data/consultation";
         }
 
-        AnalyseOverviewDO overviewDO = overviewResult.getModel();
+        //检测原始实验是否已经被转化为Aird压缩文件,是否执行了IRT计算
+        experimentResult = experimentService.getById(targetExpId);
+        if (experimentResult.isFailed()) {
+            model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
+            return "/analyse/data/consultation";
+        }
+        if (experimentResult.getModel().getSlope() == null || experimentResult.getModel().getIntercept() == null) {
+            model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
+            return "/analyse/data/consultation";
+        }
+        if (experimentResult.getModel().getAirdPath() == null || experimentResult.getModel().getAirdPath().isEmpty()) {
+            model.addAttribute(ERROR_MSG, ResultCode.AIRD_COMPRESSION_FIRST.getMessage());
+            return "/analyse/data/consultation";
+        }
+
+        libraryResult = libraryService.getById(targetLibraryId);
+        if (libraryResult.isFailed()) {
+            model.addAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED.getMessage());
+            return "/analyse/data/consultation";
+        }
+
+
+        //覆盖之前的参数
+        model.addAttribute("peptideRef", targetPeptideRef);
+        model.addAttribute("expId", targetExpId);
+        model.addAttribute("libraryId", targetLibraryId);
+        model.addAttribute("libraryName", libraryResult.getModel().getName());
+
+        model.addAttribute("exp", experimentResult.getModel());
+        if (!allCutInfo) {
+            for (String cutInfoOri : request.getParameterMap().keySet()) {
+                if (cutInfoOri.contains(Constants.CUTINFO_PREFIX) && request.getParameter(cutInfoOri).equals("on")) {
+                    usedCutInfos.add(cutInfoOri.replace(Constants.CUTINFO_PREFIX, ""));
+                }
+            }
+        }
+
         ExperimentDO experimentDO = experimentResult.getModel();
-        PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(overviewDO.getLibraryId(), data.getPeptideRef(), false);
-        model.addAttribute("peptide",peptide);
+        PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(targetLibraryId, targetPeptideRef, false);
+        model.addAttribute("peptide", peptide);
         List<String> cutInfoFromGuess = new ArrayList<>();
         List<String> cutInfoFromGuessAndHit = new ArrayList<>();
         List<Float[]> intensitiesList = new ArrayList<Float[]>();
         List<String> cutInfoFromDic = new ArrayList<>(peptide.getFragmentMap().keySet());
         //准备该肽段的其他互补离子
-        if(!noUseForFill){
+        if (!noUseForFill) {
             HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, limitLength);
-            if(noUseForLib){
+            if (noUseForLib) {
                 peptide.getFragmentMap().clear();
             }
             for (String cutInfo : bySeriesMap.keySet()) {
                 if (peptide.getFragmentMap().get(cutInfo) == null) {
-                    String cutInfoTemp = cutInfo.replace("i","");
-                    peptide.getFragmentMap().put(cutInfo, new FragmentInfo(cutInfo, bySeriesMap.get(cutInfo), 0d, cutInfoTemp.contains("^")?Integer.parseInt(cutInfoTemp.split("\\^")[1]):1));
+                    String cutInfoTemp = cutInfo.replace("i", "");
+                    peptide.getFragmentMap().put(cutInfo, new FragmentInfo(cutInfo, bySeriesMap.get(cutInfo), 0d, cutInfoTemp.contains("^") ? Integer.parseInt(cutInfoTemp.split("\\^")[1]) : 1));
                 }
                 cutInfoFromGuess.add(cutInfo);
             }
@@ -533,6 +583,23 @@ public class AnalyseController extends BaseController {
             return "/analyse/data/consultation";
         }
         AnalyseDataDO newDataDO = dataRealResult.getModel();
+
+        //获取标准库中对应的PeptideRef组
+        HashMap<String, Float> intensityMap = TargetPeptide.buildIntensityMap(peptide);
+        //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
+        FeatureByPep featureByPep = featureExtractor.getExperimentFeature(newDataDO, intensityMap, new SigmaSpacing(sigma, spacing));
+        if (featureByPep.isFeatureFound()) {
+            HashMap<Double, Double> rtShapeScoreMap = new HashMap<>();
+            for (List<ExperimentFeature> experimentFeatureList : featureByPep.getExperimentFeatures()) {
+                FeatureScores featureScores = new FeatureScores();
+                chromatographicScorer.calculateChromatographicScores(experimentFeatureList, featureByPep.getLibraryIntensityList(), featureScores, null);
+                rtShapeScoreMap.put(experimentFeatureList.get(0).getRt(), featureScores.get(ScoreType.XcorrShapeWeighted));
+            }
+            model.addAttribute("rtShapeScoreMap", rtShapeScoreMap);
+        } else {
+            logger.info("未发现好信号");
+        }
+
 
         //同一组的rt坐标是相同的
         Float[] rtArray = newDataDO.getRtArray();
@@ -558,13 +625,11 @@ public class AnalyseController extends BaseController {
             totalCutInfoList.add(cutInfo);
         }
 
-        if(allCutInfo){
+        if (allCutInfo) {
             usedCutInfos.addAll(cutInfoFromDic);
             usedCutInfos.addAll(cutInfoFromGuessAndHit);
         }
         model.addAttribute("rt", rtArray);
-        model.addAttribute("overview", overviewResult.getModel());
-        model.addAttribute("peptideRef", newDataDO.getPeptideRef());
         model.addAttribute("cutInfoFromDic", cutInfoFromDic);
         model.addAttribute("cutInfoFromGuess", cutInfoFromGuess);
         model.addAttribute("cutInfoFromGuessAndHit", cutInfoFromGuessAndHit);
@@ -593,6 +658,9 @@ public class AnalyseController extends BaseController {
                 continue;
             }
             AnalyseDataDO data = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, peptideRef, false);
+            if(data == null){
+                continue;
+            }
             JSONArray rtArray = new JSONArray();
             JSONArray intensityArrays = new JSONArray();
             JSONArray cutInfoArray = new JSONArray();

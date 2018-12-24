@@ -50,6 +50,15 @@
                         <input type="text" class="form-control m-input" name="peptideRef" placeholder="肽段全称"
                                th:value="${peptideRef}">
                     </div>
+                    <div class="input-group col-lg-2">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-success" type="button">
+                                识别状态:
+                            </button>
+                        </div>
+                        <input type="text" class="form-control m-input" name="identifiedStatus" placeholder="识别状态"
+                               th:value="${identifiedStatus}">
+                    </div>
                     <div class="input-group-append">
                         <button class="btn btn-primary" type="submit">
                             查找
@@ -133,6 +142,8 @@
                                 th:onclick="|queryGroup('${data.id}', false, false)|">
                             查看组谱图
                         </button>
+                        <a th:if="${!data.isDecoy}" target="_blank" th:href="|/analyse/consultation?dataId=${data.id}&allCutInfo=true|"
+                           class="btn btn-danger btn-sm">高级诊断</a>
                     </td>
                 </tr>
                 </tbody>

@@ -12,6 +12,7 @@ import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
+import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.ScoreService;
@@ -65,6 +66,7 @@ public class Airus {
             }
         }
         logger.info("开始获取打分数据");
+
         List<SimpleScores> scores = analyseDataService.getSimpleScoresByOverviewId(overviewId);
         ResultDO resultDO = checkData(scores);
         if (resultDO.isFailed()) {

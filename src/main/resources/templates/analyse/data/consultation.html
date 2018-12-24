@@ -33,13 +33,42 @@
 
     <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-9">
             <div class="m-portlet__body">
                 <div class="clearfix">
                     <form id="searchForm" method="post" role="form"
                           class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
                           th:action="@{/analyse/consultation}">
                         <input id="dataId" type="hidden" th:value="${dataId}" class="form-control" name="dataId">
+                        <div class="form-group m-form__group row">
+                            <div class="input-group col-lg-4">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        实验ID:
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control m-input" name="expId"
+                                       th:value="${expId}">
+                            </div>
+                            <div class="input-group col-lg-4">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        标准库ID:
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control m-input" name="libraryId"
+                                       th:value="${libraryId}">
+                            </div>
+                            <div class="input-group col-lg-4">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        targetRef:
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control m-input" name="peptideRef"
+                                       th:value="${peptideRef}">
+                            </div>
+                        </div>
                         <div class="form-group m-form__group row">
                             <div class="input-group col-lg-2">
                                 <div class="input-group-prepend">
@@ -138,26 +167,6 @@
                                     </label>
                                 </div>
                             </div>
-                            <!--<div class="input-group col-lg-2">-->
-                                <!--<div class="m-checkbox-list">-->
-                                    <!--<label class="m-checkbox">-->
-                                        <!--<input type="checkbox" class="form-control m-input" name="useIsotope"-->
-                                               <!--th:checked="${useIsotope}">-->
-                                        <!--算法生成包含同位素-->
-                                        <!--<span></span>-->
-                                    <!--</label>-->
-                                <!--</div>-->
-                            <!--</div>-->
-                            <!--<div class="input-group col-lg-2">-->
-                                <!--<div class="m-checkbox-list">-->
-                                    <!--<label class="m-checkbox">-->
-                                        <!--<input type="checkbox" class="form-control m-input" name="onlyIsotope"-->
-                                               <!--th:checked="${onlyIsotope}">-->
-                                        <!--算法生成只包含同位素-->
-                                        <!--<span></span>-->
-                                    <!--</label>-->
-                                <!--</div>-->
-                            <!--</div>-->
 
                             <div class="input-group col-lg-2">
                                 <div class="m-checkbox-list">
@@ -169,12 +178,14 @@
                                     </label>
                                 </div>
                             </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit">
+                                    分析
+                                </button>
+                            </div>
                         </div>
                         <div class="row">
-                            <div class="col-1 row">
+                            <div class="col-2 row">
                                 <div class="col-lg-12">
                                     <label>
                                         标准库
@@ -192,38 +203,24 @@
                                         </label>
                                     </div>
                                 </div>
-                                <!--<div class="col-12">-->
-                                <!--<label>-->
-                                <!--算法生成且命中片段-->
-                                <!--</label>-->
-                                <!--<div class="m-checkbox-inline" th:each="genCutInfo:${cutInfoFromGuessAndHit}">-->
-                                <!--<label class="m-checkbox m-checkbox&#45;&#45;state-success">-->
-                                <!--<input type="checkbox"-->
-                                <!--th:if="${usedCutInfos==null || usedCutInfos.contains(genCutInfo)}"-->
-                                <!--th:checked="checked" th:name="|CUTINFO_${genCutInfo}|"-->
-                                <!--th:text="${genCutInfo}">-->
-                                <!--<input type="checkbox"-->
-                                <!--th:unless="${usedCutInfos==null ||usedCutInfos.contains(genCutInfo)}"-->
-                                <!--th:name="|CUTINFO_${genCutInfo}|" th:text="${genCutInfo}">-->
-                                <!--<span></span>-->
-                                <!--</label>-->
-                                <!--</div>-->
-                                <!--</div>-->
+                                <div class="col-12">
+                                    <div class="row" th:each="rt:${rtShapeScoreMap?.keySet()}">
+                                        <label class="col-12 alert-success" th:if="${rtShapeScoreMap.get(rt) > 0.8}" th:text="|RT:${rt}|"></label>
+                                        <label class="col-12 alert-danger" th:unless="${rtShapeScoreMap.get(rt) > 0.8}" th:text="|RT:${rt}|"></label>
+                                        <label class="col-12 alert-success" style="text-align: left" th:if="${rtShapeScoreMap.get(rt) > 0.8}" th:text="${rtShapeScoreMap.get(rt)}"></label>
+                                        <label class="col-12 alert-danger" style="text-align: left" th:unless="${rtShapeScoreMap.get(rt) > 0.8}" th:text="${rtShapeScoreMap.get(rt)}"></label>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-11" id="chart" style="height: 1000px;">
+                            <div class="col-10" id="chart" style="height: 1000px;">
 
                             </div>
-                        </div>
-                        <div class="input-group-append">
-                            <button class="btn btn-primary" type="submit">
-                                分析
-                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="col-12 row">
                 <div class="m-portlet m-portlet--tab col-12">
                     <div class="m-portlet__head">
@@ -239,43 +236,6 @@
 
                     <div class="m-portlet__body">
                         <div class="form-group m-form__group row">
-                            <label for="id" class="col-3 col-form-label">
-                                ID
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="id" name="id" readonly
-                                       th:value="${overview?.id}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="id" class="col-3 col-form-label">卷积代号</label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="name" name="name" readonly
-                                       th:value="${overview?.name}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="id" class="col-3 col-form-label">原始实验ID</label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="expId" name="expId" readonly
-                                       th:value="${overview?.expId}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="library" class="col-3 col-form-label">关联标准库</label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="library" readonly
-                                       th:value="|${overview?.libraryName}(${overview?.libraryId})|">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="ExtractWindow" class="col-3 col-form-label">原始RT/MZ卷积窗口</label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="ExtractWindow" readonly
-                                       th:value="|${overview?.rtExtractWindow}/${overview?.mzExtractWindow}|">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
                             <label for="slopeIntercept" class="col-3 col-form-label">斜率/截距</label>
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="slopeIntercept" readonly
@@ -286,7 +246,7 @@
                             <label for="slopeIntercept" class="col-3 col-form-label">前体MZ</label>
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="slopeIntercept" readonly
-                                       th:value="${peptide.mz}">
+                                       th:value="${peptide?.mz}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -435,21 +395,21 @@
                             else return 0
                         });
 
-                        var rt="";
+                        var rt = "";
                         for (var i = 0; i < params.length; i++) {
                             if (params[i].data !== 0) {
-                                if(params[i].seriesName.slice(0,1) === "b"){
+                                if (params[i].seriesName.slice(0, 1) === "b") {
                                     showBion += params[i].marker + params[i].seriesName + ':' + params[i].data + '<br>'
-                                }else{
+                                } else {
                                     showYion += params[i].marker + params[i].seriesName + ':' + params[i].data + '<br>'
                                 }
                             }
                             rt = params[i].axisValue;
                         }
-                        if(showBion === ""){
-                            return "<div class='row' style='width: 400px;'><div class='col-12'>RT:"+rt+"</div><div class='col-6'>"+showYion+"</div></div>";
-                        }else{
-                            return "<div class='row' style='width: 400px;'><div class='col-12'>RT:"+rt+"</div><div class='col-6'>"+showBion+"</div><div class='col-6'>"+showYion+"</div></div>";
+                        if (showBion === "") {
+                            return "<div class='row' style='width: 400px;'><div class='col-12'>RT:" + rt + "</div><div class='col-6'>" + showYion + "</div></div>";
+                        } else {
+                            return "<div class='row' style='width: 400px;'><div class='col-12'>RT:" + rt + "</div><div class='col-6'>" + showBion + "</div><div class='col-6'>" + showYion + "</div></div>";
                         }
                     },
                     axisPointer: {

@@ -395,7 +395,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             for (WindowRang rang : rangs) {
                 long start = System.currentTimeMillis();
                 int number = doExtract(raf, swathMap.get(rang.getMzStart()), rang, overviewId, lumsParams);
-                logger.info("第" + count + "轮数据卷积完毕,扫描肽段:" + number + "个,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
+                logger.info("第" + count + "轮数据卷积完毕,有效肽段:" + number + "个,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
                 count++;
                 totalPeptideNum = totalPeptideNum + number;
             }
@@ -491,10 +491,32 @@ public class ExperimentServiceImpl implements ExperimentService {
         long start = System.currentTimeMillis();
 
         HashSet<String> targetIgnorePeptides = new HashSet<>();
-        //传入的coordinates是经过了排序处理的,前面是真肽段,后面是伪肽段
+        List<TargetPeptide> decoyList = new ArrayList<>();
+        //传入的coordinates是没有经过排序的,需要排序先处理真实肽段,再处理伪肽段
         for (TargetPeptide tp : coordinates) {
-            //如果是伪肽段并且在忽略列表里面,那么直接忽略
-            if(tp.getIsDecoy() && targetIgnorePeptides.contains(tp.getPeptideRef())){
+            if (tp.getIsDecoy()){
+                decoyList.add(tp);
+                continue;
+            }
+            //Step1. 常规卷积,卷积结果不进行压缩处理
+            AnalyseDataDO dataDO = extractForOne(tp, rtMap, lumsParams.getMzExtractWindow(), lumsParams.getRtExtractWindow(), overviewId);
+            if (dataDO == null) {
+//                logger.info("未卷积到任何片段,PeptideRef:"+tp.getPeptideRef());
+                continue;
+            }
+            //Step2. 常规选峰及打分
+            scoreService.scoreForOne(dataDO, tp, rtMap, lumsParams);
+            if(dataDO.getFeatureScoresList() == null){
+//                logger.info("未满足基础条件,直接忽略:"+dataDO.getPeptideRef());
+                targetIgnorePeptides.add(dataDO.getPeptideRef());
+                continue;
+            }
+            AnalyseDataUtil.compress(dataDO);
+            dataList.add(dataDO);
+        }
+        for(TargetPeptide tp : decoyList){
+            //如果伪肽段在忽略列表里面,那么直接忽略
+            if(targetIgnorePeptides.contains(tp.getPeptideRef())){
                 continue;
             }
             //Step1. 常规卷积,卷积结果不进行压缩处理
@@ -504,9 +526,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             }
             //Step2. 常规选峰及打分
             scoreService.scoreForOne(dataDO, tp, rtMap, lumsParams);
-            if(!dataDO.getIsDecoy() && dataDO.getFeatureScoresList() == null){
-                logger.info("未满足基础条件,直接忽略:"+dataDO.getPeptideRef());
-                targetIgnorePeptides.add(dataDO.getPeptideRef());
+            if(dataDO.getFeatureScoresList() == null){
                 continue;
             }
             AnalyseDataUtil.compress(dataDO);

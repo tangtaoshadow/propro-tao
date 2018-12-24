@@ -17,6 +17,7 @@ public enum ResultCode implements Serializable {
     ERROR("SYSTEM_ERROR", "系统繁忙 ，请稍后再试!"),
     EXCEPTION("SYSTEM_EXCEPTION", "系统繁忙， 稍后再试!"),
     IO_EXCEPTION("IO_EXCEPTION", "文件读写错误"),
+    PARAMS_NOT_ENOUGH("PARAMS_NOT_ENOUGH", "入参不齐"),
 
     /**
      * ******
@@ -61,6 +62,8 @@ public enum ResultCode implements Serializable {
     EXPERIMENT_INSERT_ERROR("EXPERIMENT_INSERT_ERROR","实验数据插入失败"),
     EXPERIMENT_MZXML_FILE_MUST_BE_CONVERTED_TO_AIRD_FORMAT_FILE_FIRST("EXPERIMENT_MZXML_FILE_MUST_BE_CONVERTED_TO_AIRD_FORMAT_FILE_FIRST","原始实验文件必须转换为Aird格式文件才可以进入下一步"),
     SWATH_INFORMATION_NOT_EXISTED("SWATH_INFORMATION_NOT_EXISTED","Swath的分块信息不存在,请确保Aird压缩过程正确"),
+    IRT_FIRST("IRT_FIRST","请先对原始实验运行Irt计算"),
+    AIRD_COMPRESSION_FIRST("AIRD_COMPRESSION_FIRST","请先对原始实验进行压缩处理"),
     /**
      * ******
      * ScanIndex

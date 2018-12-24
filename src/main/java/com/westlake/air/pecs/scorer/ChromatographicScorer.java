@@ -12,6 +12,7 @@ import com.westlake.air.pecs.utils.ScoreUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -81,16 +82,16 @@ public class ChromatographicScorer {
         if (deltas.size() != 1) {
             stdDelta = Math.sqrt(sumDelta / (deltas.size() - 1));
         }
-        if(scoreTypes == null || scoreTypes.contains(ScoreType.XcorrCoelution.getTypeName())){
+        if (scoreTypes == null || scoreTypes.contains(ScoreType.XcorrCoelution.getTypeName())) {
             scores.put(ScoreType.XcorrCoelution, meanDelta + stdDelta); //时间偏差
         }
-        if(scoreTypes == null || scoreTypes.contains(ScoreType.XcorrCoelutionWeighted.getTypeName())){
+        if (scoreTypes == null || scoreTypes.contains(ScoreType.XcorrCoelutionWeighted.getTypeName())) {
             scores.put(ScoreType.XcorrCoelutionWeighted, sumDeltaWeighted);
         }
-        if(scoreTypes == null || scoreTypes.contains(ScoreType.XcorrShape.getTypeName())){
+        if (scoreTypes == null || scoreTypes.contains(ScoreType.XcorrShape.getTypeName())) {
             scores.put(ScoreType.XcorrShape, meanIntensity); // 平均的吻合程度--> 新的吻合系数
         }
-        if(scoreTypes == null || scoreTypes.contains(ScoreType.XcorrShapeWeighted.getTypeName())){
+        if (scoreTypes == null || scoreTypes.contains(ScoreType.XcorrShapeWeighted.getTypeName())) {
             scores.put(ScoreType.XcorrShapeWeighted, sumIntensityWeighted);
         }
     }
@@ -130,16 +131,20 @@ public class ChromatographicScorer {
      *
      * @param experimentFeatures features in mrmFeature
      *                           HullInt: redistributed chromatogram in range of (peptideRef constant) leftRt and rightRt
-     * @return Table<Integer,Integer,Float[]> xcorrMatrix
+     * @return Table<Integer , Integer , Float [ ]> xcorrMatrix
      */
     private Table<Integer, Integer, Double[]> initializeXCorrMatrix(List<ExperimentFeature> experimentFeatures) {
         int listLength = experimentFeatures.size();
         Table<Integer, Integer, Double[]> xcorrMatrix = HashBasedTable.create();
         double[] intensityi, intensityj;
+        HashMap<Integer, double[]> standardizeDataMap = new HashMap<>();
+        for (int i = 0; i < listLength; i++) {
+            standardizeDataMap.put(i, MathUtil.standardizeData(experimentFeatures.get(i).getHullInt()));
+        }
         for (int i = 0; i < listLength; i++) {
             for (int j = i; j < listLength; j++) {
-                intensityi = MathUtil.standardizeData(experimentFeatures.get(i).getHullInt());
-                intensityj = MathUtil.standardizeData(experimentFeatures.get(j).getHullInt());
+                intensityi = standardizeDataMap.get(i);
+                intensityj = standardizeDataMap.get(j);
                 xcorrMatrix.put(i, j, calculateCrossCorrelation(intensityi, intensityj));
             }
         }

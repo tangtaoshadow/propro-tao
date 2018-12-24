@@ -56,6 +56,14 @@ public class TargetPeptide {
         this.rt = peptide.getRt().floatValue();
     }
 
+    public static HashMap<String, Float> buildIntensityMap(PeptideDO peptide){
+        HashMap<String, Float> intensityMap = new HashMap<>();
+        for(String cutInfo : peptide.getFragmentMap().keySet()){
+            intensityMap.put(cutInfo, peptide.getFragmentMap().get(cutInfo).getIntensity().floatValue());
+        }
+        return intensityMap;
+    }
+
     public HashMap<String, Float> buildIntensityMap(){
         HashMap<String, Float> intensityMap = new HashMap<>();
         for(String cutInfo : fragmentMap.keySet()){

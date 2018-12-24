@@ -116,7 +116,8 @@ public class TestController extends BaseController {
     @RequestMapping("test6")
     @ResponseBody
     String test6(Model model, RedirectAttributes redirectAttributes) throws IOException {
-        AnalyseDataQuery query = new AnalyseDataQuery("5c1ba15dcb15b6e1c4f20c63");
+//        AnalyseDataQuery query = new AnalyseDataQuery("5c1ba15dcb15b6e1c4f20c63");
+        AnalyseDataQuery query = new AnalyseDataQuery("5c1c9a5acb15b6bb244d985e");
         query.setFdrEnd(0.01);
         query.setIsDecoy(false);
         List<AnalyseDataDO> dataList = analyseDataService.getAll(query);
@@ -125,7 +126,7 @@ public class TestController extends BaseController {
         for(AnalyseDataDO data : dataList){
             for(FeatureScores featureScores : data.getFeatureScoresList()){
                 if(featureScores.getRt().equals(data.getBestRt())){
-                    if(featureScores.get(ScoreType.XcorrShape) < 0.4){
+                    if(featureScores.get(ScoreType.XcorrShapeWeighted) < 0.9){
                         logger.info("该肽段异常:"+data.getPeptideRef());
                         count++;
                     }

@@ -41,7 +41,7 @@
                 <thead>
                 <tr>
                     <th width="10%">
-                        实验名称
+                        实验名
                     </th>
                     <th width="15%">
                         文件位置
@@ -71,7 +71,7 @@
                 </thead>
                 <tbody>
                 <tr th:each="experiment:${experiments}">
-                    <td th:text="${experiment.name}"></td>
+                    <td th:text="|${experiment.name}(${experiment.id})|"></td>
                     <td th:text="${experiment.filePath}"></td>
                     <td th:if="!${experiment.hasAirusFile}">
                         <span class="m-badge m-badge--danger m-badge--wide">

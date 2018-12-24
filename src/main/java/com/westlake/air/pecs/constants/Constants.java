@@ -21,7 +21,7 @@ public class Constants {
     public static final double THRESHOLD = 0.000001d;
     public static final double AUTO_MAX_STDEV_FACTOR = 3.0d;
     public static final int MIN_REQUIRED_ELEMENTS = 10;
-    public static final float XCORRE_SHAPE_THRESHOLD = 0.4f;
+    public static final float XCORRE_SHAPE_THRESHOLD = 0.8f;
 
 //    public static final double NOISE_FOR_EMPTY_WINDOW = Math.pow(10.0,20);
     public static final double NOISE_FOR_EMPTY_WINDOW = 2.0d;
