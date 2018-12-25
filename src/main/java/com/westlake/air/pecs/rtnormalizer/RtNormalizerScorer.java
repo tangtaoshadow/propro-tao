@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.rtnormalizer;
 
 import com.westlake.air.pecs.constants.ScoreType;
+import com.westlake.air.pecs.domain.bean.analyse.PeptideSpectrum;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.scorer.ChromatographicScorer;
@@ -41,25 +42,25 @@ public class RtNormalizerScorer {
      * scores.log_sn_score                     * -0.72989582 +
      * scores.elution_model_fit_score          *  1.88443209;
      *
-     * @param chromatograms      chromatogramList in transitionGroup
-     * @param experimentFeatures features extracted from chromatogramList in transitionGroup
+     * @param peptideSpectrum      chromatogramList in transitionGroup
+     * @param peakGroupFeatureList features extracted from chromatogramList in transitionGroup
      * @param libraryIntensity   intensity in transitionList in transitionGroup
      * @return List of overallQuality
      */
-    public List<ScoreRtPair> score(List<RtIntensityPairsDouble> chromatograms, List<List<ExperimentFeature>> experimentFeatures, List<Double> libraryIntensity, List<double[]> noise1000List, SlopeIntercept slopeIntercept, double groupRt) {
+    public List<ScoreRtPair> score(PeptideSpectrum peptideSpectrum, List<PeakGroup> peakGroupFeatureList, List<Double> libraryIntensity, HashMap<String, double[]> noise1000Map, SlopeIntercept slopeIntercept, double groupRt) {
 
 
         List<ScoreRtPair> finalScores = new ArrayList<>();
-        for (List<ExperimentFeature> features : experimentFeatures) {
+        for (PeakGroup peakGroupFeature : peakGroupFeatureList) {
             FeatureScores scores = new FeatureScores();
-            chromatographicScorer.calculateChromatographicScores(features, libraryIntensity, scores, null);
-            chromatographicScorer.calculateLogSnScore(chromatograms, features, noise1000List, scores);
-            libraryScorer.calculateLibraryScores(features, libraryIntensity, scores, null);
+            chromatographicScorer.calculateChromatographicScores(peakGroupFeature, libraryIntensity, scores, null);
+            chromatographicScorer.calculateLogSnScore(peptideSpectrum, peakGroupFeature, noise1000Map, scores);
+            libraryScorer.calculateLibraryScores(peakGroupFeature, libraryIntensity, scores, null);
 
             double ldaScore = -1d * calculateLdaPrescore(scores);
             ScoreRtPair scoreRtPair = new ScoreRtPair();
             scoreRtPair.setGroupRt(groupRt);
-            scoreRtPair.setRt(features.get(0).getRt());
+            scoreRtPair.setRt(peakGroupFeature.getApexRt());
             scoreRtPair.setScore(ldaScore);
             scoreRtPair.setScores(scores);
             finalScores.add(scoreRtPair);

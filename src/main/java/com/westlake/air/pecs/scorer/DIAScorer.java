@@ -6,10 +6,7 @@ import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.dao.AminoAcidDAO;
 import com.westlake.air.pecs.dao.ElementsDAO;
 import com.westlake.air.pecs.dao.UnimodDAO;
-import com.westlake.air.pecs.domain.bean.score.BYSeries;
-import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
-import com.westlake.air.pecs.domain.bean.score.IntegrateWindowMzIntensity;
-import com.westlake.air.pecs.domain.bean.score.FeatureScores;
+import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.parser.model.chemistry.Element;
 import com.westlake.air.pecs.utils.MathUtil;
 import com.westlake.air.pecs.utils.ScoreUtil;
@@ -82,36 +79,31 @@ public class DIAScorer {
      * scores.isotope_correlation
      * scores.isotope_overlap //feature intensity加权的可能（带电量1-4）无法区分同位素峰值的平均发生次数之和
      *
-     * @param experimentFeatures single mrmFeature
-     * @param productMzList      mz of fragment
+     * @param peakGroupFeature single mrmFeature
+     * @param productMzMap      mz of fragment
      * @param spectrumMzArray    mz array of selected Rt
      * @param spectrumIntArray   intensity array of selected Rt
-     * @param productCharge      charge in peptide
+     * @param productChargeMap      charge in peptide
      * @param scores             scoreForAll for JProphet
      */
-    public void calculateDiaIsotopeScores(List<ExperimentFeature> experimentFeatures, List<Double> productMzList, Float[] spectrumMzArray, Float[] spectrumIntArray, List<Integer> productCharge, FeatureScores scores) {
+    public void calculateDiaIsotopeScores(PeakGroup peakGroupFeature, HashMap<String, Double> productMzMap, Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<String, Integer> productChargeMap, FeatureScores scores) {
         double isotopeCorr = 0d;
         double isotopeOverlap = 0d;
 
         //getFirstIsotopeRelativeIntensities
         double relIntensity;//feature intensity / mrmfeature intensity
-        double intensitySum = 0.0d;
+        double intensitySum = peakGroupFeature.getPeakGroupInt();
 
-        //intensity sum of feature
-        for (ExperimentFeature feature : experimentFeatures) {
-            intensitySum += feature.getIntensity();
-        }
-
-        for (int i = 0; i < experimentFeatures.size(); i++) {
-            relIntensity = (experimentFeatures.get(i).getIntensity() / intensitySum);
+        for (String cutInfo: peakGroupFeature.getIonIntensity().keySet()) {
+            relIntensity = (peakGroupFeature.getIonIntensity().get(cutInfo) / intensitySum);
             int putativeFragmentCharge = 1;
-            if (productCharge.get(i) > 1) {
-                putativeFragmentCharge = productCharge.get(i);
+            if (productChargeMap.get(cutInfo) > 1) {
+                putativeFragmentCharge = productChargeMap.get(cutInfo);
             }
             List<Double> isotopesIntList = new ArrayList<>();
             double maxIntensity = 0.0d;
             for (int iso = 0; iso <= Constants.DIA_NR_ISOTOPES; iso++) {
-                Double left = productMzList.get(i) + iso * Constants.C13C12_MASSDIFF_U / putativeFragmentCharge;
+                Double left = productChargeMap.get(cutInfo) + iso * Constants.C13C12_MASSDIFF_U / putativeFragmentCharge;
                 Double right = left;
                 left -= Constants.DIA_EXTRACT_WINDOW / 2d;
                 right += Constants.DIA_EXTRACT_WINDOW / 2d;
@@ -126,7 +118,7 @@ public class DIAScorer {
 
             //get scores.isotope_correlation
             List<Double> isotopeDistList;
-            double averageWeight = Math.abs(productMzList.get(i) * putativeFragmentCharge);
+            double averageWeight = Math.abs(productMzMap.get(cutInfo) * putativeFragmentCharge);
             //TODO @Nico no need to get each loop
             double averageWeightC = elementsDAO.getElementBySymbol(Element.C).getAverageWeight();
             double averageWeightH = elementsDAO.getElementBySymbol(Element.H).getAverageWeight();
@@ -224,7 +216,7 @@ public class DIAScorer {
             int nrOccurences = 0;
             double ratio;
             for (int ch = 1; ch <= Constants.DIA_NR_CHARGES; ch++) {
-                Double left = productMzList.get(i) - Constants.C13C12_MASSDIFF_U / ch;
+                Double left = productMzMap.get(cutInfo) - Constants.C13C12_MASSDIFF_U / ch;
                 Double right = left;
                 left -= Constants.DIA_EXTRACT_WINDOW / 2d;
                 right += Constants.DIA_EXTRACT_WINDOW / 2d;
@@ -237,7 +229,7 @@ public class DIAScorer {
                         ratio = 0d;
                     }
                     //why 1.0 not Constants.C13C12_MASSDIFF_U
-                    if (ratio > 1 && (Math.abs(mzIntensity.getMz() - (productMzList.get(i) - 1.0 / ch)) * 1000000d / productMzList.get(i)) < Constants.PEAK_BEFORE_MONO_MAX_PPM_DIFF) {
+                    if (ratio > 1 && (Math.abs(mzIntensity.getMz() - (productMzMap.get(cutInfo) - 1.0 / ch)) * 1000000d / productMzMap.get(cutInfo)) < Constants.PEAK_BEFORE_MONO_MAX_PPM_DIFF) {
                         nrOccurences++;
                     }
                 }

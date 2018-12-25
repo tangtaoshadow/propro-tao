@@ -1,12 +1,11 @@
 package com.westlake.air.pecs.feature;
 
 import com.google.common.collect.Lists;
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensitiesDouble;
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
-import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
+import com.westlake.air.pecs.domain.bean.analyse.*;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureByPep;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
+import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.simple.IntensityGroup;
 import com.westlake.air.pecs.rtnormalizer.ChromatogramFilter;
@@ -69,14 +68,13 @@ public class FeatureExtractor {
             featureFound = false;
         }
 
-        List<RtIntensityPairsDouble> rtIntensityPairsOriginList = new ArrayList<>();
-        List<RtIntensityPairsDouble> maxRtIntensityPairsList = new ArrayList<>();
-        List<IntensityRtLeftRtRightPairs> intensityRtLeftRtRightPairsList = new ArrayList<>();
 
+        HashMap<String, RtIntensityPairsDouble> ionPeaks = new HashMap<>();
+        HashMap<String, IntensityRtLeftRtRightPairs> ionPeakParams = new HashMap<>();
         List<Double> libraryIntensityList = new ArrayList<>();
 
         //对每一个chromatogram进行运算,dataDO中不含有ms1
-        List<double[]> noise1000List = new ArrayList<>();
+        HashMap<String, double[]> noise1000Map = new HashMap<>();
         HashMap<String, Double[]> intensitiesMap = new HashMap<>();
 
         //将没有卷积到信号的CutInfo过滤掉,同时将Float类型的参数调整为Double类型进行计算
@@ -103,6 +101,8 @@ public class FeatureExtractor {
         for (int k = 0; k < rtDoubleArray.length; k++) {
             rtDoubleArray[k] = Double.parseDouble(dataDO.getRtArray()[k].toString());
         }
+        PeptideSpectrum peptideSpectrum = new PeptideSpectrum(rtDoubleArray, intensitiesMap);
+
 
         HashMap<String, Double[]> smoothIntensitiesMap = gaussFilter.filter(rtDoubleArray, intensitiesMap, sigmaSpacing);
 
@@ -120,23 +120,23 @@ public class FeatureExtractor {
                 continue;
             }
             IntensityRtLeftRtRightPairs intensityRtLeftRtRightPairs = chromatogramPicker.pickChromatogram(rtDoubleArray, intensitiesMap.get(cutInfo), smoothIntensitiesMap.get(cutInfo), noisesOri1000, maxPeakPairs);
-            maxRtIntensityPairsList.add(maxPeakPairs);
-            rtIntensityPairsOriginList.add(new RtIntensityPairsDouble(rtDoubleArray, intensitiesMap.get(cutInfo)));
-            intensityRtLeftRtRightPairsList.add(intensityRtLeftRtRightPairs);
+
+            ionPeaks.put(cutInfo, maxPeakPairs);
+            ionPeakParams.put(cutInfo, intensityRtLeftRtRightPairs);
             libraryIntensityList.add(Double.parseDouble(Float.toString(intensityMap.get(cutInfo))));
-            noise1000List.add(noisesOri1000);
+            noise1000Map.put(cutInfo, noisesOri1000);
         }
 
-        if (rtIntensityPairsOriginList.size() == 0) {
+        if (intensitiesMap.size() == 0) {
             return new FeatureByPep(false);
         }
-        List<List<ExperimentFeature>> experimentFeatures = featureFinder.findFeatures(rtIntensityPairsOriginList, maxRtIntensityPairsList, intensityRtLeftRtRightPairsList);
+        List<PeakGroup> peakGroupFeatureList = featureFinder.findFeatures(peptideSpectrum, ionPeaks, ionPeakParams);
 
         FeatureByPep featureResult = new FeatureByPep(featureFound);
-        featureResult.setExperimentFeatures(experimentFeatures);
+        featureResult.setPeakGroupFeatureList(peakGroupFeatureList);
         featureResult.setLibraryIntensityList(libraryIntensityList);
-        featureResult.setRtIntensityPairsOriginList(rtIntensityPairsOriginList);
-        featureResult.setNoise1000List(noise1000List);
+        featureResult.setPeptideSpectrum(peptideSpectrum);
+        featureResult.setNoise1000Map(noise1000Map);
 
         return featureResult;
     }

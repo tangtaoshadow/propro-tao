@@ -13,8 +13,8 @@ import lombok.Data;
 @Data
 public class AirusParams {
 
-    Learner.learner learner = Learner.learner.XgbLearner;
-//    Learner.learner learner = Learner.learner.LdaLearner;
+//    Learner.learner learner = Learner.learner.XgbLearner;
+    Learner.learner learner = Learner.learner.LdaLearner;
 
     double trainTestRatio = 0.5;
 
@@ -23,6 +23,8 @@ public class AirusParams {
     double ssInitialFdr = 0.15;
 
     double ssIterationFdr = 0.05;
+
+    double xgbInitialFdr = 0.01;
 
     double xgbIterationFdr = 0.008;
 

@@ -3,6 +3,7 @@ package com.westlake.air.pecs.scorer;
 import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
+import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.utils.ArrayUtil;
 import com.westlake.air.pecs.utils.MathUtil;
@@ -29,15 +30,12 @@ public class LibraryScorer {
      * scores.library_norm_manhattan // 对experiment intensity 算平均占比差距
      * scores.norm_rt_score //normalizedExperimentalRt与groupRt之差
      *
-     * @param experimentFeatures get experimentIntensity: from features extracted
+     * @param peakGroup get experimentIntensity: from features extracted
      * @param libraryIntensity   get libraryIntensity: from transitions
      * @param scores             library_corr, library_norm_manhattan
      */
-    public void calculateLibraryScores(List<ExperimentFeature> experimentFeatures, List<Double> libraryIntensity, FeatureScores scores, HashSet<String> scoreTypes) {
-        List<Double> experimentIntensity = new ArrayList<>();
-        for (ExperimentFeature experimentFeature : experimentFeatures) {
-            experimentIntensity.add(experimentFeature.getIntensity());
-        }
+    public void calculateLibraryScores(PeakGroup peakGroup, List<Double> libraryIntensity, FeatureScores scores, HashSet<String> scoreTypes) {
+        List<Double> experimentIntensity = new ArrayList<>(peakGroup.getIonIntensity().values());
         assert experimentIntensity.size() == libraryIntensity.size();
 
         //library_norm_manhattan
@@ -144,9 +142,9 @@ public class LibraryScorer {
 
     }
 
-    public void calculateNormRtScore(List<ExperimentFeature> experimentFeatures, SlopeIntercept slopeIntercept, double groupRt, FeatureScores scores) {
+    public void calculateNormRtScore(PeakGroup peakGroup, SlopeIntercept slopeIntercept, double groupRt, FeatureScores scores) {
         //varNormRtScore
-        double experimentalRt = experimentFeatures.get(0).getRt();
+        double experimentalRt = peakGroup.getApexRt();
         double normalizedExperimentalRt = ScoreUtil.trafoApplier(slopeIntercept, experimentalRt);
         if (groupRt <= -1000d) {
             scores.put(ScoreType.NormRtScore, 0d);
@@ -160,9 +158,9 @@ public class LibraryScorer {
      * sum of intensitySum:
      * totalXic
      */
-    public void calculateIntensityScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores) {
-        double intensitySum = experimentFeatures.get(0).getIntensitySum();
-        double totalXic = experimentFeatures.get(0).getTotalXic();
+    public void calculateIntensityScore(PeakGroup peakGroup, FeatureScores scores) {
+        double intensitySum = peakGroup.getPeakGroupInt();
+        double totalXic = peakGroup.getTotalXic();
         scores.put(ScoreType.IntensityScore,(intensitySum / totalXic));
     }
 

@@ -175,6 +175,37 @@ public class MathUtil {
         }
         return standardizedData;
     }
+    /**
+     * (data - mean) / std
+     */
+    public static double[] standardizeData(Double[] data) {
+        int dataLength = data.length;
+
+        //get mean
+        double sum = 0d;
+        for (double value : data) {
+            sum += value;
+        }
+        double mean = sum / dataLength;
+
+        //get std
+        sum = 0f;
+        for (double value : data) {
+            sum += (value - mean) * (value - mean);
+        }
+        double std = Math.sqrt(sum / dataLength);
+
+        //get standardized data
+        double[] standardizedData = new double[dataLength];
+        for (int i = 0; i < dataLength; i++) {
+            if (std == 0) {
+                standardizedData[i] = 0;
+            } else {
+                standardizedData[i] = (data[i] - mean) / std;
+            }
+        }
+        return standardizedData;
+    }
 
     public static int findMaxIndex(Double[] data) {
         double max = data[0];
@@ -373,6 +404,13 @@ public class MathUtil {
     public static double sum(double[] array) {
         double sum = 0;
         for (double value : array) {
+            sum += value;
+        }
+        return sum;
+    }
+    public static Double sum(Double[] array) {
+        Double sum = 0D;
+        for (Double value : array) {
             sum += value;
         }
         return sum;

@@ -3,10 +3,12 @@ package com.westlake.air.pecs.scorer;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.westlake.air.pecs.constants.ScoreType;
+import com.westlake.air.pecs.domain.bean.analyse.PeptideSpectrum;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
+import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.utils.MathUtil;
 import com.westlake.air.pecs.utils.ScoreUtil;
 import org.springframework.stereotype.Component;
@@ -32,10 +34,10 @@ import java.util.List;
 public class ChromatographicScorer {
 
     /**
-     * @param experimentFeatures list of features in selected mrmfeature
+     * @param peakGroup list of features in selected mrmfeature
      */
-    public void calculateChromatographicScores(List<ExperimentFeature> experimentFeatures, List<Double> libraryIntensity, FeatureScores scores, HashSet<String> scoreTypes) {
-        Table<Integer, Integer, Double[]> xcorrMatrix = initializeXCorrMatrix(experimentFeatures);
+    public void calculateChromatographicScores(PeakGroup peakGroup, List<Double> libraryIntensity, FeatureScores scores, HashSet<String> scoreTypes) {
+        Table<Integer, Integer, Double[]> xcorrMatrix = initializeXCorrMatrix(peakGroup);
 
         //xcorrCoelutionScore
         //xcorrCoelutionScoreWeighted
@@ -48,12 +50,13 @@ public class ChromatographicScorer {
         List<Double> intensitiesWeighted = new ArrayList<>();
         Double[] value;
         int max;
-        for (int i = 0; i < experimentFeatures.size(); i++) {
+        int size = peakGroup.getIonApexInt().size();
+        for (int i = 0; i < size; i++) {
             value = xcorrMatrix.get(i, i);
             max = MathUtil.findMaxIndex(value);
             deltasWeighted.add(Math.abs(max - (value.length - 1) / 2) * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[i]);
             intensitiesWeighted.add(value[max] * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[i]);
-            for (int j = i; j < experimentFeatures.size(); j++) {
+            for (int j = i; j < size; j++) {
                 value = xcorrMatrix.get(i, j);
                 max = MathUtil.findMaxIndex(value);
                 deltas.add(Math.abs(max - (value.length - 1) / 2)); //first: maxdelay //delta: 偏移量
@@ -96,27 +99,27 @@ public class ChromatographicScorer {
         }
     }
 
-    public void calculateLogSnScore(List<RtIntensityPairsDouble> chromatograms, List<ExperimentFeature> experimentFeatures, List<double[]> signalToNoiseList, FeatureScores scores) {
+    public void calculateLogSnScore(PeptideSpectrum peptideSpectrum, PeakGroup peakGroup, HashMap<String, double[]> noise1000Map, FeatureScores scores) {
         //logSnScore
         // log(mean of Apex sn s)
         double rt;
         int leftIndex, rightIndex;
         double snScore = 0.0d;
-        if (signalToNoiseList.size() == 0) {
+        if (noise1000Map.size() == 0) {
             snScore = 0.0d;
         }
-        for (int k = 0; k < signalToNoiseList.size(); k++) {
-            rt = experimentFeatures.get(0).getRt(); //max peak rt
-            BisectionLowHigh bisectionLowHigh = MathUtil.bisection(chromatograms.get(k), rt);
+        for (String cutInfo: noise1000Map.keySet()) {
+            rt = peakGroup.getApexRt(); //max peak rt
+            BisectionLowHigh bisectionLowHigh = MathUtil.bisection(peptideSpectrum.getRtArray(), rt);
             leftIndex = bisectionLowHigh.getLow();
             rightIndex = bisectionLowHigh.getHigh();
-            if (Math.abs(chromatograms.get(k).getRtArray()[leftIndex] - rt) < Math.abs(chromatograms.get(k).getRtArray()[rightIndex] - rt)) {
-                snScore += signalToNoiseList.get(k)[leftIndex];
+            if (Math.abs(peptideSpectrum.getRtArray()[leftIndex] - rt) < Math.abs(peptideSpectrum.getRtArray()[rightIndex] - rt)) {
+                snScore += noise1000Map.get(cutInfo)[leftIndex];
             } else {
-                snScore += signalToNoiseList.get(k)[rightIndex];
+                snScore += noise1000Map.get(cutInfo)[rightIndex];
             }
         }
-        snScore /= signalToNoiseList.size();
+        snScore /= noise1000Map.size();
         if (snScore < 1) {
             scores.put(ScoreType.LogSnScore, 0d);
         } else {
@@ -129,17 +132,18 @@ public class ChromatographicScorer {
      * Get the XCorrMatrix with experiment Features
      * 对于一个 mrmFeature，算其中 chromatogramFeature 的 xcorrMatrix
      *
-     * @param experimentFeatures features in mrmFeature
+     * @param peakGroup features in mrmFeature
      *                           HullInt: redistributed chromatogram in range of (peptideRef constant) leftRt and rightRt
      * @return Table<Integer , Integer , Float [ ]> xcorrMatrix
      */
-    private Table<Integer, Integer, Double[]> initializeXCorrMatrix(List<ExperimentFeature> experimentFeatures) {
-        int listLength = experimentFeatures.size();
+    private Table<Integer, Integer, Double[]> initializeXCorrMatrix(PeakGroup peakGroup) {
+        List<Double[]> intensityList = new ArrayList<>(peakGroup.getIonHullInt().values());
+        int listLength = intensityList.size();
         Table<Integer, Integer, Double[]> xcorrMatrix = HashBasedTable.create();
         double[] intensityi, intensityj;
         HashMap<Integer, double[]> standardizeDataMap = new HashMap<>();
         for (int i = 0; i < listLength; i++) {
-            standardizeDataMap.put(i, MathUtil.standardizeData(experimentFeatures.get(i).getHullInt()));
+            standardizeDataMap.put(i, MathUtil.standardizeData(intensityList.get(i)));
         }
         for (int i = 0; i < listLength; i++) {
             for (int j = i; j < listLength; j++) {
@@ -153,7 +157,7 @@ public class ChromatographicScorer {
 
     /**
      * xcorrMatrix的意义：sum(反斜向的元素)/data.length(3)
-     * 0   1   2
+     *      0   1   2
      * 0   |0  |1  |2
      * 1   |-1 |0  |1
      * 2   |-2 |-1 |0

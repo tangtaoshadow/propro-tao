@@ -11,10 +11,7 @@ import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.ComparisonResult;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
-import com.westlake.air.pecs.domain.bean.score.FeatureByPep;
-import com.westlake.air.pecs.domain.bean.score.FeatureScores;
-import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
+import com.westlake.air.pecs.domain.bean.score.*;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.TargetPeptide;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
@@ -583,10 +580,10 @@ public class AnalyseController extends BaseController {
         FeatureByPep featureByPep = featureExtractor.getExperimentFeature(newDataDO, intensityMap, new SigmaSpacing(sigma, spacing));
         if (featureByPep.isFeatureFound()) {
             TreeMap<Double, Double> rtShapeScoreMap = new TreeMap<>();
-            for (List<ExperimentFeature> experimentFeatureList : featureByPep.getExperimentFeatures()) {
+            for (PeakGroup peakGroupFeature : featureByPep.getPeakGroupFeatureList()) {
                 FeatureScores featureScores = new FeatureScores();
-                chromatographicScorer.calculateChromatographicScores(experimentFeatureList, featureByPep.getLibraryIntensityList(), featureScores, null);
-                rtShapeScoreMap.put(experimentFeatureList.get(0).getRt(), featureScores.get(ScoreType.XcorrShape));
+                chromatographicScorer.calculateChromatographicScores(peakGroupFeature, featureByPep.getLibraryIntensityList(), featureScores, null);
+                rtShapeScoreMap.put(peakGroupFeature.getApexRt(), featureScores.get(ScoreType.XcorrShape));
             }
             model.addAttribute("rtShapeScoreMap", rtShapeScoreMap);
         } else {

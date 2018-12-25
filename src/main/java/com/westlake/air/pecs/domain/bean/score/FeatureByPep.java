@@ -1,8 +1,10 @@
 package com.westlake.air.pecs.domain.bean.score;
 
+import com.westlake.air.pecs.domain.bean.analyse.PeptideSpectrum;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import lombok.Data;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -13,13 +15,13 @@ import java.util.List;
 public class FeatureByPep {
     boolean featureFound;
 
-    List<RtIntensityPairsDouble> rtIntensityPairsOriginList;
+    PeptideSpectrum peptideSpectrum;
 
-    List<List<ExperimentFeature>> experimentFeatures;
+    List<PeakGroup> peakGroupFeatureList;
 
     List<Double> libraryIntensityList;
 
-    List<double[]> noise1000List;
+    HashMap<String, double[]> noise1000Map;
 
     public FeatureByPep() {
     }

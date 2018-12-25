@@ -67,6 +67,10 @@ public class XGBoostLearner extends Learner {
 //        List<Float> testData = new ArrayList<>();
         for(SimpleScores simpleScores : scores){
             for(FeatureScores featureScores: simpleScores.getFeatureScoresList()){
+                if(!simpleScores.getIsDecoy() && !checkRationality(featureScores)){
+                    featureScores.put(ScoreType.WeightedTotalScore.getTypeName(), 0d);
+                    continue;
+                }
                 HashMap<String,Double> scoreMap = featureScores.getScoresMap();
                 float[] testData = new float[scoreTypes];
                 int tempIndex = 0;
@@ -129,7 +133,14 @@ public class XGBoostLearner extends Learner {
         return trainMat;
     }
 
-
+    private boolean checkRationality(FeatureScores featureScores){
+        HashMap<String, Double> scoresMap = featureScores.getScoresMap();
+        if(scoresMap.get(ScoreType.XcorrShape.getTypeName()) < 0.5){
+            return false;
+        }else {
+            return true;
+        }
+    }
 
 
 }

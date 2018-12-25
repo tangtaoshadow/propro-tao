@@ -6,6 +6,7 @@ import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.EmgModelParams;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
+import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.utils.MathUtil;
 import net.finmath.optimizer.SolverException;
 import org.slf4j.Logger;
@@ -25,10 +26,10 @@ public class ElutionScorer {
 
     public final Logger logger = LoggerFactory.getLogger(ElutionScorer.class);
 
-    public void calculateElutionModelScore(List<ExperimentFeature> experimentFeatures, FeatureScores scores) {
+    public void calculateElutionModelScore(PeakGroup peakGroupFeature, FeatureScores scores) {
         double avgScore = 0.0d;
-        for (ExperimentFeature feature : experimentFeatures) {
-            RtIntensityPairsDouble preparedHullPoints = prepareElutionFit(feature);
+        for (String cutInfo: peakGroupFeature.getIonHullInt().keySet()) {
+            RtIntensityPairsDouble preparedHullPoints = prepareElutionFit(peakGroupFeature.getIonHullRt(), peakGroupFeature.getIonHullInt().get(cutInfo));
             if(preparedHullPoints == null){
                 avgScore += -1;
                 continue;
@@ -87,51 +88,43 @@ public class ElutionScorer {
             }
             avgScore += fScore;
         }
-        avgScore /= experimentFeatures.size();
+        avgScore /= peakGroupFeature.getIonApexInt().size();
 
         scores.put(ScoreType.ElutionModelFitScore, avgScore);
     }
     /**
      * prepareFit_
      *
-     * @param feature chromatogram level feature
+     * @param rtArray chromatogram level feature
      * @return extended rtIntensity array
      */
-    private RtIntensityPairsDouble prepareElutionFit(ExperimentFeature feature) {
-        List<Double> rtArray = feature.getHullRt();
-        List<Double> intArray = feature.getHullInt();
-
-        if(rtArray.size() < 2){
+    private RtIntensityPairsDouble prepareElutionFit(Double[] rtArray, Double[] intArray) {
+        if(rtArray.length < 2){
             return null;
         }
 
         //get rt distance average
-        double sum = rtArray.get(rtArray.size() - 1) - rtArray.get(0);
-        double rtDistanceAverage = sum / (rtArray.size() - 1);
+        double distance = rtArray[rtArray.length - 1] - rtArray[0];
+        double rtDistanceAverage = distance / (rtArray.length - 1);
 
         //get new List
-        Double[] newRtArray = new Double[rtArray.size() + 6];
-        Double[] newIntArray = new Double[intArray.size() + 6];
-        assert intArray.size() == rtArray.size();
+        Double[] newRtArray = new Double[rtArray.length + 6];
+        Double[] newIntArray = new Double[intArray.length + 6];
+        assert intArray.length == rtArray.length;
 
         for (int i = 0; i < newRtArray.length; i++) {
             if (i < 3) {
-                newRtArray[i] = (rtArray.get(0) - (3 - i) * rtDistanceAverage);
+                newRtArray[i] = (rtArray[0] - (3 - i) * rtDistanceAverage);
                 newIntArray[i] = 0.0;
             } else if (i > newRtArray.length - 4) {
-                newRtArray[i] = (rtArray.get(rtArray.size() - 1) + (i - rtArray.size() - 2) * rtDistanceAverage);
+                newRtArray[i] = (rtArray[rtArray.length - 1] + (i - rtArray.length - 2) * rtDistanceAverage);
                 newIntArray[i] = 0.0;
             } else {
-                newRtArray[i] = rtArray.get(i - 3);
-                newIntArray[i] = intArray.get(i - 3);
+                newRtArray[i] = rtArray[i - 3];
+                newIntArray[i] = intArray[i - 3];
             }
         }
-
-        RtIntensityPairsDouble rtIntensityPairs = new RtIntensityPairsDouble();
-        rtIntensityPairs.setRtArray(newRtArray);
-        rtIntensityPairs.setIntensityArray(newIntArray);
-
-        return rtIntensityPairs;
+        return new RtIntensityPairsDouble(newRtArray, newIntArray);
     }
 
     private EmgModelParams getEmgParams(RtIntensityPairsDouble featurePrepared, double[] xInitOptimized, EmgModelParams emgModelParams) {

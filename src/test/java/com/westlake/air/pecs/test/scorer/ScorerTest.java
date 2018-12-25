@@ -2,10 +2,13 @@ package com.westlake.air.pecs.test.scorer;
 
 
 import com.westlake.air.pecs.constants.ScoreType;
+import com.westlake.air.pecs.domain.bean.analyse.PeptideSpectrum;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
+import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
+import com.westlake.air.pecs.parser.model.traml.Peptide;
 import com.westlake.air.pecs.scorer.ChromatographicScorer;
 import com.westlake.air.pecs.scorer.DIAScorer;
 import com.westlake.air.pecs.scorer.ElutionScorer;
@@ -13,8 +16,10 @@ import com.westlake.air.pecs.scorer.LibraryScorer;
 import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 
 import java.util.*;
+import java.util.zip.DeflaterOutputStream;
 
 /**
  * Intensity Score has no TEST CASE
@@ -37,14 +42,14 @@ public class ScorerTest extends BaseTest {
         System.out.println("------ Chromatogram Score Test ------");
         //List<RtIntensityPairsDouble> chromatograms, List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, List<double[]> signalToNoiseList, FeatureScores scores
         List<RtIntensityPairsDouble> chromatograms = new ArrayList<>();
-        List<ExperimentFeature> experimentFeatures = prepareChromatogramTestFeature();
+        PeakGroup peakGroup = prepareChromatogramTestFeature();
         List<Double> libraryIntensity = new ArrayList<>();
         libraryIntensity.add(0.5d);
         libraryIntensity.add(0.5d);
         List<double[]> signalToNoiseList = new ArrayList<>();
         FeatureScores scores = new FeatureScores();
 
-        chromatographicScorer.calculateChromatographicScores(experimentFeatures, libraryIntensity, scores, null);
+        chromatographicScorer.calculateChromatographicScores(peakGroup, libraryIntensity, scores, null);
         assert isSimilar(scores.get(ScoreType.XcorrCoelution), 1d + Math.sqrt(3.0d), Math.pow(10, -6));
         System.out.println("XcorrCoelution Test PASSED.");
         assert isSimilar(scores.get(ScoreType.XcorrCoelutionWeighted), 1.5, Math.pow(10, -6));
@@ -59,7 +64,7 @@ public class ScorerTest extends BaseTest {
     public void calcLibraryScoreTest(){
         System.out.println("------ Library Score Test ------");
         //List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, FeatureScores scores
-        List<ExperimentFeature> experimentFeatures = prepareLibraryTestFeature();
+        PeakGroup peakGroup = prepareLibraryTestFeature();
 
         List<Double> libraryIntensity = new ArrayList<>();
         libraryIntensity.add(1d);
@@ -68,7 +73,7 @@ public class ScorerTest extends BaseTest {
 
         FeatureScores scores = new FeatureScores();
 
-        libraryScorer.calculateLibraryScores(experimentFeatures, libraryIntensity, scores, null);
+        libraryScorer.calculateLibraryScores(peakGroup, libraryIntensity, scores, null);
         assert isSimilar(scores.get(ScoreType.LibraryCorr), -0.654591316, Math.pow(10, -6));
         System.out.println("LibraryCorr Test PASSED.");
         assert isSimilar(scores.get(ScoreType.LibraryRsmd), 0.5800337593, Math.pow(10, -6));
@@ -89,18 +94,18 @@ public class ScorerTest extends BaseTest {
         //List<RtIntensityPairsDouble> chromatograms, List<ExperimentFeature> experimentFeatures, List<double[]> signalToNoiseList, FeatureScores scores
         double[] stn1 = {500};
         double[] stn2 = {1500};
-        List<double[]> signalToNoiseList = new ArrayList<>();
-        signalToNoiseList.add(stn1);
-        signalToNoiseList.add(stn2);
+        HashMap<String, double[]> signalToNoiseMap = new HashMap<>();
+        signalToNoiseMap.put("1",stn1);
+        signalToNoiseMap.put("2",stn2);
         Double[] rt = {0d};
         Double[] intens = {0d};
-        RtIntensityPairsDouble rtIntensityPairsDouble = new RtIntensityPairsDouble(rt, intens);
-        List<RtIntensityPairsDouble> chromatogram = new ArrayList<>();
-        chromatogram.add(rtIntensityPairsDouble);
-        chromatogram.add(rtIntensityPairsDouble);
-        List<ExperimentFeature> experimentFeatures = prepareLogSnScoreTestFeature();
+        HashMap<String, Double[]> intensity = new HashMap<>();
+        intensity.put("1",intens);
+        intensity.put("2",intens);
+        PeptideSpectrum peptideSpectrum = new PeptideSpectrum(rt, intensity);
+        PeakGroup peakGroup = prepareLogSnScoreTestFeature();
         FeatureScores scores = new FeatureScores();
-        chromatographicScorer.calculateLogSnScore(chromatogram, experimentFeatures, signalToNoiseList, scores);
+        chromatographicScorer.calculateLogSnScore(peptideSpectrum, peakGroup, signalToNoiseMap, scores);
         assert isSimilar(scores.get(ScoreType.LogSnScore), Math.log(1000), Math.pow(10, -6));
         System.out.println("LogSnScore Test PASSED.");
     }
@@ -108,14 +113,14 @@ public class ScorerTest extends BaseTest {
     @Test
     public void calcNormRtScoreTest(){
         //List<ExperimentFeature> experimentFeatures, SlopeIntercept slopeIntercept, double groupRt, FeatureScores scores
-        List<ExperimentFeature> experimentFeatures1 = prepareNormRtTestFeature().get(0);
-        List<ExperimentFeature> experimentFeatures2 = prepareNormRtTestFeature().get(1);
+        PeakGroup peakGroup1 = prepareNormRtTestFeature().get(0);
+        PeakGroup peakGroup2 = prepareNormRtTestFeature().get(1);
         SlopeIntercept slopeIntercept = new SlopeIntercept();
         slopeIntercept.setSlope(1d);
         FeatureScores scores = new FeatureScores();
-        libraryScorer.calculateNormRtScore(experimentFeatures1, slopeIntercept, 100, scores);
+        libraryScorer.calculateNormRtScore(peakGroup1, slopeIntercept, 100, scores);
         assert isSimilar(scores.get(ScoreType.NormRtScore), 0d, Math.pow(10, -6));
-        libraryScorer.calculateNormRtScore(experimentFeatures2, slopeIntercept, 100, scores);
+        libraryScorer.calculateNormRtScore(peakGroup2, slopeIntercept, 100, scores);
         assert isSimilar(scores.get(ScoreType.NormRtScore), 100d, Math.pow(10, -6));
         System.out.println("NormRtScore Test PASSED.");
     }
@@ -143,21 +148,19 @@ public class ScorerTest extends BaseTest {
         //List<ExperimentFeature> experimentFeatures = ;
         Float[] spectrumMzArray = prepareDIASpectrum().get(0);
         Float[] spectrumIntArray = prepareDIASpectrum().get(1);
-        List<Double> productMzArray = new ArrayList<>();
-        productMzArray.add(500d);
-        productMzArray.add(600d);
-        ExperimentFeature experimentFeature1 = new ExperimentFeature();
-        ExperimentFeature experimentFeature2 = new ExperimentFeature();
-        experimentFeature1.setIntensity(0.3);
-        experimentFeature2.setIntensity(0.7);
-        List<ExperimentFeature> experimentFeatures = new ArrayList<>();
-        experimentFeatures.add(experimentFeature1);
-        experimentFeatures.add(experimentFeature2);
-        List<Integer> productCharge = new ArrayList<>();
-        productCharge.add(1);
-        productCharge.add(1);
+        HashMap<String, Double> productMzMap = new HashMap<>();
+        productMzMap.put("1", 500d);
+        productMzMap.put("2", 600d);
+        PeakGroup peakGroup = new PeakGroup();
+        HashMap<String,Double> ionIntensityMap = new HashMap<>();
+        ionIntensityMap.put("1", 0.3D);
+        ionIntensityMap.put("2", 0.7D);
+        peakGroup.setIonIntensity(ionIntensityMap);
+        HashMap<String,Integer> productChargeMap = new HashMap<>();
+        productChargeMap.put("1",1);
+        productChargeMap.put("2",1);
         FeatureScores scores = new FeatureScores();
-        diaScorer.calculateDiaIsotopeScores(experimentFeatures, productMzArray, spectrumMzArray, spectrumIntArray, productCharge, scores);
+        diaScorer.calculateDiaIsotopeScores(peakGroup, productMzMap, spectrumMzArray, spectrumIntArray, productChargeMap, scores);
 
         assert isSimilar(scores.get(ScoreType.IsotopeCorrelationScore), 0.995335798317618 * 0.7 +  0.959692139694113 * 0.3, Math.pow(10, -3));
         assert isSimilar(scores.get(ScoreType.IsotopeOverlapScore), 0.3, Math.pow(10, -6));
@@ -185,13 +188,13 @@ public class ScorerTest extends BaseTest {
 
     @Test
     public void calcElutionScore(){
-        List<ExperimentFeature> experimentFeatures = prepareElutionScoreTestFeature();
+        PeakGroup peakGroup = prepareElutionScoreTestFeature();
         FeatureScores scores = new FeatureScores();
-        elutionScorer.calculateElutionModelScore(experimentFeatures, scores);
+        elutionScorer.calculateElutionModelScore(peakGroup, scores);
         assert isSimilar(scores.get(ScoreType.ElutionModelFitScore), 0.92436583836873376, Math.pow(10, -5));
     }
 
-    private List<ExperimentFeature> prepareChromatogramTestFeature(){
+    private PeakGroup prepareChromatogramTestFeature(){
         Double[] arr1 = {
                 5.97543668746948, 4.2749171257019, 3.3301842212677, 4.08597040176392, 5.50307035446167, 5.24326848983765,
                 8.40812492370605, 2.83419919013977, 6.94378805160522, 7.69957494735718, 4.08597040176392};
@@ -200,53 +203,39 @@ public class ScorerTest extends BaseTest {
                 15.8951349258423, 41.5446395874023, 76.0746307373047, 109.069435119629, 111.90364074707, 169.79216003418,
                 121.043930053711, 63.0136985778809, 44.6150207519531, 21.4926776885986, 7.93575811386108};
 
-        List<ExperimentFeature> experimentFeatureList = new ArrayList<>();
-        ExperimentFeature experimentFeature1 = new ExperimentFeature();
-        ExperimentFeature experimentFeature2 = new ExperimentFeature();
-        experimentFeature1.setHullInt(Arrays.asList(arr1));
-        experimentFeature2.setHullInt(Arrays.asList(arr2));
-        experimentFeatureList.add(experimentFeature1);
-        experimentFeatureList.add(experimentFeature2);
-        return experimentFeatureList;
+        PeakGroup peakGroup = new PeakGroup();
+        HashMap<String,Double[]> hullIntMap = new HashMap<>();
+        hullIntMap.put("1", arr1);
+        hullIntMap.put("2", arr2);
+        peakGroup.setIonHullInt(hullIntMap);
+        return peakGroup;
     }
 
-    private List<ExperimentFeature> prepareLibraryTestFeature(){
-        List<ExperimentFeature> experimentFeatures = new ArrayList<>();
-        ExperimentFeature experimentFeature1 = new ExperimentFeature();
-        ExperimentFeature experimentFeature2 = new ExperimentFeature();
-        ExperimentFeature experimentFeature3 = new ExperimentFeature();
-        experimentFeature1.setIntensity(782.38073);
-        experimentFeature2.setIntensity(58.384506);
-        experimentFeature3.setIntensity(58.384506);
-        experimentFeatures.add(experimentFeature1);
-        experimentFeatures.add(experimentFeature2);
-        experimentFeatures.add(experimentFeature3);
-        return experimentFeatures;
+    private PeakGroup prepareLibraryTestFeature(){
+        PeakGroup peakGroup = new PeakGroup();
+        HashMap<String, Double> ionIntensity = new HashMap<>();
+        ionIntensity.put("1",782.38073);
+        ionIntensity.put("2",58.384506);
+        ionIntensity.put("3",58.384506);
+        peakGroup.setIonIntensity(ionIntensity);
+        return peakGroup;
     }
 
-    private List<ExperimentFeature> prepareLogSnScoreTestFeature(){
-        List<ExperimentFeature> experimentFeatures = new ArrayList<>();
-        ExperimentFeature experimentFeature = new ExperimentFeature();
-        List<Double> rt = new ArrayList<>();
-        rt.add(1200d);
-        experimentFeature.setHullRt(rt);
-        experimentFeatures.add(experimentFeature);
-        experimentFeatures.add(experimentFeature);
-        return experimentFeatures;
+    private PeakGroup prepareLogSnScoreTestFeature(){
+        PeakGroup peakGroup = new PeakGroup();
+        Double[] rt = new Double[]{1200d};
+        peakGroup.setIonHullRt(rt);
+        return peakGroup;
     }
-    private List<List<ExperimentFeature>> prepareNormRtTestFeature(){
-        List<ExperimentFeature> experimentFeatures1 = new ArrayList<>();
-        List<ExperimentFeature> experimentFeatures2 = new ArrayList<>();
-        ExperimentFeature experimentFeature1 = new ExperimentFeature();
-        ExperimentFeature experimentFeature2 = new ExperimentFeature();
-        experimentFeature1.setRt(100);
-        experimentFeature2.setRt(0);
-        experimentFeatures1.add(experimentFeature1);
-        experimentFeatures2.add(experimentFeature2);
-        List<List<ExperimentFeature>> experimentFeaturesList = new ArrayList<>();
-        experimentFeaturesList.add(experimentFeatures1);
-        experimentFeaturesList.add(experimentFeatures2);
-        return experimentFeaturesList;
+    private List<PeakGroup> prepareNormRtTestFeature(){
+        PeakGroup peakGroup1 = new PeakGroup();
+        PeakGroup peakGroup2 = new PeakGroup();
+        peakGroup1.setApexRt(100d);
+        peakGroup2.setApexRt(0d);
+        List<PeakGroup> peakGroupList = new ArrayList<>();
+        peakGroupList.add(peakGroup1);
+        peakGroupList.add(peakGroup2);
+        return peakGroupList;
     }
 
     //getBYSeries Test Passed
@@ -313,40 +302,28 @@ public class ScorerTest extends BaseTest {
         return spectrum;
     }
 
-    private List<ExperimentFeature> prepareElutionScoreTestFeature(){
-        ExperimentFeature experimentFeature1 = new ExperimentFeature();
-        Double[] rt1 =        { 3103.13, 3106.56, 3109.98, 3113.41, 3116.84, 3120.26, 3123.69, 3127.11, 3130.54, 3133.97, 3137.4 };
+    private PeakGroup prepareElutionScoreTestFeature(){
+        Double[] rt =        { 3103.13, 3106.56, 3109.98, 3113.41, 3116.84, 3120.26, 3123.69, 3127.11, 3130.54, 3133.97, 3137.4 };
         Double[] intensity1 = { 5.97544, 4.27492, 3.33018, 4.08597, 5.50307, 5.24327, 8.40812, 2.8342 , 6.94379, 7.69957, 4.08597};
-        experimentFeature1.setHullRt(Arrays.asList(rt1));
-        experimentFeature1.setHullInt(Arrays.asList(intensity1));
-        experimentFeature1.setIntensity(58.38450);
-        experimentFeature1.setRt(3120d);
-        experimentFeature1.setIntensitySum(973.122);
-
-        ExperimentFeature experimentFeature2 = new ExperimentFeature();
-        Double[] rt2 =          { 3103.13, 3106.56, 3109.98, 3113.41, 3116.84, 3120.26, 3123.69, 3127.11, 3130.54, 3133.97, 3137.4 };
         Double[] intensity2 =   { 15.8951, 41.5446, 76.0746, 109.069, 111.904, 169.792, 121.044, 63.0137, 44.615 , 21.4927, 7.93576};
-        experimentFeature2.setHullRt(Arrays.asList(rt2));
-        experimentFeature2.setHullInt(Arrays.asList(intensity2));
-        experimentFeature2.setIntensity(782.38073);
-        experimentFeature2.setRt(3120d);
-        experimentFeature2.setIntensitySum(973.122);
-
-        ExperimentFeature experimentFeature3 = new ExperimentFeature();
-        Double[] rt3 =          { 3103.13, 3106.56, 3109.98, 3113.41, 3116.84, 3120.26, 3123.69, 3127.11, 3130.54, 3133.97, 3137.4};
         Double[] intensity3 =   { 5.73925, 6.7076 , 2.85782, 5.0307 , 8.95135, 14.4544, 20.9731, 24.3033, 20.6897, 13.7459, 8.90411};
-        experimentFeature3.setHullRt(Arrays.asList(rt3));
-        experimentFeature3.setHullInt(Arrays.asList(intensity3));
-        experimentFeature3.setIntensity(58.38450);
-        experimentFeature3.setRt(3120d);
-        experimentFeature3.setIntensitySum(973.122);
 
-        List<ExperimentFeature> experimentFeatures = new ArrayList<>();
-        experimentFeatures.add(experimentFeature1);
-        experimentFeatures.add(experimentFeature2);
-        experimentFeatures.add(experimentFeature3);
+        HashMap<String,Double[]> intensityMap = new HashMap<>();
+        intensityMap.put("1",intensity1);
+        intensityMap.put("2",intensity2);
+        intensityMap.put("3",intensity3);
+        HashMap<String,Double> ionIntensityMap = new HashMap<>();
+        ionIntensityMap.put("1",58.38450);
+        ionIntensityMap.put("2",782.38073);
+        ionIntensityMap.put("3",58.38450);
+        PeakGroup peakGroup = new PeakGroup();
+        peakGroup.setIonHullRt(rt);
+        peakGroup.setIonHullInt(intensityMap);
+        peakGroup.setIonIntensity(ionIntensityMap);
+        peakGroup.setApexRt(3120d);
+        peakGroup.setPeakGroupInt(973.122d);
 
-        return experimentFeatures;
+        return peakGroup;
     }
 
     private boolean isSimilar(Double a, Double b, Double tolerance ) {

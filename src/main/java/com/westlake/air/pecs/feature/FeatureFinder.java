@@ -1,17 +1,19 @@
 package com.westlake.air.pecs.feature;
 
 import com.westlake.air.pecs.constants.Constants;
+import com.westlake.air.pecs.domain.bean.analyse.PeptideSpectrum;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.PeakGroup;
-import com.westlake.air.pecs.utils.ConvolutionUtil;
 import com.westlake.air.pecs.utils.MathUtil;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -31,216 +33,133 @@ public class FeatureFinder {
      * 5）对usedChromatogram求feature
      * 6）同时累计所有chromatogram（isDetecting）的intensity为totalXIC
      *
-     * @param chromatograms      origin chromatogram
-     * @param pickedChroms       maxPeaks picked and recalculated
-     * @param intensityLeftRight left right borders
+     * @param peptideSpectrum      origin chromatogram
+     * @param ionPeaks       maxPeaks picked and recalculated
+     * @param ionPeakParams left right borders
      *                           totalXic : intensity sum of all chromatogram of peptideRef(not rastered and all interval)
      *                           HullPoints : rt intensity pairs of rastered chromatogram between rtLeft, rtRight;
      *                           ExperimentFeature::intensity: intensity sum of hullPoints' intensity
      * @return list of mrmFeature (mrmFeature is list of chromatogram feature)
      */
-    public List<List<ExperimentFeature>> findFeatures(List<RtIntensityPairsDouble> chromatograms, List<RtIntensityPairsDouble> pickedChroms, List<IntensityRtLeftRtRightPairs> intensityLeftRight) {
-
-        int[] chrPeakIndex;
-
-        List<List<ExperimentFeature>> experimentFeatures = new ArrayList<>();
+    public List<PeakGroup> findFeatures(PeptideSpectrum peptideSpectrum, HashMap<String, RtIntensityPairsDouble> ionPeaks, HashMap<String, IntensityRtLeftRtRightPairs> ionPeakParams) {
 
         //totalXIC
         double totalXic = 0.0d;
-        RtIntensityPairsDouble chromatogram;
-        for (int i = 0; i < chromatograms.size(); i++) {
-            chromatogram = chromatograms.get(i);
-            for (double intensity : chromatogram.getIntensityArray()) {
+        for (Double[] intensityTmp: peptideSpectrum.getIntensitiesMap().values()) {
+            for (double intensity : intensityTmp) {
                 totalXic += intensity;
             }
         }
 
         //mrmFeature loop
+//        List<Double> apexRtList = new ArrayList<>();
+//        List<Double> bestLeftRtList = new ArrayList<>();
+//        List<Double> bestRightRtList = new ArrayList<>();
+//        List<HashMap<String,Double>> ionApexIntList = new ArrayList<>();
+//        List<Double[]> ionHullRtList = new ArrayList<>();
+//        List<HashMap<String,Double[]>> ionHullIntList = new ArrayList<>();
+//        List<HashMap<String, Double>> ionIntensityList = new ArrayList<>();
+//        List<Double> peakGroupIntList = new ArrayList<>();
+        List<PeakGroup> peakGroupList = new ArrayList<>();
         while (true) {
-            chrPeakIndex = findLargestPeak(pickedChroms);
-            if (chrPeakIndex[0] == -1 || chrPeakIndex[1] == -1) {
+            PeakGroup peakGroup = new PeakGroup();
+            Pair<String, Integer> maxPeakLocation = findLargestPeak(ionPeaks);
+            if (maxPeakLocation.getKey().equals("null")) {
                 break;
             }
-            double peakApex = pickedChroms.get(chrPeakIndex[0]).getRtArray()[chrPeakIndex[1]];
+            String maxCutInfo = maxPeakLocation.getKey();
+            int maxIndex = maxPeakLocation.getValue();
+            double apexRt = ionPeaks.get(maxCutInfo).getRtArray()[maxIndex];
+            double bestLeft = ionPeakParams.get(maxCutInfo).getRtLeftArray()[maxIndex];
+            double bestRight = ionPeakParams.get(maxCutInfo).getRtRightArray()[maxIndex];
 
-            double bestLeft = intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]];
-            double bestRight = intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]];
+            peakGroup.setApexRt(apexRt);
+            peakGroup.setBestLeftRt(bestLeft);
+            peakGroup.setBestRightRt(bestRight);
 
-            RtIntensityPairsDouble rtInt = pickedChroms.get(chrPeakIndex[0]);
-            Double[] intensityArray = rtInt.getIntensityArray();
-            intensityArray[chrPeakIndex[1]] = 0.0d;
-            removeOverlappingFeatures(pickedChroms, bestLeft, bestRight, intensityLeftRight);
+            RtIntensityPairsDouble rtInt = ionPeaks.get(maxCutInfo);
+            rtInt.getIntensityArray()[maxIndex] = 0.0d;
 
-            RtIntensityPairsDouble masterChromatogram = new RtIntensityPairsDouble(chromatograms.get(chrPeakIndex[0]));
+            removeOverlappingFeatures(ionPeaks, bestLeft, bestRight, ionPeakParams);
 
-            PeakGroup peakGroup = new PeakGroup();
-            peakGroup.setRt(peakApex);
+            Double[] rtArray = peptideSpectrum.getRtArray();
+            int leftIndex = MathUtil.bisection(rtArray, bestLeft).getHigh();
+            int rightIndex = MathUtil.bisection(rtArray, bestRight).getHigh();
+
+            //取得[bestLeft,bestRight]对应范围的Rt
+            Double[] rasteredRt = new Double[rightIndex - leftIndex + 1];
+            System.arraycopy(rtArray, leftIndex, rasteredRt, 0, rightIndex - leftIndex + 1);
+
+            //取得[bestLeft,bestRight]对应范围的Intensity
+            HashMap<String, Double[]> ionHullInt = new HashMap<>();
+            HashMap<String, Double> ionIntensity = new HashMap<>();
+            HashMap<String, Double> ionApexInt = new HashMap<>();
+            Double peakGroupInt = 0D;
+            for(String cutInfo: peptideSpectrum.getIntensitiesMap().keySet()) {
+                Double[] intArray = peptideSpectrum.getIntensitiesMap().get(cutInfo);
+                //离子峰最大强度
+                ionApexInt.put(cutInfo, intArray[maxIndex]);
+                //离子峰
+                Double[] rasteredInt = new Double[rightIndex - leftIndex + 1];
+                System.arraycopy(intArray, leftIndex, rasteredInt, 0, rightIndex - leftIndex + 1);
+                ionHullInt.put(cutInfo, rasteredInt);
+                //peakGroup强度
+                Double ionIntTemp = MathUtil.sum(rasteredInt);
+                peakGroupInt += ionIntTemp;
+                //离子峰强度
+                ionIntensity.put(cutInfo, ionIntTemp);
+            }
+            peakGroup.setIonHullRt(rasteredRt);
+            peakGroup.setIonHullInt(ionHullInt);
+            peakGroup.setIonApexInt(ionApexInt);
+            peakGroup.setPeakGroupInt(peakGroupInt);
             peakGroup.setTotalXic(totalXic);
-            List<ExperimentFeature> mrmFeature = new ArrayList<>();
-            double sum = 0.0d;
-            for (int i = 0; i < chromatograms.size(); i++) {
-                chromatogram = chromatograms.get(i);
-                //best left and right is a constant value to a peptideRef
-                RtIntensityPairsDouble usedChromatogram = raster(chromatogram, masterChromatogram, bestLeft, bestRight);
-                ExperimentFeature feature = calculatePeakApexInt(usedChromatogram, bestLeft, bestRight, peakApex);
-                sum += feature.getIntensity();
-                mrmFeature.add(feature);
-            }
-            peakGroup.setIntensitySum(sum);
-            for (ExperimentFeature feature : mrmFeature) {
-                feature.setTotalXic(totalXic);
-                feature.setIntensitySum(sum);
-            }
-            if (sum > 0) {
-                experimentFeatures.add(mrmFeature);
-            }
-            if (sum > 0 && sum / totalXic < Constants.STOP_AFTER_INTENSITY_RATIO) {
+            peakGroup.setIonIntensity(ionIntensity);
+            peakGroupList.add(peakGroup);
+            if(peakGroupInt > 0 && peakGroupInt/totalXic<Constants.STOP_AFTER_INTENSITY_RATIO){
                 break;
             }
         }
-        checkOverlappingFeatures(experimentFeatures);
 
-        return experimentFeatures;
+        return peakGroupList;
     }
 
     /**
      * 从maxPeak list中选取最大peak对应的index
      *
-     * @param pickedChroms maxPeaks
+     * @param peaksCoord maxPeaks
      * @return list index, pairs index
      */
-    private int[] findLargestPeak(List<RtIntensityPairsDouble> pickedChroms) {
+    private Pair<String, Integer> findLargestPeak(HashMap<String, RtIntensityPairsDouble> peaksCoord) {
         double largest = 0.0d;
-        int[] chrPeakIndex = new int[2];
-        chrPeakIndex[0] = -1;
-        chrPeakIndex[1] = -1;
-        for (int i = 0; i < pickedChroms.size(); i++) {
-            for (int j = 0; j < pickedChroms.get(i).getRtArray().length; j++) {
-                if (pickedChroms.get(i).getIntensityArray()[j] > largest) {
-                    largest = pickedChroms.get(i).getIntensityArray()[j];
-                    chrPeakIndex[0] = i;
-                    chrPeakIndex[1] = j;
+        Pair<String, Integer> maxPeakLoc = Pair.of("null",-1);
+
+        for (String cutInfo: peaksCoord.keySet()) {
+            for (int i = 0; i < peaksCoord.get(cutInfo).getRtArray().length; i++) {
+                if (peaksCoord.get(cutInfo).getIntensityArray()[i] > largest) {
+                    largest = peaksCoord.get(cutInfo).getIntensityArray()[i];
+                    maxPeakLoc = Pair.of(cutInfo, i);
                 }
             }
         }
-        return chrPeakIndex;
+        return maxPeakLoc;
     }
 
+
     /**
-     * resampleChromatogram
-     * 将chromatogram中的intensity按照masterChromatogram的rt进行分布
+     * 过滤区间内的峰值，也可以理解成：以已经选取的高峰划分peak group
      *
-     * @param chromatogram       normal chromatogram
-     * @param masterChromatogram chromatogram with max peak
-     * @param leftBoundary       bestLeftRt rt of max peak(constant to peptideRef)
-     * @param rightBoundary      bestRightRt rt of max peak(constant to peptideRef)
-     * @return masterChromatogram with both rt and intensity
+     * 中心落在更高峰闭区间内的会被过滤掉
+     * 边界落在更高峰开区间内的会被过滤掉
+     * @param ionPeaks
+     * @param bestLeft 按从高到低顺序选择的最高峰的RT范围
+     * @param bestRight 同上
+     * @param ionPeakParams
      */
-    private RtIntensityPairsDouble raster(RtIntensityPairsDouble chromatogram, RtIntensityPairsDouble masterChromatogram, double leftBoundary, double rightBoundary) {
-        int chromatogramLeft, chromatogramRight;
-        int masterChromLeft, masterChromRight;
-        chromatogramLeft = ConvolutionUtil.findIndex(chromatogram.getRtArray(), leftBoundary, true);
-        chromatogramRight = ConvolutionUtil.findIndex(chromatogram.getRtArray(), rightBoundary, false);
-        masterChromLeft = ConvolutionUtil.findIndex(masterChromatogram.getRtArray(), leftBoundary, true);
-        masterChromRight = ConvolutionUtil.findIndex(masterChromatogram.getRtArray(), rightBoundary, false);
-        int masterChromLeftStatic = masterChromLeft;
-
-        Double[] rt = new Double[masterChromRight - masterChromLeft + 1];
-        Double[] intensity = new Double[masterChromRight - masterChromLeft + 1];
-        double distLeft, distRight;
-
-        for (int i = 0; i < rt.length; i++) {
-            rt[i] = 0d;
-            intensity[i] = 0d;
-        }
-
-        //set rt
-        for (int i = masterChromLeft; i <= masterChromRight; i++) {
-            rt[i - masterChromLeftStatic] = masterChromatogram.getRtArray()[i];
-        }
-
-        //set intensity
-        while (chromatogramLeft <= chromatogramRight && chromatogram.getRtArray()[chromatogramLeft] < masterChromatogram.getRtArray()[masterChromLeft]) {
-            intensity[masterChromLeft - masterChromLeftStatic] += chromatogram.getIntensityArray()[chromatogramLeft];
-            chromatogramLeft++;
-        }
-        while (chromatogramLeft <= chromatogramRight) {
-            while (masterChromLeft <= masterChromRight && chromatogram.getRtArray()[chromatogramLeft] > masterChromatogram.getRtArray()[masterChromLeft]) {
-                masterChromLeft++;
-            }
-            if (masterChromLeft != masterChromLeftStatic) {
-                masterChromLeft--;
-            }
-            if (masterChromLeft == masterChromRight) {
-                break;
-            }
-            distLeft = Math.abs(chromatogram.getRtArray()[chromatogramLeft] - masterChromatogram.getRtArray()[masterChromLeft]);
-            distRight = Math.abs(chromatogram.getRtArray()[chromatogramLeft] - masterChromatogram.getRtArray()[masterChromLeft + 1]);
-
-            intensity[masterChromLeft - masterChromLeftStatic] += chromatogram.getIntensityArray()[chromatogramLeft] * distRight / (distRight + distLeft);
-            intensity[masterChromLeft - masterChromLeftStatic + 1] += chromatogram.getIntensityArray()[chromatogramLeft] * distLeft / (distRight + distLeft);
-
-            chromatogramLeft++;
-        }
-        while (chromatogramLeft <= chromatogramRight) {
-            intensity[masterChromLeft - masterChromLeftStatic] += chromatogram.getIntensityArray()[chromatogramLeft];
-            chromatogramLeft++;
-        }
-
-        return new RtIntensityPairsDouble(rt, intensity);
-    }
-
-    /**
-     * @param chromatogram masterChromatogram(same rt)
-     * @param bestLeft     bestLeftRt rt of max peak
-     * @param bestRight    bestRightRt rt of max peak
-     * @param peakApexRt   rt of max peak
-     * @return
-     */
-    private ExperimentFeature calculatePeakApexInt(RtIntensityPairsDouble chromatogram, double bestLeft, double bestRight, double peakApexRt) {
-        Double[] rtArray = chromatogram.getRtArray();
-        Double[] intArray = chromatogram.getIntensityArray();
-
-        double peakApexDist = Math.abs(rtArray[0] - peakApexRt);
-        double peakApexInt = 0.0d;
-        List<Double> hullRt = new ArrayList<>();
-        List<Double> hullInt = new ArrayList<>();
-        double intSum = 0.0d;
-        for (int i = 0; i < chromatogram.getRtArray().length; i++) {
-            //TODO error in original code
-            if (rtArray[i] > bestLeft && rtArray[i] < bestRight) {
-                hullRt.add(rtArray[i]);
-                hullInt.add(intArray[i]);
-                if (Math.abs(rtArray[i] - peakApexRt) <= peakApexDist) {
-                    peakApexDist = Math.abs(rtArray[i] - peakApexRt);
-                    peakApexInt = intArray[i];
-                }
-                intSum += intArray[i];
-            }
-        }
-        ExperimentFeature feature = new ExperimentFeature();
-        feature.setRt(peakApexRt);
-        feature.setIntensity(intSum);
-        feature.setPeakApexInt(peakApexInt);
-        feature.setBestLeftRt(bestLeft);
-        feature.setBestRightRt(bestRight);
-        feature.setHullRt(hullRt);
-        feature.setHullInt(hullInt);
-
-        return feature;
-    }
-
-
-    private float linearInterpolate(float x, float x0, float x1, float y0, float y1) {
-
-        return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
-    }
-
-
-    private void removeOverlappingFeatures(List<RtIntensityPairsDouble> pickedChroms, double bestLeft, double bestRight, List<IntensityRtLeftRtRightPairs> intensityLeftRight) {
-        for (int i = 0; i < pickedChroms.size(); i++) {
-            Double[] intensity = pickedChroms.get(i).getIntensityArray();
-            Double[] rt = pickedChroms.get(i).getRtArray();
+    private void removeOverlappingFeatures(HashMap<String, RtIntensityPairsDouble> ionPeaks, double bestLeft, double bestRight, HashMap<String, IntensityRtLeftRtRightPairs> ionPeakParams) {
+        for (String cutInfo: ionPeaks.keySet()) {
+            Double[] intensity = ionPeaks.get(cutInfo).getIntensityArray();
+            Double[] rt = ionPeaks.get(cutInfo).getRtArray();
             for (int j = 0; j < intensity.length; j++) {
                 if (intensity[j] <= 0d) {
                     continue;
@@ -248,39 +167,13 @@ public class FeatureFinder {
                 if (rt[j] >= bestLeft && rt[j] <= bestRight) {
                     intensity[j] = 0d;
                 }
-                double left = intensityLeftRight.get(i).getRtLeftArray()[j];
-                double right = intensityLeftRight.get(i).getRtRightArray()[j];
+                double left = ionPeakParams.get(cutInfo).getRtLeftArray()[j];
+                double right = ionPeakParams.get(cutInfo).getRtRightArray()[j];
                 if ((left > bestLeft && left < bestRight) || (right > bestLeft && right < bestRight)) {
                     intensity[j] = 0d;
                 }
             }
         }
     }
-
-
-    /**
-     * 从feature中移除rt覆盖重复的feature
-     *
-     * @param experimentFeatures all mrmFeatures
-     */
-    private void checkOverlappingFeatures(List<List<ExperimentFeature>> experimentFeatures) {
-        boolean skip;
-        int i = 0;
-        while (i < experimentFeatures.size()) {
-            skip = false;
-            for (int j = 0; j < i; j++) {
-                if (experimentFeatures.get(i).get(0).getBestLeftRt() >= experimentFeatures.get(j).get(0).getBestLeftRt() &&
-                        experimentFeatures.get(i).get(0).getBestRightRt() <= experimentFeatures.get(j).get(0).getBestRightRt()) {
-                    skip = true;
-                }
-            }
-            if (skip) {
-                experimentFeatures.remove(i);
-                i--;
-            }
-            i++;
-        }
-    }
-
 
 }
