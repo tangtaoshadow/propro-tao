@@ -20,47 +20,63 @@ public class AnalyseOverviewDO extends BaseDO {
     @Id
     String id;
 
+    //对应实验的id
     String expId;
 
+    //对应实验的名称
     String expName;
 
+    //卷积代号
     String name;
 
+    //标签
     String label;
-    /**
-     * 标准库ID
-     */
+
+    //标准库ID
     String libraryId;
 
+    //标准库名称
     String libraryName;
 
+    //使用的斜率,一般来源于experimentDO对象,也可以在执行单独的卷积步骤自由设定
     Double slope;
 
+    //使用的截距,一般来源于experimentDO对象,也可以在执行单独的卷积步骤自由设定
     Double intercept;
 
+    //在打分时设定的shape分的阈值,包含XCorreShape与XCorreShapeWeight两个打分,如果低于这个阈值的峰组会被直接忽略掉,从而节省运算时间
     Float shapeScoreThreshold;
 
-    //MS1是全光谱扫描的.没有RTwindow的参数,MS2有
+    //rt卷积窗口,一般设定为600或者800,一般来源于experimentDO对象,也可以在执行单独的卷积步骤自由设定
     Float rtExtractWindow;
 
-    //MS1和MS2的mzWindow是共用同一个的
+    //mz卷积窗口,一般设定为0.05或者0.03,一般来源于experimentDO对象,也可以在执行单独的卷积步骤自由设定
     Float mzExtractWindow;
 
+    //卷积实验的创建者
     String creator = "Admin";
 
+    //在计算高斯平滑时使用的Sigma值,一般为6.25
     Float sigma;
 
+    //在计算高斯平滑时使用的Sigma值,一般为0.01
     Float spacing;
 
+    //卷积实验的创建时间
     Date createDate;
 
+    //卷积实验的最后一次修改时间
     Date lastModifiedDate;
 
+    //最终计算所得的子分数的权重,LDA算法才有
     HashMap<String, Double> weights = new HashMap<>();
 
+    //最终计算鉴定到的肽段数目
     Integer matchedPeptideCount;
 
+    //最终卷积到的肽段数目
     Integer totalPeptideCount;
 
+    //对应标准库中的肽段数目
     Integer libraryPeptideCount;
 }

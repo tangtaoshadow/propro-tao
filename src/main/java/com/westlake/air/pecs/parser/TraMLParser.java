@@ -125,9 +125,6 @@ public class TraMLParser extends BaseLibraryParser {
             }
         }
 
-        // parse product interpretation
-            // TODO: transition.getProduct().getInterpretationList()
-
         // parse rt, sequence, full name, protein name from peptideMap
         Peptide peptide = peptideMap.get(transition.getPeptideRef());
         String rt = peptide.getRetentionTimeList().get(0).getCvParams().get(0).getValue();

@@ -5,11 +5,12 @@ import lombok.Data;
 @Data
 public class MatchedPeptide {
 
+    String id;
+    //蛋白质名称
     String proteinName;
 
+    //肽段名称_带电量,例如:SLMLSYN(UniMod:7)AITHLPAGIFR_3
     String peptideRef;
-
-    String analyseDataId;
 
     @Override
     public boolean equals(Object obj) {

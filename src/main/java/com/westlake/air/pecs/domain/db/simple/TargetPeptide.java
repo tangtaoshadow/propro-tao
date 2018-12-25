@@ -9,11 +9,11 @@ import java.util.HashMap;
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-07-17 10:16
+ * 具体的注释说明请参考PeptideDO类
  */
 @Data
 public class TargetPeptide {
 
-    //对应的peptide的Id,如果是MS1的则为对应的第一条transition的Id(一个MS1会对应多条transition记录)
     String id;
 
     String proteinName;
@@ -34,8 +34,8 @@ public class TargetPeptide {
 
     float rt;
 
+    //rtStart和rtEnd是在计算时使用的,并不会存在数据库中
     float rtStart;
-
     float rtEnd;
 
     /**
@@ -56,6 +56,7 @@ public class TargetPeptide {
         this.rt = peptide.getRt().floatValue();
     }
 
+    //根据PeptideDO构建其IntensityMap,key为cutInfo,value为对应的Intensity值
     public static HashMap<String, Float> buildIntensityMap(PeptideDO peptide){
         HashMap<String, Float> intensityMap = new HashMap<>();
         for(String cutInfo : peptide.getFragmentMap().keySet()){
@@ -64,6 +65,7 @@ public class TargetPeptide {
         return intensityMap;
     }
 
+    //根据自身构建IntensityMap,key为cutInfo,value为对应的Intensity值
     public HashMap<String, Float> buildIntensityMap(){
         HashMap<String, Float> intensityMap = new HashMap<>();
         for(String cutInfo : fragmentMap.keySet()){

@@ -74,13 +74,14 @@ public class Airus {
             return finalResult;
         }
         HashMap<String, Double> weightsMap = new HashMap<>();
-        if(airusParams.getLearner().equals(Learner.learner.LdaLearner)) {
+        HashMap<String, Integer> peptideHitMap = new HashMap<>();
+        if (airusParams.getLearner().equals(Learner.learner.LdaLearner)) {
             logger.info("开始训练学习数据权重");
-            weightsMap = LDALearn(scores, airusParams);
+            weightsMap = LDALearn(scores, peptideHitMap, airusParams);
             logger.info("开始计算合并打分");
             ldaLearner.score(scores, weightsMap);
             finalResult.setWeightsMap(weightsMap);
-        }else if(airusParams.getLearner().equals(Learner.learner.XgbLearner)){
+        } else if (airusParams.getLearner().equals(Learner.learner.XgbLearner)) {
 //            logger.info("开始训练XGBooster");
             XGBLearn(scores, airusParams);
         }
@@ -90,19 +91,34 @@ public class Airus {
 
         finalResult.setAllInfo(errorStat);
 
+        for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
+            if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getFdr() <= 0.01) {
+
+            }
+        }
+
         //对于最终的打分结果和选峰结果保存到数据库中
+        int hit = 0;
         for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
             AnalyseDataDO dataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
             dataDO.setBestRt(simpleFeatureScores.getRt());
             dataDO.setFdr(simpleFeatureScores.getFdr());
             if (!simpleFeatureScores.getIsDecoy()) {
-                dataDO.setIdentifiedStatus(simpleFeatureScores.getFdr() <= 0.01 ? AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS:AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
+                if(simpleFeatureScores.getFdr() <= 0.01){
+                    Integer count = peptideHitMap.get(simpleFeatureScores.getPeptideRef());
+                    if(count != null && count > 4){
+                        hit++;
+                    }
+                }
+
+                dataDO.setIdentifiedStatus(simpleFeatureScores.getFdr() <= 0.01 ? AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS : AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
             }
             ResultDO r = analyseDataService.update(dataDO);
-            if(r.isFailed()){
+            if (r.isFailed()) {
                 logger.error(r.getMsgInfo());
             }
         }
+        logger.info("采用加权法获得的肽段数目为:"+hit);
         logger.info("打分反馈更新完毕");
         int count = AirusUtil.checkFdr(finalResult);
         finalResult.setMatchedPeptideCount(count);
@@ -112,10 +128,10 @@ public class Airus {
             overviewDO.setWeights(weightsMap);
             overviewDO.setMatchedPeptideCount(count);
             analyseOverviewService.update(overviewDO);
-        }else{
+        } else {
             logger.error(overviewResult.getMsgInfo());
         }
-        logger.info("合并打分完成,共找到新肽段"+count+"个");
+        logger.info("合并打分完成,共找到新肽段" + count + "个");
         return finalResult;
     }
 
@@ -138,7 +154,7 @@ public class Airus {
         return new ResultDO(true);
     }
 
-    public HashMap<String, Double> LDALearn(List<SimpleScores> scores, AirusParams airusParams) {
+    public HashMap<String, Double> LDALearn(List<SimpleScores> scores, HashMap<String, Integer> peptideHitMap, AirusParams airusParams) {
         int neval = airusParams.getTrainTimes();
         List<HashMap<String, Double>> weightsMapList = new ArrayList<>();
         for (int i = 0; i < neval; i++) {
@@ -151,6 +167,16 @@ public class Airus {
             ldaLearner.score(scores, ldaLearnData.getWeightsMap());
             List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName());
             ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
+            for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
+                if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getFdr() <= 0.01) {
+                    Integer count = peptideHitMap.get(simpleFeatureScores.getPeptideRef());
+                    if(count == null){
+                        count = 0;
+                    }
+                    count++;
+                    peptideHitMap.put(simpleFeatureScores.getPeptideRef(), count);
+                }
+            }
             int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
             if (count > 0) {
                 logger.info("本轮尝试有效果:检测结果:" + count + "个");
@@ -165,13 +191,13 @@ public class Airus {
         return AirusUtil.averagedWeights(weightsMapList);
     }
 
-    public void XGBLearn(List<SimpleScores> scores, AirusParams airusParams){
+    public void XGBLearn(List<SimpleScores> scores, AirusParams airusParams) {
         logger.info("开始训练Booster");
         Booster booster = semiSupervised.learnRandomizedXGB(scores, airusParams);
         try {
             logger.info("开始最终打分");
             xgBoostLearner.predictAll(booster, scores, ScoreType.MainScore.getTypeName());
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("XGBooster Predict All Fail.\n");
             e.printStackTrace();
         }

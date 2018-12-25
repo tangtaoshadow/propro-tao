@@ -153,7 +153,7 @@ public class ChromatographicScorer {
 
     /**
      * xcorrMatrix的意义：sum(反斜向的元素)/data.length(3)
-     * 0   1   2
+     *      0   1   2
      * 0   |0  |1  |2
      * 1   |-1 |0  |1
      * 2   |-2 |-1 |0

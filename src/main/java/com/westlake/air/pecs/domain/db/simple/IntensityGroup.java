@@ -13,23 +13,19 @@ import java.util.List;
 @Data
 public class IntensityGroup {
 
+    //蛋白质名称
     String proteinName;
 
+    //肽段名称_带电量,例如:SLMLSYN(UniMod:7)AITHLPAGIFR_3
     String peptideRef;
 
-    /**
-     * 对应肽段的mz
-     */
+    //对应肽段的mz
     Float mz;
 
-    /**
-     * 对应肽段序列,如果是伪肽段,则为对应的伪肽段的序列(不包含UniModId)
-     */
+    //对应肽段序列,如果是伪肽段,则为对应的伪肽段的序列(不包含UniModId)
     String sequence;
 
-    /**
-     * key为cutInfo, value为对应的fragment的intensity值
-     */
+    //key为cutInfo, value为对应的fragment的intensity值
     HashMap<String, Float> intensityMap = new HashMap<>();
 
     @Override

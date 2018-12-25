@@ -12,8 +12,10 @@ import java.util.HashMap;
 @Data
 public class SimpleScanIndex {
 
+    //原始谱图对应的rt时间
     Float rt;
 
+    //key为位置的类型,详见PositionType类,value为对应的位置
     HashMap<String, Position> positionMap;
 
     public Long getPosStart(String key){

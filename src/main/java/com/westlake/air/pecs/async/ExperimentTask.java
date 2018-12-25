@@ -79,38 +79,33 @@ public class ExperimentTask extends BaseTask {
     }
 
     /**
-     * @param experimentDO
-     * @param libraryId
-     * @param slopeIntercept
-     * @param creator
-     * @param rtExtractWindow
-     * @param mzExtractWindow
+     * LumsParams 包含
+     * experimentDO
+     * libraryId
+     * slopeIntercept
+     * creator
+     * rtExtractWindow
+     * mzExtractWindow
+     * useEpps
+     * scoreTypes
+     * sigmaSpacing
+     * shapeScoreThreshold
+     * shapeScoreWeightThreshold
      * @return
      */
     @Async(value = "extractorExecutor")
-    public void extract(ExperimentDO experimentDO, String libraryId, SlopeIntercept slopeIntercept,SigmaSpacing ss, String creator, float rtExtractWindow, float mzExtractWindow, boolean useEpps, Float shapeScoreThreshold, HashSet<String> scoreTypes, TaskDO taskDO) {
+    public void extract(LumsParams lumsParams, TaskDO taskDO) {
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
-        LumsParams input = new LumsParams();
-        input.setExperimentDO(experimentDO);
-        input.setLibraryId(libraryId);
-        input.setSlopeIntercept(slopeIntercept);
-        input.setCreator(creator);
-        input.setRtExtractWindow(rtExtractWindow);
-        input.setMzExtractWindow(mzExtractWindow);
-        input.setUseEpps(useEpps);
-        input.setScoreTypes(scoreTypes);
-        input.setSigmaSpacing(ss);
-        input.setXcorrShapeThreshold(shapeScoreThreshold);
 
-        taskDO.addLog("录入有斜率:" + slopeIntercept.getSlope() + "截距:" + slopeIntercept.getIntercept());
-        taskDO.addLog("mz卷积窗口:" + mzExtractWindow + ",RT卷积窗口:" + rtExtractWindow);
-        taskDO.addLog("Sigma:" + ss.getSigma() + ",Spacing:" + ss.getSpacing());
-        taskDO.addLog("使用标准库ID:" + libraryId);
+        taskDO.addLog("录入有斜率:" + lumsParams.getSlopeIntercept().getSlope() + "截距:" + lumsParams.getSlopeIntercept().getIntercept());
+        taskDO.addLog("mz卷积窗口:" + lumsParams.getMzExtractWindow() + ",RT卷积窗口:" + lumsParams.getRtExtractWindow());
+        taskDO.addLog("Sigma:" + lumsParams.getSigmaSpacing().getSigma() + ",Spacing:" + lumsParams.getSigmaSpacing().getSpacing());
+        taskDO.addLog("使用标准库ID:" + lumsParams.getLibraryId());
         taskDO.addLog("入参准备完毕,开始卷积,时间可能较长");
         taskService.update(taskDO);
         long start = System.currentTimeMillis();
-        experimentService.extract(input);
+        experimentService.extract(lumsParams);
 
         taskDO.addLog("处理完毕,总耗时:" + (System.currentTimeMillis() - start));
         logger.info("处理完毕,总耗时:" + (System.currentTimeMillis() - start));

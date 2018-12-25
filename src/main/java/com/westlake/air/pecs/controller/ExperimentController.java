@@ -362,7 +362,8 @@ public class ExperimentController extends BaseController {
                      //打分相关的入参
                      @RequestParam(value = "sigma", required = false, defaultValue = "6.25") Float sigma,
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
-                     @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.7") Float shapeScoreThreshold,
+                     @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.6") Float shapeScoreThreshold,
+                     @RequestParam(value = "shapeScoreWeightThreshold", required = false, defaultValue = "0.8") Float shapeScoreWeightThreshold,
                      @RequestParam(value = "useEpps", required = false) Boolean useEpps,
                      HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
@@ -393,7 +394,21 @@ public class ExperimentController extends BaseController {
             si.setIntercept(intercept);
         }
         SigmaSpacing ss = new SigmaSpacing(sigma, spacing);
-        experimentTask.extract(resultDO.getModel(), libraryId, si, ss, creator, rtExtractWindow, mzExtractWindow, useEpps, shapeScoreThreshold, scoreTypes, taskDO);
+
+        LumsParams input = new LumsParams();
+        input.setExperimentDO(resultDO.getModel());
+        input.setLibraryId(libraryId);
+        input.setSlopeIntercept(si);
+        input.setCreator(creator);
+        input.setRtExtractWindow(rtExtractWindow);
+        input.setMzExtractWindow(mzExtractWindow);
+        input.setUseEpps(useEpps);
+        input.setScoreTypes(scoreTypes);
+        input.setSigmaSpacing(ss);
+        input.setXcorrShapeThreshold(shapeScoreThreshold);
+        input.setXcorrShapeWeightThreshold(shapeScoreWeightThreshold);
+
+        experimentTask.extract(input, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }
