@@ -26,6 +26,11 @@ public class AminoAcidDAO {
     List<AminoAcid> aminoAcidList = new ArrayList<>();
     HashMap<String, AminoAcid> codeAminoAcidMap = new HashMap<>();
 
+    /**
+     * 初始化氨基酸信息表
+     * 氨基酸文件来自于dbfile/AminoAcidData.json
+     * 本函数在系统启动时执行,将文件中的氨基酸信息读入内存中
+     */
     @PostConstruct
     public void init() {
         try {

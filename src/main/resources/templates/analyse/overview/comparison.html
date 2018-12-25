@@ -17,7 +17,8 @@
         <table class="table table-bordered table-hover" style="table-layout:fixed; text-align: center;">
             <thead>
             <tr>
-                <th width="30%">肽段名称</th>
+                <th width="5%">序号</th>
+                <th width="25%">肽段名称</th>
                 <th th:each="overview:${identifiesMap.keySet()}">
                     <span th:text="${overview.name}"></span><br>
                     <span th:text="${overview.id}"></span><br>
@@ -29,6 +30,7 @@
             </thead>
             <tbody>
             <tr th:each="peptide,status:${diffPeptides}">
+                <td th:text="${status.count}"></td>
                 <td th:text="${peptide.peptideRef}"></td>
                 <td th:each="overview:${identifiesMap.keySet()}">
                    <span th:if="${identifiesMap.get(overview).get(status.index)}"

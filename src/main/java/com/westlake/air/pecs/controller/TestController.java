@@ -1,9 +1,12 @@
 package com.westlake.air.pecs.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.algorithm.FragmentFactory;
 import com.westlake.air.pecs.async.LumsTask;
+import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
@@ -19,6 +22,7 @@ import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.service.*;
+import com.westlake.air.pecs.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,7 +30,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -121,13 +128,13 @@ public class TestController extends BaseController {
         query.setFdrEnd(0.01);
         query.setIsDecoy(false);
         List<AnalyseDataDO> dataList = analyseDataService.getAll(query);
-        logger.info("总计识别肽段:"+dataList.size()+"个");
+        logger.info("总计识别肽段:" + dataList.size() + "个");
         int count = 0;
-        for(AnalyseDataDO data : dataList){
-            for(FeatureScores featureScores : data.getFeatureScoresList()){
-                if(featureScores.getRt().equals(data.getBestRt())){
-                    if(featureScores.get(ScoreType.XcorrShapeWeighted) < 0.7 && featureScores.get(ScoreType.XcorrShape) < 0.7){
-                        logger.info("该肽段异常:"+data.getPeptideRef());
+        for (AnalyseDataDO data : dataList) {
+            for (FeatureScores featureScores : data.getFeatureScoresList()) {
+                if (featureScores.getRt().equals(data.getBestRt())) {
+                    if (featureScores.get(ScoreType.XcorrShapeWeighted) < 0.7 && featureScores.get(ScoreType.XcorrShape) < 0.7) {
+                        logger.info("该肽段异常:" + data.getPeptideRef());
                         count++;
                     }
                     break;
@@ -135,7 +142,7 @@ public class TestController extends BaseController {
             }
         }
 
-        return count+"";
+        return count + "";
 
     }
 
@@ -143,12 +150,27 @@ public class TestController extends BaseController {
     @ResponseBody
     String test8(Model model, RedirectAttributes redirectAttributes) throws IOException {
 
-        logger.info("开始重新卷积并且打分");
-        TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_RECONV_WORKFLOW, "OverviewId:5c10e7f8cb15b6176029bbef");
-        taskService.insert(taskDO);
+        AnalyseDataQuery query = new AnalyseDataQuery();
+        query.setIsDecoy(false);
+        query.setFdrEnd(0.01);
+        query.setOverviewId("5c1c9a5acb15b6bb244d985e");
+        query.setSortColumn("fdr");
+        query.setPageSize(5000);
+        ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
 
-        lumsTask.swathForReconv("5c10e7f8cb15b6176029bbef", taskDO);
 
+        File file = new File("D://MatchedPeptide.txt");
+        file.createNewFile();
+        StringBuilder content = new StringBuilder();
+        for (AnalyseDataDO data : resultDO.getModel()) {
+            content.append(data.getPeptideRef()).append(",").append(data.getBestRt()).append("\r\n");
+        }
+
+        byte[] b = content.toString().getBytes();
+        int l = b.length;
+        OutputStream os = new FileOutputStream(file);
+        os.write(b, 0, l);
+        os.close();
         return "success";
     }
 }
