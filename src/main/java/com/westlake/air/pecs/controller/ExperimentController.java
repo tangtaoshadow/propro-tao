@@ -355,13 +355,14 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "id", required = true) String id,
                      @RequestParam(value = "creator", required = false) String creator,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
-                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "1200") Float rtExtractWindow,
+                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "800") Float rtExtractWindow,
                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
                      @RequestParam(value = "slope", required = false) Double slope,
                      @RequestParam(value = "intercept", required = false) Double intercept,
                      //打分相关的入参
                      @RequestParam(value = "sigma", required = false, defaultValue = "6.25") Float sigma,
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
+                     @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.7") Float shapeScoreThreshold,
                      @RequestParam(value = "useEpps", required = false) Boolean useEpps,
                      HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
@@ -392,7 +393,7 @@ public class ExperimentController extends BaseController {
             si.setIntercept(intercept);
         }
         SigmaSpacing ss = new SigmaSpacing(sigma, spacing);
-        experimentTask.extract(resultDO.getModel(), libraryId, si, ss, creator, rtExtractWindow, mzExtractWindow, useEpps, scoreTypes, taskDO);
+        experimentTask.extract(resultDO.getModel(), libraryId, si, ss, creator, rtExtractWindow, mzExtractWindow, useEpps, shapeScoreThreshold, scoreTypes, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }

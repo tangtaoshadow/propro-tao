@@ -72,7 +72,7 @@
                                 <div class="col-10">
                                     <input type="text" class="form-control m-input" id="rtExtractWindow"
                                            name="rtExtractWindow" th:value="${rtExtractWindow}">
-                                    <span class="m-form__help">默认为1200</span>
+                                    <span class="m-form__help">默认为800</span>
                                 </div>
                             </div>
                             <div class="form-group m-form__group row">
@@ -147,6 +147,15 @@
                                     <input type="text" class="form-control m-input" id="spacing" name="spacing"
                                            th:value="${spacing}">
                                     <span class="m-form__help">如果要打分,请设定,默认为0.01</span>
+                                </div>
+                            </div>
+                            <div class="form-group m-form__group row">
+                                <label for="intercept" class="col-2 col-form-label">
+                                    Shape分硬筛选条件,默认为0.7
+                                </label>
+                                <div class="col-10">
+                                    <input type="text" class="form-control m-input" id="shapeScoreThreshold" name="shapeScoreThreshold"
+                                           th:value="${shapeScoreThreshold}">
                                 </div>
                             </div>
                             <div class="m-form__group form-group row">

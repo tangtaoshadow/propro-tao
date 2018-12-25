@@ -88,7 +88,7 @@ public class ExperimentTask extends BaseTask {
      * @return
      */
     @Async(value = "extractorExecutor")
-    public void extract(ExperimentDO experimentDO, String libraryId, SlopeIntercept slopeIntercept,SigmaSpacing ss, String creator, float rtExtractWindow, float mzExtractWindow, boolean useEpps, HashSet<String> scoreTypes, TaskDO taskDO) {
+    public void extract(ExperimentDO experimentDO, String libraryId, SlopeIntercept slopeIntercept,SigmaSpacing ss, String creator, float rtExtractWindow, float mzExtractWindow, boolean useEpps, Float shapeScoreThreshold, HashSet<String> scoreTypes, TaskDO taskDO) {
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         LumsParams input = new LumsParams();
@@ -101,6 +101,7 @@ public class ExperimentTask extends BaseTask {
         input.setUseEpps(useEpps);
         input.setScoreTypes(scoreTypes);
         input.setSigmaSpacing(ss);
+        input.setXcorrShapeThreshold(shapeScoreThreshold);
 
         taskDO.addLog("录入有斜率:" + slopeIntercept.getSlope() + "截距:" + slopeIntercept.getIntercept());
         taskDO.addLog("mz卷积窗口:" + mzExtractWindow + ",RT卷积窗口:" + rtExtractWindow);

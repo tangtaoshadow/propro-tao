@@ -49,6 +49,11 @@ public class LumsParams {
      */
     boolean useEpps = false;
 
+    /**
+     * shape的筛选阈值,一般建议在0.7左右
+     */
+    Float xcorrShapeThreshold;
+
     public LumsParams(){
         scoreTypes.add(ScoreType.IntensityScore.getTypeName());
         scoreTypes.add(ScoreType.LibraryCorr.getTypeName());

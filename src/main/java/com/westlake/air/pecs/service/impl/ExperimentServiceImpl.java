@@ -659,6 +659,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         overviewDO.setMzExtractWindow(input.getMzExtractWindow());
         overviewDO.setSigma(input.getSigmaSpacing().getSigma());
         overviewDO.setSpacing(input.getSigmaSpacing().getSpacing());
+        overviewDO.setShapeScoreThreshold(input.getXcorrShapeThreshold());
         if (input.getSlopeIntercept() != null) {
             overviewDO.setSlope(input.getSlopeIntercept().getSlope());
             overviewDO.setIntercept(input.getSlopeIntercept().getIntercept());

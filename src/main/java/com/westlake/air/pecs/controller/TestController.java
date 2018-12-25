@@ -126,7 +126,7 @@ public class TestController extends BaseController {
         for(AnalyseDataDO data : dataList){
             for(FeatureScores featureScores : data.getFeatureScoresList()){
                 if(featureScores.getRt().equals(data.getBestRt())){
-                    if(featureScores.get(ScoreType.XcorrShapeWeighted) < 0.9){
+                    if(featureScores.get(ScoreType.XcorrShapeWeighted) < 0.7 && featureScores.get(ScoreType.XcorrShape) < 0.7){
                         logger.info("该肽段异常:"+data.getPeptideRef());
                         count++;
                     }

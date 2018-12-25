@@ -38,6 +38,8 @@ public class AnalyseOverviewDO extends BaseDO {
 
     Double intercept;
 
+    Float shapeScoreThreshold;
+
     //MS1是全光谱扫描的.没有RTwindow的参数,MS2有
     Float rtExtractWindow;
 

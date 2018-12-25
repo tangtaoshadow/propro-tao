@@ -4,6 +4,7 @@ import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
+import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.utils.ConvolutionUtil;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.slf4j.Logger;
@@ -60,24 +61,21 @@ public class FeatureFinder {
             if (chrPeakIndex[0] == -1 || chrPeakIndex[1] == -1) {
                 break;
             }
-//TODO origin code error
-//            double bestLeftRt = intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]];
-//            double bestRightRt = intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]];
             double peakApex = pickedChroms.get(chrPeakIndex[0]).getRtArray()[chrPeakIndex[1]];
 
-            double bestLeft = (double) (Float.parseFloat(Double.toString(intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]])));
-            double bestRight = (double) (Float.parseFloat(Double.toString(intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]])));
+            double bestLeft = intensityLeftRight.get(chrPeakIndex[0]).getRtLeftArray()[chrPeakIndex[1]];
+            double bestRight = intensityLeftRight.get(chrPeakIndex[0]).getRtRightArray()[chrPeakIndex[1]];
 
             RtIntensityPairsDouble rtInt = pickedChroms.get(chrPeakIndex[0]);
             Double[] intensityArray = rtInt.getIntensityArray();
             intensityArray[chrPeakIndex[1]] = 0.0d;
-//            rtInt.setIntensityArray(intensityArray);
-//            pickedChroms.set(chrPeakIndex[0], rtInt);
-
             removeOverlappingFeatures(pickedChroms, bestLeft, bestRight, intensityLeftRight);
 
             RtIntensityPairsDouble masterChromatogram = new RtIntensityPairsDouble(chromatograms.get(chrPeakIndex[0]));
 
+            PeakGroup peakGroup = new PeakGroup();
+            peakGroup.setRt(peakApex);
+            peakGroup.setTotalXic(totalXic);
             List<ExperimentFeature> mrmFeature = new ArrayList<>();
             double sum = 0.0d;
             for (int i = 0; i < chromatograms.size(); i++) {
@@ -88,6 +86,7 @@ public class FeatureFinder {
                 sum += feature.getIntensity();
                 mrmFeature.add(feature);
             }
+            peakGroup.setIntensitySum(sum);
             for (ExperimentFeature feature : mrmFeature) {
                 feature.setTotalXic(totalXic);
                 feature.setIntensitySum(sum);
@@ -202,9 +201,6 @@ public class FeatureFinder {
         Double[] rtArray = chromatogram.getRtArray();
         Double[] intArray = chromatogram.getIntensityArray();
 
-        int peakNum = 0;
-        float deltaRt, interpolIntensity;
-//        float intensityIntegral = 0.0f;
         double peakApexDist = Math.abs(rtArray[0] - peakApexRt);
         double peakApexInt = 0.0d;
         List<Double> hullRt = new ArrayList<>();
@@ -213,15 +209,6 @@ public class FeatureFinder {
         for (int i = 0; i < chromatogram.getRtArray().length; i++) {
             //TODO error in original code
             if (rtArray[i] > bestLeft && rtArray[i] < bestRight) {
-//                if(peakNum == 0 && i != 0){
-//                    deltaRt = rtArray[i] - bestLeftRt;
-//                    interpolIntensity = linearInterpolate(bestLeftRt, rtArray[i-1], rtArray[i], intArray[i-1], intArray[i]);
-//                    intensityIntegral += (interpolIntensity + intArray[i]) / 2.0f * deltaRt;
-//                }
-//                if(peakNum > 0){
-//                    deltaRt = rtArray[i] - rtArray[i-1];
-//                    intensityIntegral += (intArray[i-1] + intArray[i]) / 2.0f * deltaRt;
-//                }
                 hullRt.add(rtArray[i]);
                 hullInt.add(intArray[i]);
                 if (Math.abs(rtArray[i] - peakApexRt) <= peakApexDist) {
@@ -229,14 +216,6 @@ public class FeatureFinder {
                     peakApexInt = intArray[i];
                 }
                 intSum += intArray[i];
-
-                peakNum++;
-//            }else if(peakNum > 0){
-//                deltaRt = bestRightRt - rtArray[i-1];
-//                interpolIntensity = linearInterpolate(bestRightRt, rtArray[i-1], rtArray[i], intArray[i-1], intArray[i]);
-//                intensityIntegral += (intArray[i-1] + interpolIntensity)/2.0 * deltaRt;
-//                break;
-//            }
             }
         }
         ExperimentFeature feature = new ExperimentFeature();

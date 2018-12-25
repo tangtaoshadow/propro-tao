@@ -34,6 +34,12 @@
                     <th width="5%">
                         RT/MZ卷积窗口
                     </th>
+                    <th width="5%">
+                        Sigma/Spacing
+                    </th>
+                    <th width="5%">
+                        ShapeScore阈值
+                    </th>
                     <th width="10%">
                         创建时间
                     </th>
@@ -46,7 +52,7 @@
                     <th width="5%">
                         创建人
                     </th>
-                    <th width="30%">
+                    <th width="25%">
                         操作
                     </th>
                 </tr>
@@ -58,6 +64,8 @@
                     <td th:text="${overview.expName}"></td>
                     <td th:text="${overview.libraryName}"></td>
                     <td th:text="|${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></td>
+                    <td th:text="|${overview.sigma}/${overview.spacing}|"></td>
+                    <td th:text="|${overview.shapeScoreThreshold}|"></td>
                     <td th:text="${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="|${overview.slope}/${overview.intercept}|"></td>
                     <td th:text="|${overview.matchedPeptideCount}/${overview.totalPeptideCount}/${overview.libraryPeptideCount}|"></td>

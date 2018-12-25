@@ -116,19 +116,6 @@ public class AnalyseController extends BaseController {
 
         if (resultDO.isSuccess()) {
             model.addAttribute("overview", resultDO.getModel());
-            AnalyseDataQuery query = new AnalyseDataQuery(id);
-            query.setIsDecoy(true);
-            Long decoyCount = analyseDataService.count(query);
-            query.setIsDecoy(false);
-            Long realCount = analyseDataService.count(query);
-            ResultDO<LibraryDO> resLib = libraryService.getById(resultDO.getModel().getLibraryId());
-            if (resLib.isFailed()) {
-                model.addAttribute(ERROR_MSG, resLib.getMsgInfo());
-                model.addAttribute("rate", decoyCount + "/" + realCount);
-            } else {
-                model.addAttribute("rate", decoyCount + "/" + realCount + "/" + resLib.getModel().getTotalTargetCount());
-            }
-
             model.addAttribute("slopeIntercept", resultDO.getModel().getSlope() + "/" + resultDO.getModel().getIntercept());
             return "/analyse/overview/detail";
         } else {
@@ -351,11 +338,14 @@ public class AnalyseController extends BaseController {
                               @RequestParam(value = "dataId", required = false, defaultValue = "") String dataId,
                               @RequestParam(value = "cutInfo", required = false) String cutInfo) {
         ResultDO<AnalyseDataDO> dataResult = null;
+        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
         if (dataId != null && !dataId.isEmpty() && !dataId.equals("null")) {
             dataResult = analyseDataService.getById(dataId);
+        }else{
+            resultDO.setErrorResult(ResultCode.ANALYSE_DATA_ID_CANNOT_BE_EMPTY);
+            return resultDO;
         }
 
-        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
         if (dataResult.isFailed()) {
             resultDO.setErrorResult(ResultCode.ANALYSE_DATA_NOT_EXISTED);
             return resultDO;
@@ -539,7 +529,6 @@ public class AnalyseController extends BaseController {
             return "/analyse/data/consultation";
         }
 
-
         //覆盖之前的参数
         model.addAttribute("peptideRef", targetPeptideRef);
         model.addAttribute("expId", targetExpId);
@@ -565,6 +554,10 @@ public class AnalyseController extends BaseController {
         //准备该肽段的其他互补离子
         if (!noUseForFill) {
             HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, limitLength);
+            if(bySeriesMap == null){
+                model.addAttribute(ERROR_MSG, ResultCode.FRAGMENT_LENGTH_IS_TOO_LONG.getMessage());
+                return "/analyse/data/consultation";
+            }
             if (noUseForLib) {
                 peptide.getFragmentMap().clear();
             }
@@ -589,11 +582,11 @@ public class AnalyseController extends BaseController {
         //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
         FeatureByPep featureByPep = featureExtractor.getExperimentFeature(newDataDO, intensityMap, new SigmaSpacing(sigma, spacing));
         if (featureByPep.isFeatureFound()) {
-            HashMap<Double, Double> rtShapeScoreMap = new HashMap<>();
+            TreeMap<Double, Double> rtShapeScoreMap = new TreeMap<>();
             for (List<ExperimentFeature> experimentFeatureList : featureByPep.getExperimentFeatures()) {
                 FeatureScores featureScores = new FeatureScores();
                 chromatographicScorer.calculateChromatographicScores(experimentFeatureList, featureByPep.getLibraryIntensityList(), featureScores, null);
-                rtShapeScoreMap.put(experimentFeatureList.get(0).getRt(), featureScores.get(ScoreType.XcorrShapeWeighted));
+                rtShapeScoreMap.put(experimentFeatureList.get(0).getRt(), featureScores.get(ScoreType.XcorrShape));
             }
             model.addAttribute("rtShapeScoreMap", rtShapeScoreMap);
         } else {

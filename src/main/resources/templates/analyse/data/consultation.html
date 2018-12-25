@@ -94,7 +94,7 @@
                                         碎片最小长度:
                                     </button>
                                 </div>
-                                <input type="text" class="form-control m-input" name="limitLength"
+                                <input type="number" th:max="${peptide?.sequence?.length()}" class="form-control m-input" name="limitLength"
                                        th:value="${limitLength}">
                             </div>
                             <div class="input-group col-lg-2">
@@ -279,7 +279,7 @@
                                name="precursorMz">
                         <input id="experimentId" type="hidden" th:value="${expId}" class="form-control" name="expId">
                         <div class="form-group m-form__group row">
-                            <label for="id" class="col-3 col-form-label">
+                            <label for="fragmentSequence" class="col-3 col-form-label">
                                 肽段片段
                             </label>
                             <div class="col-9">
