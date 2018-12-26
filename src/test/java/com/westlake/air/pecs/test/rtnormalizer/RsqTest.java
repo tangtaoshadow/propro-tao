@@ -1,9 +1,9 @@
 package com.westlake.air.pecs.test.rtnormalizer;
 
-import com.westlake.air.pecs.domain.bean.score.RtPair;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.test.BaseTest;
 import com.westlake.air.pecs.utils.MathUtil;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
 import org.junit.Test;
@@ -29,11 +29,9 @@ public class RsqTest extends BaseTest {
         double[] rt2 = {
                 6.1, 106, -5.75181, 23.6, 78.7, 154.8, 13.1, 43.1, 113.6, 36.4, 64.6, 54.3, 97.9, 127.2, 137.8, 82.7, -23.64895
         };
-        List<RtPair> pairs = new ArrayList<>();
+        List<Pair<Double,Double>> pairs = new ArrayList<>();
         for(int i=0; i<rt1.length; i++){
-            RtPair rtPair = new RtPair();
-            rtPair.setExpRt(rt1[i]);
-            rtPair.setTheoRt(rt2[i]);
+            Pair<Double,Double> rtPair = Pair.of(rt2[i], rt1[i]);
             pairs.add(rtPair);
         }
 
@@ -51,10 +49,10 @@ public class RsqTest extends BaseTest {
 
     }
 
-    private SlopeIntercept fitRTPairs(List<RtPair> rtPairs){
+    private SlopeIntercept fitRTPairs(List<Pair<Double,Double>> rtPairs){
         WeightedObservedPoints obs = new WeightedObservedPoints();
-        for(RtPair rtPair:rtPairs){
-            obs.add(rtPair.getExpRt(),rtPair.getTheoRt());
+        for(Pair<Double,Double> rtPair:rtPairs){
+            obs.add(rtPair.getRight(),rtPair.getLeft());
         }
         PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
         double[] coeff = fitter.fit(obs.toList());

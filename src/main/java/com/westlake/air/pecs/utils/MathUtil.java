@@ -4,7 +4,7 @@ import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
-import com.westlake.air.pecs.domain.bean.score.RtPair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +20,7 @@ public class MathUtil {
 
     public static final Logger logger = LoggerFactory.getLogger(MathUtil.class);
 
-    public static double getRsq(List<RtPair> pairs) {
+    public static double getRsq(List<Pair<Double,Double>> pairs) {
         double sigmaX = 0d;
         double sigmaY = 0d;
         double sigmaXSquare = 0d;
@@ -29,8 +29,8 @@ public class MathUtil {
         double x, y;
         int n = pairs.size();
         for (int i = 0; i < n; i++) {
-            x = pairs.get(i).getExpRt();
-            y = pairs.get(i).getTheoRt();
+            x = pairs.get(i).getRight();//ExpRt
+            y = pairs.get(i).getLeft();//TheoryRt
             sigmaX += x;
             sigmaY += y;
             sigmaXY += x * y;
