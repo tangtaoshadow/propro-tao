@@ -103,7 +103,7 @@ public class DIAScorer {
             List<Double> isotopesIntList = new ArrayList<>();
             double maxIntensity = 0.0d;
             for (int iso = 0; iso <= Constants.DIA_NR_ISOTOPES; iso++) {
-                Double left = productChargeMap.get(cutInfo) + iso * Constants.C13C12_MASSDIFF_U / putativeFragmentCharge;
+                Double left = productMzMap.get(cutInfo) + iso * Constants.C13C12_MASSDIFF_U / putativeFragmentCharge;
                 Double right = left;
                 left -= Constants.DIA_EXTRACT_WINDOW / 2d;
                 right += Constants.DIA_EXTRACT_WINDOW / 2d;

@@ -68,6 +68,9 @@ public class MathUtil {
     }
 
     public static BisectionLowHigh bisection(Double[] x, double value) {
+        if(x.length ==1){
+            return new BisectionLowHigh(0,0);
+        }
         BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
         int high = x.length - 1;
         int low = 0;

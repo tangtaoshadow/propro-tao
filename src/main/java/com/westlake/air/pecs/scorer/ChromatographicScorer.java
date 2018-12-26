@@ -4,9 +4,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.analyse.PeptideSpectrum;
-import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
-import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.utils.MathUtil;
@@ -50,7 +48,7 @@ public class ChromatographicScorer {
         List<Double> intensitiesWeighted = new ArrayList<>();
         Double[] value;
         int max;
-        int size = peakGroup.getIonApexInt().size();
+        int size = peakGroup.getIonHullInt().size();
         for (int i = 0; i < size; i++) {
             value = xcorrMatrix.get(i, i);
             max = MathUtil.findMaxIndex(value);

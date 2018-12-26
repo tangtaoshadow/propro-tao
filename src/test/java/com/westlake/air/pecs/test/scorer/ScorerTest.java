@@ -4,11 +4,9 @@ package com.westlake.air.pecs.test.scorer;
 import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.analyse.PeptideSpectrum;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
-import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
-import com.westlake.air.pecs.parser.model.traml.Peptide;
 import com.westlake.air.pecs.scorer.ChromatographicScorer;
 import com.westlake.air.pecs.scorer.DIAScorer;
 import com.westlake.air.pecs.scorer.ElutionScorer;
@@ -16,7 +14,6 @@ import com.westlake.air.pecs.scorer.LibraryScorer;
 import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
 
 import java.util.*;
 import java.util.zip.DeflaterOutputStream;
@@ -40,7 +37,6 @@ public class ScorerTest extends BaseTest {
     @Test
     public void calcChromatogramScoreTest(){
         System.out.println("------ Chromatogram Score Test ------");
-        //List<RtIntensityPairsDouble> chromatograms, List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, List<double[]> signalToNoiseList, FeatureScores scores
         List<RtIntensityPairsDouble> chromatograms = new ArrayList<>();
         PeakGroup peakGroup = prepareChromatogramTestFeature();
         List<Double> libraryIntensity = new ArrayList<>();
@@ -63,7 +59,6 @@ public class ScorerTest extends BaseTest {
     @Test
     public void calcLibraryScoreTest(){
         System.out.println("------ Library Score Test ------");
-        //List<ExperimentFeature> experimentFeatures, List<Float> libraryIntensity, FeatureScores scores
         PeakGroup peakGroup = prepareLibraryTestFeature();
 
         List<Double> libraryIntensity = new ArrayList<>();
@@ -90,8 +85,6 @@ public class ScorerTest extends BaseTest {
 
     @Test
     public void calcLogSnScoreTest(){
-
-        //List<RtIntensityPairsDouble> chromatograms, List<ExperimentFeature> experimentFeatures, List<double[]> signalToNoiseList, FeatureScores scores
         double[] stn1 = {500};
         double[] stn2 = {1500};
         HashMap<String, double[]> signalToNoiseMap = new HashMap<>();
@@ -112,11 +105,11 @@ public class ScorerTest extends BaseTest {
 
     @Test
     public void calcNormRtScoreTest(){
-        //List<ExperimentFeature> experimentFeatures, SlopeIntercept slopeIntercept, double groupRt, FeatureScores scores
         PeakGroup peakGroup1 = prepareNormRtTestFeature().get(0);
         PeakGroup peakGroup2 = prepareNormRtTestFeature().get(1);
         SlopeIntercept slopeIntercept = new SlopeIntercept();
         slopeIntercept.setSlope(1d);
+        slopeIntercept.setIntercept(0d);
         FeatureScores scores = new FeatureScores();
         libraryScorer.calculateNormRtScore(peakGroup1, slopeIntercept, 100, scores);
         assert isSimilar(scores.get(ScoreType.NormRtScore), 0d, Math.pow(10, -6));
@@ -144,8 +137,7 @@ public class ScorerTest extends BaseTest {
 
     @Test
     public void calcDiaIsotopeScoreTest(){
-        //List<ExperimentFeature> experimentFeatures, List<Double> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Integer> productCharge, FeatureScores scores
-        //List<ExperimentFeature> experimentFeatures = ;
+
         Float[] spectrumMzArray = prepareDIASpectrum().get(0);
         Float[] spectrumIntArray = prepareDIASpectrum().get(1);
         HashMap<String, Double> productMzMap = new HashMap<>();
@@ -156,6 +148,7 @@ public class ScorerTest extends BaseTest {
         ionIntensityMap.put("1", 0.3D);
         ionIntensityMap.put("2", 0.7D);
         peakGroup.setIonIntensity(ionIntensityMap);
+        peakGroup.setPeakGroupInt(1D);
         HashMap<String,Integer> productChargeMap = new HashMap<>();
         productChargeMap.put("1",1);
         productChargeMap.put("2",1);

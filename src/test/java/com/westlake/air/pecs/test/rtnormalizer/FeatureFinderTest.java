@@ -2,7 +2,6 @@ package com.westlake.air.pecs.test.rtnormalizer;
 
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.feature.*;
 import com.westlake.air.pecs.test.BaseTest;

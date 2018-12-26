@@ -4,7 +4,6 @@ import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.PeptideSpectrum;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
-import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.apache.commons.lang3.tuple.Pair;

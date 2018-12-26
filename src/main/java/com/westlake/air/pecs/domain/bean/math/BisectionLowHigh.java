@@ -13,4 +13,12 @@ public class BisectionLowHigh {
 
     int high;
 
+    public BisectionLowHigh(int low, int high){
+        this.low = low;
+        this.high = high;
+    }
+
+    public BisectionLowHigh(){
+    }
+
 }

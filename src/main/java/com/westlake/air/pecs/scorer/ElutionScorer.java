@@ -4,7 +4,6 @@ import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.score.EmgModelParams;
-import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.utils.MathUtil;
@@ -88,7 +87,7 @@ public class ElutionScorer {
             }
             avgScore += fScore;
         }
-        avgScore /= peakGroupFeature.getIonApexInt().size();
+        avgScore /= peakGroupFeature.getIonHullInt().size();
 
         scores.put(ScoreType.ElutionModelFitScore, avgScore);
     }
