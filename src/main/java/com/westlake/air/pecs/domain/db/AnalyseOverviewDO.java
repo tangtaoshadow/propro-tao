@@ -44,8 +44,10 @@ public class AnalyseOverviewDO extends BaseDO {
     //使用的截距,一般来源于experimentDO对象,也可以在执行单独的卷积步骤自由设定
     Double intercept;
 
-    //在打分时设定的shape分的阈值,包含XCorreShape与XCorreShapeWeight两个打分,如果低于这个阈值的峰组会被直接忽略掉,从而节省运算时间
+    //在打分时设定的shape分的阈值,如果低于这个阈值的峰组会被直接忽略掉,从而节省运算时间
     Float shapeScoreThreshold;
+    //在打分时设定的shapeWeight分的阈值,如果低于这个阈值的峰组会被直接忽略掉,从而节省运算时间
+    Float shapeScoreWeightThreshold;
 
     //rt卷积窗口,一般设定为600或者800,一般来源于experimentDO对象,也可以在执行单独的卷积步骤自由设定
     Float rtExtractWindow;

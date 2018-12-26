@@ -12,21 +12,21 @@ import java.util.List;
  * Time: 2018-08-20 16:08
  */
 @Data
-public class FeatureByPep {
+public class PeptideFeature {
     boolean featureFound;
 
     PeptideSpectrum peptideSpectrum;
 
-    List<PeakGroup> peakGroupFeatureList;
+    List<PeakGroup> peakGroupList;
 
     List<Double> libraryIntensityList;
 
     HashMap<String, double[]> noise1000Map;
 
-    public FeatureByPep() {
+    public PeptideFeature() {
     }
 
-    public FeatureByPep(boolean isFeatureFound) {
+    public PeptideFeature(boolean isFeatureFound) {
         this.featureFound = isFeatureFound;
     }
 }

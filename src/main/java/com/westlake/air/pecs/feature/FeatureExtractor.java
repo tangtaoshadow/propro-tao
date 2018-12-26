@@ -1,9 +1,7 @@
 package com.westlake.air.pecs.feature;
 
-import com.google.common.collect.Lists;
 import com.westlake.air.pecs.domain.bean.analyse.*;
-import com.westlake.air.pecs.domain.bean.score.ExperimentFeature;
-import com.westlake.air.pecs.domain.bean.score.FeatureByPep;
+import com.westlake.air.pecs.domain.bean.score.PeptideFeature;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
@@ -62,7 +60,7 @@ public class FeatureExtractor {
      * @param sigmaSpacing
      * @return
      */
-    public FeatureByPep getExperimentFeature(AnalyseDataDO dataDO, HashMap<String, Float> intensityMap, SigmaSpacing sigmaSpacing) {
+    public PeptideFeature getExperimentFeature(AnalyseDataDO dataDO, HashMap<String, Float> intensityMap, SigmaSpacing sigmaSpacing) {
         boolean featureFound = true;
         if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() == 0) {
             featureFound = false;
@@ -93,7 +91,7 @@ public class FeatureExtractor {
         }
 
         if (intensitiesMap.size() == 0) {
-            return new FeatureByPep(false);
+            return new PeptideFeature(false);
         }
 
         //计算GaussFilter
@@ -128,12 +126,12 @@ public class FeatureExtractor {
         }
 
         if (intensitiesMap.size() == 0) {
-            return new FeatureByPep(false);
+            return new PeptideFeature(false);
         }
         List<PeakGroup> peakGroupFeatureList = featureFinder.findFeatures(peptideSpectrum, ionPeaks, ionPeakParams);
 
-        FeatureByPep featureResult = new FeatureByPep(featureFound);
-        featureResult.setPeakGroupFeatureList(peakGroupFeatureList);
+        PeptideFeature featureResult = new PeptideFeature(featureFound);
+        featureResult.setPeakGroupList(peakGroupFeatureList);
         featureResult.setLibraryIntensityList(libraryIntensityList);
         featureResult.setPeptideSpectrum(peptideSpectrum);
         featureResult.setNoise1000Map(noise1000Map);

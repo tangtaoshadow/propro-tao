@@ -623,13 +623,15 @@ public class ExperimentServiceImpl implements ExperimentService {
                 intArray[i] = acc;
             }
 
-            dataDO.getMzMap().put(fi.getCutInfo(), fi.getMz().floatValue());
+
             if (isAllZero) {
-                dataDO.getIntensityMap().put(fi.getCutInfo(), null);
+                continue;
+//                dataDO.getIntensityMap().put(fi.getCutInfo(), null);
             } else {
                 isHit = true;
                 dataDO.getIntensityMap().put(fi.getCutInfo(), intArray);
             }
+            dataDO.getMzMap().put(fi.getCutInfo(), fi.getMz().floatValue());
         }
 
         //如果所有的片段均没有卷积到结果,则直接返回null
@@ -640,6 +642,11 @@ public class ExperimentServiceImpl implements ExperimentService {
         return dataDO;
     }
 
+    /**
+     * 根据input入参初始化一个AnalyseOverviewDO
+     * @param input
+     * @return
+     */
     private AnalyseOverviewDO createOverview(LumsParams input) {
         //创建实验初始化概览数据
         AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
@@ -660,6 +667,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         overviewDO.setSigma(input.getSigmaSpacing().getSigma());
         overviewDO.setSpacing(input.getSigmaSpacing().getSpacing());
         overviewDO.setShapeScoreThreshold(input.getXcorrShapeThreshold());
+        overviewDO.setShapeScoreWeightThreshold(input.getXcorrShapeWeightThreshold());
         if (input.getSlopeIntercept() != null) {
             overviewDO.setSlope(input.getSlopeIntercept().getSlope());
             overviewDO.setIntercept(input.getSlopeIntercept().getIntercept());

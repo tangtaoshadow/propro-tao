@@ -1,8 +1,8 @@
 package com.westlake.air.pecs.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.algorithm.FragmentFactory;
 import com.westlake.air.pecs.async.ScoreTask;
@@ -560,8 +560,7 @@ public class AnalyseController extends BaseController {
             }
             for (String cutInfo : bySeriesMap.keySet()) {
                 if (peptide.getFragmentMap().get(cutInfo) == null) {
-                    String cutInfoTemp = cutInfo.replace("i", "");
-                    peptide.getFragmentMap().put(cutInfo, new FragmentInfo(cutInfo, bySeriesMap.get(cutInfo), 0d, cutInfoTemp.contains("^") ? Integer.parseInt(cutInfoTemp.split("\\^")[1]) : 1));
+                    peptide.getFragmentMap().put(cutInfo, new FragmentInfo(cutInfo, bySeriesMap.get(cutInfo), 0d, cutInfo.contains("^") ? Integer.parseInt(cutInfo.split("\\^")[1]) : 1));
                 }
                 cutInfoFromGuess.add(cutInfo);
             }
@@ -573,16 +572,24 @@ public class AnalyseController extends BaseController {
             return "/analyse/data/consultation";
         }
         AnalyseDataDO newDataDO = dataRealResult.getModel();
+        HashMap<String, Float> mzMap = newDataDO.getMzMap();
 
+        List<String> existedCutInfoList = Lists.newArrayList(peptide.getFragmentMap().keySet());
+        for(String key : existedCutInfoList){
+            if(!mzMap.containsKey(key)){
+                peptide.removeFragment(key);
+            }
+        }
         //获取标准库中对应的PeptideRef组
         HashMap<String, Float> intensityMap = TargetPeptide.buildIntensityMap(peptide);
+
         //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
-        FeatureByPep featureByPep = featureExtractor.getExperimentFeature(newDataDO, intensityMap, new SigmaSpacing(sigma, spacing));
-        if (featureByPep.isFeatureFound()) {
+        PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(newDataDO, intensityMap, new SigmaSpacing(sigma, spacing));
+        if (peptideFeature.isFeatureFound()) {
             TreeMap<Double, Double> rtShapeScoreMap = new TreeMap<>();
-            for (PeakGroup peakGroupFeature : featureByPep.getPeakGroupFeatureList()) {
+            for (PeakGroup peakGroupFeature : peptideFeature.getPeakGroupList()) {
                 FeatureScores featureScores = new FeatureScores();
-                chromatographicScorer.calculateChromatographicScores(peakGroupFeature, featureByPep.getLibraryIntensityList(), featureScores, null);
+                chromatographicScorer.calculateChromatographicScores(peakGroupFeature, peptideFeature.getLibraryIntensityList(), featureScores, null);
                 rtShapeScoreMap.put(peakGroupFeature.getApexRt(), featureScores.get(ScoreType.XcorrShape));
             }
             model.addAttribute("rtShapeScoreMap", rtShapeScoreMap);
