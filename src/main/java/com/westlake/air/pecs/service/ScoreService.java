@@ -2,7 +2,7 @@ package com.westlake.air.pecs.service;
 
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.MzIntensityPairs;
-import com.westlake.air.pecs.domain.bean.score.FeatureByPep;
+import com.westlake.air.pecs.domain.bean.score.PeptideFeature;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.TargetPeptide;
 import com.westlake.air.pecs.domain.params.LumsParams;
@@ -50,7 +50,7 @@ public interface ScoreService {
      * @param ss
      * @return
      */
-    FeatureByPep selectPeak(AnalyseDataDO data, HashMap<String, Float> intensityMap, SigmaSpacing ss);
+    PeptideFeature selectPeak(AnalyseDataDO data, HashMap<String, Float> intensityMap, SigmaSpacing ss);
 
     /**
      * 请确保调用本函数时传入的AnalyseDataDO已经解压缩

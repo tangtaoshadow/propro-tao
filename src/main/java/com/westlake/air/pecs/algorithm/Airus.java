@@ -91,11 +91,11 @@ public class Airus {
 
         finalResult.setAllInfo(errorStat);
 
-        for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
-            if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getFdr() <= 0.01) {
-
-            }
-        }
+//        for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
+//            if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getFdr() <= 0.01) {
+//
+//            }
+//        }
 
         //对于最终的打分结果和选峰结果保存到数据库中
         int hit = 0;

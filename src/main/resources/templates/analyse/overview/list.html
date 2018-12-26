@@ -38,7 +38,7 @@
                         Sigma/Spacing
                     </th>
                     <th width="5%">
-                        ShapeScore阈值
+                        Shape/ShapeWeight阈值
                     </th>
                     <th width="10%">
                         创建时间
@@ -65,7 +65,7 @@
                     <td th:text="${overview.libraryName}"></td>
                     <td th:text="|${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></td>
                     <td th:text="|${overview.sigma}/${overview.spacing}|"></td>
-                    <td th:text="|${overview.shapeScoreThreshold}|"></td>
+                    <td th:text="|${overview.shapeScoreThreshold}/${overview.shapeScoreWeightThreshold}|"></td>
                     <td th:text="${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="|${overview.slope}/${overview.intercept}|"></td>
                     <td th:text="|${overview.matchedPeptideCount}/${overview.totalPeptideCount}/${overview.libraryPeptideCount}|"></td>

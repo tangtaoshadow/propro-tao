@@ -14,7 +14,6 @@ import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.query.PeptideQuery;
 import com.westlake.air.pecs.feature.*;
 import com.westlake.air.pecs.parser.AirdFileParser;
-import com.westlake.air.pecs.parser.model.traml.Peptide;
 import com.westlake.air.pecs.rtnormalizer.ChromatogramFilter;
 import com.westlake.air.pecs.rtnormalizer.RtNormalizerScorer;
 import com.westlake.air.pecs.scorer.*;
@@ -28,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import scala.tools.nsc.typechecker.ContextErrors;
 
 import java.io.RandomAccessFile;
 import java.util.*;
@@ -95,12 +93,12 @@ public class ScoreServiceImpl implements ScoreService {
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
         for (AnalyseDataDO dataDO : dataList) {
             SlopeIntercept slopeIntercept = new SlopeIntercept();
-            FeatureByPep featureByPep = featureExtractor.getExperimentFeature(dataDO, ttMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()).buildIntensityMap(), sigmaSpacing);
-            if (!featureByPep.isFeatureFound()) {
+            PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(dataDO, ttMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()).buildIntensityMap(), sigmaSpacing);
+            if (!peptideFeature.isFeatureFound()) {
                 continue;
             }
             double groupRt = dataDO.getRt();
-            List<ScoreRtPair> scoreRtPairs = rtNormalizerScorer.score(featureByPep.getPeptideSpectrum(), featureByPep.getPeakGroupFeatureList(), featureByPep.getLibraryIntensityList(), featureByPep.getNoise1000Map(), slopeIntercept, groupRt);
+            List<ScoreRtPair> scoreRtPairs = rtNormalizerScorer.score(peptideFeature.getPeptideSpectrum(), peptideFeature.getPeakGroupList(), peptideFeature.getLibraryIntensityList(), peptideFeature.getNoise1000Map(), slopeIntercept, groupRt);
             scoreRtList.add(scoreRtPairs);
             compoundRt.add(groupRt);
         }
@@ -161,7 +159,7 @@ public class ScoreServiceImpl implements ScoreService {
 
 
     @Override
-    public FeatureByPep selectPeak(AnalyseDataDO dataDO, HashMap<String, Float> intensityMap, SigmaSpacing ss) {
+    public PeptideFeature selectPeak(AnalyseDataDO dataDO, HashMap<String, Float> intensityMap, SigmaSpacing ss) {
 
         if (dataDO.isCompressed()) {
             logger.warn("进入本函数前的AnalyseDataDO需要提前被解压缩!!!!!");
@@ -175,11 +173,11 @@ public class ScoreServiceImpl implements ScoreService {
         List<FeatureScores> featureScoresList = new ArrayList<>();
 
         //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
-        FeatureByPep featureByPep = featureExtractor.getExperimentFeature(dataDO, intensityMap, ss);
-        if (!featureByPep.isFeatureFound()) {
+        PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(dataDO, intensityMap, ss);
+        if (!peptideFeature.isFeatureFound()) {
             return null;
         } else {
-            return featureByPep;
+            return peptideFeature;
         }
     }
 
@@ -200,16 +198,16 @@ public class ScoreServiceImpl implements ScoreService {
         //获取标准库中对应的PeptideRef组
         HashMap<String, Float> intensityMap = peptide.buildIntensityMap();
         //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
-        FeatureByPep featureByPep = featureExtractor.getExperimentFeature(dataDO, intensityMap, input.getSigmaSpacing());
-        if (!featureByPep.isFeatureFound()) {
+        PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(dataDO, intensityMap, input.getSigmaSpacing());
+        if (!peptideFeature.isFeatureFound()) {
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
             return;
         }
         List<FeatureScores> featureScoresList = new ArrayList<>();
-        List<PeakGroup> peakGroupFeatureList = featureByPep.getPeakGroupFeatureList();
-        PeptideSpectrum peptideSpectrum = featureByPep.getPeptideSpectrum();
-        List<Double> libraryIntensityList = featureByPep.getLibraryIntensityList();
-        HashMap<String, double[]> noise1000Map = featureByPep.getNoise1000Map();
+        List<PeakGroup> peakGroupFeatureList = peptideFeature.getPeakGroupList();
+        PeptideSpectrum peptideSpectrum = peptideFeature.getPeptideSpectrum();
+        List<Double> libraryIntensityList = peptideFeature.getLibraryIntensityList();
+        HashMap<String, double[]> noise1000Map = peptideFeature.getNoise1000Map();
         HashMap<String, Double> productMzMap = new HashMap<>();
         HashMap<String, Integer> productChargeMap = new HashMap<>();
 
