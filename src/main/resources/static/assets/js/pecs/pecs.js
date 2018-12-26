@@ -226,12 +226,11 @@ function queryMultiGroup(peptideRef, isGaussFilter, useNoise1000) {
         dataType: "json",
         async: false,
         success: function (result) {
+            // for(i in chartMap){
+            //     chartMap[i].clear();
+            // }
             if (result.success) {
                 groups = result.model;
-            } else {
-                for(i in chartMap){
-                    chartMap[i].clear();
-                }
             }
         }
 
@@ -244,10 +243,12 @@ function queryMultiGroup(peptideRef, isGaussFilter, useNoise1000) {
     var count = 0;
     for(i in chartMap){
         var group = groups[count];
+        if(group == null){
+            continue;
+        }
         count++;
         var element = chartMap[i];
         var data_rt = group.rt;
-        var peptideRefTmp = group.peptideRef;
         var cutinfo = group.cutInfoArray;
         var intensity_arrays = group.intensityArrays;
         var bestRt = group.bestRt;

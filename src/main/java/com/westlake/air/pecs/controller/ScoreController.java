@@ -94,7 +94,7 @@ public class ScoreController extends BaseController {
         query.setOverviewId(overviewId);
         query.setPageSize(30);
         query.setPageNo(currentPage);
-        query.setSortColumn("fdr");
+//        query.setSortColumn("fdr");
         ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);

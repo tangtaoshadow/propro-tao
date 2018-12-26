@@ -690,6 +690,7 @@ public class AnalyseController extends BaseController {
             } else {
                 logger.error("No AnalyseData Has RtArray!!!");
             }
+            group.put("overviewId", overviewId);
             group.put("rt", rtArray);
             group.put("peptideRef", data.getPeptideRef());
             group.put("cutInfoArray", cutInfoArray);

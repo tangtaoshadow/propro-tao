@@ -243,9 +243,7 @@ public class ScoreServiceImpl implements ScoreService {
             chromatographicScorer.calculateChromatographicScores(peakGroupFeature, libraryIntensityList, featureScores, input.getScoreTypes());
             if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.XcorrShapeWeighted) != null
                     && featureScores.get(ScoreType.XcorrShapeWeighted) < input.getXcorrShapeWeightThreshold()
-                    && featureScores.get(ScoreType.XcorrShape) < input.getXcorrShapeThreshold()
-                    && featureScores.get(ScoreType.XcorrShape) != 0
-                    && featureScores.get(ScoreType.XcorrShapeWeighted) != 0){
+                    && featureScores.get(ScoreType.XcorrShape) < input.getXcorrShapeThreshold()){
                 continue;
             }
             if (input.getScoreTypes().contains(ScoreType.LogSnScore.getTypeName())) {

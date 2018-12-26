@@ -167,26 +167,26 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
         List<MatchedPeptide> diffPeptides = new ArrayList<>();
         //所有的需要比对的肽段取并集
         HashSet<MatchedPeptide> totalPeptides = new HashSet<>();
-        for(HashSet<MatchedPeptide> peptides : map.values()){
+        for (HashSet<MatchedPeptide> peptides : map.values()) {
             totalPeptides.addAll(peptides);
         }
 
-        for(MatchedPeptide mp : totalPeptides){
+        for (MatchedPeptide mp : totalPeptides) {
             boolean isAllContained = true;
             HashMap<String, Boolean> containedMap = new HashMap<>();
-            for(String id : map.keySet()){
+            for (String id : map.keySet()) {
                 boolean isContained = map.get(id).contains(mp);
-                if(!isContained){
+                if (!isContained) {
                     isAllContained = false;
                 }
                 containedMap.put(id, isContained);
             }
 
-            if(isAllContained){
+            if (isAllContained) {
                 samePeptides.add(mp);
-            }else{
+            } else {
                 diffPeptides.add(mp);
-                for(Map.Entry<String, Boolean> entry : containedMap.entrySet()){
+                for (Map.Entry<String, Boolean> entry : containedMap.entrySet()) {
                     identifiesMap.get(overviewMap.get(entry.getKey())).add(entry.getValue());
                 }
             }
