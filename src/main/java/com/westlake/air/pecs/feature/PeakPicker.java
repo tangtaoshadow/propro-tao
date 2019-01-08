@@ -29,7 +29,8 @@ public class PeakPicker {
         if (rtArray.length < 5) {
             return null;
         }
-        List<double[]> maxPeaks = new ArrayList<>();
+        List<Double> maxPeakRtList = new ArrayList<>();
+        List<Double> maxPeakIntList = new ArrayList<>();
         double centralPeakRt, leftNeighborRt, rightNeighborRt;
         double centralPeakInt, leftBoundaryInt, rightBoundaryInt;
         double stnLeft, stnMiddle, stnRight;
@@ -146,7 +147,7 @@ public class PeakPicker {
                 while (rightHand - leftHand > Constants.THRESHOLD) {
                     mid = (leftHand + rightHand) / 2.0d;
                     midDerivVal = peakSpline.derivatives(mid);
-                    if (Math.abs(midDerivVal) < 0.000001) {
+                    if (Math.abs(midDerivVal) < 0.001) {
                         break;
                     }
                     if (midDerivVal < 0.0d) {
@@ -158,21 +159,13 @@ public class PeakPicker {
 
                 maxPeakRt = (leftHand + rightHand) / 2.0d;
                 maxPeakInt = peakSpline.eval(maxPeakRt);
-
-                double[] peak = new double[2];
-                peak[0] = maxPeakRt;
-                peak[1] = maxPeakInt;
-                maxPeaks.add(peak);
+                maxPeakRtList.add(maxPeakRt);
+                maxPeakIntList.add(maxPeakInt);
                 i = rightBoundary;
             }
         }
-        Double[] rt = new Double[maxPeaks.size()];
-        Double[] intensity = new Double[maxPeaks.size()];
-
-        for (int i = 0; i < maxPeaks.size(); i++) {
-            rt[i] = maxPeaks.get(i)[0];
-            intensity[i] = maxPeaks.get(i)[1];
-        }
+        Double[] rt = maxPeakRtList.toArray(new Double[0]);
+        Double[] intensity = maxPeakIntList.toArray(new Double[0]);
         return new RtIntensityPairsDouble(rt, intensity);
     }
 

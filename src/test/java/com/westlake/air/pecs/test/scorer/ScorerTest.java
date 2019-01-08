@@ -39,9 +39,9 @@ public class ScorerTest extends BaseTest {
         System.out.println("------ Chromatogram Score Test ------");
         List<RtIntensityPairsDouble> chromatograms = new ArrayList<>();
         PeakGroup peakGroup = prepareChromatogramTestFeature();
-        List<Double> libraryIntensity = new ArrayList<>();
-        libraryIntensity.add(0.5d);
-        libraryIntensity.add(0.5d);
+        HashMap<String,Double> libraryIntensity = new HashMap<>();
+        libraryIntensity.put("1",0.5d);
+        libraryIntensity.put("2",0.5d);
         List<double[]> signalToNoiseList = new ArrayList<>();
         FeatureScores scores = new FeatureScores();
 
@@ -61,10 +61,10 @@ public class ScorerTest extends BaseTest {
         System.out.println("------ Library Score Test ------");
         PeakGroup peakGroup = prepareLibraryTestFeature();
 
-        List<Double> libraryIntensity = new ArrayList<>();
-        libraryIntensity.add(1d);
-        libraryIntensity.add(10000d);
-        libraryIntensity.add(2000d);
+        HashMap<String, Double> libraryIntensity = new HashMap<>();
+        libraryIntensity.put("1", 1d/12001d);
+        libraryIntensity.put("2", 10000d/12001d);
+        libraryIntensity.put("3", 2000d/12001d);
 
         FeatureScores scores = new FeatureScores();
 
@@ -85,20 +85,10 @@ public class ScorerTest extends BaseTest {
 
     @Test
     public void calcLogSnScoreTest(){
-        double[] stn1 = {500};
-        double[] stn2 = {1500};
-        HashMap<String, double[]> signalToNoiseMap = new HashMap<>();
-        signalToNoiseMap.put("1",stn1);
-        signalToNoiseMap.put("2",stn2);
-        Double[] rt = {0d};
-        Double[] intens = {0d};
-        HashMap<String, Double[]> intensity = new HashMap<>();
-        intensity.put("1",intens);
-        intensity.put("2",intens);
-        PeptideSpectrum peptideSpectrum = new PeptideSpectrum(rt, intensity);
         PeakGroup peakGroup = prepareLogSnScoreTestFeature();
+        peakGroup.setSignalToNoiseSum(2000d);
         FeatureScores scores = new FeatureScores();
-        chromatographicScorer.calculateLogSnScore(peptideSpectrum, peakGroup, signalToNoiseMap, scores);
+        chromatographicScorer.calculateLogSnScore(peakGroup, scores);
         assert isSimilar(scores.get(ScoreType.LogSnScore), Math.log(1000), Math.pow(10, -6));
         System.out.println("LogSnScore Test PASSED.");
     }
@@ -140,9 +130,9 @@ public class ScorerTest extends BaseTest {
 
         Float[] spectrumMzArray = prepareDIASpectrum().get(0);
         Float[] spectrumIntArray = prepareDIASpectrum().get(1);
-        HashMap<String, Double> productMzMap = new HashMap<>();
-        productMzMap.put("1", 500d);
-        productMzMap.put("2", 600d);
+        HashMap<String, Float> productMzMap = new HashMap<>();
+        productMzMap.put("1", 500f);
+        productMzMap.put("2", 600f);
         PeakGroup peakGroup = new PeakGroup();
         HashMap<String,Double> ionIntensityMap = new HashMap<>();
         ionIntensityMap.put("1", 0.3D);
@@ -165,14 +155,14 @@ public class ScorerTest extends BaseTest {
         //List<Double> productMzArray, List<Float> spectrumMzArray, List<Float> spectrumIntArray, List<Float> libraryIntensity, FeatureScores scores
         Float[] spectrumMzArray = prepareDIAShiftedSpectrum().get(0);
         Float[] spectrumIntArray = prepareDIAShiftedSpectrum().get(1);
-        HashMap<String, Double> productMzMap = new HashMap<>();
-        productMzMap.put("1",500d);
-        productMzMap.put("2",600d);
-        HashMap<String, Float> libraryIntensityMap = new HashMap<>();
-        libraryIntensityMap.put("1", 0.7f);
-        libraryIntensityMap.put("2", 0.3f);
+        HashMap<String, Float> productMzMap = new HashMap<>();
+        productMzMap.put("1",500f);
+        productMzMap.put("2",600f);
+        HashMap<String, Double> normedLibIntMap = new HashMap<>();
+        normedLibIntMap.put("1", 0.7d);
+        normedLibIntMap.put("2", 0.3d);
         FeatureScores scores = new FeatureScores();
-        diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, libraryIntensityMap, scores);
+        diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, normedLibIntMap, scores);
 
         assert isSimilar(scores.get(ScoreType.MassdevScore), 13.33d, Math.pow(10, -1));
         assert isSimilar(scores.get(ScoreType.MassdevScoreWeighted), 7.38d, Math.pow(10, -1));
@@ -211,6 +201,7 @@ public class ScorerTest extends BaseTest {
         ionIntensity.put("2",58.384506);
         ionIntensity.put("3",58.384506);
         peakGroup.setIonIntensity(ionIntensity);
+        peakGroup.setPeakGroupInt(782.38073+58.384506*2);
         return peakGroup;
     }
 
@@ -218,6 +209,7 @@ public class ScorerTest extends BaseTest {
         PeakGroup peakGroup = new PeakGroup();
         Double[] rt = new Double[]{1200d};
         peakGroup.setIonHullRt(rt);
+        peakGroup.setIonCount(2);
         return peakGroup;
     }
     private List<PeakGroup> prepareNormRtTestFeature(){

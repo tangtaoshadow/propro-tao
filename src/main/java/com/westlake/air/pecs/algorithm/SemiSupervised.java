@@ -51,6 +51,9 @@ public class SemiSupervised {
             ldaLearner.score(trainData, weightsMap);
             for (int times = 0; times < airusParams.getXevalNumIter(); times++) {
                 TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, ScoreType.WeightedTotalScore.getTypeName(), airusParams, airusParams.getSsIterationFdr());
+                if(trainPeaksTemp.getBestTargets().size() == 0){
+                    System.out.println("emmm");
+                }
                 weightsMap = ldaLearner.learn(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName());
                 for(Double value: weightsMap.values()){
                     if(value == null || Double.isNaN(value)){

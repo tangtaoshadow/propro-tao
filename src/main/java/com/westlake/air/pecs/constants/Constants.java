@@ -32,7 +32,8 @@ public class Constants {
     public static final String CHROMATOGRAM_PICKER_METHOD = "legacy";
 //    public static final String CHROMATOGRAM_PICKER_METHOD = "corrected";
 
-    public static final double PEAK_WIDTH = 40d;///
+    public static final double PEAK_WIDTH = -40d;///
+    public static final double MIN_INTENSITY_RATIO = 0.3d;
     public static final boolean ESTIMATE_BEST_PEPTIDES = false;
     public static final double INITIAL_QUALITY_CUTOFF = 0.5d;
     public static final double OVERALL_QUALITY_CUTOFF = 5.5d;
@@ -45,13 +46,21 @@ public class Constants {
     public static final double DEFAULT_RT_EXTRACTION_WINDOW = 600.0d;
     public static final float DEFAULT_MZ_EXTRACTION_WINDOW = 0.05f;
 
-    public static final double DIA_EXTRACT_WINDOW = 0.05d;
+    public static final float DIA_EXTRACT_WINDOW = 0.05f;
     public static final int DIA_NR_ISOTOPES = 4;
     public static final int DIA_NR_CHARGES = 4;
-    public static final double C13C12_MASSDIFF_U = 1.0033548d;
-    public static final double PEAK_BEFORE_MONO_MAX_PPM_DIFF = 20.0d;
+    public static final float C13C12_MASSDIFF_U = 1.0033548f;
+    public static final double PEAK_BEFORE_MONO_MAX_PPM_DIFF = 0.00002d;
     public static final double DIA_BYSERIES_PPM_DIFF = 10.0d;
     public static final double DIA_BYSERIES_INTENSITY_MIN = 300.0d;
+
+    public static final double AVG_WEIGHT_C = 12.0107358985d;
+    public static final double AVG_WEIGHT_H = 1.0079407537168315d;
+    public static final double AVG_WEIGHT_N = 14.0067430888d;
+    public static final double AVG_WEIGHT_O = 15.999405323160001d;
+    public static final double AVG_WEIGHT_S = 32.066084735289d;
+    public static final double AVG_WEIGHT_P = 30.97376149d;
+    public static final double AVG_TOTAL = 111.12375721974328d;
 
     public static final double C = 4.9384d;
     public static final double H = 7.7583d;

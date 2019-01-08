@@ -5,10 +5,14 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.apache.commons.math3.util.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -93,6 +97,15 @@ public class MathUtil {
         bisectionLowHigh.setLow(low);
         bisectionLowHigh.setHigh(high);
         return bisectionLowHigh;
+    }
+
+    public static int findNearestIndex(Double[] x, double value){
+        BisectionLowHigh bisectionLowHigh = bisection(x, value);
+        if(x[bisectionLowHigh.getHigh()] - value > value - x[bisectionLowHigh.getLow()]){
+            return bisectionLowHigh.getLow();
+        }else {
+            return bisectionLowHigh.getHigh();
+        }
     }
 
     public static BisectionLowHigh bisectionBD(List<BigDecimal> x, double value) {
@@ -262,7 +275,6 @@ public class MathUtil {
     public static double[] getMeanVariance(Double[] arrays) {
 
         double[] meanVariance = new double[2];
-
         //get mean
         double mean = mean(arrays);
         meanVariance[0] = mean;
@@ -274,14 +286,16 @@ public class MathUtil {
     /**
      * Normalize a with a's mean and std.
      */
-    public static void normalizeSum(HashMap<String, Float> map) {
+    public static List<Float> normalizeSum(HashMap<String, Float> map) {
+        List<Float> normedList = new ArrayList<>();
         Float sum = 0f;
         for(Float f : map.values()){
             sum+=f;
         }
         for(String key : map.keySet()){
-            map.put(key, map.get(key)/sum);
+            normedList.add(map.get(key)/sum);
         }
+        return normedList;
     }
 
     /**
@@ -407,6 +421,13 @@ public class MathUtil {
     public static double sum(double[] array) {
         double sum = 0;
         for (double value : array) {
+            sum += value;
+        }
+        return sum;
+    }
+    public static double sum(Collection<Float> array) {
+        double sum = 0;
+        for (float value : array) {
             sum += value;
         }
         return sum;

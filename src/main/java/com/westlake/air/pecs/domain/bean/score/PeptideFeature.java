@@ -15,13 +15,9 @@ import java.util.List;
 public class PeptideFeature {
     boolean featureFound;
 
-    PeptideSpectrum peptideSpectrum;
-
     List<PeakGroup> peakGroupList;
 
-    List<Double> libraryIntensityList;
-
-    HashMap<String, double[]> noise1000Map;
+    HashMap<String, Double> normedLibIntMap;
 
     public PeptideFeature() {
     }

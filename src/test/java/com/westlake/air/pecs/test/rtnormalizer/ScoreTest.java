@@ -7,6 +7,7 @@ import com.westlake.air.pecs.feature.*;
 import com.westlake.air.pecs.rtnormalizer.RtNormalizerScorer;
 import com.westlake.air.pecs.test.BaseTest;
 import com.westlake.air.pecs.utils.FileUtil;
+import org.apache.commons.math3.util.FastMath;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,4 +36,9 @@ public class ScoreTest extends BaseTest {
     @Autowired
     RtNormalizerScorer rtNormalizerScorer;
 
+    @Test
+    public void test(){
+        System.out.println(Math.log(2));
+        System.out.println(FastMath.log(2));
+    }
 }

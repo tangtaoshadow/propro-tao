@@ -54,26 +54,27 @@ public class ScoreUtil {
      * 1) get sum of list
      * 2) divide elements in list by sum
      *
-     * @param libraryIntensity input intensity list
+     * @param intensityList input intensity list
      * @return output normalized intensity list
      */
-    public static double[] normalizeSumDouble(List<Double> libraryIntensity) {
-        double[] normalizedLibraryIntensity = new double[libraryIntensity.size()];
+    public static double[] normalizeSumDouble(List<Double> intensityList) {
+        double[] normalizedIntensity = new double[intensityList.size()];
         double sum = 0d;
-        for (Double intensity : libraryIntensity) {
+        for (Double intensity : intensityList) {
             sum += intensity;
         }
-
-        if (sum == 0d) {
-            sum += 0.000001;
+        for (int i = 0; i < intensityList.size(); i++) {
+            normalizedIntensity[i] = (intensityList.get(i) / sum);
         }
-
-        for (int i = 0; i < libraryIntensity.size(); i++) {
-            normalizedLibraryIntensity[i] = (libraryIntensity.get(i) / sum);
-        }
-        return normalizedLibraryIntensity;
+        return normalizedIntensity;
     }
-
+    public static double[] normalizeSumDouble(List<Double> intensityList, double sum) {
+        double[] normalizedIntensity = new double[intensityList.size()];
+        for (int i = 0; i < intensityList.size(); i++) {
+            normalizedIntensity[i] = (intensityList.get(i) / sum);
+        }
+        return normalizedIntensity;
+    }
     /**
      * 1) get left and right index corresponding to spectrum
      * 2) get interval intensity sum to intensity

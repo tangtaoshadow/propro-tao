@@ -12,6 +12,7 @@ import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.TaskService;
 import com.westlake.air.pecs.service.PeptideService;
+import com.westlake.air.pecs.utils.MathUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,10 +67,8 @@ public class FeatureExtractor {
             featureFound = false;
         }
 
-
         HashMap<String, RtIntensityPairsDouble> ionPeaks = new HashMap<>();
         HashMap<String, IntensityRtLeftRtRightPairs> ionPeakParams = new HashMap<>();
-        List<Double> libraryIntensityList = new ArrayList<>();
 
         //对每一个chromatogram进行运算,dataDO中不含有ms1
         HashMap<String, double[]> noise1000Map = new HashMap<>();
@@ -93,7 +92,6 @@ public class FeatureExtractor {
         if (intensitiesMap.size() == 0) {
             return new PeptideFeature(false);
         }
-
         //计算GaussFilter
         Double[] rtDoubleArray = new Double[dataDO.getRtArray().length];
         for (int k = 0; k < rtDoubleArray.length; k++) {
@@ -105,6 +103,8 @@ public class FeatureExtractor {
         HashMap<String, Double[]> smoothIntensitiesMap = gaussFilter.filter(rtDoubleArray, intensitiesMap, sigmaSpacing);
 
         //对每一个片段离子选峰
+        double libIntSum = MathUtil.sum(intensityMap.values());
+        HashMap<String, Double> normedLibIntMap = new HashMap<>();
         for (String cutInfo : intensitiesMap.keySet()) {
             //计算两个信噪比
             double[] noises200 = signalToNoiseEstimator.computeSTN(rtDoubleArray, smoothIntensitiesMap.get(cutInfo), 200, 30);
@@ -121,38 +121,33 @@ public class FeatureExtractor {
 
             ionPeaks.put(cutInfo, maxPeakPairs);
             ionPeakParams.put(cutInfo, intensityRtLeftRtRightPairs);
-            libraryIntensityList.add(Double.parseDouble(Float.toString(intensityMap.get(cutInfo))));
             noise1000Map.put(cutInfo, noisesOri1000);
+            normedLibIntMap.put(cutInfo, intensityMap.get(cutInfo)/libIntSum);
         }
 
-        if (intensitiesMap.size() == 0) {
-            return new PeptideFeature(false);
-        }
-        List<PeakGroup> peakGroupFeatureList = featureFinder.findFeatures(peptideSpectrum, ionPeaks, ionPeakParams);
+        List<PeakGroup> peakGroupFeatureList = featureFinder.findFeatures(peptideSpectrum, ionPeaks, ionPeakParams,noise1000Map);
 
         PeptideFeature featureResult = new PeptideFeature(featureFound);
         featureResult.setPeakGroupList(peakGroupFeatureList);
-        featureResult.setLibraryIntensityList(libraryIntensityList);
-        featureResult.setPeptideSpectrum(peptideSpectrum);
-        featureResult.setNoise1000Map(noise1000Map);
+        featureResult.setNormedLibIntMap(normedLibIntMap);
 
         return featureResult;
     }
 
-    /**
-     * get intensityGroup corresponding to peptideRef
-     *
-     * @param intensityGroupList intensity group of all peptides
-     * @param peptideRef         chosen peptide
-     * @return intensity group of peptideRef
-     */
-    private IntensityGroup getIntensityGroupByPep(List<IntensityGroup> intensityGroupList, String peptideRef) {
-        for (IntensityGroup intensityGroup : intensityGroupList) {
-            if (intensityGroup.getPeptideRef().equals(peptideRef)) {
-                return intensityGroup;
-            }
-        }
-        System.out.println("GetIntensityGroupByPep Error.");
-        return null;
-    }
+//    /**
+//     * get intensityGroup corresponding to peptideRef
+//     *
+//     * @param intensityGroupList intensity group of all peptides
+//     * @param peptideRef         chosen peptide
+//     * @return intensity group of peptideRef
+//     */
+//    private IntensityGroup getIntensityGroupByPep(List<IntensityGroup> intensityGroupList, String peptideRef) {
+//        for (IntensityGroup intensityGroup : intensityGroupList) {
+//            if (intensityGroup.getPeptideRef().equals(peptideRef)) {
+//                return intensityGroup;
+//            }
+//        }
+//        System.out.println("GetIntensityGroupByPep Error.");
+//        return null;
+//    }
 }

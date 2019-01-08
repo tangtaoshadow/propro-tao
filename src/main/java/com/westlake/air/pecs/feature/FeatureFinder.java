@@ -3,6 +3,7 @@ package com.westlake.air.pecs.feature;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.PeptideSpectrum;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
+import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.utils.MathUtil;
@@ -11,9 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Nico Wang Ruimin
@@ -40,7 +39,7 @@ public class FeatureFinder {
      *                           ExperimentFeature::intensity: intensity sum of hullPoints' intensity
      * @return list of mrmFeature (mrmFeature is list of chromatogram feature)
      */
-    public List<PeakGroup> findFeatures(PeptideSpectrum peptideSpectrum, HashMap<String, RtIntensityPairsDouble> ionPeaks, HashMap<String, IntensityRtLeftRtRightPairs> ionPeakParams) {
+    public List<PeakGroup> findFeatures(PeptideSpectrum peptideSpectrum, HashMap<String, RtIntensityPairsDouble> ionPeaks, HashMap<String, IntensityRtLeftRtRightPairs> ionPeakParams, HashMap<String,double[]> noise1000Map) {
 
         //totalXIC
         double totalXic = 0.0d;
@@ -51,14 +50,6 @@ public class FeatureFinder {
         }
 
         //mrmFeature loop
-//        List<Double> apexRtList = new ArrayList<>();
-//        List<Double> bestLeftRtList = new ArrayList<>();
-//        List<Double> bestRightRtList = new ArrayList<>();
-//        List<HashMap<String,Double>> ionApexIntList = new ArrayList<>();
-//        List<Double[]> ionHullRtList = new ArrayList<>();
-//        List<HashMap<String,Double[]>> ionHullIntList = new ArrayList<>();
-//        List<HashMap<String, Double>> ionIntensityList = new ArrayList<>();
-//        List<Double> peakGroupIntList = new ArrayList<>();
         List<PeakGroup> peakGroupList = new ArrayList<>();
         while (true) {
             PeakGroup peakGroup = new PeakGroup();
@@ -88,16 +79,14 @@ public class FeatureFinder {
             //取得[bestLeft,bestRight]对应范围的Rt
             Double[] rasteredRt = new Double[rightIndex - leftIndex + 1];
             System.arraycopy(rtArray, leftIndex, rasteredRt, 0, rightIndex - leftIndex + 1);
-
+            int maxSpectrumIndex = MathUtil.findNearestIndex(rasteredRt,apexRt) + leftIndex;
             //取得[bestLeft,bestRight]对应范围的Intensity
             HashMap<String, Double[]> ionHullInt = new HashMap<>();
             HashMap<String, Double> ionIntensity = new HashMap<>();
-            HashMap<String, Double> ionApexInt = new HashMap<>();
             Double peakGroupInt = 0D;
+            double signalToNoiseSum = 0d;
             for(String cutInfo: peptideSpectrum.getIntensitiesMap().keySet()) {
                 Double[] intArray = peptideSpectrum.getIntensitiesMap().get(cutInfo);
-                //离子峰最大强度
-                ionApexInt.put(cutInfo, intArray[maxIndex]);
                 //离子峰
                 Double[] rasteredInt = new Double[rightIndex - leftIndex + 1];
                 System.arraycopy(intArray, leftIndex, rasteredInt, 0, rightIndex - leftIndex + 1);
@@ -107,13 +96,17 @@ public class FeatureFinder {
                 peakGroupInt += ionIntTemp;
                 //离子峰强度
                 ionIntensity.put(cutInfo, ionIntTemp);
+                //信噪比
+                signalToNoiseSum += noise1000Map.get(cutInfo)[maxSpectrumIndex];
             }
+//            List<Double> ionIntList = new ArrayList<>(ionIntensity.values());
+            peakGroup.setIonCount(ionPeaks.size());
             peakGroup.setIonHullRt(rasteredRt);
             peakGroup.setIonHullInt(ionHullInt);
-            peakGroup.setIonApexInt(ionApexInt);
             peakGroup.setPeakGroupInt(peakGroupInt);
             peakGroup.setTotalXic(totalXic);
             peakGroup.setIonIntensity(ionIntensity);
+            peakGroup.setSignalToNoiseSum(signalToNoiseSum);
             peakGroupList.add(peakGroup);
             if(peakGroupInt > 0 && peakGroupInt/totalXic<Constants.STOP_AFTER_INTENSITY_RATIO){
                 break;

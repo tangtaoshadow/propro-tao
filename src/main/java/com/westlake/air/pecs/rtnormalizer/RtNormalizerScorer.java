@@ -42,20 +42,19 @@ public class RtNormalizerScorer {
      * scores.log_sn_score                     * -0.72989582 +
      * scores.elution_model_fit_score          *  1.88443209;
      *
-     * @param peptideSpectrum      chromatogramList in transitionGroup
      * @param peakGroupFeatureList features extracted from chromatogramList in transitionGroup
-     * @param libraryIntensity   intensity in transitionList in transitionGroup
+     * @param normedLibIntMap   intensity in transitionList in transitionGroup
      * @return List of overallQuality
      */
-    public List<ScoreRtPair> score(PeptideSpectrum peptideSpectrum, List<PeakGroup> peakGroupFeatureList, List<Double> libraryIntensity, HashMap<String, double[]> noise1000Map, SlopeIntercept slopeIntercept, double groupRt) {
+    public List<ScoreRtPair> score(List<PeakGroup> peakGroupFeatureList, HashMap<String, Double> normedLibIntMap, double groupRt) {
 
 
         List<ScoreRtPair> finalScores = new ArrayList<>();
         for (PeakGroup peakGroupFeature : peakGroupFeatureList) {
             FeatureScores scores = new FeatureScores();
-            chromatographicScorer.calculateChromatographicScores(peakGroupFeature, libraryIntensity, scores, null);
-            chromatographicScorer.calculateLogSnScore(peptideSpectrum, peakGroupFeature, noise1000Map, scores);
-            libraryScorer.calculateLibraryScores(peakGroupFeature, libraryIntensity, scores, null);
+            chromatographicScorer.calculateChromatographicScores(peakGroupFeature, normedLibIntMap, scores, null);
+            chromatographicScorer.calculateLogSnScore(peakGroupFeature, scores);
+            libraryScorer.calculateLibraryScores(peakGroupFeature, normedLibIntMap, scores, null);
 
             double ldaScore = -1d * calculateLdaPrescore(scores);
             ScoreRtPair scoreRtPair = new ScoreRtPair();

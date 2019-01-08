@@ -589,7 +589,7 @@ public class AnalyseController extends BaseController {
             TreeMap<Double, Double> rtShapeScoreMap = new TreeMap<>();
             for (PeakGroup peakGroupFeature : peptideFeature.getPeakGroupList()) {
                 FeatureScores featureScores = new FeatureScores();
-                chromatographicScorer.calculateChromatographicScores(peakGroupFeature, peptideFeature.getLibraryIntensityList(), featureScores, null);
+                chromatographicScorer.calculateChromatographicScores(peakGroupFeature, peptideFeature.getNormedLibIntMap(), featureScores, null);
                 rtShapeScoreMap.put(peakGroupFeature.getApexRt(), featureScores.get(ScoreType.XcorrShape));
             }
             model.addAttribute("rtShapeScoreMap", rtShapeScoreMap);

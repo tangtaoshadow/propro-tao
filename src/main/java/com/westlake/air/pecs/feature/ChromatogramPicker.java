@@ -6,6 +6,7 @@ import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.springframework.stereotype.Component;
+import scala.collection.immutable.Stream;
 
 /**
  * Created by Nico Wang Ruimin
@@ -42,13 +43,14 @@ public class ChromatogramPicker {
         int closestPeakIndex;
         for (int i = 0; i < maxPeakSize; i++) {
             double centralPeakRt = maxPeakPairs.getRtArray()[i];
-            closestPeakIndex = findClosestPeak(rtArray, maxPeakPairs.getRtArray()[i]);
+            closestPeakIndex = findClosestPeak(rtArray, centralPeakRt);
 
             //to the left
             leftIndex = closestPeakIndex - 1;
             while (leftIndex > 0 &&
                     (chromatogram[leftIndex - 1] < chromatogram[leftIndex] || (
-                            Constants.PEAK_WIDTH > 0 && centralPeakRt - rtArray[leftIndex - 1] < Constants.PEAK_WIDTH)) &&
+//                            Constants.PEAK_WIDTH > 0 && centralPeakRt - rtArray[leftIndex - 1] < Constants.PEAK_WIDTH)) &&
+                            chromatogram[leftIndex - 1] / chromatogram[closestPeakIndex] > Constants.MIN_INTENSITY_RATIO)) &&
                     signalToNoise[leftIndex - 1] >= Constants.SIGNAL_TO_NOISE_LIMIT) {
                 leftIndex--;
             }
@@ -57,7 +59,8 @@ public class ChromatogramPicker {
             rightIndex = closestPeakIndex + 1;
             while (rightIndex < chromatogram.length - 1 &&
                     (chromatogram[rightIndex + 1] < chromatogram[rightIndex] || (
-                            Constants.PEAK_WIDTH > 0 && rtArray[rightIndex + 1] - centralPeakRt < Constants.PEAK_WIDTH)) &&
+//                            Constants.PEAK_WIDTH > 0 && rtArray[rightIndex + 1] - centralPeakRt < Constants.PEAK_WIDTH)) &&
+                            chromatogram[rightIndex + 1] / chromatogram[closestPeakIndex] > Constants.MIN_INTENSITY_RATIO)) &&
                     signalToNoise[rightIndex + 1] >= Constants.SIGNAL_TO_NOISE_LIMIT) {
                 rightIndex++;
             }

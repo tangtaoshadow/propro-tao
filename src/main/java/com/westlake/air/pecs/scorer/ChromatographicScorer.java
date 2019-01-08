@@ -9,12 +9,10 @@ import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.utils.MathUtil;
 import com.westlake.air.pecs.utils.ScoreUtil;
+import org.apache.commons.math3.util.FastMath;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Nico Wang Ruimin
@@ -34,14 +32,14 @@ public class ChromatographicScorer {
     /**
      * @param peakGroup list of features in selected mrmfeature
      */
-    public void calculateChromatographicScores(PeakGroup peakGroup, List<Double> libraryIntensity, FeatureScores scores, HashSet<String> scoreTypes) {
+    public void calculateChromatographicScores(PeakGroup peakGroup, HashMap<String, Double> normedLibIntMap, FeatureScores scores, HashSet<String> scoreTypes) {
         Table<Integer, Integer, Double[]> xcorrMatrix = initializeXCorrMatrix(peakGroup);
 
         //xcorrCoelutionScore
         //xcorrCoelutionScoreWeighted
         //xcorrShapeScore
         //xcorrShapeScoreWeighted
-        double[] normalizedLibraryIntensity = ScoreUtil.normalizeSumDouble(libraryIntensity);
+        List<Double> normalizedLibraryIntensity = new ArrayList<>(normedLibIntMap.values());
         List<Integer> deltas = new ArrayList<>();
         List<Double> deltasWeighted = new ArrayList<>();
         List<Double> intensities = new ArrayList<>();
@@ -52,16 +50,16 @@ public class ChromatographicScorer {
         for (int i = 0; i < size; i++) {
             value = xcorrMatrix.get(i, i);
             max = MathUtil.findMaxIndex(value);
-            deltasWeighted.add(Math.abs(max - (value.length - 1) / 2) * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[i]);
-            intensitiesWeighted.add(value[max] * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[i]);
+            deltasWeighted.add(FastMath.abs(max - (value.length - 1) / 2) * normalizedLibraryIntensity.get(i) * normalizedLibraryIntensity.get(i));
+            intensitiesWeighted.add(value[max] * normalizedLibraryIntensity.get(i) * normalizedLibraryIntensity.get(i));
             for (int j = i; j < size; j++) {
                 value = xcorrMatrix.get(i, j);
                 max = MathUtil.findMaxIndex(value);
                 deltas.add(Math.abs(max - (value.length - 1) / 2)); //first: maxdelay //delta: 偏移量
                 intensities.add(value[max]);//value[max] 吻合系数
                 if (j != i) {
-                    deltasWeighted.add(Math.abs(max - (value.length - 1) / 2) * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[j] * 2d);
-                    intensitiesWeighted.add(value[max] * normalizedLibraryIntensity[i] * normalizedLibraryIntensity[j] * 2d);
+                    deltasWeighted.add(Math.abs(max - (value.length - 1) / 2) * normalizedLibraryIntensity.get(i) * normalizedLibraryIntensity.get(j) * 2d);
+                    intensitiesWeighted.add(value[max] * normalizedLibraryIntensity.get(i) * normalizedLibraryIntensity.get(j) * 2d);
                 }
             }
         }
@@ -97,31 +95,15 @@ public class ChromatographicScorer {
         }
     }
 
-    public void calculateLogSnScore(PeptideSpectrum peptideSpectrum, PeakGroup peakGroup, HashMap<String, double[]> noise1000Map, FeatureScores scores) {
+    public void calculateLogSnScore(PeakGroup peakGroup, FeatureScores scores) {
         //logSnScore
         // log(mean of Apex sn s)
-        double rt;
-        int leftIndex, rightIndex;
-        double snScore = 0.0d;
-        if (noise1000Map.size() == 0) {
-            snScore = 0.0d;
-        }
-        for (String cutInfo: noise1000Map.keySet()) {
-            rt = peakGroup.getApexRt(); //max peak rt
-            BisectionLowHigh bisectionLowHigh = MathUtil.bisection(peptideSpectrum.getRtArray(), rt);
-            leftIndex = bisectionLowHigh.getLow();
-            rightIndex = bisectionLowHigh.getHigh();
-            if (Math.abs(peptideSpectrum.getRtArray()[leftIndex] - rt) < Math.abs(peptideSpectrum.getRtArray()[rightIndex] - rt)) {
-                snScore += noise1000Map.get(cutInfo)[leftIndex];
-            } else {
-                snScore += noise1000Map.get(cutInfo)[rightIndex];
-            }
-        }
-        snScore /= noise1000Map.size();
+        double snScore = peakGroup.getSignalToNoiseSum();
+        snScore /= peakGroup.getIonCount();
         if (snScore < 1) {
             scores.put(ScoreType.LogSnScore, 0d);
         } else {
-            scores.put(ScoreType.LogSnScore, Math.log(snScore));
+            scores.put(ScoreType.LogSnScore, FastMath.log(snScore));
         }
     }
 
