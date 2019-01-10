@@ -4,14 +4,8 @@ import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.db.*;
-import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
-import com.westlake.air.pecs.domain.query.ExperimentQuery;
-import com.westlake.air.pecs.domain.query.LibraryQuery;
-import com.westlake.air.pecs.domain.query.TaskQuery;
-import com.westlake.air.pecs.service.AnalyseOverviewService;
-import com.westlake.air.pecs.service.ExperimentService;
-import com.westlake.air.pecs.service.LibraryService;
-import com.westlake.air.pecs.service.TaskService;
+import com.westlake.air.pecs.domain.query.*;
+import com.westlake.air.pecs.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +35,8 @@ public class HomeController extends BaseController{
     @Autowired
     TaskService taskService;
     @Autowired
+    ProjectService projectService;
+    @Autowired
     ConfigDAO configDAO;
 
     public static int SHOW_NUM = 5;
@@ -53,6 +49,8 @@ public class HomeController extends BaseController{
         ResultDO<List<ExperimentDO>> expRes = experimentService.getList(experimentQuery);
         AnalyseOverviewQuery overviewQuery = new AnalyseOverviewQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");
         ResultDO<List<AnalyseOverviewDO>> overviewRes = analyseOverviewService.getList(overviewQuery);
+        ProjectQuery projectQuery = new ProjectQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");
+        ResultDO<List<ProjectDO>> projectsRes = projectService.getList(projectQuery);
 
         TaskQuery query = new TaskQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");
         ResultDO<List<TaskDO>> taskTotalRes = taskService.getList(query);
@@ -69,10 +67,12 @@ public class HomeController extends BaseController{
         model.addAttribute("taskTotalCount", taskTotalRes.getTotalNum());
         model.addAttribute("libCount", libRes.getTotalNum());
         model.addAttribute("expCount", expRes.getTotalNum());
+        model.addAttribute("projectCount", projectsRes.getTotalNum());
         model.addAttribute("overviewCount", overviewRes.getTotalNum());
         model.addAttribute("runningTasks", taskRunningRes.getModel());
         model.addAttribute("tasks", taskTotalRes.getModel());
         model.addAttribute("libs", libRes.getModel());
+        model.addAttribute("projects", projectsRes.getModel());
         model.addAttribute("exps", expRes.getModel());
         model.addAttribute("overviews", overviewRes.getModel());
         model.addAttribute("config", configDO);

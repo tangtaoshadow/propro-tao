@@ -13,7 +13,7 @@
 
 <div class="m-content" layout:fragment="content">
     <!--Begin::Section-->
-    <div class="m-portlet ">
+    <div class="m-portlet">
         <div class="m-portlet__body m-portlet__body--no-padding">
             <div class="row m-row--no-padding m-row--col-separator-xl">
                 <div class="col-md-12 col-lg-6 col-xl-3">
@@ -113,110 +113,35 @@
                     </div>
                     <!--end::New Users-->
                 </div>
+                <div class="col-md-12 col-lg-6 col-xl-3">
+                    <div class="m-widget24">
+                        <div class="m-widget24__item">
+                            <h2 class="m-widget24__title">项目(Projects)</h2>
+                            <br>
+                            <span class="m-widget24__desc"><a class="btn btn-primary btn-sm" th:href="|/project/list|" th:text="|See All|"></a></span>
+                            <span class="m-widget24__stats m--font-brand" th:text="${projectCount}"></span>
+                            <div class="m--space-10"></div>
+                            <div class="m-widget2">
+                                <div th:each="project:${projects}" class="m-widget2__item m-widget2__item--warning">
+                                    <div class="m-widget2__checkbox"></div>
+                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/experiment/list?projectName=${project.name}'|">
+                                        <span class="m-widget2__text" th:text="${project.name}">
+                                        </span>
+                                        <br>
+                                        <span class="m-widget2__user-name">
+										    <a href="#" class="m-widget2__link" th:text="|${project.ownerName}-${#dates.format(project.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     <!--End::Section-->
 
-    <div class="row">
-        <div class="col-md-6">
-            <div class="m-portlet m-portlet--tab">
-                <div class="m-portlet__head">
-                    <div class="m-portlet__head-caption">
-                        <div class="m-portlet__head-title">
-                            <span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
-                            <h3 class="m-portlet__head-text">全局环境配置(Global Environment Config)</h3>
-                        </div>
-                    </div>
-                </div>
-                <!--begin::Form-->
-                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/config/update}" th:method="post">
-                    <div class="m-portlet__body">
-                        <div class="form-group m-form__group m--margin-top-10">
-                            <div class="alert m-alert m-alert--default" role="alert" th:if="${config_error_msg}"></div>
-                            <div class="alert m-alert m-alert--default" role="alert" th:if="${config_success_msg}"></div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="airdFilePath" class="col-3 col-form-label">
-                                Aird实验文件存储路径
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="airdFilePath"
-                                       placeholder="Enter Experiment File Path" name="airdFilePath" th:value="${config?.airdFilePath}">
-                            </div>
-                        </div>
-
-                        <div class="form-group m-form__group row">
-                            <label for="libraryFilePath" class="col-3 col-form-label">
-                                标准库/iRT校准库文件存储路径(TSV,CSV,TraML)
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="libraryFilePath"
-                                       placeholder="Enter Library File Path" name="libraryFilePath" th:value="${config?.libraryFilePath}">
-                            </div>
-                        </div>
-
-                        <div class="form-group m-form__group row">
-                            <label for="mzxmlFilePath" class="col-3 col-form-label">
-                                MzXML实验数据存储位置
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="mzxmlFilePath"
-                                       placeholder="Enter mzXML Experiment File Path" name="mzxmlFilePath"
-                                       th:value="${config?.mzxmlFilePath}">
-                            </div>
-                        </div>
-
-                        <div class="form-group m-form__group row">
-                            <label for="exportScoresFilePath" class="col-3 col-form-label">
-                                子分数文件导出位置(支持PyProphet)
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="exportScoresFilePath"
-                                       placeholder="Enter Export Scores File Path" name="exportScoresFilePath" th:value="${config?.exportScoresFilePath}">
-                            </div>
-                        </div>
-
-                        <div class="form-group m-form__group row">
-                            <label for="prefixForCompressorFile" class="col-3 col-form-label">
-                                Aird压缩后的文件前缀
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="prefixForCompressorFile"
-                                       placeholder="Enter Prefix For Compressor File" name="prefixForCompressorFile"
-                                       th:value="${config?.prefixForCompressorFile}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="lastModifiedDate" class="col-3 col-form-label">
-                                最后修改时间
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="lastModifiedDate" readonly name="lastModifiedDate" th:value="${#dates.format(config?.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}">
-                            </div>
-                        </div>
-
-                        <div class="form-group m-form__group row">
-                            <label for="createDate" class="col-3 col-form-label">
-                                创建时间
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="createDate" readonly name="createDate" th:value="${#dates.format(config?.createDate,'yyyy-MM-dd HH:mm:ss')}">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="m-portlet__foot m-portlet__foot--fit">
-                        <div class="m-form__actions">
-                            <button type="submit" class="btn btn-primary">
-                                更新
-                            </button>
-                        </div>
-                    </div>
-                </form>
-                <!--end::Form-->
-            </div>
-        </div>
-    </div>
 </div>
 
 <th:block layout:fragment="script">

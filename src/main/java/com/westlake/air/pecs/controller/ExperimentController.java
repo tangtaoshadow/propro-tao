@@ -56,6 +56,8 @@ public class ExperimentController extends BaseController {
     AirdCompressor airdCompressor;
     @Autowired
     LumsTask lumsTask;
+    @Autowired
+    ProjectService projectService;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -101,6 +103,8 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/add")
     String add(Model model,
                @RequestParam(value = "name", required = true) String name,
+               @RequestParam(value = "projectName", required = true) String projectName,
+               @RequestParam(value = "batchName", required = false) String batchName,
                @RequestParam(value = "filePath", required = true) String filePath,
                @RequestParam(value = "description", required = false) String description,
                @RequestParam(value = "overlap", required = false) Float overlap,
@@ -110,6 +114,12 @@ public class ExperimentController extends BaseController {
         model.addAttribute("name", name);
         model.addAttribute("description", description);
 
+        ResultDO<ProjectDO> projectResult = projectService.getByName(projectName);
+        model.addAttribute("projectName", projectName);
+        if(projectResult.isFailed()){
+            model.addAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED.getMessage());
+            return "experiment/create";
+        }
         //Check Params Start
         if (filePath == null || filePath.isEmpty()) {
             model.addAttribute(ERROR_MSG, ResultCode.FILE_LOCATION_CANNOT_BE_EMPTY.getMessage());
@@ -128,6 +138,8 @@ public class ExperimentController extends BaseController {
         experimentDO.setDescription(description);
         experimentDO.setOverlap(overlap);
         experimentDO.setFilePath(filePath);
+        experimentDO.setProjectName(projectName);
+        experimentDO.setBatchName(batchName);
 
         ResultDO result = experimentService.insert(experimentDO);
         if (result.isFailed()) {
@@ -237,6 +249,8 @@ public class ExperimentController extends BaseController {
                   @RequestParam(value = "description") String description,
                   @RequestParam(value = "compressionType") String compressionType,
                   @RequestParam(value = "precision") String precision,
+                  @RequestParam(value = "projectName") String projectName,
+                  @RequestParam(value = "batchName") String batchName,
                   RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
@@ -247,6 +261,8 @@ public class ExperimentController extends BaseController {
         ExperimentDO experimentDO = resultDO.getModel();
 
         experimentDO.setName(name);
+        experimentDO.setProjectName(projectName);
+        experimentDO.setBatchName(batchName);
         experimentDO.setFilePath(filePath);
         experimentDO.setAirdPath(airdPath);
         experimentDO.setAirdIndexPath(airdIndexPath);

@@ -134,6 +134,14 @@ public enum ResultCode implements Serializable {
 
     /**
      * ******
+     * Project
+     * ******
+     */
+    PROJECT_NAME_CANNOT_BE_EMPTY("PROJECT_NAME_CANNOT_BE_EMPTY","项目名称不能为空"),
+    PROJECT_NOT_EXISTED("PROJECT_NOT_EXISTED","项目不能为空"),
+
+    /**
+     * ******
      * SQL-COMMON
      * *******
      */

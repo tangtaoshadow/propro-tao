@@ -69,6 +69,8 @@ public class ExperimentServiceImpl implements ExperimentService {
     ScoreService scoreService;
     @Autowired
     ConfigDAO configDAO;
+    @Autowired
+    ProjectService projectService;
 
     @Override
     public List<ExperimentDO> getAll() {
@@ -264,7 +266,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         analyseOverviewService.insert(overviewDO);
 
         //准备卷积结果输出文件及计算相关的路径
-        String configAircPath = configDAO.getConfig().getAircFilePath();
+        String configAircPath = projectService.getByName(lumsParams.getExperimentDO().getProjectName()).getModel().getAircPath();
         String fileParent = "";
         if (configAircPath != null && !configAircPath.isEmpty()) {
             fileParent = configAircPath;

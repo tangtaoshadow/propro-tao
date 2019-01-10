@@ -1,0 +1,127 @@
+package com.westlake.air.pecs.service.impl;
+
+import com.westlake.air.pecs.constants.ResultCode;
+import com.westlake.air.pecs.dao.ProjectDAO;
+import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.db.ProjectDO;
+import com.westlake.air.pecs.domain.query.ProjectQuery;
+import com.westlake.air.pecs.service.ProjectService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.List;
+
+@Service("projectService")
+public class ProjectServiceImpl implements ProjectService {
+
+    public final Logger logger = LoggerFactory.getLogger(ProjectServiceImpl.class);
+
+    @Autowired
+    ProjectDAO projectDAO;
+
+    @Override
+    public ResultDO<List<ProjectDO>> getList(ProjectQuery query) {
+        List<ProjectDO> projects = projectDAO.getList(query);
+        long totalCount = projectDAO.count(query);
+        ResultDO<List<ProjectDO>> resultDO = new ResultDO<>(true);
+        resultDO.setModel(projects);
+        resultDO.setTotalNum(totalCount);
+        resultDO.setPageSize(query.getPageSize());
+        return resultDO;
+    }
+
+    @Override
+    public List<ProjectDO> getAll() {
+        return projectDAO.getAll();
+    }
+
+    @Override
+    public ResultDO insert(ProjectDO project) {
+        if (project.getName() == null || project.getName().isEmpty()) {
+            return ResultDO.buildError(ResultCode.PROJECT_NAME_CANNOT_BE_EMPTY);
+        }
+        try {
+            project.setCreateDate(new Date());
+            project.setLastModifiedDate(new Date());
+            projectDAO.insert(project);
+            return ResultDO.build(project);
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            return ResultDO.buildError(ResultCode.INSERT_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO update(ProjectDO project) {
+        if (project.getId() == null || project.getId().isEmpty()) {
+            return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
+        }
+        if (project.getName() == null || project.getName().isEmpty()) {
+            return ResultDO.buildError(ResultCode.PROJECT_NAME_CANNOT_BE_EMPTY);
+        }
+
+        try {
+            project.setLastModifiedDate(new Date());
+            projectDAO.update(project);
+            return ResultDO.build(project);
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            return ResultDO.buildError(ResultCode.UPDATE_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO delete(String id) {
+        if (id == null || id.isEmpty()) {
+            return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
+        }
+        try {
+            projectDAO.delete(id);
+            return new ResultDO(true);
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            return ResultDO.buildError(ResultCode.DELETE_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO<ProjectDO> getById(String id) {
+        if (id == null || id.isEmpty()) {
+            return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
+        }
+
+        try {
+            ProjectDO project = projectDAO.getById(id);
+            if (project == null) {
+                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
+            } else {
+                return ResultDO.build(project);
+            }
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO<ProjectDO> getByName(String name) {
+        if (name == null || name.isEmpty()) {
+            return ResultDO.buildError(ResultCode.PROJECT_NAME_CANNOT_BE_EMPTY);
+        }
+
+        try {
+            ProjectDO project = projectDAO.getByName(name);
+            if (project == null) {
+                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
+            } else {
+                return ResultDO.build(project);
+            }
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
+        }
+    }
+}

@@ -39,6 +39,20 @@
                         </div>
                         <div class="form-group m-form__group">
                             <label for="name">
+                                项目名称
+                            </label>
+                            <input type="text" class="form-control m-input" id="projectName" name="projectName"
+                                   th:value="${experiment?.projectName}">
+                        </div>
+                        <div class="form-group m-form__group">
+                            <label for="name">
+                                批次
+                            </label>
+                            <input type="text" class="form-control m-input" id="batchName" name="batchName"
+                                   th:value="${experiment?.batchName}">
+                        </div>
+                        <div class="form-group m-form__group">
+                            <label for="name">
                                 实验名称
                             </label>
                             <input type="text" class="form-control m-input" id="name" name="name"

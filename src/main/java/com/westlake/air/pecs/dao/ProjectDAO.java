@@ -1,14 +1,10 @@
 package com.westlake.air.pecs.dao;
 
-import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.ProjectDO;
-import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ProjectQuery;
-import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +25,7 @@ public class ProjectDAO {
     MongoTemplate mongoTemplate;
 
     public long count(ProjectQuery query) {
-        return mongoTemplate.count(buildQueryWithoutPage(query), ExperimentDO.class);
+        return mongoTemplate.count(buildQueryWithoutPage(query), ProjectDO.class);
     }
 
     public List<ProjectDO> getList(ProjectQuery query) {
@@ -50,24 +46,24 @@ public class ProjectDAO {
         return mongoTemplate.findOne(buildQuery(query), ProjectDO.class, CollectionName);
     }
 
-    public ExperimentDO insert(ExperimentDO experimentDO) {
-        mongoTemplate.insert(experimentDO, CollectionName);
-        return experimentDO;
+    public ProjectDO insert(ProjectDO project) {
+        mongoTemplate.insert(project, CollectionName);
+        return project;
     }
 
-    public ExperimentDO update(ExperimentDO experimentDO) {
-        mongoTemplate.save(experimentDO, CollectionName);
-        return experimentDO;
+    public ProjectDO update(ProjectDO project) {
+        mongoTemplate.save(project, CollectionName);
+        return project;
     }
 
-    public List<ExperimentDO> insertAll(List<ExperimentDO> experimentList) {
-        mongoTemplate.insert(experimentList, CollectionName);
-        return experimentList;
+    public List<ProjectDO> insertAll(List<ProjectDO> projectList) {
+        mongoTemplate.insert(projectList, CollectionName);
+        return projectList;
     }
 
     public void delete(String id) {
         Query query = new Query(where("id").is(id));
-        mongoTemplate.remove(query, ExperimentDO.class, CollectionName);
+        mongoTemplate.remove(query, ProjectDO.class, CollectionName);
     }
 
     private Query buildQuery(ProjectQuery projectQuery) {
@@ -86,13 +82,13 @@ public class ProjectDAO {
             query.addCriteria(where("id").is(projectQuery.getId()));
         }
         if (projectQuery.getName() != null) {
-            query.addCriteria(where("name").regex(projectQuery.getName()));
+            query.addCriteria(where("name").is(projectQuery.getName()));
         }
         if (projectQuery.getOwnerId() != null) {
-            query.addCriteria(where("ownerId").regex(projectQuery.getOwnerId()));
+            query.addCriteria(where("ownerId").is(projectQuery.getOwnerId()));
         }
         if (projectQuery.getOwnerName() != null) {
-            query.addCriteria(where("ownerName").regex(projectQuery.getOwnerName()));
+            query.addCriteria(where("ownerName").is(projectQuery.getOwnerName()));
         }
         return query;
     }

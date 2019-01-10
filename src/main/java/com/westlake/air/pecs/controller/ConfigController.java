@@ -32,9 +32,7 @@ public class ConfigController extends BaseController {
                   @RequestParam(value = "repository", required = false) String repository
                   ) {
         ConfigDO configDO = configDAO.getConfig();
-        if(repository != null){
-            configDO.setRepository(repository);
-        }
+
         configDAO.updateConfig(configDO);
         model.addAttribute(SUCCESS_MSG, SuccessMsg.UPDATE_SUCCESS);
         model.addAttribute("config", configDAO.getConfig());

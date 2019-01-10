@@ -9,10 +9,12 @@ import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.compressor.AirdInfo;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
+import com.westlake.air.pecs.domain.db.ProjectDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.MzXMLParser;
 import com.westlake.air.pecs.service.ExperimentService;
+import com.westlake.air.pecs.service.ProjectService;
 import com.westlake.air.pecs.service.ScanIndexService;
 import com.westlake.air.pecs.utils.FileUtil;
 import org.slf4j.Logger;
@@ -36,7 +38,7 @@ public class AirdCompressor {
     @Autowired
     MzXMLParser mzXMLParser;
     @Autowired
-    ConfigDAO configDAO;
+    ProjectService projectService;
 
     /**
      * @param experimentDO
@@ -46,7 +48,8 @@ public class AirdCompressor {
         String filePath = experimentDO.getFilePath();
         File file = new File(filePath);
 
-        String configAirdPath = configDAO.getConfig().getAirdFilePath();
+        ResultDO<ProjectDO> projectResult = projectService.getByName(experimentDO.getProjectName());
+        String configAirdPath = projectResult.getModel().getAirdPath();
         String fileParent = "";
         if (configAirdPath != null && !configAirdPath.isEmpty()) {
             fileParent = configAirdPath;

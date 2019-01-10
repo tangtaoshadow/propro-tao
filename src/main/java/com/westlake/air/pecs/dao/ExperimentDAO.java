@@ -98,10 +98,10 @@ public class ExperimentDAO {
             query.addCriteria(where("name").regex(experimentQuery.getName()));
         }
         if (experimentQuery.getProjectName() != null) {
-            query.addCriteria(where("projectName").regex(experimentQuery.getProjectName()));
+            query.addCriteria(where("projectName").is(experimentQuery.getProjectName()));
         }
         if (experimentQuery.getBatchName() != null) {
-            query.addCriteria(where("batchName").regex(experimentQuery.getBatchName()));
+            query.addCriteria(where("batchName").is(experimentQuery.getBatchName()));
         }
         return query;
     }

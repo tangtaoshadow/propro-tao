@@ -43,6 +43,14 @@
                         </a>
                     </li>
                     <li class="m-menu__item " aria-haspopup="true">
+                        <a th:href="|@{/project/create}|" class="m-menu__link ">
+                            <i class="m-menu__link-icon flaticon-file"></i>
+                            <span class="m-menu__link-text">
+                                创建一个项目
+                            </span>
+                        </a>
+                    </li>
+                    <li class="m-menu__item " aria-haspopup="true">
                         <a th:href="|@{/task/create?templateName=UPLOAD_LIBRARY_FILE}|" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-file"></i>
                             <span class="m-menu__link-text">
@@ -104,6 +112,12 @@
                     </li>
                 </ul>
             </div>
+        </li>
+
+        <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel">
+            <a th:href="@{/project/list}" class="m-menu__link">
+                <span class="m-menu__link-text">项目管理</span>
+            </a>
         </li>
 
         <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel">
