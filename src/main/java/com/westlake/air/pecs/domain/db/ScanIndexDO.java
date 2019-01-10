@@ -37,12 +37,6 @@ public class ScanIndexDO extends BaseDO {
     //key为对应的文件类型, @see PositionType.class
     HashMap<String, Position> positionMap;
 
-    //在AirusData中使用,一个Swath块中所有MS2的rt时间列表
-    List<Float> rts;
-
-    //在压缩文件中存储mz数组的长度以及存储intensity数组的长度,mz长度及intensity长度交替存入
-    List<Integer> blockSizes;
-
     //在mzxml中的序号
     Integer num;
 
@@ -70,6 +64,11 @@ public class ScanIndexDO extends BaseDO {
 
     //原始文件中前体的窗口大小,未经过ExperimentDO.overlap参数调整
     Float originalWindowWideness;
+
+    //特定字段,在msLevel=0的时候使用,在Aird格式文件中使用,一个Swath块中所有MS2的rt时间列表
+    List<Float> rts;
+    //特定字段,在msLevel=0的时候使用,在压缩文件中存储mz数组的长度以及存储intensity数组的长度,mz长度及intensity长度交替存入
+    List<Integer> blockSizes;
 
     public ScanIndexDO() {}
 

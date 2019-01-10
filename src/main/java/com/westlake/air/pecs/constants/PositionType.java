@@ -9,4 +9,6 @@ public class PositionType {
     public static String SWATH = "swath";
     public static String AIRD_MZ = "mz";
     public static String AIRD_INTENSITY = "int";
+
+    public static String AIRC_RT = "rt";
 }

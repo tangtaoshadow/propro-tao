@@ -1,18 +1,16 @@
 package com.westlake.air.pecs.algorithm;
 
 import com.westlake.air.pecs.algorithm.learner.LDALearner;
-import com.westlake.air.pecs.algorithm.learner.Learner;
 import com.westlake.air.pecs.algorithm.learner.XGBoostLearner;
+import com.westlake.air.pecs.constants.Classifier;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.*;
-import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
-import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.ScoreService;
@@ -60,10 +58,11 @@ public class Airus {
         ResultDO<AnalyseOverviewDO> overviewDOResultDO = analyseOverviewService.getById(overviewId);
         if (overviewDOResultDO.isSuccess()) {
             AnalyseOverviewDO overviewDO = overviewDOResultDO.getModel();
+            overviewDO.setClassifier(airusParams.getClassifier().name());
             if (overviewDO.getMatchedPeptideCount() != null) {
                 overviewDO.setMatchedPeptideCount(null);
-                analyseOverviewService.update(overviewDO);
             }
+            analyseOverviewService.update(overviewDO);
         }
         logger.info("开始获取打分数据");
 
@@ -75,13 +74,13 @@ public class Airus {
         }
         HashMap<String, Double> weightsMap = new HashMap<>();
         HashMap<String, Integer> peptideHitMap = new HashMap<>();
-        if (airusParams.getLearner().equals(Learner.learner.LdaLearner)) {
+        if (airusParams.getClassifier().equals(Classifier.lda)) {
             logger.info("开始训练学习数据权重");
             weightsMap = LDALearn(scores, peptideHitMap, airusParams);
             logger.info("开始计算合并打分");
             ldaLearner.score(scores, weightsMap);
             finalResult.setWeightsMap(weightsMap);
-        } else if (airusParams.getLearner().equals(Learner.learner.XgbLearner)) {
+        } else if (airusParams.getClassifier().equals(Classifier.xgboost)) {
 //            logger.info("开始训练XGBooster");
             XGBLearn(scores, airusParams);
         }
@@ -104,9 +103,9 @@ public class Airus {
             dataDO.setBestRt(simpleFeatureScores.getRt());
             dataDO.setFdr(simpleFeatureScores.getFdr());
             if (!simpleFeatureScores.getIsDecoy()) {
-                if(simpleFeatureScores.getFdr() <= 0.01){
+                if (simpleFeatureScores.getFdr() <= 0.01) {
                     Integer count = peptideHitMap.get(simpleFeatureScores.getPeptideRef());
-                    if(count != null && count > 4){
+                    if (count != null && count > 4) {
                         hit++;
                     }
                 }
@@ -118,7 +117,7 @@ public class Airus {
                 logger.error(r.getMsgInfo());
             }
         }
-        logger.info("采用加权法获得的肽段数目为:"+hit);
+        logger.info("采用加权法获得的肽段数目为:" + hit);
         logger.info("打分反馈更新完毕");
         int count = AirusUtil.checkFdr(finalResult);
         finalResult.setMatchedPeptideCount(count);
@@ -170,7 +169,7 @@ public class Airus {
             for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
                 if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getFdr() <= 0.01) {
                     Integer count = peptideHitMap.get(simpleFeatureScores.getPeptideRef());
-                    if(count == null){
+                    if (count == null) {
                         count = 0;
                     }
                     count++;

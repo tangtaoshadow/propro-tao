@@ -1,8 +1,7 @@
 package com.westlake.air.pecs.domain.bean.airus;
 
-import com.westlake.air.pecs.algorithm.learner.Learner;
+import com.westlake.air.pecs.constants.Classifier;
 import com.westlake.air.pecs.constants.ScoreType;
-import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import lombok.Data;
 
 /**
@@ -13,8 +12,8 @@ import lombok.Data;
 @Data
 public class AirusParams {
 
-//    Learner.learner learner = Learner.learner.XgbLearner;
-    Learner.learner learner = Learner.learner.LdaLearner;
+//    Learner.classifier classifier = Learner.classifier.XgbLearner;
+    Classifier classifier = Classifier.lda;
 
     double trainTestRatio = 0.5;
 

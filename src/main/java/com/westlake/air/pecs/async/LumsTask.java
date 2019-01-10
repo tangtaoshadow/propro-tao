@@ -2,7 +2,7 @@ package com.westlake.air.pecs.async;
 
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.algorithm.FragmentFactory;
-import com.westlake.air.pecs.compressor.Compressor;
+import com.westlake.air.pecs.compressor.AirdCompressor;
 import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.params.LumsParams;
@@ -34,7 +34,7 @@ public class LumsTask extends BaseTask{
     @Autowired
     Airus airus;
     @Autowired
-    Compressor compressor;
+    AirdCompressor airdCompressor;
     @Autowired
     PeptideService peptideService;
     @Autowired
@@ -54,7 +54,7 @@ public class LumsTask extends BaseTask{
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         if(experimentDO.getAirdPath() == null || !(new File(experimentDO.getAirdPath()).exists())){
             taskService.update(taskDO);
-            compressor.doCompress(experimentDO);
+            airdCompressor.compress(experimentDO);
             taskDO.addLog("文件压缩完毕,耗时" + (System.currentTimeMillis() - start) + "开始卷积IRT校准库并且计算iRT值");
             taskService.update(taskDO);
         }else{

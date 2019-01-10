@@ -90,6 +90,9 @@ public enum ResultCode implements Serializable {
     DATA_ID_CANNOT_BE_EMPTY("DATA_ID_CANNOT_BE_EMPTY","DataId不能为空"),
     FRAGMENT_CANNOT_BE_EMPTY_ALL("FRAGMENT_CANNOT_BE_EMPTY_ALL","肽段碎片不能全部为空"),
     FRAGMENT_LENGTH_IS_TOO_LONG("FRAGMENT_LENGTH_IS_TOO_LONG","设定的肽段碎片长度大于本身长度"),
+    AIRC_FILE_PATH_NOT_EXISTED("AIRC_FILE_PATH_NOT_EXISTED","卷积文件路径不存在"),
+    AIRC_FILE_NOT_EXISTED("AIRC_FILE_PATH_NOT_EXISTED","卷积文件不存在"),
+    POSITION_DELTA_LIST_LENGTH_NOT_EQUAL_TO_MZMAP_PLUS_ONE("POSITION_DELTA_LIST_LENGTH_NOT_EQUAL_TO_MZMAP_PLUS_ONE","索引地址搜索块的数目与mzMap+1的结果不一致"),
 
     /**
      * ******
@@ -124,7 +127,7 @@ public enum ResultCode implements Serializable {
 
     /**
      * ******
-     * Compressor
+     * AirdCompressor
      * *******
      */
     CREATE_FILE_FAILED("CREATE_FILE_FAILED","创建文件失败"),

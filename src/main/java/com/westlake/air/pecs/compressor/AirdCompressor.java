@@ -7,7 +7,7 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
-import com.westlake.air.pecs.domain.bean.compressor.AirInfo;
+import com.westlake.air.pecs.domain.bean.compressor.AirdInfo;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.ScanIndexDO;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
@@ -24,10 +24,10 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component("compressor")
-public class Compressor {
+@Component("airdCompressor")
+public class AirdCompressor {
 
-    public final Logger logger = LoggerFactory.getLogger(Compressor.class);
+    public final Logger logger = LoggerFactory.getLogger(AirdCompressor.class);
 
     @Autowired
     ScanIndexService scanIndexService;
@@ -42,7 +42,7 @@ public class Compressor {
      * @param experimentDO
      * @return
      */
-    public ResultDO doCompress(ExperimentDO experimentDO) {
+    public ResultDO compress(ExperimentDO experimentDO) {
         String filePath = experimentDO.getFilePath();
         File file = new File(filePath);
 
@@ -56,39 +56,37 @@ public class Compressor {
         String fileNameWithoutSuffix = file.getName().replace(".mzXML", "").replace(".mzxml", "");
 
         String airdFilePath = fileParent + "/" + fileNameWithoutSuffix + Constants.SUFFIX_AIRUS_DATA;
-        String airdIndexPath = fileParent + "/" + fileNameWithoutSuffix + Constants.SUFFIX_AIRUS_INFO;
+        String airdIndexPath = fileParent + "/" + fileNameWithoutSuffix + Constants.SUFFIX_AIRUS_DATA_INFO;
 
         File airiFile = new File(airdIndexPath);
         File airdFile = new File(airdFilePath);
 
         List<WindowRang> windowRangs = experimentService.getWindows(experimentDO.getId());
 
-        AirInfo airInfo = new AirInfo();
-        airInfo.setWindowRangs(windowRangs);
+        AirdInfo airdInfo = new AirdInfo();
+        airdInfo.setWindowRangs(windowRangs);
         List<ScanIndexDO> swathIndexes = new ArrayList<>();
 
         RandomAccessFile rafRead = null;
         FileWriter fwInfo = null;
-        BufferedWriter bwInfo = null;
 
         FileOutputStream fos = null;
         BufferedOutputStream bos = null;
         try {
             if (!airiFile.exists()) {
+                airiFile.getParentFile().mkdirs();
                 airiFile.createNewFile();
             }
             if (!airdFile.exists()) {
+                airdFile.getParentFile().mkdirs();
                 airdFile.createNewFile();
             }
             rafRead = new RandomAccessFile(file, "r");
 
             //所有的索引数据均以JSON文件保存
             fwInfo = new FileWriter(airiFile.getAbsoluteFile());
-            bwInfo = new BufferedWriter(fwInfo);
-
             fos = new FileOutputStream(airdFile.getAbsoluteFile());
             bos = new BufferedOutputStream(fos);
-
 
             long startAll = System.currentTimeMillis();
             int precision = Integer.parseInt(experimentDO.getPrecision());
@@ -141,9 +139,14 @@ public class Compressor {
             }
 
             //写入基本信息
-            airInfo.setScanIndex(outputIndexList);
-            airInfo.setSwathIndexes(swathIndexes);
-            String dataInfoStr = JSON.toJSONString(airInfo);
+            airdInfo.setScanIndex(outputIndexList);
+            airdInfo.setSwathIndexes(swathIndexes);
+            airdInfo.setAirdPath(airdFilePath);
+            airdInfo.setCreator(experimentDO.getCreator());
+            airdInfo.setCreateDate(experimentDO.getCreateDate());
+            airdInfo.setDescription(experimentDO.getDescription());
+            airdInfo.setOverlap(experimentDO.getOverlap());
+            String dataInfoStr = JSON.toJSONString(airdInfo);
             fwInfo.write(dataInfoStr);
             logger.info("Total Cost:" + (System.currentTimeMillis() - startAll));
 
@@ -151,13 +154,9 @@ public class Compressor {
             logger.error(e.getMessage());
             return ResultDO.buildError(ResultCode.CREATE_FILE_FAILED);
         } finally {
-
-            FileUtil.close(bwInfo);
             FileUtil.close(fwInfo);
-
             FileUtil.close(bos);
             FileUtil.close(fos);
-
             FileUtil.close(rafRead);
         }
 
@@ -172,10 +171,6 @@ public class Compressor {
         scanIndexService.deleteAllSwathIndexByExperimentId(experimentDO.getId());
         scanIndexService.insertAll(swathIndexes, false);
         return new ResultDO(true);
-    }
-
-    public void doCompressToLMS(ExperimentDO experimentDO){
-
     }
 
     /**

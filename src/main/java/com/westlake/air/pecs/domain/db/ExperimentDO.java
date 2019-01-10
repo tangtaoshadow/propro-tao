@@ -25,17 +25,15 @@ public class ExperimentDO extends BaseDO {
     //必填,实验名称
     String name;
 
-    //必填,mzxml的文件路径
+    //mzxml的文件路径
     String filePath;
-
-    //转换压缩后的aird的文件名称
-    String airdPath;
-
-    //转换压缩后aird的文件路径
-    String airdIndexPath;
 
     //原始文件是否已经被压缩为aird文件了
     Boolean hasAirusFile;
+    //转换压缩后的aird的文件名称
+    String airdPath;
+    //转换压缩后aird的文件路径
+    String airdIndexPath;
 
     //实验的描述
     String description;

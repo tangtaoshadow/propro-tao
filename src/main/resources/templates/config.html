@@ -46,7 +46,16 @@
                                        th:value="${config?.airdFilePath}">
                             </div>
                         </div>
-
+                        <div class="form-group m-form__group row">
+                            <label for="aircFilePath" class="col-3 col-form-label">
+                                Airc卷积文件存储路径
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="aircFilePath"
+                                       placeholder="Enter Airc Convolution File Path" name="aircFilePath"
+                                       th:value="${config?.aircFilePath}">
+                            </div>
+                        </div>
                         <div class="form-group m-form__group row">
                             <label for="libraryFilePath" class="col-3 col-form-label">
                                 标准库/iRT校准库文件存储路径(TSV,CSV,TraML)
@@ -80,13 +89,23 @@
                         </div>
 
                         <div class="form-group m-form__group row">
-                            <label for="prefixForCompressorFile" class="col-3 col-form-label">
-                                Aird压缩后的文件前缀
+                            <label for="prefixForAirdFile" class="col-3 col-form-label">
+                                卷积前的原始文件前缀-Aird
                             </label>
                             <div class="col-9">
-                                <input type="text" class="form-control m-input" id="prefixForCompressorFile"
-                                       placeholder="Enter Suffix For Compressor File" name="prefixForCompressorFile"
-                                       th:value="${config?.prefixForCompressorFile}">
+                                <input type="text" class="form-control m-input" id="prefixForAirdFile"
+                                       placeholder="Enter Suffix For Aird File" name="prefixForAirdFile"
+                                       th:value="${config?.prefixForAirdFile}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="prefixForAircFile" class="col-3 col-form-label">
+                                卷积后的文件前缀-Airc
+                            </label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="prefixForAircFile"
+                                       placeholder="Enter Suffix For Airc File" name="prefixForAircFile"
+                                       th:value="${config?.prefixForAircFile}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">

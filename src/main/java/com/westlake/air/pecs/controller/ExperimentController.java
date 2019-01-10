@@ -4,10 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.async.LumsTask;
-import com.westlake.air.pecs.compressor.Compressor;
+import com.westlake.air.pecs.compressor.AirdCompressor;
 import com.westlake.air.pecs.constants.*;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
@@ -53,7 +52,7 @@ public class ExperimentController extends BaseController {
     @Autowired
     ScanIndexService scanIndexService;
     @Autowired
-    Compressor compressor;
+    AirdCompressor airdCompressor;
     @Autowired
     LumsTask lumsTask;
 
@@ -364,7 +363,7 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
                      @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.6") Float shapeScoreThreshold,
                      @RequestParam(value = "shapeScoreWeightThreshold", required = false, defaultValue = "0.8") Float shapeScoreWeightThreshold,
-                     @RequestParam(value = "useEpps", required = false) Boolean useEpps,
+                     @RequestParam(value = "useEpps", required = false,defaultValue = "false") Boolean useEpps,
                      HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
 
@@ -508,24 +507,6 @@ public class ExperimentController extends BaseController {
         TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
         taskService.insert(taskDO);
         experimentTask.compress(experimentDO, taskDO);
-
-        return "redirect:/task/detail/" + taskDO.getId();
-    }
-
-    @RequestMapping(value = "/compressToLMS")
-    String compressToLMS(Model model,
-                         @RequestParam(value = "expId", required = true) String expId,
-                         RedirectAttributes redirectAttributes) {
-
-        ResultDO<ExperimentDO> resultDO = experimentService.getById(expId);
-        if (resultDO.isFailed()) {
-            redirectAttributes.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
-            return "redirect:/experiment/list";
-        }
-        ExperimentDO experimentDO = resultDO.getModel();
-        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
-        taskService.insert(taskDO);
-        experimentTask.compressToLMS(experimentDO, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }

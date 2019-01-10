@@ -16,14 +16,16 @@ public class ConfigDO extends BaseDO {
 
     //存放aird文件的位置
     String airdFilePath;
+    //存放airc文件的位置
+    String aircFilePath;
     //存放library库文件的地方,包括TSV和TraML格式
     String libraryFilePath;
-    //卷积文件导出位置
-    String exportAnalyseFilePath;
     //子分数文件导出位置
     String exportScoresFilePath = "D:/";
     //压缩文件默认前缀
-    String prefixForCompressorFile = "airus_";
+    String prefixForAirdFile = "aird_";
+
+    String prefixForAircFile = "airc_";
     //存放mzxml文件的位置
     String mzxmlFilePath;
 

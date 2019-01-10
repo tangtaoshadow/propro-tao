@@ -40,6 +40,8 @@ public interface AnalyseDataService {
 
     ResultDO<AnalyseDataDO> getById(String id);
 
+    ResultDO<AnalyseDataDO> getByIdWithConvolutionData(String id);
+
     /**
      * 获取MS1的卷积卷积信息
      *

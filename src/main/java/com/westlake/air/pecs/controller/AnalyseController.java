@@ -24,6 +24,7 @@ import com.westlake.air.pecs.service.*;
 import com.westlake.air.pecs.utils.CompressUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -83,7 +84,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("expId", expId);
 
-        if (expId != null) {
+        if (StringUtils.isNotEmpty(expId)) {
             ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
             if (expResult.isFailed()) {
                 model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED);
@@ -95,9 +96,11 @@ public class AnalyseController extends BaseController {
         AnalyseOverviewQuery query = new AnalyseOverviewQuery();
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
-        if (expId != null) {
+        if (StringUtils.isNotEmpty(expId)) {
             query.setExpId(expId);
         }
+        query.setOrderBy(Sort.Direction.DESC);
+        query.setSortColumn("createDate");
         ResultDO<List<AnalyseOverviewDO>> resultDO = analyseOverviewService.getList(query);
         model.addAttribute("overviews", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
@@ -157,8 +160,7 @@ public class AnalyseController extends BaseController {
 
     @RequestMapping(value = "/overview/delete/{id}")
     String overviewDelete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
-        analyseOverviewService.delete(id);
-        analyseDataService.deleteAllByOverviewId(id);
+        analyseOverviewService.deleteAll(id);
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
         return "redirect:/analyse/overview/list";
     }
@@ -337,7 +339,7 @@ public class AnalyseController extends BaseController {
         ResultDO<AnalyseDataDO> dataResult = null;
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
         if (dataId != null && !dataId.isEmpty() && !dataId.equals("null")) {
-            dataResult = analyseDataService.getById(dataId);
+            dataResult = analyseDataService.getByIdWithConvolutionData(dataId);
         }else{
             resultDO.setErrorResult(ResultCode.ANALYSE_DATA_ID_CANNOT_BE_EMPTY);
             return resultDO;
@@ -378,7 +380,7 @@ public class AnalyseController extends BaseController {
                                    @RequestParam(value = "useNoise1000", required = false, defaultValue = "false") Boolean useNoise1000) {
         ResultDO<AnalyseDataDO> dataResult = null;
         if (dataId != null && !dataId.isEmpty() && !dataId.equals("null")) {
-            dataResult = analyseDataService.getById(dataId);
+            dataResult = analyseDataService.getByIdWithConvolutionData(dataId);
         }
 
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);

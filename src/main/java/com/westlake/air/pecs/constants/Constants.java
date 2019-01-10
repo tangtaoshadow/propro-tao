@@ -75,8 +75,13 @@ public class Constants {
     public static final double EMG_CONST = 2.4055;
     public static final int EMG_MAX_ITERATION = 500;
 
-    public static final String SUFFIX_AIRUS_INFO = ".aird.json";
+    //卷积前的原始数据及索引
     public static final String SUFFIX_AIRUS_DATA = ".aird";
+    public static final String SUFFIX_AIRUS_DATA_INFO = ".aird.json";
+    //卷积以后的数据格式及索引
+    public static final String SUFFIX_AIRUS_CONVOLUTION= ".airc";
+    public static final String SUFFIX_AIRUS_CONVOLUTION_INFO= ".airc.json";
+
     public static final String CHANGE_LINE = "\r\n";
     public static final String TAB = "\t";
     public static final String COMMA = ",";

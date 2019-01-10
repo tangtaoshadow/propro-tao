@@ -25,10 +25,6 @@ public abstract class Learner {
         score(data.getDecoys(), weightsMap);
     }
 
-    public enum learner{
-        LdaLearner, XgbLearner;
-    }
-
     public void score(List<SimpleScores> scores, HashMap<String, Double> weightsMap) {
         Set<Map.Entry<String, Double>> entries = weightsMap.entrySet();
         for (SimpleScores score : scores) {

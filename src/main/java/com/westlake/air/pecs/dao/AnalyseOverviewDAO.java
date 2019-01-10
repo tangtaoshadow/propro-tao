@@ -3,6 +3,7 @@ package com.westlake.air.pecs.dao;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
 import com.westlake.air.pecs.domain.query.AnalyseOverviewQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -23,18 +24,18 @@ public class AnalyseOverviewDAO {
     @Autowired
     MongoTemplate mongoTemplate;
 
-    public List<AnalyseOverviewDO> getAllByExperimentId(String expId){
+    public List<AnalyseOverviewDO> getAllByExperimentId(String expId) {
         Query query = new Query(where("expId").is(expId));
         return mongoTemplate.find(query, AnalyseOverviewDO.class, CollectionName);
     }
 
-    public AnalyseOverviewDO getFirstByExperimentId(String expId){
+    public AnalyseOverviewDO getFirstByExperimentId(String expId) {
         Query query = new Query(where("expId").is(expId));
         query.limit(1);
         List<AnalyseOverviewDO> list = mongoTemplate.find(query, AnalyseOverviewDO.class, CollectionName);
-        if(list.size() == 0){
+        if (list.size() == 0) {
             return null;
-        }else{
+        } else {
             return list.get(0);
         }
     }
@@ -43,7 +44,7 @@ public class AnalyseOverviewDAO {
         return mongoTemplate.find(buildQuery(query), AnalyseOverviewDO.class, CollectionName);
     }
 
-    public long count(AnalyseOverviewQuery query){
+    public long count(AnalyseOverviewQuery query) {
         return mongoTemplate.count(buildQueryWithoutPage(query), AnalyseOverviewDO.class, CollectionName);
     }
 
@@ -68,7 +69,7 @@ public class AnalyseOverviewDAO {
 
     public void delete(String id) {
         Query query = new Query(where("id").is(id));
-        mongoTemplate.remove(query,AnalyseOverviewDO.class, CollectionName);
+        mongoTemplate.remove(query, AnalyseOverviewDO.class, CollectionName);
     }
 
     public void deleteAllByExperimentId(String expId) {
@@ -81,8 +82,9 @@ public class AnalyseOverviewDAO {
 
         query.skip((targetQuery.getPageNo() - 1) * targetQuery.getPageSize());
         query.limit(targetQuery.getPageSize());
-        //默认没有排序功能(排序会带来极大的性能开销)
-//        query.with(new Sort(transitionQuery.getOrderBy(), transitionQuery.getSortColumn()));
+        if (targetQuery.getSortColumn() != null && targetQuery.getOrderBy() != null) {
+            query.with(new Sort(targetQuery.getOrderBy(), targetQuery.getSortColumn()));
+        }
         return query;
     }
 

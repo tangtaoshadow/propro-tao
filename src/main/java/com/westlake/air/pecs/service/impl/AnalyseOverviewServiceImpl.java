@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -90,6 +91,38 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
         }
         try {
             analyseOverviewDAO.delete(id);
+            return new ResultDO(true);
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            return ResultDO.buildError(ResultCode.DELETE_ERROR);
+        }
+    }
+
+
+    @Override
+    public ResultDO deleteAll(String id) {
+        if (id == null || id.isEmpty()) {
+            return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
+        }
+        try {
+            AnalyseOverviewDO overview = analyseOverviewDAO.getById(id);
+            if(overview != null){
+                if(overview.getAircPath() != null && !overview.getAircPath().isEmpty()){
+                    File file = new File(overview.getAircPath());
+                    if(file.exists()){
+                        file.delete();
+                    }
+                }
+                if(overview.getAircIndexPath() != null && !overview.getAircIndexPath().isEmpty()){
+                    File file = new File(overview.getAircIndexPath());
+                    if(file.exists()){
+                        file.delete();
+                    }
+                }
+            }
+            analyseOverviewDAO.delete(id);
+            analyseDataService.deleteAllByOverviewId(id);
+
             return new ResultDO(true);
         } catch (Exception e) {
             logger.warn(e.getMessage());

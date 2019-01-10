@@ -3,6 +3,8 @@ package com.westlake.air.pecs.utils;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.HashMap;
+
 public class AnalyseDataUtil {
 
     public static void compress(AnalyseDataDO data) {
@@ -10,6 +12,7 @@ public class AnalyseDataUtil {
             data.setConvRtArray(CompressUtil.zlibCompress(CompressUtil.transToByte(ArrayUtils.toPrimitive(data.getRtArray()))));
             data.setRtArray(null);
         }
+        data.setConvIntensityMap(new HashMap<>());
         for (String cutInfo : data.getIntensityMap().keySet()) {
             Float[] intensities = data.getIntensityMap().get(cutInfo);
             if (intensities != null) {

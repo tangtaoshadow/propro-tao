@@ -1,7 +1,5 @@
 package com.westlake.air.pecs.scorer;
 
-import com.alibaba.fastjson.JSON;
-import com.sun.jmx.remote.internal.ArrayQueue;
 import com.westlake.air.pecs.algorithm.FragmentFactory;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.IsotopeConstants;
@@ -9,17 +7,18 @@ import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.dao.AminoAcidDAO;
 import com.westlake.air.pecs.dao.ElementsDAO;
 import com.westlake.air.pecs.dao.UnimodDAO;
-import com.westlake.air.pecs.domain.bean.score.*;
-import com.westlake.air.pecs.parser.model.chemistry.Element;
-import com.westlake.air.pecs.utils.MathUtil;
+import com.westlake.air.pecs.domain.bean.score.BYSeries;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
+import com.westlake.air.pecs.domain.bean.score.IntegrateWindowMzIntensity;
+import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.utils.ScoreUtil;
 import org.apache.commons.math3.util.FastMath;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import scala.collection.immutable.Stream;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by Nico Wang Ruimin

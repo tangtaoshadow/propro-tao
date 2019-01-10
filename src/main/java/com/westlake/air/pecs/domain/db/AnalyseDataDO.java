@@ -1,6 +1,8 @@
 package com.westlake.air.pecs.domain.db;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.westlake.air.pecs.domain.BaseDO;
+import com.westlake.air.pecs.domain.bean.scanindex.Position;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -27,9 +29,11 @@ public class AnalyseDataDO extends BaseDO {
     //尚未鉴定
     public static Integer IDENTIFIED_STATUS_NOT_START = 3;
     @Id
+    @JSONField(serialize=false)
     String id;
 
     @Indexed
+    @JSONField(serialize=false)
     String overviewId;
 
     @Indexed
@@ -45,15 +49,15 @@ public class AnalyseDataDO extends BaseDO {
     Float mz;
 
     //对应的标准库的peptideId
+    @JSONField(serialize=false)
     String peptideId;
 
-    //对应的标记
-    String annotations;
-
     //排序后的rt
+    @JSONField(serialize=false)
     Float[] rtArray;
 
     //key为cutInfo, value为对应的intensity值
+    @JSONField(serialize=false)
     HashMap<String, Float[]> intensityMap = new HashMap<>();
 
     //key为cutInfo, value为对应的mz
@@ -62,27 +66,39 @@ public class AnalyseDataDO extends BaseDO {
     //是否是伪肽段
     Boolean isDecoy = false;
 
-    //压缩相关的字段
     /**
-     * 是否处于压缩状态
+     * 压缩相关的字段
      */
+    //是否处于压缩状态
+    @JSONField(serialize=false)
     boolean compressed = false;
 
     //内存计算时使用的字段,对应rtArray的压缩版本
+    @JSONField(serialize=false)
     byte[] convRtArray;
 
     //内存计算时使用的字段,对应intensityMap的压缩版本
+    @JSONField(serialize=false)
     HashMap<String, byte[]> convIntensityMap = new HashMap<>();
+
+    //本肽段在存储文件中的开始位置
+    Long startPos;
+    //存储在本地的位置块信息,顺序依次为convRtArray,mzMap.keySet()为顺序的各个离子片段的位置,长度为mzMap.size()+1
+    List<Integer> posDeltaList;
 
     //打分相关的字段
     @Indexed
+    @JSONField(serialize=false)
     int identifiedStatus = IDENTIFIED_STATUS_NOT_START;
 
     @Indexed
+    @JSONField(serialize=false)
     Double fdr;
 
+    @JSONField(serialize=false)
     List<FeatureScores> featureScoresList;
 
+    @JSONField(serialize=false)
     Double bestRt;
 
 

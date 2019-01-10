@@ -27,6 +27,8 @@ public interface AnalyseOverviewService {
 
     ResultDO delete(String id);
 
+    ResultDO deleteAll(String id);
+
     ResultDO deleteAllByExpId(String expId);
 
     ResultDO<AnalyseOverviewDO> getById(String id);

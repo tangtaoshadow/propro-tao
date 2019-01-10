@@ -7,7 +7,7 @@ import com.westlake.air.pecs.test.BaseTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class CompressorTest extends BaseTest {
+public class AirdCompressorTest extends BaseTest {
 
     @Autowired
     AirdFileParser airdFileParser;

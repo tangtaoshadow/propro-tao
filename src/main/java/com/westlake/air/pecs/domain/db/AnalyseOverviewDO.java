@@ -26,6 +26,13 @@ public class AnalyseOverviewDO extends BaseDO {
     //对应实验的名称
     String expName;
 
+    //是否包含卷积结果文件
+    Boolean hasAircFile;
+    //卷积结果文件路径
+    String aircPath;
+    //卷积结果索引文件路径
+    String aircIndexPath;
+
     //卷积代号
     String name;
 
@@ -57,6 +64,9 @@ public class AnalyseOverviewDO extends BaseDO {
 
     //卷积实验的创建者
     String creator = "Admin";
+
+    //最终使用的分类器:lda, xgboost
+    String classifier = "lda";
 
     //在计算高斯平滑时使用的Sigma值,一般为6.25
     Float sigma;

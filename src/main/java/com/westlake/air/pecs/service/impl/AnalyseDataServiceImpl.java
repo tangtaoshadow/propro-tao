@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.service.impl;
 
+import com.westlake.air.pecs.constants.PositionType;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.dao.AnalyseDataDAO;
 import com.westlake.air.pecs.dao.AnalyseOverviewDAO;
@@ -14,11 +15,15 @@ import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.utils.CompressUtil;
+import com.westlake.air.pecs.utils.FileUtil;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -177,6 +182,59 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             }
         } catch (Exception e) {
             return ResultDO.buildError(ResultCode.QUERY_ERROR);
+        }
+    }
+
+    @Override
+    public ResultDO<AnalyseDataDO> getByIdWithConvolutionData(String id) {
+        RandomAccessFile raf = null;
+        try {
+            AnalyseDataDO analyseDataDO = analyseDataDAO.getById(id);
+            if (analyseDataDO == null) {
+                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
+            } else {
+                AnalyseOverviewDO overview = analyseOverviewDAO.getById(analyseDataDO.getOverviewId());
+                if (overview == null) {
+                    return ResultDO.buildError(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
+                }
+                if (overview.getAircPath() == null || overview.getAircPath().isEmpty()) {
+                    return ResultDO.buildError(ResultCode.AIRC_FILE_PATH_NOT_EXISTED);
+                }
+                File file = new File(overview.getAircPath());
+                if (!file.exists()) {
+                    return ResultDO.buildError(ResultCode.AIRC_FILE_NOT_EXISTED);
+                }
+                if (analyseDataDO.getPosDeltaList().size() != (analyseDataDO.getMzMap().size() + 1)) {
+                    return ResultDO.buildError(ResultCode.POSITION_DELTA_LIST_LENGTH_NOT_EQUAL_TO_MZMAP_PLUS_ONE);
+                }
+                raf = new RandomAccessFile(file, "r");
+                long start = analyseDataDO.getStartPos();
+                raf.seek(start);
+
+                byte[] rtArray = new byte[analyseDataDO.getPosDeltaList().get(0)];
+                raf.read(rtArray);
+                analyseDataDO.setConvRtArray(rtArray);
+                start = start + rtArray.length;
+                int i = 1;
+
+                //依次读取PosDeltaList中的位置信息
+                for (String key : analyseDataDO.getConvIntensityMap().keySet()) {
+                    byte[] intensityArray = new byte[analyseDataDO.getPosDeltaList().get(i)];
+                    raf.seek(start);
+                    raf.read(intensityArray);
+                    analyseDataDO.getConvIntensityMap().put(key, intensityArray);
+                    start = start + intensityArray.length;
+                    i++;
+                }
+
+                ResultDO<AnalyseDataDO> resultDO = new ResultDO<>(true);
+                resultDO.setModel(analyseDataDO);
+                return resultDO;
+            }
+        } catch (Exception e) {
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
+        } finally {
+            FileUtil.close(raf);
         }
     }
 

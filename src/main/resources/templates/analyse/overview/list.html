@@ -14,6 +14,31 @@
     <div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>
     <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
     <div class="m-portlet__body">
+        <div class="clearfix">
+            <form id="searchForm" method="post" role="form"
+                  class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
+                  th:action="@{/analyse/overview/list}">
+                <input id="currentPage" type="hidden" class="form-control" name="currentPage">
+                <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
+
+                <div class="form-group m-form__group row">
+                    <div class="input-group col-lg-2">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-success" type="button">
+                                实验ID:
+                            </button>
+                        </div>
+                        <input type="text" class="form-control m-input" name="expId"
+                               placeholder="expId" th:value="${expId}">
+                        <div class="input-group-append">
+                            <button class="btn btn-warning" type="submit">
+                                搜索
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
         <!--begin: Datatable -->
         <div>
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
@@ -43,7 +68,10 @@
                     <th width="10%">
                         创建时间
                     </th>
-                    <th width="10%">
+                    <th width="5%">
+                        分类器
+                    </th>
+                    <th width="5%">
                         iRT参数
                     </th>
                     <th width="10%">
@@ -67,6 +95,7 @@
                     <td th:text="|${overview.sigma}/${overview.spacing}|"></td>
                     <td th:text="|${overview.shapeScoreThreshold}/${overview.shapeScoreWeightThreshold}|"></td>
                     <td th:text="${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
+                    <td th:text="|${overview.classifier}|"></td>
                     <td th:text="|${overview.slope}/${overview.intercept}|"></td>
                     <td th:text="|${overview.matchedPeptideCount}/${overview.totalPeptideCount}/${overview.libraryPeptideCount}|"></td>
                     <td th:text="${overview.creator}"></td>
@@ -79,10 +108,10 @@
                         <div class="btn-group dropright" role="group">
                             <button id="scoresBtnGroup" type="button" class="btn btn-sm dropdown-toggle"
                                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                打分相关
+                                合并打分
                             </button>
                             <div class="dropdown-menu" aria-labelledby="scoresBtn">
-                                <a class="dropdown-item" th:href="|/analyse/overview/score?overviewId=${overview.id}|">开始子分数打分</a>
+                                <!--<a class="dropdown-item" th:href="|/analyse/overview/score?overviewId=${overview.id}|">开始子分数打分</a>-->
                                 <a class="dropdown-item" th:href="|/score/airus?overviewId=${overview.id}&&classifier=lda|">LDA合并打分</a>
                                 <a class="dropdown-item" th:href="|/score/airus?overviewId=${overview.id}&&classifier=xgboost|">XGBoost合并打分</a>
                             </div>

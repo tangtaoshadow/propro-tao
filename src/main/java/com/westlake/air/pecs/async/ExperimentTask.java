@@ -2,22 +2,21 @@ package com.westlake.air.pecs.async;
 
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.algorithm.FragmentFactory;
-import com.westlake.air.pecs.compressor.Compressor;
+import com.westlake.air.pecs.compressor.AirdCompressor;
 import com.westlake.air.pecs.constants.TaskStatus;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
+import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -36,7 +35,7 @@ public class ExperimentTask extends BaseTask {
     @Autowired
     Airus airus;
     @Autowired
-    Compressor compressor;
+    AirdCompressor airdCompressor;
     @Autowired
     PeptideService peptideService;
     @Autowired
@@ -61,18 +60,7 @@ public class ExperimentTask extends BaseTask {
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         long start = System.currentTimeMillis();
-        compressor.doCompress(experimentDO);
-        taskDO.addLog("压缩转换完毕,总耗时:" + (System.currentTimeMillis() - start));
-        taskDO.finish(TaskStatus.SUCCESS.getName());
-        taskService.update(taskDO);
-    }
-
-    @Async(value = "compressFileExecutor")
-    public void compressToLMS(ExperimentDO experimentDO, TaskDO taskDO) {
-        taskDO.setStatus(TaskStatus.RUNNING.getName());
-        taskService.update(taskDO);
-        long start = System.currentTimeMillis();
-        compressor.doCompressToLMS(experimentDO);
+        airdCompressor.compress(experimentDO);
         taskDO.addLog("压缩转换完毕,总耗时:" + (System.currentTimeMillis() - start));
         taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);

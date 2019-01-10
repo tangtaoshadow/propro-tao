@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 @Component
-public class LDALearner extends Learner{
+public class LDALearner extends Learner {
 
     public final Logger logger = LoggerFactory.getLogger(LDALearner.class);
 
@@ -43,7 +43,7 @@ public class LDALearner extends Learner{
         for (SimpleFeatureScores sfs : trainPeaks.getBestTargets()) {
             int i = 0;
             for (String scoreType : keySet) {
-                if(scoreType.equals(skipScoreType)){
+                if (scoreType.equals(skipScoreType)) {
                     continue;
                 }
                 scoresMatrix.setEntry(k, i, sfs.getScoresMap().get(scoreType));
@@ -55,7 +55,7 @@ public class LDALearner extends Learner{
         for (SimpleFeatureScores sfs : trainPeaks.getTopDecoys()) {
             int i = 0;
             for (String scoreType : keySet) {
-                if(scoreType.equals(skipScoreType)){
+                if (scoreType.equals(skipScoreType)) {
                     continue;
                 }
                 scoresMatrix.setEntry(k, i, sfs.getScoresMap().get(scoreType));
@@ -73,16 +73,16 @@ public class LDALearner extends Learner{
         HashMap<String, Double> weightsMap = new HashMap<>();
         int tempJ = 0;
         for (String key : scoreMapSample.keySet()) {
-            if(key.equals(skipScoreType)){
+            if (key.equals(skipScoreType)) {
                 continue;
             }
             weightsMap.put(key, realVector.getEntry(tempJ));
             tempJ++;
         }
 
-        for(Double value: weightsMap.values()){
-            if(value == null || Double.isNaN(value)){
-                logger.info("本轮训练一坨屎:"+ JSON.toJSONString(weightsMap));
+        for (Double value : weightsMap.values()) {
+            if (value == null || Double.isNaN(value)) {
+                logger.info("本轮训练一坨屎:" + JSON.toJSONString(weightsMap));
                 return null;
             }
         }

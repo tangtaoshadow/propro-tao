@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.westlake.air.pecs.algorithm.learner.Learner;
 import com.westlake.air.pecs.async.AirusTask;
 import com.westlake.air.pecs.async.ScoreTask;
+import com.westlake.air.pecs.constants.Classifier;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.constants.TaskTemplate;
@@ -139,9 +140,9 @@ public class ScoreController extends BaseController {
         taskService.insert(taskDO);
         AirusParams airusParams = new AirusParams();
         if (classifier.equals("xgboost")) {
-            airusParams.setLearner(Learner.learner.XgbLearner);
+            airusParams.setClassifier(Classifier.xgboost);
         } else {
-            airusParams.setLearner(Learner.learner.LdaLearner);
+            airusParams.setClassifier(Classifier.lda);
         }
 
         airusTask.airus(overviewId, airusParams, taskDO);

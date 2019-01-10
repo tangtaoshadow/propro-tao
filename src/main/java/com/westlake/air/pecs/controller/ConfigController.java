@@ -30,11 +30,12 @@ public class ConfigController extends BaseController {
     @RequestMapping(value = "/update")
     String update(Model model,
                   @RequestParam(value = "airdFilePath", required = false) String airdFilePath,
+                  @RequestParam(value = "aircFilePath", required = false) String aircFilePath,
                   @RequestParam(value = "mzxmlFilePath", required = false) String oldExperimentFilePath,
                   @RequestParam(value = "libraryFilePath", required = false) String libraryFilePath,
                   @RequestParam(value = "exportScoresFilePath", required = false) String exportScoresFilePath,
-                  @RequestParam(value = "exportAnalyseFilePath", required = false) String exportAnalyseFilePath,
-                  @RequestParam(value = "prefixForCompressorFile", required = false) String prefixForCompressorFile
+                  @RequestParam(value = "prefixForAirdFile", required = false) String prefixForAirdFile,
+                  @RequestParam(value = "prefixForAircFile", required = false) String prefixForAircFile
                   ) {
         ConfigDO configDO = configDAO.getConfig();
         if(airdFilePath != null){
@@ -43,14 +44,17 @@ public class ConfigController extends BaseController {
         if(libraryFilePath != null){
             configDO.setLibraryFilePath(libraryFilePath);
         }
-        if(prefixForCompressorFile != null){
-            configDO.setPrefixForCompressorFile(prefixForCompressorFile);
+        if(aircFilePath != null){
+            configDO.setAircFilePath(aircFilePath);
         }
         if(oldExperimentFilePath != null){
             configDO.setMzxmlFilePath(oldExperimentFilePath);
         }
-        if(exportAnalyseFilePath != null){
-            configDO.setExportAnalyseFilePath(exportAnalyseFilePath);
+        if(prefixForAirdFile != null){
+            configDO.setPrefixForAirdFile(prefixForAirdFile);
+        }
+        if(prefixForAircFile != null){
+            configDO.setPrefixForAircFile(prefixForAircFile);
         }
         if(exportScoresFilePath != null){
             configDO.setExportScoresFilePath(exportScoresFilePath);
