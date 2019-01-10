@@ -23,8 +23,31 @@
 
                 <div class="form-group m-form__group row">
                     <div class="input-group col-lg-2">
-                        <input type="text" class="form-control" id="searchName" name="searchName" placeholder="实验名称"
-                               th:value="${searchName}">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-success" type="button">
+                                项目名称:
+                            </button>
+                        </div>
+                        <input type="text" class="form-control" id="projectName" name="projectName"
+                               th:value="${projectName}">
+                    </div>
+                    <div class="input-group col-lg-2">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-success" type="button">
+                                实验批次:
+                            </button>
+                        </div>
+                        <input type="text" class="form-control" id="batchName" name="batchName"
+                               th:value="${batchName}">
+                    </div>
+                    <div class="input-group col-lg-2">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-success" type="button">
+                                实验名称:
+                            </button>
+                        </div>
+                        <input type="text" class="form-control" id="expName" name="expName"
+                               th:value="${expName}">
                         <div class="input-group-append">
                             <button class="btn btn-primary" type="submit">
                                 查找
@@ -40,6 +63,12 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
+                    <th width="5%">
+                        项目名称
+                    </th>
+                    <th width="5%">
+                        实验批次
+                    </th>
                     <th width="10%">
                         实验名
                     </th>
@@ -64,13 +93,15 @@
                     <th width="10%">
                         最后修改时间
                     </th>
-                    <th width="30%">
+                    <th width="20%">
                         操作
                     </th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="experiment:${experiments}">
+                    <td th:text="|${experiment.projectName}|"></td>
+                    <td th:text="|${experiment.batchName}|"></td>
                     <td th:text="|${experiment.name}(${experiment.id})|"></td>
                     <td th:text="${experiment.filePath}"></td>
                     <td th:if="!${experiment.hasAirusFile}">

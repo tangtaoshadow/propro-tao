@@ -14,22 +14,20 @@ public class ConfigDO extends BaseDO {
 
     String id;
 
-    //存放aird文件的位置
-    String airdFilePath;
-    //存放airc文件的位置
-    String aircFilePath;
-    //存放library库文件的地方,包括TSV和TraML格式
-    String libraryFilePath;
-    //子分数文件导出位置
-    String exportScoresFilePath = "D:/";
-    //压缩文件默认前缀
-    String prefixForAirdFile = "aird_";
-
-    String prefixForAircFile = "airc_";
-    //存放mzxml文件的位置
-    String mzxmlFilePath;
+    //文件的仓库地址
+    String repository;
 
     Date createDate;
 
     Date lastModifiedDate;
+
+    //默认的airc文件会放在airc文件夹下
+    public String getAircFilePath(){
+        return repository+"/airc";
+    }
+
+    //默认的aird文件会放在aird文件夹下
+    public String getAirdFilePath(){
+        return repository+"/aird";
+    }
 }

@@ -4,6 +4,7 @@ import com.westlake.air.pecs.domain.BaseDO;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -22,8 +23,23 @@ public class ExperimentDO extends BaseDO {
     @Id
     String id;
 
+    //所属的公开组织名称
+    @Indexed
+    String publicName;
+
+    //实验项目名称
+    @Indexed
+    String projectName;
+
+    //批次名
+    @Indexed
+    String batchName;
+
     //必填,实验名称
     String name;
+
+    //实验类型,目前仅支持DIA-Swath
+    String expType;
 
     //mzxml的文件路径
     String filePath;

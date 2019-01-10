@@ -18,6 +18,10 @@ public class ExperimentQuery extends PageQuery {
 
     String name;
 
+    String projectName;
+
+    String batchName;
+
     Date createDate;
 
     Date lastModifiedDate;

@@ -29,35 +29,11 @@ public class ConfigController extends BaseController {
 
     @RequestMapping(value = "/update")
     String update(Model model,
-                  @RequestParam(value = "airdFilePath", required = false) String airdFilePath,
-                  @RequestParam(value = "aircFilePath", required = false) String aircFilePath,
-                  @RequestParam(value = "mzxmlFilePath", required = false) String oldExperimentFilePath,
-                  @RequestParam(value = "libraryFilePath", required = false) String libraryFilePath,
-                  @RequestParam(value = "exportScoresFilePath", required = false) String exportScoresFilePath,
-                  @RequestParam(value = "prefixForAirdFile", required = false) String prefixForAirdFile,
-                  @RequestParam(value = "prefixForAircFile", required = false) String prefixForAircFile
+                  @RequestParam(value = "repository", required = false) String repository
                   ) {
         ConfigDO configDO = configDAO.getConfig();
-        if(airdFilePath != null){
-            configDO.setAirdFilePath(airdFilePath);
-        }
-        if(libraryFilePath != null){
-            configDO.setLibraryFilePath(libraryFilePath);
-        }
-        if(aircFilePath != null){
-            configDO.setAircFilePath(aircFilePath);
-        }
-        if(oldExperimentFilePath != null){
-            configDO.setMzxmlFilePath(oldExperimentFilePath);
-        }
-        if(prefixForAirdFile != null){
-            configDO.setPrefixForAirdFile(prefixForAirdFile);
-        }
-        if(prefixForAircFile != null){
-            configDO.setPrefixForAircFile(prefixForAircFile);
-        }
-        if(exportScoresFilePath != null){
-            configDO.setExportScoresFilePath(exportScoresFilePath);
+        if(repository != null){
+            configDO.setRepository(repository);
         }
         configDAO.updateConfig(configDO);
         model.addAttribute(SUCCESS_MSG, SuccessMsg.UPDATE_SUCCESS);

@@ -656,10 +656,12 @@ public class AnalyseController extends BaseController {
             if (overviewId == null || overviewId.isEmpty()) {
                 continue;
             }
-            AnalyseDataDO data = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, peptideRef, false);
-            if(data == null){
+            AnalyseDataDO dataForId = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, peptideRef, false);
+            ResultDO<AnalyseDataDO> dataResult = analyseDataService.getByIdWithConvolutionData(dataForId.getId());
+            if(dataResult.isFailed() || dataResult.getModel() == null){
                 continue;
             }
+            AnalyseDataDO data = dataResult.getModel();
             JSONArray rtArray = new JSONArray();
             JSONArray intensityArrays = new JSONArray();
             JSONArray cutInfoArray = new JSONArray();

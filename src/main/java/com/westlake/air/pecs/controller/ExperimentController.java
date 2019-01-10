@@ -26,6 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -60,12 +61,22 @@ public class ExperimentController extends BaseController {
     String list(Model model,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
-                @RequestParam(value = "searchName", required = false) String searchName) {
-        model.addAttribute("searchName", searchName);
+                @RequestParam(value = "projectName", required = false) String projectName,
+                @RequestParam(value = "batchName", required = false) String batchName,
+                @RequestParam(value = "expName", required = false) String expName) {
+        model.addAttribute("expName", expName);
+        model.addAttribute("projectName", expName);
+        model.addAttribute("batchName", expName);
         model.addAttribute("pageSize", pageSize);
         ExperimentQuery query = new ExperimentQuery();
-        if (searchName != null && !searchName.isEmpty()) {
-            query.setName(searchName);
+        if (expName != null && !expName.isEmpty()) {
+            query.setName(expName);
+        }
+        if(projectName != null && !projectName.isEmpty()){
+            query.setProjectName(projectName);
+        }
+        if(batchName != null && !batchName.isEmpty()){
+            query.setBatchName(batchName);
         }
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
@@ -132,7 +143,11 @@ public class ExperimentController extends BaseController {
     }
 
     @RequestMapping(value = "/batchadd", method = {RequestMethod.POST})
-    String batchAdd(Model model, ExpVO exps, RedirectAttributes redirectAttributes) {
+    String batchAdd(Model model,
+                    @RequestParam(value = "projectName", required = false) String projectName,
+                    @RequestParam(value = "batchName", required = false) String batchName,
+                    ExpVO exps,
+                    RedirectAttributes redirectAttributes) {
 
         String errorInfo = "";
         List<Exp> expList = exps.getExps();
@@ -147,6 +162,8 @@ public class ExperimentController extends BaseController {
             }
 
             ExperimentDO experimentDO = new ExperimentDO();
+            experimentDO.setProjectName(projectName);
+            experimentDO.setBatchName(batchName);
             experimentDO.setName(exp.getName());
             experimentDO.setDescription(exp.getDescription());
             experimentDO.setOverlap(exp.getOverlap());

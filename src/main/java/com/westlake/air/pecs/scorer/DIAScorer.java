@@ -49,11 +49,11 @@ public class DIAScorer {
      * scores.massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比之和
      * scores.weighted_massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比按libraryIntensity加权之和
      *
-     * @param productMzArray      根据transitionGroup获得存在transition中的productMz，存成Float array
-     * @param spectrumMzArray     根据transitionGroup选取的RT选择的最近的Spectrum对应的mzArray
-     * @param spectrumIntArray    根据transitionGroup选取的RT选择的最近的Spectrum对应的intensityArray
-     * @param normedLibIntMap unNormalized library intensity(in peptidepeptide)
-     * @param scores              scoreForAll for Airus
+     * @param productMzArray   根据transitionGroup获得存在transition中的productMz，存成Float array
+     * @param spectrumMzArray  根据transitionGroup选取的RT选择的最近的Spectrum对应的mzArray
+     * @param spectrumIntArray 根据transitionGroup选取的RT选择的最近的Spectrum对应的intensityArray
+     * @param normedLibIntMap  unNormalized library intensity(in peptidepeptide)
+     * @param scores           scoreForAll for Airus
      */
     public void calculateDiaMassDiffScore(HashMap<String, Float> productMzArray, Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<String, Double> normedLibIntMap, FeatureScores scores) {
 
@@ -85,11 +85,11 @@ public class DIAScorer {
      * scores.isotope_overlap //feature intensity加权的可能（带电量1-4）无法区分同位素峰值的平均发生次数之和
      *
      * @param peakGroupFeature single mrmFeature
-     * @param productMzMap      mz of fragment
-     * @param spectrumMzArray    mz array of selected Rt
-     * @param spectrumIntArray   intensity array of selected Rt
-     * @param productChargeMap      charge in peptide
-     * @param scores             scoreForAll for JProphet
+     * @param productMzMap     mz of fragment
+     * @param spectrumMzArray  mz array of selected Rt
+     * @param spectrumIntArray intensity array of selected Rt
+     * @param productChargeMap charge in peptide
+     * @param scores           scoreForAll for JProphet
      */
     public void calculateDiaIsotopeScores(PeakGroup peakGroupFeature, HashMap<String, Float> productMzMap, Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<String, Integer> productChargeMap, FeatureScores scores) {
         double isotopeCorr = 0d;
@@ -100,7 +100,7 @@ public class DIAScorer {
         double relIntensity;//离子强度占peak group强度的比例
         double intensitySum = peakGroupFeature.getPeakGroupInt();
 
-        for (String cutInfo: peakGroupFeature.getIonIntensity().keySet()) {
+        for (String cutInfo : peakGroupFeature.getIonIntensity().keySet()) {
             float monoPeakMz = productMzMap.get(cutInfo);
             int putativeFragmentCharge = productChargeMap.get(cutInfo);
             relIntensity = (peakGroupFeature.getIonIntensity().get(cutInfo) / intensitySum);
@@ -124,17 +124,17 @@ public class DIAScorer {
             double massWeight = monoPeakMz * putativeFragmentCharge;
             double factor = massWeight / Constants.AVG_TOTAL;
             HashMap<String, Integer> formula = new HashMap<>(); //等比放大算多少个？
-            formula.put("C", (int)Math.round(Constants.C * factor));
-            formula.put("N", (int)Math.round(Constants.N * factor));
-            formula.put("O", (int)Math.round(Constants.O * factor));
-            formula.put("S", (int)Math.round(Constants.S * factor));
+            formula.put("C", (int) Math.round(Constants.C * factor));
+            formula.put("N", (int) Math.round(Constants.N * factor));
+            formula.put("O", (int) Math.round(Constants.O * factor));
+            formula.put("S", (int) Math.round(Constants.S * factor));
 
             double theroyWeight = Constants.AVG_WEIGHT_C * formula.get("C") +
-                                    Constants.AVG_WEIGHT_N * formula.get("N") +
-                                    Constants.AVG_WEIGHT_O * formula.get("O") +
-                                    Constants.AVG_WEIGHT_S * formula.get("S");//模拟表达式的weight
+                    Constants.AVG_WEIGHT_N * formula.get("N") +
+                    Constants.AVG_WEIGHT_O * formula.get("O") +
+                    Constants.AVG_WEIGHT_S * formula.get("S");//模拟表达式的weight
             double remainingMass = massWeight - theroyWeight;
-            formula.put("H", (int)Math.round(remainingMass / Constants.AVG_WEIGHT_H));//residual添加H
+            formula.put("H", (int) Math.round(remainingMass / Constants.AVG_WEIGHT_H));//residual添加H
 
             Double[] isotopeDistributionC = convolvePow(IsotopeConstants.C, formula.get("C"));
             Double[] isotopeDistributionH = convolvePow(IsotopeConstants.H, formula.get("H"));
@@ -170,7 +170,6 @@ public class DIAScorer {
             }
 
 
-
             //get scores.isotope_overlap
             int largePeaksBeforeFirstIsotope = 0;
             double ratio;
@@ -191,7 +190,7 @@ public class DIAScorer {
                     ratio = 0d;
                 }
                 //从OpenSWATH源代码1.0改为Constants.C13C12_MASSDIFF_U,作为leftPeakMz
-                if (ratio > 1 && (Math.abs(mzIntensity.getMz() - (monoPeakMz - 1.0d / ch))/ monoPeakMz) < Constants.PEAK_BEFORE_MONO_MAX_PPM_DIFF) {
+                if (ratio > 1 && (Math.abs(mzIntensity.getMz() - (monoPeakMz - 1.0d / ch)) / monoPeakMz) < Constants.PEAK_BEFORE_MONO_MAX_PPM_DIFF) {
                     largePeaksBeforeFirstIsotope++;//-i同位素出现的次数
                 }
 
@@ -240,15 +239,15 @@ public class DIAScorer {
     }
 
     /**
-     * @param factor       number of predicted element
+     * @param factor number of predicted element
      * @return
      */
-    private Double[] convolvePow(List<Double[]> distribution ,int factor) {
+    private Double[] convolvePow(List<Double[]> distribution, int factor) {
 
         if (factor == 1) {
             return distribution.get(0);
         }
-        int log2n = (int) Math.ceil(FastMath.log(2,factor));
+        int log2n = (int) Math.ceil(FastMath.log(2, factor));
 
         Double[] distributionResult;
         if ((factor & 1) == 1) {
@@ -256,7 +255,7 @@ public class DIAScorer {
         } else {
             distributionResult = new Double[]{1d};
         }
-        for (int i = 1; i<log2n; i++) {
+        for (int i = 1; i <= log2n; i++) {
             if ((factor & (1 << i)) == 1 << i) {
                 distributionResult = convolve(distributionResult, distribution.get(i), Constants.DIA_NR_ISOTOPES + 1);
             }
