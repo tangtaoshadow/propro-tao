@@ -39,7 +39,7 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="20%">
+                    <th width="10%">
                         项目名称
                     </th>
                     <th width="10%">
@@ -57,7 +57,7 @@
                     <th width="15%">
                         最后修改时间
                     </th>
-                    <th width="20%">
+                    <th width="30%">
                         操作
                     </th>
                 </tr>
@@ -74,6 +74,10 @@
                         <!--<a th:href="|/project/delete/${project.id}|" class="btn btn-danger btn-sm">删除</a>-->
                         <a th:href="|/experiment/batchcreate?projectName=${project.name}|" class="btn btn-danger btn-sm">添加实验数据</a>
                         <a th:href="|/experiment/list?projectName=${project.name}|" class="btn btn-primary btn-sm">查看项目实验</a>
+                        <a th:href="|/project/aird/${project.id}|" class="btn btn-warning btn-sm">批量执行Aird压缩</a>
+                        <a th:href="|/project/irt/${project.id}|" class="btn btn-success btn-sm">批量执行iRT</a>
+                        <a th:href="|/project/extract/${project.id}|" class="btn btn-info btn-sm">批量执行卷积与打分</a>
+                        <a th:href="|/project/airus/${project.id}|" class="btn btn-brand btn-sm">批量执行LDA合并打分</a>
                     </td>
                 </tr>
                 </tbody>

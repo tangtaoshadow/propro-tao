@@ -13,4 +13,7 @@ public class SuccessMsg {
     public static String DELETE_SUCCESS = "删除成功! Delete Success!";
     public static String UPDATE_SUCCESS = "更新成功! Update Success!";
 
+    public static String ALL_FILES_UNDER_THIS_PROJECT_ARE_ALREADY_COMPRESSED = "ALL_FILES_UNDER_THIS_PROJECT_ARE_ALREADY_COMPRESSED!该项目下的所有文件均已经被转化为Aird压缩文件";
+
+
 }

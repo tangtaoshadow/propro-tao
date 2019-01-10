@@ -58,6 +58,9 @@ public class LumsParams {
      */
     Float xcorrShapeWeightThreshold;
 
+    //上下文备忘录
+    String note;
+
     public LumsParams(){
         scoreTypes.add(ScoreType.IntensityScore.getTypeName());
         scoreTypes.add(ScoreType.LibraryCorr.getTypeName());

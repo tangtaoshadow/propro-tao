@@ -1,8 +1,12 @@
 package com.westlake.air.pecs.controller;
 
 import com.westlake.air.pecs.constants.SuccessMsg;
+import com.westlake.air.pecs.constants.TaskTemplate;
 import com.westlake.air.pecs.domain.ResultDO;
+import com.westlake.air.pecs.domain.db.ExperimentDO;
 import com.westlake.air.pecs.domain.db.ProjectDO;
+import com.westlake.air.pecs.domain.db.TaskDO;
+import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ProjectQuery;
 import com.westlake.air.pecs.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +27,8 @@ import java.util.List;
 @RequestMapping("project")
 public class ProjectController extends BaseController {
 
-   @Autowired
-   ProjectService projectService;
+    @Autowired
+    ProjectService projectService;
 
 
     @RequestMapping(value = "/list")
@@ -40,7 +44,7 @@ public class ProjectController extends BaseController {
         if (name != null && !name.isEmpty()) {
             query.setName(name);
         }
-        if(ownerName != null && !ownerName.isEmpty()){
+        if (ownerName != null && !ownerName.isEmpty()) {
             query.setOwnerName(ownerName);
         }
 
@@ -106,6 +110,61 @@ public class ProjectController extends BaseController {
         projectService.delete(id);
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
         return "redirect:/project/list";
+    }
 
+    @RequestMapping(value = "/aird/{id}")
+    String aird(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+
+        List<ExperimentDO> expList = getAllExperimentsByProjectId(id);
+        int count = 0;
+        for (ExperimentDO exp : expList) {
+            if (!exp.getHasAirusFile()) {
+                TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, exp.getName() + ":" + exp.getId());
+                taskService.insert(taskDO);
+                experimentTask.compress(exp, taskDO);
+                count++;
+            }
+        }
+        if (count == 0) {
+            redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.ALL_FILES_UNDER_THIS_PROJECT_ARE_ALREADY_COMPRESSED);
+            return "redirect:/project/list";
+        } else {
+            return "redirect:/task/list";
+        }
+
+    }
+
+    @RequestMapping(value = "/irt/{id}")
+    String irt(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+
+        List<ExperimentDO> expList = getAllExperimentsByProjectId(id);
+        int count = 0;
+        for (ExperimentDO exp : expList) {
+            if (!exp.getHasAirusFile()) {
+                TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, exp.getName() + ":" + exp.getId());
+                taskService.insert(taskDO);
+                experimentTask.compress(exp, taskDO);
+                count++;
+            }
+        }
+        if (count == 0) {
+            redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.ALL_FILES_UNDER_THIS_PROJECT_ARE_ALREADY_COMPRESSED);
+            return "redirect:/project/list";
+        } else {
+            return "redirect:/task/list";
+        }
+
+    }
+
+    private List<ExperimentDO> getAllExperimentsByProjectId(String id) {
+        ResultDO<ProjectDO> resultDO = projectService.getById(id);
+        if (resultDO.isFailed()) {
+            return null;
+        }
+
+        ExperimentQuery query = new ExperimentQuery();
+        query.setProjectName(resultDO.getModel().getName());
+        List<ExperimentDO> expList = experimentService.getAll(query);
+        return expList;
     }
 }

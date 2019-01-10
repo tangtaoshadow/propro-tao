@@ -34,6 +34,10 @@ public class ExperimentDAO {
         return mongoTemplate.find(buildQuery(query), ExperimentDO.class, CollectionName);
     }
 
+    public List<ExperimentDO> getAll(ExperimentQuery query) {
+        return mongoTemplate.find(buildQueryWithoutPage(query), ExperimentDO.class, CollectionName);
+    }
+
     public List<ExperimentDO> getAll() {
         return mongoTemplate.findAll(ExperimentDO.class, CollectionName);
     }

@@ -67,8 +67,8 @@ public class ExperimentController extends BaseController {
                 @RequestParam(value = "batchName", required = false) String batchName,
                 @RequestParam(value = "expName", required = false) String expName) {
         model.addAttribute("expName", expName);
-        model.addAttribute("projectName", expName);
-        model.addAttribute("batchName", expName);
+        model.addAttribute("projectName", projectName);
+        model.addAttribute("batchName", batchName);
         model.addAttribute("pageSize", pageSize);
         ExperimentQuery query = new ExperimentQuery();
         if (expName != null && !expName.isEmpty()) {
@@ -396,6 +396,7 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
                      @RequestParam(value = "slope", required = false) Double slope,
                      @RequestParam(value = "intercept", required = false) Double intercept,
+                     @RequestParam(value = "note", required = false) String note,
                      //打分相关的入参
                      @RequestParam(value = "sigma", required = false, defaultValue = "6.25") Float sigma,
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
