@@ -657,6 +657,9 @@ public class AnalyseController extends BaseController {
                 continue;
             }
             AnalyseDataDO dataForId = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, peptideRef, false);
+            if(dataForId == null){
+                continue;
+            }
             ResultDO<AnalyseDataDO> dataResult = analyseDataService.getByIdWithConvolutionData(dataForId.getId());
             if(dataResult.isFailed() || dataResult.getModel() == null){
                 continue;
