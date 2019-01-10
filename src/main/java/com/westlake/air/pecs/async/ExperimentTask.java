@@ -47,6 +47,7 @@ public class ExperimentTask extends BaseTask {
 
     @Async(value = "uploadFileExecutor")
     public void saveExperimentTask(ExperimentDO experimentDO, File file, TaskDO taskDO) {
+        taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         experimentService.uploadFile(experimentDO, file, taskDO);
@@ -57,6 +58,7 @@ public class ExperimentTask extends BaseTask {
 
     @Async(value = "compressFileExecutor")
     public void compress(ExperimentDO experimentDO, TaskDO taskDO) {
+        taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         long start = System.currentTimeMillis();
@@ -83,6 +85,7 @@ public class ExperimentTask extends BaseTask {
      */
     @Async(value = "extractorExecutor")
     public void extract(LumsParams lumsParams, TaskDO taskDO) {
+        taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
 
@@ -103,6 +106,7 @@ public class ExperimentTask extends BaseTask {
 
     @Async(value = "extractorExecutor")
     public void convAndIrt(ExperimentDO experimentDO, String iRtLibraryId, Float mzExtractWindow, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
+        taskDO.start();
         taskDO.addLog("开始卷积IRT校准库并且计算iRT值");
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);

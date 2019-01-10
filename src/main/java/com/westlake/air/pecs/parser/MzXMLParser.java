@@ -139,7 +139,7 @@ public class MzXMLParser extends BaseParser {
         //如果存在连续的intensity为0的情况仅保留其中的一个0,所以数组的最大值是values.length/2
         int[] mzArray = new int[values.length / 2];
         float[] intensityArray = new float[values.length / 2];
-        int j = 0;
+        int j = 0; //用以标记实际的数组长度
         int countZero = 0;
         for (int i = 0; i < values.length - 1; i += 2) {
             //如果取到的intensity是0,那么进行判断
