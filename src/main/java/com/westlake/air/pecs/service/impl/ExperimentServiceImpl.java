@@ -306,6 +306,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             fos = new FileOutputStream(aircFile.getAbsoluteFile());
             bos = new BufferedOutputStream(fos);
 
+            //核心函数在这里
             List<AnalyseDataDO> totalDataList = extract(raf, bos, overviewDO.getId(), lumsParams);
             overviewDO.setTotalPeptideCount(totalDataList.size());
             overviewDO.setAircIndexPath(aircIndexPath);

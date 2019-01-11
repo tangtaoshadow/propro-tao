@@ -78,7 +78,11 @@ public class PeptideDAO {
     }
 
     public List<PeptideDO> insert(List<PeptideDO> peptides) {
-        mongoTemplate.insert(peptides, CollectionName);
+        try{
+            mongoTemplate.insert(peptides, CollectionName);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         return peptides;
     }
 

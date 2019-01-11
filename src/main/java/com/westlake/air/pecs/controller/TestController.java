@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.algorithm.FragmentFactory;
 import com.westlake.air.pecs.async.LumsTask;
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.constants.TaskTemplate;
@@ -34,6 +35,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -75,6 +78,16 @@ public class TestController extends BaseController {
     @RequestMapping("test")
     @ResponseBody
     String test(Model model, RedirectAttributes redirectAttributes) {
+        try {
+            String result = FileUtil.readFile("D:/1.txt");
+            String[] array = result.split("\r\n");
+            HashSet<String> set = new HashSet<>();
+            set.addAll(Arrays.asList(array));
+
+            logger.info(set.size() + "");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return "success";
     }
 

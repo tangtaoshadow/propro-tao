@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.parser;
 
+import com.alibaba.fastjson.JSON;
 import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.peptide.Annotation;
@@ -8,6 +9,7 @@ import com.westlake.air.pecs.domain.db.LibraryDO;
 import com.westlake.air.pecs.domain.db.PeptideDO;
 import com.westlake.air.pecs.domain.db.TaskDO;
 import com.westlake.air.pecs.service.TaskService;
+import com.westlake.air.pecs.utils.FileUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +19,7 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by James Lu MiaoShan
@@ -82,19 +82,27 @@ public class LibraryTsvParser extends BaseLibraryParser {
                 }
 
                 PeptideDO peptide = resultDO.getModel();
-                PeptideDO existedPeptide = map.get(peptide.getPeptideRef()+"_"+peptide.getIsDecoy());
-                if(existedPeptide == null){
-                    map.put(peptide.getPeptideRef()+"_"+peptide.getIsDecoy(), peptide);
-                }else{
+                PeptideDO existedPeptide = map.get(peptide.getPeptideRef() + "_" + peptide.getIsDecoy());
+                if (existedPeptide == null) {
+                    map.put(peptide.getPeptideRef() + "_" + peptide.getIsDecoy(), peptide);
+                } else {
                     for (String key : peptide.getFragmentMap().keySet()) {
                         existedPeptide.putFragment(key, peptide.getFragmentMap().get(key));
                     }
                 }
             }
             List<PeptideDO> peptides = new ArrayList<>(map.values());
+            HashSet<String> proteins = new HashSet<>();
+            for (PeptideDO p : peptides) {
+                if (p.getProteinName() == null || p.getProteinName().isEmpty()) {
+                    logger.info(p.getPeptideRef());
+                }
+                proteins.add(p.getProteinName());
+            }
+
             peptideService.insertAll(peptides, false);
             tranResult.setModel(peptides);
-            taskDO.addLog(map.values().size() + "条数据插入成功");
+            taskDO.addLog(peptides.size() + "条肽段数据插入成功,其中蛋白质种类有" + proteins.size() + "个");
             taskService.update(taskDO);
         } catch (Exception e) {
             e.printStackTrace();

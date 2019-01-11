@@ -93,6 +93,7 @@ public class ExperimentTask extends BaseTask {
         taskDO.addLog("mz卷积窗口:" + lumsParams.getMzExtractWindow() + ",RT卷积窗口:" + lumsParams.getRtExtractWindow());
         taskDO.addLog("Sigma:" + lumsParams.getSigmaSpacing().getSigma() + ",Spacing:" + lumsParams.getSigmaSpacing().getSpacing());
         taskDO.addLog("使用标准库ID:" + lumsParams.getLibraryId());
+        taskDO.addLog("使用限制阈值Shape/ShapeWeight:" + lumsParams.getXcorrShapeThreshold()+"/"+lumsParams.getXcorrShapeWeightThreshold());
         taskDO.addLog("入参准备完毕,开始卷积,时间可能较长");
         taskService.update(taskDO);
         long start = System.currentTimeMillis();
