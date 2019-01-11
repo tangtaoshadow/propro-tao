@@ -49,7 +49,7 @@ public class LumsTask extends BaseTask{
         long startAll = System.currentTimeMillis();
         long start = System.currentTimeMillis();
         ExperimentDO experimentDO = lumsParams.getExperimentDO();
-
+        taskDO.start();
         taskDO.addLog("开始创建Aird压缩文件");
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         if(experimentDO.getAirdPath() == null || !(new File(experimentDO.getAirdPath()).exists())){
@@ -112,6 +112,7 @@ public class LumsTask extends BaseTask{
     public void swathForReconv(String fatherOverviewId, TaskDO taskDO) {
         long startAll = System.currentTimeMillis();
         long start = System.currentTimeMillis();
+        taskDO.start();
         taskDO.addLog("开始执行重卷积");
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);

@@ -21,6 +21,7 @@ public class AirusTask {
     @Async(value = "airusExecutor")
     public void airus(String overviewId, AirusParams airusParams, TaskDO taskDO) {
         long start = System.currentTimeMillis();
+        taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         FinalResult result = apiService.doAirus(overviewId, airusParams);

@@ -109,7 +109,6 @@ public class Airus {
                         hit++;
                     }
                 }
-
                 dataDO.setIdentifiedStatus(simpleFeatureScores.getFdr() <= 0.01 ? AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS : AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
             }
             ResultDO r = analyseDataService.update(dataDO);

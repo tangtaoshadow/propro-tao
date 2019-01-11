@@ -44,7 +44,7 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="10%">
+                    <th width="5%">
                         分析ID
                     </th>
                     <th width="10%">
@@ -80,6 +80,9 @@
                     <th width="5%">
                         创建人
                     </th>
+                    <th width="5%">
+                        备忘录
+                    </th>
                     <th width="25%">
                         操作
                     </th>
@@ -99,6 +102,7 @@
                     <td th:text="|${overview.slope}/${overview.intercept}|"></td>
                     <td th:text="|${overview.matchedPeptideCount}/${overview.totalPeptideCount}/${overview.libraryPeptideCount}|"></td>
                     <td th:text="${overview.creator}"></td>
+                    <td th:text="${overview?.note}"></td>
                     <td>
                         <a th:href="|/analyse/overview/detail/${overview.id}|" class="btn btn-success btn-sm">查看分析报告</a>
                         <a th:href="|/analyse/data/list?overviewId=${overview.id}|"

@@ -12,7 +12,7 @@
     <div class="d-flex align-items-center">
         <div class="mr-auto">
             <h3 class="m-subheader__title m-subheader__title--separator">
-                卷积实验
+                批量卷积实验
             </h3>
         </div>
     </div>
@@ -40,17 +40,17 @@
                     </div>
                 </div>
                 <!--begin::Form-->
-                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/experiment/doextract}">
+                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/project/doextract}">
                     <div class="m-portlet__body row">
-                        <input type="text" name="id" hidden="hidden" th:value="${experiment?.id}">
+                        <input type="text" name="id" hidden="hidden" th:value="${project?.id}">
                         <div class="col-md-7">
                             <div class="form-group m-form__group row">
                                 <label for="name" class="col-2 col-form-label">
-                                    实验
+                                    项目名称
                                 </label>
                                 <div class="col-10">
                                     <input type="text" class="form-control m-input" id="name" readonly name="name"
-                                           th:value="|${experiment?.name}(${experiment?.filePath})|">
+                                           th:value="|${project?.name}(${project?.id})|">
                                 </div>
                             </div>
                             <div class="form-group m-form__group row">
@@ -84,24 +84,6 @@
                                            name="mzExtractWindow"
                                            th:value="${mzExtractWindow}">
                                     <span class="m-form__help">默认为0.05</span>
-                                </div>
-                            </div>
-                            <div class="form-group m-form__group row">
-                                <label for="slope" class="col-2 col-form-label">
-                                    Slope斜率
-                                </label>
-                                <div class="col-10">
-                                    <input type="text" class="form-control m-input" id="slope" name="slope"
-                                           th:value="${experiment?.slope}">
-                                </div>
-                            </div>
-                            <div class="form-group m-form__group row">
-                                <label for="intercept" class="col-2 col-form-label">
-                                    intercept截距
-                                </label>
-                                <div class="col-10">
-                                    <input type="text" class="form-control m-input" id="intercept" name="intercept"
-                                           th:value="${experiment?.intercept}">
                                 </div>
                             </div>
                             <div class="form-group m-form__group row">
@@ -198,7 +180,7 @@
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <button type="submit" class="btn btn-primary">开始卷积</button>
+                            <button type="submit" class="btn btn-primary">开始批量卷积</button>
                         </div>
                     </div>
                 </form>

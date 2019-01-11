@@ -24,6 +24,7 @@ public class LibraryTask extends BaseTask{
 
     @Async(value = "uploadFileExecutor")
     public void saveLibraryTask(LibraryDO library, InputStream in, String fileName, TaskDO taskDO) {
+        taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         libraryService.uploadFile(library, in, fileName, taskDO);

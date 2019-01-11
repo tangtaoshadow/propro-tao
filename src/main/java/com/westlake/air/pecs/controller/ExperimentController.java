@@ -67,8 +67,8 @@ public class ExperimentController extends BaseController {
                 @RequestParam(value = "batchName", required = false) String batchName,
                 @RequestParam(value = "expName", required = false) String expName) {
         model.addAttribute("expName", expName);
-        model.addAttribute("projectName", expName);
-        model.addAttribute("batchName", expName);
+        model.addAttribute("projectName", projectName);
+        model.addAttribute("batchName", batchName);
         model.addAttribute("pageSize", pageSize);
         ExperimentQuery query = new ExperimentQuery();
         if (expName != null && !expName.isEmpty()) {
@@ -96,7 +96,10 @@ public class ExperimentController extends BaseController {
     }
 
     @RequestMapping(value = "/batchcreate")
-    String batchCreate(Model model) {
+    String batchCreate(Model model,
+                       @RequestParam(value = "projectName", required = false)String projectName) {
+
+        model.addAttribute("projectName", projectName);
         return "experiment/batchcreate";
     }
 
@@ -283,6 +286,7 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/delete/{id}")
     String delete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+        ResultDO<ExperimentDO> exp = experimentService.getById(id);
         experimentService.delete(id);
         scanIndexService.deleteAllByExperimentId(id);
         List<AnalyseOverviewDO> overviewDOList = analyseOverviewService.getAllByExpId(id);
@@ -292,6 +296,7 @@ public class ExperimentController extends BaseController {
 
         analyseOverviewService.deleteAllByExpId(id);
 
+        redirectAttributes.addFlashAttribute("projectName", exp.getModel().getProjectName());
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
         return "redirect:/experiment/list";
 
@@ -391,6 +396,7 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
                      @RequestParam(value = "slope", required = false) Double slope,
                      @RequestParam(value = "intercept", required = false) Double intercept,
+                     @RequestParam(value = "note", required = false) String note,
                      //打分相关的入参
                      @RequestParam(value = "sigma", required = false, defaultValue = "6.25") Float sigma,
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,

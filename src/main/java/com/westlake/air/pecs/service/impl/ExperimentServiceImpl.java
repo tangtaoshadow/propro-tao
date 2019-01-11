@@ -94,6 +94,11 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     @Override
+    public List<ExperimentDO> getAll(ExperimentQuery query) {
+        return experimentDAO.getAll(query);
+    }
+
+    @Override
     public ResultDO insert(ExperimentDO experimentDO) {
         if (experimentDO.getName() == null || experimentDO.getName().isEmpty()) {
             return ResultDO.buildError(ResultCode.LIBRARY_NAME_CANNOT_BE_EMPTY);
@@ -752,6 +757,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
         overviewDO.setCreator(input.getCreator());
         overviewDO.setCreateDate(new Date());
+        overviewDO.setNote(input.getNote());
         overviewDO.setRtExtractWindow(input.getRtExtractWindow());
         overviewDO.setMzExtractWindow(input.getMzExtractWindow());
         overviewDO.setSigma(input.getSigmaSpacing().getSigma());

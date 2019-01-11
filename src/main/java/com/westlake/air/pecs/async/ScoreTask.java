@@ -32,6 +32,7 @@ public class ScoreTask extends BaseTask {
     @Async(value = "scoreExecutor")
     public void score(String overviewId, ExperimentDO experimentDO, SlopeIntercept slopeIntercept, String libraryId, SigmaSpacing sigmaSpacing, HashSet<String> scoreTypes, TaskDO taskDO) {
         long start = System.currentTimeMillis();
+        taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
 

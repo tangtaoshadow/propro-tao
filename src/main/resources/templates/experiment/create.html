@@ -46,6 +46,28 @@
                         </div>
 
                         <div class="form-group m-form__group row">
+                            <label for="projectName" class="col-2 col-form-label">
+                                所属项目名称
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="projectName"
+                                       placeholder="Enter Project Name" name="name" th:value="${projectName}">
+                                <span class="m-form__help">所属项目名称</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="projectName" class="col-2 col-form-label">
+                                所属项目批次
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="batchName"
+                                       placeholder="Enter Project Batch Name" name="name" th:value="${batchName}">
+                                <span class="m-form__help">所属项目批次名称</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
                             <label for="filePath" class="col-2 col-form-label">
                                 文件绝对路径
                             </label>
