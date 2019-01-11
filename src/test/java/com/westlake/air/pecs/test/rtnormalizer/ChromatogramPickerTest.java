@@ -3,6 +3,7 @@ package com.westlake.air.pecs.test.rtnormalizer;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
+import com.westlake.air.pecs.domain.bean.score.IonPeak;
 import com.westlake.air.pecs.feature.ChromatogramPicker;
 import com.westlake.air.pecs.feature.GaussFilter;
 import com.westlake.air.pecs.feature.PeakPicker;
@@ -12,6 +13,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by Nico Wang Ruimin
@@ -47,7 +49,7 @@ public class ChromatogramPickerTest extends BaseTest {
 
         RtIntensityPairsDouble peakPickerResult = peakPicker.pickMaxPeak(rtData1, gaussFilterResult.get("temp"), stn200);
 
-        IntensityRtLeftRtRightPairs chromatogramPickerResult = chromatogramPicker.pickChromatogram(rtData1, intData1, gaussFilterResult.get("temp"), stnOrigin, peakPickerResult);
+        List<IonPeak> chromatogramPickerResult = chromatogramPicker.pickChromatogram(rtData1, intData1, gaussFilterResult.get("temp"), stnOrigin, peakPickerResult);
 
         System.out.printf("Chromatogram Picker Test finished.");
 

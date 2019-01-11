@@ -15,11 +15,14 @@ public class IntensityRtLeftRtRightPairs {
 
     Double[] intensityArray;
 
+    int[] peakPosition;
+
     public IntensityRtLeftRtRightPairs(){}
 
-    public IntensityRtLeftRtRightPairs(Double[] intensityArray, Double[] rtLeftArray, Double[] rtRightArray){
+    public IntensityRtLeftRtRightPairs(Double[] intensityArray, Double[] rtLeftArray, Double[] rtRightArray, int[] peakPosition){
         this.rtLeftArray = rtLeftArray;
         this.rtRightArray = rtRightArray;
         this.intensityArray = intensityArray;
+        this.peakPosition = peakPosition;
     }
 }

@@ -3,14 +3,17 @@ package com.westlake.air.pecs.feature;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.PeptideSpectrum;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
-import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
+import com.westlake.air.pecs.domain.bean.score.IonPeak;
 import com.westlake.air.pecs.domain.bean.score.PeakGroup;
+import com.westlake.air.pecs.utils.ArrayUtil;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import scala.Int;
+import scala.collection.immutable.Stream;
 
 import java.util.*;
 
@@ -39,7 +42,7 @@ public class FeatureFinder {
      *                           ExperimentFeature::intensity: intensity sum of hullPoints' intensity
      * @return list of mrmFeature (mrmFeature is list of chromatogram feature)
      */
-    public List<PeakGroup> findFeatures(PeptideSpectrum peptideSpectrum, HashMap<String, RtIntensityPairsDouble> ionPeaks, HashMap<String, IntensityRtLeftRtRightPairs> ionPeakParams, HashMap<String,double[]> noise1000Map) {
+    public List<PeakGroup> findFeatures(PeptideSpectrum peptideSpectrum, HashMap<String, RtIntensityPairsDouble> ionPeaks, HashMap<String, List<IonPeak>> ionPeakParams, HashMap<String,double[]> noise1000Map) {
 
         //totalXIC
         double totalXic = 0.0d;
@@ -49,8 +52,10 @@ public class FeatureFinder {
             }
         }
 
-        //mrmFeature loop
         List<PeakGroup> peakGroupList = new ArrayList<>();
+
+
+        //mrmFeature loop
         while (true) {
             PeakGroup peakGroup = new PeakGroup();
             Pair<String, Integer> maxPeakLocation = findLargestPeak(ionPeaks);
@@ -59,9 +64,12 @@ public class FeatureFinder {
             }
             String maxCutInfo = maxPeakLocation.getKey();
             int maxIndex = maxPeakLocation.getValue();
+            int leftIndex = ionPeakParams.get(maxCutInfo).get(maxIndex).getLeftRtIndex();
+            int rightIndex = ionPeakParams.get(maxCutInfo).get(maxIndex).getRightRtIndex();
             double apexRt = ionPeaks.get(maxCutInfo).getRtArray()[maxIndex];
-            double bestLeft = ionPeakParams.get(maxCutInfo).getRtLeftArray()[maxIndex];
-            double bestRight = ionPeakParams.get(maxCutInfo).getRtRightArray()[maxIndex];
+            double bestLeft = peptideSpectrum.getRtArray()[leftIndex];
+            double bestRight = peptideSpectrum.getRtArray()[rightIndex];
+
 
             peakGroup.setApexRt(apexRt);
             peakGroup.setBestLeftRt(bestLeft);
@@ -70,11 +78,9 @@ public class FeatureFinder {
             RtIntensityPairsDouble rtInt = ionPeaks.get(maxCutInfo);
             rtInt.getIntensityArray()[maxIndex] = 0.0d;
 
-            removeOverlappingFeatures(ionPeaks, bestLeft, bestRight, ionPeakParams);
+            removeOverlappingFeatures(ionPeaks, leftIndex, rightIndex, ionPeakParams);
 
             Double[] rtArray = peptideSpectrum.getRtArray();
-            int leftIndex = MathUtil.bisection(rtArray, bestLeft).getHigh();
-            int rightIndex = MathUtil.bisection(rtArray, bestRight).getHigh();
 
             //取得[bestLeft,bestRight]对应范围的Rt
             Double[] rasteredRt = new Double[rightIndex - leftIndex + 1];
@@ -116,6 +122,96 @@ public class FeatureFinder {
         return peakGroupList;
     }
 
+    public List<PeakGroup> findFeaturesNew(PeptideSpectrum peptideSpectrum, HashMap<String, RtIntensityPairsDouble> ionPeaks, HashMap<String, List<IonPeak>> ionPeakParams, HashMap<String,double[]> noise1000Map){
+
+        //totalXIC
+        double totalXic = 0.0d;
+        for (Double[] intensityTmp: peptideSpectrum.getIntensitiesMap().values()) {
+            for (double intensity : intensityTmp) {
+                totalXic += intensity;
+            }
+        }
+
+        //new function
+        List<PeakGroup> peakGroupList = new ArrayList<>();
+        Double[] peakDensity = new Double[peptideSpectrum.getRtArray().length];
+        List<HashMap<String, IonPeak>> ionPeakPositionList = new ArrayList<>();
+        for(int i=0; i<peptideSpectrum.getRtArray().length; i++){
+            ionPeakPositionList.add(new HashMap<>());
+        }
+        for(String cutInfo: ionPeakParams.keySet()){
+            for (IonPeak ionPeak: ionPeakParams.get(cutInfo)){
+                ionPeakPositionList.get(ionPeak.getApexRtIndex()).put(cutInfo, ionPeak);
+            }
+        }
+        for (int i=1; i<peakDensity.length-1; i++){
+//            peakDensity[i] = density(ionPeakPositionList, i);
+            peakDensity[i] = ionPeakPositionList.get(i).size() + Constants.SIDE_PEAK_DENSITY*(ionPeakPositionList.get(i-1).size() + ionPeakPositionList.get(i+1).size());
+        } peakDensity[0] = 0d; peakDensity[peakDensity.length-1] = 0d;
+        List<Integer> topIndex = getTopIndex(peakDensity, ionPeakParams.size() * Constants.ION_PERCENT);
+
+        for(int i=0; i<topIndex.size(); i++){
+            int maxIndex = topIndex.get(i);
+            if(maxIndex == 0){
+                continue;
+            }
+            //合并周围结果
+
+            PeakGroup peakGroup = new PeakGroup();
+            HashMap<String, IonPeak> concateMap = concatenate(ionPeakPositionList, maxIndex, 1);
+            String maxIon = getMaxIntensityIndex(concateMap);
+            int leftIndex = concateMap.get(maxIon).getLeftRtIndex();
+            int rightIndex = concateMap.get(maxIon).getRightRtIndex();
+            double apexRt = ionPeaks.get(maxIon).getRtArray()[concateMap.get(maxIon).getIndex()];
+            double bestLeft = peptideSpectrum.getRtArray()[leftIndex];
+            double bestRight = peptideSpectrum.getRtArray()[rightIndex];
+
+            peakGroup.setApexRt(apexRt);
+            peakGroup.setBestLeftRt(bestLeft);
+            peakGroup.setBestRightRt(bestRight);
+
+            for(int j=0; j<topIndex.size(); j++){
+                if(topIndex.get(j)<=rightIndex && topIndex.get(j)>=leftIndex){
+                    topIndex.set(j,0);
+                }
+            }
+            Double[] rtArray = peptideSpectrum.getRtArray();
+
+            //取得[bestLeft,bestRight]对应范围的Rt
+            Double[] rasteredRt = new Double[rightIndex - leftIndex + 1];
+            System.arraycopy(rtArray, leftIndex, rasteredRt, 0, rightIndex - leftIndex + 1);
+            int maxSpectrumIndex = MathUtil.findNearestIndex(rasteredRt,apexRt) + leftIndex;
+            //取得[bestLeft,bestRight]对应范围的Intensity
+            HashMap<String, Double[]> ionHullInt = new HashMap<>();
+            HashMap<String, Double> ionIntensity = new HashMap<>();
+            Double peakGroupInt = 0D;
+            double signalToNoiseSum = 0d;
+            for(String cutInfo: peptideSpectrum.getIntensitiesMap().keySet()) {
+                Double[] intArray = peptideSpectrum.getIntensitiesMap().get(cutInfo);
+                //离子峰
+                Double[] rasteredInt = new Double[rightIndex - leftIndex + 1];
+                System.arraycopy(intArray, leftIndex, rasteredInt, 0, rightIndex - leftIndex + 1);
+                ionHullInt.put(cutInfo, rasteredInt);
+                //peakGroup强度
+                Double ionIntTemp = MathUtil.sum(rasteredInt);
+                peakGroupInt += ionIntTemp;
+                //离子峰强度
+                ionIntensity.put(cutInfo, ionIntTemp);
+                //信噪比
+                signalToNoiseSum += noise1000Map.get(cutInfo)[maxSpectrumIndex];
+            }
+//            List<Double> ionIntList = new ArrayList<>(ionIntensity.values());
+            peakGroup.setIonCount(ionPeaks.size());
+            peakGroup.setIonHullRt(rasteredRt);
+            peakGroup.setIonHullInt(ionHullInt);
+            peakGroup.setPeakGroupInt(peakGroupInt);
+            peakGroup.setTotalXic(totalXic);
+            peakGroup.setIonIntensity(ionIntensity);
+            peakGroup.setSignalToNoiseSum(signalToNoiseSum);
+            peakGroupList.add(peakGroup);
+        }
+        return peakGroupList;
+    }
     /**
      * 从maxPeak list中选取最大peak对应的index
      *
@@ -148,24 +244,71 @@ public class FeatureFinder {
      * @param bestRight 同上
      * @param ionPeakParams
      */
-    private void removeOverlappingFeatures(HashMap<String, RtIntensityPairsDouble> ionPeaks, double bestLeft, double bestRight, HashMap<String, IntensityRtLeftRtRightPairs> ionPeakParams) {
+    private void removeOverlappingFeatures(HashMap<String, RtIntensityPairsDouble> ionPeaks, int bestLeft, int bestRight, HashMap<String, List<IonPeak>> ionPeakParams) {
         for (String cutInfo: ionPeaks.keySet()) {
             Double[] intensity = ionPeaks.get(cutInfo).getIntensityArray();
-            Double[] rt = ionPeaks.get(cutInfo).getRtArray();
             for (int j = 0; j < intensity.length; j++) {
                 if (intensity[j] <= 0d) {
                     continue;
                 }
-                if (rt[j] >= bestLeft && rt[j] <= bestRight) {
+                if (j >= bestLeft && j <= bestRight) {
                     intensity[j] = 0d;
                 }
-                double left = ionPeakParams.get(cutInfo).getRtLeftArray()[j];
-                double right = ionPeakParams.get(cutInfo).getRtRightArray()[j];
+                double left = ionPeakParams.get(cutInfo).get(j).getLeftRtIndex();
+                double right = ionPeakParams.get(cutInfo).get(j).getRightRtIndex();
                 if ((left > bestLeft && left < bestRight) || (right > bestLeft && right < bestRight)) {
                     intensity[j] = 0d;
                 }
             }
         }
+    }
+
+    private List<Integer> getTopIndex(Double[] value, double minIon){
+        Integer[] indexAfterSort = ArrayUtil.indexAfterSort(value);
+        List<Integer> index = new ArrayList<>();
+        for(int i=0; i<value.length; i++){
+            int indexTemp = indexAfterSort[indexAfterSort.length-1-i];
+            if(value[indexTemp] < minIon){
+                break;
+            }
+            index.add(indexTemp);
+        }
+        return index;
+    }
+
+    private String getMaxIntensityIndex(HashMap<String, IonPeak> ionPeakList){
+        double maxIntensity = -1d;
+        String maxIon = "";
+        for(String cutInfo: ionPeakList.keySet()){
+            if (ionPeakList.get(cutInfo).getIntensity() > maxIntensity){
+                maxIntensity = ionPeakList.get(cutInfo).getIntensity();
+                maxIon = cutInfo;
+            }
+        }
+        return maxIon;
+    }
+
+    private HashMap<String, IonPeak> concatenate(List<HashMap<String, IonPeak>> ionPeakList, int maxIndex, int range){
+        HashMap<String, IonPeak> result = new HashMap<>();
+        for(int i=maxIndex-range; i<=maxIndex + range && i<ionPeakList.size(); i++){
+            for(String cutInfo: ionPeakList.get(i).keySet()){
+                if (!result.containsKey(cutInfo)){
+                    result.put(cutInfo, ionPeakList.get(i).get(cutInfo));
+                }else if(result.get(cutInfo).getIntensity() < ionPeakList.get(i).get(cutInfo).getIntensity()){
+                    result.put(cutInfo, ionPeakList.get(i).get(cutInfo));
+                }
+            }
+        }
+        return result;
+    }
+
+    private double density(List<HashMap<String, IonPeak>> ionPeakList, int maxIndex){
+        HashSet<String> set = new HashSet<>();
+        for(int i=maxIndex-1; i<=maxIndex+1; i++){
+            set.addAll(ionPeakList.get(i).keySet());
+        }
+        int midSize = ionPeakList.get(maxIndex).size();
+        return midSize + Constants.SIDE_PEAK_DENSITY *(midSize-set.size());
     }
 
 }

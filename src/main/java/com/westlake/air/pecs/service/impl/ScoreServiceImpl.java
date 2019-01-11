@@ -239,14 +239,11 @@ public class ScoreServiceImpl implements ScoreService {
             FeatureScores featureScores = new FeatureScores();
             chromatographicScorer.calculateChromatographicScores(peakGroupFeature, normedLibIntMap, featureScores, input.getScoreTypes());
             if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.XcorrShapeWeighted) != null
-                    && featureScores.get(ScoreType.XcorrShapeWeighted) < 0.8
-                    && featureScores.get(ScoreType.XcorrShape) < 0.65){
-//                    && featureScores.get(ScoreType.XcorrShapeWeighted) < input.getXcorrShapeWeightThreshold()
-//                    && featureScores.get(ScoreType.XcorrShape) < input.getXcorrShapeThreshold()){
+//                    && featureScores.get(ScoreType.XcorrShapeWeighted) < 0.8
+//                    && featureScores.get(ScoreType.XcorrShape) < 0.65){
+                    && featureScores.get(ScoreType.XcorrShapeWeighted) < input.getXcorrShapeWeightThreshold()
+                    && featureScores.get(ScoreType.XcorrShape) < input.getXcorrShapeThreshold()){
                 continue;
-            }
-            if (input.getScoreTypes().contains(ScoreType.LogSnScore.getTypeName())) {
-                chromatographicScorer.calculateLogSnScore(peakGroupFeature, featureScores);
             }
             //根据RT时间和前体MZ获取最近的一个原始谱图
             if (input.isUsedDIAScores()) {
@@ -254,11 +251,17 @@ public class ScoreServiceImpl implements ScoreService {
                 if (mzIntensityPairs != null) {
                     Float[] spectrumMzArray = mzIntensityPairs.getMzArray();
                     Float[] spectrumIntArray = mzIntensityPairs.getIntensityArray();
+                    diaScorer.calculateDiaIsotopeScores(peakGroupFeature, productMzMap, spectrumMzArray, spectrumIntArray, productChargeMap, featureScores);
+//                    if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.IsotopeCorrelationScore) < 0.7){
+//                        continue;
+//                    }
                     diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
                     diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, normedLibIntMap, featureScores);
-                    diaScorer.calculateDiaIsotopeScores(peakGroupFeature, productMzMap, spectrumMzArray, spectrumIntArray, productChargeMap, featureScores);
 
                 }
+            }
+            if (input.getScoreTypes().contains(ScoreType.LogSnScore.getTypeName())) {
+                chromatographicScorer.calculateLogSnScore(peakGroupFeature, featureScores);
             }
 
             if (input.getScoreTypes().contains(ScoreType.ElutionModelFitScore.getTypeName())) {

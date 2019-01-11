@@ -1,6 +1,7 @@
 package com.westlake.air.pecs.feature;
 
 import com.westlake.air.pecs.domain.bean.analyse.*;
+import com.westlake.air.pecs.domain.bean.score.IonPeak;
 import com.westlake.air.pecs.domain.bean.score.PeptideFeature;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
 import com.westlake.air.pecs.domain.bean.score.PeakGroup;
@@ -68,7 +69,7 @@ public class FeatureExtractor {
         }
 
         HashMap<String, RtIntensityPairsDouble> ionPeaks = new HashMap<>();
-        HashMap<String, IntensityRtLeftRtRightPairs> ionPeakParams = new HashMap<>();
+        HashMap<String, List<IonPeak>> ionPeakParams = new HashMap<>();
 
         //对每一个chromatogram进行运算,dataDO中不含有ms1
         HashMap<String, double[]> noise1000Map = new HashMap<>();
@@ -117,10 +118,10 @@ public class FeatureExtractor {
                 logger.info("Error: MaxPeakPairs were null!");
                 continue;
             }
-            IntensityRtLeftRtRightPairs intensityRtLeftRtRightPairs = chromatogramPicker.pickChromatogram(rtDoubleArray, intensitiesMap.get(cutInfo), smoothIntensitiesMap.get(cutInfo), noisesOri1000, maxPeakPairs);
+            List<IonPeak> ionPeakList = chromatogramPicker.pickChromatogram(rtDoubleArray, intensitiesMap.get(cutInfo), smoothIntensitiesMap.get(cutInfo), noisesOri1000, maxPeakPairs);
 
             ionPeaks.put(cutInfo, maxPeakPairs);
-            ionPeakParams.put(cutInfo, intensityRtLeftRtRightPairs);
+            ionPeakParams.put(cutInfo, ionPeakList);
             noise1000Map.put(cutInfo, noisesOri1000);
             normedLibIntMap.put(cutInfo, intensityMap.get(cutInfo)/libIntSum);
         }

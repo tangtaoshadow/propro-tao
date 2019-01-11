@@ -4,9 +4,12 @@ import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.pecs.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.pecs.domain.bean.score.IntensityRtLeftRtRightPairs;
+import com.westlake.air.pecs.domain.bean.score.IonPeak;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.springframework.stereotype.Component;
-import scala.collection.immutable.Stream;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Nico Wang Ruimin
@@ -26,11 +29,8 @@ public class ChromatogramPicker {
      * @param maxPeakPairs         picked max peak
      * @return 左右边界rt, chromatogram边界内intensity求和
      */
-    public IntensityRtLeftRtRightPairs pickChromatogram(Double[] rtArray, Double[] intensityArray, Double[] smoothIntensityArray, double[] signalToNoise, RtIntensityPairsDouble maxPeakPairs) {
+    public List<IonPeak> pickChromatogram(Double[] rtArray, Double[] intensityArray, Double[] smoothIntensityArray, double[] signalToNoise, RtIntensityPairsDouble maxPeakPairs) {
         int maxPeakSize = maxPeakPairs.getRtArray().length;
-        int[][] leftRight = new int[maxPeakSize][2];
-        Double[] leftRt = new Double[maxPeakSize];
-        Double[] rightRt = new Double[maxPeakSize];
         int leftIndex, rightIndex;
 
         Double[] chromatogram;
@@ -41,10 +41,10 @@ public class ChromatogramPicker {
         }
 
         int closestPeakIndex;
+        List<IonPeak> ionPeakList = new ArrayList<>();
         for (int i = 0; i < maxPeakSize; i++) {
             double centralPeakRt = maxPeakPairs.getRtArray()[i];
             closestPeakIndex = findClosestPeak(rtArray, centralPeakRt);
-
             //to the left
             leftIndex = closestPeakIndex - 1;
             while (leftIndex > 0 &&
@@ -64,17 +64,10 @@ public class ChromatogramPicker {
                     signalToNoise[rightIndex + 1] >= Constants.SIGNAL_TO_NOISE_LIMIT) {
                 rightIndex++;
             }
-
-            leftRight[i][0] = leftIndex;
-            leftRight[i][1] = rightIndex;
-            leftRt[i] = rtArray[leftIndex];
-            rightRt[i] = rtArray[rightIndex];
-
+            ionPeakList.add(new IonPeak(integratePeaks(intensityArray, leftIndex, rightIndex), leftIndex, rightIndex, closestPeakIndex, i));
         }
 
-        Double[] intensity = integratePeaks(intensityArray, leftRight);
-
-        return new IntensityRtLeftRtRightPairs(intensity, leftRt, rightRt);
+        return ionPeakList;
     }
 
     private int findClosestPeak(Double[] rtArray, double rt) {
@@ -89,16 +82,10 @@ public class ChromatogramPicker {
         }
     }
 
-    private Double[] integratePeaks(Double[] intensityArray, int[][] leftRight) {
-        int leftIndex, rightIndex;
-        Double[] intensity = new Double[leftRight.length];
-        for (int i = 0; i < leftRight.length; i++) {
-            intensity[i] = 0d;
-            leftIndex = leftRight[i][0];
-            rightIndex = leftRight[i][1];
-            for (int j = leftIndex; j <= rightIndex; j++) {
-                intensity[i] += intensityArray[j];
-            }
+    private double integratePeaks(Double[] intensityArray, int leftIndex, int rightIndex) {
+        double intensity = 0d;
+        for (int i = leftIndex; i <= rightIndex; i++) {
+            intensity += intensityArray[i];
         }
         return intensity;
     }

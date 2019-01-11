@@ -40,5 +40,6 @@ public class ScoreTest extends BaseTest {
     public void test(){
         System.out.println(Math.log(2));
         System.out.println(FastMath.log(2));
+        System.out.println( (int) Math.ceil(FastMath.log(2,8)));
     }
 }
