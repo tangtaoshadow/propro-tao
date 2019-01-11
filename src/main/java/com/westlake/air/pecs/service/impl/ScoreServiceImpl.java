@@ -189,17 +189,17 @@ public class ScoreServiceImpl implements ScoreService {
             AnalyseDataUtil.decompress(dataDO);
         }
 
-//        if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() < 3) {
-//            logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
-//            dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
-//            return;
-//        }
-
-        if (dataDO.getIntensityMap() == null) {
-            logger.info("数据的离子片段为空:PeptideRef:" + dataDO.getPeptideRef());
+        if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() < 3) {
+            logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
             return;
         }
+
+//        if (dataDO.getIntensityMap() == null) {
+//            logger.info("数据的离子片段为空:PeptideRef:" + dataDO.getPeptideRef());
+//            dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
+//            return;
+//        }
 
         //获取标准库中对应的PeptideRef组
         //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
