@@ -35,10 +35,9 @@ public class TaskController extends BaseController {
     @RequestMapping(value = "/list")
     String list(Model model,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
+                @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
                 @RequestParam(value = "taskTemplate", required = false) String taskTemplate,
-                @RequestParam(value = "taskStatus", required = false) String taskStatus
-                ) {
+                @RequestParam(value = "taskStatus", required = false) String taskStatus) {
 
         if(taskTemplate != null){
             model.addAttribute("taskTemplate", taskTemplate);
