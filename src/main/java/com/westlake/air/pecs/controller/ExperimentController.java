@@ -401,7 +401,7 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "sigma", required = false, defaultValue = "6.25") Float sigma,
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
                      @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.6") Float shapeScoreThreshold,
-                     @RequestParam(value = "shapeScoreWeightThreshold", required = false, defaultValue = "0.8") Float shapeScoreWeightThreshold,
+                     @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.8") Float shapeWeightScoreThreshold,
                      @RequestParam(value = "useEpps", required = false,defaultValue = "false") Boolean useEpps,
                      HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
@@ -444,7 +444,7 @@ public class ExperimentController extends BaseController {
         input.setScoreTypes(scoreTypes);
         input.setSigmaSpacing(ss);
         input.setXcorrShapeThreshold(shapeScoreThreshold);
-        input.setXcorrShapeWeightThreshold(shapeScoreWeightThreshold);
+        input.setXcorrShapeWeightThreshold(shapeWeightScoreThreshold);
 
         experimentTask.extract(input, taskDO);
 
