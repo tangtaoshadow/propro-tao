@@ -22,6 +22,8 @@ public interface ExperimentService {
 
     List<ExperimentDO> getAll(ExperimentQuery query);
 
+    List<ExperimentDO> getAllByProjectName(String projectName);
+
     List<ExperimentDO> getAll();
 
     List<ExperimentDO> getSimpleAll();

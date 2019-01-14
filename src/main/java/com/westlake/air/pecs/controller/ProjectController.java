@@ -154,10 +154,12 @@ public class ProjectController extends BaseController {
                RedirectAttributes redirectAttributes) {
 
         ResultDO<ProjectDO> resultDO = projectService.getById(id);
+        List<ExperimentDO> expList = experimentService.getAllByProjectName(resultDO.getModel().getName());
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.PROJECT_NOT_EXISTED);
             return "redirect:/project/list";
         }
+        model.addAttribute("exps",expList);
         model.addAttribute("project", resultDO.getModel());
         model.addAttribute("iRtLibraryId", iRtLibraryId);
         model.addAttribute("libraries", getLibraryList(1));

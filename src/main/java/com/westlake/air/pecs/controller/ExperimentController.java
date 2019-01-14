@@ -437,6 +437,7 @@ public class ExperimentController extends BaseController {
         input.setExperimentDO(resultDO.getModel());
         input.setLibraryId(libraryId);
         input.setSlopeIntercept(si);
+        input.setNote(note);
         input.setCreator(creator);
         input.setRtExtractWindow(rtExtractWindow);
         input.setMzExtractWindow(mzExtractWindow);

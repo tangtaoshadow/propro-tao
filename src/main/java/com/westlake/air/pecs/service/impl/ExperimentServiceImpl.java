@@ -99,6 +99,13 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     @Override
+    public List<ExperimentDO> getAllByProjectName(String projectName) {
+        ExperimentQuery query = new ExperimentQuery();
+        query.setProjectName(projectName);
+        return experimentDAO.getAll(query);
+    }
+
+    @Override
     public ResultDO insert(ExperimentDO experimentDO) {
         if (experimentDO.getName() == null || experimentDO.getName().isEmpty()) {
             return ResultDO.buildError(ResultCode.LIBRARY_NAME_CANNOT_BE_EMPTY);
