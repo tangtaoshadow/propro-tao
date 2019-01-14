@@ -15,10 +15,15 @@ public class SimpleFeatureScores {
 
     Boolean isDecoy;
 
+    //本峰值对应的最佳RT时间
     Double rt;
 
+    Double intensitySum;
+
+    //本峰对应的打分列表
     HashMap<String, Double> scoresMap;
 
+    //本峰对应的最终综合打分
     Double mainScore;
 
     Double pValue;

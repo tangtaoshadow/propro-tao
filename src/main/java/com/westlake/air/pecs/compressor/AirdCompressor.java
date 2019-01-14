@@ -58,8 +58,8 @@ public class AirdCompressor {
         }
         String fileNameWithoutSuffix = file.getName().replace(".mzXML", "").replace(".mzxml", "");
 
-        String airdFilePath = fileParent + "/" + fileNameWithoutSuffix + Constants.SUFFIX_AIRUS_DATA;
-        String airdIndexPath = fileParent + "/" + fileNameWithoutSuffix + Constants.SUFFIX_AIRUS_DATA_INFO;
+        String airdFilePath = fileParent + fileNameWithoutSuffix + Constants.SUFFIX_AIRUS_DATA;
+        String airdIndexPath = fileParent + fileNameWithoutSuffix + Constants.SUFFIX_AIRUS_DATA_INFO;
 
         File airiFile = new File(airdIndexPath);
         File airdFile = new File(airdFilePath);

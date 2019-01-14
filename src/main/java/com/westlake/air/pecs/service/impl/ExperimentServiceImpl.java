@@ -286,8 +286,8 @@ public class ExperimentServiceImpl implements ExperimentService {
             fileParent = file.getParent();
         }
         String fileNameWithoutSuffix = file.getName().replace(".aird", "");
-        String aircFilePath = fileParent + "/" + fileNameWithoutSuffix + "-" + overviewDO.getId() + Constants.SUFFIX_AIRUS_CONVOLUTION;
-        String aircIndexPath = fileParent + "/" + fileNameWithoutSuffix + "-" + overviewDO.getId() + Constants.SUFFIX_AIRUS_CONVOLUTION_INFO;
+        String aircFilePath = fileParent + fileNameWithoutSuffix + "-" + overviewDO.getId() + Constants.SUFFIX_AIRUS_CONVOLUTION;
+        String aircIndexPath = fileParent + fileNameWithoutSuffix + "-" + overviewDO.getId() + Constants.SUFFIX_AIRUS_CONVOLUTION_INFO;
         File aircFile = new File(aircFilePath);
         File aircIndexFile = new File(aircIndexPath);
         FileWriter fwInfo = null;

@@ -37,78 +37,6 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="airdFilePath" class="col-3 col-form-label">
-                                Aird实验文件存储路径
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="airdFilePath"
-                                       placeholder="Enter Aird Experiment File Path" name="airdFilePath"
-                                       th:value="${config?.airdFilePath}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="aircFilePath" class="col-3 col-form-label">
-                                Airc卷积文件存储路径
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="aircFilePath"
-                                       placeholder="Enter Airc Convolution File Path" name="aircFilePath"
-                                       th:value="${config?.aircFilePath}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="libraryFilePath" class="col-3 col-form-label">
-                                标准库/iRT校准库文件存储路径(TSV,CSV,TraML)
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="libraryFilePath"
-                                       placeholder="Enter Library File Path" name="libraryFilePath"
-                                       th:value="${config?.libraryFilePath}">
-                            </div>
-                        </div>
-
-                        <div class="form-group m-form__group row">
-                            <label for="mzxmlFilePath" class="col-3 col-form-label">
-                                MzXML实验数据存储位置
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="mzxmlFilePath"
-                                       placeholder="Enter mzXML Experiment File Path" name="mzxmlFilePath"
-                                       th:value="${config?.mzxmlFilePath}">
-                            </div>
-                        </div>
-
-                        <div class="form-group m-form__group row">
-                            <label for="exportScoresFilePath" class="col-3 col-form-label">
-                                子分数文件导出位置(支持PyProphet)
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="exportScoresFilePath"
-                                       placeholder="Enter Export Scores File Path" name="exportScoresFilePath" th:value="${config?.exportScoresFilePath}">
-                            </div>
-                        </div>
-
-                        <div class="form-group m-form__group row">
-                            <label for="prefixForAirdFile" class="col-3 col-form-label">
-                                卷积前的原始文件前缀-Aird
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="prefixForAirdFile"
-                                       placeholder="Enter Suffix For Aird File" name="prefixForAirdFile"
-                                       th:value="${config?.prefixForAirdFile}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="prefixForAircFile" class="col-3 col-form-label">
-                                卷积后的文件前缀-Airc
-                            </label>
-                            <div class="col-9">
-                                <input type="text" class="form-control m-input" id="prefixForAircFile"
-                                       placeholder="Enter Suffix For Airc File" name="prefixForAircFile"
-                                       th:value="${config?.prefixForAircFile}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
                             <label for="lastModifiedDate" class="col-3 col-form-label">
                                 最后修改时间
                             </label>
@@ -118,7 +46,6 @@
                                        th:value="${#dates.format(config?.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}">
                             </div>
                         </div>
-
                         <div class="form-group m-form__group row">
                             <label for="createDate" class="col-3 col-form-label">
                                 创建时间

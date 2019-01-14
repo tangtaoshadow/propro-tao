@@ -3,7 +3,6 @@ package com.westlake.air.pecs.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import com.westlake.air.pecs.algorithm.Airus;
 import com.westlake.air.pecs.algorithm.FragmentFactory;
 import com.westlake.air.pecs.async.ScoreTask;
 import com.westlake.air.pecs.constants.*;
@@ -11,7 +10,10 @@ import com.westlake.air.pecs.dao.ConfigDAO;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.analyse.ComparisonResult;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.pecs.domain.bean.score.*;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
+import com.westlake.air.pecs.domain.bean.score.PeakGroup;
+import com.westlake.air.pecs.domain.bean.score.PeptideFeature;
+import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.db.simple.TargetPeptide;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
@@ -57,11 +59,11 @@ public class AnalyseController extends BaseController {
     @Autowired
     ExperimentService experimentService;
     @Autowired
+    ProjectService projectService;
+    @Autowired
     ScoreService scoreService;
     @Autowired
     ScoreTask scoreTask;
-    @Autowired
-    Airus airus;
     @Autowired
     GaussFilter gaussFilter;
     @Autowired
@@ -127,31 +129,55 @@ public class AnalyseController extends BaseController {
     @RequestMapping(value = "/overview/export/{id}")
     String overviewExport(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) throws IOException {
 
-        int pageSize = 100;
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(id);
+        if (overviewResult.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
+            return "redirect:/analyse/overview/list";
+        }
+        ResultDO<ExperimentDO> experimentResult = experimentService.getById(overviewResult.getModel().getExpId());
+        if (experimentResult.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED);
+            return "redirect:/analyse/overview/list";
+        }
+        ResultDO<ProjectDO> projectResult = projectService.getByName(experimentResult.getModel().getProjectName());
+        if (projectResult.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED);
+            return "redirect:/analyse/overview/list";
+        }
+        String exportPath = projectResult.getModel().getExportPath();
+
+        int pageSize = 1000;
         AnalyseDataQuery query = new AnalyseDataQuery(id);
+        query.setIsDecoy(false);
+        query.setFdrEnd(0.01);
+        query.setSortColumn("fdr");
+        query.setOrderBy(Sort.Direction.ASC);
         int count = analyseDataService.count(query).intValue();
         int totalPage = count % pageSize == 0 ? count / pageSize : (count / pageSize + 1);
 
-        File file = new File("D://test.json");
+        File file = new File(exportPath + overviewResult.getModel().getName() + "[" + overviewResult.getModel().getId() + "].txt");
         if (!file.exists()) {
+            file.getParentFile().mkdirs();
             file.createNewFile();
         }
-        OutputStream os = new FileOutputStream(file);
 
-        byte[] changeLine = "\n".getBytes();
+        String header = "protein,peptideRef,intensity";
+        String content = header + "\n";
+
+        OutputStream os = new FileOutputStream(file);
         query.setPageSize(pageSize);
-        query.setOverviewId(id);
         for (int i = 1; i <= totalPage; i++) {
             query.setPageNo(i);
             ResultDO<List<AnalyseDataDO>> dataListRes = analyseDataService.getList(query);
-
-            String content = JSONArray.toJSONString(dataListRes.getModel());
+            for (AnalyseDataDO analyseData : dataListRes.getModel()) {
+                String line = analyseData.getProteinName() + "," + analyseData.getPeptideRef() + "," + analyseData.getIntensitySum().longValue() + "\n";
+                content += line;
+            }
             byte[] b = content.getBytes();
             int l = b.length;
 
             os.write(b, 0, l);
-            logger.info("打印第" + i + "/" + totalPage + "行,本行长度:" + l + ";");
-            os.write(changeLine, 0, changeLine.length);
+            logger.info("打印第" + i + "/" + totalPage + "页,本页长度:" + l + ";");
         }
         os.close();
         return "redirect:/analyse/overview/list";
@@ -340,7 +366,7 @@ public class AnalyseController extends BaseController {
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
         if (dataId != null && !dataId.isEmpty() && !dataId.equals("null")) {
             dataResult = analyseDataService.getByIdWithConvolutionData(dataId);
-        }else{
+        } else {
             resultDO.setErrorResult(ResultCode.ANALYSE_DATA_ID_CANNOT_BE_EMPTY);
             return resultDO;
         }
@@ -553,7 +579,7 @@ public class AnalyseController extends BaseController {
         //准备该肽段的其他互补离子
         if (!noUseForFill) {
             HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, limitLength);
-            if(bySeriesMap == null){
+            if (bySeriesMap == null) {
                 model.addAttribute(ERROR_MSG, ResultCode.FRAGMENT_LENGTH_IS_TOO_LONG.getMessage());
                 return "/analyse/data/consultation";
             }
@@ -577,8 +603,8 @@ public class AnalyseController extends BaseController {
         HashMap<String, Float> mzMap = newDataDO.getMzMap();
 
         List<String> existedCutInfoList = Lists.newArrayList(peptide.getFragmentMap().keySet());
-        for(String key : existedCutInfoList){
-            if(!mzMap.containsKey(key)){
+        for (String key : existedCutInfoList) {
+            if (!mzMap.containsKey(key)) {
                 peptide.removeFragment(key);
             }
         }
@@ -657,11 +683,11 @@ public class AnalyseController extends BaseController {
                 continue;
             }
             AnalyseDataDO dataForId = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, peptideRef, false);
-            if(dataForId == null){
+            if (dataForId == null) {
                 continue;
             }
             ResultDO<AnalyseDataDO> dataResult = analyseDataService.getByIdWithConvolutionData(dataForId.getId());
-            if(dataResult.isFailed() || dataResult.getModel() == null){
+            if (dataResult.isFailed() || dataResult.getModel() == null) {
                 continue;
             }
             AnalyseDataDO data = dataResult.getModel();

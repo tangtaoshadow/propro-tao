@@ -91,6 +91,7 @@ public class AnalyseDataDO extends BaseDO {
     @JSONField(serialize=false)
     int identifiedStatus = IDENTIFIED_STATUS_NOT_START;
 
+    //最终给出的FDR打分
     @Indexed
     @JSONField(serialize=false)
     Double fdr;
@@ -98,8 +99,11 @@ public class AnalyseDataDO extends BaseDO {
     @JSONField(serialize=false)
     List<FeatureScores> featureScoresList;
 
+    //最终选出的最佳峰
     @JSONField(serialize=false)
     Double bestRt;
 
-
+    //最终的定量值
+    @JSONField(serialize=false)
+    Double intensitySum;
 }

@@ -188,16 +188,19 @@ public class AirusUtil {
                     bestFeatureScores.setMainScore(featureScores.get(scoreType));
                     bestFeatureScores.setScoresMap(featureScores.getScoresMap());
                     bestFeatureScores.setRt(featureScores.getRt());
+                    bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
                 } else {
                     Double featureMainScore = featureScores.get(scoreType);
                     if (featureMainScore > bestFeatureScores.getMainScore()) {
                         bestFeatureScores.setMainScore(featureMainScore);
                         bestFeatureScores.setScoresMap(featureScores.getScoresMap());
                         bestFeatureScores.setRt(featureScores.getRt());
+                        bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
                     }
                 }
             }
 
+            score.setIntensitySum(bestFeatureScores.getIntensitySum());
             score.setBestRt(bestFeatureScores.getRt());
             bestFeatureScoresList.add(bestFeatureScores);
 

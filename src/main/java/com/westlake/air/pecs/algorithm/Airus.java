@@ -90,18 +90,14 @@ public class Airus {
 
         finalResult.setAllInfo(errorStat);
 
-//        for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
-//            if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getFdr() <= 0.01) {
-//
-//            }
-//        }
-
         //对于最终的打分结果和选峰结果保存到数据库中
         int hit = 0;
+        logger.info("将合并打分及定量结果反馈更新到数据库中,总计:"+featureScoresList+"条数据");
         for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
             AnalyseDataDO dataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
             dataDO.setBestRt(simpleFeatureScores.getRt());
             dataDO.setFdr(simpleFeatureScores.getFdr());
+            dataDO.setIntensitySum(simpleFeatureScores.getIntensitySum());
             if (!simpleFeatureScores.getIsDecoy()) {
                 if (simpleFeatureScores.getFdr() <= 0.01) {
                     Integer count = peptideHitMap.get(simpleFeatureScores.getPeptideRef());

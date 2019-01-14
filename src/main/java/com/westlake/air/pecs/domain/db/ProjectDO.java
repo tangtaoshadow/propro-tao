@@ -38,10 +38,14 @@ public class ProjectDO extends BaseDO {
     Date lastModifiedDate;
 
     public String getAirdPath(){
-        return repository + "/aird";
+        return repository + "/aird/";
     }
 
     public String getAircPath(){
-        return repository + "/airc";
+        return repository + "/airc/";
+    }
+
+    public String getExportPath(){
+        return repository + "/export/";
     }
 }

@@ -14,7 +14,6 @@ public class ConfigDO extends BaseDO {
 
     String id;
 
-
     Date createDate;
 
     Date lastModifiedDate;

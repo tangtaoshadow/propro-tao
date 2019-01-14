@@ -27,7 +27,7 @@
 
     <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="m-portlet m-portlet--tab">
                 <div class="m-portlet__head">
                     <div class="m-portlet__head-caption">
@@ -94,6 +94,12 @@
                                        name="mzExtractWindow"
                                        th:value="${mzExtractWindow}">
                                 <span class="m-form__help">默认为0.05</span>
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="mzExtractWindow" class="col-2 col-form-label" th:text="|作用实验列表(${exps.size()}个)|"></label>
+                            <div class="col-10 row" >
+                                <label class="col-3 col-form-label" th:each="exp:${exps}" th:text="|${exp.name}(${exp.id})|"></label>
                             </div>
                         </div>
                     </div>

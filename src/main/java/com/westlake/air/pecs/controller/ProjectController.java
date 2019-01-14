@@ -207,11 +207,13 @@ public class ProjectController extends BaseController {
         model.addAttribute("libraryId", libraryId);
 
         ResultDO<ProjectDO> resultDO = projectService.getById(id);
+        List<ExperimentDO> expList = experimentService.getAllByProjectName(resultDO.getModel().getName());
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED);
             return "redirect:/project/list";
         }
 
+        model.addAttribute("exps", expList);
         model.addAttribute("libraries", getLibraryList(0));
         model.addAttribute("project", resultDO.getModel());
         model.addAttribute("scoreTypes", ScoreType.getShownTypes());

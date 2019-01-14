@@ -195,12 +195,6 @@ public class ScoreServiceImpl implements ScoreService {
             return;
         }
 
-//        if (dataDO.getIntensityMap() == null) {
-//            logger.info("数据的离子片段为空:PeptideRef:" + dataDO.getPeptideRef());
-//            dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
-//            return;
-//        }
-
         //获取标准库中对应的PeptideRef组
         //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
         PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(dataDO, peptide.buildIntensityMap(), input.getSigmaSpacing());
@@ -245,8 +239,6 @@ public class ScoreServiceImpl implements ScoreService {
             FeatureScores featureScores = new FeatureScores();
             chromatographicScorer.calculateChromatographicScores(peakGroupFeature, normedLibIntMap, featureScores, input.getScoreTypes());
             if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.XcorrShapeWeighted) != null
-//                    && featureScores.get(ScoreType.XcorrShapeWeighted) < 0.8
-//                    && featureScores.get(ScoreType.XcorrShape) < 0.65){
                     && featureScores.get(ScoreType.XcorrShapeWeighted) < input.getXcorrShapeWeightThreshold()
                     && featureScores.get(ScoreType.XcorrShape) < input.getXcorrShapeThreshold()){
                 continue;

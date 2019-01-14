@@ -20,6 +20,7 @@ import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.ScoreService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -95,7 +96,6 @@ public class ScoreController extends BaseController {
         query.setOverviewId(overviewId);
         query.setPageSize(30);
         query.setPageNo(currentPage);
-//        query.setSortColumn("fdr");
         ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
