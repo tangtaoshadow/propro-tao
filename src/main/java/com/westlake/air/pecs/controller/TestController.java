@@ -78,16 +78,9 @@ public class TestController extends BaseController {
     @RequestMapping("test")
     @ResponseBody
     String test(Model model, RedirectAttributes redirectAttributes) {
-        try {
-            String result = FileUtil.readFile("D:/1.txt");
-            String[] array = result.split("\r\n");
-            HashSet<String> set = new HashSet<>();
-            set.addAll(Arrays.asList(array));
 
-            logger.info(set.size() + "");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        File file = new File("\\\\172.16.13.114\\share\\syt");
+        logger.info(file.exists()+"");
         return "success";
     }
 

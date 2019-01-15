@@ -201,11 +201,11 @@
             <version>0.1.12</version>
         </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>org.jocl</groupId>-->
-            <!--<artifactId>jocl</artifactId>-->
-            <!--<version>2.0.1</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.dcache</groupId>
+            <artifactId>nfs4j-core</artifactId>
+            <version>0.17.2</version>
+        </dependency>
     </dependencies>
 
 
@@ -229,6 +229,12 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
+        </repository>
+        <repository>
+            <id>dcache-releases</id>
+            <name>dCache.ORG maven repository</name>
+            <url>https://download.dcache.org/nexus/content/repositories/releases</url>
+            <layout>default</layout>
         </repository>
     </repositories>
 
