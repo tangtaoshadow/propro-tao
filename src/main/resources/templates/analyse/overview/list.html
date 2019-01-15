@@ -118,7 +118,8 @@
                             <div class="dropdown-menu" aria-labelledby="scoresBtn">
                                 <!--<a class="dropdown-item" th:href="|/analyse/overview/score?overviewId=${overview.id}|">开始子分数打分</a>-->
                                 <a class="dropdown-item" th:href="|/score/airus?overviewId=${overview.id}&&classifier=lda|">LDA合并打分</a>
-                                <a class="dropdown-item" th:href="|/score/airus?overviewId=${overview.id}&&classifier=xgboost|">XGBoost合并打分</a>
+                                <!--<a class="dropdown-item" th:href="|/score/airus?overviewId=${overview.id}&&classifier=xgboost|">XGBoost合并打分</a>-->
+                                <a class="dropdown-item" onclick="alert('暂时未开放!')">XGBoost合并打分</a>
                             </div>
                         </div>
                     </td>
