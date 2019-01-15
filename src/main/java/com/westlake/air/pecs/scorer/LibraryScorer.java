@@ -1,5 +1,6 @@
 package com.westlake.air.pecs.scorer;
 
+import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.PeakGroup;
@@ -63,12 +64,15 @@ public class LibraryScorer {
         //需要的前置变量：dotprod, sum, 2sum
         if(scoreTypes == null || scoreTypes.contains(ScoreType.LibraryCorr.getTypeName())) {
             double expDeno = experiment2Sum - experimentSum * experimentSum / normedLibInt.size();
-            if (expDeno == 0d){
+            if (expDeno <= Constants.MIN_DOUBLE){
                 scores.put(ScoreType.LibraryCorr, 0d);
             }else {
                 double libDeno = library2Sum - librarySum * librarySum / normedLibInt.size();
                 double pearsonR = dotprod - experimentSum * librarySum / normedLibInt.size();
                 pearsonR /= FastMath.sqrt(expDeno * libDeno);
+//                if(Double.isNaN(pearsonR)){
+//                    System.out.println("");
+//                }
                 scores.put(ScoreType.LibraryCorr, pearsonR);
             }
 

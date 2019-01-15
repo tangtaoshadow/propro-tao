@@ -126,7 +126,7 @@ public class FeatureExtractor {
             normedLibIntMap.put(cutInfo, intensityMap.get(cutInfo)/libIntSum);
         }
 
-        List<PeakGroup> peakGroupFeatureList = featureFinder.findFeatures(peptideSpectrum, ionPeaks, ionPeakParams,noise1000Map);
+        List<PeakGroup> peakGroupFeatureList = featureFinder.findFeaturesNew(peptideSpectrum, ionPeaks, ionPeakParams,noise1000Map);
 
         PeptideFeature featureResult = new PeptideFeature(featureFound);
         featureResult.setPeakGroupList(peakGroupFeatureList);
