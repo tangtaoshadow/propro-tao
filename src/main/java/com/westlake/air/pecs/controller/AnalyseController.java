@@ -417,6 +417,8 @@ public class AnalyseController extends BaseController {
 
         AnalyseDataDO data = dataResult.getModel();
 
+
+
         JSONObject res = new JSONObject();
         JSONArray rtArray = new JSONArray();
         JSONArray intensityArrays = new JSONArray();
@@ -431,7 +433,14 @@ public class AnalyseController extends BaseController {
 
             Float[] pairIntensityArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvIntensityMap().get(cutInfo)));
             if (isGaussFilter) {
-                pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, cutInfo, pairIntensityArray);
+                ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(data.getOverviewId());
+                if (overviewResult == null || overviewResult.isFailed()) {
+                    resultDO.setErrorResult(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
+                    return resultDO;
+                }
+
+                AnalyseOverviewDO overview = overviewResult.getModel();
+                pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, cutInfo, pairIntensityArray,new SigmaSpacing(overview.getSigma(), overview.getSpacing()));
             }
 
             cutInfoArray.add(cutInfo);
@@ -704,7 +713,14 @@ public class AnalyseController extends BaseController {
                 }
                 Float[] pairIntensityArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvIntensityMap().get(cutInfo)));
                 if (isGaussFilter) {
-                    pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, cutInfo, pairIntensityArray);
+
+                    ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(data.getOverviewId());
+                    if (overviewResult == null || overviewResult.isFailed()) {
+                        resultDO.setErrorResult(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
+                        return resultDO;
+                    }
+                    AnalyseOverviewDO overview = overviewResult.getModel();
+                    pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, cutInfo, pairIntensityArray,new SigmaSpacing(overview.getSigma(), overview.getSpacing()));
                 }
                 cutInfoArray.add(cutInfo);
                 JSONArray intensityArray = new JSONArray();

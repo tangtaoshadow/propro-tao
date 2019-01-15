@@ -49,8 +49,8 @@ public class ChromatogramPicker {
             leftIndex = closestPeakIndex - 1;
             while (leftIndex > 0 &&
                     (chromatogram[leftIndex - 1] < chromatogram[leftIndex] || (
-//                            Constants.PEAK_WIDTH > 0 && centralPeakRt - rtArray[leftIndex - 1] < Constants.PEAK_WIDTH)) &&
-                            chromatogram[leftIndex - 1] / chromatogram[closestPeakIndex] > Constants.MIN_INTENSITY_RATIO)) &&
+                            Constants.PEAK_WIDTH > 0 && centralPeakRt - rtArray[leftIndex - 1] < Constants.PEAK_WIDTH)) &&
+//                            chromatogram[leftIndex - 1] / chromatogram[closestPeakIndex] > Constants.MIN_INTENSITY_RATIO)) &&
                     signalToNoise[leftIndex - 1] >= Constants.SIGNAL_TO_NOISE_LIMIT) {
                 leftIndex--;
             }
@@ -59,8 +59,8 @@ public class ChromatogramPicker {
             rightIndex = closestPeakIndex + 1;
             while (rightIndex < chromatogram.length - 1 &&
                     (chromatogram[rightIndex + 1] < chromatogram[rightIndex] || (
-//                            Constants.PEAK_WIDTH > 0 && rtArray[rightIndex + 1] - centralPeakRt < Constants.PEAK_WIDTH)) &&
-                            chromatogram[rightIndex + 1] / chromatogram[closestPeakIndex] > Constants.MIN_INTENSITY_RATIO)) &&
+                            Constants.PEAK_WIDTH > 0 && rtArray[rightIndex + 1] - centralPeakRt < Constants.PEAK_WIDTH)) &&
+//                            chromatogram[rightIndex + 1] / chromatogram[closestPeakIndex] > Constants.MIN_INTENSITY_RATIO)) &&
                     signalToNoise[rightIndex + 1] >= Constants.SIGNAL_TO_NOISE_LIMIT) {
                 rightIndex++;
             }
