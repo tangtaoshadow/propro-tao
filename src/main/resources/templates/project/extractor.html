@@ -107,9 +107,11 @@
                                 </div>
                             </div>
                             <div class="form-group m-form__group row">
-                                <label for="mzExtractWindow" class="col-2 col-form-label" th:text="|作用实验列表(${exps.size()}个)|"></label>
-                                <div class="col-10 row" >
-                                    <label class="col-3 col-form-label" th:each="exp:${exps}" th:text="|${exp.name}(${exp.id})|"></label>
+                                <label for="mzExtractWindow" class="col-2 col-form-label"
+                                       th:text="|作用实验列表(${exps.size()}个)|"></label>
+                                <div class="col-10 row">
+                                    <label class="col-3 col-form-label" th:each="exp:${exps}"
+                                           th:text="|${exp.name}(${exp.id})|"></label>
                                 </div>
                             </div>
                         </div>
@@ -121,7 +123,8 @@
                                 <div class="m-form__group form-group col-10">
                                     <div class="m-checkbox-list">
                                         <label class="m-checkbox m-checkbox--state-success">
-                                            <input type="checkbox" name="useEpps" th:checked="${useEpps}" th:text="是否执行后续的完整流程">
+                                            <input type="checkbox" name="useEpps" th:checked="${useEpps}"
+                                                   th:text="是否执行后续的完整流程">
                                             <span></span>
                                         </label>
                                     </div>
@@ -149,20 +152,24 @@
                             </div>
                             <div class="form-group m-form__group row">
                                 <label for="shapeScoreThreshold" class="col-2 col-form-label">
-                                    Shape阈值,默认为0.6
+                                    Shape阈值
                                 </label>
                                 <div class="col-10">
-                                    <input type="text" class="form-control m-input" id="shapeScoreThreshold" name="shapeScoreThreshold"
+                                    <input type="text" class="form-control m-input" id="shapeScoreThreshold"
+                                           name="shapeScoreThreshold"
                                            th:value="${shapeScoreThreshold}">
+                                    <span class="m-form__help">默认为0.6</span>
                                 </div>
                             </div>
                             <div class="form-group m-form__group row">
                                 <label for="shapeWeightScoreThreshold" class="col-2 col-form-label">
-                                    ShapeWeight阈值,默认为0.8
+                                    ShapeWeight阈值
                                 </label>
                                 <div class="col-10">
-                                    <input type="text" class="form-control m-input" id="shapeWeightScoreThreshold" name="shapeWeightScoreThreshold"
+                                    <input type="text" class="form-control m-input" id="shapeWeightScoreThreshold"
+                                           name="shapeWeightScoreThreshold"
                                            th:value="${shapeWeightScoreThreshold}">
+                                    <span class="m-form__help">默认为0.8</span>
                                 </div>
                             </div>
                             <div class="m-form__group form-group row">
@@ -181,7 +188,6 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">

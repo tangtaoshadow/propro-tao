@@ -14,6 +14,7 @@ import com.westlake.air.pecs.domain.db.simple.MatchedPeptide;
 import com.westlake.air.pecs.domain.db.simple.SimpleScores;
 import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
+import com.westlake.air.pecs.utils.AnalyseDataUtil;
 import com.westlake.air.pecs.utils.CompressUtil;
 import com.westlake.air.pecs.utils.FileUtil;
 import org.apache.commons.lang3.ArrayUtils;
@@ -208,29 +209,46 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
                     return ResultDO.buildError(ResultCode.POSITION_DELTA_LIST_LENGTH_NOT_EQUAL_TO_MZMAP_PLUS_ONE);
                 }
                 raf = new RandomAccessFile(file, "r");
-                long start = analyseDataDO.getStartPos();
-                raf.seek(start);
-
-                byte[] rtArray = new byte[analyseDataDO.getPosDeltaList().get(0)];
-                raf.read(rtArray);
-                analyseDataDO.setConvRtArray(rtArray);
-                start = start + rtArray.length;
-                int i = 1;
-
-                //依次读取PosDeltaList中的位置信息
-                for (String key : analyseDataDO.getConvIntensityMap().keySet()) {
-                    byte[] intensityArray = new byte[analyseDataDO.getPosDeltaList().get(i)];
-                    raf.seek(start);
-                    raf.read(intensityArray);
-                    analyseDataDO.getConvIntensityMap().put(key, intensityArray);
-                    start = start + intensityArray.length;
-                    i++;
-                }
-
-                ResultDO<AnalyseDataDO> resultDO = new ResultDO<>(true);
-                resultDO.setModel(analyseDataDO);
-                return resultDO;
+                ResultDO<AnalyseDataDO> result = AnalyseDataUtil.readConvDataFromFile(analyseDataDO, raf);
+                return result;
             }
+        } catch (Exception e) {
+            return ResultDO.buildError(ResultCode.QUERY_ERROR);
+        } finally {
+            FileUtil.close(raf);
+        }
+    }
+
+    @Override
+    public ResultDO<List<AnalyseDataDO>> getListWithConvolutionData(AnalyseDataQuery query) {
+        RandomAccessFile raf = null;
+        try {
+            List<AnalyseDataDO> dataList = analyseDataDAO.getList(query);
+
+            AnalyseOverviewDO overview = analyseOverviewDAO.getById(query.getOverviewId());
+            if (overview == null) {
+                return ResultDO.buildError(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
+            }
+            if (overview.getAircPath() == null || overview.getAircPath().isEmpty()) {
+                return ResultDO.buildError(ResultCode.AIRC_FILE_PATH_NOT_EXISTED);
+            }
+            File file = new File(overview.getAircPath());
+            if (!file.exists()) {
+                return ResultDO.buildError(ResultCode.AIRC_FILE_NOT_EXISTED);
+            }
+
+            raf = new RandomAccessFile(file, "r");
+            for (AnalyseDataDO analyseDataDO : dataList) {
+                ResultDO<AnalyseDataDO> res = AnalyseDataUtil.readConvDataFromFile(analyseDataDO, raf);
+                if(res.isFailed()){
+                    logger.error(res.getMsgInfo());
+                }
+            }
+
+            ResultDO<List<AnalyseDataDO>> resultDO = new ResultDO<>(true);
+            resultDO.setModel(dataList);
+            return resultDO;
+
         } catch (Exception e) {
             return ResultDO.buildError(ResultCode.QUERY_ERROR);
         } finally {

@@ -131,7 +131,7 @@ public class ProjectController extends BaseController {
         }
         int count = 0;
         for (ExperimentDO exp : expList) {
-            if (!exp.getHasAirusFile()) {
+            if (exp.getHasAirusFile()==null || !exp.getHasAirusFile()) {
                 TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, exp.getName() + ":" + exp.getId());
                 taskService.insert(taskDO);
                 experimentTask.compress(exp, taskDO);
@@ -144,7 +144,6 @@ public class ProjectController extends BaseController {
         } else {
             return "redirect:/task/list";
         }
-
     }
 
     @RequestMapping(value = "/irt")
@@ -295,7 +294,6 @@ public class ProjectController extends BaseController {
         }
         return "redirect:/task/list";
     }
-
 
     private List<ExperimentDO> getAllExperimentsByProjectId(String id) {
         ResultDO<ProjectDO> resultDO = projectService.getById(id);

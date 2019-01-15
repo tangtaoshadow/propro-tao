@@ -19,6 +19,8 @@ import com.westlake.air.pecs.domain.query.AnalyseDataQuery;
 import com.westlake.air.pecs.service.AnalyseDataService;
 import com.westlake.air.pecs.service.AnalyseOverviewService;
 import com.westlake.air.pecs.service.ScoreService;
+import com.westlake.air.pecs.utils.AnalyseDataUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
@@ -105,6 +107,57 @@ public class ScoreController extends BaseController {
         }
         model.addAttribute("overview", overviewResult.getModel());
         model.addAttribute("scores", resultDO.getModel());
+        model.addAttribute("totalPage", resultDO.getTotalPage());
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalNum", resultDO.getTotalNum());
+        return "scores/list";
+    }
+
+    @RequestMapping(value = "/report")
+    String report(Model model,
+                @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+                @RequestParam(value = "pageSize", required = false, defaultValue = "100") Integer pageSize,
+                @RequestParam(value = "overviewId", required = false) String overviewId,
+                @RequestParam(value = "peptideRef", required = false) String peptideRef,
+                @RequestParam(value = "fdrStart", required = false) Double fdrStart,
+                @RequestParam(value = "fdrEnd", required = false) Double fdrEnd,
+                RedirectAttributes redirectAttributes) {
+        model.addAttribute("overviewId", overviewId);
+        model.addAttribute("peptideRef", peptideRef);
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("fdrStart", fdrStart);
+        model.addAttribute("fdrEnd", fdrEnd);
+        AnalyseDataQuery query = new AnalyseDataQuery();
+        if (peptideRef != null && !peptideRef.isEmpty()) {
+            query.setPeptideRef(peptideRef);
+        }
+        if (fdrStart != null) {
+            query.setFdrStart(fdrStart);
+        }
+        if (fdrEnd != null) {
+            query.setFdrEnd(fdrEnd);
+        }
+        query.setIsDecoy(false);
+        if (overviewId == null) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_ID_CAN_NOT_BE_EMPTY.getMessage());
+            return "redirect:/analyse/overview/list";
+        }
+        query.setOverviewId(overviewId);
+        query.setPageSize(pageSize);
+        query.setPageNo(currentPage);
+        ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getListWithConvolutionData(query);
+
+        for(AnalyseDataDO data : resultDO.getModel()){
+            AnalyseDataUtil.decompress(data);
+
+        }
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        if (overviewResult.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
+            return "redirect:/analyse/overview/list";
+        }
+        model.addAttribute("overview", overviewResult.getModel());
+        model.addAttribute("dataList", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalNum", resultDO.getTotalNum());

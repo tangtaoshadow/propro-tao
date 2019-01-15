@@ -105,6 +105,7 @@
                     <td th:text="${overview?.note}"></td>
                     <td>
                         <a th:href="|/analyse/overview/detail/${overview.id}|" class="btn btn-success btn-sm">查看分析报告</a>
+                        <a th:href="|/score/report?overviewId=${overview.id}|" class="btn btn-success btn-sm">审核鉴定结果</a>
                         <a th:href="|/analyse/data/list?overviewId=${overview.id}|"
                            class="btn btn-info btn-sm">查看卷积数据</a>
                         <a th:href="|/score/list?overviewId=${overview.id}&isDecoy=No|" class="btn btn-brand btn-sm">查看子分数</a>
