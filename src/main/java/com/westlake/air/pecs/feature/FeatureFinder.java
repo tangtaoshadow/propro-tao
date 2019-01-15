@@ -251,11 +251,12 @@ public class FeatureFinder {
                 if (intensity[j] <= 0d) {
                     continue;
                 }
-                if (j >= bestLeft && j <= bestRight) {
+                int mid = ionPeakParams.get(cutInfo).get(j).getApexRtIndex();
+                if (mid >= bestLeft && mid <= bestRight) {
                     intensity[j] = 0d;
                 }
-                double left = ionPeakParams.get(cutInfo).get(j).getLeftRtIndex();
-                double right = ionPeakParams.get(cutInfo).get(j).getRightRtIndex();
+                int left = ionPeakParams.get(cutInfo).get(j).getLeftRtIndex();
+                int right = ionPeakParams.get(cutInfo).get(j).getRightRtIndex();
                 if ((left > bestLeft && left < bestRight) || (right > bestLeft && right < bestRight)) {
                     intensity[j] = 0d;
                 }
