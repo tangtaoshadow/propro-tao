@@ -93,7 +93,7 @@ public class Airus {
 
         //对于最终的打分结果和选峰结果保存到数据库中
         int hit = 0;
-        logger.info("将合并打分及定量结果反馈更新到数据库中,总计:"+featureScoresList+"条数据");
+        logger.info("将合并打分及定量结果反馈更新到数据库中,总计:"+featureScoresList.size()+"条数据");
         for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
             AnalyseDataDO dataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
             dataDO.setBestRt(simpleFeatureScores.getRt());
@@ -151,7 +151,7 @@ public class Airus {
 
     public HashMap<String, Double> LDALearn(List<SimpleScores> scores, HashMap<String, Integer> peptideHitMap, AirusParams airusParams) {
         int neval = airusParams.getTrainTimes();
-        test(scores);
+//        test(scores);
         List<HashMap<String, Double>> weightsMapList = new ArrayList<>();
         for (int i = 0; i < neval; i++) {
             logger.info("开始第" + i + "轮尝试");

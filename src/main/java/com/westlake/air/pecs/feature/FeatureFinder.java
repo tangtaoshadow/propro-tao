@@ -163,7 +163,7 @@ public class FeatureFinder {
             int leftIndex = concateMap.get(maxIon).getLeftRtIndex();
             int rightIndex = concateMap.get(maxIon).getRightRtIndex();
             double apexRt = ionPeaks.get(maxIon).getRtArray()[concateMap.get(maxIon).getIndex()];
-            double apexInt = ionPeaks.get(maxIon).getIntensityArray()[concateMap.get(maxIon).getIndex()];
+//            double apexInt = ionPeaks.get(maxIon).getIntensityArray()[concateMap.get(maxIon).getIndex()];
             double bestLeft = peptideSpectrum.getRtArray()[leftIndex];
             double bestRight = peptideSpectrum.getRtArray()[rightIndex];
 
@@ -255,11 +255,12 @@ public class FeatureFinder {
                 if (intensity[j] <= 0d) {
                     continue;
                 }
-                if (j >= bestLeft && j <= bestRight) {
+                int mid = ionPeakParams.get(cutInfo).get(j).getApexRtIndex();
+                if (mid >= bestLeft && mid <= bestRight) {
                     intensity[j] = 0d;
                 }
-                double left = ionPeakParams.get(cutInfo).get(j).getLeftRtIndex();
-                double right = ionPeakParams.get(cutInfo).get(j).getRightRtIndex();
+                int left = ionPeakParams.get(cutInfo).get(j).getLeftRtIndex();
+                int right = ionPeakParams.get(cutInfo).get(j).getRightRtIndex();
                 if ((left > bestLeft && left < bestRight) || (right > bestLeft && right < bestRight)) {
                     intensity[j] = 0d;
                 }
