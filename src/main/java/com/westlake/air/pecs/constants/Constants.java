@@ -37,7 +37,7 @@ public class Constants {
     public static final String CHROMATOGRAM_PICKER_METHOD = "legacy";
 //    public static final String CHROMATOGRAM_PICKER_METHOD = "corrected";
 
-    public static final double PEAK_WIDTH = 5d;///
+    public static final double PEAK_WIDTH = 10d;///
     public static final double MIN_INTENSITY_RATIO = 0.6d;
     public static final boolean ESTIMATE_BEST_PEPTIDES = false;
     public static final double INITIAL_QUALITY_CUTOFF = 0.5d;
