@@ -295,7 +295,7 @@ public class Airus {
         for(SimpleScores simpleScores: scores){
             for(ScoreType scoreType: ScoreType.values()){
                 for(FeatureScores featureScores: simpleScores.getFeatureScoresList()){
-                    if(featureScores.get(scoreType).isNaN()){
+                    if(featureScores.get(scoreType).isNaN()|| featureScores.get(scoreType).isInfinite()){
                         System.out.println("");
                     }
                 }

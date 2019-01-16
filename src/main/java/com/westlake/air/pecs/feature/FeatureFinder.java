@@ -9,6 +9,7 @@ import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.utils.ArrayUtil;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.util.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -193,7 +194,7 @@ public class FeatureFinder {
                 //离子峰
 //                Double[] rasteredInt = new Double[rightIndex - leftIndex + 1];
 //                System.arraycopy(intArray, leftIndex, rasteredInt, 0, rightIndex - leftIndex + 1);
-                Double[] rasteredInt = filteredCopy(intArray, leftIndex, rightIndex, 1.5 * intArray[maxSpectrumIndex]);
+                Double[] rasteredInt = filteredCopy(intArray, leftIndex, rightIndex, 1.5 * FastMath.max(FastMath.max(intArray[maxSpectrumIndex-1],intArray[maxSpectrumIndex]), intArray[maxSpectrumIndex+1]));
                 ionHullInt.put(cutInfo, rasteredInt);
                 //peakGroup强度
 //                Double ionIntTemp = MathUtil.sum(rasteredInt);
