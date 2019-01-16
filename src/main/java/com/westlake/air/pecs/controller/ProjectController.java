@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 
@@ -38,7 +39,6 @@ public class ProjectController extends BaseController {
 
     @Autowired
     ProjectService projectService;
-
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -85,6 +85,11 @@ public class ProjectController extends BaseController {
         model.addAttribute("ownerName", ownerName);
         model.addAttribute("name", name);
         model.addAttribute("description", description);
+
+        File file = new File(repository);
+        if(!file.exists()){
+            file.mkdirs();
+        }
 
         ProjectDO projectDO = new ProjectDO();
         projectDO.setName(name);

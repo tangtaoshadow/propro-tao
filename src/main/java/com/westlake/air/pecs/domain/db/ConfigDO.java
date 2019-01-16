@@ -3,7 +3,9 @@ package com.westlake.air.pecs.domain.db;
 import com.westlake.air.pecs.domain.BaseDO;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -17,4 +19,7 @@ public class ConfigDO extends BaseDO {
     Date createDate;
 
     Date lastModifiedDate;
+
+    List<String> repoUrls = new ArrayList<>();
+
 }

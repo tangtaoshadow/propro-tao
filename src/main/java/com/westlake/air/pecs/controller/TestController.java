@@ -79,7 +79,9 @@ public class TestController extends BaseController {
     @ResponseBody
     String test(Model model, RedirectAttributes redirectAttributes) {
 
-        File file = new File("\\\\172.16.13.114\\share\\syt");
+        File file = new File("\\\\172.16.13.114\\share\\propro\\SGS");
+        file.mkdirs();
+
         logger.info(file.exists()+"");
         return "success";
     }

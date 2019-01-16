@@ -174,6 +174,7 @@ public class ExperimentController extends BaseController {
 
             if (!file.exists()) {
                 errorInfo += ResultCode.FILE_NOT_EXISTED.getMessage() + ":" + exp.getFilePath() + "\r\n";
+                continue;
             }
 
             ExperimentDO experimentDO = new ExperimentDO();

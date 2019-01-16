@@ -47,7 +47,7 @@
                                 库文件类型
                             </label>
                             <input type="text" class="form-control m-input" id="type" name="type" th:value="${library?.type}">
-                            <span class="m-form__help">0:标准库,1:校准库</span>
+                            <span class="m-form__help">0:标准库,1:iRT库</span>
                         </div>
                         <div class="form-group m-form__group">
                             <label for="instrument">
@@ -73,7 +73,7 @@
                         </div>
                         <div class="form-group m-form__group">
                             <label>
-                                上传TSV格式文件(不上传代表不作修改,上传后会覆盖原有的数据)
+                                上传TSV或者TraML格式文件(不上传代表不作修改,上传后会覆盖原有的数据)
                             </label>
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" name="file" id="customFile">
