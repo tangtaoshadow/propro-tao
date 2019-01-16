@@ -9,6 +9,7 @@ import com.westlake.air.pecs.utils.MathUtil;
 import com.westlake.air.pecs.utils.ScoreUtil;
 import org.apache.commons.math3.util.FastMath;
 import org.springframework.stereotype.Component;
+import scala.collection.immutable.Stream;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,15 +65,15 @@ public class LibraryScorer {
         //需要的前置变量：dotprod, sum, 2sum
         if(scoreTypes == null || scoreTypes.contains(ScoreType.LibraryCorr.getTypeName())) {
             double expDeno = experiment2Sum - experimentSum * experimentSum / normedLibInt.size();
-            if (expDeno <= Constants.MIN_DOUBLE){
+            double libDeno = library2Sum - librarySum * librarySum / normedLibInt.size();
+            if (expDeno <= Constants.MIN_DOUBLE || libDeno <= Constants.MIN_DOUBLE){
                 scores.put(ScoreType.LibraryCorr, 0d);
             }else {
-                double libDeno = library2Sum - librarySum * librarySum / normedLibInt.size();
                 double pearsonR = dotprod - experimentSum * librarySum / normedLibInt.size();
                 pearsonR /= FastMath.sqrt(expDeno * libDeno);
-//                if(Double.isNaN(pearsonR)){
-//                    System.out.println("");
-//                }
+                if(Double.isNaN(pearsonR) || Double.isInfinite(pearsonR)){
+                    System.out.println("");
+                }
                 scores.put(ScoreType.LibraryCorr, pearsonR);
             }
 
