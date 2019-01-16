@@ -43,7 +43,7 @@ public class DecoyController extends BaseController {
         model.addAttribute("overlapList", result.getOverlapList());
         model.addAttribute("decoyList", result.getDecoyList());
         model.addAttribute("targetList", result.getTargetList());
-        return "/decoy/overview";
+        return "decoy/overview";
     }
 
     @RequestMapping(value = "/check")
@@ -52,13 +52,13 @@ public class DecoyController extends BaseController {
                  @RequestParam(value = "isDecoy", required = false) boolean isDecoy) {
         List<MzResult> result = fragmentFactory.check(id, 0.1, isDecoy);
         model.addAttribute("resultList", result.size() > 100 ? result.subList(0, 100) : result);
-        return "/decoy/check";
+        return "decoy/check";
     }
 
     @RequestMapping(value = "/manager")
     String manager(Model model) {
         model.addAttribute("libraries", getLibraryList(LibraryDO.TYPE_STANDARD));
-        return "/decoy/manager";
+        return "decoy/manager";
     }
 
     @RequestMapping(value = "/delete")
@@ -68,7 +68,7 @@ public class DecoyController extends BaseController {
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
         LibraryDO library = resultDO.getModel();
         libraryService.countAndUpdateForLibrary(library);
-        return "redirect:/library/detail/" + id;
+        return "redirect:library/detail/" + id;
     }
 
     @RequestMapping(value = "/generate")
@@ -102,6 +102,6 @@ public class DecoyController extends BaseController {
         LibraryDO library = resultDO.getModel();
         libraryService.countAndUpdateForLibrary(library);
 
-        return "redirect:/library/detail/" + id;
+        return "redirect:library/detail/" + id;
     }
 }

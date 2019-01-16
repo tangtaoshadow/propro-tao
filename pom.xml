@@ -14,8 +14,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.0.5.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <version>2.1.2.RELEASE</version>
     </parent>
 
     <properties>
@@ -201,11 +200,11 @@
             <version>0.1.12</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.dcache</groupId>
-            <artifactId>nfs4j-core</artifactId>
-            <version>0.17.2</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.dcache</groupId>-->
+            <!--<artifactId>nfs4j-core</artifactId>-->
+            <!--<version>0.17.2</version>-->
+        <!--</dependency>-->
     </dependencies>
 
 
@@ -230,12 +229,12 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <id>dcache-releases</id>
-            <name>dCache.ORG maven repository</name>
-            <url>https://download.dcache.org/nexus/content/repositories/releases</url>
-            <layout>default</layout>
-        </repository>
+        <!--<repository>-->
+            <!--<id>dcache-releases</id>-->
+            <!--<name>dCache.ORG maven repository</name>-->
+            <!--<url>https://download.dcache.org/nexus/content/repositories/releases</url>-->
+            <!--<layout>default</layout>-->
+        <!--</repository>-->
     </repositories>
 
     <build>

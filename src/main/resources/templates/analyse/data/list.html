@@ -88,7 +88,7 @@
                     <td th:text="${data.proteinName}"></td>
                     <td>
                         <a target="_Blank"
-                           th:href="|@{/peptide/list?libraryId=${overview?.libraryId}&peptideRef=${data.peptideRef}}|"
+                           th:href="@{/peptide/list(libraryId=${overview?.libraryId},peptideRef=${data.peptideRef})}"
                            th:text="${data.peptideRef}"></a>
                     </td>
                     <td th:if="${data.isDecoy}">
@@ -142,7 +142,7 @@
                                 th:onclick="|queryGroup('${data.id}', false, false)|">
                             查看组谱图
                         </button>
-                        <a th:if="${!data.isDecoy}" target="_blank" th:href="@{/analyse/consultation(dataId=${data.id}&allCutInfo=true})"
+                        <a th:if="${!data.isDecoy}" target="_blank" th:href="@{/analyse/consultation(dataId=${data.id},allCutInfo=true})"
                            class="btn btn-danger btn-sm">高级诊断</a>
                     </td>
                 </tr>
@@ -251,7 +251,7 @@
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <a th:href="@{/analyse/overview/delete/${overview?.id}}" class="btn btn-danger">删除</a>
+                            <a th:href="@{/analyse/overview/delete/{id}(id=${overview?.id})}" class="btn btn-danger">删除</a>
                         </div>
                     </div>
                 </form>

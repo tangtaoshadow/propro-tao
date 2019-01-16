@@ -63,6 +63,7 @@ public enum ResultCode implements Serializable {
     EXPERIMENT_MZXML_FILE_MUST_BE_CONVERTED_TO_AIRD_FORMAT_FILE_FIRST("EXPERIMENT_MZXML_FILE_MUST_BE_CONVERTED_TO_AIRD_FORMAT_FILE_FIRST","原始实验文件必须转换为Aird格式文件才可以进入下一步"),
     SWATH_INFORMATION_NOT_EXISTED("SWATH_INFORMATION_NOT_EXISTED","Swath的分块信息不存在,请确保Aird压缩过程正确"),
     IRT_FIRST("IRT_FIRST","请先对原始实验运行Irt计算"),
+    IRT_EXCEPTION("IRT_EXCEPTION","iRT失败"),
     AIRD_COMPRESSION_FIRST("AIRD_COMPRESSION_FIRST","请先对原始实验进行压缩处理"),
     /**
      * ******

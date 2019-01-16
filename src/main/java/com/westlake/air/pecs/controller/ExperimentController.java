@@ -7,13 +7,13 @@ import com.westlake.air.pecs.async.LumsTask;
 import com.westlake.air.pecs.compressor.AirdCompressor;
 import com.westlake.air.pecs.constants.*;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.params.Exp;
 import com.westlake.air.pecs.domain.params.ExpVO;
+import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.MzXMLParser;
@@ -26,7 +26,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -154,7 +153,7 @@ public class ExperimentController extends BaseController {
         taskService.insert(taskDO);
 
         experimentTask.saveExperimentTask(experimentDO, file, taskDO);
-        return "redirect:/task/detail/" + taskDO.getId();
+        return "redirect:task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/batchadd", method = {RequestMethod.POST})
@@ -203,7 +202,7 @@ public class ExperimentController extends BaseController {
         if (!errorInfo.isEmpty()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, errorInfo);
         }
-        return "redirect:/task/list?taskTemplate=" + TaskTemplate.UPLOAD_EXPERIMENT_FILE.getName();
+        return "redirect:task/list?taskTemplate=" + TaskTemplate.UPLOAD_EXPERIMENT_FILE.getName();
     }
 
     @RequestMapping(value = "/edit/{id}")
@@ -212,10 +211,10 @@ public class ExperimentController extends BaseController {
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/experiment/list";
+            return "redirect:experiment/list";
         } else {
             model.addAttribute("experiment", resultDO.getModel());
-            return "/experiment/edit";
+            return "experiment/edit";
         }
     }
 
@@ -233,10 +232,10 @@ public class ExperimentController extends BaseController {
             model.addAttribute("experiment", resultDO.getModel());
             model.addAttribute("ms1Count", ms1Count);
             model.addAttribute("ms2Count", ms2Count);
-            return "/experiment/detail";
+            return "experiment/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/experiment/list";
+            return "redirect:experiment/list";
         }
     }
 
@@ -260,7 +259,7 @@ public class ExperimentController extends BaseController {
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/experiment/list";
+            return "redirect:experiment/list";
         }
         ExperimentDO experimentDO = resultDO.getModel();
 
@@ -281,7 +280,7 @@ public class ExperimentController extends BaseController {
             model.addAttribute(ERROR_MSG, result.getMsgInfo());
             return "experiment/create";
         }
-        return "redirect:/experiment/list";
+        return "redirect:experiment/list";
 
     }
 
@@ -299,7 +298,7 @@ public class ExperimentController extends BaseController {
 
         redirectAttributes.addFlashAttribute("projectName", exp.getModel().getProjectName());
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
-        return "redirect:/experiment/list";
+        return "redirect:experiment/list";
 
     }
 
@@ -347,7 +346,7 @@ public class ExperimentController extends BaseController {
 
         ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
         if (expResult.isFailed()) {
-            return "/experiment/swath";
+            return "experiment/swath";
         }
 
         ExperimentDO exp = expResult.getModel();
@@ -365,7 +364,7 @@ public class ExperimentController extends BaseController {
         lumsParams.setSigmaSpacing(new SigmaSpacing(sigma, spacing));
 
         lumsTask.swath(lumsParams, taskDO);
-        return "redirect:/task/detail/" + taskDO.getId();
+        return "redirect:task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/extractor")
@@ -378,14 +377,14 @@ public class ExperimentController extends BaseController {
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OBJECT_NOT_EXISTED);
-            return "redirect:/experiment/list";
+            return "redirect:experiment/list";
         }
 
         model.addAttribute("libraries", getLibraryList(0));
         model.addAttribute("experiment", resultDO.getModel());
         model.addAttribute("scoreTypes", ScoreType.getShownTypes());
 
-        return "/experiment/extractor";
+        return "experiment/extractor";
     }
 
     @RequestMapping(value = "/doextract")
@@ -409,12 +408,12 @@ public class ExperimentController extends BaseController {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
-            return "redirect:/extractor?id=" + id;
+            return "redirect:extractor?id=" + id;
         }
 
         ResultDO<LibraryDO> libResult = libraryService.getById(libraryId);
         if (libResult.isFailed()) {
-            return "redirect:/extractor?id=" + id;
+            return "redirect:extractor?id=" + id;
         }
 
         HashSet<String> scoreTypes = new HashSet<>();
@@ -450,7 +449,7 @@ public class ExperimentController extends BaseController {
 
         experimentTask.extract(input, taskDO);
 
-        return "redirect:/task/detail/" + taskDO.getId();
+        return "redirect:task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/doextractone")
@@ -479,12 +478,12 @@ public class ExperimentController extends BaseController {
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OBJECT_NOT_EXISTED);
-            return "redirect:/experiment/list";
+            return "redirect:experiment/list";
         }
 
         model.addAttribute("libraries", getLibraryList(1));
         model.addAttribute("experiment", resultDO.getModel());
-        return "/experiment/irt";
+        return "experiment/irt";
     }
 
     @RequestMapping(value = "/doirt")
@@ -498,7 +497,7 @@ public class ExperimentController extends BaseController {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
-            return "redirect:/irt/" + id;
+            return "redirect:irt/" + id;
         }
 
         TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName() + ":" + iRtLibraryId);
@@ -507,7 +506,7 @@ public class ExperimentController extends BaseController {
         SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);
         experimentTask.convAndIrt(resultDO.getModel(), iRtLibraryId, mzExtractWindow, sigmaSpacing, taskDO);
 
-        return "redirect:/task/detail/" + taskDO.getId();
+        return "redirect:task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/getWindows")
@@ -542,13 +541,13 @@ public class ExperimentController extends BaseController {
         ResultDO<ExperimentDO> resultDO = experimentService.getById(expId);
         if (resultDO.isFailed()) {
             redirectAttributes.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
-            return "redirect:/experiment/list";
+            return "redirect:experiment/list";
         }
         ExperimentDO experimentDO = resultDO.getModel();
         TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
         taskService.insert(taskDO);
         experimentTask.compress(experimentDO, taskDO);
 
-        return "redirect:/task/detail/" + taskDO.getId();
+        return "redirect:task/detail/" + taskDO.getId();
     }
 }

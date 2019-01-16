@@ -57,13 +57,13 @@ public class ScanIndexController extends BaseController {
 
         if (experimentId == null || experimentId.isEmpty()) {
             model.addAttribute(ERROR_MSG, ResultCode.SCAN_INDEX_LIST_MUST_BE_QUERY_WITH_EXPERIMENT_ID.getMessage());
-            return "/scanindex/list";
+            return "scanindex/list";
         }
 
         ResultDO<ExperimentDO> expResult = experimentService.getById(experimentId);
         if (expResult.isFailed()) {
             model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
-            return "/scanindex/list";
+            return "scanindex/list";
         }
         model.addAttribute("experiment", expResult.getModel());
         ScanIndexQuery query = new ScanIndexQuery();
@@ -109,10 +109,10 @@ public class ScanIndexController extends BaseController {
         ResultDO<ScanIndexDO> resultDO = scanIndexService.getById(id);
         if (resultDO.isSuccess()) {
             model.addAttribute("scanIndex", resultDO.getModel());
-            return "/scanindex/detail";
+            return "scanindex/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/scanindex/list";
+            return "redirect:scanindex/list";
         }
     }
 }

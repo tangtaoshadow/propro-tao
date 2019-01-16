@@ -93,7 +93,7 @@ public class ScoreController extends BaseController {
         }
         if (overviewId == null) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_ID_CAN_NOT_BE_EMPTY.getMessage());
-            return "redirect:/analyse/overview/list";
+            return "redirect:analyse/overview/list";
         }
         query.setOverviewId(overviewId);
         query.setPageSize(30);
@@ -103,7 +103,7 @@ public class ScoreController extends BaseController {
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         if (overviewResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-            return "redirect:/analyse/overview/list";
+            return "redirect:analyse/overview/list";
         }
         model.addAttribute("overview", overviewResult.getModel());
         model.addAttribute("scores", resultDO.getModel());
@@ -140,7 +140,7 @@ public class ScoreController extends BaseController {
         query.setIsDecoy(false);
         if (overviewId == null) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_ID_CAN_NOT_BE_EMPTY.getMessage());
-            return "redirect:/analyse/overview/list";
+            return "redirect:analyse/overview/list";
         }
         query.setOverviewId(overviewId);
         query.setPageSize(pageSize);
@@ -154,7 +154,7 @@ public class ScoreController extends BaseController {
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         if (overviewResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-            return "redirect:/analyse/overview/list";
+            return "redirect:analyse/overview/list";
         }
         model.addAttribute("overview", overviewResult.getModel());
         model.addAttribute("dataList", resultDO.getModel());
@@ -200,6 +200,6 @@ public class ScoreController extends BaseController {
 
         airusTask.airus(overviewId, airusParams, taskDO);
 
-        return "redirect:/task/detail/" + taskDO.getId();
+        return "redirect:task/detail/" + taskDO.getId();
     }
 }

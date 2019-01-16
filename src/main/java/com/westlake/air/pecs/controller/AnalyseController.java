@@ -90,7 +90,7 @@ public class AnalyseController extends BaseController {
             ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
             if (expResult.isFailed()) {
                 model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED);
-                return "/analyse/overview/list";
+                return "analyse/overview/list";
             }
             model.addAttribute("experiment", expResult.getModel());
         }
@@ -108,7 +108,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("scores", ScoreType.getUsedTypes());
-        return "/analyse/overview/list";
+        return "analyse/overview/list";
     }
 
     @RequestMapping(value = "/overview/detail/{id}")
@@ -119,10 +119,10 @@ public class AnalyseController extends BaseController {
         if (resultDO.isSuccess()) {
             model.addAttribute("overview", resultDO.getModel());
             model.addAttribute("slopeIntercept", resultDO.getModel().getSlope() + "/" + resultDO.getModel().getIntercept());
-            return "/analyse/overview/detail";
+            return "analyse/overview/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/analyse/overview/list";
+            return "redirect:analyse/overview/list";
         }
     }
 
@@ -132,17 +132,17 @@ public class AnalyseController extends BaseController {
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(id);
         if (overviewResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
-            return "redirect:/analyse/overview/list";
+            return "redirect:analyse/overview/list";
         }
         ResultDO<ExperimentDO> experimentResult = experimentService.getById(overviewResult.getModel().getExpId());
         if (experimentResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED);
-            return "redirect:/analyse/overview/list";
+            return "redirect:analyse/overview/list";
         }
         ResultDO<ProjectDO> projectResult = projectService.getByName(experimentResult.getModel().getProjectName());
         if (projectResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED);
-            return "redirect:/analyse/overview/list";
+            return "redirect:analyse/overview/list";
         }
         String exportPath = projectResult.getModel().getExportPath();
 
@@ -180,7 +180,7 @@ public class AnalyseController extends BaseController {
             logger.info("打印第" + i + "/" + totalPage + "页,本页长度:" + l + ";");
         }
         os.close();
-        return "redirect:/analyse/overview/list";
+        return "redirect:analyse/overview/list";
 
     }
 
@@ -188,12 +188,12 @@ public class AnalyseController extends BaseController {
     String overviewDelete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         analyseOverviewService.deleteAll(id);
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
-        return "redirect:/analyse/overview/list";
+        return "redirect:analyse/overview/list";
     }
 
     @RequestMapping(value = "/overview/select")
     String overviewSelect(Model model, RedirectAttributes redirectAttributes) {
-        return "/analyse/overview/select";
+        return "analyse/overview/select";
     }
 
     @RequestMapping(value = "/overview/comparison")
@@ -228,14 +228,14 @@ public class AnalyseController extends BaseController {
                 redirectAttributes.addFlashAttribute(key, map.get(key));
                 redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.COMPARISON_OVERVIEW_IDS_MUST_BIGGER_THAN_TWO.getMessage());
             }
-            return "redirect:/analyse/overview/select";
+            return "redirect:analyse/overview/select";
         }
 
         ComparisonResult result = analyseOverviewService.comparison(overviewIds);
         model.addAttribute("samePeptides", result.getSamePeptides());
         model.addAttribute("diffPeptides", result.getDiffPeptides());
         model.addAttribute("identifiesMap", result.getIdentifiesMap());
-        return "/analyse/overview/comparison";
+        return "analyse/overview/comparison";
     }
 
     @RequestMapping(value = "/data/list")
@@ -277,7 +277,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalNum", resultDO.getTotalNum());
 
-        return "/analyse/data/list";
+        return "analyse/data/list";
     }
 
     @RequestMapping(value = "/overview/score")
@@ -293,7 +293,7 @@ public class AnalyseController extends BaseController {
         ResultDO<AnalyseOverviewDO> resultDO = analyseOverviewService.getById(overviewId);
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-            return "redirect:/analyse/overview/list";
+            return "redirect:analyse/overview/list";
         }
 
         AnalyseOverviewDO overviewDO = resultDO.getModel();
@@ -301,7 +301,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("slope", overviewDO.getSlope());
         model.addAttribute("intercept", overviewDO.getIntercept());
         model.addAttribute("scoreTypes", ScoreType.getShownTypes());
-        return "/analyse/overview/score";
+        return "analyse/overview/score";
     }
 
     @RequestMapping(value = "/overview/doscore")
@@ -330,7 +330,7 @@ public class AnalyseController extends BaseController {
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         if (overviewResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-            return "redirect:/analyse/overview/list";
+            return "redirect:analyse/overview/list";
         }
 
         AnalyseOverviewDO overviewDO = overviewResult.getModel();
@@ -339,7 +339,7 @@ public class AnalyseController extends BaseController {
         ResultDO<ExperimentDO> expResult = experimentService.getById(overviewDO.getExpId());
         if (expResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
-            return "redirect:/experiment/list";
+            return "redirect:experiment/list";
         }
 
         TaskDO taskDO = new TaskDO(TaskTemplate.SCORE, overviewDO.getName());
@@ -354,7 +354,7 @@ public class AnalyseController extends BaseController {
         }
 
         scoreTask.score(overviewId, expResult.getModel(), si, overviewDO.getLibraryId(), new SigmaSpacing(sigma, spacing), scoreTypes, taskDO);
-        return "redirect:/task/detail/" + taskDO.getId();
+        return "redirect:task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/view")
@@ -519,13 +519,13 @@ public class AnalyseController extends BaseController {
             ResultDO<AnalyseDataDO> dataResult = analyseDataService.getById(dataId);
             if (dataResult.isFailed()) {
                 model.addAttribute(ERROR_MSG, ResultCode.ANALYSE_DATA_NOT_EXISTED.getMessage());
-                return "/analyse/data/consultation";
+                return "analyse/data/consultation";
             }
             data = dataResult.getModel();
             overviewResult = analyseOverviewService.getById(data.getOverviewId());
             if (overviewResult.isFailed()) {
                 model.addAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-                return "/analyse/data/consultation";
+                return "analyse/data/consultation";
             }
             targetExpId = overviewResult.getModel().getExpId();
             targetLibraryId = overviewResult.getModel().getLibraryId();
@@ -539,28 +539,28 @@ public class AnalyseController extends BaseController {
             targetPeptideRef = peptideRef;
         } else {
             model.addAttribute(ERROR_MSG, ResultCode.PARAMS_NOT_ENOUGH.getMessage());
-            return "/analyse/data/consultation";
+            return "analyse/data/consultation";
         }
 
         //检测原始实验是否已经被转化为Aird压缩文件,是否执行了IRT计算
         experimentResult = experimentService.getById(targetExpId);
         if (experimentResult.isFailed()) {
             model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
-            return "/analyse/data/consultation";
+            return "analyse/data/consultation";
         }
         if (experimentResult.getModel().getSlope() == null || experimentResult.getModel().getIntercept() == null) {
             model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
-            return "/analyse/data/consultation";
+            return "analyse/data/consultation";
         }
         if (experimentResult.getModel().getAirdPath() == null || experimentResult.getModel().getAirdPath().isEmpty()) {
             model.addAttribute(ERROR_MSG, ResultCode.AIRD_COMPRESSION_FIRST.getMessage());
-            return "/analyse/data/consultation";
+            return "analyse/data/consultation";
         }
 
         libraryResult = libraryService.getById(targetLibraryId);
         if (libraryResult.isFailed()) {
             model.addAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED.getMessage());
-            return "/analyse/data/consultation";
+            return "analyse/data/consultation";
         }
 
         //覆盖之前的参数
@@ -590,7 +590,7 @@ public class AnalyseController extends BaseController {
             HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, limitLength);
             if (bySeriesMap == null) {
                 model.addAttribute(ERROR_MSG, ResultCode.FRAGMENT_LENGTH_IS_TOO_LONG.getMessage());
-                return "/analyse/data/consultation";
+                return "analyse/data/consultation";
             }
             if (noUseForLib) {
                 peptide.getFragmentMap().clear();
@@ -606,7 +606,7 @@ public class AnalyseController extends BaseController {
         ResultDO<AnalyseDataDO> dataRealResult = experimentService.extractOne(experimentDO, peptide, rtExtractWindow, mzExtractWindow);
         if (dataRealResult.isFailed()) {
             model.addAttribute(ERROR_MSG, ResultCode.CONVOLUTION_DATA_NOT_EXISTED.getMessage());
-            return "/analyse/data/consultation";
+            return "analyse/data/consultation";
         }
         AnalyseDataDO newDataDO = dataRealResult.getModel();
         HashMap<String, Float> mzMap = newDataDO.getMzMap();
@@ -671,7 +671,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("intensitiesList", intensitiesList);
         model.addAttribute("totalCutInfos", totalCutInfoList);
 
-        return "/analyse/data/consultation";
+        return "analyse/data/consultation";
     }
 
     @RequestMapping(value = "/viewMultiGroup")

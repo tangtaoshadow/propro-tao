@@ -128,7 +128,7 @@ public class LibraryController extends BaseController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "redirect:/task/detail/" + taskDO.getId();
+        return "redirect:task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/aggregate/{id}")
@@ -137,13 +137,13 @@ public class LibraryController extends BaseController {
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/library/list";
+            return "redirect:library/list";
         }
 
         LibraryDO library = resultDO.getModel();
         libraryService.countAndUpdateForLibrary(library);
 
-        return "redirect:/library/detail/" + library.getId();
+        return "redirect:library/detail/" + library.getId();
     }
 
     @RequestMapping(value = "/edit/{id}")
@@ -151,10 +151,10 @@ public class LibraryController extends BaseController {
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/library/list";
+            return "redirect:library/list";
         } else {
             model.addAttribute("library", resultDO.getModel());
-            return "/library/edit";
+            return "library/edit";
         }
     }
 
@@ -171,10 +171,10 @@ public class LibraryController extends BaseController {
                 }
             }
             model.addAttribute("library", resultDO.getModel());
-            return "/library/detail";
+            return "library/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/library/listStandard";
+            return "redirect:library/listStandard";
         }
     }
 
@@ -191,9 +191,9 @@ public class LibraryController extends BaseController {
 
         String redirectListUrl = null;
         if (type == 1) {
-            redirectListUrl = "redirect:/library/listIrt";
+            redirectListUrl = "redirect:library/listIrt";
         } else {
-            redirectListUrl = "redirect:/library/listStandard";
+            redirectListUrl = "redirect:library/listStandard";
         }
 
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
@@ -214,7 +214,7 @@ public class LibraryController extends BaseController {
 
         //如果没有更新源文件,那么直接返回标准库详情页面
         if (file == null || file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
-            return "redirect:/library/detail/" + library.getId();
+            return "redirect:library/detail/" + library.getId();
         }
 
         TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_LIBRARY_FILE, library.getName());
@@ -226,7 +226,7 @@ public class LibraryController extends BaseController {
             e.printStackTrace();
         }
 
-        return "redirect:/task/detail/" + taskDO.getId();
+        return "redirect:task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/delete/{id}")
@@ -237,9 +237,9 @@ public class LibraryController extends BaseController {
 
         String redirectListUrl = null;
         if (type == 1) {
-            redirectListUrl = "redirect:/library/listIrt";
+            redirectListUrl = "redirect:library/listIrt";
         } else {
-            redirectListUrl = "redirect:/library/listStandard";
+            redirectListUrl = "redirect:library/listStandard";
         }
         peptideService.deleteAllByLibraryId(id);
         if (resultDO.isSuccess()) {

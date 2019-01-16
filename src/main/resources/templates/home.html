@@ -27,12 +27,13 @@
                             <div class="m-widget2">
                                 <div th:each="exp:${exps}" class="m-widget2__item m-widget2__item--warning">
                                     <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/experiment/detail/${exp.id}'|">
-                                        <span class="m-widget2__text" th:text="${exp.name}">
+                                    <div class="m-widget2__desc">
+                                        <span class="m-widget2__text">
+                                            <a th:href="@{/experiment/detail/{id}(id=${exp?.id})}" class="m-widget2__link" th:text="${exp?.name}"></a>
                                         </span>
                                         <br>
                                         <span class="m-widget2__user-name">
-										    <a href="#" class="m-widget2__link" th:text="|${exp.creator}-${#dates.format(exp.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
+										    <a class="m-widget2__link" th:text="|${exp?.creator}-${#dates.format(exp?.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
                                         </span>
                                     </div>
                                 </div>
@@ -51,11 +52,13 @@
                             <div class="m-widget2">
                                 <div th:each="overview:${overviews}" class="m-widget2__item m-widget2__item--accent">
                                     <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/analyse/overview/detail/${overview.id}'|">
-                                        <span class="m-widget2__text" th:text="${overview.name}"></span>
+                                    <div class="m-widget2__desc">
+                                        <span class="m-widget2__text">
+                                            <a th:href="@{/analyse/overview/detail/{id}(id=${overview?.id})}" class="m-widget2__link" th:text="${overview?.name}"></a>
+                                        </span>
                                         <br>
                                         <span class="m-widget2__user-name">
-										    <a href="#" class="m-widget2__link" th:text="|${overview.creator}-${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
+										    <a class="m-widget2__link" th:text="|${overview?.creator}-${#dates.format(overview?.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
                                         </span>
                                     </div>
                                 </div>
@@ -74,11 +77,13 @@
                             <div class="m-widget2">
                                 <div th:each="lib:${libs}" class="m-widget2__item m-widget2__item--info">
                                     <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/library/detail/${lib.id}'|">
-                                        <span class="m-widget2__text" th:text="${lib.name}"></span>
+                                    <div class="m-widget2__desc">
+                                        <span class="m-widget2__text">
+                                            <a th:href="@{/library/detail/{id}(id=${lib?.id})}" th:text="${lib?.name}" class="m-widget2__link"></a>
+                                        </span>
                                         <br>
                                         <span class="m-widget2__user-name">
-										    <a href="#" class="m-widget2__link" th:text="|${lib.creator}-${#dates.format(lib.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
+										    <a th:href="@{/library/detail/{id}(id=${lib?.id})}" class="m-widget2__link" th:text="|${lib?.creator}-${#dates.format(lib?.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
                                         </span>
                                     </div>
                                 </div>
@@ -100,11 +105,13 @@
                             <div class="m-widget2">
                                 <div th:each="task:${tasks}" class="m-widget2__item m-widget2__item--success">
                                     <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/task/detail/${task.id}'|">
-                                        <span class="m-widget2__text" th:text="${task.name}"></span>
+                                    <div class="m-widget2__desc">
+                                        <span class="m-widget2__text">
+                                            <a th:href="@{/task/detail/{id}(id=${task.id})}" th:text="${task?.name}" class="m-widget2__link"></a>
+                                        </span>
                                         <br>
                                         <span class="m-widget2__user-name">
-										    <a href="#" class="m-widget2__link" th:text="|${task.creator}-${#dates.format(task.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
+										    <a th:href="@{/task/detail/{id}(id=${task.id})}" class="m-widget2__link" th:text="|${task?.creator}-${#dates.format(task?.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
                                         </span>
                                     </div>
                                 </div>
@@ -124,12 +131,13 @@
                             <div class="m-widget2">
                                 <div th:each="project:${projects}" class="m-widget2__item m-widget2__item--warning">
                                     <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/experiment/list?projectName=${project.name}'|">
-                                        <span class="m-widget2__text" th:text="${project.name}">
+                                    <div class="m-widget2__desc">
+                                        <span class="m-widget2__text">
+                                            <a th:href="@{/experiment/list(projectName=${project.name})}" class="m-widget2__link" th:text="${project?.name}"></a>
                                         </span>
                                         <br>
                                         <span class="m-widget2__user-name">
-										    <a href="#" class="m-widget2__link" th:text="|${project.ownerName}-${#dates.format(project.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
+										    <a th:href="@{/experiment/list(projectName=${project.name})}" class="m-widget2__link" th:text="|${project?.ownerName}-${#dates.format(project?.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
                                         </span>
                                     </div>
                                 </div>

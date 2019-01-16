@@ -432,7 +432,9 @@ public class ExperimentServiceImpl implements ExperimentService {
             logger.info("开始卷积数据");
             long start = System.currentTimeMillis();
             List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
-
+            if(dataList == null){
+                return ResultDO.buildError(ResultCode.IRT_EXCEPTION);
+            }
             logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
             start = System.currentTimeMillis();
             ResultDO resultDO = scoreService.computeIRt(dataList, iRtLibraryId, sigmaSpacing);
