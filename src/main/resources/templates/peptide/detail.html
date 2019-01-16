@@ -64,7 +64,7 @@
                                         <input type="text" class="form-control m-input" id="libraryId" name="libraryId"
                                                readonly th:value="${peptide?.libraryId}"/>
                                         <span class="m-form__help">
-                                            <a th:href="|/library/detail/${peptide?.libraryId}|">点击查看</a>
+                                            <a th:href="|@{/library/detail/${peptide?.libraryId}}|">点击查看</a>
                                         </span>
                                     </div>
                                 </div>
@@ -199,8 +199,8 @@
                             </div>
                             <!--<div class="m-portlet__foot m-portlet__foot&#45;&#45;fit">-->
                             <!--<div class="m-form__actions">-->
-                            <!--<a th:href="|/library/edit/${library?.id}|" class="btn btn-primary">修改</a>-->
-                            <!--<a th:href="|/library/delete/${library?.id}|" class="btn btn-danger">删除</a>-->
+                            <!--<a th:href="|@{/library/edit/${library?.id}}|" class="btn btn-primary">修改</a>-->
+                            <!--<a th:href="|@{/library/delete/${library?.id}}|" class="btn btn-danger">删除</a>-->
                             <!--</div>-->
                             <!--</div>-->
                         </form>
@@ -221,7 +221,7 @@
                             </div>
                         </div>
                         <div class="m-portlet__body">
-                            <a th:href="|/transition/createdecoy/${transition?.id}|" class="btn btn-warning">生成伪肽段</a>
+                            <a th:href="@{/transition/createdecoy/${transition?.id}}" class="btn btn-warning">生成伪肽段</a>
                         </div>
                     </div>
                 </div>

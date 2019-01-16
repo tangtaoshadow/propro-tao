@@ -4,12 +4,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.westlake.air</groupId>
-    <artifactId>pecs</artifactId>
+    <artifactId>propro</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>PECS</name>
-    <description>Proteomics Elastic Compute Service</description>
+    <name>propro</name>
+    <description>Proteomics Pro</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -239,13 +239,24 @@
     </repositories>
 
     <build>
+        <finalName>propro</finalName>
+        <!--<resources>-->
+            <!--<resource>-->
+                <!--<directory>src/main/resources</directory>-->
+                <!--<includes>-->
+                    <!--<include>**/**</include>-->
+                <!--</includes>-->
+            <!--</resource>-->
+        <!--</resources>-->
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
+
     </build>
+
 
 
 </project>

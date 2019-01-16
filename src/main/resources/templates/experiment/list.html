@@ -4,7 +4,7 @@
 <!-- begin::Head -->
 <head>
     <title>欢迎登陆西湖大学PECS分析平台</title>
-    <link th:href="@{/assets/css/pagination.css}" rel="stylesheet" type="text/css" />
+    <link th:href="@{/assets/css/pagination.css}" rel="stylesheet" type="text/css"/>
 
 </head>
 <!-- end::Head -->
@@ -17,7 +17,9 @@
     <div class="m-portlet__body">
         <!--begin: Search Form -->
         <div class="clearfix">
-            <form id="searchForm" method="post" role="form" class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed" th:action="@{/experiment/list}">
+            <form id="searchForm" method="post" role="form"
+                  class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
+                  th:action="@{/experiment/list}">
                 <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                 <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
 
@@ -120,29 +122,28 @@
                     <td th:text="${#dates.format(experiment.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(experiment.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
-                        <a th:href="|/experiment/edit/${experiment.id}|"
+                        <a th:href="@{'/experiment/edit/' + ${experiment.id}}"
                            class="btn btn-primary btn-sm">编辑
                         </a>
-                        <a th:href="|/experiment/detail/${experiment.id}|"
+                        <a th:href="@{'/experiment/detail/' + ${experiment.id}}"
                            class="btn btn-success btn-sm">详情
                         </a>
-                        <a th:href="|/experiment/extractor?id=${experiment.id}|"
+                        <a th:href="@{/experiment/extractor(id=${experiment.id})}"
                            class="btn btn-brand btn-sm">开始卷积
                         </a>
-                        <!--<a th:href="|/experiment/extractor?id=${experiment.id}&|"-->
-                           <!--class="btn btn-default btn-sm">一条龙卷积-->
+                        <!--<a th:href="|@{/experiment/extractor?id=${experiment.id}}|"-->
+                        <!--class="btn btn-default btn-sm">一条龙卷积-->
                         <!--</a>-->
-                        <a th:href="|/experiment/irt?id=${experiment.id}|"
+                        <a th:href="@{/experiment/irt(id=${experiment.id})}"
                            class="btn btn-accent btn-sm">计算IRT
                         </a>
-                        <a th:href="|/scanindex/list?experimentId=${experiment.id}|"
+                        <a th:href="@{/scanindex/list(experimentId=${experiment.id})}"
                            class="btn btn-info btn-sm">原始索引
                         </a>
-                        <a th:href="|/experiment/compress?expId=${experiment.id}|"
+                        <a th:href="@{/experiment/compress(expId=${experiment.id})}"
                            class="btn btn-danger btn-sm">Aird压缩
                         </a>
-
-                        <a th:href="|/analyse/overview/list?expId=${experiment.id}|"
+                        <a th:href="@{/analyse/overview/list(expId=${experiment.id})}"
                            class="btn btn-warning btn-sm">查看卷积实验
                         </a>
                     </td>

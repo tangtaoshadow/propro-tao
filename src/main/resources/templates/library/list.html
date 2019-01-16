@@ -75,10 +75,10 @@
                     <td th:text="${#dates.format(library.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(library.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
-                        <a th:href="|/library/edit/${library.id}|" class="btn btn-primary btn-sm">编辑</a>
-                        <a th:href="|/library/detail/${library.id}|" class="btn btn-success btn-sm">详情</a>
-                        <a th:href="|/peptide/list?libraryId=${library.id}|" class="btn btn-info btn-sm">肽段列表</a>
-                        <a th:href="|/peptide/protein?libraryId=${library.id}|" class="btn btn-success btn-sm">蛋白列表</a>
+                        <a th:href="@{/library/edit/${library.id}}" class="btn btn-primary btn-sm">编辑</a>
+                        <a th:href="@{/library/detail/${library.id}}" class="btn btn-success btn-sm">详情</a>
+                        <a th:href="@{/peptide/list(libraryId=${library.id})}" class="btn btn-info btn-sm">肽段列表</a>
+                        <a th:href="@{/peptide/protein(libraryId=${library.id})}" class="btn btn-success btn-sm">蛋白列表</a>
                     </td>
                 </tr>
                 </tbody>
