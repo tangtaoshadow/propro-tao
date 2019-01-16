@@ -122,7 +122,7 @@ public class AnalyseController extends BaseController {
             return "analyse/overview/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:analyse/overview/list";
+            return "redirect:/analyse/overview/list";
         }
     }
 
@@ -132,17 +132,17 @@ public class AnalyseController extends BaseController {
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(id);
         if (overviewResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
-            return "redirect:analyse/overview/list";
+            return "redirect:/analyse/overview/list";
         }
         ResultDO<ExperimentDO> experimentResult = experimentService.getById(overviewResult.getModel().getExpId());
         if (experimentResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED);
-            return "redirect:analyse/overview/list";
+            return "redirect:/analyse/overview/list";
         }
         ResultDO<ProjectDO> projectResult = projectService.getByName(experimentResult.getModel().getProjectName());
         if (projectResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED);
-            return "redirect:analyse/overview/list";
+            return "redirect:/analyse/overview/list";
         }
         String exportPath = projectResult.getModel().getExportPath();
 
@@ -180,7 +180,7 @@ public class AnalyseController extends BaseController {
             logger.info("打印第" + i + "/" + totalPage + "页,本页长度:" + l + ";");
         }
         os.close();
-        return "redirect:analyse/overview/list";
+        return "redirect:/analyse/overview/list";
 
     }
 
@@ -188,7 +188,7 @@ public class AnalyseController extends BaseController {
     String overviewDelete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         analyseOverviewService.deleteAll(id);
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
-        return "redirect:analyse/overview/list";
+        return "redirect:/analyse/overview/list";
     }
 
     @RequestMapping(value = "/overview/select")
@@ -228,7 +228,7 @@ public class AnalyseController extends BaseController {
                 redirectAttributes.addFlashAttribute(key, map.get(key));
                 redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.COMPARISON_OVERVIEW_IDS_MUST_BIGGER_THAN_TWO.getMessage());
             }
-            return "redirect:analyse/overview/select";
+            return "redirect:/analyse/overview/select";
         }
 
         ComparisonResult result = analyseOverviewService.comparison(overviewIds);
@@ -293,7 +293,7 @@ public class AnalyseController extends BaseController {
         ResultDO<AnalyseOverviewDO> resultDO = analyseOverviewService.getById(overviewId);
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-            return "redirect:analyse/overview/list";
+            return "redirect:/analyse/overview/list";
         }
 
         AnalyseOverviewDO overviewDO = resultDO.getModel();
@@ -330,7 +330,7 @@ public class AnalyseController extends BaseController {
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         if (overviewResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-            return "redirect:analyse/overview/list";
+            return "redirect:/analyse/overview/list";
         }
 
         AnalyseOverviewDO overviewDO = overviewResult.getModel();
@@ -339,7 +339,7 @@ public class AnalyseController extends BaseController {
         ResultDO<ExperimentDO> expResult = experimentService.getById(overviewDO.getExpId());
         if (expResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
-            return "redirect:experiment/list";
+            return "redirect:/experiment/list";
         }
 
         TaskDO taskDO = new TaskDO(TaskTemplate.SCORE, overviewDO.getName());
@@ -354,7 +354,7 @@ public class AnalyseController extends BaseController {
         }
 
         scoreTask.score(overviewId, expResult.getModel(), si, overviewDO.getLibraryId(), new SigmaSpacing(sigma, spacing), scoreTypes, taskDO);
-        return "redirect:task/detail/" + taskDO.getId();
+        return "redirect:/task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/view")

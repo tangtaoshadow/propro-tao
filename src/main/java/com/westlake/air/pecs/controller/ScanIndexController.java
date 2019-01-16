@@ -112,7 +112,7 @@ public class ScanIndexController extends BaseController {
             return "scanindex/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:scanindex/list";
+            return "redirect:/scanindex/list";
         }
     }
 }

@@ -59,8 +59,8 @@
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <a th:href="@{/library/aggregate/${library?.id}}" class="btn btn-warning">重新计算蛋白质,肽段数目</a>
-                            <a th:href="@{/decoy/overview/${library?.id}}" class="btn btn-primary">进行伪肽段覆盖率诊断</a>
+                            <a th:href="@{/library/aggregate/{id}(id=${library?.id})}" class="btn btn-warning">重新计算蛋白质,肽段数目</a>
+                            <a th:href="@{/decoy/overview/{id}(id=${library?.id})}" class="btn btn-primary">进行伪肽段覆盖率诊断</a>
                             <a th:href="@{/decoy/check(id=${library?.id},isDecoy=true)}" class="btn btn-success">检测伪肽段MZ计算误差</a>
                             <a th:href="@{/decoy/check(id=${library?.id},isDecoy=false)}" class="btn btn-info">检测真实肽段MZ计算误差</a>
                             <a th:href="@{/decoy/generate(id=${library?.id})}" class="btn btn-success">生成伪肽段</a>

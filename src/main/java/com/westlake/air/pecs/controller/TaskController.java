@@ -74,7 +74,7 @@ public class TaskController extends BaseController {
                   @RequestParam(value = "templateName", required = true) String templateName) {
         TaskTemplate template = TaskTemplate.getByName(templateName);
         if (template != null) {
-            return "redirect:" + template.getPagePath();
+            return "redirect:/" + template.getPagePath();
         } else {
             return "home";
         }
@@ -112,6 +112,6 @@ public class TaskController extends BaseController {
     @RequestMapping(value = "/delete/{id}")
     String delete(Model model, @PathVariable("id") String id) {
         taskService.delete(id);
-        return "redirect:task/list";
+        return "redirect:/task/list";
     }
 }

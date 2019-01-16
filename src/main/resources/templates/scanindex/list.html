@@ -132,7 +132,7 @@
                 <tr th:each="scanIndex,status:${scanIndexList}">
                     <td th:text="${status.index+1}"></td>
                     <td>
-                        <a th:href="|@{/experiment/detail/${scanIndex.experimentId}}|"
+                        <a th:href="@{/experiment/detail/{id}(id=${scanIndex.experimentId})}"
                            th:text="${experiment.name}"></a>
                     </td>
                     <td th:text="${scanIndex.parentNum}"></td>
@@ -147,17 +147,17 @@
                     <td th:text="|${scanIndex.precursorMzStart}/${scanIndex.precursorMzEnd}|">
                     <td th:text="|${scanIndex.originalWindowWideness}/${scanIndex.windowWideness}|"></td>
                     <td>
-                        <a th:href="@{/scanindex/detail/${scanIndex.id}}"
+                        <a th:href="@{/scanindex/detail/{id}(id=${scanIndex.id})}"
                            class="btn btn-success btn-sm">详情
                         </a>
                         <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
-                                data-target="#m_modal_spectrum"
-                                th:onclick="|query('${scanIndex.id}','${experiment.id}','aird')|">
+                                data-target="#m_modal_spectrum" th:data1="${scanIndex.id}" th:data2="${experiment.id}"
+                                th:onclick="query(this.getAttribute('data1'),this.getAttribute('data2'),'aird')">
                             Aird谱图
                         </button>
                         <button type="button" class="btn btn-sm btn-brand" data-toggle="modal"
-                                data-target="#m_modal_spectrum"
-                                th:onclick="|query('${scanIndex.id}','${experiment.id}','mzxml')|">
+                                data-target="#m_modal_spectrum" th:data1="${scanIndex.id}" th:data2="${experiment.id}"
+                                th:onclick="query(query(this.getAttribute('data1'),this.getAttribute('data2'),'mzxml')">
                             MzXML谱图
                         </button>
                     </td>

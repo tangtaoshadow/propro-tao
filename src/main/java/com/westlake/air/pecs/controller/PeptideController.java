@@ -128,7 +128,7 @@ public class PeptideController extends BaseController {
             return "peptide/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:peptide/list";
+            return "redirect:/peptide/list";
         }
     }
 
@@ -138,7 +138,7 @@ public class PeptideController extends BaseController {
 
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:peptide/list";
+            return "redirect:/peptide/list";
         }
 
         PeptideDO peptideDO = shuffleGenerator.generate(resultDO.getModel());

@@ -104,12 +104,12 @@
                     <td th:text="${overview.creator}"></td>
                     <td th:text="${overview?.note}"></td>
                     <td>
-                        <a th:href="@{/analyse/overview/detail/${overview.id}}" class="btn btn-success btn-sm">查看分析报告</a>
+                        <a th:href="@{/analyse/overview/detail/{id}(id=${overview?.id})}" class="btn btn-success btn-sm">查看分析报告</a>
                         <a th:href="@{/score/report(overviewId=${overview.id})}" class="btn btn-success btn-sm">审核鉴定结果</a>
                         <a th:href="@{/analyse/data/list(overviewId=${overview.id})}"
                            class="btn btn-info btn-sm">查看卷积数据</a>
                         <a th:href="@{/score/list(overviewId=${overview.id},isDecoy=No)}" class="btn btn-brand btn-sm">查看子分数</a>
-                        <a th:href="@{/analyse/overview/export/${overview.id}}" class="btn btn-warning btn-sm">导出已鉴定肽段</a>
+                        <a th:href="@{/analyse/overview/export/{id}(id=${overview?.id})}" class="btn btn-warning btn-sm">导出已鉴定肽段</a>
                         <div class="btn-group dropright" role="group">
                             <button id="scoresBtnGroup" type="button" class="btn btn-sm dropdown-toggle"
                                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -117,7 +117,7 @@
                             </button>
                             <div class="dropdown-menu" aria-labelledby="scoresBtn">
                                 <!--<a class="dropdown-item" th:href="|@{/analyse/overview/score?overviewId=${overview.id}}|">开始子分数打分</a>-->
-                                <a class="dropdown-item" th:href="@{/score/airus(overviewId=${overview.id},classifier=lda})">LDA合并打分</a>
+                                <a class="dropdown-item" th:href="@{/score/airus(overviewId=${overview.id},classifier=lda)}">LDA合并打分</a>
                                 <!--<a class="dropdown-item" th:href="|@{/score/airus?overviewId=${overview.id},classifier=xgboost}|">XGBoost合并打分</a>-->
                                 <a class="dropdown-item" onclick="alert('暂时未开放!')">XGBoost合并打分</a>
                             </div>

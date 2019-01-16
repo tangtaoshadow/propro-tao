@@ -68,7 +68,7 @@ public class DecoyController extends BaseController {
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
         LibraryDO library = resultDO.getModel();
         libraryService.countAndUpdateForLibrary(library);
-        return "redirect:library/detail/" + id;
+        return "redirect:/library/detail/" + id;
     }
 
     @RequestMapping(value = "/generate")
@@ -102,6 +102,6 @@ public class DecoyController extends BaseController {
         LibraryDO library = resultDO.getModel();
         libraryService.countAndUpdateForLibrary(library);
 
-        return "redirect:library/detail/" + id;
+        return "redirect:/library/detail/" + id;
     }
 }

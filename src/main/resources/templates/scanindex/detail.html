@@ -60,7 +60,7 @@
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="experimentId" name="experimentId" readonly th:value="${scanIndex?.experimentId}"/>
                                         <span class="m-form__help">
-                                            <a th:href="@{/experiment/detail/${scanIndex?.experimentId}}">点击查看</a>
+                                            <a th:href="@{/experiment/detail/{id}(id=${scanIndex?.experimentId})}">点击查看</a>
                                         </span>
                                     </div>
                                 </div>

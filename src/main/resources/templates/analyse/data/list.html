@@ -126,8 +126,8 @@
                                 <td th:text="${data.mzMap.get(cutInfo)}"></td>
                                 <td>
                                     <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
-                                            data-target="#m_modal_target"
-                                            th:onclick="|query('${data.id}','${cutInfo}')|">
+                                            data-target="#m_modal_target" th:data1="${data.id}" th:data2="${cutInfo}"
+                                            th:onclick="query(this.getAttribute('data1'),this.getAttribute('data2'))">
                                         查看谱图
                                     </button>
                                 </td>
@@ -138,11 +138,11 @@
 
                     <td>
                         <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
-                                data-target="#m_modal_group"
-                                th:onclick="|queryGroup('${data.id}', false, false)|">
+                                data-target="#m_modal_group" th:data1="${data.id}"
+                                th:onclick="queryGroup(this.getAttribute('data1'), false, false)">
                             查看组谱图
                         </button>
-                        <a th:if="${!data.isDecoy}" target="_blank" th:href="@{/analyse/consultation(dataId=${data.id},allCutInfo=true})"
+                        <a th:if="${!data.isDecoy}" target="_blank" th:href="@{/analyse/consultation(dataId=${data.id},allCutInfo=true)}"
                            class="btn btn-danger btn-sm">高级诊断</a>
                     </td>
                 </tr>
@@ -284,19 +284,19 @@
                     <div class="modal-header">
                         <h5 class="modal-title">
                             <button type="button" class="btn btn-sm btn-warning"
-                                    th:onclick="|queryGroup(null,true,false)|">
+                                    th:onclick="queryGroup(null,true,false)">
                                 高斯平滑
                             </button>
                             <button type="button" class="btn btn-sm btn-info"
-                                    th:onclick="|queryGroup(null,true, true)|">
+                                    th:onclick="queryGroup(null,true, true)">
                                 平滑去噪
                             </button>
                             <button type="button" class="btn btn-sm btn-brand"
-                                    th:onclick="|queryGroup(null,false, false)|">
+                                    th:onclick="queryGroup(null,false, false)">
                                 原始数据
                             </button>
                             <button type="button" class="btn btn-sm btn-accent"
-                                    th:onclick="|queryGroup(null,false, true)|">
+                                    th:onclick="queryGroup(null,false, true)">
                                 原始去噪
                             </button>
                             <span class="m-badge m-badge--success m-badge--wide" id="peptideLabel">

@@ -44,8 +44,8 @@
                 </td>
                 <td>
                     <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
-                            data-target="#m_modal_group"
-                            th:onclick="|queryMultiGroup('${peptide.peptideRef}',false,false)|">
+                            data-target="#m_modal_group" th:data1="${peptide.peptideRef}"
+                            th:onclick="queryMultiGroup(this.getAttribute('data1'),false,false)">
                         查看谱图
                     </button>
                 </td>
@@ -61,19 +61,19 @@
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <button type="button" class="btn btn-sm btn-warning"
-                                th:onclick="|queryMultiGroup(null,true,false)|">
+                                th:onclick="queryMultiGroup(null,true,false)">
                             高斯平滑
                         </button>
                         <button type="button" class="btn btn-sm btn-info"
-                                th:onclick="|queryMultiGroup(null,true,true)|">
+                                th:onclick="queryMultiGroup(null,true,true)">
                             平滑去噪
                         </button>
                         <button type="button" class="btn btn-sm btn-brand"
-                                th:onclick="|queryMultiGroup(null,false,false)|">
+                                th:onclick="queryMultiGroup(null,false,false)">
                             原始数据
                         </button>
                         <button type="button" class="btn btn-sm btn-accent"
-                                th:onclick="|queryMultiGroup(null,false,true)|">
+                                th:onclick="queryMultiGroup(null,false,true)">
                             原始去噪
                         </button>
                         <span class="m-badge m-badge--success m-badge--wide" id="peptideLabel">

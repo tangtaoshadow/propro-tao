@@ -116,7 +116,7 @@
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <a th:href="@{/analyse/overview/delete/${overview?.id}}" class="btn btn-danger">删除</a>
+                            <a th:href="@{/analyse/overview/delete/{id}(id=${overview?.id})}" class="btn btn-danger">删除</a>
                         </div>
                     </div>
                 </form>

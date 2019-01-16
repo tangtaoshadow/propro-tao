@@ -52,7 +52,7 @@
                             <tr th:each="protein,status:${proteins}">
                                 <td th:text="${status.index+1}"></td>
                                 <td>
-                                    <a th:href="@{/peptide/detail/${protein.peptideId}}" th:text="${protein.peptideId}"></a>
+                                    <a th:href="@{/peptide/detail/{id}(id=${protein.peptideId})}" th:text="${protein.peptideId}"></a>
                                 </td>
                                 <td th:text="${protein.libraryId}"></td>
                                 <td th:text="${protein.libraryName}"></td>

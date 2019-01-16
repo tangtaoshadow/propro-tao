@@ -103,7 +103,7 @@ public class ProjectController extends BaseController {
             return "project/create";
         }
 
-        return "redirect:project/list";
+        return "redirect:/project/list";
     }
 
     @RequestMapping(value = "/edit/{id}")
@@ -112,7 +112,7 @@ public class ProjectController extends BaseController {
         ResultDO<ProjectDO> resultDO = projectService.getById(id);
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:project/list";
+            return "redirect:/project/list";
         } else {
             model.addAttribute("project", resultDO.getModel());
             return "project/edit";
@@ -123,7 +123,7 @@ public class ProjectController extends BaseController {
     String delete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         projectService.delete(id);
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
-        return "redirect:project/list";
+        return "redirect:/project/list";
     }
 
     @RequestMapping(value = "/aird/{id}")
@@ -132,7 +132,7 @@ public class ProjectController extends BaseController {
         List<ExperimentDO> expList = getAllExperimentsByProjectId(id);
         if (expList == null) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.NO_EXPERIMENT_UNDER_PROJECT);
-            return "redirect:project/list";
+            return "redirect:/project/list";
         }
         int count = 0;
         for (ExperimentDO exp : expList) {
@@ -145,9 +145,9 @@ public class ProjectController extends BaseController {
         }
         if (count == 0) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.ALL_FILES_UNDER_THIS_PROJECT_ARE_ALREADY_COMPRESSED);
-            return "redirect:project/list";
+            return "redirect:/project/list";
         } else {
-            return "redirect:task/list";
+            return "redirect:/task/list";
         }
     }
 
@@ -161,7 +161,7 @@ public class ProjectController extends BaseController {
         List<ExperimentDO> expList = experimentService.getAllByProjectName(resultDO.getModel().getName());
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.PROJECT_NOT_EXISTED);
-            return "redirect:project/list";
+            return "redirect:/project/list";
         }
         model.addAttribute("exps",expList);
         model.addAttribute("project", resultDO.getModel());
@@ -183,7 +183,7 @@ public class ProjectController extends BaseController {
         List<ExperimentDO> expList = getAllExperimentsByProjectId(id);
         if (expList == null) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.NO_EXPERIMENT_UNDER_PROJECT);
-            return "redirect:project/list";
+            return "redirect:/project/list";
         }
         int count = 0;
         for (ExperimentDO exp : expList) {
@@ -197,9 +197,9 @@ public class ProjectController extends BaseController {
         }
         if (count == 0) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.ALL_EXPERIMENTS_UNDER_THIS_PROJECT_ARE_ALREADY_COMPUTE_IRT);
-            return "redirect:project/list";
+            return "redirect:/project/list";
         } else {
-            return "redirect:task/list";
+            return "redirect:/task/list";
         }
     }
 
@@ -214,10 +214,11 @@ public class ProjectController extends BaseController {
         List<ExperimentDO> expList = experimentService.getAllByProjectName(resultDO.getModel().getName());
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED);
-            return "redirect:project/list";
+            return "redirect:/project/list";
         }
 
         model.addAttribute("exps", expList);
+        model.addAttribute("useEpps", true);
         model.addAttribute("libraries", getLibraryList(0));
         model.addAttribute("project", resultDO.getModel());
         model.addAttribute("scoreTypes", ScoreType.getShownTypes());
@@ -238,18 +239,18 @@ public class ProjectController extends BaseController {
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
                      @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.6") Float shapeScoreThreshold,
                      @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.8") Float shapeWeightScoreThreshold,
-                     @RequestParam(value = "useEpps", required = false, defaultValue = "false") Boolean useEpps,
+                     @RequestParam(value = "useEpps", required = false, defaultValue = "true") Boolean useEpps,
                      HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
 
         ResultDO<ProjectDO> projectResult = projectService.getById(id);
         if (projectResult.isFailed()) {
-            return "redirect:extractor?id=" + id;
+            return "redirect:/extractor?id=" + id;
         }
 
         ResultDO<LibraryDO> libResult = libraryService.getById(libraryId);
         if (libResult.isFailed()) {
-            return "redirect:extractor?id=" + id;
+            return "redirect:/extractor?id=" + id;
         }
 
         HashSet<String> scoreTypes = new HashSet<>();
@@ -263,7 +264,7 @@ public class ProjectController extends BaseController {
         List<ExperimentDO> exps = getAllExperimentsByProjectId(id);
         if (exps == null) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.NO_EXPERIMENT_UNDER_PROJECT);
-            return "redirect:project/list";
+            return "redirect:/project/list";
         }
         String errorInfo = "";
         for (ExperimentDO exp : exps) {
@@ -297,7 +298,7 @@ public class ProjectController extends BaseController {
         if (StringUtils.isNotEmpty(errorInfo)) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, errorInfo);
         }
-        return "redirect:task/list";
+        return "redirect:/task/list";
     }
 
     private List<ExperimentDO> getAllExperimentsByProjectId(String id) {

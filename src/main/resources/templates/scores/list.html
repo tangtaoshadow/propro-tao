@@ -153,8 +153,8 @@
                                     <a th:href="@{/score/list(overviewId=${overviewId},peptideRef=${score?.peptideRef})}"
                                        class="btn btn-primary btn-sm">查看真伪肽段打分</a>
                                     <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
-                                            data-target="#m_modal_group"
-                                            th:onclick="|queryGroup('${score.id}', false, false)|">
+                                            data-target="#m_modal_group" th:data1 = "${score.id}"
+                                            th:onclick="queryGroup(this.getAttribute('data1'), false, false)">
                                         查看卷积组谱图
                                     </button>
                                     <a th:if="${!score.isDecoy}" target="_blank" th:href="@{/analyse/consultation(dataId=${score.id},allCutInfo=true)}"
@@ -345,19 +345,19 @@
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <button type="button" class="btn btn-sm btn-warning"
-                                th:onclick="|queryGroup(null,true,false)|">
+                                th:onclick="queryGroup(null,true,false)">
                             高斯平滑
                         </button>
                         <button type="button" class="btn btn-sm btn-info"
-                                th:onclick="|queryGroup(null,true, true)|">
+                                th:onclick="queryGroup(null,true, true)">
                             平滑去噪
                         </button>
                         <button type="button" class="btn btn-sm btn-brand"
-                                th:onclick="|queryGroup(null,false, false)|">
+                                th:onclick="queryGroup(null,false, false)">
                             原始数据
                         </button>
                         <button type="button" class="btn btn-sm btn-accent"
-                                th:onclick="|queryGroup(null,false, true)|">
+                                th:onclick="queryGroup(null,false, true)">
                             原始去噪
                         </button>
                         <span class="m-badge m-badge--success m-badge--wide" id="peptideLabel">
