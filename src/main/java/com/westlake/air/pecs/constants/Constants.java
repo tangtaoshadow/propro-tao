@@ -6,6 +6,8 @@ package com.westlake.air.pecs.constants;
  */
 public class Constants {
 
+    public static final double MIN_DOUBLE = Math.pow(10d, -6);
+    public static final double SQRT_2PI = Math.sqrt(2 * Math.PI);
     //每批处理的数据
     public static final int MAX_PAGE_SIZE_FOR_FRAGMENT = 100000;
     public static final int DECOY_GENERATOR_TRY_TIMES = 10;
@@ -35,8 +37,8 @@ public class Constants {
     public static final String CHROMATOGRAM_PICKER_METHOD = "legacy";
 //    public static final String CHROMATOGRAM_PICKER_METHOD = "corrected";
 
-    public static final double PEAK_WIDTH = -40d;///
-    public static final double MIN_INTENSITY_RATIO = 0.3d;
+    public static final double PEAK_WIDTH = 10d;///
+    public static final double MIN_INTENSITY_RATIO = 0.6d;
     public static final boolean ESTIMATE_BEST_PEPTIDES = false;
     public static final double INITIAL_QUALITY_CUTOFF = 0.5d;
     public static final double OVERALL_QUALITY_CUTOFF = 5.5d;
