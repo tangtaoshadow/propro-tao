@@ -250,7 +250,7 @@ public class ScoreServiceImpl implements ScoreService {
                     Float[] spectrumMzArray = mzIntensityPairs.getMzArray();
                     Float[] spectrumIntArray = mzIntensityPairs.getIntensityArray();
                     diaScorer.calculateDiaIsotopeScores(peakGroupFeature, productMzMap, spectrumMzArray, spectrumIntArray, productChargeMap, featureScores);
-//                    if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.IsotopeCorrelationScore) < 0.7){
+//                    if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.IsotopeCorrelationScore) < 0.4){
 //                        continue;
 //                    }
                     diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);

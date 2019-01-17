@@ -15,7 +15,7 @@ public class Constants {
     public static final int PRECISION = 1000000;
     public static final double SIDE_PEAK_DENSITY = 0.4d;
     public static final int TOP_N_INDEX = 10;
-    public static final double ION_PERCENT = 0.4;
+    public static final double ION_PERCENT = 0.4;//最优？
 
     //RT Normalizer
     public static final boolean CHECK_SPACINGS = true;
@@ -37,7 +37,7 @@ public class Constants {
     public static final String CHROMATOGRAM_PICKER_METHOD = "legacy";
 //    public static final String CHROMATOGRAM_PICKER_METHOD = "corrected";
 
-    public static final double PEAK_WIDTH = 10d;///
+    public static final double PEAK_WIDTH = 5d;///
     public static final double MIN_INTENSITY_RATIO = 0.6d;
     public static final boolean ESTIMATE_BEST_PEPTIDES = false;
     public static final double INITIAL_QUALITY_CUTOFF = 0.5d;
