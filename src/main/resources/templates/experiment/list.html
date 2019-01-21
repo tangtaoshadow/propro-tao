@@ -122,10 +122,10 @@
                     <td th:text="${#dates.format(experiment.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(experiment.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
-                        <a th:href="@{'/experiment/edit/' + ${experiment.id}}"
+                        <a th:href="@{/experiment/edit/{id}(id=${experiment.id})}"
                            class="btn btn-primary btn-sm">编辑
                         </a>
-                        <a th:href="@{'/experiment/detail/' + ${experiment.id}}"
+                        <a th:href="@{/experiment/detail/{id}(id=${experiment.id})}"
                            class="btn btn-success btn-sm">详情
                         </a>
                         <a th:href="@{/experiment/extractor(id=${experiment.id})}"
