@@ -149,7 +149,7 @@ public class FeatureFinder {
 //            peakDensity[i] = density(ionPeakPositionList, i);
             peakDensity[i] = ionPeakPositionList.get(i).size() + Constants.SIDE_PEAK_DENSITY*(ionPeakPositionList.get(i-1).size() + ionPeakPositionList.get(i+1).size());
         } peakDensity[0] = 0d; peakDensity[peakDensity.length-1] = 0d;
-        List<Integer> topIndex = getTopIndex(peakDensity, ionPeakParams.size() * Constants.ION_PERCENT);
+        List<Integer> topIndex = getTopIndex(peakDensity, FastMath.round(ionPeakParams.size() * Constants.ION_PERCENT * 10)/10d );
 
         for(int i=0; i<topIndex.size(); i++){
             int maxIndex = topIndex.get(i);
@@ -190,11 +190,16 @@ public class FeatureFinder {
             Double peakGroupInt = 0D;
             double signalToNoiseSum = 0d;
             for(String cutInfo: peptideSpectrum.getIntensitiesMap().keySet()) {
-                Double[] intArray = peptideSpectrum.getIntensitiesMap().get(cutInfo);
                 //离子峰
+                Double[] intArray = peptideSpectrum.getIntensitiesMap().get(cutInfo);
+                double localMaxIntensity = intArray[maxSpectrumIndex];
+//                if(intArray[maxSpectrumIndex] < intArray[maxSpectrumIndex-1] && intArray[maxSpectrumIndex] < intArray[maxSpectrumIndex+1]){
+//                    localMaxIntensity = FastMath.max(intArray[maxSpectrumIndex-1], intArray[maxSpectrumIndex+1]);
+//                }
+                localMaxIntensity = FastMath.max(intArray[maxSpectrumIndex-1], FastMath.max(intArray[maxSpectrumIndex], intArray[maxSpectrumIndex+1]));
 //                Double[] rasteredInt = new Double[rightIndex - leftIndex + 1];
 //                System.arraycopy(intArray, leftIndex, rasteredInt, 0, rightIndex - leftIndex + 1);
-                Double[] rasteredInt = filteredCopy(intArray, leftIndex, rightIndex, 1.5 * FastMath.max(FastMath.max(intArray[maxSpectrumIndex-1],intArray[maxSpectrumIndex]), intArray[maxSpectrumIndex+1]));
+                Double[] rasteredInt = filteredCopy(intArray, leftIndex, rightIndex, Double.MAX_VALUE);
                 ionHullInt.put(cutInfo, rasteredInt);
                 //peakGroup强度
 //                Double ionIntTemp = MathUtil.sum(rasteredInt);
@@ -323,7 +328,7 @@ public class FeatureFinder {
             if(array[leftIndex + i] <= maxValue){
                 result[i] = array[leftIndex + i];
             }else {
-                result[i] = 1d;
+                result[i] = maxValue;
             }
         }
         return result;
