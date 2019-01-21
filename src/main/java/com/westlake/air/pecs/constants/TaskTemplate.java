@@ -14,24 +14,24 @@ public enum TaskTemplate {
     /**
      * upload experiment file
      */
-    UPLOAD_EXPERIMENT_FILE("UPLOAD_EXPERIMENT_FILE", "/experiment/create"),
+    UPLOAD_EXPERIMENT_FILE("UPLOAD_EXPERIMENT_FILE", "experiment/create"),
 
     /**
      * upload library file(including standard library and irt library)
      */
-    UPLOAD_LIBRARY_FILE("UPLOAD_LIBRARY_FILE", "/library/create"),
+    UPLOAD_LIBRARY_FILE("UPLOAD_LIBRARY_FILE", "library/create"),
 
     /**
      * extract for mzxml with standard library
      */
-    EXTRACTOR("EXTRACTOR", "/experiment/extractor"),
+    EXTRACTOR("EXTRACTOR", "experiment/extractor"),
 
-    EXTRACT_PEAKPICK_SCORE("EXTRACT_PEAKPICK_SCORE", "/experiment/extractor"),
+    EXTRACT_PEAKPICK_SCORE("EXTRACT_PEAKPICK_SCORE", "experiment/extractor"),
 
     /**
      * compute irt for slope and intercept
      */
-    IRT("IRT", "/experiment/irt"),
+    IRT("IRT", "experiment/irt"),
 
     /**
      * compute sub scores
