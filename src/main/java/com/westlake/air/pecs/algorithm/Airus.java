@@ -7,6 +7,7 @@ import com.westlake.air.pecs.constants.ResultCode;
 import com.westlake.air.pecs.constants.ScoreType;
 import com.westlake.air.pecs.domain.ResultDO;
 import com.westlake.air.pecs.domain.bean.airus.*;
+import com.westlake.air.pecs.domain.bean.score.FeatureScores;
 import com.westlake.air.pecs.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.pecs.domain.db.AnalyseDataDO;
 import com.westlake.air.pecs.domain.db.AnalyseOverviewDO;
@@ -150,6 +151,7 @@ public class Airus {
 
     public HashMap<String, Double> LDALearn(List<SimpleScores> scores, HashMap<String, Integer> peptideHitMap, AirusParams airusParams) {
         int neval = airusParams.getTrainTimes();
+//        test(scores);
         List<HashMap<String, Double>> weightsMapList = new ArrayList<>();
         for (int i = 0; i < neval; i++) {
             logger.info("开始第" + i + "轮尝试");
@@ -289,4 +291,15 @@ public class Airus {
         }
     }
 
+    private void test(List<SimpleScores> scores){
+        for(SimpleScores simpleScores: scores){
+            for(ScoreType scoreType: ScoreType.values()){
+                for(FeatureScores featureScores: simpleScores.getFeatureScoresList()){
+                    if(featureScores.get(scoreType).isNaN()|| featureScores.get(scoreType).isInfinite()){
+                        System.out.println("");
+                    }
+                }
+            }
+        }
+    }
 }

@@ -24,6 +24,8 @@
                     <span th:text="${overview.id}"></span><br>
                     <span th:text="|#{label_recognized_peptides_count}:${overview.matchedPeptideCount}|"></span><br>
                     <span th:text="|#{label_mz_rt_extract_window}:${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></span>
+                    <span th:text="|备注:${overview.note}|"></span><br>
+                    <span th:text="|卷积参数:${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></span>
                 </th>
                 <th width="10%" th:text="#{label_operation}"></th>
             </tr>

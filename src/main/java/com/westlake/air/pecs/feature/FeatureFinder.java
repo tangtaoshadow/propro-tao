@@ -9,6 +9,7 @@ import com.westlake.air.pecs.domain.bean.score.PeakGroup;
 import com.westlake.air.pecs.utils.ArrayUtil;
 import com.westlake.air.pecs.utils.MathUtil;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.util.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -148,7 +149,7 @@ public class FeatureFinder {
 //            peakDensity[i] = density(ionPeakPositionList, i);
             peakDensity[i] = ionPeakPositionList.get(i).size() + Constants.SIDE_PEAK_DENSITY*(ionPeakPositionList.get(i-1).size() + ionPeakPositionList.get(i+1).size());
         } peakDensity[0] = 0d; peakDensity[peakDensity.length-1] = 0d;
-        List<Integer> topIndex = getTopIndex(peakDensity, ionPeakParams.size() * Constants.ION_PERCENT);
+        List<Integer> topIndex = getTopIndex(peakDensity, FastMath.round(ionPeakParams.size() * Constants.ION_PERCENT * 10)/10d );
 
         for(int i=0; i<topIndex.size(); i++){
             int maxIndex = topIndex.get(i);
@@ -163,6 +164,7 @@ public class FeatureFinder {
             int leftIndex = concateMap.get(maxIon).getLeftRtIndex();
             int rightIndex = concateMap.get(maxIon).getRightRtIndex();
             double apexRt = ionPeaks.get(maxIon).getRtArray()[concateMap.get(maxIon).getIndex()];
+//            double apexInt = ionPeaks.get(maxIon).getIntensityArray()[concateMap.get(maxIon).getIndex()];
             double bestLeft = peptideSpectrum.getRtArray()[leftIndex];
             double bestRight = peptideSpectrum.getRtArray()[rightIndex];
 
@@ -180,20 +182,28 @@ public class FeatureFinder {
             //取得[bestLeft,bestRight]对应范围的Rt
             Double[] rasteredRt = new Double[rightIndex - leftIndex + 1];
             System.arraycopy(rtArray, leftIndex, rasteredRt, 0, rightIndex - leftIndex + 1);
-            int maxSpectrumIndex = MathUtil.findNearestIndex(rasteredRt,apexRt) + leftIndex;
+            int nearestRtIndex = MathUtil.findNearestIndex(rasteredRt,apexRt);
+            int maxSpectrumIndex = nearestRtIndex + leftIndex;
             //取得[bestLeft,bestRight]对应范围的Intensity
             HashMap<String, Double[]> ionHullInt = new HashMap<>();
             HashMap<String, Double> ionIntensity = new HashMap<>();
             Double peakGroupInt = 0D;
             double signalToNoiseSum = 0d;
             for(String cutInfo: peptideSpectrum.getIntensitiesMap().keySet()) {
-                Double[] intArray = peptideSpectrum.getIntensitiesMap().get(cutInfo);
                 //离子峰
-                Double[] rasteredInt = new Double[rightIndex - leftIndex + 1];
-                System.arraycopy(intArray, leftIndex, rasteredInt, 0, rightIndex - leftIndex + 1);
+                Double[] intArray = peptideSpectrum.getIntensitiesMap().get(cutInfo);
+                double localMaxIntensity = intArray[maxSpectrumIndex];
+//                if(intArray[maxSpectrumIndex] < intArray[maxSpectrumIndex-1] && intArray[maxSpectrumIndex] < intArray[maxSpectrumIndex+1]){
+//                    localMaxIntensity = FastMath.max(intArray[maxSpectrumIndex-1], intArray[maxSpectrumIndex+1]);
+//                }
+                localMaxIntensity = FastMath.max(intArray[maxSpectrumIndex-1], FastMath.max(intArray[maxSpectrumIndex], intArray[maxSpectrumIndex+1]));
+//                Double[] rasteredInt = new Double[rightIndex - leftIndex + 1];
+//                System.arraycopy(intArray, leftIndex, rasteredInt, 0, rightIndex - leftIndex + 1);
+                Double[] rasteredInt = filteredCopy(intArray, leftIndex, rightIndex, Double.MAX_VALUE);
                 ionHullInt.put(cutInfo, rasteredInt);
                 //peakGroup强度
-                Double ionIntTemp = MathUtil.sum(rasteredInt);
+//                Double ionIntTemp = MathUtil.sum(rasteredInt);
+                Double ionIntTemp = (intArray[maxSpectrumIndex]+1) * Math.min(maxSpectrumIndex - leftIndex, rightIndex - maxSpectrumIndex) * Constants.SQRT_2PI / 2;
                 peakGroupInt += ionIntTemp;
                 //离子峰强度
                 ionIntensity.put(cutInfo, ionIntTemp);
@@ -310,6 +320,18 @@ public class FeatureFinder {
         }
         int midSize = ionPeakList.get(maxIndex).size();
         return midSize + Constants.SIDE_PEAK_DENSITY *(midSize-set.size());
+    }
+
+    private Double[] filteredCopy(Double[] array, int leftIndex, int rightIndex, double maxValue){
+        Double[] result = new Double[rightIndex-leftIndex+1];
+        for(int i=0; i<result.length; i++){
+            if(array[leftIndex + i] <= maxValue){
+                result[i] = array[leftIndex + i];
+            }else {
+                result[i] = maxValue;
+            }
+        }
+        return result;
     }
 
 }
