@@ -3,9 +3,8 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>欢迎登陆西湖大学PECS分析平台</title>
-    <link th:href="|${url}/assets/css/pagination.css|" rel="stylesheet" type="text/css" />
-
+    <title th:text="#{title_welcome_to_propro}"></title>
+    <link th:href="|${url}/assets/css/pagination.css|" rel="stylesheet" type="text/css"/>
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -22,11 +21,10 @@
                 <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
                 <div class="form-group m-form__group">
                     <div class="input-group">
-                        <input type="text" class="form-control" id="searchName" name="searchName" placeholder="库名称"
+                        <input type="text" class="form-control" id="searchName" name="searchName" th:placeholder="#{label_library_name}"
                                th:value="${searchName}">
                         <div class="input-group-append">
-                            <button class="btn btn-primary" type="submit">
-                                查找
+                            <button class="btn btn-primary" type="submit" th:text="#{btn_search}">
                             </button>
                         </div>
                     </div>
@@ -39,30 +37,14 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="20%">
-                        库名
-                    </th>
-                    <th width="5%">
-                        蛋白质数目
-                    </th>
-                    <th width="5%">
-                        总肽段数目
-                    </th>
-                    <th width="5%">
-                        真肽段数目
-                    </th>
-                    <th width="5%">
-                        伪肽段数目
-                    </th>
-                    <th width="15%">
-                        创建时间
-                    </th>
-                    <th width="15%">
-                        最后修改时间
-                    </th>
-                    <th width="20%">
-                        操作
-                    </th>
+                    <th width="20%" th:text="#{label_library_name}"></th>
+                    <th width="5%" th:text="#{label_proteins_count}"></th>
+                    <th width="5%" th:text="#{label_total_peptides_count}"></th>
+                    <th width="5%" th:text="#{label_total_target_peptides_count}"></th>
+                    <th width="5%" th:text="#{label_total_decoy_peptides_count}"></th>
+                    <th width="15%" th:text="#{label_create_date}"></th>
+                    <th width="15%" th:text="#{label_last_modified_date}"></th>
+                    <th width="20%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -75,10 +57,10 @@
                     <td th:text="${#dates.format(library.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(library.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
-                        <a th:href="@{/library/edit/{id}(id=${library.id})}" class="btn btn-primary btn-sm">编辑</a>
-                        <a th:href="@{/library/detail/{id}(id=${library.id})}" class="btn btn-success btn-sm">详情</a>
-                        <a th:href="@{/peptide/list(libraryId=${library.id})}" class="btn btn-info btn-sm">肽段列表</a>
-                        <a th:href="@{/peptide/protein(libraryId=${library.id})}" class="btn btn-success btn-sm">蛋白列表</a>
+                        <a th:href="@{/library/edit/{id}(id=${library.id})}" class="btn btn-primary btn-sm" th:text="#{btn_modify}"></a>
+                        <a th:href="@{/library/detail/{id}(id=${library.id})}" class="btn btn-success btn-sm" th:text="#{btn_detail}"></a>
+                        <a th:href="@{/peptide/list(libraryId=${library.id})}" class="btn btn-info btn-sm" th:text="#{menu_peptide_list}"></a>
+                        <a th:href="@{/peptide/protein(libraryId=${library.id})}" class="btn btn-success btn-sm" th:text="#{label_protein_list}"></a>
                     </td>
                 </tr>
                 </tbody>

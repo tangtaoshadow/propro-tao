@@ -3,9 +3,8 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>欢迎登陆西湖大学PECS分析平台</title>
+    <title th:text="#{title_welcome_to_propro}"></title>
     <link th:href="@{/assets/css/pagination.css}" rel="stylesheet" type="text/css"/>
-
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -26,8 +25,7 @@
                 <div class="form-group m-form__group row">
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                项目名称:
+                            <button class="btn btn-success" type="button" th:text="#{label_project_name}">
                             </button>
                         </div>
                         <input type="text" class="form-control" id="projectName" name="projectName"
@@ -35,8 +33,7 @@
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                实验批次:
+                            <button class="btn btn-success" type="button" th:text="#{label_batch_name}">
                             </button>
                         </div>
                         <input type="text" class="form-control" id="batchName" name="batchName"
@@ -44,15 +41,13 @@
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                实验名称:
+                            <button class="btn btn-success" type="button" th:text="#{label_exp_name}">
                             </button>
                         </div>
                         <input type="text" class="form-control" id="expName" name="expName"
                                th:value="${expName}">
                         <div class="input-group-append">
-                            <button class="btn btn-primary" type="submit">
-                                查找
+                            <button class="btn btn-primary" type="submit" th:text="#{btn_search}">
                             </button>
                         </div>
                     </div>
@@ -65,38 +60,27 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="5%">
-                        项目名称
+                    <th width="5%" th:text="#{label_project_name}">
                     </th>
-                    <th width="5%">
-                        实验批次
+                    <th width="5%" th:text="#{label_batch_name}">
                     </th>
-                    <th width="10%">
-                        实验名
+                    <th width="10%" th:text="#{label_exp_name}">
                     </th>
-                    <th width="15%">
-                        文件位置
+                    <th width="15%" th:text="#{label_mzxml_file_path}">
                     </th>
-                    <th width="5%">
-                        Aird压缩
+                    <th width="5%" th:text="#{label_is_aird_existed}">
                     </th>
-                    <th width="5%">
-                        压缩类型
+                    <th width="5%" th:text="#{label_compression_type}">
                     </th>
-                    <th width="5%">
-                        数值精度
+                    <th width="5%" th:text="#{label_data_precision}">
                     </th>
-                    <th width="10%">
-                        iRT结果
+                    <th width="10%" th:text="#{label_slope_intercept}">
                     </th>
-                    <th width="10%">
-                        创建时间
+                    <th width="10%" th:text="#{label_create_date}">
                     </th>
-                    <th width="10%">
-                        最后修改时间
+                    <th width="10%" th:text="#{label_last_modified_date}">
                     </th>
-                    <th width="20%">
-                        操作
+                    <th width="20%" th:text="#{label_operation}">
                     </th>
                 </tr>
                 </thead>
@@ -107,13 +91,11 @@
                     <td th:text="|${experiment.name}(${experiment.id})|"></td>
                     <td th:text="${experiment.filePath}"></td>
                     <td th:if="!${experiment.hasAirusFile}">
-                        <span class="m-badge m-badge--danger m-badge--wide">
-                            未压缩
+                        <span class="m-badge m-badge--danger m-badge--wide" th:text="#{label_uncompressed}">
                         </span>
                     </td>
                     <td th:if="${experiment.hasAirusFile}">
-                       <span class="m-badge m-badge--success m-badge--wide">
-                           已压缩
+                       <span class="m-badge m-badge--success m-badge--wide" th:text="#{label_compressed}">
                        </span>
                     </td>
                     <td th:text="${experiment.compressionType}"></td>
@@ -123,28 +105,25 @@
                     <td th:text="${#dates.format(experiment.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
                         <a th:href="@{/experiment/edit/{id}(id=${experiment.id})}"
-                           class="btn btn-primary btn-sm">编辑
+                           class="btn btn-primary btn-sm" th:text="#{btn_modify}">
                         </a>
                         <a th:href="@{/experiment/detail/{id}(id=${experiment.id})}"
-                           class="btn btn-success btn-sm">详情
+                           class="btn btn-success btn-sm" th:text="#{btn_detail}">
                         </a>
                         <a th:href="@{/experiment/extractor(id=${experiment.id})}"
-                           class="btn btn-brand btn-sm">开始卷积
+                           class="btn btn-brand btn-sm" th:text="#{btn_start_convolution}">
                         </a>
-                        <!--<a th:href="|@{/experiment/extractor?id=${experiment.id}}|"-->
-                        <!--class="btn btn-default btn-sm">一条龙卷积-->
-                        <!--</a>-->
                         <a th:href="@{/experiment/irt(id=${experiment.id})}"
-                           class="btn btn-accent btn-sm">计算IRT
+                           class="btn btn-accent btn-sm" th:text="#{btn_start_irt}">
                         </a>
                         <a th:href="@{/scanindex/list(experimentId=${experiment.id})}"
-                           class="btn btn-info btn-sm">原始索引
+                           class="btn btn-info btn-sm" th:text="#{label_spectrum_list}">
                         </a>
                         <a th:href="@{/experiment/compress(expId=${experiment.id})}"
-                           class="btn btn-danger btn-sm">Aird压缩
+                           class="btn btn-danger btn-sm" th:text="#{btn_start_aird_compression}">
                         </a>
                         <a th:href="@{/analyse/overview/list(expId=${experiment.id})}"
-                           class="btn btn-warning btn-sm">查看卷积实验
+                           class="btn btn-warning btn-sm" th:text="#{label_convolution_data}">
                         </a>
                     </td>
                 </tr>

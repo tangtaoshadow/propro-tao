@@ -3,9 +3,7 @@
       layout:decorator="layouts/layout">
     <!-- begin::Head -->
     <head>
-        <title>
-            欢迎登陆西湖大学PECS分析平台
-        </title>
+        <title th:text="#{title_welcome_to_propro}"></title>
     </head>
     <!-- end::Head -->
     <!-- end::Body -->
@@ -14,8 +12,7 @@
         <div class="m-subheader ">
             <div class="d-flex align-items-center">
                 <div class="mr-auto">
-                    <h3 class="m-subheader__title m-subheader__title--separator">
-                        标准库详情页面
+                    <h3 class="m-subheader__title m-subheader__title--separator" th:text="#{label_peptide_detail}">
                     </h3>
                 </div>
             </div>
@@ -39,7 +36,7 @@
                                     <span class="m-portlet__head-icon m--hide">
                                         <i class="la la-gear"></i>
                                     </span>
-                                    <h3 class="m-portlet__head-text">肽段详情页</h3>
+                                    <h3 class="m-portlet__head-text" th:text="#{label_peptide_detail}"></h3>
                                 </div>
                             </div>
                         </div>
@@ -53,44 +50,39 @@
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="id" name="id" readonly
                                                th:value="${peptide?.id}">
-                                        <span class="m-form__help">全局唯一</span>
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label class="col-2 col-form-label">
-                                        对应库文件ID
+                                    <label class="col-2 col-form-label" th:text="#{label_library_id}">
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="libraryId" name="libraryId"
                                                readonly th:value="${peptide?.libraryId}"/>
                                         <span class="m-form__help">
-                                            <a th:href="@{/library/detail/{id}(id=${peptide?.libraryId})}">点击查看</a>
+                                            <a th:href="@{/library/detail/{id}(id=${peptide?.libraryId})}" th:text="#{btn_click_to_view}"></a>
                                         </span>
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="sequence" class="col-2 col-form-label">
-                                        对应肽段序列
+                                    <label for="sequence" class="col-2 col-form-label" th:text="#{label_peptide_sequence}">
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="sequence"
                                                name="sequence" readonly
-                                               th:value="${transition?.sequence}">
+                                               th:value="${peptide?.sequence}">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="proteinName" class="col-2 col-form-label">
-                                        对应蛋白质名称
+                                    <label for="proteinName" class="col-2 col-form-label" th:text="#{label_protein_name}">
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="proteinName"
                                                name="proteinName"
-                                               readonly th:value="${transition?.proteinName}">
+                                               readonly th:value="${peptide?.proteinName}">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="precursorMz" class="col-2 col-form-label">
-                                        肽段荷质比MZ
+                                    <label for="precursorMz" class="col-2 col-form-label" th:text="#{label_peptide_mz}">
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="precursorMz"
@@ -99,8 +91,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="rt" class="col-2 col-form-label">
-                                        归一化RT
+                                    <label for="rt" class="col-2 col-form-label" th:text="#{label_rt}">
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="rt"
@@ -118,8 +109,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="isDecoy" class="col-2 col-form-label">
-                                        是否是伪肽段
+                                    <label for="isDecoy" class="col-2 col-form-label" th:text="#{label_is_decoy}">
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="isDecoy" name="isDecoy"
@@ -128,8 +118,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="fullUniModPeptideName" class="col-2 col-form-label">
-                                        完整版肽段名称(含修饰基团)
+                                    <label for="fullUniModPeptideName" class="col-2 col-form-label" th:text="#{label_peptide_full_name}">
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="fullUniModPeptideName"
@@ -138,8 +127,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="charge" class="col-2 col-form-label">
-                                        肽段带电量
+                                    <label for="charge" class="col-2 col-form-label" th:text="#{label_charge}">
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="charge"
@@ -148,8 +136,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label class="col-2 col-form-label">
-                                        修饰基团
+                                    <label class="col-2 col-form-label" th:text="#{label_unimod}">
                                     </label>
                                     <div class="col-10">
                                         <div th:each="unimod:${peptide?.unimodMap}">
@@ -159,28 +146,17 @@
                                 </div>
 
                                 <div class="form-group m-form__group row">
-                                    <label class="col-2 col-form-label">
-                                        肽段片段信息
+                                    <label class="col-2 col-form-label" th:text="#{label_fragment}">
                                     </label>
                                     <div class="col-10">
                                         <table class="table table-bordered table-hover" style="table-layout:fixed;">
                                             <thead>
                                             <tr>
-                                                <th width="20%">
-                                                    CutInfo
-                                                </th>
-                                                <th width="20%">
-                                                    碎片MZ
-                                                </th>
-                                                <th width="20%">
-                                                    碎片强度
-                                                </th>
-                                                <th width="10%">
-                                                    碎片带电量
-                                                </th>
-                                                <th width="30%">
-                                                    Annotations
-                                                </th>
+                                                <th width="20%" th:text="#{label_cutinfo}"></th>
+                                                <th width="20%" th:text="#{label_fragment_mz}"></th>
+                                                <th width="20%" th:text="#{label_fragment_intensity}"></th>
+                                                <th width="10%" th:text="#{label_charge}"></th>
+                                                <th width="30%" th:text="#{label_annotations}"></th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -197,33 +173,10 @@
                                 </div>
 
                             </div>
-                            <!--<div class="m-portlet__foot m-portlet__foot&#45;&#45;fit">-->
-                            <!--<div class="m-form__actions">-->
-                            <!--<a th:href="|@{/library/edit/${library?.id}}|" class="btn btn-primary">修改</a>-->
-                            <!--<a th:href="|@{/library/delete/${library?.id}}|" class="btn btn-danger">删除</a>-->
-                            <!--</div>-->
-                            <!--</div>-->
                         </form>
                         <!--end::Form-->
                     </div>
                     <!--end::Portlet-->
-                </div>
-                <div class="col-md-6">
-                    <div class="m-portlet m-portlet--tab">
-                        <div class="m-portlet__head">
-                            <div class="m-portlet__head-caption">
-                                <div class="m-portlet__head-title">
-                                    <span class="m-portlet__head-icon m--hide">
-                                        <i class="la la-gear"></i>
-                                    </span>
-                                    <h3 class="m-portlet__head-text">相关操作</h3>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="m-portlet__body">
-                            <a th:href="@{/transition/createdecoy/{id}(id=${transition?.id})}" class="btn btn-warning">生成伪肽段</a>
-                        </div>
-                    </div>
                 </div>
             </div>
 

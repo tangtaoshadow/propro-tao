@@ -3,7 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>欢迎登陆西湖大学PECS分析平台</title>
+    <title th:text="#{title_welcome_to_propro}"></title>
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -12,8 +12,7 @@
 <div class="m-subheader ">
     <div class="d-flex align-items-center">
         <div class="mr-auto">
-            <h3 class="m-subheader__title m-subheader__title--separator">
-                实验数据详情页面
+            <h3 class="m-subheader__title m-subheader__title--separator" th:text="#{label_exp_detail}">
             </h3>
         </div>
     </div>
@@ -37,9 +36,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">实验数据详情页
-                                <a th:href="@{/scanindex/list(experimentId=${experiment?.id})}" class="btn btn-primary">查看原始谱图列表</a>
-                            </h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_exp_detail}"></h3>
                         </div>
                     </div>
                 </div>
@@ -47,18 +44,15 @@
                 <form class="m-form m-form--fit m-form--label-align-right">
                     <div class="m-portlet__body">
                         <div class="form-group m-form__group row">
-                            <label for="id" class="col-2 col-form-label">
-                                实验ID
+                            <label for="id" class="col-2 col-form-label" th:text="#{label_exp_id}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="id" name="id" readonly
                                        th:value="${experiment?.id}">
-                                <span class="m-form__help">实验ID全局唯一</span>
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="name" class="col-2 col-form-label">
-                                实验名称
+                            <label for="name" class="col-2 col-form-label" th:text="#{label_exp_name}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="name" name="name" readonly
@@ -66,8 +60,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="Overlap" class="col-2 col-form-label">
-                                自定义Swath Overlap
+                            <label for="Overlap" class="col-2 col-form-label" th:text="#{label_swath_window_overlap}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="Overlap" readonly
@@ -75,8 +68,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="filePath" class="col-2 col-form-label">
-                                MzXML文件路径
+                            <label for="filePath" class="col-2 col-form-label" th:text="#{label_mzxml_file_path}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="filePath" readonly
@@ -84,8 +76,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="airdPath" class="col-2 col-form-label">
-                                Aird文件路径
+                            <label for="airdPath" class="col-2 col-form-label" th:text="#{label_aird_file_path}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="airdPath" readonly
@@ -93,8 +84,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="airdIndexPath" class="col-2 col-form-label">
-                                Aird索引文件路径
+                            <label for="airdIndexPath" class="col-2 col-form-label" th:text="#{label_aird_index_file_path}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="airdIndexPath" readonly
@@ -102,52 +92,22 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="ms1Count" class="col-2 col-form-label">
-                                MS1数目
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="ms1Count" readonly
-                                       th:value="${ms1Count}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="ms2Count" class="col-2 col-form-label">
-                                MS2数目
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="ms2Count" readonly
-                                       th:value="${ms2Count}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="slope" class="col-2 col-form-label">
-                                iRT-校准库ID
+                            <label for="slope" class="col-2 col-form-label" th:text="#{label_irt_library_id}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="iRtLibraryId" readonly th:value="${experiment?.iRtLibraryId}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="slope" class="col-2 col-form-label">
-                                iRT-Slope
+                            <label for="slope" class="col-2 col-form-label" th:text="#{label_slope_intercept}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="slope" readonly
-                                       th:value="${experiment?.slope}">
+                                       th:value="|${experiment?.slope}/${experiment?.intercept}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="intercept" class="col-2 col-form-label">
-                                iRT-Intercept
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="intercept" readonly
-                                       th:value="${experiment?.intercept}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="compressionType" class="col-2 col-form-label">
-                                是否有Aird文件
+                            <label for="compressionType" class="col-2 col-form-label" th:text="#{label_is_aird_existed}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="compressionType" readonly
@@ -155,8 +115,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="windowRangsSize" class="col-2 col-form-label">
-                                Swath窗口数
+                            <label for="windowRangsSize" class="col-2 col-form-label" th:text="#{label_swath_windows_count}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="windowRangsSize" readonly
@@ -164,8 +123,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="windowRangs" class="col-2 col-form-label">
-                                Swath窗口
+                            <label for="windowRangs" class="col-2 col-form-label" th:text="#{label_swath_windows}">
                             </label>
                             <div class="col-10">
                                 <textarea class="form-control m-input" id="windowRangs" name="windowRangs" rows="4"
@@ -173,8 +131,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="compressionType" class="col-2 col-form-label">
-                                数值压缩类型
+                            <label for="compressionType" class="col-2 col-form-label" th:text="#{label_compression_type}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="compressionType" readonly
@@ -182,8 +139,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="precision" class="col-2 col-form-label">
-                                数值精度
+                            <label for="precision" class="col-2 col-form-label" th:text="#{label_data_precision}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="precision" readonly
@@ -191,8 +147,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="creator" class="col-2 col-form-label">
-                                创建人
+                            <label for="creator" class="col-2 col-form-label" th:text="#{label_creator}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="creator" name="creator"
@@ -200,8 +155,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="createDate" class="col-2 col-form-label">
-                                创建时间
+                            <label for="createDate" class="col-2 col-form-label" th:text="#{label_create_date}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="createDate" name="createDate"
@@ -210,8 +164,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="lastModifiedDate" class="col-2 col-form-label">
-                                最后修改时间
+                            <label for="lastModifiedDate" class="col-2 col-form-label" th:text="#{label_last_modified_date}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="lastModifiedDate"
@@ -220,8 +173,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="description" class="col-2 col-form-label">
-                                详细描述
+                            <label for="description" class="col-2 col-form-label" th:text="#{label_detail_description}">
                             </label>
                             <div class="col-10">
                                 <textarea class="form-control m-input" id="description" name="description" rows="3"
@@ -231,8 +183,9 @@
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <a th:href="@{/experiment/edit/{id}(id=${experiment?.id})}" class="btn btn-primary">修改</a>
-                            <a th:href="@{/experiment/delete/{id}(id=${experiment?.id})}" class="btn btn-danger">删除</a>
+                            <a th:href="@{/scanindex/list(experimentId=${experiment?.id})}" class="btn btn-brand" th:text="#{label_spectrum_list}"></a>
+                            <a th:href="@{/experiment/edit/{id}(id=${experiment?.id})}" class="btn btn-primary" th:text="#{btn_modify}"></a>
+                            <a th:href="@{/experiment/delete/{id}(id=${experiment?.id})}" class="btn btn-danger" th:text="#{btn_delete}"></a>
                         </div>
                     </div>
                 </form>
@@ -272,7 +225,7 @@
 
             option = {
                 title: {
-                    text: '实验数据窗口区间',
+                    text: 'Swath Windows',
                     subtext: name
                 },
                 tooltip: {
@@ -283,7 +236,7 @@
                     formatter: function (params) {
                         var start = params[0];
                         var windows = params[1];
-                        return '窗口间隔:' + start.name + '毫秒' + '<br/>' + '区间:' + start.value + '-' + (start.value + windows.value);
+                        return 'Interval:' + start.name + 'ms' + '<br/>' + 'Range:' + start.value + '-' + (start.value + windows.value);
                     }
                 },
                 grid: {
@@ -304,7 +257,7 @@
                 },
                 series: [
                     {
-                        name: '起始位置',
+                        name: 'Start Position',
                         type: 'bar',
                         stack: '总量',
                         itemStyle: {
@@ -320,7 +273,7 @@
                         data: starts
                     },
                     {
-                        name: '区间',
+                        name: 'Range',
                         type: 'bar',
                         stack: '总量',
                         barWidth: 8,

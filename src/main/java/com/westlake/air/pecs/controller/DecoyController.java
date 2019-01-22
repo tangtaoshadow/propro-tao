@@ -46,15 +46,6 @@ public class DecoyController extends BaseController {
         return "decoy/overview";
     }
 
-    @RequestMapping(value = "/check")
-    String check(Model model,
-                 @RequestParam(value = "id", required = true) String id,
-                 @RequestParam(value = "isDecoy", required = false) boolean isDecoy) {
-        List<MzResult> result = fragmentFactory.check(id, 0.1, isDecoy);
-        model.addAttribute("resultList", result.size() > 100 ? result.subList(0, 100) : result);
-        return "decoy/check";
-    }
-
     @RequestMapping(value = "/manager")
     String manager(Model model) {
         model.addAttribute("libraries", getLibraryList(LibraryDO.TYPE_STANDARD));

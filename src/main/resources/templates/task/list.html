@@ -3,9 +3,8 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>欢迎登陆西湖大学PECS分析平台</title>
+    <title th:text="#{title_welcome_to_propro}"></title>
     <link th:href="@{/assets/css/pagination.css}" rel="stylesheet" type="text/css" />
-
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -24,9 +23,7 @@
                 <div class="form-group m-form__group">
                     <div class="input-group col-lg-4">
                         <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                类型:
-                            </button>
+                            <button class="btn btn-success" type="button" th:text="#{label_type}"></button>
                         </div>
                         <select class="form-control m-input" id="taskTemplate" name="taskTemplate">
                             <option value="All" selected="selected" th:text="All"></option>
@@ -36,9 +33,7 @@
                     </div>
                     <div class="input-group col-lg-4">
                         <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                状态:
-                            </button>
+                            <button class="btn btn-success" type="button" th:text="#{label_status}"></button>
                         </div>
                         <select class="form-control m-input" id="taskStatus" name="taskStatus">
                             <option value="All" selected="selected" th:text="All"></option>
@@ -49,9 +44,7 @@
                     </div>
                     <div class="input-group">
                         <div class="input-group-append">
-                            <button class="btn btn-primary" type="submit">
-                                查找
-                            </button>
+                            <button class="btn btn-primary" type="submit" th:text="#{btn_search}"></button>
                         </div>
                     </div>
                 </div>
@@ -63,27 +56,13 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="40%">
-                        任务名称
-                    </th>
-                    <th width="10%">
-                        任务模板类型
-                    </th>
-                    <th width="5%">
-                        任务状态
-                    </th>
-                    <th width="5%">
-                        总计耗时
-                    </th>
-                    <th width="10%">
-                        创建时间
-                    </th>
-                    <th width="10%">
-                        最后修改时间
-                    </th>
-                    <th width="20%">
-                        操作
-                    </th>
+                    <th width="40%" th:text="#{label_task_name}"></th>
+                    <th width="10%" th:text="#{label_task_template}"></th>
+                    <th width="5%" th:text="#{label_task_status}"></th>
+                    <th width="5%" th:text="#{label_task_cost_time}"></th>
+                    <th width="10%" th:text="#{label_create_date}"></th>
+                    <th width="10%" th:text="#{label_last_modified_date}"></th>
+                    <th width="20%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -95,8 +74,8 @@
                     <td th:text="${#dates.format(task.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(task.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
-                        <a th:href="@{/task/detail/{id}(id=${task.id})}" class="btn btn-success btn-sm">详情</a>
-                        <a th:href="@{/task/delete/{id}(id=${task.id})}" class="btn btn-danger btn-sm">删除</a>
+                        <a th:href="@{/task/detail/{id}(id=${task.id})}" class="btn btn-success btn-sm" th:text="#{btn_detail}"></a>
+                        <a th:href="@{/task/delete/{id}(id=${task.id})}" class="btn btn-danger btn-sm" th:text="#{btn_delete}"></a>
                     </td>
                 </tr>
                 </tbody>

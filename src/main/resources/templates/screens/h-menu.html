@@ -12,14 +12,14 @@
 
         <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel">
             <a th:href="@{/}" class="m-menu__link">
-                <span class="m-menu__link-text">首页</span>
+                <span class="m-menu__link-text" th:text="#{homepage}"></span>
             </a>
         </li>
 
         <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel" data-menu-submenu-toggle="click"
             aria-haspopup="true">
             <a href="#" class="m-menu__link m-menu__toggle">
-                <span class="m-menu__link-text">任务</span>
+                <span class="m-menu__link-text" th:text="#{task}"></span>
                 <i class="m-menu__hor-arrow la la-angle-down"></i>
                 <i class="m-menu__ver-arrow la la-angle-right"></i>
             </a>
@@ -29,49 +29,31 @@
                     <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
                         <a th:href="@{/task/list}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-map"></i>
-                            <span class="m-menu__link-text">
-                                任务列表
-                            </span>
+                            <span class="m-menu__link-text" th:text="#{task_list}"></span>
                         </a>
                     </li>
-                    <!--<li class="m-menu__item " data-redirect="true" aria-haspopup="true">-->
-                        <!--<a th:href="@{/experiment/swath}" class="m-menu__link ">-->
-                            <!--<i class="m-menu__link-icon flaticon-folder"></i>-->
-                            <!--<span class="m-menu__link-text">-->
-                                <!--创建一个完整分析流程-->
-                            <!--</span>-->
-                        <!--</a>-->
-                    <!--</li>-->
                     <li class="m-menu__item " aria-haspopup="true">
                         <a th:href="@{/project/create}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-file"></i>
-                            <span class="m-menu__link-text">
-                                创建一个项目
-                            </span>
+                            <span class="m-menu__link-text" th:text="#{create_project}"></span>
                         </a>
                     </li>
                     <li class="m-menu__item " aria-haspopup="true">
                         <a th:href="@{/task/create(templateName=UPLOAD_LIBRARY_FILE)}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-file"></i>
-                            <span class="m-menu__link-text">
-                                导入标准库
-                            </span>
+                            <span class="m-menu__link-text" th:text="#{import_library}"></span>
                         </a>
                     </li>
                     <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
                         <a th:href="@{/task/create(templateName=UPLOAD_EXPERIMENT_FILE)}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-diagram"></i>
-                            <span class="m-menu__link-text">
-                                导入实验数据
-                            </span>
+                            <span class="m-menu__link-text" th:text="#{import_experiment}"></span>
                         </a>
                     </li>
                     <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
                         <a th:href="@{/experiment/batchcreate}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-diagram"></i>
-                            <span class="m-menu__link-text">
-                                导入项目组实验数据集
-                            </span>
+                            <span class="m-menu__link-text" th:text="#{batch_import_experiment}"></span>
                         </a>
                     </li>
                 </ul>
@@ -79,7 +61,7 @@
         </li>
         <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel" data-menu-submenu-toggle="click" aria-haspopup="true">
             <a href="#" class="m-menu__link m-menu__toggle">
-                <span class="m-menu__link-text">标准库&iRT校准库</span>
+                <span class="m-menu__link-text" th:text="#{menu_library_and_irt_library}"></span>
                 <i class="m-menu__hor-arrow la la-angle-down"></i>
                 <i class="m-menu__ver-arrow la la-angle-right"></i>
             </a>
@@ -89,25 +71,19 @@
                     <li class="m-menu__item " aria-haspopup="true">
                         <a th:href="@{/library/listStandard}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-file"></i>
-                            <span class="m-menu__link-text">
-                                标准库列表
-                            </span>
+                            <span class="m-menu__link-text" th:text="#{menu_library_list}"></span>
                         </a>
                     </li>
                     <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
                         <a th:href="@{/library/listIrt}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-diagram"></i>
-                            <span class="m-menu__link-text">
-                                iRT校准库列表
-                            </span>
+                            <span class="m-menu__link-text" th:text="#{menu_irt_library_list}"></span>
                         </a>
                     </li>
                     <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
                         <a th:href="@{/peptide/list}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-map"></i>
-                            <span class="m-menu__link-text">
-                                肽段列表
-                            </span>
+                            <span class="m-menu__link-text" th:text="#{menu_peptide_list}"></span>
                         </a>
                     </li>
                 </ul>
@@ -116,19 +92,19 @@
 
         <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel">
             <a th:href="@{/project/list}" class="m-menu__link">
-                <span class="m-menu__link-text">项目管理</span>
+                <span class="m-menu__link-text" th:text="#{menu_project}"></span>
             </a>
         </li>
 
         <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel">
             <a th:href="@{/experiment/list}" class="m-menu__link">
-                <span class="m-menu__link-text">实验数据</span>
+                <span class="m-menu__link-text" th:text="#{menu_experiment}"></span>
             </a>
         </li>
 
         <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel" data-menu-submenu-toggle="click" aria-haspopup="true">
             <a href="#" class="m-menu__link m-menu__toggle">
-                <span class="m-menu__link-text">数据分析</span>
+                <span class="m-menu__link-text" th:text="#{menu_analyse_overview}"></span>
                 <i class="m-menu__hor-arrow la la-angle-down"></i>
                 <i class="m-menu__ver-arrow la la-angle-right"></i>
             </a>
@@ -138,17 +114,13 @@
                     <li class="m-menu__item " aria-haspopup="true">
                         <a th:href="@{/analyse/overview/list}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-file"></i>
-                            <span class="m-menu__link-text">
-                                数据分析列表
-                            </span>
+                            <span class="m-menu__link-text" th:text="#{menu_analyse_overview_list}"></span>
                         </a>
                     </li>
                     <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
                         <a th:href="@{/analyse/overview/select}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-diagram"></i>
-                            <span class="m-menu__link-text">
-                                交叉比对分析
-                            </span>
+                            <span class="m-menu__link-text" th:text="#{menu_cross_comparision}"></span>
                         </a>
                     </li>
                 </ul>
@@ -159,7 +131,7 @@
         <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel" data-menu-submenu-toggle="click"
             aria-haspopup="true">
             <a href="#" class="m-menu__link m-menu__toggle">
-                <span class="m-menu__link-text">工具集</span>
+                <span class="m-menu__link-text" th:text="#{menu_tools}"></span>
                 <i class="m-menu__hor-arrow la la-angle-down"></i>
                 <i class="m-menu__ver-arrow la la-angle-right"></i>
             </a>
@@ -169,41 +141,25 @@
                     <li class="m-menu__item " aria-haspopup="true">
                         <a th:href="@{/analyse/consultation(allCutInfo=true)}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-file"></i>
-                            <span class="m-menu__link-text">
-                                肽段诊断工具
-                            </span>
+                            <span class="m-menu__link-text" th:text="#{menu_peptide_clinic}"></span>
                         </a>
                     </li>
                     <li class="m-menu__item " aria-haspopup="true">
                         <a th:href="@{/peptide/calculator}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-file"></i>
-                            <span class="m-menu__link-text">
-                                分子质量计算器
-                            </span>
+                            <span class="m-menu__link-text" th:text="#{menu_molecular_mass_calculator}"></span>
                         </a>
                     </li>
-                    <!--<li class="m-menu__item " aria-haspopup="true">-->
-                        <!--<a th:href="@{/experiment/compressor}" class="m-menu__link ">-->1
-                            <!--<i class="m-menu__link-icon flaticon-file"></i>-->
-                            <!--<span class="m-menu__link-text">-->
-                                <!--MzXML文件压缩机-->
-                            <!--</span>-->
-                        <!--</a>-->
-                    <!--</li>-->
                     <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
                         <a th:href="@{/spectrum/mzxmlextractor}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-diagram"></i>
-                            <span class="m-menu__link-text">
-                                MzXML扫描数据解压缩
-                            </span>
+                            <span class="m-menu__link-text" th:text="#{menu_mzxml_decompressor}"></span>
                         </a>
                     </li>
                     <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
                         <a th:href="@{/spectrum/mzmlextractor}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-folder"></i>
-                            <span class="m-menu__link-text">
-                                MzML扫描数据解压缩
-                            </span>
+                            <span class="m-menu__link-text" th:text="#{menu_mzxl_decompressor}"></span>
                         </a>
                     </li>
                 </ul>
@@ -213,27 +169,25 @@
         <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel" data-menu-submenu-toggle="click"
             aria-haspopup="true">
             <a href="#" class="m-menu__link m-menu__toggle">
-                <span class="m-menu__link-text">文档专区</span>
+                <span class="m-menu__link-text" th:text="#{menu_documents}"></span>
                 <i class="m-menu__hor-arrow la la-angle-down"></i>
                 <i class="m-menu__ver-arrow la la-angle-right"></i>
             </a>
             <div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left">
                 <span class="m-menu__arrow m-menu__arrow--adjust"></span>
                 <ul class="m-menu__subnav">
-                    <li class="m-menu__item " aria-haspopup="true">
-                        <a th:href="@{/document/feature}" class="m-menu__link ">
-                            <i class="m-menu__link-icon flaticon-file"></i>
-                            <span class="m-menu__link-text">
-                                Feature字段说明
-                            </span>
-                        </a>
-                    </li>
+                    <!--<li class="m-menu__item " aria-haspopup="true">-->
+                        <!--<a th:href="@{/document/feature}" class="m-menu__link ">-->
+                            <!--<i class="m-menu__link-icon flaticon-file"></i>-->
+                            <!--<span class="m-menu__link-text">-->
+                                <!--Feature字段说明-->
+                            <!--</span>-->
+                        <!--</a>-->
+                    <!--</li>-->
                     <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
                         <a href="#" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-diagram"></i>
-                            <span class="m-menu__link-text">
-                                PECS使用白皮书
-                            </span>
+                            <span class="m-menu__link-text" th:text="#{menu_manual}"></span>
                         </a>
                     </li>
                 </ul>

@@ -221,17 +221,8 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/detail/{id}")
     String detail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
-
-        ScanIndexQuery query = new ScanIndexQuery();
-        query.setExperimentId(id);
-        query.setMsLevel(1);
-        Long ms1Count = scanIndexService.count(query);
-        query.setMsLevel(2);
-        Long ms2Count = scanIndexService.count(query);
         if (resultDO.isSuccess()) {
             model.addAttribute("experiment", resultDO.getModel());
-            model.addAttribute("ms1Count", ms1Count);
-            model.addAttribute("ms2Count", ms2Count);
             return "experiment/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());

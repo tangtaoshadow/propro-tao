@@ -3,11 +3,8 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>
-        欢迎登陆西湖大学PECS分析平台
-    </title>
+    <title th:text="#{title_welcome_to_propro}"></title>
     <link th:href="|${url}/assets/css/pagination.css|" rel="stylesheet" type="text/css"/>
-
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -16,8 +13,7 @@
 <div class="m-subheader ">
     <div class="d-flex align-items-center">
         <div class="mr-auto">
-            <h3 class="m-subheader__title m-subheader__title--separator">
-                实验卷积数据列表组视图
+            <h3 class="m-subheader__title m-subheader__title--separator" th:text="#{label_feature_score_list}">
             </h3>
         </div>
     </div>
@@ -44,9 +40,7 @@
                     <div class="form-group m-form__group row">
                         <div class="input-group col-lg-2">
                             <div class="input-group-prepend">
-                                <button class="btn btn-success" type="button">
-                                    是否被鉴定:
-                                </button>
+                                <button class="btn btn-success" type="button" th:text="#{label_if_identified}"></button>
                             </div>
                             <select class="form-control m-input" id="isIdentified" name="isIdentified">
                                 <option th:text="All" th:value="All"
@@ -59,9 +53,7 @@
                         </div>
                         <div class="input-group col-lg-2">
                             <div class="input-group-prepend">
-                                <button class="btn btn-success" type="button">
-                                    是否是伪肽段:
-                                </button>
+                                <button class="btn btn-success" type="button" th:text="#{label_is_decoy}"></button>
                             </div>
                             <select class="form-control m-input" id="isDecoy" name="isDecoy">
                                 <option th:text="All" th:value="All"
@@ -99,10 +91,7 @@
                             <input type="text" class="form-control" name="peptideRef" placeholder="PeptideRef"
                                    th:value="${peptideRef}">
                             <div class="input-group-append">
-                                <button class="btn btn-primary" type="submit">
-                                    查找
-                                </button>
-
+                                <button class="btn btn-primary" type="submit" th:text="#{btn_search}"></button>
                             </div>
                         </div>
                     </div>
@@ -116,12 +105,7 @@
                 <div class="m-portlet__head">
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
-                            <h3 class="m-portlet__head-text">
-                                卷积ID <span th:text="${overview.id}"></span>
-                                </br>
-                                卷积代号:<span th:text="${overview.name}"></span>
-                                </br>
-                                总计有 <span th:text="${totalNum}"></span> 组打分
+                            <h3 class="m-portlet__head-text" th:text="|#{label_analyse_overview}:${overview.name},ID:${overview.id},Total:${totalNum} Group Scores|">
                             </h3>
                         </div>
                     </div>
@@ -143,7 +127,7 @@
                                 <span th:if="${!score.isDecoy&&score.identifiedStatus!=0}" class="m-accordion__item-icon"><i
                                         class="fa fa-close"></i></span>
                                 <span class="m-accordion__item-title"
-                                      th:text="|(${score?.featureScoresList?.size()})[预测RT:${score?.rt}][FDR:${score?.fdr}]${score.isDecoy?'伪肽段':'肽段'}:${score?.peptideRef}|"></span>
+                                      th:text="|(${score?.featureScoresList?.size()})[#{label_predict} RT:${score?.rt}][FDR:${score?.fdr}]${score.isDecoy?'Decoy':'Target'}:${score?.peptideRef}|"></span>
                                 <span class="m-accordion__item-mode"></span>
                             </div>
                             <div class="m-accordion__item-body collapse"
@@ -151,14 +135,13 @@
                                  aria-labelledby="m_accordion_7_item_1_head" data-parent="#m_accordion_7">
                                 <div class="m-accordion__item-content">
                                     <a th:href="@{/score/list(overviewId=${overviewId},peptideRef=${score?.peptideRef})}"
-                                       class="btn btn-primary btn-sm">查看真伪肽段打分</a>
+                                       class="btn btn-primary btn-sm" th:text="#{btn_view_peptide_score}"></a>
                                     <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
                                             data-target="#m_modal_group" th:data1 = "${score.id}"
-                                            th:onclick="queryGroup(this.getAttribute('data1'), false, false)">
-                                        查看卷积组谱图
+                                            th:onclick="queryGroup(this.getAttribute('data1'), false, false)" th:text="#{btn_group_chromatograms}">
                                     </button>
                                     <a th:if="${!score.isDecoy}" target="_blank" th:href="@{/analyse/consultation(dataId=${score.id},allCutInfo=true)}"
-                                       class="btn btn-danger btn-sm">高级诊断</a>
+                                       class="btn btn-danger btn-sm" th:text="#{btn_peptide_clinic}"></a>
                                     <table class="table table-bordered table-hover" style="table-layout:fixed;">
                                         <thead>
                                         <tr>
@@ -345,23 +328,14 @@
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <button type="button" class="btn btn-sm btn-warning"
-                                th:onclick="queryGroup(null,true,false)">
-                            高斯平滑
-                        </button>
+                                th:onclick="queryGroup(null,true,false)" th:text="#{btn_gauss_filter}"></button>
                         <button type="button" class="btn btn-sm btn-info"
-                                th:onclick="queryGroup(null,true, true)">
-                            平滑去噪
-                        </button>
+                                th:onclick="queryGroup(null,true, true)" th:text="#{btn_denoising_gauss_filter}"></button>
                         <button type="button" class="btn btn-sm btn-brand"
-                                th:onclick="queryGroup(null,false, false)">
-                            原始数据
-                        </button>
+                                th:onclick="queryGroup(null,false, false)" th:text="#{btn_original_data}"></button>
                         <button type="button" class="btn btn-sm btn-accent"
-                                th:onclick="queryGroup(null,false, true)">
-                            原始去噪
-                        </button>
+                                th:onclick="queryGroup(null,false, true)" th:text="#{btn_denoising_data}"></button>
                         <span class="m-badge m-badge--success m-badge--wide" id="peptideLabel">
-
                         </span>
                     </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
@@ -369,8 +343,7 @@
                 </div>
                 <div id="modal-body-group" class="modal-body" style="width: 1200px;height:600px;"></div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        关闭
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{btn_close}">
                     </button>
                 </div>
             </div>

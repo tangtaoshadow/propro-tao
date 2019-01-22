@@ -3,9 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>
-        欢迎登陆西湖大学PECS分析平台
-    </title>
+    <title th:text="#{title_welcome_to_propro}"></title>
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -25,9 +23,9 @@
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
                             <h3 class="m-portlet__head-text"
-                                th:text="|任务详情  :  ${task?.taskTemplate}|"></h3>
+                                th:text="|#{label_task_detail}  :  ${task?.taskTemplate}|"></h3>
                             <h5 class="m-portlet__head-text" th:if="${task?.totalCost}"
-                                th:text="|任务耗时  :  ${task?.totalCost/1000}秒|"></h5>
+                                th:text="|#{label_task_cost_time} : ${task?.totalCost/1000} s|"></h5>
                         </div>
                     </div>
                 </div>

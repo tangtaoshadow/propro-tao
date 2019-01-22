@@ -3,7 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>欢迎登陆西湖大学PECS分析平台</title>
+    <title th:text="#{title_welcome_to_propro}"></title>
     <link th:href="|${url}/assets/css/pagination.css|" rel="stylesheet" type="text/css"/>
 </head>
 <!-- end::Head -->
@@ -17,15 +17,15 @@
         <table class="table table-bordered table-hover" style="table-layout:fixed; text-align: center;">
             <thead>
             <tr>
-                <th width="5%">序号</th>
-                <th width="25%">肽段名称</th>
+                <th width="5%">No.</th>
+                <th width="25%" th:text="#{label_peptide_name}"></th>
                 <th th:each="overview:${identifiesMap.keySet()}">
                     <span th:text="${overview.name}"></span><br>
                     <span th:text="${overview.id}"></span><br>
-                    <span th:text="|识别肽段:${overview.matchedPeptideCount}|"></span><br>
-                    <span th:text="|卷积参数:${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></span>
+                    <span th:text="|#{label_recognized_peptides_count}:${overview.matchedPeptideCount}|"></span><br>
+                    <span th:text="|#{label_mz_rt_extract_window}:${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></span>
                 </th>
-                <th width="10%">操作</th>
+                <th width="10%" th:text="#{label_operation}"></th>
             </tr>
             </thead>
             <tbody>
@@ -34,19 +34,16 @@
                 <td th:text="${peptide.peptideRef}"></td>
                 <td th:each="overview:${identifiesMap.keySet()}">
                    <span th:if="${identifiesMap.get(overview).get(status.index)}"
-                         class="m-badge m-badge--success m-badge--wide">
-                       鉴定成功
+                         class="m-badge m-badge--success m-badge--wide" th:text="#{label_identified_success}">
                    </span>
                    <span th:if="${!identifiesMap.get(overview).get(status.index)}"
-                          class="m-badge m-badge--danger m-badge--wide">
-                       鉴定失败
+                          class="m-badge m-badge--danger m-badge--wide" th:text="#{label_identified_failed}">
                    </span>
                 </td>
                 <td>
                     <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
                             data-target="#m_modal_group" th:data1="${peptide.peptideRef}"
-                            th:onclick="queryMultiGroup(this.getAttribute('data1'),false,false)">
-                        查看谱图
+                            th:onclick="queryMultiGroup(this.getAttribute('data1'),false,false)" th:text="#{btn_chromatogram}">
                     </button>
                 </td>
             </tr>
@@ -61,34 +58,29 @@
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <button type="button" class="btn btn-sm btn-warning"
-                                th:onclick="queryMultiGroup(null,true,false)">
-                            高斯平滑
+                                th:onclick="queryMultiGroup(null,true,false)" th:text="#{btn_gauss_filter}">
                         </button>
                         <button type="button" class="btn btn-sm btn-info"
-                                th:onclick="queryMultiGroup(null,true,true)">
-                            平滑去噪
+                                th:onclick="queryMultiGroup(null,true,true)" th:text="#{btn_denoising_gauss_filter}">
                         </button>
                         <button type="button" class="btn btn-sm btn-brand"
-                                th:onclick="queryMultiGroup(null,false,false)">
-                            原始数据
+                                th:onclick="queryMultiGroup(null,false,false)" th:text="#{btn_original_data}">
                         </button>
                         <button type="button" class="btn btn-sm btn-accent"
-                                th:onclick="queryMultiGroup(null,false,true)">
-                            原始去噪
+                                th:onclick="queryMultiGroup(null,false,true)" th:text="#{btn_denoising_data}">
                         </button>
                         <span class="m-badge m-badge--success m-badge--wide" id="peptideLabel">
 
                         </span>
                     </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
+                            aria-hidden="true" th:text="#{btn_close}"></span></button>
                 </div>
                 <div id="modal-body-group" class="modal-body row" style="width: 1600px;">
                     <div th:class="col-md-12" style="width: 1000px;height: 400px;" th:each="overview:${identifiesMap.keySet()}" th:id="${overview.id}" th:data="${overview.name}"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        关闭
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{btn_close}">
                     </button>
                 </div>
             </div>

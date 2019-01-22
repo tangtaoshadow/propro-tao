@@ -3,9 +3,8 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>欢迎登陆西湖大学PECS分析平台</title>
+    <title th:text="#{title_welcome_to_propro}"></title>
     <link th:href="|${url}/assets/css/pagination.css|" rel="stylesheet" type="text/css"/>
-
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -28,18 +27,14 @@
                 <div class="form-group m-form__group row">
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                实验ID:
-                            </button>
+                            <button class="btn btn-success" type="button" th:text="#{label_exp_id}"></button>
                         </div>
                         <input type="text" class="form-control m-input" name="experimentId"
                                th:value="${experimentId}">
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                MS等级:
-                            </button>
+                            <button class="btn btn-success" type="button" th:text="#{label_ms_level}"></button>
                         </div>
                         <input type="text" class="form-control m-input" name="msLevel" th:value="${msLevel}">
                     </div>
@@ -63,8 +58,8 @@
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                前体Mz-Start:
+                            <button class="btn btn-success" type="button" >
+                                Precursor Mz-Start:
                             </button>
                         </div>
                         <input type="text" class="form-control m-input" name="precursorMzStart"
@@ -73,9 +68,7 @@
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-append">
-                            <button class="btn btn-warning" type="submit">
-                                搜索
-                            </button>
+                            <button class="btn btn-warning" type="submit" th:text="#{btn_search}"></button>
                         </div>
                     </div>
                 </div>
@@ -87,45 +80,19 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="2%">
-                        No.
-                    </th>
-                    <th width="10%">
-                        实验名称
-                    </th>
-                    <th width="3%">
-                        父节点
-                    </th>
-                    <th width="3%">
-                        序列号
-                    </th>
-                    <th width="2%">
-                        MS
-                    </th>
-                    <th width="5%">
-                        RT
-                    </th>
-                    <th width="10%">
-                        Mzxml Position(Start/Size)
-                    </th>
-                    <th width="10%">
-                        Mz Position(Start/Size)
-                    </th>
-                    <th width="10%">
-                        Intensity Position(Start/Size)
-                    </th>
-                    <th width="10%">
-                        MZ窗口(校准前)
-                    </th>
-                    <th width="10%">
-                        MZ窗口(校准后)
-                    </th>
-                    <th width="10%">
-                        窗口宽度(校准前/后)
-                    </th>
-                    <th width="15%">
-                        操作
-                    </th>
+                    <th width="2%">No.</th>
+                    <th width="10%" th:text="#{label_exp_name}"></th>
+                    <th width="3%" th:text="#{label_parent_node}"></th>
+                    <th width="3%">Num</th>
+                    <th width="2%" th:text="#{label_ms_level}"></th>
+                    <th width="5%">RT</th>
+                    <th width="10%">mzXml Position(Start/Size)</th>
+                    <th width="10%">mz Position(Start/Size)</th>
+                    <th width="10%">Intensity Position(Start/Size)</th>
+                    <th width="10%" th:text="#{label_precursor_mz_range_before_adjust}"></th>
+                    <th width="10%" th:text="#{label_precursor_mz_range_after_adjust}"></th>
+                    <th width="10%" th:text="|#{label_swath_window_weight}(Before/After)|"></th>
+                    <th width="15%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -148,17 +115,15 @@
                     <td th:text="|${scanIndex.originalWindowWideness}/${scanIndex.windowWideness}|"></td>
                     <td>
                         <a th:href="@{/scanindex/detail/{id}(id=${scanIndex.id})}"
-                           class="btn btn-success btn-sm">详情
+                           class="btn btn-success btn-sm" th:text="#{btn_detail}">
                         </a>
                         <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
                                 data-target="#m_modal_spectrum" th:data1="${scanIndex.id}" th:data2="${experiment.id}"
-                                th:onclick="query(this.getAttribute('data1'),this.getAttribute('data2'),'aird')">
-                            Aird谱图
+                                th:onclick="query(this.getAttribute('data1'),this.getAttribute('data2'),'aird')" th:text="#{label_aird_spectrum}">
                         </button>
                         <button type="button" class="btn btn-sm btn-brand" data-toggle="modal"
                                 data-target="#m_modal_spectrum" th:data1="${scanIndex.id}" th:data2="${experiment.id}"
-                                th:onclick="query(query(this.getAttribute('data1'),this.getAttribute('data2'),'mzxml')">
-                            MzXML谱图
+                                th:onclick="query(query(this.getAttribute('data1'),this.getAttribute('data2'),'mzxml')" th:text="#{label_mzxml_spectrum}">
                         </button>
                     </td>
                 </tr>
@@ -181,9 +146,7 @@
 
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                            关闭
-                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{btn_close}"></button>
                     </div>
                 </div>
             </div>

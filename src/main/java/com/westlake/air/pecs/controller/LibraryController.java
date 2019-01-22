@@ -96,7 +96,6 @@ public class LibraryController extends BaseController {
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     String add(Model model,
                @RequestParam(value = "name", required = true) String name,
-               @RequestParam(value = "instrument", required = false) String instrument,
                @RequestParam(value = "type", required = true) Integer type,
                @RequestParam(value = "description", required = false) String description,
                @RequestParam(value = "file") MultipartFile file,
@@ -109,7 +108,6 @@ public class LibraryController extends BaseController {
 
         LibraryDO library = new LibraryDO();
         library.setName(name);
-        library.setInstrument(instrument);
         library.setDescription(description);
         library.setType(type);
         ResultDO resultDO = libraryService.insert(library);
@@ -182,7 +180,6 @@ public class LibraryController extends BaseController {
     String update(Model model,
                   @RequestParam(value = "id", required = true) String id,
                   @RequestParam(value = "name") String name,
-                  @RequestParam(value = "instrument") String instrument,
                   @RequestParam(value = "type") Integer type,
                   @RequestParam(value = "description") String description,
                   @RequestParam(value = "justReal", required = false) boolean justReal,
@@ -204,7 +201,6 @@ public class LibraryController extends BaseController {
 
         LibraryDO library = resultDO.getModel();
         library.setDescription(description);
-        library.setInstrument(instrument);
         library.setType(type);
         ResultDO updateResult = libraryService.update(library);
         if (updateResult.isFailed()) {

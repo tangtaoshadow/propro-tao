@@ -3,9 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>
-        欢迎登陆西湖大学PECS分析平台
-    </title>
+    <title th:text="#{title_welcome_to_propro}"></title>
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -14,8 +12,7 @@
 <div class="m-subheader ">
     <div class="d-flex align-items-center">
         <div class="mr-auto">
-            <h3 class="m-subheader__title m-subheader__title--separator">
-                标准库详情页面
+            <h3 class="m-subheader__title m-subheader__title--separator" th:text="#{label_library_detail}">
             </h3>
         </div>
     </div>
@@ -39,7 +36,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">标准库详情页</h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_library_detail}"></h3>
                         </div>
                     </div>
                 </div>
@@ -47,37 +44,24 @@
                 <form class="m-form m-form--fit m-form--label-align-right">
                     <div class="m-portlet__body">
                         <div class="form-group m-form__group row">
-                            <label for="id" class="col-2 col-form-label">
-                                库文件ID
+                            <label for="id" class="col-2 col-form-label" th:text="#{label_library_id}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="id" name="id" readonly
                                        th:value="${library?.id}">
-                                <span class="m-form__help">库ID全局唯一</span>
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="libraryName" class="col-2 col-form-label">
-                                库文件名称
+                            <label for="libraryName" class="col-2 col-form-label" th:text="#{label_library_name}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="libraryName" name="name" readonly
                                        th:value="${library?.name}">
-                                <span class="m-form__help">库名称全局唯一</span>
+                                <span class="m-form__help" th:text="#{label_library_name_must_be_unique}"></span>
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="instrument" class="col-2 col-form-label">
-                                设备名称
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="instrument" name="instrument"
-                                       readonly th:value="${library?.instrument}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="proteinCount" class="col-2 col-form-label">
-                                蛋白质数目
+                            <label for="proteinCount" class="col-2 col-form-label" th:text="#{label_proteins_count}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="proteinCount" name="proteinCount"
@@ -85,8 +69,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="totalCount" class="col-2 col-form-label">
-                                总肽段片段数目
+                            <label for="totalCount" class="col-2 col-form-label" th:text="#{label_total_peptides_count}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="totalCount"
@@ -94,8 +77,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="totalTargetCount" class="col-2 col-form-label">
-                                真实肽段片段总数目
+                            <label for="totalTargetCount" class="col-2 col-form-label" th:text="#{label_total_target_peptides_count}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="totalTargetCount"
@@ -103,8 +85,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="totalDecoyCount" class="col-2 col-form-label">
-                                伪肽段片段总数目
+                            <label for="totalDecoyCount" class="col-2 col-form-label" th:text="#{label_total_decoy_peptides_count}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="totalDecoyCount"
@@ -112,8 +93,7 @@
                             </div>
                         </div>
                         <div th:if="${minRt}" class="form-group m-form__group row">
-                            <label for="rtRange" class="col-2 col-form-label">
-                                RT范围
+                            <label for="rtRange" class="col-2 col-form-label" th:text="#{label_rt_range}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="rtRange"
@@ -121,8 +101,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="description" class="col-2 col-form-label">
-                                详细描述
+                            <label for="description" class="col-2 col-form-label" th:text="#{label_detail_description}">
                             </label>
                             <div class="col-10">
                                 <textarea class="form-control m-input" id="description" name="description" rows="3"
@@ -130,8 +109,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="creator" class="col-2 col-form-label">
-                                创建人
+                            <label for="creator" class="col-2 col-form-label" th:text="#{label_creator}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="creator" name="creator"
@@ -139,8 +117,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="createDate" class="col-2 col-form-label">
-                                创建时间
+                            <label for="createDate" class="col-2 col-form-label" th:text="#{label_create_date}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="createDate" name="createDate"
@@ -148,8 +125,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="lastModifiedDate" class="col-2 col-form-label">
-                                最后修改时间
+                            <label for="lastModifiedDate" class="col-2 col-form-label" th:text="#{label_last_modified_date}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="lastModifiedDate"
@@ -160,8 +136,8 @@
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <a th:href="@{/library/edit/{id}(id=${library?.id})}" class="btn btn-primary">修改</a>
-                            <a th:href="@{/library/delete/{id}(id=${library?.id})}" class="btn btn-danger">删除</a>
+                            <a th:href="@{/library/edit/{id}(id=${library?.id})}" class="btn btn-primary" th:text="#{btn_modify}"></a>
+                            <a th:href="@{/library/delete/{id}(id=${library?.id})}" class="btn btn-danger" th:text="#{btn_delete}"></a>
                         </div>
                     </div>
                 </form>
@@ -177,18 +153,14 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">肽段分析</h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_peptide_analyse}"></h3>
                         </div>
                     </div>
                 </div>
                 <div class="m-portlet__body">
-                    <a th:href="@{/library/aggregate/{id}(id=${library?.id})}" class="btn btn-warning">重新计算蛋白质,肽段数目</a>
-                    <a th:href="@{/decoy/overview/{id}(id=${library?.id})}" class="btn btn-primary">进行伪肽段覆盖率诊断</a>
-                    <a th:href="@{/library/overview/{id}(id=${library?.id})}" class="btn btn-primary">测试</a>
-                    <a th:href="@{/decoy/check(id=${library?.id},isDecoy=true)}" class="btn btn-success">检测伪肽段MZ计算误差</a>
-                    <a th:href="@{/decoy/check(id=${library?.id},isDecoy=false)}" class="btn btn-info">检测真实肽段MZ计算误差</a>
-                    <a th:href="@{/decoy/generate(id=${library?.id})}" class="btn btn-success">生成伪肽段</a>
-                    <a th:href="@{/decoy/delete(id=${library?.id})}" class="btn btn-danger">删除伪肽段</a>
+                    <a th:href="@{/library/aggregate/{id}(id=${library?.id})}" class="btn btn-warning" th:text="#{btn_recount_for_protein_and_peptide}"></a>
+                    <a th:href="@{/decoy/generate(id=${library?.id})}" class="btn btn-success" th:text="#{btn_generate_decoy}"></a>
+                    <a th:href="@{/decoy/delete(id=${library?.id})}" class="btn btn-danger" th:text="#{btn_delete_decoy}"></a>
                 </div>
             </div>
         </div>

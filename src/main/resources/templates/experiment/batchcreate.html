@@ -3,9 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>
-        欢迎登陆西湖大学PECS分析平台
-    </title>
+    <title th:text="#{title_welcome_to_propro}"></title>
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -22,7 +20,7 @@
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
                             <span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
-                            <h3 class="m-portlet__head-text">为项目组导入实验数据</h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_import_exps_for_project}"></h3>
                         </div>
                     </div>
                 </div>
@@ -30,15 +28,13 @@
                 <form class="m-form" id="mainForm" th:action="@{/experiment/batchadd}" th:method="post" enctype="multipart/form-data">
                     <div class="m-portlet__body">
                         <div class="m-form__section m-form__section--first">
-                            <div class="alert m-alert m-alert--default" role="alert">
-                                请确认实验数据所关联的项目信息
+                            <div class="alert m-alert m-alert--default" role="alert" th:text="#{label_confirm_the_information_of_the_related_project}">
                             </div>
                             <div class="form-group m-form__group row">
                                 <div class="col-md-3">
                                     <div class="m-form__group m-form__group--inline">
-                                        <div class="m-form__label">
-                                            <label>
-                                                ProjectName:
+                                        <div class="m-form__label" >
+                                            <label th:text="#{label_project_name}">
                                             </label>
                                         </div>
                                         <div class="m-form__control">
@@ -50,8 +46,7 @@
                                 <div class="col-md-3">
                                     <div class="m-form__group m-form__group--inline">
                                         <div class="m-form__label">
-                                            <label>
-                                                BatchName:
+                                            <label th:text="#{label_batch_name}">
                                             </label>
                                         </div>
                                         <div class="m-form__control">
@@ -64,7 +59,7 @@
                                 <div class="col-md-3">
                                     <div class="m-form__group m-form__group--inline">
                                         <div class="m-form__control">
-                                            <a th:href="@{/project/create}" class="btn btn-warning">还没有关联项目?点我去创建一个!</a>
+                                            <a th:href="@{/project/create}" class="btn btn-warning" th:text="#{label_click_me_to_create_a_new_project}"></a>
                                         </div>
                                     </div>
                                 </div>
@@ -72,8 +67,7 @@
                         </div>
 
                         <div class="m-form__section m-form__section--first">
-                            <div class="alert m-alert m-alert--default" role="alert">
-                                请填写MzXML的文件路径及必要信息
+                            <div class="alert m-alert m-alert--default" role="alert" th:text="#{label_please_fill_the_mzxml_file_path_and_informations}">
                             </div>
                             <div class="col-md-3">
                                 <div class="m-form__group m-form__group--inline">
@@ -85,7 +79,7 @@
                                     <div class="m-form__control">
                                         <input type="text" id="folderPath" class="form-control m-input"
                                                name="folderPath">
-                                        <span>由于浏览器安全原因无法直接获取文件的本地绝对路径,需要手动填写在这里</span>
+                                        <span th:text="#{label_browser_security_tips}"></span>
                                     </div>
                                 </div>
                             </div>
@@ -195,8 +189,7 @@
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <button type="button" class="btn btn-primary" onclick="submitForm()">
-                                提交
+                            <button type="button" class="btn btn-primary" onclick="submitForm()" th:text="#{btn_submit}">
                             </button>
                         </div>
                     </div>

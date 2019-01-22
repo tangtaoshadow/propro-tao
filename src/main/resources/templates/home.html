@@ -3,9 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>
-        欢迎登陆西湖大学PECS分析平台
-    </title>
+    <title th:text="#{title_welcome_to_propro}"></title>
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -19,7 +17,7 @@
                 <div class="col-md-12 col-lg-6 col-xl-3">
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">实验数据(Experiments)</h2>
+                            <h2 class="m-widget24__title" th:text="#{label_exp}"></h2>
                             <br>
                             <span class="m-widget24__desc"><a class="btn btn-primary btn-sm" th:href="@{/experiment/list}" th:text="|See All|"></a></span>
                             <span class="m-widget24__stats m--font-brand" th:text="${expCount}"></span>
@@ -44,7 +42,7 @@
                 <div class="col-md-12 col-lg-6 col-xl-3">
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">数据分析(Analyses)</h2>
+                            <h2 class="m-widget24__title" th:text="#{label_analyse_overview}"></h2>
                             <br>
                             <span class="m-widget24__desc">The convoluted data</span>
                             <span class="m-widget24__stats m--font-danger" th:text="${overviewCount}"></span>
@@ -69,7 +67,7 @@
                 <div class="col-md-12 col-lg-6 col-xl-3">
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">标准库(Libraries)</h2>
+                            <h2 class="m-widget24__title" th:text="#{label_library}"></h2>
                             <br>
                             <span class="m-widget24__desc">Include Standard and iRT libraries</span>
                             <span class="m-widget24__stats m--font-info" th:text="${libCount}"></span>
@@ -95,7 +93,7 @@
                     <!--begin::New Users-->
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">任务(Tasks)</h2>
+                            <h2 class="m-widget24__title" th:text="#{label_task}"></h2>
                             <br>
                             <span class="m-widget24__desc">Running Tasks / Total Tasks</span>
                             <span class="m-widget24__stats m--font-success" th:text="${taskTotalCount}"></span>
@@ -123,7 +121,7 @@
                 <div class="col-md-12 col-lg-6 col-xl-3">
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">项目(Projects)</h2>
+                            <h2 class="m-widget24__title" th:text="#{menu_project}"></h2>
                             <br>
                             <span class="m-widget24__desc"><a class="btn btn-primary btn-sm" th:href="@{/project/list}" th:text="|See All|"></a></span>
                             <span class="m-widget24__stats m--font-brand" th:text="${projectCount}"></span>
