@@ -3,9 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>
-        欢迎登陆西湖大学PECS分析平台
-    </title>
+    <title th:text="#{title_welcome_to_propro}"></title>
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -19,20 +17,21 @@
                 <div class="col-md-12 col-lg-6 col-xl-3">
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">实验数据(Experiments)</h2>
+                            <h2 class="m-widget24__title" th:text="#{label_exp}"></h2>
                             <br>
-                            <span class="m-widget24__desc"><a class="btn btn-primary btn-sm" th:href="|/experiment/list|" th:text="|See All|"></a></span>
+                            <span class="m-widget24__desc"><a class="btn btn-primary btn-sm" th:href="@{/experiment/list}" th:text="|See All|"></a></span>
                             <span class="m-widget24__stats m--font-brand" th:text="${expCount}"></span>
                             <div class="m--space-10"></div>
                             <div class="m-widget2">
                                 <div th:each="exp:${exps}" class="m-widget2__item m-widget2__item--warning">
                                     <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/experiment/detail/${exp.id}'|">
-                                        <span class="m-widget2__text" th:text="${exp.name}">
+                                    <div class="m-widget2__desc">
+                                        <span class="m-widget2__text">
+                                            <a th:href="@{/experiment/detail/{id}(id=${exp?.id})}" class="m-widget2__link" th:text="${exp?.name}"></a>
                                         </span>
                                         <br>
                                         <span class="m-widget2__user-name">
-										    <a href="#" class="m-widget2__link" th:text="|${exp.creator}-${#dates.format(exp.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
+										    <a class="m-widget2__link" th:text="|${exp?.creator}-${#dates.format(exp?.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
                                         </span>
                                     </div>
                                 </div>
@@ -43,7 +42,7 @@
                 <div class="col-md-12 col-lg-6 col-xl-3">
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">数据分析(Analyses)</h2>
+                            <h2 class="m-widget24__title" th:text="#{label_analyse_overview}"></h2>
                             <br>
                             <span class="m-widget24__desc">The convoluted data</span>
                             <span class="m-widget24__stats m--font-danger" th:text="${overviewCount}"></span>
@@ -51,11 +50,13 @@
                             <div class="m-widget2">
                                 <div th:each="overview:${overviews}" class="m-widget2__item m-widget2__item--accent">
                                     <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/analyse/overview/detail/${overview.id}'|">
-                                        <span class="m-widget2__text" th:text="${overview.name}"></span>
+                                    <div class="m-widget2__desc">
+                                        <span class="m-widget2__text">
+                                            <a th:href="@{/analyse/overview/detail/{id}(id=${overview?.id})}" class="m-widget2__link" th:text="${overview?.name}"></a>
+                                        </span>
                                         <br>
                                         <span class="m-widget2__user-name">
-										    <a href="#" class="m-widget2__link" th:text="|${overview.creator}-${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
+										    <a class="m-widget2__link" th:text="|${overview?.creator}-${#dates.format(overview?.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
                                         </span>
                                     </div>
                                 </div>
@@ -66,7 +67,7 @@
                 <div class="col-md-12 col-lg-6 col-xl-3">
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">标准库(Libraries)</h2>
+                            <h2 class="m-widget24__title" th:text="#{label_library}"></h2>
                             <br>
                             <span class="m-widget24__desc">Include Standard and iRT libraries</span>
                             <span class="m-widget24__stats m--font-info" th:text="${libCount}"></span>
@@ -74,11 +75,13 @@
                             <div class="m-widget2">
                                 <div th:each="lib:${libs}" class="m-widget2__item m-widget2__item--info">
                                     <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/library/detail/${lib.id}'|">
-                                        <span class="m-widget2__text" th:text="${lib.name}"></span>
+                                    <div class="m-widget2__desc">
+                                        <span class="m-widget2__text">
+                                            <a th:href="@{/library/detail/{id}(id=${lib?.id})}" th:text="${lib?.name}" class="m-widget2__link"></a>
+                                        </span>
                                         <br>
                                         <span class="m-widget2__user-name">
-										    <a href="#" class="m-widget2__link" th:text="|${lib.creator}-${#dates.format(lib.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
+										    <a th:href="@{/library/detail/{id}(id=${lib?.id})}" class="m-widget2__link" th:text="|${lib?.creator}-${#dates.format(lib?.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
                                         </span>
                                     </div>
                                 </div>
@@ -90,7 +93,7 @@
                     <!--begin::New Users-->
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">任务(Tasks)</h2>
+                            <h2 class="m-widget24__title" th:text="#{label_task}"></h2>
                             <br>
                             <span class="m-widget24__desc">Running Tasks / Total Tasks</span>
                             <span class="m-widget24__stats m--font-success" th:text="${taskTotalCount}"></span>
@@ -100,11 +103,13 @@
                             <div class="m-widget2">
                                 <div th:each="task:${tasks}" class="m-widget2__item m-widget2__item--success">
                                     <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/task/detail/${task.id}'|">
-                                        <span class="m-widget2__text" th:text="${task.name}"></span>
+                                    <div class="m-widget2__desc">
+                                        <span class="m-widget2__text">
+                                            <a th:href="@{/task/detail/{id}(id=${task.id})}" th:text="${task?.name}" class="m-widget2__link"></a>
+                                        </span>
                                         <br>
                                         <span class="m-widget2__user-name">
-										    <a href="#" class="m-widget2__link" th:text="|${task.creator}-${#dates.format(task.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
+										    <a th:href="@{/task/detail/{id}(id=${task.id})}" class="m-widget2__link" th:text="|${task?.creator}-${#dates.format(task?.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
                                         </span>
                                     </div>
                                 </div>
@@ -116,20 +121,21 @@
                 <div class="col-md-12 col-lg-6 col-xl-3">
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">项目(Projects)</h2>
+                            <h2 class="m-widget24__title" th:text="#{menu_project}"></h2>
                             <br>
-                            <span class="m-widget24__desc"><a class="btn btn-primary btn-sm" th:href="|/project/list|" th:text="|See All|"></a></span>
+                            <span class="m-widget24__desc"><a class="btn btn-primary btn-sm" th:href="@{/project/list}" th:text="|See All|"></a></span>
                             <span class="m-widget24__stats m--font-brand" th:text="${projectCount}"></span>
                             <div class="m--space-10"></div>
                             <div class="m-widget2">
                                 <div th:each="project:${projects}" class="m-widget2__item m-widget2__item--warning">
                                     <div class="m-widget2__checkbox"></div>
-                                    <div class="m-widget2__desc" th:onclick="|window.location.href='/experiment/list?projectName=${project.name}'|">
-                                        <span class="m-widget2__text" th:text="${project.name}">
+                                    <div class="m-widget2__desc">
+                                        <span class="m-widget2__text">
+                                            <a th:href="@{/experiment/list(projectName=${project.name})}" class="m-widget2__link" th:text="${project?.name}"></a>
                                         </span>
                                         <br>
                                         <span class="m-widget2__user-name">
-										    <a href="#" class="m-widget2__link" th:text="|${project.ownerName}-${#dates.format(project.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
+										    <a th:href="@{/experiment/list(projectName=${project.name})}" class="m-widget2__link" th:text="|${project?.ownerName}-${#dates.format(project?.createDate,'yyyy-MM-dd HH:mm:ss')}|"></a>
                                         </span>
                                     </div>
                                 </div>

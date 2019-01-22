@@ -14,6 +14,6 @@ public class DocumentController {
 
     @RequestMapping(value = "/feature")
     String delete(Model model) {
-        return "/document/feature";
+        return "document/feature";
     }
 }

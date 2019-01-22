@@ -15,7 +15,7 @@ public class Constants {
     public static final int PRECISION = 1000000;
     public static final double SIDE_PEAK_DENSITY = 0.4d;
     public static final int TOP_N_INDEX = 10;
-    public static final double ION_PERCENT = 0.4;//最优？
+    public static final double ION_PERCENT = 0.4;//最优?
 
     //RT Normalizer
     public static final boolean CHECK_SPACINGS = true;

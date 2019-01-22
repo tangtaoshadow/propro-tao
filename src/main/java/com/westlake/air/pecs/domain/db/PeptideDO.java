@@ -37,7 +37,6 @@ public class PeptideDO extends BaseDO {
     /**
      * 对应蛋白质名称
      */
-    @Indexed
     String proteinName;
 
     /**

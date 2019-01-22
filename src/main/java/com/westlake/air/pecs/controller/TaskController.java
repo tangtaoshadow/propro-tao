@@ -74,9 +74,9 @@ public class TaskController extends BaseController {
                   @RequestParam(value = "templateName", required = true) String templateName) {
         TaskTemplate template = TaskTemplate.getByName(templateName);
         if (template != null) {
-            return "redirect:" + template.getPagePath();
+            return "redirect:/" + template.getPagePath();
         } else {
-            return "/home";
+            return "home";
         }
     }
 

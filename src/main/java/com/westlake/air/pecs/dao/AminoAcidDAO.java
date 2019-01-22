@@ -2,6 +2,7 @@ package com.westlake.air.pecs.dao;
 
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.parser.model.chemistry.AminoAcid;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +36,12 @@ public class AminoAcidDAO {
     @PostConstruct
     public void init() {
         try {
-            File file = new File(getClass().getClassLoader().getResource("dbfile/AminoAcidData.json").getPath());
+
+            InputStream stream = getClass().getClassLoader().getResourceAsStream("dbfile/AminoAcidData.json");
+            File file = new File("dbfile/AminoAcidData.json");
+            FileUtils.copyInputStreamToFile(stream, file);
+
+//            File file = new File(getClass().getClassLoader().getResource("dbfile/AminoAcidData.json").getPath());
             FileInputStream fis = new FileInputStream(file);
             int fileLength = fis.available();
             byte[] bytes = new byte[fileLength];

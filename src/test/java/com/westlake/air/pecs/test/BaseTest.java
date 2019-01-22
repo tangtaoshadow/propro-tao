@@ -1,7 +1,7 @@
 package com.westlake.air.pecs.test;
 
 import com.alibaba.fastjson.JSON;
-import com.westlake.air.pecs.PecsPlatformApplication;
+import com.westlake.air.pecs.MainPlatformApplication;
 import com.westlake.air.pecs.domain.db.PeptideDO;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -18,7 +18,7 @@ import java.io.FileInputStream;
  * Time: 2018-08-08 19:32
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = PecsPlatformApplication.class)
+@SpringBootTest(classes = MainPlatformApplication.class)
 @WebAppConfiguration
 public class BaseTest {
 

@@ -17,7 +17,7 @@ public class AirusParams {
 
     double trainTestRatio = 0.5;
 
-    int xevalNumIter = 10;
+    int xevalNumIter = 20;
 
     double ssInitialFdr = 0.15;
 
@@ -28,7 +28,7 @@ public class AirusParams {
     double xgbIterationFdr = 0.008;
 
     //训练数据集的次数
-    int trainTimes = 10;
+    int trainTimes = 20;
 
     String ssMainScore = "var_xcorr_shape";
 

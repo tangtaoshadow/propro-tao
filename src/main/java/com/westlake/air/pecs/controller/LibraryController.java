@@ -96,7 +96,6 @@ public class LibraryController extends BaseController {
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     String add(Model model,
                @RequestParam(value = "name", required = true) String name,
-               @RequestParam(value = "instrument", required = false) String instrument,
                @RequestParam(value = "type", required = true) Integer type,
                @RequestParam(value = "description", required = false) String description,
                @RequestParam(value = "file") MultipartFile file,
@@ -109,7 +108,6 @@ public class LibraryController extends BaseController {
 
         LibraryDO library = new LibraryDO();
         library.setName(name);
-        library.setInstrument(instrument);
         library.setDescription(description);
         library.setType(type);
         ResultDO resultDO = libraryService.insert(library);
@@ -117,7 +115,7 @@ public class LibraryController extends BaseController {
             logger.warn(resultDO.getMsgInfo());
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             redirectAttributes.addFlashAttribute("library", library);
-            return "redirect:/library/create";
+            return "redirect://library/create";
         }
 
         TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_LIBRARY_FILE, library.getName());
@@ -154,7 +152,7 @@ public class LibraryController extends BaseController {
             return "redirect:/library/list";
         } else {
             model.addAttribute("library", resultDO.getModel());
-            return "/library/edit";
+            return "library/edit";
         }
     }
 
@@ -171,7 +169,7 @@ public class LibraryController extends BaseController {
                 }
             }
             model.addAttribute("library", resultDO.getModel());
-            return "/library/detail";
+            return "library/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/library/listStandard";
@@ -182,7 +180,6 @@ public class LibraryController extends BaseController {
     String update(Model model,
                   @RequestParam(value = "id", required = true) String id,
                   @RequestParam(value = "name") String name,
-                  @RequestParam(value = "instrument") String instrument,
                   @RequestParam(value = "type") Integer type,
                   @RequestParam(value = "description") String description,
                   @RequestParam(value = "justReal", required = false) boolean justReal,
@@ -204,7 +201,6 @@ public class LibraryController extends BaseController {
 
         LibraryDO library = resultDO.getModel();
         library.setDescription(description);
-        library.setInstrument(instrument);
         library.setType(type);
         ResultDO updateResult = libraryService.update(library);
         if (updateResult.isFailed()) {
@@ -231,8 +227,12 @@ public class LibraryController extends BaseController {
 
     @RequestMapping(value = "/delete/{id}")
     String delete(Model model, @PathVariable("id") String id,
-                  @RequestParam(value = "type", required = false) Integer type,
                   RedirectAttributes redirectAttributes) {
+        ResultDO<LibraryDO> res = libraryService.getById(id);
+        int type = 0;
+        if(res.isFailed()){
+            type = res.getModel().getType();
+        }
         ResultDO resultDO = libraryService.delete(id);
 
         String redirectListUrl = null;

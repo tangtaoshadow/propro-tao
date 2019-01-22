@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.pecs.constants.Constants;
 import com.westlake.air.pecs.parser.model.chemistry.Element;
 import com.westlake.air.pecs.utils.ElementUtil;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +42,11 @@ public class ElementsDAO {
     @PostConstruct
     public void init() {
         try {
-            File file = new File(getClass().getClassLoader().getResource("dbfile/elementsWithWeight.json").getPath());
+
+            InputStream stream = getClass().getClassLoader().getResourceAsStream("dbfile/elementsWithWeight.json");
+            File file = new File("dbfile/elementsWithWeight.json");
+            FileUtils.copyInputStreamToFile(stream, file);
+
             FileInputStream fis = new FileInputStream(file);
             int fileLength = fis.available();
             byte[] bytes = new byte[fileLength];

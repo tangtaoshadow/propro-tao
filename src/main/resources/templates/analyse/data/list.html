@@ -3,12 +3,8 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>
-        欢迎登陆西湖大学PECS分析平台
-    </title>
-
+    <title th:text="#{title_welcome_to_propro}"></title>
     <link th:href="|${url}/assets/css/pagination.css|" rel="stylesheet" type="text/css"/>
-
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -17,9 +13,7 @@
 <div class="m-subheader ">
     <div class="d-flex align-items-center">
         <div class="mr-auto">
-            <h3 class="m-subheader__title m-subheader__title--separator">
-                实验卷积数据列表页面
-            </h3>
+            <h3 class="m-subheader__title m-subheader__title--separator" th:text="#{menu_analyse_data_list}"></h3>
         </div>
     </div>
 </div>
@@ -47,22 +41,18 @@
                                 PeptideRef:
                             </button>
                         </div>
-                        <input type="text" class="form-control m-input" name="peptideRef" placeholder="肽段全称"
+                        <input type="text" class="form-control m-input" name="peptideRef" th:placeholder="#{placeholder_peptide_ref}"
                                th:value="${peptideRef}">
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                识别状态:
-                            </button>
+                            <button class="btn btn-success" type="button" th:text="#{btn_identified_status}"></button>
                         </div>
-                        <input type="text" class="form-control m-input" name="identifiedStatus" placeholder="识别状态"
+                        <input type="text" class="form-control m-input" name="identifiedStatus" th:placeholder="#{placeholder_identified_status}"
                                th:value="${identifiedStatus}">
                     </div>
                     <div class="input-group-append">
-                        <button class="btn btn-primary" type="submit">
-                            查找
-                        </button>
+                        <button class="btn btn-primary" type="submit" th:text="#{btn_search}"></button>
                     </div>
                 </div>
             </form>
@@ -74,12 +64,12 @@
                 <thead>
                 <tr>
                     <th width="2%">No.</th>
-                    <th width="25%">蛋白名称</th>
-                    <th width="20%">肽段全称</th>
-                    <th width="5%">肽段真伪</th>
+                    <th width="25%" th:text="#{label_protein_name}"></th>
+                    <th width="20%" th:text="#{label_peptide_name}"></th>
+                    <th width="5%" th:text="#{label_is_decoy}"></th>
                     <th width="6%">RT</th>
-                    <th width="25%">片段</th>
-                    <th width="17%">操作</th>
+                    <th width="25%" th:text="#{label_fragment}"></th>
+                    <th width="17%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -88,36 +78,24 @@
                     <td th:text="${data.proteinName}"></td>
                     <td>
                         <a target="_Blank"
-                           th:href="|/peptide/list?libraryId=${overview?.libraryId}&peptideRef=${data.peptideRef}|"
+                           th:href="@{/peptide/list(libraryId=${overview?.libraryId},peptideRef=${data.peptideRef})}"
                            th:text="${data.peptideRef}"></a>
                     </td>
                     <td th:if="${data.isDecoy}">
-                        <span class="m-badge m-badge--danger m-badge--wide">
-                            伪
-                        </span>
+                        <span class="m-badge m-badge--danger m-badge--wide" th:text="#{label_decoy}"></span>
                     </td>
                     <td th:if="${!data.isDecoy}">
-                       <span class="m-badge m-badge--success m-badge--wide">
-                           真
-                       </span>
+                       <span class="m-badge m-badge--success m-badge--wide" th:text="#{label_target}"></span>
                     </td>
                     <td th:text="${data.rt}"></td>
-
                     <td>
                         <table class="table table-bordered table-hover"
                                style="table-layout:fixed;background-color: whitesmoke;text-align: center;">
                             <thead>
                             <tr>
-                                <th width="30%">
-                                    CutInfo
-                                </th>
-                                <th width="30%">
-                                    碎片MZ
-                                </th>
-                                <th width="40%">
-                                    操作
-                                </th>
-
+                                <th width="30%" th:text="#{label_cutinfo}"></th>
+                                <th width="30%" th:text="#{label_fragment_mz}"></th>
+                                <th width="40%" th:text="#{label_operation}"></th>
                             </tr>
                             </thead>
                             <tbody>
@@ -126,9 +104,8 @@
                                 <td th:text="${data.mzMap.get(cutInfo)}"></td>
                                 <td>
                                     <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
-                                            data-target="#m_modal_target"
-                                            th:onclick="|query('${data.id}','${cutInfo}')|">
-                                        查看谱图
+                                            data-target="#m_modal_target" th:data1="${data.id}" th:data2="${cutInfo}"
+                                            th:onclick="query(this.getAttribute('data1'),this.getAttribute('data2'))" th:text="#{btn_chromatogram}">
                                     </button>
                                 </td>
                             </tr>
@@ -138,12 +115,11 @@
 
                     <td>
                         <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
-                                data-target="#m_modal_group"
-                                th:onclick="|queryGroup('${data.id}', false, false)|">
-                            查看组谱图
+                                data-target="#m_modal_group" th:data1="${data.id}"
+                                th:onclick="queryGroup(this.getAttribute('data1'), false, false)" th:text="#{btn_group_chromatograms}">
                         </button>
-                        <a th:if="${!data.isDecoy}" target="_blank" th:href="|/analyse/consultation?dataId=${data.id}&allCutInfo=true|"
-                           class="btn btn-danger btn-sm">高级诊断</a>
+                        <a th:if="${!data.isDecoy}" target="_blank" th:href="@{/analyse/consultation(dataId=${data.id},allCutInfo=true)}"
+                           class="btn btn-danger btn-sm" th:text="#{btn_peptide_clinic}"></a>
                     </td>
                 </tr>
                 </tbody>
@@ -159,7 +135,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">卷积数据概述详情页</h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_analyse_overview_detail}"></h3>
                         </div>
                     </div>
                 </div>
@@ -176,17 +152,15 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="id" class="col-3 col-form-label">
-                                卷积代号
+                            <label for="id" class="col-3 col-form-label" th:text="#{label_analyse_code}">
                             </label>
                             <div class="col-9">
-                                <input type="text" class="form-control m-input" id="expId" name="expId" readonly
+                                <input type="text" class="form-control m-input" id="name" name="name" readonly
                                        th:value="${overview?.name}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="id" class="col-3 col-form-label">
-                                实验ID
+                            <label for="id" class="col-3 col-form-label" th:text="#{label_exp_id}">
                             </label>
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="expId" name="expId" readonly
@@ -194,8 +168,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="library" class="col-3 col-form-label">
-                                关联标准库
+                            <label for="library" class="col-3 col-form-label" th:text="#{label_associated_library}">
                             </label>
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="library" readonly
@@ -203,17 +176,14 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="evolutionMSDataNum" class="col-3 col-form-label">
-                                总计卷积数据
-                            </label>
+                            <label for="evolutionMSDataNum" class="col-3 col-form-label" th:text="#{label_total_chromatogram_count}"></label>
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="evolutionMSDataNum" readonly
                                        th:value="|${totalNum}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="ExtractWindow" class="col-3 col-form-label">
-                                RT/MZ卷积窗口
+                            <label for="ExtractWindow" class="col-3 col-form-label" th:text="#{label_mz_rt_extract_window}">
                             </label>
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="ExtractWindow" readonly
@@ -221,8 +191,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="slopeIntercept" class="col-3 col-form-label">
-                                Slope/Intercept
+                            <label for="slopeIntercept" class="col-3 col-form-label" th:text="#{label_slope_intercept}">
                             </label>
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="slopeIntercept" readonly
@@ -230,8 +199,8 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="creator" class="col-3 col-form-label">
-                                创建人
+                            <label for="creator" class="col-3 col-form-label" th:text="#{label_creator}">
+
                             </label>
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="creator" readonly
@@ -239,8 +208,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="createDate" class="col-3 col-form-label">
-                                创建时间
+                            <label for="createDate" class="col-3 col-form-label" th:text="#{label_create_date}">
                             </label>
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="createDate" name="createDate"
@@ -251,7 +219,7 @@
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <a th:href="|/analyse/overview/delete/${overview?.id}|" class="btn btn-danger">删除</a>
+                            <a th:href="@{/analyse/overview/delete/{id}(id=${overview?.id})}" class="btn btn-danger" th:text="#{btn_delete}"></a>
                         </div>
                     </div>
                 </form>
@@ -270,8 +238,7 @@
                     </div>
                     <div id="modal-body" class="modal-body" style="width: 1200px;height:600px;"></div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                            关闭
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{btn_close}">
                         </button>
                     </div>
                 </div>
@@ -284,20 +251,16 @@
                     <div class="modal-header">
                         <h5 class="modal-title">
                             <button type="button" class="btn btn-sm btn-warning"
-                                    th:onclick="|queryGroup(null,true,false)|">
-                                高斯平滑
+                                    th:onclick="queryGroup(null,true,false)" th:text="#{btn_gauss_filter}">
                             </button>
                             <button type="button" class="btn btn-sm btn-info"
-                                    th:onclick="|queryGroup(null,true, true)|">
-                                平滑去噪
+                                    th:onclick="queryGroup(null,true, true)" th:text="#{btn_denoising_gauss_filter}">
                             </button>
                             <button type="button" class="btn btn-sm btn-brand"
-                                    th:onclick="|queryGroup(null,false, false)|">
-                                原始数据
+                                    th:onclick="queryGroup(null,false, false)" th:text="#{btn_original_data}">
                             </button>
                             <button type="button" class="btn btn-sm btn-accent"
-                                    th:onclick="|queryGroup(null,false, true)|">
-                                原始去噪
+                                    th:onclick="queryGroup(null,false, true)" th:text="#{btn_denoising_data}">
                             </button>
                             <span class="m-badge m-badge--success m-badge--wide" id="peptideLabel">
 
@@ -308,8 +271,7 @@
                     </div>
                     <div id="modal-body-group" class="modal-body" style="width: 1200px;height:600px;"></div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                            关闭
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{btn_close}">
                         </button>
                     </div>
                 </div>

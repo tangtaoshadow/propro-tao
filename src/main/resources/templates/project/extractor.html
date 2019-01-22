@@ -3,7 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>欢迎登陆西湖大学PECS分析平台</title>
+    <title th:text="#{title_welcome_to_propro}"></title>
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -11,8 +11,7 @@
 <div class="m-subheader ">
     <div class="d-flex align-items-center">
         <div class="mr-auto">
-            <h3 class="m-subheader__title m-subheader__title--separator">
-                批量卷积实验
+            <h3 class="m-subheader__title m-subheader__title--separator" th:text="#{label_batch_convolution}">
             </h3>
         </div>
     </div>
@@ -35,7 +34,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">卷积操作</h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_convolution_panel}"></h3>
                         </div>
                     </div>
                 </div>
@@ -45,18 +44,14 @@
                         <input type="text" name="id" hidden="hidden" th:value="${project?.id}">
                         <div class="col-md-7">
                             <div class="form-group m-form__group row">
-                                <label for="name" class="col-2 col-form-label">
-                                    项目名称
-                                </label>
+                                <label for="name" class="col-2 col-form-label" th:text="#{label_project_name}"></label>
                                 <div class="col-10">
                                     <input type="text" class="form-control m-input" id="name" readonly name="name"
                                            th:value="|${project?.name}(${project?.id})|">
                                 </div>
                             </div>
                             <div class="form-group m-form__group row">
-                                <label for="library" class="col-2 col-form-label">
-                                    关联标准库名称及ID
-                                </label>
+                                <label for="library" class="col-2 col-form-label" th:text="#{label_library}"></label>
                                 <div class="col-10">
                                     <select class="form-control m-input" id="library" name="libraryId">
                                         <option th:each="library:${libraries}" th:value="${library.id}"
@@ -66,40 +61,29 @@
                                 </div>
                             </div>
                             <div class="form-group m-form__group row">
-                                <label for="rtExtractWindow" class="col-2 col-form-label">
-                                    RT卷积窗口
-                                </label>
+                                <label for="rtExtractWindow" class="col-2 col-form-label" th:text="#{label_rt_extract_window}"></label>
                                 <div class="col-10">
-                                    <input type="text" class="form-control m-input" id="rtExtractWindow"
-                                           name="rtExtractWindow" th:value="${rtExtractWindow}">
-                                    <span class="m-form__help">默认为800</span>
+                                    <input type="text" class="form-control m-input" id="rtExtractWindow" name="rtExtractWindow" th:value="${rtExtractWindow}">
+                                    <span class="m-form__help" th:text="#{label_default_rt_extract_window}"></span>
                                 </div>
                             </div>
                             <div class="form-group m-form__group row">
-                                <label for="mzExtractWindow" class="col-2 col-form-label">
-                                    MZ卷积窗口
+                                <label for="mzExtractWindow" class="col-2 col-form-label" th:text="#{label_mz_extract_window}">
                                 </label>
                                 <div class="col-10">
-                                    <input type="text" class="form-control m-input" id="mzExtractWindow"
-                                           name="mzExtractWindow"
-                                           th:value="${mzExtractWindow}">
-                                    <span class="m-form__help">默认为0.05</span>
+                                    <input type="text" class="form-control m-input" id="mzExtractWindow" name="mzExtractWindow" th:value="${mzExtractWindow}">
+                                    <span class="m-form__help" th:text="#{label_default_mz_extract_window}"></span>
                                 </div>
                             </div>
                             <div class="form-group m-form__group row">
-                                <label for="creator" class="col-2 col-form-label">
-                                    操作人
-                                </label>
+                                <label for="creator" class="col-2 col-form-label" th:text="#{label_creator}"></label>
                                 <div class="col-10">
-                                    <input type="text" class="form-control m-input" id="creator" name="creator"
-                                           th:value="${creator}">
+                                    <input type="text" class="form-control m-input" id="creator" name="creator" th:value="${creator}">
                                     <span class="m-form__help"></span>
                                 </div>
                             </div>
                             <div class="form-group m-form__group row">
-                                <label for="note" class="col-2 col-form-label">
-                                    备忘录
-                                </label>
+                                <label for="note" class="col-2 col-form-label" th:text="#{label_note}"></label>
                                 <div class="col-10">
                                     <input type="text" class="form-control m-input" id="note" name="note"
                                            th:value="${note}">
@@ -108,7 +92,7 @@
                             </div>
                             <div class="form-group m-form__group row">
                                 <label for="mzExtractWindow" class="col-2 col-form-label"
-                                       th:text="|作用实验列表(${exps.size()}个)|"></label>
+                                       th:text="|#{label_exps_count}(${exps.size()})|"></label>
                                 <div class="col-10 row">
                                     <label class="col-3 col-form-label" th:each="exp:${exps}"
                                            th:text="|${exp.name}(${exp.id})|"></label>
@@ -117,64 +101,49 @@
                         </div>
                         <div class="col-md-5">
                             <div class="form-group m-form__group row">
-                                <label class="col-2 col-form-label">
-                                    额外执行步骤
+                                <label class="col-2 col-form-label" th:text="#{label_additional_steps}">
                                 </label>
                                 <div class="m-form__group form-group col-10">
                                     <div class="m-checkbox-list">
                                         <label class="m-checkbox m-checkbox--state-success">
                                             <input type="checkbox" name="useEpps" th:checked="${useEpps}"
-                                                   th:text="是否执行后续的完整流程">
+                                                   th:text="#{label_use_epps}">
                                             <span></span>
                                         </label>
                                     </div>
                                 </div>
                             </div>
                             <div class="form-group m-form__group row">
-                                <label for="sigma" class="col-2 col-form-label">
-                                    Sigma
-                                </label>
+                                <label for="sigma" class="col-2 col-form-label" th:text="#{label_set_sigma}"></label>
                                 <div class="col-10">
-                                    <input type="text" class="form-control m-input" id="sigma" name="sigma"
-                                           th:value="${sigma}">
-                                    <span class="m-form__help">如果要打分,请设定,默认为6.25</span>
+                                    <input type="text" class="form-control m-input" id="sigma" name="sigma" th:value="${sigma}">
+                                    <span class="m-form__help" th:text="#{label_default_sigma}"></span>
                                 </div>
                             </div>
                             <div class="form-group m-form__group row">
-                                <label for="spacing" class="col-2 col-form-label">
-                                    spacing
-                                </label>
+                                <label for="spacing" class="col-2 col-form-label"  th:text="#{label_default_spacing}"></label>
                                 <div class="col-10">
                                     <input type="text" class="form-control m-input" id="spacing" name="spacing"
                                            th:value="${spacing}">
-                                    <span class="m-form__help">如果要打分,请设定,默认为0.01</span>
+                                    <span class="m-form__help" th:text="#{label_default_spacing}"></span>
                                 </div>
                             </div>
                             <div class="form-group m-form__group row">
-                                <label for="shapeScoreThreshold" class="col-2 col-form-label">
-                                    Shape阈值
-                                </label>
+                                <label for="shapeScoreThreshold" class="col-2 col-form-label" th:text="#{label_threshold_for_shape}"></label>
                                 <div class="col-10">
-                                    <input type="text" class="form-control m-input" id="shapeScoreThreshold"
-                                           name="shapeScoreThreshold"
-                                           th:value="${shapeScoreThreshold}">
-                                    <span class="m-form__help">默认为0.6</span>
+                                    <input type="text" class="form-control m-input" id="shapeScoreThreshold" name="shapeScoreThreshold" th:value="${shapeScoreThreshold}">
+                                    <span class="m-form__help" th:text="#{label_default_shape_threshold}"></span>
                                 </div>
                             </div>
                             <div class="form-group m-form__group row">
-                                <label for="shapeWeightScoreThreshold" class="col-2 col-form-label">
-                                    ShapeWeight阈值
-                                </label>
+                                <label for="shapeWeightScoreThreshold" class="col-2 col-form-label" th:text="#{label_threshold_for_shape_weight}"></label>
                                 <div class="col-10">
-                                    <input type="text" class="form-control m-input" id="shapeWeightScoreThreshold"
-                                           name="shapeWeightScoreThreshold"
-                                           th:value="${shapeWeightScoreThreshold}">
-                                    <span class="m-form__help">默认为0.8</span>
+                                    <input type="text" class="form-control m-input" id="shapeWeightScoreThreshold" name="shapeWeightScoreThreshold" th:value="${shapeWeightScoreThreshold}">
+                                    <span class="m-form__help" th:text="#{label_default_shape_weight_threshold}"></span>
                                 </div>
                             </div>
                             <div class="m-form__group form-group row">
-                                <label>
-                                    选择你需要的子分数打分算法
+                                <label th:text="#{label_choose_feature_score_algorithms}">
                                 </label>
                                 <div class="col-md-3">
                                     <div class="m-checkbox-list" th:each="scoreType:${scoreTypes}">
@@ -192,7 +161,7 @@
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <button type="submit" class="btn btn-primary">开始批量卷积</button>
+                            <button type="submit" class="btn btn-primary" th:text="#{btn_start_convolution}"></button>
                         </div>
                     </div>
                 </form>

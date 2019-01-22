@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 
@@ -38,7 +39,6 @@ public class ProjectController extends BaseController {
 
     @Autowired
     ProjectService projectService;
-
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -86,6 +86,11 @@ public class ProjectController extends BaseController {
         model.addAttribute("name", name);
         model.addAttribute("description", description);
 
+        File file = new File(repository);
+        if(!file.exists()){
+            file.mkdirs();
+        }
+
         ProjectDO projectDO = new ProjectDO();
         projectDO.setName(name);
         projectDO.setDescription(description);
@@ -110,7 +115,7 @@ public class ProjectController extends BaseController {
             return "redirect:/project/list";
         } else {
             model.addAttribute("project", resultDO.getModel());
-            return "/project/edit";
+            return "project/edit";
         }
     }
 
@@ -214,11 +219,12 @@ public class ProjectController extends BaseController {
         }
 
         model.addAttribute("exps", expList);
+        model.addAttribute("useEpps", true);
         model.addAttribute("libraries", getLibraryList(0));
         model.addAttribute("project", resultDO.getModel());
         model.addAttribute("scoreTypes", ScoreType.getShownTypes());
 
-        return "/project/extractor";
+        return "project/extractor";
     }
 
     @RequestMapping(value = "/doextract")
@@ -234,7 +240,7 @@ public class ProjectController extends BaseController {
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
                      @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.6") Float shapeScoreThreshold,
                      @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.8") Float shapeWeightScoreThreshold,
-                     @RequestParam(value = "useEpps", required = false, defaultValue = "false") Boolean useEpps,
+                     @RequestParam(value = "useEpps", required = false, defaultValue = "true") Boolean useEpps,
                      HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
 

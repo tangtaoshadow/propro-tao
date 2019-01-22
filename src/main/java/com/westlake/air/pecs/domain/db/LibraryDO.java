@@ -34,8 +34,6 @@ public class LibraryDO extends BaseDO {
 
     String description;
 
-    String instrument;
-
     //蛋白总数目
     Long proteinCount;
 //

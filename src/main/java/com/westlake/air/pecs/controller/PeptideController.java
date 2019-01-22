@@ -125,7 +125,7 @@ public class PeptideController extends BaseController {
         ResultDO<PeptideDO> resultDO = peptideService.getById(id);
         if (resultDO.isSuccess()) {
             model.addAttribute("peptide", resultDO.getModel());
-            return "/peptide/detail";
+            return "peptide/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/peptide/list";
@@ -148,7 +148,7 @@ public class PeptideController extends BaseController {
             logger.info("未能够生成伪肽段");
         }
         model.addAttribute("peptide", resultDO.getModel());
-        return "/peptide/detail";
+        return "peptide/detail";
     }
 
     @RequestMapping(value = "/calculator")
@@ -165,11 +165,11 @@ public class PeptideController extends BaseController {
         model.addAttribute("deviation", deviation);
         model.addAttribute("unimodIds", unimodIds);
         if (sequence == null || sequence.isEmpty()) {
-            return "/peptide/calculator";
+            return "peptide/calculator";
         }
 
         if (type == null || type.isEmpty()) {
-            return "/peptide/calculator";
+            return "peptide/calculator";
         }
 
         model.addAttribute("sequence", sequence);
@@ -187,7 +187,7 @@ public class PeptideController extends BaseController {
         model.addAttribute("monoMz", monoMz);
         model.addAttribute("averageMz", averageMz);
 
-        return "/peptide/calculator";
+        return "peptide/calculator";
     }
 
 }

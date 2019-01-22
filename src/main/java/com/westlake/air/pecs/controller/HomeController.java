@@ -76,7 +76,7 @@ public class HomeController extends BaseController{
         model.addAttribute("exps", expRes.getModel());
         model.addAttribute("overviews", overviewRes.getModel());
         model.addAttribute("config", configDO);
-        return "/home";
+        return "home";
     }
 
 }

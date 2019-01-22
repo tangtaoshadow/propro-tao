@@ -1,15 +1,13 @@
 package com.westlake.air.pecs.dao;
 
 import com.westlake.air.pecs.parser.model.chemistry.Unimod;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 
 /**
@@ -24,9 +22,11 @@ public class UnimodDAO {
     public HashMap<String, Unimod> unimodMap = new HashMap<>();
 
     @PostConstruct
-    public void init() {
-        String filepath = getClass().getClassLoader().getResource("dbfile/unimod.obo").getPath();
-        File file = new File(filepath);
+    public void init() throws IOException {
+
+        InputStream stream = getClass().getClassLoader().getResourceAsStream("dbfile/unimod.obo");
+        File file = new File("dbfile/unimod.obo");
+        FileUtils.copyInputStreamToFile(stream, file);
 
         BufferedReader reader = null;
         try {

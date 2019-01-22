@@ -7,13 +7,13 @@ import com.westlake.air.pecs.async.LumsTask;
 import com.westlake.air.pecs.compressor.AirdCompressor;
 import com.westlake.air.pecs.constants.*;
 import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
 import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
 import com.westlake.air.pecs.domain.db.*;
 import com.westlake.air.pecs.domain.params.Exp;
 import com.westlake.air.pecs.domain.params.ExpVO;
+import com.westlake.air.pecs.domain.params.LumsParams;
 import com.westlake.air.pecs.domain.query.ExperimentQuery;
 import com.westlake.air.pecs.domain.query.ScanIndexQuery;
 import com.westlake.air.pecs.parser.MzXMLParser;
@@ -26,7 +26,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -174,6 +173,7 @@ public class ExperimentController extends BaseController {
 
             if (!file.exists()) {
                 errorInfo += ResultCode.FILE_NOT_EXISTED.getMessage() + ":" + exp.getFilePath() + "\r\n";
+                continue;
             }
 
             ExperimentDO experimentDO = new ExperimentDO();
@@ -214,25 +214,16 @@ public class ExperimentController extends BaseController {
             return "redirect:/experiment/list";
         } else {
             model.addAttribute("experiment", resultDO.getModel());
-            return "/experiment/edit";
+            return "experiment/edit";
         }
     }
 
     @RequestMapping(value = "/detail/{id}")
     String detail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
-
-        ScanIndexQuery query = new ScanIndexQuery();
-        query.setExperimentId(id);
-        query.setMsLevel(1);
-        Long ms1Count = scanIndexService.count(query);
-        query.setMsLevel(2);
-        Long ms2Count = scanIndexService.count(query);
         if (resultDO.isSuccess()) {
             model.addAttribute("experiment", resultDO.getModel());
-            model.addAttribute("ms1Count", ms1Count);
-            model.addAttribute("ms2Count", ms2Count);
-            return "/experiment/detail";
+            return "experiment/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/experiment/list";
@@ -346,7 +337,7 @@ public class ExperimentController extends BaseController {
 
         ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
         if (expResult.isFailed()) {
-            return "/experiment/swath";
+            return "experiment/swath";
         }
 
         ExperimentDO exp = expResult.getModel();
@@ -380,11 +371,12 @@ public class ExperimentController extends BaseController {
             return "redirect:/experiment/list";
         }
 
+        model.addAttribute("useEpps", true);
         model.addAttribute("libraries", getLibraryList(0));
         model.addAttribute("experiment", resultDO.getModel());
         model.addAttribute("scoreTypes", ScoreType.getShownTypes());
 
-        return "/experiment/extractor";
+        return "experiment/extractor";
     }
 
     @RequestMapping(value = "/doextract")
@@ -402,7 +394,7 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
                      @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.6") Float shapeScoreThreshold,
                      @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.8") Float shapeWeightScoreThreshold,
-                     @RequestParam(value = "useEpps", required = false,defaultValue = "false") Boolean useEpps,
+                     @RequestParam(value = "useEpps", required = false, defaultValue = "true") Boolean useEpps,
                      HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
 
@@ -483,7 +475,7 @@ public class ExperimentController extends BaseController {
 
         model.addAttribute("libraries", getLibraryList(1));
         model.addAttribute("experiment", resultDO.getModel());
-        return "/experiment/irt";
+        return "experiment/irt";
     }
 
     @RequestMapping(value = "/doirt")
