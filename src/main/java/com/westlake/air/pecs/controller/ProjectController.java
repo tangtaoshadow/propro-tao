@@ -79,18 +79,21 @@ public class ProjectController extends BaseController {
                @RequestParam(value = "repository", required = true) String repository,
                @RequestParam(value = "ownerName", required = false) String ownerName,
                @RequestParam(value = "description", required = false) String description,
+               @RequestParam(value = "type", required = true) String type,
                RedirectAttributes redirectAttributes) {
 
         model.addAttribute("repository", repository);
         model.addAttribute("ownerName", ownerName);
         model.addAttribute("name", name);
         model.addAttribute("description", description);
+        model.addAttribute("type", type);
 
         ProjectDO projectDO = new ProjectDO();
         projectDO.setName(name);
         projectDO.setDescription(description);
         projectDO.setRepository(repository);
         projectDO.setOwnerName(ownerName);
+        projectDO.setType(type);
 
         ResultDO result = projectService.insert(projectDO);
         if (result.isFailed()) {

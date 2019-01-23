@@ -40,7 +40,7 @@
                             </label>
                             <div class="col-8">
                                 <input type="text" class="form-control m-input" id="name"
-                                       placeholder="Enter Project Name" name="name" th:value="${project?.name}">
+                                       placeholder="Enter Project Name" name="name" th:value="${name}">
                                 <span class="m-form__help">项目名称全局唯一</span>
                             </div>
                         </div>
@@ -50,7 +50,16 @@
                             </label>
                             <div class="col-8">
                                 <input type="text" class="form-control m-input" id="repository" name="repository"
-                                       placeholder="repository" th:value="${project?.repository}">
+                                       placeholder="repository" th:value="${repository}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="type" class="col-4 col-form-label">
+                                实验类型
+                            </label>
+                            <div class="col-8">
+                                <input type="text" class="form-control m-input" id="type" name="type"
+                                       placeholder="0:DIA,1:PRM" th:value="${type}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -58,7 +67,7 @@
                                 必填,项目负责人
                             </label>
                             <div class="col-8">
-                                <input type="text" class="form-control m-input" id="ownerName" name="ownerName" th:value="${project?.ownerName}">
+                                <input type="text" class="form-control m-input" id="ownerName" name="ownerName" th:value="${ownerName}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -67,7 +76,7 @@
                             </label>
                             <div class="col-8">
                             <textarea class="form-control m-input" id="description" name="description"
-                                      rows="3" th:value="${project?.description}"></textarea>
+                                      rows="3" th:value="${description}"></textarea>
                             </div>
                         </div>
 

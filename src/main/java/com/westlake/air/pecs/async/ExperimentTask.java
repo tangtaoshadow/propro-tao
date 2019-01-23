@@ -54,7 +54,12 @@ public class ExperimentTask extends BaseTask {
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         experimentService.uploadFile(experimentDO, file, taskDO);
-        List<WindowRang> rangs = experimentService.getWindows(experimentDO.getId());
+        List<WindowRang> rangs;
+        if(experimentDO.getType().equals("1")){
+            rangs = experimentService.getPrmWindows(experimentDO.getId());
+        }else {
+            rangs = experimentService.getWindows(experimentDO.getId());
+        }
         experimentDO.setWindowRangs(rangs);
         experimentService.update(experimentDO);
     }
