@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -166,14 +167,14 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public ResultDO parseAndInsert(LibraryDO library, InputStream in, String fileName, TaskDO taskDO) {
+    public ResultDO parseAndInsert(LibraryDO library, InputStream in, String fileName, HashSet<String> prmPeptideRefSet, TaskDO taskDO) {
 
         ResultDO resultDO;
 
         if (fileName.toLowerCase().endsWith("tsv") || fileName.toLowerCase().endsWith("csv")) {
-            resultDO = tsvParser.parseAndInsert(in, library, taskDO);
+            resultDO = tsvParser.parseAndInsert(in, library, prmPeptideRefSet, taskDO);
         } else if (fileName.toLowerCase().endsWith("traml")) {
-            resultDO = traMLParser.parseAndInsert(in, library, taskDO);
+            resultDO = traMLParser.parseAndInsert(in, library, prmPeptideRefSet, taskDO);
         } else {
             return ResultDO.buildError(ResultCode.INPUT_FILE_TYPE_MUST_BE_TSV_OR_TRAML);
         }
@@ -201,9 +202,9 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public void uploadFile(LibraryDO library, InputStream in, String fileName, TaskDO taskDO) {
+    public void uploadFile(LibraryDO library, InputStream in, String fileName, HashSet<String> prmPeptideRefSet, TaskDO taskDO) {
         //先Parse文件,再作数据库的操作
-        ResultDO result = parseAndInsert(library, in, fileName, taskDO);
+        ResultDO result = parseAndInsert(library, in, fileName, prmPeptideRefSet, taskDO);
         if (result.getErrorList() != null) {
             if (result.getErrorList().size() > errorListNumberLimit) {
                 taskDO.addLog("解析错误,错误的条数过多,这边只显示" + errorListNumberLimit + "条错误信息");

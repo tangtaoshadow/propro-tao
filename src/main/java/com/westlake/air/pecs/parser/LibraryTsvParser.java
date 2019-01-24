@@ -49,7 +49,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
     private static String Quantifying = "quantifying_transition";
 
     @Override
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library, TaskDO taskDO) {
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> prmPeptideRefSet, TaskDO taskDO) {
 
         ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
         try {
@@ -74,6 +74,9 @@ public class LibraryTsvParser extends BaseLibraryParser {
             int count = 0;
             HashMap<String, PeptideDO> map = new HashMap<>();
             while ((line = reader.readLine()) != null) {
+                if(!prmPeptideRefSet.isEmpty() && !isPrmPeptideRef(line, columnMap, prmPeptideRefSet)){
+                    continue;
+                }
                 ResultDO<PeptideDO> resultDO = parseTransition(line, columnMap, library);
 
                 if (resultDO.isFailed()) {
@@ -182,5 +185,12 @@ public class LibraryTsvParser extends BaseLibraryParser {
         return resultDO;
     }
 
+
+    private boolean isPrmPeptideRef(String line, HashMap<String, Integer> columnMap, HashSet<String> peptideRefList){
+        String[] row = line.split("\t");
+        String fullName = row[columnMap.get(FullUniModPeptideName)];
+        String charge = row[columnMap.get(PrecursorCharge)];
+        return peptideRefList.contains(fullName+"_"+charge);
+    }
 
 }

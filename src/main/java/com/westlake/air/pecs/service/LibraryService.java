@@ -7,6 +7,7 @@ import com.westlake.air.pecs.domain.query.LibraryQuery;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -34,9 +35,9 @@ public interface LibraryService {
 
     String getNameById(String id);
 
-    ResultDO parseAndInsert(LibraryDO library, InputStream in, String fileName, TaskDO taskDO);
+    ResultDO parseAndInsert(LibraryDO library, InputStream in, String fileName, HashSet<String> prmPeptideRefSet, TaskDO taskDO);
 
     void countAndUpdateForLibrary(LibraryDO library);
 
-    void uploadFile(LibraryDO library, InputStream in, String fileName, TaskDO taskDO);
+    void uploadFile(LibraryDO library, InputStream in, String fileName, HashSet<String> prmPeptideRefSet, TaskDO taskDO);
 }

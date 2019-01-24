@@ -11,6 +11,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -23,10 +25,10 @@ public class LibraryTask extends BaseTask{
     LibraryService libraryService;
 
     @Async(value = "uploadFileExecutor")
-    public void saveLibraryTask(LibraryDO library, InputStream in, String fileName, TaskDO taskDO) {
+    public void saveLibraryTask(LibraryDO library, InputStream in, String fileName, HashSet<String> prmPeptideRefSet, TaskDO taskDO) {
         taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
-        libraryService.uploadFile(library, in, fileName, taskDO);
+        libraryService.uploadFile(library, in, fileName, prmPeptideRefSet, taskDO);
     }
 }

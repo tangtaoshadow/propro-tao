@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,7 +35,7 @@ public abstract class BaseLibraryParser {
 
     public static final Pattern unimodPattern = Pattern.compile("([a-z])[\\(]unimod[\\:](\\d*)[\\)]");
 
-    public abstract ResultDO parseAndInsert(InputStream in, LibraryDO library, TaskDO taskDO);
+    public abstract ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> prmPeptideRefList, TaskDO taskDO);
 
     protected ResultDO<Annotation> parseAnnotation(String annotations) {
         ResultDO<Annotation> resultDO = new ResultDO<>(true);
