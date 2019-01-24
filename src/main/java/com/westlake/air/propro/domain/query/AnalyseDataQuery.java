@@ -1,0 +1,57 @@
+package com.westlake.air.propro.domain.query;
+
+import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by James Lu MiaoShan
+ * Time: 2018-07-19 15:55
+ */
+@Data
+public class AnalyseDataQuery extends PageQuery{
+
+    private static final long serialVersionUID = -3258829839166834225L;
+
+    String id;
+
+    String overviewId;
+
+    String transitionId;
+
+    String libraryId;
+
+    Integer msLevel;
+
+    String peptideRef;
+
+    Boolean isDecoy;
+
+    Float mzStart;
+
+    Float mzEnd;
+
+    List<Integer> identifiedStatus;
+
+    Double fdrStart;
+
+    Double fdrEnd;
+
+    public AnalyseDataQuery(){}
+
+    public AnalyseDataQuery(String overviewId){
+        this.overviewId = overviewId;
+    }
+
+    public AnalyseDataQuery(int pageNo,int pageSize){
+        super(pageNo, pageSize);
+    }
+
+    public void addIndentifiedStatus(Integer status){
+        if(identifiedStatus == null){
+            identifiedStatus = new ArrayList<>();
+        }
+        identifiedStatus.add(status);
+    }
+}
