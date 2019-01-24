@@ -3,12 +3,8 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>
-        欢迎登陆西湖大学PECS分析平台
-    </title>
-
+    <title th:text="#{title_welcome_to_propro}"></title>
     <link th:href="|${url}/assets/css/pagination.css|" rel="stylesheet" type="text/css"/>
-
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -17,8 +13,7 @@
 <div class="m-subheader ">
     <div class="d-flex align-items-center">
         <div class="mr-auto">
-            <h3 class="m-subheader__title m-subheader__title--separator">
-                肽段检测会诊工具
+            <h3 class="m-subheader__title m-subheader__title--separator" th:text="#{menu_peptide_clinic}">
             </h3>
         </div>
     </div>
@@ -43,17 +38,14 @@
                         <div class="form-group m-form__group row">
                             <div class="input-group col-lg-4">
                                 <div class="input-group-prepend">
-                                    <button class="btn btn-success" type="button">
-                                        实验ID:
-                                    </button>
+                                    <button class="btn btn-success" type="button" th:text="#{label_exp_id}"></button>
                                 </div>
                                 <input type="text" class="form-control m-input" name="expId"
                                        th:value="${expId}">
                             </div>
                             <div class="input-group col-lg-4">
                                 <div class="input-group-prepend">
-                                    <button class="btn btn-success" type="button">
-                                        标准库ID:
+                                    <button class="btn btn-success" type="button" th:text="#{label_associated_library}">
                                     </button>
                                 </div>
                                 <input type="text" class="form-control m-input" name="libraryId"
@@ -90,8 +82,7 @@
                             </div>
                             <div class="input-group col-lg-2">
                                 <div class="input-group-prepend">
-                                    <button class="btn btn-success" type="button">
-                                        碎片最小长度:
+                                    <button class="btn btn-success" type="button" th:text="#{label_fragment_min_length}">
                                     </button>
                                 </div>
                                 <input type="number" th:max="${peptide?.sequence?.length()}" class="form-control m-input" name="limitLength"
@@ -130,8 +121,7 @@
                                 <div class="m-checkbox-list">
                                     <label class="m-checkbox">
                                         <input type="checkbox" class="form-control m-input" name="useGaussFilter"
-                                               th:checked="${useGaussFilter}">
-                                        是否使用高斯平滑
+                                               th:checked="${useGaussFilter}" th:text="#{label_if_use_gauss_filter}">
                                         <span></span>
                                     </label>
                                 </div>
@@ -141,8 +131,7 @@
                                 <div class="m-checkbox-list">
                                     <label class="m-checkbox">
                                         <input type="checkbox" class="form-control m-input" name="useNoise"
-                                               th:checked="${useNoise}">
-                                        是否使用降噪处理
+                                               th:checked="${useNoise}" th:text="#{label_if_use_data_denoising}">
                                         <span></span>
                                     </label>
                                 </div>
@@ -151,8 +140,7 @@
                                 <div class="m-checkbox-list">
                                     <label class="m-checkbox">
                                         <input type="checkbox" class="form-control m-input" name="noUseForFill"
-                                               th:checked="${noUseForFill}">
-                                        不使用算法生成
+                                               th:checked="${noUseForFill}" th:text="#{label_no_use_for_algo_fill}">
                                         <span></span>
                                     </label>
                                 </div>
@@ -161,8 +149,7 @@
                                 <div class="m-checkbox-list">
                                     <label class="m-checkbox">
                                         <input type="checkbox" class="form-control m-input" name="noUseForLib"
-                                               th:checked="${noUseForLib}">
-                                        不使用标准库
+                                               th:checked="${noUseForLib}" th:text="#{label_no_use_for_library_fill}">
                                         <span></span>
                                     </label>
                                 </div>
@@ -172,23 +159,20 @@
                                 <div class="m-checkbox-list">
                                     <label class="m-checkbox">
                                         <input type="checkbox" class="form-control m-input" name="allCutInfo"
-                                               th:checked="${allCutInfo}">
-                                        每一次都重新计算所有片段
+                                               th:checked="${allCutInfo}" th:text="#{label_recalculate_per_time}">
                                         <span></span>
                                     </label>
                                 </div>
                             </div>
                             <div class="input-group-append">
-                                <button class="btn btn-primary" type="submit">
-                                    分析
+                                <button class="btn btn-primary" type="submit" th:text="#{btn_analyse}">
                                 </button>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-2 row">
                                 <div class="col-lg-12">
-                                    <label>
-                                        标准库
+                                    <label th:text="#{label_associated_library}">
                                     </label>
                                     <div class="m-checkbox-list" th:each="dicCutInfo:${cutInfoFromDic}">
                                         <label class="m-checkbox m-checkbox--state-success">
@@ -229,29 +213,29 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                                <h3 class="m-portlet__head-text">诊断肽段: <span th:text="${peptideRef}"></span></h3>
+                                <h3 class="m-portlet__head-text" th:text="#{label_peptide_reference}"><span th:text="${peptideRef}"></span></h3>
                             </div>
                         </div>
                     </div>
 
                     <div class="m-portlet__body">
                         <div class="form-group m-form__group row">
-                            <label for="slopeIntercept" class="col-3 col-form-label">斜率/截距</label>
+                            <label for="slopeIntercept" class="col-3 col-form-label" th:text="#{label_slope_intercept}"></label>
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="slopeIntercept" readonly
                                        th:value="|${exp?.slope}/${exp?.intercept}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="slopeIntercept" class="col-3 col-form-label">前体MZ</label>
+                            <label for="precursorMz" class="col-3 col-form-label" th:text="#{label_precursor_mz}"></label>
                             <div class="col-9">
-                                <input type="text" class="form-control m-input" id="slopeIntercept" readonly
+                                <input type="text" class="form-control m-input" id="precursorMz" readonly
                                        th:value="${peptide?.mz}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="slopeIntercept" class="col-12 col-form-label" style="text-align: center;">
-                                算法生成但未命中的片段</label>
+                            <label for="slopeIntercept" class="col-12 col-form-label" style="text-align: center;" th:text="#{label_algo_fill_but_not_hit}">
+                            </label>
                             <div class="m-checkbox-list" th:each="genCutInfo:${cutInfoFromGuess}">
                                 <a class="m-checkbox m-checkbox--state-success" th:text="${genCutInfo}"></a>
                             </div>
@@ -267,7 +251,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                                <h3 class="m-portlet__head-text">按片段搜索相似肽段(不包含Unimod,长度不能小于4)</span></h3>
+                                <h3 class="m-portlet__head-text" th:text="#{label_search_by_similar_peptide}"></span></h3>
                             </div>
                         </div>
                     </div>
@@ -279,8 +263,7 @@
                                name="precursorMz">
                         <input id="experimentId" type="hidden" th:value="${expId}" class="form-control" name="expId">
                         <div class="form-group m-form__group row">
-                            <label for="fragmentSequence" class="col-3 col-form-label">
-                                肽段片段
+                            <label for="fragmentSequence" class="col-3 col-form-label" th:text="#{label_fragment_sequence}">
                             </label>
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="fragmentSequence"
@@ -288,13 +271,12 @@
                             </div>
                         </div>
                         <div class="input-group-append">
-                            <button class="btn btn-primary" onclick="search()">
-                                搜索
+                            <button class="btn btn-primary" onclick="search()" th:text="#{btn_search}">
                             </button>
                         </div>
                         <div class="form-group m-form__group row">
                             <label for="slopeIntercept" class="col-12 col-form-label"
-                                   style="text-align: center">搜索结果</label>
+                                   style="text-align: center" th:text="#{label_search_result}"></label>
                             <div class="col-12" id="searchResult">
 
                             </div>

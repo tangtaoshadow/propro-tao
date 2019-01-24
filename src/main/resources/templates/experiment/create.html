@@ -3,9 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>
-        欢迎登陆西湖大学PECS分析平台
-    </title>
+    <title th:text="#{title_welcome_to_propro}"></title>
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -22,7 +20,7 @@
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
                             <span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
-                            <h3 class="m-portlet__head-text">导入实验数据</h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_import_experiments}"></h3>
                         </div>
                     </div>
                 </div>
@@ -30,66 +28,55 @@
                 <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/experiment/add}" th:method="post" enctype="multipart/form-data">
                     <div class="m-portlet__body">
                         <div class="form-group m-form__group m--margin-top-10">
-                            <div class="alert m-alert m-alert--default" role="alert">
-                                请导入MzXML格式的实验数据
+                            <div class="alert m-alert m-alert--default" role="alert" th:text="#{import_mzxml_format_experiments}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="name" class="col-2 col-form-label">
-                                实验数据名称
+                            <label for="name" class="col-2 col-form-label" th:text="#{label_exp_name}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="name"
                                        placeholder="Enter Experiment Name" name="name" th:value="${name}">
-                                <span class="m-form__help">实验数据名称全局唯一</span>
+                                <span class="m-form__help" th:text="#{label_exp_name_must_be_unique}"></span>
                             </div>
                         </div>
 
                         <div class="form-group m-form__group row">
-                            <label for="projectName" class="col-2 col-form-label">
-                                所属项目名称
+                            <label for="projectName" class="col-2 col-form-label" th:text="#{label_related_project_name}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="projectName"
                                        placeholder="Enter Project Name" name="name" th:value="${projectName}">
-                                <span class="m-form__help">所属项目名称</span>
                             </div>
                         </div>
 
                         <div class="form-group m-form__group row">
-                            <label for="projectName" class="col-2 col-form-label">
-                                所属项目批次
+                            <label for="projectName" class="col-2 col-form-label" th:text="#{label_related_project_batch_name}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="batchName"
                                        placeholder="Enter Project Batch Name" name="name" th:value="${batchName}">
-                                <span class="m-form__help">所属项目批次名称</span>
                             </div>
                         </div>
 
                         <div class="form-group m-form__group row">
-                            <label for="filePath" class="col-2 col-form-label">
-                                文件绝对路径
+                            <label for="filePath" class="col-2 col-form-label" th:text="#{label_absoluted_file_path}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="filePath"
                                        placeholder="Enter File Location,such as D:/data/xxx.mzXML" name="filePath" th:value="${filePath}">
-                                <span class="m-form__help">文件在服务器上的绝对路径</span>
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="overlap" class="col-2 col-form-label">
-                                自定义Swath重叠区域
+                            <label for="overlap" class="col-2 col-form-label" th:text="#{label_swath_window_overlap}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="overlap"
                                        placeholder="" name="overlap" th:value="${overlap}">
-                                <span class="m-form__help">自定义Swath窗口重叠区域,如果窗口间没有重叠可以不填</span>
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="description" class="col-2 col-form-label">
-                                详细描述
+                            <label for="description" class="col-2 col-form-label" th:text="#{label_detail_description}">
                             </label>
                             <div class="col-10">
                             <textarea class="form-control m-input" id="description" name="description"
@@ -99,8 +86,7 @@
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <button type="submit" class="btn btn-primary">
-                                提交
+                            <button type="submit" class="btn btn-primary" th:text="#{btn_submit}">
                             </button>
                         </div>
                     </div>

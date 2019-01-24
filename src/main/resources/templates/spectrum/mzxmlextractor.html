@@ -3,9 +3,8 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>欢迎登陆西湖大学PECS分析平台</title>
+    <title th:text="#{title_welcome_to_propro}"></title>
     <link th:href="|${url}/assets/css/main.css|" rel="stylesheet" type="text/css"/>
-
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -24,8 +23,7 @@
                     <div class="form-group m-form__group row">
                         <div class="input-group col-lg-6">
                             <div class="input-group-prepend">
-                                <button class="btn btn-success" type="button">
-                                    精度:
+                                <button class="btn btn-success" type="button" th:text="#{label_data_precision}">
                                 </button>
                             </div>
                             <select class="form-control m-input" name="precision">
@@ -38,8 +36,7 @@
                         <div class="input-group col-lg-6">
                             <div class="m-checkbox-list">
                                 <label class="m-checkbox">
-                                    <input id="isZlibCompression" type="checkbox" th:checked="${isZlibCompression}" name="isZlibCompression">
-                                    是否是压缩数据
+                                    <input id="isZlibCompression" type="checkbox" th:checked="${isZlibCompression}" name="isZlibCompression" th:text="#{label_is_zlib}">
                                     <span></span>
                                 </label>
                             </div>
@@ -48,14 +45,13 @@
                     <div class="form-group m-form__group row">
                         <div class="input-group col-lg-12">
                             <div class="input-group-prepend">
-                                <button class="btn btn-success" type="button">
-                                    压缩数据:
+                                <button class="btn btn-success" type="button" th:text="#{label_compressed_data}">
                                 </button>
                             </div>
                             <textarea rows="15" class="form-control m-input" name="values" placeholder="values"
                                       th:text="${values}"></textarea>
                             <div class="input-group-append">
-                                <button class="btn btn-warning" type="submit">解压</button>
+                                <button class="btn btn-warning" type="submit" th:text="#{btn_decompress}"></button>
                             </div>
                         </div>
                     </div>

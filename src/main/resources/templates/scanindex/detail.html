@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
-      layout:decorator="layouts/layout">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" layout:decorator="layouts/layout">
     <!-- begin::Head -->
     <head>
-        <title>欢迎登陆西湖大学PECS分析平台</title>
+        <title th:text="#{title_welcome_to_propro}"></title>
     </head>
     <!-- end::Head -->
     <!-- end::Body -->
@@ -12,9 +11,7 @@
         <div class="m-subheader ">
             <div class="d-flex align-items-center">
                 <div class="mr-auto">
-                    <h3 class="m-subheader__title m-subheader__title--separator">
-                        标准库详情页面
-                    </h3>
+                    <h3 class="m-subheader__title m-subheader__title--separator" th:text="#{label_scan_index_detail}"></h3>
                 </div>
             </div>
         </div>
@@ -37,7 +34,7 @@
                                     <span class="m-portlet__head-icon m--hide">
                                         <i class="la la-gear"></i>
                                     </span>
-                                    <h3 class="m-portlet__head-text">ScanIndex详情页</h3>
+                                    <h3 class="m-portlet__head-text" th:text="#{label_scan_index_detail}"></h3>
                                 </div>
                             </div>
                         </div>
@@ -50,23 +47,19 @@
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="id" name="id" readonly th:value="${scanIndex?.id}">
-                                        <span class="m-form__help">全局唯一</span>
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label class="col-2 col-form-label">
-                                        对应实验的ID
-                                    </label>
+                                    <label class="col-2 col-form-label" th:text="#{label_exp_id}"></label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="experimentId" name="experimentId" readonly th:value="${scanIndex?.experimentId}"/>
                                         <span class="m-form__help">
-                                            <a th:href="|/experiment/detail/${scanIndex?.experimentId}|">点击查看</a>
+                                            <a th:href="@{/experiment/detail/{id}(id=${scanIndex?.experimentId})}" th:text="#{btn_click_to_view}"></a>
                                         </span>
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="msLevel" class="col-2 col-form-label">
-                                        MS等级
+                                    <label for="msLevel" class="col-2 col-form-label" th:text="#{label_ms_level}">
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="msLevel" name="msLevel" readonly th:value="${scanIndex?.msLevel}">
@@ -74,15 +67,14 @@
                                 </div>
                                 <div class="form-group m-form__group row">
                                     <label for="num" class="col-2 col-form-label">
-                                        组内序号
+                                        Num.
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="num" name="num" readonly th:value="${scanIndex?.num}">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="mzxmlStart" class="col-2 col-form-label">
-                                        所在文件位置
+                                    <label for="mzxmlStart" class="col-2 col-form-label" th:text="#{label_loc_in_mzxml_file}">
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="mzxmlStart" name="mzxmlStart"
@@ -90,8 +82,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="airdStart" class="col-2 col-form-label">
-                                        所在文件位置(In aird File)
+                                    <label for="airdStart" class="col-2 col-form-label" th:text="#{label_loc_in_aird_file}">
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="airdStart" name="airdStart"
@@ -99,17 +90,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="airdBinStart" class="col-2 col-form-label">
-                                        所在文件位置(In aird bin File)
-                                    </label>
-                                    <div class="col-10">
-                                        <input type="text" class="form-control m-input" id="airdBinStart" name="airdBinStart"
-                                               readonly th:value="|${scanIndex?.positionMap?.get('aird')?.start} -> ${scanIndex?.positionMap?.get('aird')?.delta}|">
-                                    </div>
-                                </div>
-                                <div class="form-group m-form__group row">
-                                    <label for="originalPrecursorMz" class="col-2 col-form-label">
-                                        MZ窗口位置(校准前)
+                                    <label for="originalPrecursorMz" class="col-2 col-form-label" th:text="#{label_precursor_mz_range_before_adjust}">
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="originalPrecursorMz" name="originalPrecursorMz"
@@ -117,8 +98,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="precursorMz" class="col-2 col-form-label">
-                                        MZ窗口位置(校准后)
+                                    <label for="precursorMz" class="col-2 col-form-label" th:text="#{label_precursor_mz_range_after_adjust}">
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="precursorMz" name="precursorMz"
@@ -126,8 +106,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="windowWideness" class="col-2 col-form-label">
-                                        Swath窗口宽度(校准前/后)
+                                    <label for="windowWideness" class="col-2 col-form-label" th:text="|#{label_swath_window_weight}(Before/After)|">
+
                                     </label>
                                     <div class="col-10">
                                         <input type="text" class="form-control m-input" id="windowWideness" name="windowWideness"
@@ -147,7 +127,7 @@
                                         Aird-RTs
                                     </label>
                                     <div class="col-10">
-                                        <input type="text" class="form-control m-input" id="rts" name="rts" readonly th:value="|${scanIndex?.rts?.size()}组|">
+                                        <input type="text" class="form-control m-input" id="rts" name="rts" readonly th:value="|${scanIndex?.rts?.size()}|">
                                     </div>
                                 </div>
                             </div>

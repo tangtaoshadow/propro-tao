@@ -3,9 +3,8 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>欢迎登陆西湖大学PECS分析平台</title>
+    <title th:text="#{title_welcome_to_propro}"></title>
     <link th:href="|${url}/assets/css/pagination.css|" rel="stylesheet" type="text/css"/>
-
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -28,8 +27,7 @@
                 <div class="form-group m-form__group row">
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                标准库/iRT库:
+                            <button class="btn btn-success" type="button" th:text="|#{label_library}/#{label_irt_library}|">
                             </button>
                         </div>
                         <select class="form-control m-input" id="libraryId" name="libraryId">
@@ -40,8 +38,7 @@
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                是否伪肽段:
+                            <button class="btn btn-success" type="button" th:text="#{label_is_decoy}">
                             </button>
                         </div>
                         <select class="form-control m-input" id="decoyFilter" name="decoyFilter">
@@ -52,8 +49,7 @@
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                蛋白质名称:
+                            <button class="btn btn-success" type="button" th:text="#{label_protein_name}">
                             </button>
                         </div>
                         <input type="text" class="form-control m-input" name="proteinName"
@@ -61,24 +57,22 @@
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                Sequence(不含Unimod):
+                            <button class="btn btn-success" type="button" th:text="|#{label_sequence}(#{label_no_unimod})|">
                             </button>
                         </div>
                         <input type="text" class="form-control m-input" name="sequence"
-                               placeholder="本字段支持模糊搜索" th:value="${sequence}">
+                               th:placeholder="#{label_support_fuzzy_search}" th:value="${sequence}">
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
                             <button class="btn btn-success" type="button">
-                                肽段:
+                                peptideRef:
                             </button>
                         </div>
                         <input type="text" class="form-control m-input" name="peptideRef"
                                placeholder="peptideRef" th:value="${peptideRef}">
                         <div class="input-group-append">
-                            <button class="btn btn-warning" type="submit">
-                                搜索
+                            <button class="btn btn-warning" type="submit" th:text="#{btn_search}">
                             </button>
                         </div>
                     </div>
@@ -130,7 +124,7 @@
                 <tr th:each="peptide,status:${peptideList}">
                     <td th:text="${status.index+1}"></td>
                     <td>
-                        <a th:href="|/library/detail/${peptide.libraryId}|"
+                        <a th:href="@{/library/detail/{id}(id=${peptide.libraryId})}"
                            th:text="${peptide.libraryName}"></a>
                     </td>
                     <td th:text="${peptide.proteinName}"></td>
@@ -182,7 +176,7 @@
                         </table>
                     </td>
                     <td>
-                        <a th:href="|/peptide/detail/${peptide.id}|"
+                        <a th:href="@{/peptide/detail/{id}(id=${peptide.id})}"
                            class="btn btn-success btn-sm">详情
                         </a>
                     </td>

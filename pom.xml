@@ -4,18 +4,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.westlake.air</groupId>
-    <artifactId>pecs</artifactId>
+    <artifactId>propro</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>PECS</name>
-    <description>Proteomics Elastic Compute Service</description>
+    <name>propro</name>
+    <description>Proteomics Pro</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.0.5.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <version>2.1.2.RELEASE</version>
     </parent>
 
     <properties>
@@ -202,9 +201,9 @@
         </dependency>
 
         <!--<dependency>-->
-            <!--<groupId>org.jocl</groupId>-->
-            <!--<artifactId>jocl</artifactId>-->
-            <!--<version>2.0.1</version>-->
+            <!--<groupId>org.dcache</groupId>-->
+            <!--<artifactId>nfs4j-core</artifactId>-->
+            <!--<version>0.17.2</version>-->
         <!--</dependency>-->
     </dependencies>
 
@@ -230,16 +229,33 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <!--<repository>-->
+            <!--<id>dcache-releases</id>-->
+            <!--<name>dCache.ORG maven repository</name>-->
+            <!--<url>https://download.dcache.org/nexus/content/repositories/releases</url>-->
+            <!--<layout>default</layout>-->
+        <!--</repository>-->
     </repositories>
 
     <build>
+        <finalName>propro</finalName>
+        <!--<resources>-->
+            <!--<resource>-->
+                <!--<directory>src/main/resources</directory>-->
+                <!--<includes>-->
+                    <!--<include>**/**</include>-->
+                <!--</includes>-->
+            <!--</resource>-->
+        <!--</resources>-->
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
+
     </build>
+
 
 
 </project>

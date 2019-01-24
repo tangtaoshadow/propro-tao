@@ -3,9 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>
-        欢迎登陆西湖大学PECS分析平台
-    </title>
+    <title th:text="#{title_welcome_to_propro}"></title>
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -22,7 +20,7 @@
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
                             <span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
-                            <h3 class="m-portlet__head-text">更新实验数据</h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_update_exp_info}"></h3>
                         </div>
                     </div>
                 </div>
@@ -31,102 +29,85 @@
                       th:method="post" enctype="multipart/form-data">
                     <div class="m-portlet__body">
                         <div class="form-group m-form__group">
-                            <label for="id">
-                                实验ID
+                            <label for="id" th:text="#{label_exp_id}">
                             </label>
                             <input type="text" class="form-control m-input" name="id" id="id" readonly
                                    th:value="${experiment?.id}">
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="name">
-                                项目名称
+                            <label for="name" th:text="#{label_project_name}">
                             </label>
                             <input type="text" class="form-control m-input" id="projectName" name="projectName"
                                    th:value="${experiment?.projectName}">
                         </div>
-                        <div class="form-group m-form__group">
-                            <label for="name">
-                                批次
+                        <div class="form-group m-form__group" >
+                            <label for="name" th:text="#{label_batch_name}">
                             </label>
                             <input type="text" class="form-control m-input" id="batchName" name="batchName"
                                    th:value="${experiment?.batchName}">
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="name">
-                                实验名称
+                            <label for="name" th:text="#{label_exp_name}">
                             </label>
                             <input type="text" class="form-control m-input" id="name" name="name"
                                    th:value="${experiment?.name}">
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="overlap">
-                                自定义Swath重叠区域(两个窗口交叉区域的绝对数值)
+                            <label for="overlap" th:text="#{label_swath_window_overlap}">
                             </label>
                             <input type="text" class="form-control m-input" id="overlap" readonly
-                                   placeholder="" name="overlap" th:value="${experiment?.overlap}">
+                                   th:placeholder="#{label_absoluted_value_between_windows}" name="overlap" th:value="${experiment?.overlap}">
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="slope">
-                                iRT-校准库ID
+                            <label for="slope" th:text="#{label_irt_library_id}">
                             </label>
                             <input type="text" class="form-control m-input" id="iRtLibraryId" name="iRtLibraryId"
                                    th:value="${experiment?.iRtLibraryId}">
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="slope">
-                                iRT-slope
+                            <label for="slope" th:text="#{label_slope}">
                             </label>
                             <input type="text" class="form-control m-input" id="slope" name="slope"
                                    th:value="${experiment?.slope}">
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="intercept">
-                                iRT-intercept
+                            <label for="intercept" th:text="#{label_intercept}">
                             </label>
                             <input type="text" class="form-control m-input" id="intercept" name="intercept"
                                    th:value="${experiment?.intercept}">
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="compressionType">
-                                压缩类型
+                            <label for="compressionType" th:text="#{label_compression_type}">
                             </label>
                             <input type="text" class="form-control m-input" id="compressionType" name="compressionType"
                                    th:value="${experiment?.compressionType}">
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="compressionType">
-                                数值精度
+                            <label for="compressionType" th:text="#{label_data_precision}">
                             </label>
                             <input type="text" class="form-control m-input" id="precision" name="precision"
                                    th:value="${experiment?.precision}">
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="filePath">
-                                MzXML文件位置
+                            <label for="filePath" th:text="#{label_mzxml_file_path}">
                             </label>
                             <input type="text" class="form-control m-input" id="filePath" name="filePath"
                                    th:value="${experiment?.filePath}">
-                            <span class="m-form__help">一般情况下不要乱改本字段</span>
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="airdPath">
-                                Aird文件位置
+                            <label for="airdPath" th:text="#{label_aird_file_path}">
                             </label>
                             <input type="text" class="form-control m-input" id="airdPath" name="airdPath"
                                    th:value="${experiment?.airdPath}">
-                            <span class="m-form__help">一般情况下不要乱改本字段</span>
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="airdIndexPath">
-                                Aird索引文件位置
+                            <label for="airdIndexPath" th:text="#{label_aird_index_file_path}">
                             </label>
                             <input type="text" class="form-control m-input" id="airdIndexPath" name="airdIndexPath"
                                    th:value="${experiment?.airdIndexPath}">
-                            <span class="m-form__help">一般情况下不要乱改本字段</span>
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="description">
-                                详细描述
+                            <label for="description" th:text="#{label_detail_description}">
                             </label>
                             <textarea class="form-control m-input" id="description" name="description" rows="3"
                                       th:text="${experiment?.description}"></textarea>
@@ -135,8 +116,7 @@
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <button type="submit" class="btn btn-primary">
-                                更新
+                            <button type="submit" class="btn btn-primary" th:text="#{btn_update}">
                             </button>
                         </div>
                     </div>
