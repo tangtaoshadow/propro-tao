@@ -3,9 +3,7 @@
 	<!-- begin::Head -->
 	<head>
 		<meta charset="utf-8" />
-		<title>
-			Westlake-Swath Platform 西湖大学Swath操作平台
-		</title>
+		<title th:text="#{title_welcome_to_propro}"></title>
 		<meta name="description" content="Swath Platform Login Page">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -31,9 +29,7 @@
 						</div>
 						<div class="m-login__signin">
 							<div class="m-login__head">
-								<h4 class="m-login__title">
-									欢迎登陆西湖大学PECS分析平台
-								</h4>
+								<h4 class="m-login__title" th:text="#{title_welcome_to_propro}"></h4>
 							</div>
 							<form class="m-login__form m-form" th:action="@{/home}" method="post">
 								<div class="form-group m-form__group">
@@ -57,9 +53,7 @@
 									<!--</div>-->
 								<!--</div>-->
 								<div class="m-login__form-action">
-									<button id="m_login_signin_submit" class="btn btn-focus m-btn m-btn--pill m-btn--custom m-btn--air  m-login__btn">
-										登陆
-									</button>
+									<button id="m_login_signin_submit" class="btn btn-focus m-btn m-btn--pill m-btn--custom m-btn--air  m-login__btn" th:text="#{btn_login}"></button>
 								</div>
 							</form>
 						</div>

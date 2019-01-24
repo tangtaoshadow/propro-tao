@@ -3,17 +3,14 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>
-        欢迎登陆西湖大学PECS分析平台
-    </title>
+    <title th:text="#{title_welcome_to_propro}"></title>
 </head>
 <!-- end::Head -->
 <body>
 <div class="m-subheader ">
     <div class="d-flex align-items-center">
         <div class="mr-auto">
-            <h3 class="m-subheader__title m-subheader__title--separator">
-                实验分析数据概述详情页面
+            <h3 class="m-subheader__title m-subheader__title--separator" th:text="#{label_analyse_overview_detail}">
             </h3>
         </div>
     </div>
@@ -37,7 +34,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">分析报告 <span th:if="${overview.matchedPeptideCount}" th:text="|最终识别肽段:${overview.matchedPeptideCount}|"></span></h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_analyse_report}"></h3>
                         </div>
                     </div>
                 </div>
@@ -52,19 +49,19 @@
                                 <input type="text" class="form-control m-input" id="id" name="id" readonly
                                        th:value="${overview?.id}">
                             </div>
-                            <label for="id" class="col-2 col-form-label">卷积代号</label>
+                            <label for="id" class="col-2 col-form-label" th:text="#{label_analyse_code}"></label>
                             <div class="col-4">
                                 <input type="text" class="form-control m-input" id="name" name="name" readonly
                                        th:value="${overview?.name}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="id" class="col-2 col-form-label">原始实验</label>
+                            <label for="id" class="col-2 col-form-label" th:text="#{label_exp_id}"></label>
                             <div class="col-4">
                                 <input type="text" class="form-control m-input" id="expId" name="expId" readonly
                                        th:value="|${overview?.expName}(${overview?.expId})|">
                             </div>
-                            <label for="library" class="col-2 col-form-label">关联标准库</label>
+                            <label for="library" class="col-2 col-form-label" th:text="#{label_associated_library}"></label>
                             <div class="col-4">
                                 <input type="text" class="form-control m-input" id="library" readonly
                                        th:value="|${overview?.libraryName}(${overview?.libraryId})|">
@@ -72,12 +69,12 @@
                         </div>
 
                         <div class="form-group m-form__group row">
-                            <label for="ExtractWindow" class="col-2 col-form-label">RT/MZ卷积窗口</label>
+                            <label for="ExtractWindow" class="col-2 col-form-label" th:text="#{label_mz_rt_extract_window}"></label>
                             <div class="col-4">
                                 <input type="text" class="form-control m-input" id="ExtractWindow" readonly
                                        th:value="|${overview?.rtExtractWindow}/${overview?.mzExtractWindow}|">
                             </div>
-                            <label for="slopeIntercept" class="col-2 col-form-label">斜率/截距</label>
+                            <label for="slopeIntercept" class="col-2 col-form-label" th:text="#{label_slope_intercept}"></label>
                             <div class="col-4">
                                 <input type="text" class="form-control m-input" id="slopeIntercept" readonly
                                        th:value="|${slopeIntercept}|">
@@ -91,7 +88,7 @@
                                 <input type="text" class="form-control m-input" id="ExtractWindow" readonly
                                        th:value="|${overview?.sigma}/${overview?.spacing}|">
                             </div>
-                            <label for="matchPeptide" class="col-2 col-form-label">肽段识别状况</label>
+                            <label for="matchPeptide" class="col-2 col-form-label" th:text="#{label_peptide_recognized_ratio}"></label>
                             <div class="col-4">
                                 <input type="text" class="form-control m-input" id="matchPeptide" name="matchPeptide"
                                        readonly
@@ -100,12 +97,12 @@
                         </div>
 
                         <div class="form-group m-form__group row">
-                            <label for="creator" class="col-2 col-form-label">创建人</label>
+                            <label for="creator" class="col-2 col-form-label" th:text="#{label_creator}"></label>
                             <div class="col-4">
                                 <input type="text" class="form-control m-input" id="creator" readonly
                                        th:value="|${overview?.creator}|">
                             </div>
-                            <label for="createDate" class="col-2 col-form-label">创建时间</label>
+                            <label for="createDate" class="col-2 col-form-label" th:text="#{label_create_date}"></label>
                             <div class="col-4">
                                 <input type="text" class="form-control m-input" id="createDate" name="createDate"
                                        readonly
@@ -116,7 +113,7 @@
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <a th:href="|/analyse/overview/delete/${overview?.id}|" class="btn btn-danger">删除</a>
+                            <a th:href="@{/analyse/overview/delete/{id}(id=${overview?.id})}" class="btn btn-danger" th:text="#{btn_delete}"></a>
                         </div>
                     </div>
                 </form>
@@ -132,13 +129,13 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">数据卷积操作面板</h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_convolution_panel}"></h3>
                         </div>
                     </div>
                 </div>
                 <div class="m-portlet__body">
-                    <a th:href="|/analyse/data/list?overviewId=${overview.id}|" class="btn btn-info btn-sm">查看卷积数据</a>
-                    <a th:href="|/scores/list?overviewId=${overview.id}|" class="btn btn-brand btn-sm">查看打分数据</a>
+                    <a th:href="@{/analyse/data/list(overviewId=${overview.id})}" class="btn btn-info btn-sm" th:text="#{label_convolution_data}"></a>
+                    <a th:href="@{/scores/list(overviewId=${overview.id})}" class="btn btn-brand btn-sm" th:text="#{label_see_score_data}"></a>
                 </div>
             </div>
             <div class="m-portlet m-portlet--tab">
@@ -148,7 +145,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">子分数分布权重--<label class="col-form-label" th:text="|总计使用打分种类:${overview.weights.size()}种|"></label></h3>
+                            <h3 class="m-portlet__head-text" th:text="|#{label_feature_scores_weights},#{label_feature_score_types}:${overview.weights.size()}|"></h3>
                         </div>
                     </div>
                 </div>
@@ -159,11 +156,9 @@
                             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                                 <thead>
                                 <tr>
-                                    <th width="20%">
-                                        打分类型
+                                    <th width="20%" th:text="#{label_feature_score_type}">
                                     </th>
-                                    <th width="20%">
-                                        打分权重
+                                    <th width="20%" th:text="#{label_feature_score_weight}">
                                     </th>
                                 </tr>
                                 </thead>

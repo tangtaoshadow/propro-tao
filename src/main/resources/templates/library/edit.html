@@ -3,9 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>
-        欢迎登陆西湖大学PECS分析平台
-    </title>
+    <title th:text="#{title_welcome_to_propro}"></title>
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -22,7 +20,7 @@
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
 							<span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
-                            <h3 class="m-portlet__head-text">更新库文件</h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_update_library}"></h3>
                         </div>
                     </div>
                 </div>
@@ -30,61 +28,48 @@
                 <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/library/update}" th:method="post" enctype="multipart/form-data">
                     <div class="m-portlet__body">
                         <div class="form-group m-form__group">
-                            <label for="id">
-                                库文件ID
+                            <label for="id" th:text="#{label_library_id}">
                             </label>
                             <input type="text" class="form-control m-input" id="id" name="id" readonly th:value="${library?.id}">
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="name">
-                                库文件名称
+                            <label for="name" th:text="#{label_library_name}">
                             </label>
                             <input type="text" class="form-control m-input" id="name" name="name" readonly th:value="${library?.name}">
-                            <span class="m-form__help">库名称全局唯一</span>
+                            <span class="m-form__help" th:text="#{label_library_name_must_be_unique}"></span>
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="type">
-                                库文件类型
+                            <label for="type" th:text="#{label_library_type}">
                             </label>
                             <input type="text" class="form-control m-input" id="type" name="type" th:value="${library?.type}">
-                            <span class="m-form__help">0:标准库,1:校准库</span>
-                        </div>
-                        <div class="form-group m-form__group">
-                            <label for="instrument">
-                                设备名称
-                            </label>
-                            <input type="text" class="form-control m-input" id="instrument" name="instrument" th:value="${library?.instrument}">
+                            <span class="m-form__help">0:Library,1:iRT-Library</span>
                         </div>
                         <div class="form-group m-form__group">
                             <div class="m-checkbox-list">
                                 <label class="m-checkbox">
-                                    <input id="justReal" type="checkbox" name="justReal">
-                                    仅录入真实肽段
+                                    <input id="justReal" type="checkbox" name="justReal" th:text="#{label_only_target}">
                                     <span></span>
                                 </label>
                             </div>
                         </div>
                         <div class="form-group m-form__group">
-                            <label for="description">
-                                详细描述
+                            <label for="description" th:text="#{label_detail_description}">
                             </label>
                             <textarea class="form-control m-input" id="description" name="description"
                                       rows="3" th:text="${library?.description}"></textarea>
                         </div>
                         <div class="form-group m-form__group">
-                            <label>
-                                上传TSV格式文件(不上传代表不作修改,上传后会覆盖原有的数据)
+                            <label th:text="#{label_upload_csv_or_traml_format_file}">
                             </label>
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" name="file" id="customFile">
-                                <label class="custom-file-label" for="customFile">选择文件</label>
+                                <label class="custom-file-label" for="customFile" th:text="#{label_choose_file}"></label>
                             </div>
                         </div>
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <button type="submit" class="btn btn-primary">
-                                更新
+                            <button type="submit" class="btn btn-primary" th:text="#{btn_update}">
                             </button>
                         </div>
                     </div>

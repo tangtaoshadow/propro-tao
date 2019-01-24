@@ -3,7 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>欢迎登陆西湖大学PECS分析平台</title>
+    <title th:text="#{title_welcome_to_propro}"></title>
     <link th:href="|${url}/assets/css/pagination.css|" rel="stylesheet" type="text/css"/>
 </head>
 <!-- end::Head -->
@@ -24,15 +24,13 @@
                 <div class="form-group m-form__group row">
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                实验ID:
+                            <button class="btn btn-success" type="button" th:text="#{label_exp_id}">
                             </button>
                         </div>
                         <input type="text" class="form-control m-input" name="expId"
                                placeholder="expId" th:value="${expId}">
                         <div class="input-group-append">
-                            <button class="btn btn-warning" type="submit">
-                                搜索
+                            <button class="btn btn-warning" type="submit" th:text="#{btn_search}">
                             </button>
                         </div>
                     </div>
@@ -44,47 +42,33 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="5%">
-                        分析ID
+                    <th width="5%" th:text="#{label_analyse_overview_id}">
                     </th>
-                    <th width="10%">
-                        分析代号
+                    <th width="10%" th:text="#{label_analyse_code}">
                     </th>
-                    <th width="5%">
-                        实验名称
+                    <th width="5%" th:text="#{label_exp_name}">
                     </th>
-                    <th width="5%">
-                        标准库名称
+                    <th width="5%" th:text="#{label_library_name}">
                     </th>
-                    <th width="5%">
-                        RT/MZ卷积窗口
+                    <th width="5%" th:text="#{label_mz_rt_extract_window}">
                     </th>
-                    <th width="5%">
-                        Sigma/Spacing
+                    <th width="5%" th:text="#{label_sigma_spacing}">
                     </th>
-                    <th width="5%">
-                        Shape/ShapeWeight阈值
+                    <th width="5%" th:text="#{label_threshold_for_shape_and_shape_weight}">
                     </th>
-                    <th width="10%">
-                        创建时间
+                    <th width="10%" th:text="#{label_create_date}">
                     </th>
-                    <th width="5%">
-                        分类器
+                    <th width="5%" th:text="#{label_classifier}">
                     </th>
-                    <th width="5%">
-                        iRT参数
+                    <th width="5%" th:text="#{label_slope_intercept}">
                     </th>
-                    <th width="10%">
-                        识别数/卷积数/标准库数
+                    <th width="10%" th:text="#{label_reco_conv_total}">
                     </th>
-                    <th width="5%">
-                        创建人
+                    <th width="5%" th:text="#{label_creator}">
                     </th>
-                    <th width="5%">
-                        备忘录
+                    <th width="5%" th:text="#{label_note}">
                     </th>
-                    <th width="25%">
-                        操作
+                    <th width="25%" th:text="#{label_operation}">
                     </th>
                 </tr>
                 </thead>
@@ -104,21 +88,20 @@
                     <td th:text="${overview.creator}"></td>
                     <td th:text="${overview?.note}"></td>
                     <td>
-                        <a th:href="|/analyse/overview/detail/${overview.id}|" class="btn btn-success btn-sm">查看分析报告</a>
-                        <a th:href="|/score/report?overviewId=${overview.id}|" class="btn btn-success btn-sm">审核鉴定结果</a>
-                        <a th:href="|/analyse/data/list?overviewId=${overview.id}|"
-                           class="btn btn-info btn-sm">查看卷积数据</a>
-                        <a th:href="|/score/list?overviewId=${overview.id}&isDecoy=No|" class="btn btn-brand btn-sm">查看子分数</a>
-                        <a th:href="|/analyse/overview/export/${overview.id}|" class="btn btn-warning btn-sm">导出已鉴定肽段</a>
+                        <a th:href="@{/analyse/overview/detail/{id}(id=${overview?.id})}" class="btn btn-success btn-sm" th:text="#{label_analyse_report}"></a>
+                        <a th:href="@{/score/report(overviewId=${overview.id})}" class="btn btn-success btn-sm" th:text="#{label_check_recognized_result}"></a>
+                        <a th:href="@{/analyse/data/list(overviewId=${overview.id})}"
+                           class="btn btn-info btn-sm" th:text="#{label_convolution_data}"></a>
+                        <a th:href="@{/score/list(overviewId=${overview.id},isDecoy=No)}" class="btn btn-brand btn-sm" th:text="#{label_see_score_data}"></a>
+                        <a th:href="@{/analyse/overview/export/{id}(id=${overview?.id})}" class="btn btn-warning btn-sm" th:text="#{label_export_recognized_peptides}"></a>
                         <div class="btn-group dropright" role="group">
                             <button id="scoresBtnGroup" type="button" class="btn btn-sm dropdown-toggle"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                合并打分
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" th:text="#{label_do_identified_score}">
                             </button>
                             <div class="dropdown-menu" aria-labelledby="scoresBtn">
-                                <!--<a class="dropdown-item" th:href="|/analyse/overview/score?overviewId=${overview.id}|">开始子分数打分</a>-->
-                                <a class="dropdown-item" th:href="|/score/airus?overviewId=${overview.id}&&classifier=lda|">LDA合并打分</a>
-                                <a class="dropdown-item" th:href="|/score/airus?overviewId=${overview.id}&&classifier=xgboost|">XGBoost合并打分</a>
+                                <a class="dropdown-item" th:href="@{/score/airus(overviewId=${overview.id},classifier=lda)}" th:text="#{label_identified_score_with_lda}"></a>
+                                <!--<a class="dropdown-item" th:href="|@{/score/airus?overviewId=${overview.id},classifier=xgboost}|">XGBoost合并打分</a>-->
+                                <a class="dropdown-item" onclick="alert('Not Open!')" th:text="#{label_identified_score_with_xgboost}"></a>
                             </div>
                         </div>
                     </td>

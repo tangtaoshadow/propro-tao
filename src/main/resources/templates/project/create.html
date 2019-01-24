@@ -3,9 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>
-        欢迎登陆西湖大学PECS分析平台
-    </title>
+    <title th:text="#{title_welcome_to_propro}"></title>
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -22,7 +20,7 @@
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
                             <span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
-                            <h3 class="m-portlet__head-text">创建一个项目</h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_create_project}"></h3>
                         </div>
                     </div>
                 </div>
@@ -30,24 +28,19 @@
                 <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/project/add}" th:method="post">
                     <div class="m-portlet__body">
                         <div class="form-group m-form__group m--margin-top-10">
-                            <div class="alert m-alert m-alert--default" role="alert">
-                                请填写项目的相关信息
+                            <div class="alert m-alert m-alert--default" role="alert" th:text="#{label_fill_information}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="name" class="col-4 col-form-label">
-                                必填,项目名称
-                            </label>
+                            <label for="name" class="col-4 col-form-label" th:text="#{label_project_name}"></label>
                             <div class="col-8">
                                 <input type="text" class="form-control m-input" id="name"
                                        placeholder="Enter Project Name" name="name" th:value="${name}">
-                                <span class="m-form__help">项目名称全局唯一</span>
+                                <span class="m-form__help" th:text="#{label_project_name_must_be_unique}"></span>
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="repository" class="col-4 col-form-label">
-                                必填,项目仓库路径(用以存放Aird,Airc等平台专用类型的文件,请注意:本字段一旦创建无法修改)
-                            </label>
+                            <label for="repository" class="col-4 col-form-label" th:text="#{label_project_repository}"></label>
                             <div class="col-8">
                                 <input type="text" class="form-control m-input" id="repository" name="repository"
                                        placeholder="repository" th:value="${repository}">
@@ -63,29 +56,22 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="ownerName" class="col-4 col-form-label">
-                                必填,项目负责人
-                            </label>
+                            <label for="ownerName" class="col-4 col-form-label" th:text="#{label_creator}"></label>
                             <div class="col-8">
                                 <input type="text" class="form-control m-input" id="ownerName" name="ownerName" th:value="${ownerName}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="description" class="col-4 col-form-label">
-                                详细描述
-                            </label>
+                            <label for="description" class="col-4 col-form-label" th:text="#{label_detail_description}"></label>
                             <div class="col-8">
                             <textarea class="form-control m-input" id="description" name="description"
                                       rows="3" th:value="${description}"></textarea>
                             </div>
                         </div>
-
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <button type="submit" class="btn btn-primary">
-                                提交
-                            </button>
+                            <button type="submit" class="btn btn-primary" th:text="#{btn_submit}"></button>
                         </div>
                     </div>
                 </form>

@@ -3,7 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>欢迎登陆西湖大学PECS分析平台</title>
+    <title th:text="#{title_welcome_to_propro}"></title>
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -19,7 +19,7 @@
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
                             <span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
-                            <h3 class="m-portlet__head-text">选择需要比对的分析结果(注:最多同时比对四个实验结果)</h3>
+                            <h3 class="m-portlet__head-text" th:text="|#{label_choose_overviews_to_compare}(#{label_max_for} 4 Overviews)|"></h3>
                         </div>
                     </div>
                 </div>
@@ -28,8 +28,7 @@
                       th:method="post">
                     <div class="m-portlet__body">
                         <div class="form-group m-form__group row">
-                            <label for="overviewIdA" class="col-form-label col-lg-3">
-                                实验A分析结果ID
+                            <label for="overviewIdA" class="col-form-label col-lg-3" th:text="|#{label_overview_id_for} A|">
                             </label>
                             <div class="col-lg-4 col-md-9 col-sm-12">
                                 <input type="text" class="form-control m-input" name="overviewIdA" id="overviewIdA"
@@ -37,8 +36,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="overviewIdB" class="col-form-label col-lg-3">
-                                实验B分析结果ID
+                            <label for="overviewIdB" class="col-form-label col-lg-3" th:text="|#{label_overview_id_for} B|">
                             </label>
                             <div class="col-lg-4 col-md-9 col-sm-12">
                                 <input type="text" class="form-control m-input" name="overviewIdB" id="overviewIdB"
@@ -46,8 +44,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="overviewIdC" class="col-form-label col-lg-3">
-                                实验C分析结果ID
+                            <label for="overviewIdC" class="col-form-label col-lg-3" th:text="|#{label_overview_id_for} C|">
                             </label>
                             <div class="col-lg-4 col-md-9 col-sm-12">
                                 <input type="text" class="form-control m-input" name="overviewIdC" id="overviewIdC"
@@ -55,8 +52,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="overviewIdD" class="col-form-label col-lg-3">
-                                实验D分析结果ID
+                            <label for="overviewIdD" class="col-form-label col-lg-3" th:text="|#{label_overview_id_for} D|">
                             </label>
                             <div class="col-lg-4 col-md-9 col-sm-12">
                                 <input type="text" class="form-control m-input" name="overviewIdD" id="overviewIdD"
@@ -66,8 +62,7 @@
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <button type="submit" class="btn btn-primary">
-                                开始比对
+                            <button type="submit" class="btn btn-primary" th:text="#{btn_start_compare}">
                             </button>
                         </div>
                     </div>

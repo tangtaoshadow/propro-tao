@@ -3,9 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>
-        欢迎登陆西湖大学PECS分析平台
-    </title>
+    <title th:text="#{title_welcome_to_propro}"></title>
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -14,8 +12,7 @@
 <div class="m-subheader ">
     <div class="d-flex align-items-center">
         <div class="mr-auto">
-            <h3 class="m-subheader__title m-subheader__title--separator">
-                真伪肽段分析图
+            <h3 class="m-subheader__title m-subheader__title--separator" th:text="#{label_analyse_for_target_decoy}">
             </h3>
         </div>
     </div>
@@ -38,7 +35,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">原始肽段碎片分布</h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_distribution_of_peptide_fragments}"></h3>
                         </div>
                     </div>
                 </div>
@@ -46,14 +43,11 @@
                     <table class="table table-bordered" style="table-layout:fixed;">
                         <thead>
                         <tr>
-                            <th width="70%">
-                                片段
+                            <th width="70%" th:text="#{label_fragment}">
                             </th>
-                            <th width="10%">
-                                类型
+                            <th width="10%" th:text="#{label_type}">
                             </th>
-                            <th width="20%">
-                                重复次数
+                            <th width="20%" th:text="#{label_repetitions}">
                             </th>
                         </tr>
                         </thead>
@@ -76,7 +70,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">重复碎片分布</h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_distribution_for_repeated_fragments}"></h3>
                         </div>
                     </div>
                 </div>
@@ -84,14 +78,11 @@
                     <table class="table table-bordered" style="table-layout:fixed;">
                         <thead>
                         <tr>
-                            <th width="70%">
-                                片段
+                            <th width="70%" th:text="#{label_fragment}">
                             </th>
-                            <th width="10%">
-                                类型
+                            <th width="10%" th:text="#{label_type}">
                             </th>
-                            <th width="20%">
-                                重复次数
+                            <th width="20%" th:text="#{label_repetitions}">
                             </th>
                         </tr>
                         </thead>
@@ -114,7 +105,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">伪肽段碎片分布</h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_distribution_for_decoy_fragments}"></h3>
                         </div>
                     </div>
                 </div>
@@ -122,14 +113,11 @@
                     <table class="table table-bordered" style="table-layout:fixed;">
                         <thead>
                         <tr>
-                            <th width="70%">
-                                片段
+                            <th width="70%" th:text="#{label_fragment}">
                             </th>
-                            <th width="10%">
-                                类型
+                            <th width="10%" th:text="#{label_type}">
                             </th>
-                            <th width="20%">
-                                重复次数
+                            <th width="20%" th:text="#{label_repetitions}">
                             </th>
                         </tr>
                         </thead>

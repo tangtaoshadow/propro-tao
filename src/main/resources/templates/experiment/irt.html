@@ -3,7 +3,7 @@
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
-    <title>欢迎登陆西湖大学PECS分析平台</title>
+    <title th:text="#{title_welcome_to_propro}"></title>
 </head>
 <!-- end::Head -->
 <!-- end::Body -->
@@ -12,7 +12,7 @@
     <div class="d-flex align-items-center">
         <div class="mr-auto">
             <h3 class="m-subheader__title m-subheader__title--separator">
-                irt计算
+                iRT
             </h3>
         </div>
     </div>
@@ -35,7 +35,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text">irt计算</h3>
+                            <h3 class="m-portlet__head-text">iRT</h3>
                         </div>
                     </div>
                 </div>
@@ -44,8 +44,7 @@
                     <div class="m-portlet__body">
                         <input type="text" name="id" hidden="hidden" th:value="${experiment?.id}">
                         <div class="form-group m-form__group row">
-                            <label for="name" class="col-2 col-form-label">
-                                实验
+                            <label for="name" class="col-2 col-form-label" th:text="#{label_exp}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="name" readonly name="name"
@@ -53,8 +52,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="iRtLibraryId" class="col-2 col-form-label">
-                                关联irt校准库名称及ID
+                            <label for="iRtLibraryId" class="col-2 col-form-label" th:text="#{label_irt_library}">
                             </label>
                             <div class="col-10">
                                 <select class="form-control m-input" id="iRtLibraryId" name="iRtLibraryId">
@@ -65,41 +63,38 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="sigma" class="col-2 col-form-label">
-                                Sigma
+                            <label for="sigma" class="col-2 col-form-label" th:text="#{label_set_sigma}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="sigma"
                                        name="rtExtractWindow" th:value="${sigma}">
-                                <span class="m-form__help">默认为6.25</span>
+                                <span class="m-form__help" th:text="#{label_default_sigma}"></span>
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="spacing" class="col-2 col-form-label">
-                                Spacing
+                            <label for="spacing" class="col-2 col-form-label" th:text="#{label_set_spacing}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="spacing"
                                        name="spacing"
                                        th:value="${spacing}">
-                                <span class="m-form__help">默认为0.01</span>
+                                <span class="m-form__help" th:text="#{label_default_spacing}"></span>
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="mzExtractWindow" class="col-2 col-form-label">
-                                MZ卷积窗口
+                            <label for="mzExtractWindow" class="col-2 col-form-label" th:text="#{label_mz_extract_window}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="mzExtractWindow"
                                        name="mzExtractWindow"
                                        th:value="${mzExtractWindow}">
-                                <span class="m-form__help">默认为0.05</span>
+                                <span class="m-form__help" th:text="#{label_default_mz_extract_window}"></span>
                             </div>
                         </div>
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <button type="submit" class="btn btn-primary">开始计算iRT</button>
+                            <button type="submit" class="btn btn-primary" th:text="#{btn_start_irt}"></button>
                         </div>
                     </div>
                 </form>
