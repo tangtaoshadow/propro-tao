@@ -29,6 +29,9 @@ public class LibraryDO extends BaseDO {
 
     String fatherId;
 
+    //类似于PRM实验，需要在卷积中同时使用iRT库；
+    Boolean needIrt = false;
+
     //0:标准库,1:iRT校准库
     Integer type;
 

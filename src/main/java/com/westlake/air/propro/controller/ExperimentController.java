@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.async.LumsTask;
 import com.westlake.air.propro.compressor.AirdCompressor;
 import com.westlake.air.propro.constants.*;
+import com.westlake.air.propro.dao.ScanIndexDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.analyse.WindowRang;
@@ -15,26 +16,9 @@ import com.westlake.air.propro.domain.params.Exp;
 import com.westlake.air.propro.domain.params.ExpVO;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
+import com.westlake.air.propro.domain.query.ScanIndexQuery;
 import com.westlake.air.propro.parser.MzXMLParser;
 import com.westlake.air.propro.service.*;
-import com.westlake.air.pecs.async.LumsTask;
-import com.westlake.air.pecs.compressor.AirdCompressor;
-import com.westlake.air.pecs.constants.*;
-import com.westlake.air.pecs.dao.ScanIndexDAO;
-import com.westlake.air.pecs.domain.ResultDO;
-import com.westlake.air.pecs.domain.params.LumsParams;
-import com.westlake.air.pecs.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.pecs.domain.bean.analyse.WindowRang;
-import com.westlake.air.pecs.domain.bean.score.SlopeIntercept;
-import com.westlake.air.pecs.domain.db.*;
-import com.westlake.air.pecs.domain.params.Exp;
-import com.westlake.air.pecs.domain.params.ExpVO;
-import com.westlake.air.pecs.domain.query.ExperimentQuery;
-import com.westlake.air.pecs.domain.query.ScanIndexQuery;
-import com.westlake.air.pecs.parser.MzXMLParser;
-import com.westlake.air.pecs.service.*;
-import javafx.collections.transformation.SortedList;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -391,7 +375,10 @@ public class ExperimentController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OBJECT_NOT_EXISTED);
             return "redirect:/experiment/list";
         }
-
+//        List<ScoreType> scoreType = ScoreType.getShownTypes();
+//        if(resultDO.getModel().getType().equals("1")){
+//            HashSet<String> prm
+//        }
         model.addAttribute("useEpps", true);
         model.addAttribute("libraries", getLibraryList(0));
         model.addAttribute("experiment", resultDO.getModel());

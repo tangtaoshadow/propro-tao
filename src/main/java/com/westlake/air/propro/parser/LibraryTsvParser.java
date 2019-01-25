@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -72,7 +73,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
             int count = 0;
             HashMap<String, PeptideDO> map = new HashMap<>();
             while ((line = reader.readLine()) != null) {
-                if(!prmPeptideRefSet.isEmpty() && !isPrmPeptideRef(line, columnMap, prmPeptideRefSet)){
+                if (!prmPeptideRefSet.isEmpty() && !isPrmPeptideRef(line, columnMap, prmPeptideRefSet)) {
                     continue;
                 }
                 ResultDO<PeptideDO> resultDO = parseTransition(line, columnMap, library);
@@ -183,12 +184,44 @@ public class LibraryTsvParser extends BaseLibraryParser {
         return resultDO;
     }
 
+    public ResultDO<HashSet<String>> getPrmPeptideRef(InputStream in) {
+        try {
+            InputStreamReader isr = new InputStreamReader(in, "UTF-8");
+            BufferedReader reader = new BufferedReader(isr);
+            String line = reader.readLine();
+            if (line == null) {
+                return ResultDO.buildError(ResultCode.LINE_IS_EMPTY);
+            }
+            String[] columns = line.split(",");
+            HashMap<String, Integer> columnMap = new HashMap<>();
+            for (int i = 0; i < columns.length; i++) {
+                columnMap.put(StringUtils.deleteWhitespace(columns[i].toLowerCase()), i);
+            }
+            boolean isFormat1 = columnMap.containsKey("compound") && columnMap.containsKey("z");
+            boolean isFormat2 = columnMap.containsKey("comment") && columnMap.containsKey("cs[z]");
+            if (!isFormat1 && !isFormat2) {
+                return ResultDO.buildError(ResultCode.FILE_FORMAT_NOT_SUPPORTED);
+            }
 
-    private boolean isPrmPeptideRef(String line, HashMap<String, Integer> columnMap, HashSet<String> peptideRefList){
+            HashSet<String> prmPeptideRefSet = new HashSet<>();
+            while ((line = reader.readLine()) != null) {
+                columns = line.split(",");
+                String sequence = columns[isFormat1 ? columnMap.get("compound") : columnMap.get("comment")].replace(" (light)","").replace("[+57.021464]","(UniMod:4)");
+                String charge = columns[isFormat1 ? columnMap.get("z") : columnMap.get("cs[z]")];
+                prmPeptideRefSet.add(sequence + "_" + charge);
+            }
+            return new ResultDO<HashSet<String>>(true).setModel(prmPeptideRefSet);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResultDO.buildError(ResultCode.FILE_FORMAT_NOT_SUPPORTED);
+        }
+    }
+
+    private boolean isPrmPeptideRef(String line, HashMap<String, Integer> columnMap, HashSet<String> peptideRefList) {
         String[] row = line.split("\t");
         String fullName = row[columnMap.get(FullUniModPeptideName)];
         String charge = row[columnMap.get(PrecursorCharge)];
-        return peptideRefList.contains(fullName+"_"+charge);
+        return peptideRefList.contains(fullName + "_" + charge);
     }
 
 }
