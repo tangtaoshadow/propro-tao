@@ -1333,7 +1333,8 @@ select.form-control:focus::-ms-value {
   padding-bottom: calc(0.65rem + 1px);
   margin-bottom: 0;
   font-size: inherit;
-  line-height: 1.25; }
+  line-height: 1.25;
+  word-break:break-all;}
 
 .col-form-label-lg {
   padding-top: calc(1rem + 1px);

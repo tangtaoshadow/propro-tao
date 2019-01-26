@@ -44,11 +44,15 @@
                         <div class="form-group m-form__group row">
                             <label for="type" class="col-2 col-form-label" th:text="#{label_library_type}">
                             </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="type" name="type"
-                                       placeholder="0:Library,1:iRT-Library" th:value="${library?.type}">
+                            <div class="col-6">
+                                <!--<input type="text" class="form-control m-input" id="type" name="type" placeholder="0:Library,1:iRT-Library" th:value="${library?.type}">-->
+                                <select class="form-control m-input" id="type" name="type">
+                                    <option th:text="#{label_library}" th:value="0" th:selected="${type}==0?true:false"></option>
+                                    <option th:text="#{label_irt_library}" th:value="1" th:selected="${type}==1?true:false"></option>
+                                </select>
                             </div>
                         </div>
+
                         <div class="form-group m-form__group row">
                             <label for="description" class="col-2 col-form-label" th:text="#{label_detail_description}">
                             </label>

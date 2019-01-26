@@ -61,6 +61,16 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
+                            <label for="libraryType" class="col-2 col-form-label" th:text="#{label_library_type}">
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="libraryType" name="type" readonly th:if="${library?.type}==0"
+                                       th:value="#{label_library}">
+                                <input type="text" class="form-control m-input" id="libraryType" name="type" readonly th:if="${library?.type}==1"
+                                       th:value="#{label_irt_library}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
                             <label for="proteinCount" class="col-2 col-form-label" th:text="#{label_proteins_count}">
                             </label>
                             <div class="col-10">
