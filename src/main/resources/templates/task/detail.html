@@ -33,9 +33,9 @@
                 <!--begin: Portlet Body-->
                 <div class="m-portlet__body m-portlet__body--no-padding">
                     <div class="m-demo">
-                        <div class="alert alert-warning" role="alert" th:if="${task?.status}=='RUNNING'">RUNNING</div>
-                        <div class="alert alert-success" role="alert" th:if="${task?.status}=='SUCCESS'">SUCCESS</div>
-                        <div class="alert alert-danger" role="alert" th:if="${task?.status}=='FAILED'">FAILED</div>
+                        <div class="alert alert-warning" role="alert" th:if="${task?.status}=='RUNNING'">Task is running,Please wait...</div>
+                        <div class="alert alert-success" role="alert" th:if="${task?.status}=='SUCCESS'">Task is success!!!</div>
+                        <div class="alert alert-danger" role="alert" th:if="${task?.status}=='FAILED'">Task is failed!!!</div>
                         <div class="m-demo__preview">
                             <div class="m-list-timeline">
                                 <div class="m-list-timeline__items">

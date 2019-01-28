@@ -417,9 +417,7 @@ public class MzXMLParser extends BaseParser {
     public List<ScanIndexDO> indexForSwath(File file) {
 
         List<ScanIndexDO> indexList = new ArrayList<>();
-        RandomAccessFile raf = null;
         try {
-            raf = new RandomAccessFile(file, "r");
             //获取索引的起始位置
             Long indexOffset = parseIndexOffset(file);
 
@@ -447,8 +445,6 @@ public class MzXMLParser extends BaseParser {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            FileUtil.close(raf);
         }
 
         return indexList;

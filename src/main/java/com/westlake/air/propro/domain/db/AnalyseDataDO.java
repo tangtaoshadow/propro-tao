@@ -35,7 +35,6 @@ public class AnalyseDataDO extends BaseDO {
     @JSONField(serialize=false)
     String overviewId;
 
-    @Indexed
     String proteinName;
 
     @Indexed
