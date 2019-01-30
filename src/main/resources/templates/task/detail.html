@@ -38,17 +38,15 @@
                         <div class="alert alert-danger" role="alert" th:if="${task?.status}=='FAILED'">Task is failed!!!</div>
                         <div class="m-demo__preview">
                             <div class="m-list-timeline">
-                                <div class="m-list-timeline__items">
-                                    <div th:each="log:${task?.logs}"
-                                         class="m-list-timeline__item">
-                                        <span class="m-list-timeline__badge"></span>
-                                        <span class="m-list-timeline__text"
-                                              th:text="${log.content}"></span>
-                                        <span class="m-list-timeline__time"
-                                              th:text="${#dates.format(log.time,'yyyy-MM-dd HH:mm:ss')}"></span>
-                                    </div>
+                            <div class="m-list-timeline__items">
+                                <div th:each="log:${task?.logs}"
+                                     class="m-list-timeline__item">
+                                    <span class="m-list-timeline__badge"></span>
+                                    <span class="m-list-timeline__text" th:text="${log.content}"></span>
+                                    <span class="m-list-timeline__time" th:text="${#dates.format(log.time,'yyyy-MM-dd HH:mm:ss')}"></span>
                                 </div>
                             </div>
+                        </div>
                         </div>
                     </div>
                 </div>

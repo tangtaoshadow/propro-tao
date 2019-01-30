@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 import java.util.*;
 
 /**
@@ -55,9 +56,11 @@ public class MzXMLParser extends BaseParser {
      */
     public List<ScanIndexDO> index(File file, ExperimentDO experimentDO, TaskDO taskDO) {
         RandomAccessFile raf = null;
+        FileChannel fc = null;
         List<ScanIndexDO> list = null;
         try {
             raf = new RandomAccessFile(file, "r");
+//            fc = raf.getChannel();
             list = indexForSwath(file);
             if (list != null && list.size() > 0) {
                 ScanIndexDO index = list.get(0);
@@ -263,15 +266,17 @@ public class MzXMLParser extends BaseParser {
     }
 
     /**
+     * 获取mzXML文件中索引块的开始结束的位置
      * 使用FileInputStream读取,效率最高
-     *
+     * 注意本函数需要由外部调用方负责关闭文件流
      * @param file
      * @return
      * @throws IOException
      */
-    public Long parseIndexOffset(File file) throws IOException {
+    private Long parseIndexOffset(File file) throws IOException {
 
         FileInputStream inputStream = new FileInputStream(file);
+        //保存索引块位置的信息在mzXML文件的最最底部,因此直接从底部向上截取1000字符应该可以保证已经包含了位置的信息,下一步再对这1000个字符进行解析
         long skip = inputStream.getChannel().size() - 1000;
         FileUtil.fileInputStreamSkip(inputStream, skip);
 
@@ -418,6 +423,7 @@ public class MzXMLParser extends BaseParser {
 
         List<ScanIndexDO> indexList = new ArrayList<>();
         try {
+//            FileInputStream inputStream = new FileInputStream(file);
             //获取索引的起始位置
             Long indexOffset = parseIndexOffset(file);
 
