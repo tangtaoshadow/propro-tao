@@ -99,11 +99,11 @@ public class LibraryController extends BaseController {
                @RequestParam(value = "name", required = true) String name,
                @RequestParam(value = "type", required = true) Integer type,
                @RequestParam(value = "description", required = false) String description,
-               @RequestParam(value = "libFile") MultipartFile libfile,
-               @RequestParam(value = "prmFile", required = false) MultipartFile prmfile,
+               @RequestParam(value = "libFile") MultipartFile libFile,
+               @RequestParam(value = "prmFile", required = false) MultipartFile prmFile,
                RedirectAttributes redirectAttributes) {
 
-        if (libfile == null || libfile.getOriginalFilename() == null || libfile.getOriginalFilename().isEmpty()) {
+        if (libFile == null || libFile.getOriginalFilename() == null || libFile.getOriginalFilename().isEmpty()) {
             model.addAttribute(ERROR_MSG, ResultCode.FILE_NOT_EXISTED);
             return "library/create";
         }
@@ -124,10 +124,10 @@ public class LibraryController extends BaseController {
 
 
         HashSet<String> prmPeptideRefSet = new HashSet<>();
-        if(!prmfile.isEmpty()) {
-            library.setNeedIrt(true);
+        if(!prmFile.isEmpty()) {
+//            library.setNeedIrt(true);
             try {
-                ResultDO<HashSet<String>> prmResultDO = tsvParser.getPrmPeptideRef(prmfile.getInputStream());
+                ResultDO<HashSet<String>> prmResultDO = tsvParser.getPrmPeptideRef(prmFile.getInputStream());
                 if (prmResultDO.isFailed()) {
                     logger.warn(prmResultDO.getMsgInfo());
                     redirectAttributes.addFlashAttribute(ERROR_MSG, prmResultDO.getMsgInfo());
@@ -142,7 +142,7 @@ public class LibraryController extends BaseController {
 
 
         try {
-            libraryTask.saveLibraryTask(library, libfile.getInputStream(), libfile.getOriginalFilename(), prmPeptideRefSet, taskDO);
+            libraryTask.saveLibraryTask(library, libFile.getInputStream(), libFile.getOriginalFilename(), prmPeptideRefSet, taskDO);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -203,7 +203,8 @@ public class LibraryController extends BaseController {
                   @RequestParam(value = "type") Integer type,
                   @RequestParam(value = "description") String description,
                   @RequestParam(value = "justReal", required = false) boolean justReal,
-                  @RequestParam(value = "file") MultipartFile file,
+                  @RequestParam(value = "libFile") MultipartFile libFile,
+                  @RequestParam(value = "prmFile", required = false) MultipartFile prmFile,
                   RedirectAttributes redirectAttributes) {
 
         String redirectListUrl = null;
@@ -229,15 +230,30 @@ public class LibraryController extends BaseController {
         }
 
         //如果没有更新源文件,那么直接返回标准库详情页面
-        if (file == null || file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
+        if (libFile == null || libFile.getOriginalFilename() == null || libFile.getOriginalFilename().isEmpty()) {
             return "redirect:/library/detail/" + library.getId();
         }
 
         TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_LIBRARY_FILE, library.getName());
         taskService.insert(taskDO);
-
+        HashSet<String> prmPeptideRefSet = new HashSet<>();
+        if(!prmFile.isEmpty()) {
+//            library.setNeedIrt(true);
+            try {
+                ResultDO<HashSet<String>> prmResultDO = tsvParser.getPrmPeptideRef(prmFile.getInputStream());
+                if (prmResultDO.isFailed()) {
+                    logger.warn(prmResultDO.getMsgInfo());
+                    redirectAttributes.addFlashAttribute(ERROR_MSG, prmResultDO.getMsgInfo());
+                    redirectAttributes.addFlashAttribute("library", library);
+                    return "redirect:/library/detail/" + library.getId();
+                }
+                prmPeptideRefSet = prmResultDO.getModel();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
         try {
-            libraryTask.saveLibraryTask(library, file.getInputStream(), file.getOriginalFilename(), new HashSet<>(), taskDO);
+            libraryTask.saveLibraryTask(library, libFile.getInputStream(), libFile.getOriginalFilename(), prmPeptideRefSet, taskDO);
         } catch (IOException e) {
             e.printStackTrace();
         }
