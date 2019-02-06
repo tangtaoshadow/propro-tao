@@ -48,10 +48,14 @@ public class ChromatogramPicker {
             leftIndex = closestPeakIndex - 1;
             while (leftIndex > 0 &&
                     (chromatogram[leftIndex - 1] < chromatogram[leftIndex] || (
-                            Constants.PEAK_WIDTH > 0 && centralPeakRt - rtArray[leftIndex - 1] < Constants.PEAK_WIDTH)) &&
-//                            chromatogram[leftIndex - 1] / chromatogram[closestPeakIndex] > Constants.MIN_INTENSITY_RATIO)) &&
-                    signalToNoise[leftIndex - 1] >= Constants.SIGNAL_TO_NOISE_LIMIT) {
-                leftIndex--;
+                            Constants.PEAK_WIDTH > 0 && centralPeakRt - rtArray[leftIndex - 1] < Constants.PEAK_WIDTH))){
+//                            chromatogram[leftIndex - 1] / chromatogram[closestPeakIndex] > Constants.MIN_INTENSITY_RATIO))){
+                if(signalToNoise[leftIndex - 1] >= Constants.SIGNAL_TO_NOISE_LIMIT){
+                    leftIndex --;
+                } else {
+                    leftIndex --;
+                    break;
+                }
             }
 
             //to the right

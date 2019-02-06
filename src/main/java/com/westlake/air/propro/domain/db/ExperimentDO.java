@@ -84,4 +84,7 @@ public class ExperimentDO extends BaseDO {
     //Swath窗口列表
     List<WindowRang> windowRangs;
 
+    //0:DIA, 1:PRM
+    String type;
+
 }

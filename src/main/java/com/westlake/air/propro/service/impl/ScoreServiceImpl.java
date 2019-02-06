@@ -250,9 +250,9 @@ public class ScoreServiceImpl implements ScoreService {
                     Float[] spectrumMzArray = mzIntensityPairs.getMzArray();
                     Float[] spectrumIntArray = mzIntensityPairs.getIntensityArray();
                     diaScorer.calculateDiaIsotopeScores(peakGroupFeature, productMzMap, spectrumMzArray, spectrumIntArray, productChargeMap, featureScores);
-//                    if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.IsotopeCorrelationScore) < 0.4){
-//                        continue;
-//                    }
+                    if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.IsotopeCorrelationScore) < 0.5){
+                        continue;
+                    }
                     diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
                     diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, normedLibIntMap, featureScores);
 
@@ -275,6 +275,8 @@ public class ScoreServiceImpl implements ScoreService {
             }
             swathLDAScorer.calculateSwathLdaPrescore(featureScores);
             featureScores.setRt(peakGroupFeature.getApexRt());
+            featureScores.setLeftSideRt(peakGroupFeature.getBestLeftRt());
+            featureScores.setRightSideRt(peakGroupFeature.getBestRightRt());
             featureScores.setIntensitySum(peakGroupFeature.getPeakGroupInt());
             featureScoresList.add(featureScores);
         }

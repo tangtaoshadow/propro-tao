@@ -556,9 +556,9 @@ public class MzXMLParser extends BaseParser {
                 if (tmpStr.startsWith("windowWideness")) {
                     scanIndexDO.setWindowWideness(Float.parseFloat(tmpStr.split("=")[1].replace("\"", "")));
                     //在通过overlap调整前先保存原始的值
-                    float delta = (float)(Math.round(scanIndexDO.getWindowWideness() / 2 * 1000)/1000);//防止出现奇怪的尾数
-                    scanIndexDO.setOriginalPrecursorMzStart((scanIndexDO.getPrecursorMz() - delta)*1000/1000);
-                    scanIndexDO.setOriginalPrecursorMzEnd((scanIndexDO.getPrecursorMz() + delta)*1000/1000);
+                    float delta = Math.round(scanIndexDO.getWindowWideness() / 2 * 1000)/1000f;//防止出现奇怪的尾数
+                    scanIndexDO.setOriginalPrecursorMzStart((scanIndexDO.getPrecursorMz() - delta)*1000/1000f);
+                    scanIndexDO.setOriginalPrecursorMzEnd((scanIndexDO.getPrecursorMz() + delta)*1000/1000f);
                     scanIndexDO.setOriginalWindowWideness(scanIndexDO.getWindowWideness());
                     if (overlap != null) {
                         scanIndexDO.setWindowWideness(scanIndexDO.getWindowWideness() - overlap);
@@ -567,14 +567,14 @@ public class MzXMLParser extends BaseParser {
                 }
             }
 
-            float delta = (float)(Math.round(scanIndexDO.getWindowWideness() / 2 * 1000)/1000);//防止出现奇怪的尾数
+            float delta = Math.round(scanIndexDO.getWindowWideness() / 2 * 1000)/1000f;//防止出现奇怪的尾数
             //解决某些情况下在计算了Overlap以后窗口左区间大于400的情况,这个时候可以强制补齐到400
             if (Math.abs(scanIndexDO.getPrecursorMz() - delta - 400) <= 1) {
                 scanIndexDO.setPrecursorMzStart(400f);
             } else {
-                scanIndexDO.setPrecursorMzStart((scanIndexDO.getPrecursorMz() - delta)*1000/1000);
+                scanIndexDO.setPrecursorMzStart((scanIndexDO.getPrecursorMz() - delta)*1000/1000f);
             }
-            scanIndexDO.setPrecursorMzEnd((scanIndexDO.getPrecursorMz() + delta)*1000/1000);
+            scanIndexDO.setPrecursorMzEnd((scanIndexDO.getPrecursorMz() + delta)*1000/1000f);
         }
 
         String scan = read.substring(0, read.indexOf(">"));

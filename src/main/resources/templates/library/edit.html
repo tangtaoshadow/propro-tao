@@ -71,11 +71,19 @@
                                       rows="3" th:text="${library?.description}"></textarea>
                         </div>
                         <div class="form-group m-form__group">
-                            <label th:text="#{label_upload_csv_or_traml_format_file}">
+                            <label th:text="#{label_upload_csv_or_traml_format_library}">
                             </label>
                             <div class="custom-file">
-                                <input type="file" class="custom-file-input" name="file" id="customFile">
-                                <label class="custom-file-label" for="customFile" th:text="#{label_choose_file}"></label>
+                                <input type="file" class="custom-file-input" name="libFile" id="libFile">
+                                <label class="custom-file-label" for="libFile" th:text="#{label_choose_file}"></label>
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group">
+                            <label th:text="#{label_upload_csv_format_peptide_list}">
+                            </label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" name="prmFile" id="prmFile">
+                                <label class="custom-file-label" for="prmFile" th:text="#{label_prm_only}"></label>
                             </div>
                         </div>
                     </div>

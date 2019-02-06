@@ -35,7 +35,7 @@
                             <label for="name" class="col-4 col-form-label" th:text="#{label_project_name}"></label>
                             <div class="col-8">
                                 <input type="text" class="form-control m-input" id="name"
-                                       placeholder="Enter Project Name" name="name" th:value="${project?.name}">
+                                       placeholder="Enter Project Name" name="name" th:value="${name}">
                                 <span class="m-form__help" th:text="#{label_project_name_must_be_unique}"></span>
                             </div>
                         </div>
@@ -43,20 +43,27 @@
                             <label for="repository" class="col-4 col-form-label" th:text="#{label_project_repository}"></label>
                             <div class="col-8">
                                 <input type="text" class="form-control m-input" id="repository" name="repository"
-                                       placeholder="repository" th:value="${project?.repository}">
+                                       placeholder="repository" th:value="${repository}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="type" class="col-4 col-form-label" th:text="#{label_project_type}"></label>
+                            <div class="col-8">
+                                <input type="text" class="form-control m-input" id="type" name="type"
+                                       placeholder="0:DIA,1:PRM" th:value="${type}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
                             <label for="ownerName" class="col-4 col-form-label" th:text="#{label_creator}"></label>
                             <div class="col-8">
-                                <input type="text" class="form-control m-input" id="ownerName" name="ownerName" th:value="${project?.ownerName}">
+                                <input type="text" class="form-control m-input" id="ownerName" name="ownerName" th:value="${ownerName}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
                             <label for="description" class="col-4 col-form-label" th:text="#{label_detail_description}"></label>
                             <div class="col-8">
                             <textarea class="form-control m-input" id="description" name="description"
-                                      rows="3" th:value="${project?.description}"></textarea>
+                                      rows="3" th:value="${description}"></textarea>
                             </div>
                         </div>
                     </div>

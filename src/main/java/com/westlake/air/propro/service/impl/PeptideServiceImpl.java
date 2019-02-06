@@ -215,12 +215,18 @@ public class PeptideServiceImpl implements PeptideService {
     }
 
     @Override
-    public List<TargetPeptide> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd) {
+    public List<TargetPeptide> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd, String type) {
 
         long start = System.currentTimeMillis();
         PeptideQuery query = new PeptideQuery(libraryId);
-        query.setMzStart((double) precursorMzStart);
-        query.setMzEnd((double) precursorMzEnd);
+        if(type.equals("1")){
+            float precursorMz = (precursorMzEnd + precursorMzStart)/2;
+            query.setMzStart(precursorMz - 0.0002d);
+            query.setMzEnd(precursorMz + 0.0002d);
+        }else {
+            query.setMzStart((double) precursorMzStart);
+            query.setMzEnd((double) precursorMzEnd);
+        }
 
         List<TargetPeptide> targetList = peptideDAO.getTPAll(query);
         long readDB = System.currentTimeMillis() - start;

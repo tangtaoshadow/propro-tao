@@ -112,7 +112,7 @@ public class PeakPicker {
                     stnRight = signalToNoise[i + right];
 
 
-                    if (rtArray[i + right] < rightBoundaryInt &&
+                    if (intensityArray[i + right] < rightBoundaryInt &&
                             (!Constants.CHECK_SPACINGS || (rtArray[i + right] - rtArray[rightBoundary] < Constants.SPACING_DIFFERENCE_GAP * minSpacing))) {
                         if (stnRight >= Constants.SIGNAL_TO_NOISE_LIMIT &&
                                 (!Constants.CHECK_SPACINGS || rtArray[i + right] - rtArray[rightBoundary] < Constants.SPACING_DIFFERENCE * minSpacing)) {

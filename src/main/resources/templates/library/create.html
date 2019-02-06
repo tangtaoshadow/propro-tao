@@ -29,7 +29,7 @@
                       enctype="multipart/form-data">
                     <div class="m-portlet__body">
                         <div class="form-group m-form__group m--margin-top-10">
-                            <div class="alert m-alert m-alert--default" role="alert" th:text="#{label_import_csv_or_traml_format_file}">
+                            <div class="alert m-alert m-alert--default" role="alert" th:text="#{label_import_csv_or_traml_format_library}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -63,12 +63,24 @@
                         </div>
 
                         <div class="form-group m-form__group row">
-                            <label class="col-2 col-form-label" th:text="#{label_upload_csv_or_traml_format_file}">
+                            <label class="col-2 col-form-label" th:text="#{label_upload_csv_or_traml_format_library}">
                             </label>
                             <div class="col-10">
                                 <div class="custom-file">
-                                    <input type="file" class="custom-file-input" name="file" id="file">
-                                    <label class="custom-file-label" for="file" th:text="#{label_choose_file}">
+                                    <input type="file" class="custom-file-input" name="libFile" id="libFile">
+                                    <label class="custom-file-label" for="libFile" th:text="#{label_choose_file}">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label class="col-2 col-form-label" th:text="#{label_upload_csv_format_peptide_list}">
+                            </label>
+                            <div class="col-10">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" name="prmFile" id="prmFile">
+                                    <label class="custom-file-label" for="libFile" th:text="#{label_prm_only}">
                                     </label>
                                 </div>
                             </div>

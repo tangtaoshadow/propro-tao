@@ -130,14 +130,41 @@ function queryGroup(dataId, isGaussFilter, useNoise1000) {
     var cutinfo = datas.cutInfoArray;
     var intensity_arrays = datas.intensityArrays;
     var bestRt = datas.bestRt;
+    var leftRtList = datas.leftRtList;
+    var rightRtList = datas.rightRtList;
+    var boundaryData = [];
+    for (var i =0; i<leftRtList.length; i++){
+        if(bestRt < rightRtList[i] && bestRt > leftRtList[i]){
+            boundaryData.push([
+                {xAxis: leftRtList[i]+"",itemStyle:{color:'rgba(102,204,255,0.5)'}},
+                {xAxis: rightRtList[i]+""}
+            ]);
+        }else {
+            boundaryData.push([
+                {xAxis: leftRtList[i]+""},
+                {xAxis: rightRtList[i]+""}
+            ]);
+        }
+    }
+
 
     var intensity_series = [];
-    for (var i = 0; i < intensity_arrays.length; i++) {
+    intensity_series.push({
+        name: cutinfo[0],
+        type: 'line',
+        smooth: true,
+        data: intensity_arrays[0],
+        markArea: {
+            silent: true,
+            data: boundaryData
+        }
+    });
+    for (var i = 1; i < intensity_arrays.length; i++) {
         intensity_series.push({
             name: cutinfo[i],
             type: 'line',
             smooth: true,
-            data: intensity_arrays[i],
+            data: intensity_arrays[i]
         });
     }
     var label = document.getElementById("peptideLabel");
@@ -185,6 +212,7 @@ function queryGroup(dataId, isGaussFilter, useNoise1000) {
             splitLine: {
                 show: false
             }
+
         },
         yAxis: {},
         series: intensity_series
@@ -252,6 +280,22 @@ function queryMultiGroup(peptideRef, isGaussFilter, useNoise1000) {
         var cutinfo = group.cutInfoArray;
         var intensity_arrays = group.intensityArrays;
         var bestRt = group.bestRt;
+        var leftRtList = group.leftRtList;
+        var rightRtList = group.rightRtList;
+        var boundaryData = [];
+        for (var i =0; i<leftRtList.length; i++){
+            if(bestRt < rightRtList[i] && bestRt > leftRtList[i]){
+                boundaryData.push([
+                    {xAxis: leftRtList[i]+"",itemStyle:{color:'rgba(102,204,255,0.5)'}},
+                    {xAxis: rightRtList[i]+""}
+                ]);
+            }else {
+                boundaryData.push([
+                    {xAxis: leftRtList[i]+""},
+                    {xAxis: rightRtList[i]+""}
+                ]);
+            }
+        }
 
         var intensity_series = [];
         for (var i = 0; i < intensity_arrays.length; i++) {
@@ -260,6 +304,10 @@ function queryMultiGroup(peptideRef, isGaussFilter, useNoise1000) {
                 type: 'line',
                 smooth: true,
                 data: intensity_arrays[i],
+                markArea: {
+                    silent: true,
+                    data: boundaryData
+                }
             });
         }
 
