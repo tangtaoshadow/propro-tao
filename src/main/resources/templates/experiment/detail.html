@@ -60,6 +60,14 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
+                            <label for="type" class="col-2 col-form-label" th:text="#{label_exp_type}">
+                            </label>
+                            <div class="col-10">
+                                <input type="text" class="form-control m-input" id="type" name="type" readonly
+                                       th:value="${experiment?.type}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
                             <label for="Overlap" class="col-2 col-form-label" th:text="#{label_swath_window_overlap}">
                             </label>
                             <div class="col-10">

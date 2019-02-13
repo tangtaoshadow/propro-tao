@@ -239,6 +239,7 @@ public class ExperimentController extends BaseController {
     String update(Model model,
                   @RequestParam(value = "id", required = true) String id,
                   @RequestParam(value = "name") String name,
+                  @RequestParam(value = "type") String type,
                   @RequestParam(value = "iRtLibraryId") String iRtLibraryId,
                   @RequestParam(value = "slope") Double slope,
                   @RequestParam(value = "intercept") Double intercept,
@@ -260,6 +261,7 @@ public class ExperimentController extends BaseController {
         ExperimentDO experimentDO = resultDO.getModel();
 
         experimentDO.setName(name);
+        experimentDO.setType(type);
         experimentDO.setProjectName(projectName);
         experimentDO.setBatchName(batchName);
         experimentDO.setFilePath(filePath);
