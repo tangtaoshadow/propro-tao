@@ -102,7 +102,7 @@ public class Airus {
             if (!simpleFeatureScores.getIsDecoy()) {
                 if (simpleFeatureScores.getFdr() <= 0.01) {
                     Integer count = peptideHitMap.get(simpleFeatureScores.getPeptideRef());
-                    if (count != null && count > 4) {
+                    if (count != null && count >= airusParams.getTrainTimes()/2) {
                         hit++;
                     }
                 }

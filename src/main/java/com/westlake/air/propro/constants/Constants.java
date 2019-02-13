@@ -18,7 +18,7 @@ public class Constants {
     public static final double ION_PERCENT = 0.4;//最优?
 
     //RT Normalizer
-    public static final boolean CHECK_SPACINGS = true;
+    public static final boolean CHECK_SPACINGS = false;
     public static final double SPACING_DIFFERENCE = 1.5d;
     public static final double SPACING_DIFFERENCE_GAP = 4d;
     public static final double SIGNAL_TO_NOISE_LIMIT = 1.0d;
