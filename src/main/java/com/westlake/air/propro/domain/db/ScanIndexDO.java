@@ -1,5 +1,6 @@
 package com.westlake.air.propro.domain.db;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.westlake.air.propro.domain.BaseDO;
 import com.westlake.air.propro.domain.bean.scanindex.Position;
 import lombok.Data;
@@ -19,6 +20,7 @@ import java.util.List;
 public class ScanIndexDO extends BaseDO {
 
     @Id
+    @JSONField(serialize=false)
     String id;
 
     /**

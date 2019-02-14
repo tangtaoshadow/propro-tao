@@ -63,7 +63,7 @@ public class LibraryController extends BaseController {
         model.addAttribute("libraryList", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
-        return "library/list";
+        return "library/listStandard";
     }
 
     @RequestMapping(value = "/listIrt")
@@ -85,7 +85,7 @@ public class LibraryController extends BaseController {
         model.addAttribute("libraryList", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
-        return "library/list";
+        return "library/listIrt";
     }
 
     @RequestMapping(value = "/create")
