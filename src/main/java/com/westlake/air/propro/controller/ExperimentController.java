@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.async.LumsTask;
 import com.westlake.air.propro.compressor.AirdCompressor;
 import com.westlake.air.propro.constants.*;
+import com.westlake.air.propro.dao.ScanIndexDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.analyse.WindowRang;
@@ -15,6 +16,7 @@ import com.westlake.air.propro.domain.params.Exp;
 import com.westlake.air.propro.domain.params.ExpVO;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
+import com.westlake.air.propro.domain.query.ScanIndexQuery;
 import com.westlake.air.propro.parser.MzXMLParser;
 import com.westlake.air.propro.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +27,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by James Lu MiaoShan
@@ -56,6 +57,8 @@ public class ExperimentController extends BaseController {
     LumsTask lumsTask;
     @Autowired
     ProjectService projectService;
+    @Autowired
+    ScanIndexDAO scanIndexDAO;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -141,6 +144,7 @@ public class ExperimentController extends BaseController {
         experimentDO.setFilePath(filePath);
         experimentDO.setProjectName(projectName);
         experimentDO.setBatchName(batchName);
+        experimentDO.setType(projectResult.getModel().getType());
 
         ResultDO result = experimentService.insert(experimentDO);
         if (result.isFailed()) {
@@ -175,6 +179,7 @@ public class ExperimentController extends BaseController {
                 continue;
             }
 
+            ResultDO<ProjectDO> projectResult = projectService.getByName(projectName);
             ExperimentDO experimentDO = new ExperimentDO();
             experimentDO.setProjectName(projectName);
             experimentDO.setBatchName(batchName);
@@ -182,6 +187,7 @@ public class ExperimentController extends BaseController {
             experimentDO.setDescription(exp.getDescription());
             experimentDO.setOverlap(exp.getOverlap());
             experimentDO.setFilePath(exp.getFilePath());
+            experimentDO.setType(projectResult.getModel().getType());
 
             ResultDO result = experimentService.insert(experimentDO);
             if (result.isFailed()) {
@@ -233,6 +239,7 @@ public class ExperimentController extends BaseController {
     String update(Model model,
                   @RequestParam(value = "id", required = true) String id,
                   @RequestParam(value = "name") String name,
+                  @RequestParam(value = "type") String type,
                   @RequestParam(value = "iRtLibraryId") String iRtLibraryId,
                   @RequestParam(value = "slope") Double slope,
                   @RequestParam(value = "intercept") Double intercept,
@@ -254,6 +261,7 @@ public class ExperimentController extends BaseController {
         ExperimentDO experimentDO = resultDO.getModel();
 
         experimentDO.setName(name);
+        experimentDO.setType(type);
         experimentDO.setProjectName(projectName);
         experimentDO.setBatchName(batchName);
         experimentDO.setFilePath(filePath);
@@ -369,7 +377,10 @@ public class ExperimentController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OBJECT_NOT_EXISTED);
             return "redirect:/experiment/list";
         }
-
+//        List<ScoreType> scoreType = ScoreType.getShownTypes();
+//        if(resultDO.getModel().getType().equals("1")){
+//            HashSet<String> prm
+//        }
         model.addAttribute("useEpps", true);
         model.addAttribute("libraries", getLibraryList(0));
         model.addAttribute("experiment", resultDO.getModel());
@@ -502,7 +513,7 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/getWindows")
     @ResponseBody
-    ResultDO<JSONObject> getWindows(Model model, @RequestParam(value = "expId", required = false) String expId) {
+    ResultDO<JSONObject> getWindows(Model model, @RequestParam(value = "expId", required = true) String expId) {
         List<WindowRang> rangs = experimentService.getWindows(expId);
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
 
@@ -520,6 +531,86 @@ public class ExperimentController extends BaseController {
         res.put("rangs", mzRangArray);
         res.put("min", rangs.get(0).getMzStart());
         res.put("max", rangs.get(rangs.size() - 1).getMzEnd());
+        resultDO.setModel(res);
+        return resultDO;
+    }
+    @RequestMapping(value = "/getPrmWindows")
+    @ResponseBody
+    ResultDO<JSONObject> getPrmWindows(Model model, @RequestParam(value = "expId", required = true) String expId){
+
+        ScanIndexQuery query = new ScanIndexQuery();
+        query.setExperimentId(expId);
+        query.setMsLevel(2);
+        List<ScanIndexDO> msAllIndexes = scanIndexDAO.getAll(query);
+        HashMap<Float, Float[]> peptideMap = new HashMap<>();
+        for(ScanIndexDO scanIndexDO: msAllIndexes){
+            if (!peptideMap.containsKey(scanIndexDO.getPrecursorMz())) {
+                peptideMap.put(scanIndexDO.getPrecursorMz(), new Float[]{Float.MAX_VALUE, Float.MIN_VALUE});
+            }
+            if(scanIndexDO.getRt()>peptideMap.get(scanIndexDO.getPrecursorMz())[1]){
+                peptideMap.get(scanIndexDO.getPrecursorMz())[1] = scanIndexDO.getRt();
+            }
+            if(scanIndexDO.getRt()<peptideMap.get(scanIndexDO.getPrecursorMz())[0]){
+                peptideMap.get(scanIndexDO.getPrecursorMz())[0] = scanIndexDO.getRt();
+            }
+        }
+        JSONArray peptideMs1List = new JSONArray();
+        for(Float precursorMz: peptideMap.keySet()){
+            JSONArray peptide = new JSONArray();
+            peptide.add(new Float[]{peptideMap.get(precursorMz)[0] ,precursorMz});
+            peptide.add(new Float[]{peptideMap.get(precursorMz)[1] ,precursorMz});
+            peptideMs1List.add(peptide);
+        }
+        JSONObject res = new JSONObject();
+        res.put("peptideList",peptideMs1List);
+        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
+        resultDO.setModel(res);
+        return resultDO;
+    }
+
+    @RequestMapping(value = "/getPrmDensity")
+    @ResponseBody
+    ResultDO<JSONObject> getPrmDensity(Model model, @RequestParam(value = "expId", required = true) String expId){
+        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
+        JSONArray ms2Density = new JSONArray();
+        ScanIndexQuery query = new ScanIndexQuery();
+        query.setExperimentId(expId);
+
+        query.setMsLevel(1);
+        List<ScanIndexDO> ms1Indexs = scanIndexDAO.getAll(query);
+        List<Float> ms1RtList = new ArrayList<>();
+        for(ScanIndexDO ms1: ms1Indexs){
+            ms1RtList.add(ms1.getRt());
+        }
+        Collections.sort(ms1RtList);
+
+        query.setMsLevel(2);
+        List<ScanIndexDO> ms2Indexs = scanIndexDAO.getAll(query);
+        List<Float> ms2RtList = new ArrayList<>();
+        for(ScanIndexDO ms2: ms2Indexs){
+            ms2RtList.add(ms2.getRt());
+        }
+        Collections.sort(ms2RtList);
+        int ms2Index = ms2Indexs.size() - 1;
+        int max = Integer.MIN_VALUE;
+        for(int ms1Index = ms1RtList.size() - 1; ms1Index >=0; ms1Index--){
+            int count = 0;
+            for(; ms2Index >= 0; ms2Index--){
+                if(ms2Index-count>=0 && ms2RtList.get(ms2Index - count) > ms1RtList.get(ms1Index)){
+                    count ++;
+                }else {
+                    break;
+                }
+            }
+            ms2Density.add(new Float[]{ms1RtList.get(ms1Index), (float)count});
+            if(count > max){
+                max = count;
+            }
+        }
+
+        JSONObject res = new JSONObject();
+        res.put("ms2Density", ms2Density);
+        res.put("max", (int)Math.ceil(max/10d)*10d);
         resultDO.setModel(res);
         return resultDO;
     }

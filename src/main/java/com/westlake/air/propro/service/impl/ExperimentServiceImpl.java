@@ -221,6 +221,32 @@ public class ExperimentServiceImpl implements ExperimentService {
         }
         return windowRangs;
     }
+    @Override
+    public List<WindowRang> getPrmWindows(String expId) {
+        ScanIndexQuery query = new ScanIndexQuery();
+        query.setMsLevel(2);
+        query.setExperimentId(expId);
+        List<ScanIndexDO> ms2Indexes = scanIndexDAO.getAll(query);
+        if (ms2Indexes == null || ms2Indexes.size() == 0) {
+            return null;
+        }
+
+        List<WindowRang> windowRangs = new ArrayList<>();
+        List<Float> precursorUniqueMz = new ArrayList<>();
+
+        for(ScanIndexDO ms2Index : ms2Indexes){
+            float precursorMz = ms2Index.getPrecursorMz();
+            if(precursorUniqueMz.contains(precursorMz)){
+                continue;
+            }
+            precursorUniqueMz.add(precursorMz);
+            WindowRang rang = new WindowRang();
+            rang.setMzStart(ms2Index.getPrecursorMzStart());
+            rang.setMzEnd(ms2Index.getPrecursorMzEnd());
+            windowRangs.add(rang);
+        }
+        return windowRangs;
+    }
 
     @Override
     public void uploadFile(ExperimentDO experimentDO, File file, TaskDO taskDO) {
@@ -404,9 +430,9 @@ public class ExperimentServiceImpl implements ExperimentService {
                 //Step2.获取标准库的目标肽段片段的坐标
                 //key为rt
                 TreeMap<Float, MzIntensityPairs> rtMap;
-                List<TargetPeptide> coordinates = peptideService.buildMS2Coordinates(iRtLibraryId, SlopeIntercept.create(), -1, rang.getMzStart(), rang.getMzEnd());
+                List<TargetPeptide> coordinates = peptideService.buildMS2Coordinates(iRtLibraryId, SlopeIntercept.create(), -1, rang.getMzStart(), rang.getMzEnd(), exp.getType());
                 if (coordinates.size() == 0) {
-                    logger.warn("No Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
+                    logger.warn("No iRT Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
                     continue;
                 }
                 //Step3.提取指定原始谱图
@@ -524,7 +550,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         List<TargetPeptide> coordinates;
         TreeMap<Float, MzIntensityPairs> rtMap;
         //Step2.获取标准库的目标肽段片段的坐标
-        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibraryId(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), rang.getMzStart(), rang.getMzEnd());
+        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibraryId(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), rang.getMzStart(), rang.getMzEnd(), lumsParams.getExperimentDO().getType());
         if (coordinates.isEmpty()) {
             logger.warn("No Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
             return null;

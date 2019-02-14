@@ -106,9 +106,11 @@ public class FeatureExtractor {
         for (String cutInfo : intensitiesMap.keySet()) {
             //计算两个信噪比
             double[] noises200 = signalToNoiseEstimator.computeSTN(rtDoubleArray, smoothIntensitiesMap.get(cutInfo), 200, 30);
+//            double[] noises200 = signalToNoiseEstimator.computeSTN(rtDoubleArray, intensitiesMap.get(cutInfo), 200, 30);
             double[] noisesOri1000 = signalToNoiseEstimator.computeSTN(rtDoubleArray, intensitiesMap.get(cutInfo), 1000, 30);
             //根据信噪比和峰值形状选择最高峰,用降噪200及平滑过后的图去挑选Peak峰
             RtIntensityPairsDouble maxPeakPairs = peakPicker.pickMaxPeak(rtDoubleArray, smoothIntensitiesMap.get(cutInfo), noises200);
+//            RtIntensityPairsDouble maxPeakPairs = peakPicker.pickMaxPeak(rtDoubleArray, intensitiesMap.get(cutInfo), noises200);
 
             //根据信噪比和最高峰选择谱图
             if (maxPeakPairs == null) {

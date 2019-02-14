@@ -63,7 +63,7 @@ public class AirdCompressor {
         File airiFile = new File(airdIndexPath);
         File airdFile = new File(airdFilePath);
 
-        List<WindowRang> windowRangs = experimentService.getWindows(experimentDO.getId());
+        List<WindowRang> windowRangs = experimentService.getPrmWindows(experimentDO.getId());
 
         AirdInfo airdInfo = new AirdInfo();
         airdInfo.setWindowRangs(windowRangs);

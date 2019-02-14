@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 @Component("traMLParser")
@@ -106,6 +107,7 @@ public class TraMLParser extends BaseLibraryParser {
                 if (cvParam.getName().equals("isolation window target m/z")) {
                     peptideDO.setMz(Double.valueOf(cvParam.getValue()));
                 }
+                //charge state以Peptide部分带电量为准
                 if (cvParam.getName().equals("charge state")) {
                     peptideDO.setCharge(Integer.valueOf(cvParam.getValue()));
                 }
@@ -162,7 +164,7 @@ public class TraMLParser extends BaseLibraryParser {
     }
 
     @Override
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library, TaskDO taskDO) {
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> prmPeptideRefSet, TaskDO taskDO) {
         TraML traML = parse(in);
 
         HashMap<String, Peptide> peptideMap = makePeptideMap(traML.getCompoundList().getPeptideList());
@@ -180,6 +182,9 @@ public class TraMLParser extends BaseLibraryParser {
 
             HashMap<String, PeptideDO> map = new HashMap<>();
             for (Transition transition : traML.getTransitionList()) {
+                if(!prmPeptideRefSet.isEmpty() && !isPrmPeptideRef(transition, peptideMap, prmPeptideRefSet)){
+                    continue;
+                }
                 ResultDO<PeptideDO> resultDO = parseTransition(transition, peptideMap, library);
 
                 if (resultDO.isFailed()) {
@@ -219,5 +224,17 @@ public class TraMLParser extends BaseLibraryParser {
         }
 
         return tranResult;
+    }
+
+    private boolean isPrmPeptideRef(Transition transition, HashMap<String, Peptide> peptideMap, HashSet<String> peptideRefList){
+        Peptide peptide = peptideMap.get(transition.getPeptideRef());
+        String charge = "";
+        for(CvParam cvParam : peptide.getCvParams()){
+            if(cvParam.getName().equals("charge state")){
+                charge = cvParam.getValue();
+            }
+        }
+        String fullName = peptide.getUserParams().get(0).getValue();
+        return peptideRefList.contains(fullName+"_"+charge);
     }
 }

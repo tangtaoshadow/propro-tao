@@ -200,7 +200,7 @@ public class FeatureFinder {
                 ionHullInt.put(cutInfo, rasteredInt);
                 //peakGroup强度
 //                Double ionIntTemp = MathUtil.sum(rasteredInt);
-                Double ionIntTemp = (intArray[maxSpectrumIndex]+1) * Math.min(maxSpectrumIndex - leftIndex, rightIndex - maxSpectrumIndex) * Constants.SQRT_2PI / 2;
+                Double ionIntTemp = (intArray[maxSpectrumIndex]+1) * Math.min(maxSpectrumIndex - leftIndex, rightIndex - maxSpectrumIndex) * Constants.SQRT_2PI / 2d;
                 peakGroupInt += ionIntTemp;
                 //离子峰强度
                 ionIntensity.put(cutInfo, ionIntTemp);
