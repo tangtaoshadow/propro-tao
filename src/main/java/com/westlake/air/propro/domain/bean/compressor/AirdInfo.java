@@ -29,7 +29,7 @@ public class AirdInfo {
     /**
      * Store the window rangs which have been adjusted with experiment overlap
      */
-    List<WindowRang> windowRangs = new ArrayList<>();
+    List<WindowRang> windowRanges = new ArrayList<>();
 
     /**
      * the whole new scan index for new format file
