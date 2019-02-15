@@ -66,7 +66,7 @@ public class AirdCompressor {
         List<WindowRang> windowRangs = experimentService.getPrmWindows(experimentDO.getId());
 
         AirdInfo airdInfo = new AirdInfo();
-        airdInfo.setWindowRangs(windowRangs);
+        airdInfo.setRangeList(windowRangs);
         List<ScanIndexDO> swathIndexes = new ArrayList<>();
 
         RandomAccessFile rafRead = null;
@@ -141,8 +141,8 @@ public class AirdCompressor {
             }
 
             //写入基本信息
-            airdInfo.setScanIndex(outputIndexList);
-            airdInfo.setSwathIndexes(swathIndexes);
+            airdInfo.setScanIndexList(outputIndexList);
+            airdInfo.setSwathIndexList(swathIndexes);
             airdInfo.setAirdPath(airdFilePath);
             airdInfo.setCreator(experimentDO.getCreator());
             airdInfo.setCreateDate(experimentDO.getCreateDate());

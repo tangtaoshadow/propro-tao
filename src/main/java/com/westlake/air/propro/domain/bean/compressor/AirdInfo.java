@@ -29,15 +29,15 @@ public class AirdInfo {
     /**
      * Store the window rangs which have been adjusted with experiment overlap
      */
-    List<WindowRang> windowRanges = new ArrayList<>();
+    List<WindowRang> rangeList = new ArrayList<>();
 
     /**
      * the whole new scan index for new format file
      */
-    List<ScanIndexDO> scanIndex = new ArrayList<>();
+    List<ScanIndexDO> scanIndexList = new ArrayList<>();
 
     /**
      * the swath window location(start and and) for new format file
      */
-    List<ScanIndexDO> swathIndexes = new ArrayList<>();
+    List<ScanIndexDO> swathIndexList = new ArrayList<>();
 }
