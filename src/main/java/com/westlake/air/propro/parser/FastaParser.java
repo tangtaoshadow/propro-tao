@@ -1,11 +1,12 @@
 package com.westlake.air.propro.parser;
 
+import com.westlake.air.propro.constants.ResultCode;
+import com.westlake.air.propro.domain.ResultDO;
 import org.junit.Test;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -16,9 +17,37 @@ import java.util.*;
  */
 @Component
 public class FastaParser {
-    public HashMap<String, HashSet<String>> parse(File file) {
+
+    int minPepLen = 0;
+    int maxPepLen = 100;
+
+    public ResultDO<HashSet<String>> getUniquePeptide(InputStream in){
+        ResultDO<HashMap<String, HashSet<String>>> protMapResultDO = parse(in);
+        if(protMapResultDO.isFailed()){
+            ResultDO<HashSet<String>> resultDO = new ResultDO(false);
+            resultDO.setMsgInfo(protMapResultDO.getMsgInfo());
+            return resultDO;
+        }
+        HashSet<String> uniquePeptides = new HashSet<>();
+        HashSet<String> allPeptides = new HashSet<>();
+        for (HashSet<String> peptideSet: protMapResultDO.getModel().values()){
+            for (String peptide: peptideSet){
+                if (allPeptides.contains(peptide) && uniquePeptides.contains(peptide)){
+                    //若之前出现过，且在Unique中，移除
+                    uniquePeptides.remove(peptide);
+                }else {
+                    //若之前没出现过，暂且放在Unique中
+                    uniquePeptides.add(peptide);
+                }
+                allPeptides.add(peptide);
+            }
+        }
+        return new ResultDO<HashSet<String>>(true).setModel(uniquePeptides);
+    }
+
+    private ResultDO<HashMap<String, HashSet<String>>> parse(InputStream in) {
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
             String line = reader.readLine();
             String lastProteinMessage = line;
             //设置初始容量为128，避免重新分配空间造成的性能损失
@@ -40,11 +69,10 @@ public class FastaParser {
             }
             HashSet<String> enzymedSequence = getEnzymeResult(lastSequence.toString());
             proteinPeptideMap.put(lastProteinMessage, enzymedSequence);
-            return proteinPeptideMap;
+            return new ResultDO<HashMap<String, HashSet<String>>>(true).setModel(proteinPeptideMap);
         } catch (Exception e) {
             e.printStackTrace();
-            return new HashMap<>();
-        }
+            return ResultDO.buildError(ResultCode.PRM_FILE_FORMAT_NOT_SUPPORTED);        }
     }
 
     /**
@@ -56,7 +84,7 @@ public class FastaParser {
         String[] result = proteinSequence.replaceAll("K", "K|").replaceAll("R", "R|").split("\\|");
         HashSet<String> peptideSet = new HashSet<>();
         for(String peptide: result){
-            if(peptide.length() >= 12 && peptide.length() <=22){
+            if(peptide.length() >= minPepLen && peptide.length() <= maxPepLen){
                 peptideSet.add(peptide);
             }
         }
@@ -67,27 +95,14 @@ public class FastaParser {
     public void test(){
         long startTime = System.currentTimeMillis();
         File file = new File("D:\\data\\swissprot_human_20180209_target_IRT_contaminant.fasta");
-        HashMap<String, HashSet<String>> result = parse(file);
-        HashSet<String> uniquePeptide = getUniquePeptide(result);
-        System.out.println("parseFinished.");
-        System.out.println("time used: " + (System.currentTimeMillis() - startTime));
+        try {
+            InputStream in = new FileInputStream(file);
+            HashSet<String> uniquePeptide = getUniquePeptide(in).getModel();
+            System.out.println("parseFinished.");
+            System.out.println("time used: " + (System.currentTimeMillis() - startTime));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
-    private HashSet<String> getUniquePeptide(HashMap<String,HashSet<String>> originMap){
-        HashSet<String> uniquePeptides = new HashSet<>();
-        HashSet<String> allPeptides = new HashSet<>();
-        for (HashSet<String> peptideSet: originMap.values()){
-            for (String peptide: peptideSet){
-                if (allPeptides.contains(peptide) && uniquePeptides.contains(peptide)){
-                    //若之前出现过，且在Unique中，移除
-                    uniquePeptides.remove(peptide);
-                }else {
-                    //若之前没出现过，暂且放在Unique中
-                    uniquePeptides.add(peptide);
-                }
-                allPeptides.add(peptide);
-            }
-        }
-        return uniquePeptides;
-    }
 }

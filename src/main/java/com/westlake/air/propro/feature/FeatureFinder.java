@@ -161,7 +161,6 @@ public class FeatureFinder {
             int leftIndex = concateMap.get(maxIon).getLeftRtIndex();
             int rightIndex = concateMap.get(maxIon).getRightRtIndex();
             double apexRt = ionPeaks.get(maxIon).getRtArray()[concateMap.get(maxIon).getIndex()];
-//            double apexInt = ionPeaks.get(maxIon).getIntensityArray()[concateMap.get(maxIon).getIndex()];
             double bestLeft = peptideSpectrum.getRtArray()[leftIndex];
             double bestRight = peptideSpectrum.getRtArray()[rightIndex];
 
@@ -189,25 +188,28 @@ public class FeatureFinder {
             for(String cutInfo: peptideSpectrum.getIntensitiesMap().keySet()) {
                 //离子峰
                 Double[] intArray = peptideSpectrum.getIntensitiesMap().get(cutInfo);
+                //设定局部最大值（峰型控制备用）
                 double localMaxIntensity = intArray[maxSpectrumIndex];
 //                if(intArray[maxSpectrumIndex] < intArray[maxSpectrumIndex-1] && intArray[maxSpectrumIndex] < intArray[maxSpectrumIndex+1]){
 //                    localMaxIntensity = FastMath.max(intArray[maxSpectrumIndex-1], intArray[maxSpectrumIndex+1]);
 //                }
                 localMaxIntensity = FastMath.max(intArray[maxSpectrumIndex-1], FastMath.max(intArray[maxSpectrumIndex], intArray[maxSpectrumIndex+1]));
+
+                //获得峰值部分的Intensity序列
 //                Double[] rasteredInt = new Double[rightIndex - leftIndex + 1];
 //                System.arraycopy(intArray, leftIndex, rasteredInt, 0, rightIndex - leftIndex + 1);
                 Double[] rasteredInt = filteredCopy(intArray, leftIndex, rightIndex, Double.MAX_VALUE);
                 ionHullInt.put(cutInfo, rasteredInt);
-                //peakGroup强度
+
+                //离子峰强度
 //                Double ionIntTemp = MathUtil.sum(rasteredInt);
                 Double ionIntTemp = (intArray[maxSpectrumIndex]+1) * Math.min(maxSpectrumIndex - leftIndex, rightIndex - maxSpectrumIndex) * Constants.SQRT_2PI / 2d;
                 peakGroupInt += ionIntTemp;
-                //离子峰强度
                 ionIntensity.put(cutInfo, ionIntTemp);
+
                 //信噪比
                 signalToNoiseSum += noise1000Map.get(cutInfo)[maxSpectrumIndex];
             }
-//            List<Double> ionIntList = new ArrayList<>(ionIntensity.values());
             peakGroup.setIonCount(ionPeaks.size());
             peakGroup.setIonHullRt(rasteredRt);
             peakGroup.setIonHullInt(ionHullInt);

@@ -18,6 +18,7 @@ import com.westlake.air.propro.parser.LibraryTsvParser;
 import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.PeptideService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.aggregation.ArrayOperators;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 
@@ -99,8 +101,9 @@ public class LibraryController extends BaseController {
                @RequestParam(value = "name", required = true) String name,
                @RequestParam(value = "type", required = true) Integer type,
                @RequestParam(value = "description", required = false) String description,
-               @RequestParam(value = "libFile") MultipartFile libFile,
+               @RequestParam(value = "libFile", required = true) MultipartFile libFile,
                @RequestParam(value = "prmFile", required = false) MultipartFile prmFile,
+               @RequestParam(value = "fastaFile", required = false) MultipartFile fastaFile,
                RedirectAttributes redirectAttributes) {
 
         if (libFile == null || libFile.getOriginalFilename() == null || libFile.getOriginalFilename().isEmpty()) {
@@ -121,28 +124,18 @@ public class LibraryController extends BaseController {
             redirectAttributes.addFlashAttribute("library", library);
             return "redirect://library/create";
         }
-
-
-        HashSet<String> prmPeptideRefSet = new HashSet<>();
-        if(!prmFile.isEmpty()) {
-//            library.setNeedIrt(true);
-            try {
-                ResultDO<HashSet<String>> prmResultDO = tsvParser.getPrmPeptideRef(prmFile.getInputStream());
-                if (prmResultDO.isFailed()) {
-                    logger.warn(prmResultDO.getMsgInfo());
-                    redirectAttributes.addFlashAttribute(ERROR_MSG, prmResultDO.getMsgInfo());
-                    redirectAttributes.addFlashAttribute("library", library);
-                    return "redirect://library/create";
-                }
-                prmPeptideRefSet = prmResultDO.getModel();
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-
-
         try {
-            libraryTask.saveLibraryTask(library, libFile.getInputStream(), libFile.getOriginalFilename(), prmPeptideRefSet, taskDO);
+            InputStream libFileStream = libFile.getInputStream();
+            InputStream prmFileStream = null;
+            if(!prmFile.isEmpty()){
+                prmFileStream = prmFile.getInputStream();
+            }
+            InputStream fastaFileStream = null;
+            if(!fastaFile.isEmpty()){
+                fastaFileStream = fastaFile.getInputStream();
+            }
+
+            libraryTask.saveLibraryTask(library, libFileStream, libFile.getOriginalFilename(), fastaFileStream, prmFileStream, taskDO);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -205,6 +198,7 @@ public class LibraryController extends BaseController {
                   @RequestParam(value = "justReal", required = false) boolean justReal,
                   @RequestParam(value = "libFile") MultipartFile libFile,
                   @RequestParam(value = "prmFile", required = false) MultipartFile prmFile,
+                  @RequestParam(value = "fastaFile", required = false) MultipartFile fastaFile,
                   RedirectAttributes redirectAttributes) {
 
         String redirectListUrl = null;
@@ -236,24 +230,19 @@ public class LibraryController extends BaseController {
 
         TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_LIBRARY_FILE, library.getName());
         taskService.insert(taskDO);
-        HashSet<String> prmPeptideRefSet = new HashSet<>();
-        if(!prmFile.isEmpty()) {
-//            library.setNeedIrt(true);
-            try {
-                ResultDO<HashSet<String>> prmResultDO = tsvParser.getPrmPeptideRef(prmFile.getInputStream());
-                if (prmResultDO.isFailed()) {
-                    logger.warn(prmResultDO.getMsgInfo());
-                    redirectAttributes.addFlashAttribute(ERROR_MSG, prmResultDO.getMsgInfo());
-                    redirectAttributes.addFlashAttribute("library", library);
-                    return "redirect:/library/detail/" + library.getId();
-                }
-                prmPeptideRefSet = prmResultDO.getModel();
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
+
         try {
-            libraryTask.saveLibraryTask(library, libFile.getInputStream(), libFile.getOriginalFilename(), prmPeptideRefSet, taskDO);
+            InputStream libFileStream = libFile.getInputStream();
+            InputStream prmFileStream = null;
+            if(!prmFile.isEmpty()){
+                prmFileStream = prmFile.getInputStream();
+            }
+            InputStream fastaFileStream = null;
+            if(!prmFile.isEmpty()){
+                fastaFileStream = fastaFile.getInputStream();
+            }
+
+            libraryTask.saveLibraryTask(library, libFileStream, libFile.getOriginalFilename(), fastaFileStream, prmFileStream, taskDO);
         } catch (IOException e) {
             e.printStackTrace();
         }

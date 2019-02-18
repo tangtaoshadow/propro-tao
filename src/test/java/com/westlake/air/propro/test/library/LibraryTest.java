@@ -37,7 +37,7 @@ public class LibraryTest extends BaseTest {
         libraryService.insert(libraryDO);
         String filePath = getClass().getClassLoader().getResource("ChromatogramExtractor_input.tsv").getPath();
         File file = new File(filePath);
-        ResultDO resultDO = libraryService.parseAndInsert(libraryDO, new FileInputStream(file), filePath, new HashSet<String>(),new TaskDO());
+        ResultDO resultDO = libraryService.parseAndInsert(libraryDO, new FileInputStream(file), filePath, null, null, new TaskDO());
         assert resultDO.isSuccess();
         List<PeptideDO> trans = peptideService.getAllByLibraryId(libraryDO.getId());
         assert trans.size() == 3;

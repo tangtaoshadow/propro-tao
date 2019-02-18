@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +36,7 @@ public abstract class BaseLibraryParser {
 
     public static final Pattern unimodPattern = Pattern.compile("([a-z])[\\(]unimod[\\:](\\d*)[\\)]");
 
-    public abstract ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> prmPeptideRefList, TaskDO taskDO);
+    public abstract ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashSet<String> prmPeptideRefSet, TaskDO taskDO);
 
     protected ResultDO<Annotation> parseAnnotation(String annotations) {
         ResultDO<Annotation> resultDO = new ResultDO<>(true);
@@ -117,6 +118,59 @@ public abstract class BaseLibraryParser {
         }
         if (unimodMap.size() > 0) {
             peptideDO.setUnimodMap(unimodMap);
+        }
+    }
+
+    /**
+     * 从去除的Peptide推断的Protein中删除含有未去除Peptide的Protein
+     * @param dropSet 非Unique的Peptide推断得到的ProtSet
+     * @param uniqueSet Unique的Peptide推断得到的ProtSet
+     * @return 非Unique蛋白的数量
+     */
+    protected int getDropCount(HashSet<String> dropSet, HashSet<String> uniqueSet){
+        List<String> dropList = new ArrayList<>(dropSet);
+        int dropCount = dropList.size();
+        for(String prot: dropList){
+            if (uniqueSet.contains(prot)){
+                dropCount--;
+            }
+        }
+        return dropCount;
+    }
+
+    protected void uniqueCount(PeptideDO peptide, HashSet<String> fastaUniqueSet, HashMap<String, PeptideDO> map, HashSet<String> fastaDropPep, HashSet<String> libraryDropPep, HashSet<String> fastaDropProt, HashSet<String> libraryDropProt, HashSet<String> uniqueProt){
+        if(peptide.getProteinName().startsWith("1/") || peptide.getProteinName().startsWith("DECOY_1/")){
+            if(!fastaUniqueSet.isEmpty() && !fastaUniqueSet.contains(peptide.getTargetSequence())){
+                peptide.setIsUnique(false);
+                setDropProt(peptide, fastaDropProt);
+                fastaDropPep.add(peptide.getTargetSequence());
+            }else {
+                if (peptide.getIsDecoy()){
+                    uniqueProt.add(peptide.getProteinName().replace("DECOY_",""));
+                }else {
+                    uniqueProt.add(peptide.getProteinName());
+                }
+            }
+        }else {
+            peptide.setIsUnique(false);
+            setDropProt(peptide, libraryDropProt);
+            libraryDropPep.add(peptide.getTargetSequence());
+        }
+        PeptideDO existedPeptide = map.get(peptide.getPeptideRef()+"_"+peptide.getIsDecoy());
+        if(existedPeptide == null){
+            map.put(peptide.getPeptideRef()+"_"+peptide.getIsDecoy(), peptide);
+        }else{
+            for (String key : peptide.getFragmentMap().keySet()) {
+                existedPeptide.putFragment(key, peptide.getFragmentMap().get(key));
+            }
+        }
+    }
+
+    private void setDropProt(PeptideDO peptide, HashSet<String> protSet){
+        if (peptide.getIsDecoy()){
+            protSet.add(peptide.getProteinName().replace("DECOY_",""));
+        }else {
+            protSet.add(peptide.getProteinName());
         }
     }
 }

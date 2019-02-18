@@ -45,6 +45,7 @@ public class PeptideController extends BaseController {
                 @RequestParam(value = "sequence", required = false) String sequence,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "decoyFilter", required = false, defaultValue = "All") String decoyFilter,
+                @RequestParam(value = "uniqueFilter", required = false, defaultValue = "All") String uniqueFilter,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
         long startTime = System.currentTimeMillis();
         model.addAttribute("libraryId", libraryId);
@@ -52,6 +53,7 @@ public class PeptideController extends BaseController {
         model.addAttribute("peptideRef", peptideRef);
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("decoyFilter", decoyFilter);
+        model.addAttribute("uniqueFilter", uniqueFilter);
         model.addAttribute("libraries",getLibraryList(null));
         model.addAttribute("sequence",sequence);
 
@@ -74,6 +76,13 @@ public class PeptideController extends BaseController {
                 query.setIsDecoy(true);
             }else if(decoyFilter.equals("No")){
                 query.setIsDecoy(false);
+            }
+        }
+        if (!uniqueFilter.equals("All")) {
+            if(uniqueFilter.equals("Yes")){
+                query.setIsUnique(true);
+            }else if(uniqueFilter.equals("No")){
+                query.setIsUnique(false);
             }
         }
 

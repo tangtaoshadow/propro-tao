@@ -23,10 +23,10 @@ public class LibraryTask extends BaseTask{
     LibraryService libraryService;
 
     @Async(value = "uploadFileExecutor")
-    public void saveLibraryTask(LibraryDO library, InputStream in, String fileName, HashSet<String> prmPeptideRefSet, TaskDO taskDO) {
+    public void saveLibraryTask(LibraryDO library, InputStream libFileStream, String fileName, InputStream fastaFileStream, InputStream prmFileStream, TaskDO taskDO) {
         taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
-        libraryService.uploadFile(library, in, fileName, prmPeptideRefSet, taskDO);
+        libraryService.uploadFile(library, libFileStream, fileName, fastaFileStream, prmFileStream, taskDO);
     }
 }

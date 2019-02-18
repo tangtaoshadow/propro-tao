@@ -382,6 +382,7 @@ public class ExperimentController extends BaseController {
 //            HashSet<String> prm
 //        }
         model.addAttribute("useEpps", true);
+        model.addAttribute("uniqueOnly", false);
         model.addAttribute("libraries", getLibraryList(0));
         model.addAttribute("experiment", resultDO.getModel());
         model.addAttribute("scoreTypes", ScoreType.getShownTypes());
@@ -405,6 +406,7 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.6") Float shapeScoreThreshold,
                      @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.8") Float shapeWeightScoreThreshold,
                      @RequestParam(value = "useEpps", required = false, defaultValue = "true") Boolean useEpps,
+                     @RequestParam(value = "uniqueOnly", required = false, defaultValue = "false") Boolean uniqueOnly,
                      HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
 
@@ -444,6 +446,7 @@ public class ExperimentController extends BaseController {
         input.setRtExtractWindow(rtExtractWindow);
         input.setMzExtractWindow(mzExtractWindow);
         input.setUseEpps(useEpps);
+        input.setUniqueOnly(uniqueOnly);
         input.setScoreTypes(scoreTypes);
         input.setSigmaSpacing(ss);
         input.setXcorrShapeThreshold(shapeScoreThreshold);

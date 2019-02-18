@@ -75,12 +75,23 @@
                         </div>
 
                         <div class="form-group m-form__group row">
+                            <label class="col-2 col-form-label" th:text="#{label_upload_fasta_format_file}">
+                            </label>
+                            <div class="col-10">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" name="fastaFile" id="fastaFile">
+                                    <label class="custom-file-label" for="fastaFile" th:text="#{label_fasta_note}">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
                             <label class="col-2 col-form-label" th:text="#{label_upload_csv_format_peptide_list}">
                             </label>
                             <div class="col-10">
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input" name="prmFile" id="prmFile">
-                                    <label class="custom-file-label" for="libFile" th:text="#{label_prm_only}">
+                                    <label class="custom-file-label" for="prmFile" th:text="#{label_prm_only}">
                                     </label>
                                 </div>
                             </div>

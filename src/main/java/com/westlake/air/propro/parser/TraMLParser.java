@@ -10,6 +10,7 @@ import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.parser.model.traml.*;
 import com.westlake.air.propro.parser.xml.AirXStream;
 import com.westlake.air.propro.service.TaskService;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -134,6 +135,7 @@ public class TraMLParser extends BaseLibraryParser {
         peptideDO.setSequence(peptide.getSequence());
         peptideDO.setProteinName(peptide.getProteinRefList().get(0).getRef());
         peptideDO.setFullName(peptide.getUserParams().get(0).getValue());
+        peptideDO.setTargetSequence(removeUnimod(peptideDO.getFullName()));
         for(CvParam cvParam : peptide.getCvParams()){
             if(cvParam.getName().equals("charge state")){
                 peptideDO.setCharge(Integer.valueOf(cvParam.getValue()));
@@ -164,7 +166,7 @@ public class TraMLParser extends BaseLibraryParser {
     }
 
     @Override
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> prmPeptideRefSet, TaskDO taskDO) {
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashSet<String> prmPeptideRefSet, TaskDO taskDO) {
         TraML traML = parse(in);
 
         HashMap<String, Peptide> peptideMap = makePeptideMap(traML.getCompoundList().getPeptideList());
@@ -181,6 +183,11 @@ public class TraMLParser extends BaseLibraryParser {
             }
 
             HashMap<String, PeptideDO> map = new HashMap<>();
+            HashSet<String> fastaDropPep = new HashSet<>();
+            HashSet<String> libraryDropPep = new HashSet<>();
+            HashSet<String> fastaDropProt = new HashSet<>();
+            HashSet<String> libraryDropProt = new HashSet<>();
+            HashSet<String> uniqueProt = new HashSet<>();
             for (Transition transition : traML.getTransitionList()) {
                 if(!prmPeptideRefSet.isEmpty() && !isPrmPeptideRef(transition, peptideMap, prmPeptideRefSet)){
                     continue;
@@ -193,36 +200,24 @@ public class TraMLParser extends BaseLibraryParser {
                 }
 
                 PeptideDO peptide = resultDO.getModel();
-                PeptideDO existedPeptide = map.get(peptide.getPeptideRef()+"_"+peptide.getIsDecoy());
-                if(existedPeptide == null){
-                    map.put(peptide.getPeptideRef()+"_"+peptide.getIsDecoy(), peptide);
-                }else{
-                    for (String key : peptide.getFragmentMap().keySet()) {
-                        existedPeptide.putFragment(key, peptide.getFragmentMap().get(key));
-                    }
-                }
+                uniqueCount(peptide, fastaUniqueSet, map, fastaDropPep, libraryDropPep, fastaDropProt, libraryDropProt, uniqueProt);
             }
-            ArrayList<PeptideDO> totalList = new ArrayList<PeptideDO>(map.values());
-            int decoyCount = 0;
-            int targetCount = 0;
-            for(PeptideDO pt : totalList){
-                if(pt.getIsDecoy()){
-                    decoyCount++;
-                }else{
-                    targetCount++;
-                }
+            library.setFastaDeWeightPepCount(fastaDropPep.size());
+            library.setFastaDeWeightProtCount(getDropCount(fastaDropProt, uniqueProt));
+            library.setLibraryDeWeightPepCount(libraryDropPep.size());
+            library.setLibraryDeWeightProtCount(getDropCount(libraryDropProt, uniqueProt));
+            if(!fastaUniqueSet.isEmpty()) {
+                System.out.println("fasta额外检出：" + fastaDropPep.size() + "个Peptide");
             }
-            logger.info("伪肽段:"+decoyCount);
-            logger.info("真实肽段:"+targetCount);
-            peptideService.insertAll(totalList, false);
-            tranResult.setModel(totalList);
-            taskDO.addLog(totalList.size() + "条数据插入成功");
+            ArrayList<PeptideDO> peptides = new ArrayList<PeptideDO>(map.values());
+            peptideService.insertAll(peptides, false);
+            tranResult.setModel(peptides);
+            taskDO.addLog(peptides.size() + "条数据插入成功");
             taskService.update(taskDO);
-            logger.info(map.values().size() + "条数据插入成功");
+            logger.info(peptides.size() + "条肽段数据插入成功,其中蛋白质种类有" + uniqueProt.size() + "个");
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return tranResult;
     }
 
@@ -236,5 +231,21 @@ public class TraMLParser extends BaseLibraryParser {
         }
         String fullName = peptide.getUserParams().get(0).getValue();
         return peptideRefList.contains(fullName+"_"+charge);
+    }
+
+    private String removeUnimod(String fullName){
+        if (fullName.contains("(")){
+            String[] parts = fullName.replaceAll("\\(","|(").replaceAll("\\)","|").split("\\|");
+            String sequence = "";
+            for(String part: parts){
+                if (part.startsWith("(")){
+                    continue;
+                }
+                sequence += part;
+            }
+            return sequence;
+        }else {
+            return fullName;
+        }
     }
 }
