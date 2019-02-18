@@ -34,6 +34,7 @@ public abstract class BaseLibraryParser {
     @Autowired
     PeptideService peptideService;
 
+    boolean drop = true;
     public static final Pattern unimodPattern = Pattern.compile("([a-z])[\\(]unimod[\\:](\\d*)[\\)]");
 
     public abstract ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashSet<String> prmPeptideRefSet, TaskDO taskDO);
@@ -138,24 +139,39 @@ public abstract class BaseLibraryParser {
         return dropCount;
     }
 
-    protected void uniqueCount(PeptideDO peptide, HashSet<String> fastaUniqueSet, HashMap<String, PeptideDO> map, HashSet<String> fastaDropPep, HashSet<String> libraryDropPep, HashSet<String> fastaDropProt, HashSet<String> libraryDropProt, HashSet<String> uniqueProt){
-        if(peptide.getProteinName().startsWith("1/") || peptide.getProteinName().startsWith("DECOY_1/")){
+    protected void setUnique(PeptideDO peptide, HashSet<String> fastaUniqueSet, HashSet<String> fastaDropPep, HashSet<String> libraryDropPep, HashSet<String> fastaDropProt, HashSet<String> libraryDropProt, HashSet<String> uniqueProt){
+        if(peptide.getProteinName().startsWith("1/")){
             if(!fastaUniqueSet.isEmpty() && !fastaUniqueSet.contains(peptide.getTargetSequence())){
                 peptide.setIsUnique(false);
-                setDropProt(peptide, fastaDropProt);
-                fastaDropPep.add(peptide.getTargetSequence());
+                fastaDropProt.add(peptide.getProteinName());
+                fastaDropPep.add(peptide.getPeptideRef());
             }else {
-                if (peptide.getIsDecoy()){
-                    uniqueProt.add(peptide.getProteinName().replace("DECOY_",""));
-                }else {
-                    uniqueProt.add(peptide.getProteinName());
-                }
+                uniqueProt.add(peptide.getProteinName());
             }
         }else {
             peptide.setIsUnique(false);
-            setDropProt(peptide, libraryDropProt);
-            libraryDropPep.add(peptide.getTargetSequence());
+            libraryDropProt.add(peptide.getProteinName());
+            libraryDropPep.add(peptide.getPeptideRef());
         }
+    }
+
+    protected String removeUnimod(String fullName){
+        if (fullName.contains("(")){
+            String[] parts = fullName.replaceAll("\\(","|(").replaceAll("\\)","|").split("\\|");
+            String sequence = "";
+            for(String part: parts){
+                if (part.startsWith("(")){
+                    continue;
+                }
+                sequence += part;
+            }
+            return sequence;
+        }else {
+            return fullName;
+        }
+    }
+
+    protected void addFragment(PeptideDO peptide, HashMap<String, PeptideDO> map){
         PeptideDO existedPeptide = map.get(peptide.getPeptideRef()+"_"+peptide.getIsDecoy());
         if(existedPeptide == null){
             map.put(peptide.getPeptideRef()+"_"+peptide.getIsDecoy(), peptide);
@@ -163,14 +179,6 @@ public abstract class BaseLibraryParser {
             for (String key : peptide.getFragmentMap().keySet()) {
                 existedPeptide.putFragment(key, peptide.getFragmentMap().get(key));
             }
-        }
-    }
-
-    private void setDropProt(PeptideDO peptide, HashSet<String> protSet){
-        if (peptide.getIsDecoy()){
-            protSet.add(peptide.getProteinName().replace("DECOY_",""));
-        }else {
-            protSet.add(peptide.getProteinName());
         }
     }
 }

@@ -133,7 +133,7 @@ public class TraMLParser extends BaseLibraryParser {
         String rt = peptide.getRetentionTimeList().get(0).getCvParams().get(0).getValue();
         peptideDO.setRt(Double.valueOf(rt));
         peptideDO.setSequence(peptide.getSequence());
-        peptideDO.setProteinName(peptide.getProteinRefList().get(0).getRef());
+        peptideDO.setProteinName(peptide.getProteinRefList().get(0).getRef().replace("DECOY_",""));
         peptideDO.setFullName(peptide.getUserParams().get(0).getValue());
         peptideDO.setTargetSequence(removeUnimod(peptideDO.getFullName()));
         for(CvParam cvParam : peptide.getCvParams()){
@@ -200,7 +200,8 @@ public class TraMLParser extends BaseLibraryParser {
                 }
 
                 PeptideDO peptide = resultDO.getModel();
-                uniqueCount(peptide, fastaUniqueSet, map, fastaDropPep, libraryDropPep, fastaDropProt, libraryDropProt, uniqueProt);
+                setUnique(peptide, fastaUniqueSet, fastaDropPep, libraryDropPep, fastaDropProt, libraryDropProt, uniqueProt);
+                addFragment(peptide, map);
             }
             library.setFastaDeWeightPepCount(fastaDropPep.size());
             library.setFastaDeWeightProtCount(getDropCount(fastaDropProt, uniqueProt));
@@ -233,19 +234,5 @@ public class TraMLParser extends BaseLibraryParser {
         return peptideRefList.contains(fullName+"_"+charge);
     }
 
-    private String removeUnimod(String fullName){
-        if (fullName.contains("(")){
-            String[] parts = fullName.replaceAll("\\(","|(").replaceAll("\\)","|").split("\\|");
-            String sequence = "";
-            for(String part: parts){
-                if (part.startsWith("(")){
-                    continue;
-                }
-                sequence += part;
-            }
-            return sequence;
-        }else {
-            return fullName;
-        }
-    }
+
 }

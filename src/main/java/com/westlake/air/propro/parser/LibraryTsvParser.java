@@ -92,7 +92,8 @@ public class LibraryTsvParser extends BaseLibraryParser {
                 }
 
                 PeptideDO peptide = resultDO.getModel();
-                uniqueCount(peptide, fastaUniqueSet, map, fastaDropPep, libraryDropPep, fastaDropProt, libraryDropProt, uniqueProt);
+                setUnique(peptide, fastaUniqueSet, fastaDropPep, libraryDropPep, fastaDropProt, libraryDropProt, uniqueProt);
+                addFragment(peptide, map);
             }
             if(!fastaUniqueSet.isEmpty()) {
                 logger.info("fasta额外检出：" + fastaDropPep.size() + "个PeptideSequence");
@@ -146,14 +147,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
 
         fi.setIntensity(Double.parseDouble(row[columnMap.get(ProductIonIntensity)]));
         peptideDO.setSequence(row[columnMap.get(PeptideSequence)]);
-        peptideDO.setProteinName(row[columnMap.get(ProteinName)]);
-        peptideDO.setUniProtName(row[columnMap.get(UniprotId)]);
-        String[] transitionGroupId = row[columnMap.get(TransitionGroupId)].split("_");
-        if (transitionGroupId.length >= 3 && transitionGroupId.length <= 4){
-            peptideDO.setTargetSequence(isDecoy ? transitionGroupId[2]:transitionGroupId[1]);
-        }else {
-            logger.info("Transition group id parse ERROR.");
-        }
+        peptideDO.setProteinName(row[columnMap.get(UniprotId)]);
 
         String annotations = row[columnMap.get(Annotation)].replaceAll("\"", "");
         fi.setAnnotations(annotations);
@@ -161,8 +155,14 @@ public class LibraryTsvParser extends BaseLibraryParser {
         if (fullName == null) {
             logger.info("Full Peptide Name cannot be empty");
         } else {
-            peptideDO.setFullName(row[columnMap.get(FullUniModPeptideName)]);
+            if (!isDecoy) {
+                peptideDO.setFullName(row[columnMap.get(FullUniModPeptideName)]);
+            }else {
+                String[] transitionGroupId = row[columnMap.get(TransitionGroupId)].split("_");
+                peptideDO.setFullName(transitionGroupId[2]);
+            }
         }
+        peptideDO.setTargetSequence(removeUnimod(peptideDO.getFullName()));
         try {
             peptideDO.setCharge(Integer.parseInt(row[columnMap.get(PrecursorCharge)]));
         } catch (Exception e) {
