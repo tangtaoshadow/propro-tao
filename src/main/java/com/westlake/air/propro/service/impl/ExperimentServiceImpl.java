@@ -1,7 +1,6 @@
 package com.westlake.air.propro.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.PositionType;
 import com.westlake.air.propro.constants.ResultCode;
@@ -10,24 +9,21 @@ import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.dao.ExperimentDAO;
 import com.westlake.air.propro.dao.ScanIndexDAO;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.compressor.AircInfo;
+import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.propro.domain.bean.analyse.WindowRange;
-import com.westlake.air.propro.domain.bean.compressor.AircInfo;
-import com.westlake.air.propro.domain.bean.compressor.AirdInfo;
+import com.westlake.air.propro.domain.bean.analyse.WindowRang;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
-import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.ScanIndexQuery;
 import com.westlake.air.propro.parser.AirdFileParser;
 import com.westlake.air.propro.parser.MzXMLParser;
 import com.westlake.air.propro.service.*;
-import com.westlake.air.propro.utils.AnalyseDataUtil;
-import com.westlake.air.propro.utils.ConvolutionUtil;
-import com.westlake.air.propro.utils.FileUtil;
+import com.westlake.air.propro.utils.*;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -195,7 +191,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     @Override
-    public List<WindowRange> getWindows(String expId) {
+    public List<WindowRang> getWindows(String expId) {
         ScanIndexQuery query = new ScanIndexQuery();
         query.setPageSize(1);
         query.setMsLevel(1);
@@ -214,20 +210,19 @@ public class ExperimentServiceImpl implements ExperimentService {
             return null;
         }
 
-        List<WindowRange> windowRanges = new ArrayList<>();
+        List<WindowRang> windowRangs = new ArrayList<>();
         float ms2Interval = Math.round((ms2Indexes.get(1).getRt() - ms2Indexes.get(0).getRt()) * 100000) / 100000f;
         for (int i = 0; i < ms2Indexes.size(); i++) {
-            WindowRange rang = new WindowRange();
-            rang.setStart(ms2Indexes.get(i).getPrecursorMzStart());
-            rang.setEnd(ms2Indexes.get(i).getPrecursorMzEnd());
-            rang.setInterval(ms2Interval);
-            windowRanges.add(rang);
+            WindowRang rang = new WindowRang();
+            rang.setMzStart(ms2Indexes.get(i).getPrecursorMzStart());
+            rang.setMzEnd(ms2Indexes.get(i).getPrecursorMzEnd());
+            rang.setMs2Interval(ms2Interval);
+            windowRangs.add(rang);
         }
-        return windowRanges;
+        return windowRangs;
     }
-
     @Override
-    public List<WindowRange> getPrmWindows(String expId) {
+    public List<WindowRang> getPrmWindows(String expId) {
         ScanIndexQuery query = new ScanIndexQuery();
         query.setMsLevel(2);
         query.setExperimentId(expId);
@@ -236,21 +231,21 @@ public class ExperimentServiceImpl implements ExperimentService {
             return null;
         }
 
-        List<WindowRange> windowRanges = new ArrayList<>();
+        List<WindowRang> windowRangs = new ArrayList<>();
         List<Float> precursorUniqueMz = new ArrayList<>();
 
-        for (ScanIndexDO ms2Index : ms2Indexes) {
+        for(ScanIndexDO ms2Index : ms2Indexes){
             float precursorMz = ms2Index.getPrecursorMz();
-            if (precursorUniqueMz.contains(precursorMz)) {
+            if(precursorUniqueMz.contains(precursorMz)){
                 continue;
             }
             precursorUniqueMz.add(precursorMz);
-            WindowRange rang = new WindowRange();
-            rang.setStart(ms2Index.getPrecursorMzStart());
-            rang.setEnd(ms2Index.getPrecursorMzEnd());
-            windowRanges.add(rang);
+            WindowRang rang = new WindowRang();
+            rang.setMzStart(ms2Index.getPrecursorMzStart());
+            rang.setMzEnd(ms2Index.getPrecursorMzEnd());
+            windowRangs.add(rang);
         }
-        return windowRanges;
+        return windowRangs;
     }
 
     @Override
@@ -280,50 +275,6 @@ public class ExperimentServiceImpl implements ExperimentService {
             taskDO.addLog("索引存储失败:" + e.getMessage());
             taskDO.finish(TaskStatus.FAILED.getName());
             taskService.update(taskDO);
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void uploadAirdFile(ExperimentDO experimentDO, String airdFilePath, TaskDO taskDO) {
-        if (!FileUtil.isAirdFile(airdFilePath)) {
-            taskDO.addLog("Aird文件格式不正确");
-            taskDO.finish(TaskStatus.FAILED.getName());
-            taskService.update(taskDO);
-            return;
-        }
-
-        experimentDO.setHasAirusFile(true);
-        experimentDO.setAirdPath(airdFilePath);
-        String airdIndexPath = FileUtil.getAirdIndexFilePath(airdFilePath);
-        experimentDO.setAirdIndexPath(airdIndexPath);
-        try {
-            String airdInfoJson = FileUtil.readFile(airdIndexPath);
-            AirdInfo airdInfo = null;
-            try {
-                airdInfo = JSONObject.parseObject(airdInfoJson, AirdInfo.class);
-            } catch (Exception e) {
-                taskDO.addLog("索引文件内部格式异常,JSON转换错误");
-                taskDO.finish(TaskStatus.FAILED.getName());
-                taskService.update(taskDO);
-                return;
-            }
-
-            experimentDO.setByteOrder(airdInfo.getByteOrder());
-            experimentDO.setCompressStrategy(airdInfo.getCompressStrategy());
-            experimentDO.setOverlap(airdInfo.getOverlap());
-
-            for (ScanIndexDO scanIndex : airdInfo.getScanIndexList()) {
-                scanIndex.setExperimentId(experimentDO.getId());
-            }
-            for (ScanIndexDO swathIndex : airdInfo.getSwathIndexList()) {
-                swathIndex.setExperimentId(experimentDO.getId());
-            }
-
-            scanIndexService.insertAll(airdInfo.getScanIndexList(), false);
-            scanIndexService.insertAll(airdInfo.getSwathIndexList(), false);
-
-        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -468,24 +419,24 @@ public class ExperimentServiceImpl implements ExperimentService {
         File file = (File) checkResult.getModel();
         RandomAccessFile raf = null;
 
-        List<WindowRange> rangs = exp.getWindowRanges();
+        List<WindowRang> rangs = exp.getWindowRangs();
         List<AnalyseDataDO> finalList = new ArrayList<>();
 
         HashMap<Float, ScanIndexDO> swathMap = scanIndexService.getSwathIndexList(exp.getId());
 
         try {
             raf = new RandomAccessFile(file, "r");
-            for (WindowRange rang : rangs) {
+            for (WindowRang rang : rangs) {
                 //Step2.获取标准库的目标肽段片段的坐标
                 //key为rt
                 TreeMap<Float, MzIntensityPairs> rtMap;
-                List<TargetPeptide> coordinates = peptideService.buildMS2Coordinates(iRtLibraryId, SlopeIntercept.create(), -1, rang.getStart(), rang.getEnd(), exp.getType());
+                List<TargetPeptide> coordinates = peptideService.buildMS2Coordinates(iRtLibraryId, SlopeIntercept.create(), -1, rang.getMzStart(), rang.getMzEnd(), exp.getType(), false);
                 if (coordinates.size() == 0) {
-                    logger.warn("No iRT Coordinates Found,Rang:" + rang.getStart() + ":" + rang.getEnd());
+                    logger.warn("No iRT Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
                     continue;
                 }
                 //Step3.提取指定原始谱图
-                rtMap = airdFileParser.parseSwathBlockValues(raf, swathMap.get(rang.getStart()));
+                rtMap = airdFileParser.parseSwathBlockValues(raf, swathMap.get(rang.getMzStart()));
 
                 //Step4.卷积并且存储数据
                 extractForIrt(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
@@ -505,7 +456,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             logger.info("开始卷积数据");
             long start = System.currentTimeMillis();
             List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
-            if (dataList == null) {
+            if(dataList == null){
                 return ResultDO.buildError(ResultCode.IRT_EXCEPTION);
             }
             logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
@@ -531,7 +482,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
         //Step1.获取窗口信息.
         logger.info("获取Swath窗口信息");
-        List<WindowRange> rangs = lumsParams.getExperimentDO().getWindowRanges();
+        List<WindowRang> rangs = lumsParams.getExperimentDO().getWindowRangs();
         HashMap<Float, ScanIndexDO> swathMap = scanIndexService.getSwathIndexList(lumsParams.getExperimentDO().getId());
 
         //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
@@ -540,9 +491,9 @@ public class ExperimentServiceImpl implements ExperimentService {
         List<AnalyseDataDO> totalDataList = new ArrayList<>();
         try {
             long startPosition = 0;
-            for (WindowRange rang : rangs) {
+            for (WindowRang rang : rangs) {
                 long start = System.currentTimeMillis();
-                List<AnalyseDataDO> dataList = doExtract(raf, swathMap.get(rang.getStart()), rang, overviewId, lumsParams);
+                List<AnalyseDataDO> dataList = doExtract(raf, swathMap.get(rang.getMzStart()), rang, overviewId, lumsParams);
                 if (dataList != null) {
                     totalDataList.addAll(dataList);
                     //将卷积的核心数据压缩以后存储到本地
@@ -555,7 +506,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                         deltaList.add(rtArray.length);
                         startPosition = startPosition + rtArray.length;
                         //逐个存储fragment对应的卷积位置的
-                        for (String key : data.getConvIntensityMap().keySet()) {
+                        for(String key : data.getConvIntensityMap().keySet()){
                             deltaList.add(data.getConvIntensityMap().get(key).length);
                             startPosition = startPosition + data.getConvIntensityMap().get(key).length;
                             intensityAll = ArrayUtils.addAll(intensityAll, data.getConvIntensityMap().get(key));
@@ -568,7 +519,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                         //压缩数据已经存储到本地,清空内容中的压缩数据
                         data.setPosDeltaList(deltaList);
                         data.setConvRtArray(null);
-                        for (String key : data.getConvIntensityMap().keySet()) {
+                        for(String key : data.getConvIntensityMap().keySet()){
                             data.getConvIntensityMap().put(key, null);
                         }
                     }
@@ -595,13 +546,13 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @return
      * @throws Exception
      */
-    private List<AnalyseDataDO> doExtract(RandomAccessFile raf, ScanIndexDO swathIndex, WindowRange rang, String overviewId, LumsParams lumsParams) throws Exception {
+    private List<AnalyseDataDO> doExtract(RandomAccessFile raf, ScanIndexDO swathIndex, WindowRang rang, String overviewId, LumsParams lumsParams) throws Exception {
         List<TargetPeptide> coordinates;
         TreeMap<Float, MzIntensityPairs> rtMap;
         //Step2.获取标准库的目标肽段片段的坐标
-        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibraryId(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), rang.getStart(), rang.getEnd(), lumsParams.getExperimentDO().getType());
+        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibraryId(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), rang.getMzStart(), rang.getMzEnd(), lumsParams.getExperimentDO().getType(),lumsParams.isUniqueOnly());
         if (coordinates.isEmpty()) {
-            logger.warn("No Coordinates Found,Rang:" + rang.getStart() + ":" + rang.getEnd());
+            logger.warn("No Coordinates Found,Rang:" + rang.getMzStart() + ":" + rang.getMzEnd());
             return null;
         }
         //Step3.提取指定原始谱图

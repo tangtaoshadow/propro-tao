@@ -58,7 +58,7 @@ public class ExperimentTest extends BaseTest {
         libraryService.insert(libraryDO);
         String filePath = getClass().getClassLoader().getResource("ChromatogramExtractor_input.tsv").getPath();
         File file = new File(filePath);
-        libraryService.parseAndInsert(libraryDO, new FileInputStream(file), filePath,new HashSet<>(), new TaskDO());
+        libraryService.parseAndInsert(libraryDO, new FileInputStream(file), filePath,null, null, new TaskDO());
 
         String filePathMZXML = getClass().getClassLoader().getResource("ChromatogramExtractor_input.mzXML").getPath();
         ExperimentDO experimentDO = new ExperimentDO();

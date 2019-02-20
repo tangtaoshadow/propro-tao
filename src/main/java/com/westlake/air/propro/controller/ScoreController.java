@@ -2,6 +2,7 @@ package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.async.AirusTask;
 import com.westlake.air.propro.async.ScoreTask;
 import com.westlake.air.propro.constants.Classifier;
@@ -26,6 +27,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -109,6 +113,70 @@ public class ScoreController extends BaseController {
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalNum", resultDO.getTotalNum());
         return "scores/list";
+    }
+    @RequestMapping(value = "/result/list")
+    String resultList(Model model,
+                @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+                @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize,
+                @RequestParam(value = "overviewId", required = true) String overviewId,
+                @RequestParam(value = "peptideRef", required = false) String peptideRef,
+                @RequestParam(value = "proteinName", required = false) String proteinName,
+                @RequestParam(value = "isIdentified", required = false) String isIdentified,
+                RedirectAttributes redirectAttributes) {
+
+        model.addAttribute("overviewId", overviewId);
+        model.addAttribute("proteinName", proteinName);
+        model.addAttribute("peptideRef", peptideRef);
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("isIdentified", isIdentified);
+        AnalyseDataQuery query = new AnalyseDataQuery();
+        query.setIsDecoy(false);
+        if (peptideRef != null && !peptideRef.isEmpty()) {
+            query.setPeptideRef(peptideRef);
+        }
+        if (proteinName != null && !proteinName.isEmpty()) {
+            query.setProteinName(proteinName);
+        }
+        if (isIdentified != null && isIdentified.equals("Yes")) {
+            query.addIndentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS);
+        } else if (isIdentified != null && isIdentified.equals("No")) {
+            query.addIndentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
+            query.addIndentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
+        }
+        query.setOverviewId(overviewId);
+        query.setPageSize(pageSize);
+        query.setPageNo(currentPage);
+
+        ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
+        if (peptideRef != null){
+            query.setPeptideRef(null);
+            query.setProteinName(resultDO.getModel().get(0).getProteinName());
+            resultDO = analyseDataService.getList(query);
+        }
+        List<AnalyseDataDO> dataDOList = resultDO.getModel();
+        HashMap<String, List<AnalyseDataDO>> proteinMap = new HashMap<>();
+        for (AnalyseDataDO dataDO: dataDOList){
+            if (proteinMap.containsKey(dataDO.getProteinName())){
+                proteinMap.get(dataDO.getProteinName()).add(dataDO);
+            }else {
+                List<AnalyseDataDO> newList = new ArrayList<>();
+                newList.add(dataDO);
+                proteinMap.put(dataDO.getProteinName(), newList);
+            }
+        }
+//        JSONObject protMap = new JSONObject();
+//        for (String protName: proteinMap.keySet()){
+//            JSONArray peptideArray = new JSONArray();
+//            Collections.addAll(peptideArray, proteinMap.get(protName));
+//            protMap.put(protName, peptideArray);
+//        }
+        model.addAttribute("protMap", proteinMap);
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        model.addAttribute("overview", overviewResult.getModel());
+        model.addAttribute("totalPage", resultDO.getTotalPage());
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalNum", resultDO.getTotalNum());
+        return "scores/result/list";
     }
 
     @RequestMapping(value = "/report")

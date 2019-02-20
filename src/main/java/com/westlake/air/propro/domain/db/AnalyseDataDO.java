@@ -40,6 +40,8 @@ public class AnalyseDataDO extends BaseDO {
     @Indexed
     String peptideRef;
 
+    Boolean isUnique;
+
     //该肽段片段的理论rt值,从标准库中冗余所得
     Float rt;
 

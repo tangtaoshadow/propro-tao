@@ -8,6 +8,7 @@ import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.query.LibraryQuery;
 import com.westlake.air.propro.domain.query.PeptideQuery;
+import com.westlake.air.propro.parser.FastaParser;
 import com.westlake.air.propro.parser.TraMLParser;
 import com.westlake.air.propro.parser.LibraryTsvParser;
 import com.westlake.air.propro.service.LibraryService;
@@ -44,6 +45,8 @@ public class LibraryServiceImpl implements LibraryService {
     TraMLParser traMLParser;
     @Autowired
     TaskService taskService;
+    @Autowired
+    FastaParser fastaParser;
 
     @Override
     public List<LibraryDO> getAll() {
@@ -167,14 +170,40 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public ResultDO parseAndInsert(LibraryDO library, InputStream in, String fileName, HashSet<String> prmPeptideRefSet, TaskDO taskDO) {
+    public ResultDO parseAndInsert(LibraryDO library, InputStream libFileStream, String fileName, InputStream fastaFileStream, InputStream prmFileStream, TaskDO taskDO) {
 
         ResultDO resultDO;
 
+        //parse fasta
+        //若有fasta文件，fasta与Library一起判断unique；若无则用Library判断unique
+        HashSet<String> fastaUniqueSet = new HashSet<>();
+        if(fastaFileStream != null) {
+            ResultDO<HashSet<String>> fastaResultDO = fastaParser.getUniquePeptide(fastaFileStream);
+            if (fastaResultDO.isFailed()){
+                logger.warn(fastaResultDO.getMsgInfo());
+            }
+            fastaUniqueSet = fastaResultDO.getModel();
+        }
+
+        //parse prm
+        HashSet<String> prmPeptideRefSet = new HashSet<>();
+        if(prmFileStream != null) {
+            try {
+                ResultDO<HashSet<String>> prmResultDO = tsvParser.getPrmPeptideRef(prmFileStream);
+                if (prmResultDO.isFailed()) {
+                    logger.warn(prmResultDO.getMsgInfo());
+                }
+                prmPeptideRefSet = prmResultDO.getModel();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+
         if (fileName.toLowerCase().endsWith("tsv") || fileName.toLowerCase().endsWith("csv")) {
-            resultDO = tsvParser.parseAndInsert(in, library, prmPeptideRefSet, taskDO);
+            resultDO = tsvParser.parseAndInsert(libFileStream, library, fastaUniqueSet, prmPeptideRefSet, taskDO);
         } else if (fileName.toLowerCase().endsWith("traml")) {
-            resultDO = traMLParser.parseAndInsert(in, library, prmPeptideRefSet, taskDO);
+            resultDO = traMLParser.parseAndInsert(libFileStream, library, fastaUniqueSet, prmPeptideRefSet, taskDO);
         } else {
             return ResultDO.buildError(ResultCode.INPUT_FILE_TYPE_MUST_BE_TSV_OR_TRAML);
         }
@@ -186,6 +215,7 @@ public class LibraryServiceImpl implements LibraryService {
     public void countAndUpdateForLibrary(LibraryDO library) {
         try {
             library.setProteinCount(peptideService.countByProteinName(library.getId()));
+            library.setUniqueProteinCount(peptideService.countByUniqueProteinName(library.getId()));
 
             PeptideQuery query = new PeptideQuery();
             query.setLibraryId(library.getId());
@@ -194,6 +224,12 @@ public class LibraryServiceImpl implements LibraryService {
             library.setTotalTargetCount(peptideService.count(query));
             query.setIsDecoy(true);
             library.setTotalDecoyCount(peptideService.count(query));
+            query.setIsUnique(true);
+            library.setTotalUniqueDecoyCount(peptideService.count(query));
+            query.setIsDecoy(false);
+            library.setTotalUniqueTargetCount(peptideService.count(query));
+            query.setIsDecoy(null);
+            library.setTotalUniqueCount(peptideService.count(query));
 
             update(library);
         } catch (Exception e) {
@@ -202,9 +238,9 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public void uploadFile(LibraryDO library, InputStream in, String fileName, HashSet<String> prmPeptideRefSet, TaskDO taskDO) {
+    public void uploadFile(LibraryDO library, InputStream libFileStream, String fileName, InputStream fastaFileStream, InputStream prmFileStream, TaskDO taskDO) {
         //先Parse文件,再作数据库的操作
-        ResultDO result = parseAndInsert(library, in, fileName, prmPeptideRefSet, taskDO);
+        ResultDO result = parseAndInsert(library, libFileStream, fileName, fastaFileStream, prmFileStream, taskDO);
         if (result.getErrorList() != null) {
             if (result.getErrorList().size() > errorListNumberLimit) {
                 taskDO.addLog("解析错误,错误的条数过多,这边只显示" + errorListNumberLimit + "条错误信息");

@@ -9,6 +9,7 @@ import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.service.TaskService;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -36,6 +38,8 @@ public class LibraryTsvParser extends BaseLibraryParser {
     private static String ProductMz = "productmz";
     private static String NormalizedRetentionTime = "tr_recalibrated";
     private static String TransitionName = "transition_name";
+    private static String TransitionGroupId = "transition_group_id";
+    private static String UniprotId = "uniprotid";
     private static String IsDecoy = "decoy";
     private static String ProductIonIntensity = "libraryintensity";
     private static String PeptideSequence = "peptidesequence";
@@ -48,7 +52,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
     private static String Quantifying = "quantifying_transition";
 
     @Override
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> prmPeptideRefSet, TaskDO taskDO) {
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashSet<String> prmPeptideRefSet, TaskDO taskDO) {
 
         ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
         try {
@@ -70,8 +74,12 @@ public class LibraryTsvParser extends BaseLibraryParser {
                 return ResultDO.buildError(ResultCode.DELETE_ERROR);
             }
 
-            int count = 0;
             HashMap<String, PeptideDO> map = new HashMap<>();
+            HashSet<String> fastaDropPep = new HashSet<>();
+            HashSet<String> libraryDropPep = new HashSet<>();
+            HashSet<String> fastaDropProt = new HashSet<>();
+            HashSet<String> libraryDropProt = new HashSet<>();
+            HashSet<String> uniqueProt = new HashSet<>();
             while ((line = reader.readLine()) != null) {
                 if (!prmPeptideRefSet.isEmpty() && !isPrmPeptideRef(line, columnMap, prmPeptideRefSet)) {
                     continue;
@@ -84,32 +92,25 @@ public class LibraryTsvParser extends BaseLibraryParser {
                 }
 
                 PeptideDO peptide = resultDO.getModel();
-                PeptideDO existedPeptide = map.get(peptide.getPeptideRef() + "_" + peptide.getIsDecoy());
-                if (existedPeptide == null) {
-                    map.put(peptide.getPeptideRef() + "_" + peptide.getIsDecoy(), peptide);
-                } else {
-                    for (String key : peptide.getFragmentMap().keySet()) {
-                        existedPeptide.putFragment(key, peptide.getFragmentMap().get(key));
-                    }
-                }
+                setUnique(peptide, fastaUniqueSet, fastaDropPep, libraryDropPep, fastaDropProt, libraryDropProt, uniqueProt);
+                addFragment(peptide, map);
             }
-            List<PeptideDO> peptides = new ArrayList<>(map.values());
-            HashSet<String> proteins = new HashSet<>();
-            for (PeptideDO p : peptides) {
-                if (p.getProteinName() == null || p.getProteinName().isEmpty()) {
-                    logger.info(p.getPeptideRef());
-                }
-                proteins.add(p.getProteinName());
+            if(!fastaUniqueSet.isEmpty()) {
+                logger.info("fasta额外检出：" + fastaDropPep.size() + "个PeptideSequence");
             }
+            library.setFastaDeWeightPepCount(fastaDropPep.size());
+            library.setFastaDeWeightProtCount(getDropCount(fastaDropProt, uniqueProt));
+            library.setLibraryDeWeightPepCount(libraryDropPep.size());
+            library.setLibraryDeWeightProtCount(getDropCount(libraryDropProt, uniqueProt));
 
+            List<PeptideDO> peptides = new ArrayList<>(map.values());
             peptideService.insertAll(peptides, false);
             tranResult.setModel(peptides);
-            taskDO.addLog(peptides.size() + "条肽段数据插入成功,其中蛋白质种类有" + proteins.size() + "个");
+            taskDO.addLog(peptides.size() + "条肽段数据插入成功,其中蛋白质种类有" + uniqueProt.size() + "个");
             taskService.update(taskDO);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return tranResult;
     }
 
@@ -146,16 +147,22 @@ public class LibraryTsvParser extends BaseLibraryParser {
 
         fi.setIntensity(Double.parseDouble(row[columnMap.get(ProductIonIntensity)]));
         peptideDO.setSequence(row[columnMap.get(PeptideSequence)]);
-        peptideDO.setProteinName(row[columnMap.get(ProteinName)]);
+        peptideDO.setProteinName(row[columnMap.get(UniprotId)]);
 
         String annotations = row[columnMap.get(Annotation)].replaceAll("\"", "");
         fi.setAnnotations(annotations);
-        String fullName = row[columnMap.get(FullUniModPeptideName)];
+        String fullName = row[columnMap.get(FullUniModPeptideName)];//no target sequence
         if (fullName == null) {
             logger.info("Full Peptide Name cannot be empty");
         } else {
-            peptideDO.setFullName(row[columnMap.get(FullUniModPeptideName)]);
+            if (!isDecoy) {
+                peptideDO.setFullName(row[columnMap.get(FullUniModPeptideName)]);
+            }else {
+                String[] transitionGroupId = row[columnMap.get(TransitionGroupId)].split("_");
+                peptideDO.setFullName(transitionGroupId[2]);
+            }
         }
+        peptideDO.setTargetSequence(removeUnimod(peptideDO.getFullName()));
         try {
             peptideDO.setCharge(Integer.parseInt(row[columnMap.get(PrecursorCharge)]));
         } catch (Exception e) {
@@ -186,11 +193,11 @@ public class LibraryTsvParser extends BaseLibraryParser {
 
     public ResultDO<HashSet<String>> getPrmPeptideRef(InputStream in) {
         try {
-            InputStreamReader isr = new InputStreamReader(in, "UTF-8");
+            InputStreamReader isr = new InputStreamReader(in, StandardCharsets.UTF_8);
             BufferedReader reader = new BufferedReader(isr);
             String line = reader.readLine();
             if (line == null) {
-                return ResultDO.buildError(ResultCode.LINE_IS_EMPTY);
+                return ResultDO.buildError(ResultCode.PRM_FILE_IS_EMPTY);
             }
             String[] columns = line.split(",");
             HashMap<String, Integer> columnMap = new HashMap<>();
@@ -200,7 +207,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
             boolean isFormat1 = columnMap.containsKey("compound") && columnMap.containsKey("z");
             boolean isFormat2 = columnMap.containsKey("comment") && columnMap.containsKey("cs[z]");
             if (!isFormat1 && !isFormat2) {
-                return ResultDO.buildError(ResultCode.FILE_FORMAT_NOT_SUPPORTED);
+                return ResultDO.buildError(ResultCode.PRM_FILE_FORMAT_NOT_SUPPORTED);
             }
 
             HashSet<String> prmPeptideRefSet = new HashSet<>();
@@ -213,7 +220,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
             return new ResultDO<HashSet<String>>(true).setModel(prmPeptideRefSet);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResultDO.buildError(ResultCode.FILE_FORMAT_NOT_SUPPORTED);
+            return ResultDO.buildError(ResultCode.PRM_FILE_FORMAT_NOT_SUPPORTED);
         }
     }
 

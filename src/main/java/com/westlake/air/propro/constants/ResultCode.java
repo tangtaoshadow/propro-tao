@@ -65,6 +65,10 @@ public enum ResultCode implements Serializable {
     IRT_FIRST("IRT_FIRST", "请先对原始实验运行Irt计算"),
     IRT_EXCEPTION("IRT_EXCEPTION", "iRT失败"),
     AIRD_COMPRESSION_FIRST("AIRD_COMPRESSION_FIRST", "请先对原始实验进行压缩处理"),
+    PRM_FILE_IS_EMPTY("PRM_FILE_IS_EMPTY", "PRM文件为空"),
+    PRM_FILE_FORMAT_NOT_SUPPORTED("PRM_FILE_FORMAT_NOT_SUPPORTED","PRM文件格式不支持"),
+    FASTA_FILE_FORMAT_NOT_SUPPORTED("FASTA_FILE_FORMAT_NOT_SUPPORTED","FASTA文件格式不支持"),
+
     /**
      * ******
      * ScanIndex

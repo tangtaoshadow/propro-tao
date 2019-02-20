@@ -35,15 +35,19 @@ public class PeptideDO extends BaseDO {
     String libraryName;
 
     /**
-     * 对应蛋白质名称
+     * 对应蛋白质名称（包含Decoy信息）
      */
     String proteinName;
+
+//    String uniProtName;
 
     /**
      * 肽段的唯一识别符,格式为 : fullName_precursorCharge,如果是伪肽段,则本字段为对应的真肽段的PeptideRef
      */
     @Indexed
     String peptideRef;
+
+    Boolean isUnique = true;
 
     /**
      * 肽段的荷质比MZ

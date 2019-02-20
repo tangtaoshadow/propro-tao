@@ -48,6 +48,8 @@ public class LumsParams {
      */
     boolean useEpps = false;
 
+    boolean uniqueOnly = false;
+
     /**
      * shape的筛选阈值,一般建议在0.6左右
      */
