@@ -18,6 +18,14 @@ public class FileUtil {
 
     public final Logger logger = LoggerFactory.getLogger(getClass());
 
+    public static String readFile(File file) throws IOException {
+        FileInputStream fis = new FileInputStream(file);
+        int fileLength = fis.available();
+        byte[] bytes = new byte[fileLength];
+        fis.read(bytes);
+        return new String(bytes, 0, fileLength);
+    }
+
     public static String readFile(String filePath) throws IOException {
         File file = new File(filePath);
         FileInputStream fis = new FileInputStream(file);
@@ -48,6 +56,19 @@ public class FileUtil {
         }
         br.close();
         return dataList;
+    }
+
+    //根据Aird文件获取同名同目录下的Aird索引文件的文件路径
+    public static String getAirdIndexFilePath(String airdFilePath){
+        return airdFilePath.substring(0,airdFilePath.lastIndexOf(".")) + ".json";
+    }
+
+    public static boolean isAirdFile(String airdFilePath){
+        return airdFilePath.toLowerCase().endsWith(".aird");
+    }
+
+    public static boolean isAirdIndexFile(String airdIndexFilePath){
+        return airdIndexFilePath.toLowerCase().endsWith(".json");
     }
 
     public static List<AnalyseDataDO> getAnalyseDataList(String filePath) throws IOException {

@@ -1,6 +1,7 @@
 package com.westlake.air.propro.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.PositionType;
 import com.westlake.air.propro.constants.ResultCode;
@@ -9,21 +10,24 @@ import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.dao.ExperimentDAO;
 import com.westlake.air.propro.dao.ScanIndexDAO;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.analyse.WindowRange;
-import com.westlake.air.propro.domain.bean.compressor.AircInfo;
-import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
+import com.westlake.air.propro.domain.bean.analyse.WindowRange;
+import com.westlake.air.propro.domain.bean.compressor.AircInfo;
+import com.westlake.air.propro.domain.bean.compressor.AirdInfo;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
+import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.ScanIndexQuery;
 import com.westlake.air.propro.parser.AirdFileParser;
 import com.westlake.air.propro.parser.MzXMLParser;
 import com.westlake.air.propro.service.*;
-import com.westlake.air.propro.utils.*;
+import com.westlake.air.propro.utils.AnalyseDataUtil;
+import com.westlake.air.propro.utils.ConvolutionUtil;
+import com.westlake.air.propro.utils.FileUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -221,6 +225,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         }
         return windowRanges;
     }
+
     @Override
     public List<WindowRange> getPrmWindows(String expId) {
         ScanIndexQuery query = new ScanIndexQuery();
@@ -234,9 +239,9 @@ public class ExperimentServiceImpl implements ExperimentService {
         List<WindowRange> windowRanges = new ArrayList<>();
         List<Float> precursorUniqueMz = new ArrayList<>();
 
-        for(ScanIndexDO ms2Index : ms2Indexes){
+        for (ScanIndexDO ms2Index : ms2Indexes) {
             float precursorMz = ms2Index.getPrecursorMz();
-            if(precursorUniqueMz.contains(precursorMz)){
+            if (precursorUniqueMz.contains(precursorMz)) {
                 continue;
             }
             precursorUniqueMz.add(precursorMz);
@@ -275,6 +280,50 @@ public class ExperimentServiceImpl implements ExperimentService {
             taskDO.addLog("索引存储失败:" + e.getMessage());
             taskDO.finish(TaskStatus.FAILED.getName());
             taskService.update(taskDO);
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void uploadAirdFile(ExperimentDO experimentDO, String airdFilePath, TaskDO taskDO) {
+        if (!FileUtil.isAirdFile(airdFilePath)) {
+            taskDO.addLog("Aird文件格式不正确");
+            taskDO.finish(TaskStatus.FAILED.getName());
+            taskService.update(taskDO);
+            return;
+        }
+
+        experimentDO.setHasAirusFile(true);
+        experimentDO.setAirdPath(airdFilePath);
+        String airdIndexPath = FileUtil.getAirdIndexFilePath(airdFilePath);
+        experimentDO.setAirdIndexPath(airdIndexPath);
+        try {
+            String airdInfoJson = FileUtil.readFile(airdIndexPath);
+            AirdInfo airdInfo = null;
+            try {
+                airdInfo = JSONObject.parseObject(airdInfoJson, AirdInfo.class);
+            } catch (Exception e) {
+                taskDO.addLog("索引文件内部格式异常,JSON转换错误");
+                taskDO.finish(TaskStatus.FAILED.getName());
+                taskService.update(taskDO);
+                return;
+            }
+
+            experimentDO.setByteOrder(airdInfo.getByteOrder());
+            experimentDO.setCompressStrategy(airdInfo.getCompressStrategy());
+            experimentDO.setOverlap(airdInfo.getOverlap());
+
+            for (ScanIndexDO scanIndex : airdInfo.getScanIndexList()) {
+                scanIndex.setExperimentId(experimentDO.getId());
+            }
+            for (ScanIndexDO swathIndex : airdInfo.getSwathIndexList()) {
+                swathIndex.setExperimentId(experimentDO.getId());
+            }
+
+            scanIndexService.insertAll(airdInfo.getScanIndexList(), false);
+            scanIndexService.insertAll(airdInfo.getSwathIndexList(), false);
+
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -456,7 +505,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             logger.info("开始卷积数据");
             long start = System.currentTimeMillis();
             List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
-            if(dataList == null){
+            if (dataList == null) {
                 return ResultDO.buildError(ResultCode.IRT_EXCEPTION);
             }
             logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
@@ -506,7 +555,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                         deltaList.add(rtArray.length);
                         startPosition = startPosition + rtArray.length;
                         //逐个存储fragment对应的卷积位置的
-                        for(String key : data.getConvIntensityMap().keySet()){
+                        for (String key : data.getConvIntensityMap().keySet()) {
                             deltaList.add(data.getConvIntensityMap().get(key).length);
                             startPosition = startPosition + data.getConvIntensityMap().get(key).length;
                             intensityAll = ArrayUtils.addAll(intensityAll, data.getConvIntensityMap().get(key));
@@ -519,7 +568,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                         //压缩数据已经存储到本地,清空内容中的压缩数据
                         data.setPosDeltaList(deltaList);
                         data.setConvRtArray(null);
-                        for(String key : data.getConvIntensityMap().keySet()){
+                        for (String key : data.getConvIntensityMap().keySet()) {
                             data.getConvIntensityMap().put(key, null);
                         }
                     }

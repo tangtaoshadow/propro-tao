@@ -145,7 +145,6 @@ public class AirdCompressor {
             airdInfo.setSwathIndexList(swathIndexes);
             airdInfo.setAirdPath(airdFilePath);
             airdInfo.setCreator(experimentDO.getCreator());
-            airdInfo.setCreateDate(experimentDO.getCreateDate());
             airdInfo.setDescription(experimentDO.getDescription());
             airdInfo.setOverlap(experimentDO.getOverlap());
             String dataInfoStr = JSON.toJSONString(airdInfo);

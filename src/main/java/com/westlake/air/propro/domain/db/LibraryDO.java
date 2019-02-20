@@ -32,16 +32,13 @@ public class LibraryDO extends BaseDO {
     //类似于PRM实验，需要在卷积中同时使用iRT库；
 //    Boolean needIrt = false;
 
-    //0:标准库,1:iRT校准库
+    //0:标准库,1:iRT校准库,2:PRM筛选标准库
     Integer type;
 
     String description;
 
     //蛋白总数目
     Long proteinCount;
-//
-//    //真肽段数目
-//    Long peptideCount;
 
     //肽段总数目
     Long totalCount;

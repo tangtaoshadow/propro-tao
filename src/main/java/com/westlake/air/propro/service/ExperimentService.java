@@ -48,6 +48,8 @@ public interface ExperimentService {
 
     void uploadFile(ExperimentDO experimentDO, File file, TaskDO taskDO);
 
+    void uploadAirdFile(ExperimentDO experimentDO, String airdFilePath, TaskDO taskDO);
+
     /**
      * 卷积的核心函数,最终返回卷积到的Peptide数目
      * 目前只支持MS2的卷积

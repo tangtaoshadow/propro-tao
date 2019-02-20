@@ -1,6 +1,7 @@
 package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.algorithm.Airus;
 import com.westlake.air.propro.algorithm.FragmentFactory;
 import com.westlake.air.propro.async.LumsTask;
@@ -10,6 +11,7 @@ import com.westlake.air.propro.constants.TaskTemplate;
 import com.westlake.air.propro.dao.AnalyseDataDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
+import com.westlake.air.propro.domain.bean.compressor.AirdInfo;
 import com.westlake.air.propro.domain.bean.scanindex.Position;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.params.LumsParams;
@@ -73,16 +75,16 @@ public class TestController extends BaseController {
     @ResponseBody
     String test(Model model, RedirectAttributes redirectAttributes) {
 
-        RandomAccessFile raf = null;
         try {
-            File file = new File("D:\\data\\test\\little\\test.aird");
-            raf = new RandomAccessFile(file, "r");
-            MzIntensityPairs pairs = airdFileParser.parseValue(raf, new Position(64214080L, 4601L), new Position(64218681L, 528L), ByteOrder.BIG_ENDIAN);
-            System.out.println(pairs.getIntensityArray().length);
-        } catch (FileNotFoundException e) {
+            String airdFilePath = "\\\\RS1219\\ProproNAS\\data\\SGS\\napedro_L120224_010_SW.aird";
+            String airdIndexFilePath = FileUtil.getAirdIndexFilePath(airdFilePath);
+            File file = new File(airdIndexFilePath);
+            String airdInfoJson = FileUtil.readFile(file);
+            AirdInfo airdInfo = JSONObject.parseObject(airdInfoJson, AirdInfo.class);
+            List scanList = airdInfo.getScanIndexList();
+            List blockList = airdInfo.getSwathIndexList();
+        } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            FileUtil.close(raf);
         }
 
         return null;

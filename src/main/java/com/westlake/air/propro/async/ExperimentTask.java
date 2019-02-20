@@ -64,6 +64,15 @@ public class ExperimentTask extends BaseTask {
         experimentService.update(experimentDO);
     }
 
+    @Async(value = "uploadFileExecutor")
+    public void saveAirdTask(ExperimentDO experimentDO, String airdFilePath, TaskDO taskDO) {
+        taskDO.start();
+        taskDO.setStatus(TaskStatus.RUNNING.getName());
+        taskService.update(taskDO);
+        experimentService.uploadAirdFile(experimentDO, airdFilePath, taskDO);
+        experimentService.update(experimentDO);
+    }
+
     @Async(value = "compressFileExecutor")
     public void compress(ExperimentDO experimentDO, TaskDO taskDO) {
         taskDO.start();

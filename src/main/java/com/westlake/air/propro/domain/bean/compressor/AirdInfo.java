@@ -22,8 +22,8 @@ public class AirdInfo {
     String description;
     //实验的创建者
     String creator = "Propro-Client";
-    //实验的创建日期
-    Date createDate;
+
+    String createDate;
     //Swaht的各个窗口间的重叠部分
     Float overlap;
 

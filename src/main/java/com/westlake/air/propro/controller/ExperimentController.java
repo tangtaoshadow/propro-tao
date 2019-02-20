@@ -155,7 +155,8 @@ public class ExperimentController extends BaseController {
         TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_EXPERIMENT_FILE, experimentDO.getName());
         taskService.insert(taskDO);
 
-        experimentTask.saveExperimentTask(experimentDO, file, taskDO);
+//        experimentTask.saveExperimentTask(experimentDO, file, taskDO);
+        experimentTask.saveAirdTask(experimentDO, file.getPath(), taskDO);
         return "redirect:/task/detail/" + taskDO.getId();
     }
 
