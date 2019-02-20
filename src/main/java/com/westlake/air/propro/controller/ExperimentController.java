@@ -19,6 +19,7 @@ import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.ScanIndexQuery;
 import com.westlake.air.propro.parser.MzXMLParser;
 import com.westlake.air.propro.service.*;
+import com.westlake.air.propro.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -155,8 +156,12 @@ public class ExperimentController extends BaseController {
         TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_EXPERIMENT_FILE, experimentDO.getName());
         taskService.insert(taskDO);
 
-//        experimentTask.saveExperimentTask(experimentDO, file, taskDO);
-        experimentTask.saveAirdTask(experimentDO, file.getPath(), taskDO);
+        if(FileUtil.isMzXMLFile(filePath)){
+            experimentTask.saveExperimentTask(experimentDO, file, taskDO);
+        }else{
+            experimentTask.saveAirdTask(experimentDO, file.getPath(), taskDO);
+        }
+
         return "redirect:/task/detail/" + taskDO.getId();
     }
 
@@ -201,7 +206,11 @@ public class ExperimentController extends BaseController {
                 taskDO.finish(TaskStatus.FAILED.getName());
             } else {
                 taskService.insert(taskDO);
-                experimentTask.saveExperimentTask(experimentDO, file, taskDO);
+                if(FileUtil.isMzXMLFile(file.getPath())){
+                    experimentTask.saveExperimentTask(experimentDO, file, taskDO);
+                }else{
+                    experimentTask.saveAirdTask(experimentDO, file.getPath(), taskDO);
+                }
             }
         }
 

@@ -71,6 +71,10 @@ public class FileUtil {
         return airdIndexFilePath.toLowerCase().endsWith(".json");
     }
 
+    public static boolean isMzXMLFile(String mzXMLFilePath){
+        return mzXMLFilePath.toLowerCase().endsWith(".mzxml");
+    }
+
     public static List<AnalyseDataDO> getAnalyseDataList(String filePath) throws IOException {
         String content = readFile(filePath);
         List<AnalyseDataDO> dataList = JSONArray.parseArray(content, AnalyseDataDO.class);
