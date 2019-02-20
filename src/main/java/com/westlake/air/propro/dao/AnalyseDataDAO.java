@@ -128,7 +128,7 @@ public class AnalyseDataDAO {
         if (analyseDataQuery.getPeptideRef() != null) {
             query.addCriteria(where("peptideRef").is(analyseDataQuery.getPeptideRef()));
         }
-        if (analyseDataQuery.getPeptideRef() != null) {
+        if (analyseDataQuery.getProteinName() != null) {
             query.addCriteria(where("proteinName").is(analyseDataQuery.getProteinName()));
         }
         if (analyseDataQuery.getIsDecoy() != null) {

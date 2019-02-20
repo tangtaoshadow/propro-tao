@@ -38,6 +38,7 @@ public class ShuffleGenerator extends BaseGenerator {
         List<PeptideDO> decoys = new ArrayList<>();
         for (PeptideDO trans : list) {
             PeptideDO decoy = generate(trans);
+            decoy.setIsUnique(trans.getIsUnique());
             decoys.add(decoy);
         }
         logger.info("伪肽段生成完毕,总计:"+decoys.size()+"个");
