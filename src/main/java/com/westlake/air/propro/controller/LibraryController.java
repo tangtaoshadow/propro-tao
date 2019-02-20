@@ -6,7 +6,7 @@ import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.SuccessMsg;
 import com.westlake.air.propro.constants.TaskTemplate;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.analyse.WindowRang;
+import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
@@ -304,10 +304,10 @@ public class LibraryController extends BaseController {
             return ResultDO.buildError(ResultCode.EXPERIMENT_NOT_EXISTED);
         }
         ExperimentDO exp = expResult.getModel();
-        List<WindowRang> rangs = exp.getWindowRangs();
-        WindowRang targetRang = null;
-        for (WindowRang rang : rangs) {
-            if (precursorMz >= rang.getMzStart() && precursorMz < rang.getMzEnd()) {
+        List<WindowRange> rangs = exp.getWindowRanges();
+        WindowRange targetRang = null;
+        for (WindowRange rang : rangs) {
+            if (precursorMz >= rang.getStart() && precursorMz < rang.getEnd()) {
                 targetRang = rang;
                 break;
             }
@@ -317,8 +317,8 @@ public class LibraryController extends BaseController {
         query.setLikeSequence(fragmentSequence);
         query.setIsDecoy(false);
         if (targetRang != null) {
-            query.setMzStart(Double.parseDouble(targetRang.getMzStart().toString()));
-            query.setMzEnd(Double.parseDouble(targetRang.getMzEnd().toString()));
+            query.setMzStart(Double.parseDouble(targetRang.getStart().toString()));
+            query.setMzEnd(Double.parseDouble(targetRang.getEnd().toString()));
         }
 
         List<PeptideDO> peptides = peptideService.getAll(query);

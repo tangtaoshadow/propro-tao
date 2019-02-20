@@ -1,7 +1,7 @@
 package com.westlake.air.propro.domain.db;
 
 import com.westlake.air.propro.domain.BaseDO;
-import com.westlake.air.propro.domain.bean.analyse.WindowRang;
+import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -82,7 +82,7 @@ public class ExperimentDO extends BaseDO {
     String precision;
 
     //Swath窗口列表
-    List<WindowRang> windowRangs;
+    List<WindowRange> windowRanges;
 
     //0:DIA, 1:PRM
     String type;

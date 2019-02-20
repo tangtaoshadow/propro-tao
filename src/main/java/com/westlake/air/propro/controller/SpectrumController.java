@@ -126,7 +126,7 @@ public class SpectrumController extends BaseController {
         try {
             File file = new File(experimentDO.getAirdPath());
             raf = new RandomAccessFile(file, "r");
-            pairs = airdFileParser.parseValue(raf, scanIndexDO.getPositionMap().get(PositionType.AIRD_MZ),scanIndexDO.getPositionMap().get(PositionType.AIRD_INTENSITY));
+            pairs = airdFileParser.parseValue(raf, scanIndexDO.getPositionMap().get(PositionType.AIRD_MZ),scanIndexDO.getPositionMap().get(PositionType.AIRD_INTENSITY),ByteOrder.BIG_ENDIAN);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

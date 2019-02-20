@@ -1,7 +1,7 @@
 package com.westlake.air.propro.utils;
 
 import com.google.common.collect.Ordering;
-import com.westlake.air.propro.domain.bean.analyse.WindowRang;
+import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
@@ -108,14 +108,14 @@ public class SortUtil {
      * @param isDesc 是否降序排序
      * @return
      */
-    public static List<WindowRang> sortByMzStart(List<WindowRang> rangs, boolean isDesc) {
-        Ordering<WindowRang> ordering = Ordering.from(new Comparator<WindowRang>() {
+    public static List<WindowRange> sortByMzStart(List<WindowRange> rangs, boolean isDesc) {
+        Ordering<WindowRange> ordering = Ordering.from(new Comparator<WindowRange>() {
             @Override
-            public int compare(WindowRang o1, WindowRang o2) {
+            public int compare(WindowRange o1, WindowRange o2) {
                 if (isDesc) {
-                    return o2.getMzStart().compareTo(o1.getMzStart());
+                    return o2.getStart().compareTo(o1.getStart());
                 } else {
-                    return o1.getMzStart().compareTo(o2.getMzStart());
+                    return o1.getStart().compareTo(o2.getStart());
                 }
             }
         });

@@ -9,7 +9,7 @@ import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.dao.ScanIndexDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.propro.domain.bean.analyse.WindowRang;
+import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.params.Exp;
@@ -514,7 +514,7 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/getWindows")
     @ResponseBody
     ResultDO<JSONObject> getWindows(Model model, @RequestParam(value = "expId", required = true) String expId) {
-        List<WindowRang> rangs = experimentService.getWindows(expId);
+        List<WindowRange> rangs = experimentService.getWindows(expId);
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
 
         JSONObject res = new JSONObject();
@@ -522,15 +522,15 @@ public class ExperimentController extends BaseController {
         JSONArray mzStartArray = new JSONArray();
         JSONArray mzRangArray = new JSONArray();
         for (int i = 0; i < rangs.size(); i++) {
-            indexArray.add((int) (rangs.get(i).getMs2Interval() * 1000) + "ms");
-            mzStartArray.add(rangs.get(i).getMzStart());
-            mzRangArray.add((rangs.get(i).getMzEnd() - rangs.get(i).getMzStart()));
+            indexArray.add((int) (rangs.get(i).getInterval() * 1000) + "ms");
+            mzStartArray.add(rangs.get(i).getStart());
+            mzRangArray.add((rangs.get(i).getEnd() - rangs.get(i).getStart()));
         }
         res.put("indexes", indexArray);
         res.put("starts", mzStartArray);
         res.put("rangs", mzRangArray);
-        res.put("min", rangs.get(0).getMzStart());
-        res.put("max", rangs.get(rangs.size() - 1).getMzEnd());
+        res.put("min", rangs.get(0).getStart());
+        res.put("max", rangs.get(rangs.size() - 1).getEnd());
         resultDO.setModel(res);
         return resultDO;
     }

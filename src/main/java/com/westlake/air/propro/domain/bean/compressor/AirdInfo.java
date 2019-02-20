@@ -1,6 +1,6 @@
 package com.westlake.air.propro.domain.bean.compressor;
 
-import com.westlake.air.propro.domain.bean.analyse.WindowRang;
+import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import com.westlake.air.propro.domain.db.ScanIndexDO;
 import lombok.Data;
 
@@ -11,16 +11,17 @@ import java.util.List;
 @Data
 public class AirdInfo {
 
-    String compressionType = "zlib";
-    String byteOrder = "network";
-    String precision = "32";
+    //mz数组采用了pfor+zlib的压缩,intensity数组采用了zlib压缩
+    String compressStrategy = "mz:pfor,zlib;intensity:zlib";
+    //枚举值,LITTLE_ENDIAN和BIG_ENDIAN两种
+    String byteOrder = "LITTLE_ENDIAN";
 
-    //转换压缩后的aird的文件路径
+    //转换压缩后的aird的文件路径,默认读取的是同目录下同文件名的aird文件,如果不存在则读取本字段
     String airdPath;
     //实验的描述
     String description;
     //实验的创建者
-    String creator = "Admin";
+    String creator = "Propro-Client";
     //实验的创建日期
     Date createDate;
     //Swaht的各个窗口间的重叠部分
@@ -29,7 +30,7 @@ public class AirdInfo {
     /**
      * Store the window rangs which have been adjusted with experiment overlap
      */
-    List<WindowRang> rangeList = new ArrayList<>();
+    List<WindowRange> rangeList = new ArrayList<>();
 
     /**
      * the whole new scan index for new format file

@@ -63,7 +63,7 @@ public class AirdFileParser extends BaseParser {
      * @param intPos
      * @return
      */
-    public MzIntensityPairs parseValue(RandomAccessFile raf, Position mzPos, Position intPos) {
+    public MzIntensityPairs parseValue(RandomAccessFile raf, Position mzPos, Position intPos,ByteOrder order) {
 
         try {
             raf.seek(mzPos.getStart());
@@ -74,7 +74,7 @@ public class AirdFileParser extends BaseParser {
             reader = new byte[intPos.getDelta().intValue()];
             raf.read(reader);
 
-            Float[] intensityArray = getValues(reader, Constants.AIRD_PRECISION_32, true, ByteOrder.BIG_ENDIAN);
+            Float[] intensityArray = getValues(reader, Constants.AIRD_PRECISION_32, true, order);
             return new MzIntensityPairs(mzArray, intensityArray);
         } catch (IOException e) {
             e.printStackTrace();

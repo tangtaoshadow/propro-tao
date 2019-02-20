@@ -4,17 +4,22 @@ import com.alibaba.fastjson.JSON;
 import com.westlake.air.propro.algorithm.Airus;
 import com.westlake.air.propro.algorithm.FragmentFactory;
 import com.westlake.air.propro.async.LumsTask;
+import com.westlake.air.propro.constants.PositionType;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.constants.TaskTemplate;
 import com.westlake.air.propro.dao.AnalyseDataDAO;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
+import com.westlake.air.propro.domain.bean.scanindex.Position;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
+import com.westlake.air.propro.parser.AirdFileParser;
 import com.westlake.air.propro.service.*;
+import com.westlake.air.propro.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,10 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.ByteOrder;
 import java.util.List;
 
 /**
@@ -58,6 +61,8 @@ public class TestController extends BaseController {
     FragmentFactory fragmentFactory;
     @Autowired
     LumsTask lumsTask;
+    @Autowired
+    AirdFileParser airdFileParser;
 
     public static float MZ_EXTRACT_WINDOW = 0.05f;
     public static float RT_EXTRACT_WINDOW = 1200f;
@@ -68,11 +73,19 @@ public class TestController extends BaseController {
     @ResponseBody
     String test(Model model, RedirectAttributes redirectAttributes) {
 
-        File file = new File("\\\\172.16.13.114\\share\\propro\\SGS");
-        file.mkdirs();
+        RandomAccessFile raf = null;
+        try {
+            File file = new File("D:\\data\\test\\little\\test.aird");
+            raf = new RandomAccessFile(file, "r");
+            MzIntensityPairs pairs = airdFileParser.parseValue(raf, new Position(64214080L, 4601L), new Position(64218681L, 528L), ByteOrder.BIG_ENDIAN);
+            System.out.println(pairs.getIntensityArray().length);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            FileUtil.close(raf);
+        }
 
-        logger.info(file.exists()+"");
-        return "success";
+        return null;
     }
 
     //计算iRT

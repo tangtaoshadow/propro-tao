@@ -1,9 +1,9 @@
 package com.westlake.air.propro.service;
 
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.propro.domain.bean.analyse.WindowRang;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
@@ -43,8 +43,8 @@ public interface ExperimentService {
      * @param expId
      * @return
      */
-    List<WindowRang> getWindows(String expId);
-    List<WindowRang> getPrmWindows(String expId);
+    List<WindowRange> getWindows(String expId);
+    List<WindowRange> getPrmWindows(String expId);
 
     void uploadFile(ExperimentDO experimentDO, File file, TaskDO taskDO);
 

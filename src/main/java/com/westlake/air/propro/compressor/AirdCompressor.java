@@ -5,7 +5,7 @@ import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.PositionType;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.analyse.WindowRang;
+import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import com.westlake.air.propro.domain.bean.compressor.AirdInfo;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.ProjectDO;
@@ -63,10 +63,10 @@ public class AirdCompressor {
         File airiFile = new File(airdIndexPath);
         File airdFile = new File(airdFilePath);
 
-        List<WindowRang> windowRangs = experimentService.getPrmWindows(experimentDO.getId());
+        List<WindowRange> windowRanges = experimentService.getPrmWindows(experimentDO.getId());
 
         AirdInfo airdInfo = new AirdInfo();
-        airdInfo.setRangeList(windowRangs);
+        airdInfo.setRangeList(windowRanges);
         List<ScanIndexDO> swathIndexes = new ArrayList<>();
 
         RandomAccessFile rafRead = null;
@@ -113,15 +113,15 @@ public class AirdCompressor {
             logger.info("压缩MS1完毕,开始提取并且压缩MS2");
 
             //再写入所有的MS2
-            for (WindowRang rang : windowRangs) {
+            for (WindowRange rang : windowRanges) {
                 ScanIndexDO swathIndex = new ScanIndexDO();
                 swathIndex.setPosStart(PositionType.SWATH, start);
                 swathIndex.setExperimentId(experimentDO.getId());
                 swathIndex.setMsLevel(0);
-                swathIndex.setPrecursorMzStart(rang.getMzStart());
-                swathIndex.setPrecursorMzEnd(rang.getMzEnd());
+                swathIndex.setPrecursorMzStart(rang.getStart());
+                swathIndex.setPrecursorMzEnd(rang.getEnd());
                 long startTime = System.currentTimeMillis();
-                List<ScanIndexDO> indexes = scanIndexService.getAll(new ScanIndexQuery(experimentDO.getId(), 2, rang.getMzStart(), rang.getMzEnd()));
+                List<ScanIndexDO> indexes = scanIndexService.getAll(new ScanIndexQuery(experimentDO.getId(), 2, rang.getStart(), rang.getEnd()));
                 List<Float> rts = new ArrayList<>();
                 List<Integer> blockSizes = new ArrayList<>();
                 for (ScanIndexDO index : indexes) {
@@ -137,7 +137,7 @@ public class AirdCompressor {
                 swathIndexes.add(swathIndex);
 
                 outputIndexList.addAll(indexes);
-                logger.info("Rang:" + rang.getMzStart() + ":" + rang.getMzEnd() + " Finished,Time:" + (System.currentTimeMillis() - startTime));
+                logger.info("Rang:" + rang.getStart() + ":" + rang.getEnd() + " Finished,Time:" + (System.currentTimeMillis() - startTime));
             }
 
             //写入基本信息
@@ -166,7 +166,7 @@ public class AirdCompressor {
         experimentDO.setAirdIndexPath(airdIndexPath);
         experimentDO.setAirdPath(airdFilePath);
 
-        experimentDO.setWindowRangs(windowRangs);
+        experimentDO.setWindowRanges(windowRanges);
         experimentService.update(experimentDO);
 
         //新增SwathBlock块的索引
@@ -183,7 +183,6 @@ public class AirdCompressor {
     private void readyToOutput(ScanIndexDO index) {
         index.setId(null);
         index.setExperimentId(null);
-        index.setRtStr(null);
     }
 
     /**

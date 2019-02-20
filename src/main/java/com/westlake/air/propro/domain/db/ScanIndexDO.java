@@ -27,6 +27,7 @@ public class ScanIndexDO extends BaseDO {
      * 0 代表Swath Block Index,包含了一个完整的Swath窗口中的所有谱图
      */
     @Indexed
+    @JSONField(name = "level")
     Integer msLevel;
 
     @Indexed
@@ -36,34 +37,44 @@ public class ScanIndexDO extends BaseDO {
     String experimentId;
 
     //key为对应的文件类型, @see PositionType.class
+    @JSONField(name = "pos")
     HashMap<String, Position> positionMap;
 
     //在mzxml中的序号
     Integer num;
 
-    //RT(Time)S格式
-    String rtStr;
+//    //RT(Time)S格式
+//    String rtStr;
 
+    @JSONField(name = "pNum")
     Integer parentNum;
 
     //前体的荷质比
+    @JSONField(name = "mz")
     Float precursorMz;
 
     //前体的荷质比窗口开始位置,已经经过ExperimentDO.overlap参数调整
+    @JSONField(name = "mzStart")
     Float precursorMzStart;
 
     //前体的荷质比窗口结束位置,已经经过ExperimentDO.overlap参数调整
+    @JSONField(name = "mzEnd")
     Float precursorMzEnd;
 
     //原始文件中前体的荷质比窗口开始位置,未经过ExperimentDO.overlap参数调整
+    @JSONField(name = "oMzStart")
     Float originalPrecursorMzStart;
+
     //原始文件中前体的荷质比窗口结束位置,未经过ExperimentDO.overlap参数调整
+    @JSONField(name = "oMzEnd")
     Float originalPrecursorMzEnd;
 
     //前体的荷质比窗口
+    @JSONField(name = "wid")
     Float windowWideness;
 
     //原始文件中前体的窗口大小,未经过ExperimentDO.overlap参数调整
+    @JSONField(name = "oWid")
     Float originalWindowWideness;
 
     //特定字段,在msLevel=0的时候使用,在Aird格式文件中使用,一个Swath块中所有MS2的rt时间列表
@@ -79,11 +90,11 @@ public class ScanIndexDO extends BaseDO {
     }
 
     public void setRtStr(String rtStr) {
-        if(rtStr == null){
-            this.rtStr = null;
-            return;
-        }
-        this.rtStr = rtStr;
+//        if(rtStr == null){
+//            this.rtStr = null;
+//            return;
+//        }
+//        this.rtStr = rtStr;
         if (rtStr.startsWith("PT") && rtStr.endsWith("S")) {
             this.rt = Float.parseFloat(rtStr.substring(2, rtStr.length() - 1));
         }

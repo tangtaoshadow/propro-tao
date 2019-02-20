@@ -120,7 +120,7 @@ public class ScoreServiceImpl implements ScoreService {
     }
 
     @Override
-    public void scoreForAll(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, LumsParams input) {
+    public void scoreForAll(List<AnalyseDataDO> dataList, WindowRange rang, ScanIndexDO swathIndex, LumsParams input) {
 
         if (dataList == null || dataList.size() == 0) {
             return;
@@ -129,8 +129,8 @@ public class ScoreServiceImpl implements ScoreService {
 
         //标准库按照PeptideRef分组
         PeptideQuery query = new PeptideQuery(input.getLibraryId());
-        query.setMzStart(Double.parseDouble(rang.getMzStart().toString()));
-        query.setMzEnd(Double.parseDouble(rang.getMzEnd().toString()));
+        query.setMzStart(Double.parseDouble(rang.getStart().toString()));
+        query.setMzEnd(Double.parseDouble(rang.getEnd().toString()));
         HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(query);
 
         int count = 0;

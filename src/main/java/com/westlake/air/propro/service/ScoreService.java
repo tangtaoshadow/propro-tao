@@ -2,12 +2,12 @@ package com.westlake.air.propro.service;
 
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
+import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import com.westlake.air.propro.domain.bean.score.PeptideFeature;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.propro.domain.bean.analyse.WindowRang;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 
 import java.util.HashMap;
@@ -41,7 +41,7 @@ public interface ScoreService {
      *                 sigmaSpacing Sigma通常为30/8 = 6.25/Spacing通常为0.01
      *                 overviewId
      */
-    void scoreForAll(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, LumsParams input);
+    void scoreForAll(List<AnalyseDataDO> dataList, WindowRange rang, ScanIndexDO swathIndex, LumsParams input);
 
     /**
      * 请确保调用本函数时传入的AnalyseDataDO已经解压缩
