@@ -55,7 +55,6 @@ public class TaskDO extends BaseDO {
         this.taskTemplate = taskTemplate.getName();
         this.status = TaskStatus.WAITING.getName();
         this.name = taskTemplate.getName() + "-" + taskSuffixName;
-//        start();
     }
 
     public void addLog(String content) {

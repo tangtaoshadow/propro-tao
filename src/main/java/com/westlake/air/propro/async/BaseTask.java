@@ -1,7 +1,7 @@
 package com.westlake.air.propro.async;
 
+import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import com.westlake.air.propro.domain.params.LumsParams;
-import com.westlake.air.propro.domain.bean.analyse.WindowRang;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.ScanIndexDO;
 import com.westlake.air.propro.domain.db.TaskDO;
@@ -36,14 +36,14 @@ public class BaseTask {
 
     public void score(String overviewId, LumsParams lumsParams, TaskDO taskDO) {
 
-        List<WindowRang> rangs = lumsParams.getExperimentDO().getWindowRangs();
+        List<WindowRange> rangs = lumsParams.getExperimentDO().getWindowRanges();
         HashMap<Float, ScanIndexDO> swathMap = scanIndexService.getSwathIndexList(lumsParams.getExperimentDO().getId());
         AnalyseDataQuery query = new AnalyseDataQuery(overviewId);
 
         for (int i = 0; i < rangs.size(); i++) {
             long start = System.currentTimeMillis();
-            query.setMzStart(rangs.get(i).getMzStart());
-            query.setMzEnd(rangs.get(i).getMzEnd());
+            query.setMzStart(rangs.get(i).getStart());
+            query.setMzEnd(rangs.get(i).getEnd());
             List<AnalyseDataDO> datas = analyseDataService.getAll(query);
             if (datas == null || datas.size() == 0) {
                 continue;
@@ -54,7 +54,7 @@ public class BaseTask {
             start = System.currentTimeMillis();
             lumsParams.setUsedDIAScores(true);
 
-            scoreService.scoreForAll(datas, rangs.get(i), swathMap.get(rangs.get(i).getMzStart()), lumsParams);
+            scoreService.scoreForAll(datas, rangs.get(i), swathMap.get(rangs.get(i).getStart()), lumsParams);
             taskDO.addLog("第" + (i+1) + "批打分结束,本批次打分总计耗时(不包含读取数据库时间):" + (System.currentTimeMillis() - start) + "毫秒");
             logger.info("第" + (i+1) + "批打分结束,本批次打分总计耗时(不包含读取数据库时间):" + (System.currentTimeMillis() - start) + "毫秒");
             taskService.update(taskDO);

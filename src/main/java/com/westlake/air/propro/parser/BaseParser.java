@@ -3,6 +3,7 @@ package com.westlake.air.propro.parser;
 import com.westlake.air.propro.utils.CompressUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.util.control.Exception;
 
 import java.nio.*;
 
@@ -45,16 +46,21 @@ public class BaseParser {
         return floatValues;
     }
 
+    //默认为BIG_ENDIAN
+    public Float[] getMzValues(byte[] value) {
+        return getMzValues(value, ByteOrder.BIG_ENDIAN);
+    }
+
     /**
      * get mz values only for aird file
      * @param value
      * @return
      */
-    public Float[] getMzValues(byte[] value) {
+    public Float[] getMzValues(byte[] value, ByteOrder order) {
 
         ByteBuffer byteBuffer = ByteBuffer.wrap(value);
         byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(byteBuffer.array()));
-        byteBuffer.order(ByteOrder.BIG_ENDIAN);
+        byteBuffer.order(order);
 
         IntBuffer ints = byteBuffer.asIntBuffer();
         int[] intValues = new int[ints.capacity()];
@@ -70,15 +76,20 @@ public class BaseParser {
         return floatValues;
     }
 
+    //默认为BIG_ENDIAN
+    public Float[] getIntValues(byte[] value) {
+        return getIntValues(value, ByteOrder.BIG_ENDIAN);
+    }
+
     /**
      * get mz values only for aird file
      * @param value
      * @return
      */
-    public Float[] getIntValues(byte[] value) {
+    public Float[] getIntValues(byte[] value, ByteOrder order) {
         ByteBuffer byteBuffer = ByteBuffer.wrap(value);
         byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(byteBuffer.array()));
-        byteBuffer.order(ByteOrder.BIG_ENDIAN);
+        byteBuffer.order(order);
 
         FloatBuffer intensities = byteBuffer.asFloatBuffer();
         Float[] intValues = new Float[intensities.capacity()];

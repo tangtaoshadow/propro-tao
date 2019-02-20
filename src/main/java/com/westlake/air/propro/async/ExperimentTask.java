@@ -8,7 +8,7 @@ import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.airus.AirusParams;
 import com.westlake.air.propro.domain.bean.airus.FinalResult;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.propro.domain.bean.analyse.WindowRang;
+import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.TaskDO;
@@ -54,13 +54,22 @@ public class ExperimentTask extends BaseTask {
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
         experimentService.uploadFile(experimentDO, file, taskDO);
-        List<WindowRang> rangs;
+        List<WindowRange> rangs;
         if(experimentDO.getType().equals("1")){
             rangs = experimentService.getPrmWindows(experimentDO.getId());
         }else {
             rangs = experimentService.getWindows(experimentDO.getId());
         }
-        experimentDO.setWindowRangs(rangs);
+        experimentDO.setWindowRanges(rangs);
+        experimentService.update(experimentDO);
+    }
+
+    @Async(value = "uploadFileExecutor")
+    public void saveAirdTask(ExperimentDO experimentDO, String airdFilePath, TaskDO taskDO) {
+        taskDO.start();
+        taskDO.setStatus(TaskStatus.RUNNING.getName());
+        taskService.update(taskDO);
+        experimentService.uploadAirdFile(experimentDO, airdFilePath, taskDO);
         experimentService.update(experimentDO);
     }
 

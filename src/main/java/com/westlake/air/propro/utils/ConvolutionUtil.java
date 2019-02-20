@@ -13,7 +13,7 @@ import java.io.File;
 public class ConvolutionUtil {
 
     /**
-     * 计算 mz在[mzStart, mzEnd]范围对应的intensity和
+     * 计算 mz在[start, end]范围对应的intensity和
      *
      * @param mzArray        从小到到已经排好序
      * @param intensityArray
