@@ -119,8 +119,8 @@ public class AnalyseDataDAO {
         if (analyseDataQuery.getOverviewId() != null) {
             query.addCriteria(where("overviewId").is(analyseDataQuery.getOverviewId()));
         }
-        if (analyseDataQuery.getTransitionId() != null) {
-            query.addCriteria(where("peptideId").is(analyseDataQuery.getTransitionId()));
+        if (analyseDataQuery.getPeptideId() != null) {
+            query.addCriteria(where("peptideId").is(analyseDataQuery.getPeptideId()));
         }
         if (analyseDataQuery.getMsLevel() != null) {
             query.addCriteria(where("msLevel").is(analyseDataQuery.getMsLevel()));

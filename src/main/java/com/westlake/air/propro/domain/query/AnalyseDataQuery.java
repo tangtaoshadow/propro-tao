@@ -18,7 +18,7 @@ public class AnalyseDataQuery extends PageQuery{
 
     String overviewId;
 
-    String transitionId;
+    String peptideId;
 
     String libraryId;
 
