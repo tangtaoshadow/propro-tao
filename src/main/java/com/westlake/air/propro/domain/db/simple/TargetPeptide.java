@@ -32,6 +32,8 @@ public class TargetPeptide {
 
     Boolean isDecoy;
 
+    Boolean isUnique;
+
     float rt;
 
     //rtStart和rtEnd是在计算时使用的,并不会存在数据库中

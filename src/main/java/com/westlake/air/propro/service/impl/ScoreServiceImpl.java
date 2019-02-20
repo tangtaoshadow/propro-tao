@@ -194,6 +194,7 @@ public class ScoreServiceImpl implements ScoreService {
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
             return;
         }
+        dataDO.setIsUnique(peptide.getIsUnique());
 
         //获取标准库中对应的PeptideRef组
         //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善

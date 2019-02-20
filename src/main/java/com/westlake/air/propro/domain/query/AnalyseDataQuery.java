@@ -26,6 +26,8 @@ public class AnalyseDataQuery extends PageQuery{
 
     String peptideRef;
 
+    String proteinName;
+
     Boolean isDecoy;
 
     Float mzStart;
