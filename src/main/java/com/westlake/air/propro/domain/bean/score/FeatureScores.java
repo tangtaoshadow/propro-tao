@@ -41,6 +41,9 @@ public class FeatureScores {
     //检测出的该峰的峰顶的rt时间
     Double rt;
 
+    Double leftSideRt;
+    Double rightSideRt;
+
     //定量值
     Double intensitySum;
 

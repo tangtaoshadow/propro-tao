@@ -139,6 +139,11 @@ public enum ScoreType {
         List<ScoreType> types = Lists.newArrayList(values());
         types.remove(ScoreType.WeightedTotalScore);
         types.remove(ScoreType.MainScore);
+//        if(type.equals("1")){
+//            types.remove(ScoreType.BseriesScore);
+//            types.remove(ScoreType.YseriesScore);
+//            types.remove(ScoreType.);
+//        }
         return types;
     }
 

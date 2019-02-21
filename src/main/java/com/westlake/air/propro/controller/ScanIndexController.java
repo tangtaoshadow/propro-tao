@@ -35,11 +35,10 @@ public class ScanIndexController extends BaseController {
     String list(Model model,
                 @RequestParam(value = "experimentId", required = false) String experimentId,
                 @RequestParam(value = "msLevel", required = false) Integer msLevel,
-                @RequestParam(value = "numStart", required = false) Integer numStart,
-                @RequestParam(value = "numEnd", required = false) Integer numEnd,
+                @RequestParam(value = "parentNum", required = false) Integer parentNum,
                 @RequestParam(value = "rtStart", required = false) Double rtStart,
                 @RequestParam(value = "rtEnd", required = false) Double rtEnd,
-                @RequestParam(value = "rtStr", required = false) String rtStr,
+                @RequestParam(value = "rt", required = false) String rt,
                 @RequestParam(value = "precursorMzStart", required = false) Float precursorMzStart,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
@@ -47,11 +46,10 @@ public class ScanIndexController extends BaseController {
 
         pageSize = 150;
         model.addAttribute("experimentId", experimentId);
-        model.addAttribute("numStart", numStart);
-        model.addAttribute("numEnd", numEnd);
+        model.addAttribute("parentNum", parentNum);
         model.addAttribute("rtStart", rtStart);
         model.addAttribute("rtEnd", rtEnd);
-        model.addAttribute("rtStr", rtStr);
+        model.addAttribute("rt", rt);
         model.addAttribute("msLevel", msLevel);
         model.addAttribute("precursorMzStart", precursorMzStart);
 
@@ -71,23 +69,20 @@ public class ScanIndexController extends BaseController {
         if (msLevel != null) {
             query.setMsLevel(msLevel);
         }
-        if (numStart != null) {
-            query.setNumStart(numStart);
-        }
-        if (numEnd != null) {
-            query.setNumEnd(numEnd);
-        }
         if (rtStart != null) {
             query.setRtStart(rtStart);
         }
         if (rtEnd != null) {
             query.setRtEnd(rtEnd);
         }
-        if (rtStr != null && !rtStr.isEmpty()) {
-            query.setRtStr("PT"+rtStr+"S");
+        if (rt != null && !rt.isEmpty()) {
+            query.setRt(Float.parseFloat(rt));
         }
         if(precursorMzStart != null){
             query.setPrecursorMzStart(precursorMzStart);
+        }
+        if(parentNum != null){
+            query.setParentNum(parentNum);
         }
 
         query.setPageSize(pageSize);

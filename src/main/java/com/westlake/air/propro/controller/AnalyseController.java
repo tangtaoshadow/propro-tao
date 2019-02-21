@@ -459,6 +459,15 @@ public class AnalyseController extends BaseController {
         } else {
             logger.error("No AnalyseData Has RtArray!!!");
         }
+
+        JSONArray leftRtList = new JSONArray();
+        JSONArray rightRtList = new JSONArray();
+        for(FeatureScores scores :data.getFeatureScoresList()){
+            leftRtList.add(scores.getLeftSideRt());
+            rightRtList.add(scores.getRightSideRt());
+        }
+        res.put("leftRtList", leftRtList);
+        res.put("rightRtList", rightRtList);
         res.put("rt", rtArray);
         res.put("peptideRef", data.getPeptideRef());
         res.put("cutInfoArray", cutInfoArray);
@@ -739,6 +748,14 @@ public class AnalyseController extends BaseController {
             } else {
                 logger.error("No AnalyseData Has RtArray!!!");
             }
+            JSONArray leftRtList = new JSONArray();
+            JSONArray rightRtList = new JSONArray();
+            for(FeatureScores scores :data.getFeatureScoresList()){
+                leftRtList.add(scores.getLeftSideRt());
+                rightRtList.add(scores.getRightSideRt());
+            }
+            group.put("leftRtList", leftRtList);
+            group.put("rightRtList", rightRtList);
             group.put("overviewId", overviewId);
             group.put("rt", rtArray);
             group.put("peptideRef", data.getPeptideRef());

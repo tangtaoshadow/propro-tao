@@ -30,21 +30,4 @@ public class MzXMLParserTest extends BaseTest {
         filePaths.add(FilenameUtils.normalize("D:\\data\\SGS\\mzxml\\napedro_L120224_010_Water.mzXML"));
     }
 
-    @Test
-    public void testParseIndex() {
-        long start = System.currentTimeMillis();
-        init();
-        for (String path : filePaths) {
-            File file = new File(path);
-
-            try {
-                Long result = mzXMLParser.parseIndexOffset(file);
-                logger.info(result+"");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        logger.info("Cost:" + (System.currentTimeMillis() - start));
-
-    }
 }

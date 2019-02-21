@@ -121,12 +121,11 @@ public class SpectrumController extends BaseController {
         ExperimentDO experimentDO = expResult.getModel();
         ScanIndexDO scanIndexDO = indexResult.getModel();
 
-
         RandomAccessFile raf = null;
         try {
             File file = new File(experimentDO.getAirdPath());
             raf = new RandomAccessFile(file, "r");
-            pairs = airdFileParser.parseValue(raf, scanIndexDO.getPositionMap().get(PositionType.AIRD_MZ),scanIndexDO.getPositionMap().get(PositionType.AIRD_INTENSITY));
+            pairs = airdFileParser.parseValue(raf, scanIndexDO.getPositionMap().get(PositionType.AIRD_MZ), scanIndexDO.getPositionMap().get(PositionType.AIRD_INTENSITY), experimentDO.getByteOrderClass());
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

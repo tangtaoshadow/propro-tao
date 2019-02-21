@@ -36,18 +36,24 @@ public class LibraryDO extends BaseDO {
 
     //蛋白总数目
     Long proteinCount;
-//
-//    //真肽段数目
-//    Long peptideCount;
+    Long uniqueProteinCount;
 
     //肽段总数目
     Long totalCount;
+    Long totalUniqueCount;
 
     //真肽段片段总数目
     Long totalTargetCount;
+    Long totalUniqueTargetCount;
 
     //为肽段片段总数目
     Long totalDecoyCount;
+    Long totalUniqueDecoyCount;
+
+    int fastaDeWeightPepCount;
+    int libraryDeWeightPepCount;
+    int fastaDeWeightProtCount;
+    int libraryDeWeightProtCount;
 
     Date createDate;
 

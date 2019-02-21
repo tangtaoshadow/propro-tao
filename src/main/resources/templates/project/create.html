@@ -43,7 +43,25 @@
                             <label for="repository" class="col-4 col-form-label" th:text="#{label_project_repository}"></label>
                             <div class="col-8">
                                 <input type="text" class="form-control m-input" id="repository" name="repository"
-                                       placeholder="repository" th:value="${project?.repository}">
+                                       placeholder="repository,better for 500G or higher disk space" th:value="${project?.repository}">
+                            </div>
+                        </div>
+                        <!--<div class="form-group m-form__group row">-->
+                            <!--<label for="type" class="col-4 col-form-label" th:text="#{label_project_type}"></label>-->
+                            <!--<div class="col-8">-->
+                                <!--<input type="text" class="form-control m-input" id="type" name="type"-->
+                                       <!--placeholder="0:DIA,1:PRM" th:value="${type}">-->
+                            <!--</div>-->
+                        <!--</div>-->
+                        <div class="form-group m-form__group row">
+                            <label for="type" class="col-4 col-form-label" th:text="#{label_project_type}">
+                            </label>
+                            <div class="col-8">
+                                <!--<input type="text" class="form-control m-input" id="type" name="type" placeholder="0:Library,1:iRT-Library" th:value="${library?.type}">-->
+                                <select class="form-control m-input" id="type" name="type">
+                                    <option th:value="0" th:selected="${type}=='0'?true:false">DIA-Swath</option>
+                                    <option th:value="1" th:selected="${type}=='1'?true:false">PRM</option>
+                                </select>
                             </div>
                         </div>
                         <div class="form-group m-form__group row">

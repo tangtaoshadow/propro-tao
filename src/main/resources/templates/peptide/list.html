@@ -49,6 +49,17 @@
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
+                            <button class="btn btn-success" type="button" th:text="#{label_is_unique}">
+                            </button>
+                        </div>
+                        <select class="form-control m-input" id="uniqueFilter" name="uniqueFilter">
+                            <option th:text="Yes" th:selected="${uniqueFilter}=='Yes'?true:false"></option>
+                            <option th:text="No" th:selected="${uniqueFilter}=='No'?true:false"></option>
+                            <option th:text="All" th:selected="${uniqueFilter}=='All'?true:false"></option>
+                        </select>
+                    </div>
+                    <div class="input-group col-lg-2">
+                        <div class="input-group-prepend">
                             <button class="btn btn-success" type="button" th:text="#{label_protein_name}">
                             </button>
                         </div>

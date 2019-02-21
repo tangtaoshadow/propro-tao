@@ -119,14 +119,17 @@ public class AnalyseDataDAO {
         if (analyseDataQuery.getOverviewId() != null) {
             query.addCriteria(where("overviewId").is(analyseDataQuery.getOverviewId()));
         }
-        if (analyseDataQuery.getTransitionId() != null) {
-            query.addCriteria(where("peptideId").is(analyseDataQuery.getTransitionId()));
+        if (analyseDataQuery.getPeptideId() != null) {
+            query.addCriteria(where("peptideId").is(analyseDataQuery.getPeptideId()));
         }
         if (analyseDataQuery.getMsLevel() != null) {
             query.addCriteria(where("msLevel").is(analyseDataQuery.getMsLevel()));
         }
         if (analyseDataQuery.getPeptideRef() != null) {
             query.addCriteria(where("peptideRef").is(analyseDataQuery.getPeptideRef()));
+        }
+        if (analyseDataQuery.getProteinName() != null) {
+            query.addCriteria(where("proteinName").is(analyseDataQuery.getProteinName()));
         }
         if (analyseDataQuery.getIsDecoy() != null) {
             query.addCriteria(where("isDecoy").is(analyseDataQuery.getIsDecoy()));

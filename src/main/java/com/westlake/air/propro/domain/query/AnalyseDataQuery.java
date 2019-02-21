@@ -18,13 +18,15 @@ public class AnalyseDataQuery extends PageQuery{
 
     String overviewId;
 
-    String transitionId;
+    String peptideId;
 
     String libraryId;
 
     Integer msLevel;
 
     String peptideRef;
+
+    String proteinName;
 
     Boolean isDecoy;
 

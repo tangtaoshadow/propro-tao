@@ -195,6 +195,11 @@ public class PeptideServiceImpl implements PeptideService {
     }
 
     @Override
+    public Long countByUniqueProteinName(String libraryId) {
+        return peptideDAO.countByUniqueProteinName(libraryId);
+    }
+
+    @Override
     public Long countByPeptideRef(String libraryId) {
         return peptideDAO.countByPeptideRef(libraryId);
     }
@@ -215,12 +220,21 @@ public class PeptideServiceImpl implements PeptideService {
     }
 
     @Override
-    public List<TargetPeptide> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd) {
+    public List<TargetPeptide> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd, String type, boolean uniqueCheck) {
 
         long start = System.currentTimeMillis();
         PeptideQuery query = new PeptideQuery(libraryId);
-        query.setMzStart((double) precursorMzStart);
-        query.setMzEnd((double) precursorMzEnd);
+        if(type.equals("1")){
+            float precursorMz = (precursorMzEnd + precursorMzStart)/2;
+            query.setMzStart(precursorMz - 0.0002d);
+            query.setMzEnd(precursorMz + 0.0002d);
+        }else {
+            query.setMzStart((double) precursorMzStart);
+            query.setMzEnd((double) precursorMzEnd);
+        }
+        if(uniqueCheck){
+            query.setIsUnique(true);
+        }
 
         List<TargetPeptide> targetList = peptideDAO.getTPAll(query);
         long readDB = System.currentTimeMillis() - start;

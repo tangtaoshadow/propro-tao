@@ -15,9 +15,12 @@ public class ProjectDO extends BaseDO {
     @Id
     String id;
 
-    //项目名称
+    //项目名称,唯一值
     @Indexed
     String name;
+
+    //0:DIA, 1:PRM
+    String type;
 
     //项目仓库路径(存储项目所有元数据的地方)
     String repository;

@@ -120,7 +120,7 @@ public class ScoreServiceImpl implements ScoreService {
     }
 
     @Override
-    public void scoreForAll(List<AnalyseDataDO> dataList, WindowRang rang, ScanIndexDO swathIndex, LumsParams input) {
+    public void scoreForAll(List<AnalyseDataDO> dataList, WindowRange rang, ScanIndexDO swathIndex, LumsParams input) {
 
         if (dataList == null || dataList.size() == 0) {
             return;
@@ -129,8 +129,8 @@ public class ScoreServiceImpl implements ScoreService {
 
         //标准库按照PeptideRef分组
         PeptideQuery query = new PeptideQuery(input.getLibraryId());
-        query.setMzStart(Double.parseDouble(rang.getMzStart().toString()));
-        query.setMzEnd(Double.parseDouble(rang.getMzEnd().toString()));
+        query.setMzStart(Double.parseDouble(rang.getStart().toString()));
+        query.setMzEnd(Double.parseDouble(rang.getEnd().toString()));
         HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(query);
 
         int count = 0;
@@ -142,7 +142,7 @@ public class ScoreServiceImpl implements ScoreService {
 
             TreeMap<Float, MzIntensityPairs> rtMap = null;
             if (input.isUsedDIAScores()) {
-                rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex);
+                rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex, exp.getByteOrderClass());
             }
 
             for (AnalyseDataDO dataDO : dataList) {
@@ -194,6 +194,7 @@ public class ScoreServiceImpl implements ScoreService {
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
             return;
         }
+        dataDO.setIsUnique(peptide.getIsUnique());
 
         //获取标准库中对应的PeptideRef组
         //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
@@ -250,7 +251,7 @@ public class ScoreServiceImpl implements ScoreService {
                     Float[] spectrumMzArray = mzIntensityPairs.getMzArray();
                     Float[] spectrumIntArray = mzIntensityPairs.getIntensityArray();
                     diaScorer.calculateDiaIsotopeScores(peakGroupFeature, productMzMap, spectrumMzArray, spectrumIntArray, productChargeMap, featureScores);
-//                    if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.IsotopeCorrelationScore) < 0.4){
+//                    if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.IsotopeCorrelationScore) < 0.5){
 //                        continue;
 //                    }
                     diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
@@ -275,6 +276,8 @@ public class ScoreServiceImpl implements ScoreService {
             }
             swathLDAScorer.calculateSwathLdaPrescore(featureScores);
             featureScores.setRt(peakGroupFeature.getApexRt());
+            featureScores.setLeftSideRt(peakGroupFeature.getBestLeftRt());
+            featureScores.setRightSideRt(peakGroupFeature.getBestRightRt());
             featureScores.setIntensitySum(peakGroupFeature.getPeakGroupInt());
             featureScoresList.add(featureScores);
         }

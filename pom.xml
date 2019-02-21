@@ -207,8 +207,6 @@
         <!--</dependency>-->
     </dependencies>
 
-
-
     <repositories>
         <repository>
             <id>pst-release</id>
@@ -229,12 +227,6 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-        <!--<repository>-->
-            <!--<id>dcache-releases</id>-->
-            <!--<name>dCache.ORG maven repository</name>-->
-            <!--<url>https://download.dcache.org/nexus/content/repositories/releases</url>-->
-            <!--<layout>default</layout>-->
-        <!--</repository>-->
     </repositories>
 
     <build>
@@ -253,9 +245,5 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
-
     </build>
-
-
-
 </project>

@@ -28,6 +28,8 @@ public class PeptideQuery extends PageQuery {
      */
     Boolean isDecoy;
 
+    Boolean isUnique;
+
     /**
      * 对应肽段序列
      */

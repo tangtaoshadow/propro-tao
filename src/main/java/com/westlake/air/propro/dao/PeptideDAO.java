@@ -129,6 +129,16 @@ public class PeptideDAO {
                 BasicDBObject.class);
         return (long) a.getMappedResults().size();
     }
+    public long countByUniqueProteinName(String libraryId) {
+        AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
+                Aggregation.newAggregation(
+                        PeptideDO.class,
+                        Aggregation.match(where("libraryId").is(libraryId)),
+                        Aggregation.match(where("isUnique").is(true)),
+                        Aggregation.group("proteinName").count().as("count")).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
+                BasicDBObject.class);
+        return (long) a.getMappedResults().size();
+    }
 
     public long countByPeptideRef(String libraryId) {
         AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
@@ -170,6 +180,9 @@ public class PeptideDAO {
         }
         if (peptideQuery.getIsDecoy() != null) {
             query.addCriteria(where("isDecoy").is(peptideQuery.getIsDecoy()));
+        }
+        if (peptideQuery.getIsUnique() != null) {
+            query.addCriteria(where("isUnique").is(peptideQuery.getIsUnique()));
         }
         if (peptideQuery.getFullName() != null) {
             query.addCriteria(where("fullName").regex(peptideQuery.getFullName(), "i"));

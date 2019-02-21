@@ -25,7 +25,7 @@ public class AirdFileParser extends BaseParser {
      * @return
      * @throws Exception
      */
-    public TreeMap<Float, MzIntensityPairs> parseSwathBlockValues(RandomAccessFile raf, ScanIndexDO indexDO) throws Exception {
+    public TreeMap<Float, MzIntensityPairs> parseSwathBlockValues(RandomAccessFile raf, ScanIndexDO indexDO, ByteOrder byteOrder) throws Exception {
         TreeMap<Float, MzIntensityPairs> map = new TreeMap<>();
         List<Float> rts = indexDO.getRts();
         List<MzIntensityPairs> pairsList = new ArrayList<>();
@@ -34,7 +34,7 @@ public class AirdFileParser extends BaseParser {
         byte[] result = new byte[indexDO.getPosDelta(PositionType.SWATH).intValue()];
 
         raf.read(result);
-        List<Integer> blockSizes = indexDO.getBlockSizes();
+        List<Integer> blockSizes = indexDO.getBlocks();
 
         int start = 0;
         for (int i = 0; i < blockSizes.size() - 1; i = i + 2) {
@@ -42,7 +42,7 @@ public class AirdFileParser extends BaseParser {
             start = start + blockSizes.get(i);
             byte[] intensity = ArrayUtils.subarray(result, start, start + blockSizes.get(i + 1));
             start = start + blockSizes.get(i + 1);
-            pairsList.add(new MzIntensityPairs(getMzValues(mz), getIntValues(intensity)));
+            pairsList.add(new MzIntensityPairs(getMzValues(mz, byteOrder), getIntValues(intensity, byteOrder)));
         }
         if (rts.size() != pairsList.size()) {
             logger.error("RTs Length not equals to pairsList length!!!");
@@ -63,18 +63,18 @@ public class AirdFileParser extends BaseParser {
      * @param intPos
      * @return
      */
-    public MzIntensityPairs parseValue(RandomAccessFile raf, Position mzPos, Position intPos) {
+    public MzIntensityPairs parseValue(RandomAccessFile raf, Position mzPos, Position intPos,ByteOrder order) {
 
         try {
             raf.seek(mzPos.getStart());
             byte[] reader = new byte[mzPos.getDelta().intValue()];
             raf.read(reader);
-            Float[] mzArray = getMzValues(reader);
+            Float[] mzArray = getMzValues(reader, order);
             raf.seek(intPos.getStart());
             reader = new byte[intPos.getDelta().intValue()];
             raf.read(reader);
 
-            Float[] intensityArray = getValues(reader, Constants.AIRD_PRECISION_32, true, ByteOrder.BIG_ENDIAN);
+            Float[] intensityArray = getValues(reader, Constants.AIRD_PRECISION_32, true, order);
             return new MzIntensityPairs(mzArray, intensityArray);
         } catch (IOException e) {
             e.printStackTrace();

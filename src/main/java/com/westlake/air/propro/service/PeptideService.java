@@ -57,6 +57,7 @@ public interface PeptideService {
      * @return
      */
     Long countByProteinName(String libraryId);
+    Long countByUniqueProteinName(String libraryId);
 
     /**
      * 计算不同肽段的数目
@@ -84,7 +85,7 @@ public interface PeptideService {
      * @param precursorMzEnd
      * @return
      */
-    List<TargetPeptide> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd);
+    List<TargetPeptide> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd, String type, boolean uniqueCheck);
 
     /**
      * 根据限制条件获取按照PeptideRef+IsDecoy进行分组的Intensity Map

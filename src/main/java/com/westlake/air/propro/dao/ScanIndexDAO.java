@@ -110,14 +110,11 @@ public class ScanIndexDAO {
         if (scanIndexQuery.getId() != null) {
             query.addCriteria(where("id").is(scanIndexQuery.getId()));
         }
-        if (scanIndexQuery.getNumStart() != null) {
-            query.addCriteria(where("num").gte(scanIndexQuery.getNumStart()).lte(scanIndexQuery.getNumEnd()));
-        }
         if (scanIndexQuery.getMsLevel() != null) {
             query.addCriteria(where("msLevel").is(scanIndexQuery.getMsLevel()));
         }
-        if (scanIndexQuery.getRtStr() != null) {
-            query.addCriteria(where("rtStr").is(scanIndexQuery.getRtStr()));
+        if (scanIndexQuery.getRt() != null) {
+            query.addCriteria(where("rt").is(scanIndexQuery.getRt()));
         }
         Criteria c = null;
         if (scanIndexQuery.getRtStart() != null) {

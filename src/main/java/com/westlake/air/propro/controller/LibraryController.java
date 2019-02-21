@@ -6,7 +6,7 @@ import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.SuccessMsg;
 import com.westlake.air.propro.constants.TaskTemplate;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.analyse.WindowRang;
+import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
@@ -18,6 +18,7 @@ import com.westlake.air.propro.parser.LibraryTsvParser;
 import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.PeptideService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.aggregation.ArrayOperators;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -63,7 +66,7 @@ public class LibraryController extends BaseController {
         model.addAttribute("libraryList", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
-        return "library/list";
+        return "library/listStandard";
     }
 
     @RequestMapping(value = "/listIrt")
@@ -85,7 +88,7 @@ public class LibraryController extends BaseController {
         model.addAttribute("libraryList", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
-        return "library/list";
+        return "library/listIrt";
     }
 
     @RequestMapping(value = "/create")
@@ -98,31 +101,41 @@ public class LibraryController extends BaseController {
                @RequestParam(value = "name", required = true) String name,
                @RequestParam(value = "type", required = true) Integer type,
                @RequestParam(value = "description", required = false) String description,
-               @RequestParam(value = "file") MultipartFile file,
+               @RequestParam(value = "libFile", required = true) MultipartFile libFile,
+               @RequestParam(value = "prmFile", required = false) MultipartFile prmFile,
+               @RequestParam(value = "fastaFile", required = false) MultipartFile fastaFile,
                RedirectAttributes redirectAttributes) {
 
-        if (file == null || file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
+        if (libFile == null || libFile.getOriginalFilename() == null || libFile.getOriginalFilename().isEmpty()) {
             model.addAttribute(ERROR_MSG, ResultCode.FILE_NOT_EXISTED);
             return "library/create";
         }
-
         LibraryDO library = new LibraryDO();
         library.setName(name);
         library.setDescription(description);
         library.setType(type);
+
         ResultDO resultDO = libraryService.insert(library);
+        TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_LIBRARY_FILE, library.getName());
+        taskService.insert(taskDO);
         if (resultDO.isFailed()) {
             logger.warn(resultDO.getMsgInfo());
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             redirectAttributes.addFlashAttribute("library", library);
             return "redirect://library/create";
         }
-
-        TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_LIBRARY_FILE, library.getName());
-        taskService.insert(taskDO);
-
         try {
-            libraryTask.saveLibraryTask(library, file.getInputStream(), file.getOriginalFilename(), taskDO);
+            InputStream libFileStream = libFile.getInputStream();
+            InputStream prmFileStream = null;
+            if(!prmFile.isEmpty()){
+                prmFileStream = prmFile.getInputStream();
+            }
+            InputStream fastaFileStream = null;
+            if(!fastaFile.isEmpty()){
+                fastaFileStream = fastaFile.getInputStream();
+            }
+
+            libraryTask.saveLibraryTask(library, libFileStream, libFile.getOriginalFilename(), fastaFileStream, prmFileStream, taskDO);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -183,7 +196,9 @@ public class LibraryController extends BaseController {
                   @RequestParam(value = "type") Integer type,
                   @RequestParam(value = "description") String description,
                   @RequestParam(value = "justReal", required = false) boolean justReal,
-                  @RequestParam(value = "file") MultipartFile file,
+                  @RequestParam(value = "libFile") MultipartFile libFile,
+                  @RequestParam(value = "prmFile", required = false) MultipartFile prmFile,
+                  @RequestParam(value = "fastaFile", required = false) MultipartFile fastaFile,
                   RedirectAttributes redirectAttributes) {
 
         String redirectListUrl = null;
@@ -209,7 +224,7 @@ public class LibraryController extends BaseController {
         }
 
         //如果没有更新源文件,那么直接返回标准库详情页面
-        if (file == null || file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
+        if (libFile == null || libFile.getOriginalFilename() == null || libFile.getOriginalFilename().isEmpty()) {
             return "redirect:/library/detail/" + library.getId();
         }
 
@@ -217,7 +232,17 @@ public class LibraryController extends BaseController {
         taskService.insert(taskDO);
 
         try {
-            libraryTask.saveLibraryTask(library, file.getInputStream(), file.getOriginalFilename(), taskDO);
+            InputStream libFileStream = libFile.getInputStream();
+            InputStream prmFileStream = null;
+            if(!prmFile.isEmpty()){
+                prmFileStream = prmFile.getInputStream();
+            }
+            InputStream fastaFileStream = null;
+            if(!prmFile.isEmpty()){
+                fastaFileStream = fastaFile.getInputStream();
+            }
+
+            libraryTask.saveLibraryTask(library, libFileStream, libFile.getOriginalFilename(), fastaFileStream, prmFileStream, taskDO);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -268,10 +293,10 @@ public class LibraryController extends BaseController {
             return ResultDO.buildError(ResultCode.EXPERIMENT_NOT_EXISTED);
         }
         ExperimentDO exp = expResult.getModel();
-        List<WindowRang> rangs = exp.getWindowRangs();
-        WindowRang targetRang = null;
-        for (WindowRang rang : rangs) {
-            if (precursorMz >= rang.getMzStart() && precursorMz < rang.getMzEnd()) {
+        List<WindowRange> rangs = exp.getWindowRanges();
+        WindowRange targetRang = null;
+        for (WindowRange rang : rangs) {
+            if (precursorMz >= rang.getStart() && precursorMz < rang.getEnd()) {
                 targetRang = rang;
                 break;
             }
@@ -281,8 +306,8 @@ public class LibraryController extends BaseController {
         query.setLikeSequence(fragmentSequence);
         query.setIsDecoy(false);
         if (targetRang != null) {
-            query.setMzStart(Double.parseDouble(targetRang.getMzStart().toString()));
-            query.setMzEnd(Double.parseDouble(targetRang.getMzEnd().toString()));
+            query.setMzStart(Double.parseDouble(targetRang.getStart().toString()));
+            query.setMzEnd(Double.parseDouble(targetRang.getEnd().toString()));
         }
 
         List<PeptideDO> peptides = peptideService.getAll(query);

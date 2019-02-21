@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 import java.util.*;
 
 /**
@@ -55,9 +56,11 @@ public class MzXMLParser extends BaseParser {
      */
     public List<ScanIndexDO> index(File file, ExperimentDO experimentDO, TaskDO taskDO) {
         RandomAccessFile raf = null;
+        FileChannel fc = null;
         List<ScanIndexDO> list = null;
         try {
             raf = new RandomAccessFile(file, "r");
+//            fc = raf.getChannel();
             list = indexForSwath(file);
             if (list != null && list.size() > 0) {
                 ScanIndexDO index = list.get(0);
@@ -263,15 +266,17 @@ public class MzXMLParser extends BaseParser {
     }
 
     /**
+     * 获取mzXML文件中索引块的开始结束的位置
      * 使用FileInputStream读取,效率最高
-     *
+     * 注意本函数需要由外部调用方负责关闭文件流
      * @param file
      * @return
      * @throws IOException
      */
-    public Long parseIndexOffset(File file) throws IOException {
+    private Long parseIndexOffset(File file) throws IOException {
 
         FileInputStream inputStream = new FileInputStream(file);
+        //保存索引块位置的信息在mzXML文件的最最底部,因此直接从底部向上截取1000字符应该可以保证已经包含了位置的信息,下一步再对这1000个字符进行解析
         long skip = inputStream.getChannel().size() - 1000;
         FileUtil.fileInputStreamSkip(inputStream, skip);
 
@@ -417,9 +422,8 @@ public class MzXMLParser extends BaseParser {
     public List<ScanIndexDO> indexForSwath(File file) {
 
         List<ScanIndexDO> indexList = new ArrayList<>();
-        RandomAccessFile raf = null;
         try {
-            raf = new RandomAccessFile(file, "r");
+//            FileInputStream inputStream = new FileInputStream(file);
             //获取索引的起始位置
             Long indexOffset = parseIndexOffset(file);
 
@@ -447,8 +451,6 @@ public class MzXMLParser extends BaseParser {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            FileUtil.close(raf);
         }
 
         return indexList;
@@ -556,9 +558,9 @@ public class MzXMLParser extends BaseParser {
                 if (tmpStr.startsWith("windowWideness")) {
                     scanIndexDO.setWindowWideness(Float.parseFloat(tmpStr.split("=")[1].replace("\"", "")));
                     //在通过overlap调整前先保存原始的值
-                    float delta = (float)(Math.round(scanIndexDO.getWindowWideness() / 2 * 1000)/1000);//防止出现奇怪的尾数
-                    scanIndexDO.setOriginalPrecursorMzStart((scanIndexDO.getPrecursorMz() - delta)*1000/1000);
-                    scanIndexDO.setOriginalPrecursorMzEnd((scanIndexDO.getPrecursorMz() + delta)*1000/1000);
+                    float delta = Math.round(scanIndexDO.getWindowWideness() / 2 * 1000)/1000f;//防止出现奇怪的尾数
+                    scanIndexDO.setOriginalPrecursorMzStart((scanIndexDO.getPrecursorMz() - delta)*1000/1000f);
+                    scanIndexDO.setOriginalPrecursorMzEnd((scanIndexDO.getPrecursorMz() + delta)*1000/1000f);
                     scanIndexDO.setOriginalWindowWideness(scanIndexDO.getWindowWideness());
                     if (overlap != null) {
                         scanIndexDO.setWindowWideness(scanIndexDO.getWindowWideness() - overlap);
@@ -567,14 +569,14 @@ public class MzXMLParser extends BaseParser {
                 }
             }
 
-            float delta = (float)(Math.round(scanIndexDO.getWindowWideness() / 2 * 1000)/1000);//防止出现奇怪的尾数
+            float delta = Math.round(scanIndexDO.getWindowWideness() / 2 * 1000)/1000f;//防止出现奇怪的尾数
             //解决某些情况下在计算了Overlap以后窗口左区间大于400的情况,这个时候可以强制补齐到400
             if (Math.abs(scanIndexDO.getPrecursorMz() - delta - 400) <= 1) {
                 scanIndexDO.setPrecursorMzStart(400f);
             } else {
-                scanIndexDO.setPrecursorMzStart((scanIndexDO.getPrecursorMz() - delta)*1000/1000);
+                scanIndexDO.setPrecursorMzStart((scanIndexDO.getPrecursorMz() - delta)*1000/1000f);
             }
-            scanIndexDO.setPrecursorMzEnd((scanIndexDO.getPrecursorMz() + delta)*1000/1000);
+            scanIndexDO.setPrecursorMzEnd((scanIndexDO.getPrecursorMz() + delta)*1000/1000f);
         }
 
         String scan = read.substring(0, read.indexOf(">"));

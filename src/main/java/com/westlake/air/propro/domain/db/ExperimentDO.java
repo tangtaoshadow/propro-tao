@@ -1,14 +1,19 @@
 package com.westlake.air.propro.domain.db;
 
+import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.domain.BaseDO;
-import com.westlake.air.propro.domain.bean.analyse.WindowRang;
+import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.nio.ByteOrder;
 import java.util.Date;
 import java.util.List;
+
+import static com.westlake.air.propro.constants.Constants.EXP_TYPE_DIA_SWATH;
+import static com.westlake.air.propro.constants.Constants.EXP_TYPE_PRM;
 
 /**
  * Created by James Lu MiaoShan
@@ -38,8 +43,8 @@ public class ExperimentDO extends BaseDO {
     //必填,实验名称
     String name;
 
-    //实验类型,目前仅支持DIA-Swath
-    String expType;
+    //0:DIA-Swath, 1:PRM
+    String type;
 
     //mzxml的文件路径
     String filePath;
@@ -75,13 +80,37 @@ public class ExperimentDO extends BaseDO {
     //计算irt后得到的截距
     Double intercept;
 
+    //转byte时的编码顺序,一般C#默认采用LITTLE_ENDIAN,Aird文件由Propro-Client(C#端)转换而来,因此也采用LITTLE_ENDIAN的编码
+    String byteOrder;
+
+    //MZ数组和Intensity数组分别采用的压缩策略,Propro1.0采用的是mz:pfor,zlib;intensity:zlib
+    String compressStrategy;
+
     //新增的三个字段,用以支持最新的数据格式,仅支持MzXML格式的文件
     String compressionType;
-
     //压缩的数值精度,一般为32或者64,代表Float类型和Double类型
     String precision;
 
     //Swath窗口列表
-    List<WindowRang> windowRangs;
+    List<WindowRange> windowRanges;
+
+    public String getTypeName() {
+        switch (type) {
+            case EXP_TYPE_DIA_SWATH:
+                return "DIA-Swath";
+            case EXP_TYPE_PRM:
+                return "PRM";
+            default:
+                return "Unknown";
+        }
+    }
+
+    public ByteOrder getByteOrderClass(){
+        if("LITTLE_ENDIAN".equals(byteOrder)){
+            return ByteOrder.LITTLE_ENDIAN;
+        }else{
+            return ByteOrder.BIG_ENDIAN;
+        }
+    }
 
 }

@@ -46,8 +46,7 @@
                                 <div class="col-md-3">
                                     <div class="m-form__group m-form__group--inline">
                                         <div class="m-form__label">
-                                            <label th:text="#{label_batch_name}">
-                                            </label>
+                                            <label th:text="#{label_batch_name}"></label>
                                         </div>
                                         <div class="m-form__control">
                                             <input type="text" class="form-control m-input" name="batchName"
@@ -67,18 +66,18 @@
                         </div>
 
                         <div class="m-form__section m-form__section--first">
-                            <div class="alert m-alert m-alert--default" role="alert" th:text="#{label_please_fill_the_mzxml_file_path_and_informations}">
+                            <div class="alert m-alert m-alert--default" role="alert" th:text="#{label_please_fill_the_spectrum_file_path_and_informations}">
                             </div>
                             <div class="col-md-3">
                                 <div class="m-form__group m-form__group--inline">
                                     <div class="m-form__label">
                                         <label>
-                                            MzXML_Folder_Path:
+                                            Folder_Path:
                                         </label>
                                     </div>
                                     <div class="m-form__control">
                                         <input type="text" id="folderPath" class="form-control m-input"
-                                               name="folderPath">
+                                               name="folderPath" th:value="${repository}">
                                         <span th:text="#{label_browser_security_tips}"></span>
                                     </div>
                                 </div>
@@ -87,11 +86,11 @@
                                 <div class="m-form__group m-form__group--inline">
                                     <div class="m-form__label">
                                         <label>
-                                            MzXML_File_List:
+                                            File_List(mzXML,aird):
                                         </label>
                                     </div>
                                     <div class="m-form__control">
-                                        <input type="file" multiple="multiple" id="fileList"
+                                        <input type="file" multiple="multiple" id="fileList" accept=".mzxml,.aird"
                                                class="form-control m-input" name="fileList" onchange="fileChanged()">
                                     </div>
                                 </div>
@@ -229,7 +228,7 @@
             return "<div data-repeater-item class='form-group m-form__group row align-items-center'><div class='col-md-3'><div class='m-form__group m-form__group--inline'>" +
                 "<div class='m-form__label'><label>ExperimentName:</label></div>" +
                 "<div class='m-form__control'><input type='text' class='form-control m-input' name='" + "exps[" + count + "].name' origin-name='name' placeholder='Enter Unique Experiment Name' value='" +
-                name +
+                name.substring(0, name.lastIndexOf('.')) +
                 "'></div></div><div class='d-md-none m--margin-bottom-10'></div></div><div class='col-md-3'><div class='m-form__group m-form__group--inline'> <div class='m-form__label'> <label class='m-label m-label--single'>FilePath:</label></div>" +
                 "<div class='m-form__control'><input type='text' class='form-control m-input' origin-name='filePath' name='" + "exps[" + count + "].filePath' placeholder='Enter File Path' value='" +
                 path + "\\" + name +
