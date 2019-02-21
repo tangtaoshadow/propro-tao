@@ -96,4 +96,6 @@ public class Constants {
 
     public static final String CUTINFO_PREFIX = "CUTINFO_";
 
+    public static final String EXP_TYPE_DIA_SWATH = "0";
+    public static final String EXP_TYPE_PRM = "1";
 }

@@ -44,17 +44,17 @@
                                 RT:
                             </button>
                         </div>
-                        <input type="text" class="form-control m-input" name="rtStr"
-                               placeholder="1036.45" th:value="${rtStr}">
+                        <input type="text" class="form-control m-input" name="rt"
+                               placeholder="1036.45" th:value="${rt}">
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
                             <button class="btn btn-success" type="button">
-                                Num:
+                                ParentNum:
                             </button>
                         </div>
-                        <input type="text" class="form-control m-input" name="num"
-                               placeholder="" th:value="${num}">
+                        <input type="text" class="form-control m-input" name="parentNum"
+                               placeholder="" th:value="${parentNum}">
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
@@ -83,10 +83,10 @@
                     <th width="2%">No.</th>
                     <th width="10%" th:text="#{label_exp_name}"></th>
                     <th width="3%" th:text="#{label_parent_node}"></th>
-                    <th width="3%">Num</th>
-                    <th width="2%" th:text="#{label_ms_level}"></th>
+                    <th width="5%">Num</th>
+                    <th width="5%" th:text="#{label_ms_level}"></th>
                     <th width="5%">RT</th>
-                    <th width="10%">mzXml Position(Start/Size)</th>
+                    <!--<th width="10%">mzXml Position(Start/Size)</th>-->
                     <th width="10%">mz Position(Start/Size)</th>
                     <th width="10%">Intensity Position(Start/Size)</th>
                     <th width="10%" th:text="#{label_precursor_mz_range_before_adjust}"></th>
@@ -106,8 +106,8 @@
 
                     <td th:text="${scanIndex.num}"></td>
                     <td th:text="${scanIndex.msLevel}"></td>
-                    <td th:text="${scanIndex.rtStr}"></td>
-                    <td th:text="|${scanIndex.positionMap?.get('mzxml')?.start} : ${scanIndex.positionMap?.get('mzxml')?.delta}|"></td>
+                    <td th:text="${scanIndex.rt}"></td>
+                    <!--<td th:text="|${scanIndex.positionMap?.get('mzxml')?.start} : ${scanIndex.positionMap?.get('mzxml')?.delta}|"></td>-->
                     <td th:text="|${scanIndex.positionMap?.get('mz')?.start} : ${scanIndex.positionMap?.get('mz')?.delta}|"></td>
                     <td th:text="|${scanIndex.positionMap?.get('int')?.start} : ${scanIndex.positionMap?.get('int')?.delta}|"></td>
                     <td th:text="|${scanIndex.originalPrecursorMzStart}/${scanIndex.originalPrecursorMzEnd}|"></td>
@@ -121,10 +121,10 @@
                                 data-target="#m_modal_spectrum" th:data1="${scanIndex.id}" th:data2="${experiment.id}"
                                 th:onclick="query(this.getAttribute('data1'),this.getAttribute('data2'),'aird')" th:text="#{label_aird_spectrum}">
                         </button>
-                        <button type="button" class="btn btn-sm btn-brand" data-toggle="modal"
-                                data-target="#m_modal_spectrum" th:data1="${scanIndex.id}" th:data2="${experiment.id}"
-                                th:onclick="query(query(this.getAttribute('data1'),this.getAttribute('data2'),'mzxml')" th:text="#{label_mzxml_spectrum}">
-                        </button>
+                        <!--<button type="button" class="btn btn-sm btn-brand" data-toggle="modal"-->
+                                <!--data-target="#m_modal_spectrum" th:data1="${scanIndex.id}" th:data2="${experiment.id}"-->
+                                <!--th:onclick="query(query(this.getAttribute('data1'),this.getAttribute('data2'),'mzxml')" th:text="#{label_mzxml_spectrum}">-->
+                        <!--</button>-->
                     </td>
                 </tr>
                 </tbody>

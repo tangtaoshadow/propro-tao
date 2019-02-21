@@ -15,7 +15,7 @@ public class ProjectDO extends BaseDO {
     @Id
     String id;
 
-    //项目名称
+    //项目名称,唯一值
     @Indexed
     String name;
 

@@ -133,7 +133,7 @@ public class AirdCompressor {
                 }
                 swathIndex.setPosEnd(PositionType.SWATH, start);
                 swathIndex.setRts(rts);
-                swathIndex.setBlockSizes(blockSizes);
+                swathIndex.setBlocks(blockSizes);
                 swathIndexes.add(swathIndex);
 
                 outputIndexList.addAll(indexes);

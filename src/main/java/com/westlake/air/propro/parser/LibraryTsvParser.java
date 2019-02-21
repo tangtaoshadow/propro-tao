@@ -133,7 +133,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
      */
     private ResultDO<PeptideDO> parseTransition(String line, HashMap<String, Integer> columnMap, LibraryDO library) {
         ResultDO<PeptideDO> resultDO = new ResultDO<>(true);
-        String[] row = line.split("\t");
+        String[] row = StringUtils.splitByWholeSeparator(line,"\t");
         PeptideDO peptideDO = new PeptideDO();
         boolean isDecoy = !row[columnMap.get(IsDecoy)].equals("0");
 
@@ -147,7 +147,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
 
         fi.setIntensity(Double.parseDouble(row[columnMap.get(ProductIonIntensity)]));
         peptideDO.setSequence(row[columnMap.get(PeptideSequence)]);
-        peptideDO.setProteinName(row[columnMap.get(UniprotId)]);
+        peptideDO.setProteinName(row[columnMap.get(ProteinName)].replace("DECOY_",""));
 
         String annotations = row[columnMap.get(Annotation)].replaceAll("\"", "");
         fi.setAnnotations(annotations);

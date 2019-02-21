@@ -99,9 +99,16 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/batchcreate")
     String batchCreate(Model model,
-                       @RequestParam(value = "projectName", required = false)String projectName) {
+                       @RequestParam(value = "projectName", required = false)String projectName,
+                       RedirectAttributes redirectAttributes) {
 
+        ResultDO<ProjectDO> result = projectService.getByName(projectName);
+        if(result.isFailed()){
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED.getMessage());
+            return "redirect:/project/list";
+        }
         model.addAttribute("projectName", projectName);
+        model.addAttribute("repository",result.getModel().getRepository());
         return "experiment/batchcreate";
     }
 
@@ -639,6 +646,10 @@ public class ExperimentController extends BaseController {
             return "redirect:/experiment/list";
         }
         ExperimentDO experimentDO = resultDO.getModel();
+        if(experimentDO.getType().equals(Constants.EXP_TYPE_DIA_SWATH)){
+            redirectAttributes.addAttribute(ERROR_MSG, ResultCode.NO_AIRD_COMPRESSION_FOR_DIA_SWATH.getMessage());
+            return "redirect:/experiment/list";
+        }
         TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
         taskService.insert(taskDO);
         experimentTask.compress(experimentDO, taskDO);

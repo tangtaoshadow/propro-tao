@@ -142,7 +142,7 @@ public class ScoreServiceImpl implements ScoreService {
 
             TreeMap<Float, MzIntensityPairs> rtMap = null;
             if (input.isUsedDIAScores()) {
-                rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex);
+                rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex, exp.getByteOrderClass());
             }
 
             for (AnalyseDataDO dataDO : dataList) {

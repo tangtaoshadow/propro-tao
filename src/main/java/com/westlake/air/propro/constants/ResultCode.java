@@ -68,6 +68,7 @@ public enum ResultCode implements Serializable {
     PRM_FILE_IS_EMPTY("PRM_FILE_IS_EMPTY", "PRM文件为空"),
     PRM_FILE_FORMAT_NOT_SUPPORTED("PRM_FILE_FORMAT_NOT_SUPPORTED","PRM文件格式不支持"),
     FASTA_FILE_FORMAT_NOT_SUPPORTED("FASTA_FILE_FORMAT_NOT_SUPPORTED","FASTA文件格式不支持"),
+    NO_AIRD_COMPRESSION_FOR_DIA_SWATH("NO_AIRD_COMPRESSION_FOR_DIA_SWATH","DIA-Swath实验不需要进行Aird文件压缩,请使用Propro客户端进行压缩"),
 
     /**
      * ******

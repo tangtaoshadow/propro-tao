@@ -292,6 +292,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
         experimentDO.setHasAirusFile(true);
         experimentDO.setAirdPath(airdFilePath);
+
         String airdIndexPath = FileUtil.getAirdIndexFilePath(airdFilePath);
         experimentDO.setAirdIndexPath(airdIndexPath);
         try {
@@ -305,7 +306,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                 taskService.update(taskDO);
                 return;
             }
-
+            experimentDO.setWindowRanges(airdInfo.getRangeList());
             experimentDO.setByteOrder(airdInfo.getByteOrder());
             experimentDO.setCompressStrategy(airdInfo.getCompressStrategy());
             experimentDO.setOverlap(airdInfo.getOverlap());
@@ -319,6 +320,10 @@ public class ExperimentServiceImpl implements ExperimentService {
 
             scanIndexService.insertAll(airdInfo.getScanIndexList(), false);
             scanIndexService.insertAll(airdInfo.getSwathIndexList(), false);
+
+            taskDO.addLog("索引存储成功");
+            taskDO.finish(TaskStatus.SUCCESS.getName());
+            taskService.update(taskDO);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -425,7 +430,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             //Step1.获取窗口信息.
             ScanIndexDO scanIndexDO = scanIndexService.getSwathIndex(exp.getId(), peptide.getMz().floatValue());
             //Step2.获取该窗口内的谱图Map,key值代表了RT
-            TreeMap<Float, MzIntensityPairs> rtMap = airdFileParser.parseSwathBlockValues(raf, scanIndexDO);
+            TreeMap<Float, MzIntensityPairs> rtMap = airdFileParser.parseSwathBlockValues(raf, scanIndexDO , exp.getByteOrderClass());
             TargetPeptide tp = new TargetPeptide(peptide);
             Double rt = peptide.getRt();
             if (rtExtractorWindow == -1) {
@@ -482,7 +487,12 @@ public class ExperimentServiceImpl implements ExperimentService {
                     continue;
                 }
                 //Step3.提取指定原始谱图
-                rtMap = airdFileParser.parseSwathBlockValues(raf, swathMap.get(range.getStart()));
+                ScanIndexDO index = swathMap.get(range.getStart());
+                if(index != null){
+                    rtMap = airdFileParser.parseSwathBlockValues(raf, index, exp.getByteOrderClass());
+                }else{
+                    continue;
+                }
 
                 //Step4.卷积并且存储数据
                 extractForIrt(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
@@ -603,7 +613,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         }
         //Step3.提取指定原始谱图
         long start = System.currentTimeMillis();
-        rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex);
+        rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex, lumsParams.getExperimentDO().getByteOrderClass());
         logger.info("IO及解码耗时:" + (System.currentTimeMillis() - start));
         if (lumsParams.isUseEpps()) {
             return eppsAndInsert(coordinates, rtMap, overviewId, lumsParams);

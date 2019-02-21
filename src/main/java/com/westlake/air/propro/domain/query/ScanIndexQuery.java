@@ -25,7 +25,7 @@ public class ScanIndexQuery extends PageQuery {
 
     Double rtEnd;
 
-    String rtStr;
+    Float rt;
 
     Integer parentNum;
 

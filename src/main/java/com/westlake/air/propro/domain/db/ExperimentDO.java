@@ -1,5 +1,6 @@
 package com.westlake.air.propro.domain.db;
 
+import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.domain.BaseDO;
 import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import lombok.Data;
@@ -7,8 +8,12 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.nio.ByteOrder;
 import java.util.Date;
 import java.util.List;
+
+import static com.westlake.air.propro.constants.Constants.EXP_TYPE_DIA_SWATH;
+import static com.westlake.air.propro.constants.Constants.EXP_TYPE_PRM;
 
 /**
  * Created by James Lu MiaoShan
@@ -37,6 +42,9 @@ public class ExperimentDO extends BaseDO {
 
     //必填,实验名称
     String name;
+
+    //0:DIA-Swath, 1:PRM
+    String type;
 
     //mzxml的文件路径
     String filePath;
@@ -86,7 +94,23 @@ public class ExperimentDO extends BaseDO {
     //Swath窗口列表
     List<WindowRange> windowRanges;
 
-    //0:DIA-Swath, 1:PRM
-    String type;
+    public String getTypeName() {
+        switch (type) {
+            case EXP_TYPE_DIA_SWATH:
+                return "DIA-Swath";
+            case EXP_TYPE_PRM:
+                return "PRM";
+            default:
+                return "Unknown";
+        }
+    }
+
+    public ByteOrder getByteOrderClass(){
+        if("LITTLE_ENDIAN".equals(byteOrder)){
+            return ByteOrder.LITTLE_ENDIAN;
+        }else{
+            return ByteOrder.BIG_ENDIAN;
+        }
+    }
 
 }
