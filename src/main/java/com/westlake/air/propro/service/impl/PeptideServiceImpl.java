@@ -1,6 +1,7 @@
 package com.westlake.air.propro.service.impl;
 
 import com.google.common.collect.Ordering;
+import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.dao.LibraryDAO;
 import com.westlake.air.propro.dao.PeptideDAO;
@@ -224,7 +225,7 @@ public class PeptideServiceImpl implements PeptideService {
 
         long start = System.currentTimeMillis();
         PeptideQuery query = new PeptideQuery(libraryId);
-        if(type.equals("1")){
+        if(type.equals(Constants.EXP_TYPE_PRM)){
             float precursorMz = (precursorMzEnd + precursorMzStart)/2;
             query.setMzStart(precursorMz - 0.0002d);
             query.setMzEnd(precursorMz + 0.0002d);

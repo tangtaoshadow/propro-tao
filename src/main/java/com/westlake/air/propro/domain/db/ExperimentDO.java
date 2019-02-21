@@ -43,7 +43,7 @@ public class ExperimentDO extends BaseDO {
     //必填,实验名称
     String name;
 
-    //0:DIA-Swath, 1:PRM
+    //DIA-Swath, PRM, @see Constants
     String type;
 
     //mzxml的文件路径
@@ -80,7 +80,7 @@ public class ExperimentDO extends BaseDO {
     //计算irt后得到的截距
     Double intercept;
 
-    //转byte时的编码顺序,一般C#默认采用LITTLE_ENDIAN,Aird文件由Propro-Client(C#端)转换而来,因此也采用LITTLE_ENDIAN的编码
+    //转byte时的编码顺序,由于C#默认采用LITTLE_ENDIAN,Aird文件由Propro-Client(C#端)转换而来,因此也采用LITTLE_ENDIAN的编码
     String byteOrder;
 
     //MZ数组和Intensity数组分别采用的压缩策略,Propro1.0采用的是mz:pfor,zlib;intensity:zlib
@@ -93,17 +93,6 @@ public class ExperimentDO extends BaseDO {
 
     //Swath窗口列表
     List<WindowRange> windowRanges;
-
-    public String getTypeName() {
-        switch (type) {
-            case EXP_TYPE_DIA_SWATH:
-                return "DIA-Swath";
-            case EXP_TYPE_PRM:
-                return "PRM";
-            default:
-                return "Unknown";
-        }
-    }
 
     public ByteOrder getByteOrderClass(){
         if("LITTLE_ENDIAN".equals(byteOrder)){

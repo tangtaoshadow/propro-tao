@@ -3,6 +3,7 @@ package com.westlake.air.propro.async;
 import com.westlake.air.propro.algorithm.Airus;
 import com.westlake.air.propro.algorithm.FragmentFactory;
 import com.westlake.air.propro.compressor.AirdCompressor;
+import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.TaskStatus;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.airus.AirusParams;
@@ -55,7 +56,7 @@ public class ExperimentTask extends BaseTask {
         taskService.update(taskDO);
         experimentService.uploadFile(experimentDO, file, taskDO);
         List<WindowRange> rangs;
-        if(experimentDO.getType().equals("1")){
+        if(experimentDO.getType().equals(Constants.EXP_TYPE_DIA_SWATH)){
             rangs = experimentService.getPrmWindows(experimentDO.getId());
         }else {
             rangs = experimentService.getWindows(experimentDO.getId());
