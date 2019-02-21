@@ -36,17 +36,19 @@
                 <thead>
                 <tr>
                     <th width="10%" th:text="#{label_project_name}"></th>
+                    <th width="10%" th:text="#{label_project_type}"></th>
                     <th width="10%" th:text="#{label_project_repository}"></th>
                     <th width="10%" th:text="#{label_creator}"></th>
                     <th width="10%" th:text="#{label_detail_description}"></th>
-                    <th width="15%" th:text="#{label_create_date}"></th>
-                    <th width="15%" th:text="#{label_last_modified_date}"></th>
+                    <th width="10%" th:text="#{label_create_date}"></th>
+                    <th width="10%" th:text="#{label_last_modified_date}"></th>
                     <th width="30%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="project:${projectList}">
                     <td th:text="|${project.name}(${project.id})|"></td>
+                    <td th:text="${project.type}"></td>
                     <td th:text="${project.repository}"></td>
                     <td th:text="${project.ownerName}"></td>
                     <td th:text="${project.description}"></td>

@@ -19,7 +19,7 @@ public class ProjectDO extends BaseDO {
     @Indexed
     String name;
 
-    //0:DIA, 1:PRM
+    //DIA_SWATH, PRM
     String type;
 
     //项目仓库路径(存储项目所有元数据的地方)
