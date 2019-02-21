@@ -63,7 +63,15 @@ public class AirdCompressor {
         File airiFile = new File(airdIndexPath);
         File airdFile = new File(airdFilePath);
 
-        List<WindowRange> windowRanges = experimentService.getPrmWindows(experimentDO.getId());
+        List<WindowRange> windowRanges = null;
+
+        if(experimentDO.getType().equals(Constants.EXP_TYPE_DIA_SWATH)){
+            windowRanges = experimentService.getWindows(experimentDO.getId());
+        }else if(experimentDO.getType().equals(Constants.EXP_TYPE_PRM)){
+            windowRanges = experimentService.getPrmWindows(experimentDO.getId());
+        }else{
+            return ResultDO.buildError(ResultCode.EXPERIMENT_TYPE_MUST_DEFINE);
+        }
 
         AirdInfo airdInfo = new AirdInfo();
         airdInfo.setRangeList(windowRanges);
