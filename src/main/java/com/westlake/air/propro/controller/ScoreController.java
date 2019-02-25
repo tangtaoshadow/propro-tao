@@ -117,7 +117,7 @@ public class ScoreController extends BaseController {
     @RequestMapping(value = "/result/list")
     String resultList(Model model,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize,
+                @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
                 @RequestParam(value = "overviewId", required = true) String overviewId,
                 @RequestParam(value = "peptideRef", required = false) String peptideRef,
                 @RequestParam(value = "proteinName", required = false) String proteinName,
@@ -144,18 +144,15 @@ public class ScoreController extends BaseController {
             query.addIndentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
         }
         query.setOverviewId(overviewId);
-        query.setPageSize(pageSize);
-        query.setPageNo(currentPage);
 
-        ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
-        if (peptideRef != null){
+        List<AnalyseDataDO> analyseDataDOList = analyseDataService.getAll(query);
+        if (peptideRef != null && peptideRef.length()>0){
             query.setPeptideRef(null);
-            query.setProteinName(resultDO.getModel().get(0).getProteinName());
-            resultDO = analyseDataService.getList(query);
+            query.setProteinName(analyseDataDOList.get(0).getProteinName());
+            analyseDataDOList = analyseDataService.getAll(query);
         }
-        List<AnalyseDataDO> dataDOList = resultDO.getModel();
         HashMap<String, List<AnalyseDataDO>> proteinMap = new HashMap<>();
-        for (AnalyseDataDO dataDO: dataDOList){
+        for (AnalyseDataDO dataDO: analyseDataDOList){
             if (proteinMap.containsKey(dataDO.getProteinName())){
                 proteinMap.get(dataDO.getProteinName()).add(dataDO);
             }else {
@@ -164,18 +161,20 @@ public class ScoreController extends BaseController {
                 proteinMap.put(dataDO.getProteinName(), newList);
             }
         }
-//        JSONObject protMap = new JSONObject();
-//        for (String protName: proteinMap.keySet()){
-//            JSONArray peptideArray = new JSONArray();
-//            Collections.addAll(peptideArray, proteinMap.get(protName));
-//            protMap.put(protName, peptideArray);
-//        }
-        model.addAttribute("protMap", proteinMap);
+        List<String> protList = new ArrayList<>(proteinMap.keySet());
+        int totalPage = (int) Math.ceil(protList.size()/(double)pageSize);
+        HashMap<String, List<AnalyseDataDO>> pageProtMap = new HashMap<>();
+
+        for(int i=pageSize*(currentPage-1); i<protList.size() && i<pageSize*currentPage; i++){
+            pageProtMap.put(protList.get(i), proteinMap.get(protList.get(i)));
+        }
+
+        model.addAttribute("protMap", pageProtMap);
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         model.addAttribute("overview", overviewResult.getModel());
-        model.addAttribute("totalPage", resultDO.getTotalPage());
+        model.addAttribute("totalPage", totalPage);
         model.addAttribute("currentPage", currentPage);
-        model.addAttribute("totalNum", resultDO.getTotalNum());
+        model.addAttribute("totalNum", protList.size());
         return "scores/result/list";
     }
 

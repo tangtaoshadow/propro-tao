@@ -57,12 +57,14 @@ public class FastaParser {
                 if (line.startsWith(">")) {
                     //进入下一个protein的分析
                     //此时lastSequence里面存有了当前protein的sequence
-                    HashSet<String> enzymedSequence = getEnzymeResult(lastSequence.toString());
-                    proteinPeptideMap.put(lastProteinMessage, enzymedSequence);
-
+                    if (!line.startsWith(">CON")) {
+                        HashSet<String> enzymedSequence = getEnzymeResult(lastSequence.toString());
+                        proteinPeptideMap.put(lastProteinMessage, enzymedSequence);
+                    }
                     //分离为peptide之后，存储新protein的信息，并清空lastSequence
                     lastProteinMessage = line;
                     lastSequence.setLength(0);
+
                 } else {
                     lastSequence.append(line);
                 }

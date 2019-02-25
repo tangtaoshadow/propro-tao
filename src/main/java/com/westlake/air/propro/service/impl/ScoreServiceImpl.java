@@ -279,6 +279,7 @@ public class ScoreServiceImpl implements ScoreService {
             featureScores.setLeftSideRt(peakGroupFeature.getBestLeftRt());
             featureScores.setRightSideRt(peakGroupFeature.getBestRightRt());
             featureScores.setIntensitySum(peakGroupFeature.getPeakGroupInt());
+            featureScores.setFragIntMap(peakGroupFeature.getIonIntensity());
             featureScoresList.add(featureScores);
         }
 

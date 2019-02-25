@@ -227,7 +227,7 @@
 
 
         function init(id, name) {
-            if (expType === '1') {
+            if (expType === 'PRM') {
                 var result = $.ajax({url: "/experiment/getPrmWindows?expId=" + id, async: false});
                 var datas = result.responseJSON.model;
                 var peptideList = datas.peptideList;

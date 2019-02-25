@@ -25,6 +25,9 @@ public class AnalyseOverviewDO extends BaseDO {
     //对应实验的名称
     String expName;
 
+    //0:DIA 1:PRM
+    String type;
+
     //是否包含卷积结果文件
     Boolean hasAircFile;
     //卷积结果文件路径

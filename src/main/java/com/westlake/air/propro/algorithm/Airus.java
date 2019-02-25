@@ -54,6 +54,7 @@ public class Airus {
     XGBoostLearner xgBoostLearner;
 
     public FinalResult doAirus(String overviewId, AirusParams airusParams) {
+        double fdrThreshold = 0.01;
         FinalResult finalResult = new FinalResult();
         logger.info("开始清理已识别的肽段数目");
         ResultDO<AnalyseOverviewDO> overviewDOResultDO = analyseOverviewService.getById(overviewId);
@@ -64,6 +65,9 @@ public class Airus {
                 overviewDO.setMatchedPeptideCount(null);
             }
             analyseOverviewService.update(overviewDO);
+            if(overviewDO.getType().equals("1")){
+                fdrThreshold = 0.001;
+            }
         }
         logger.info("开始获取打分数据");
 
@@ -99,14 +103,15 @@ public class Airus {
             dataDO.setBestRt(simpleFeatureScores.getRt());
             dataDO.setFdr(simpleFeatureScores.getFdr());
             dataDO.setIntensitySum(simpleFeatureScores.getIntensitySum());
+            dataDO.setFragIntMap(simpleFeatureScores.getFragIntMap());
             if (!simpleFeatureScores.getIsDecoy()) {
-                if (simpleFeatureScores.getFdr() <= 0.01) {
+                if (simpleFeatureScores.getFdr() <= fdrThreshold) {
                     Integer count = peptideHitMap.get(simpleFeatureScores.getPeptideRef());
                     if (count != null && count >= airusParams.getTrainTimes()/2) {
                         hit++;
                     }
                 }
-                dataDO.setIdentifiedStatus(simpleFeatureScores.getFdr() <= 0.01 ? AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS : AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
+                dataDO.setIdentifiedStatus(simpleFeatureScores.getFdr() <= fdrThreshold ? AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS : AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
             }
             ResultDO r = analyseDataService.update(dataDO);
             if (r.isFailed()) {
