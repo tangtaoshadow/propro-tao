@@ -47,6 +47,8 @@ public class FeatureScores {
     //定量值
     Double intensitySum;
 
+    HashMap<String, Double> fragIntMap;
+
     //key为子分数类型
     HashMap<String, Double> scoresMap;
 

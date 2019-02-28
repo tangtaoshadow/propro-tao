@@ -188,6 +188,7 @@ public class AirusUtil {
                     bestFeatureScores.setScoresMap(featureScores.getScoresMap());
                     bestFeatureScores.setRt(featureScores.getRt());
                     bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
+                    bestFeatureScores.setFragIntMap(featureScores.getFragIntMap());
                 } else {
                     Double featureMainScore = featureScores.get(scoreType);
                     if (featureMainScore > bestFeatureScores.getMainScore()) {
@@ -195,6 +196,7 @@ public class AirusUtil {
                         bestFeatureScores.setScoresMap(featureScores.getScoresMap());
                         bestFeatureScores.setRt(featureScores.getRt());
                         bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
+                        bestFeatureScores.setFragIntMap(featureScores.getFragIntMap());
                     }
                 }
             }
@@ -394,8 +396,8 @@ public class AirusUtil {
             Collections.shuffle(decoys);
         }
 
-        int decoyLength = (int) (targets.size() * fraction) + 1;
-        int targetLength = (int) (decoys.size() * fraction) + 1;
+        int targetLength = (int) (targets.size() * fraction) + 1;
+        int decoyLength = (int) (decoys.size() * fraction) + 1;
 
         TrainData td = new TrainData(targets.subList(0, targetLength), decoys.subList(0, decoyLength));
         return td;

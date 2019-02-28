@@ -65,7 +65,7 @@
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="type" name="type" readonly
                                        th:value="${experiment?.type}">
-                                <span>0:DIA-Swath,1:PRM</span>
+                                <span>DIA-Swath,PRM</span>
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -227,7 +227,7 @@
 
 
         function init(id, name) {
-            if (expType === '1') {
+            if (expType === 'PRM') {
                 var result = $.ajax({url: "/experiment/getPrmWindows?expId=" + id, async: false});
                 var datas = result.responseJSON.model;
                 var peptideList = datas.peptideList;

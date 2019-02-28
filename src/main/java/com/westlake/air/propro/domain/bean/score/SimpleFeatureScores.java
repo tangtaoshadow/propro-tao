@@ -32,6 +32,8 @@ public class SimpleFeatureScores {
 
     Double fdr;
 
+    HashMap<String, Double> fragIntMap;
+
     public SimpleFeatureScores(){}
 
     public SimpleFeatureScores(String peptideRef, Boolean isDecoy){

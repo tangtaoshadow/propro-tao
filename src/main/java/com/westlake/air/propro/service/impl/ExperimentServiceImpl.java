@@ -838,7 +838,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
         overviewDO.setExpId(input.getExperimentDO().getId());
         overviewDO.setExpName(input.getExperimentDO().getName());
-
+        overviewDO.setType(input.getExperimentDO().getType());
         if (input.getLibraryId() != null) {
             String name = libraryService.getNameById(input.getLibraryId());
             overviewDO.setLibraryId(input.getLibraryId());

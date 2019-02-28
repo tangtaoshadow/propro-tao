@@ -27,7 +27,7 @@ public class AirdInfo {
     //Swaht的各个窗口间的重叠部分
     Float overlap;
 
-    //0:DIA-Swath,1:PRM
+    //DIA-Swath,PRM
     String type;
     /**
      * Store the window rangs which have been adjusted with experiment overlap

@@ -1,19 +1,23 @@
 package com.westlake.air.propro.controller;
 
+import com.sun.applet2.AppletParameters;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.constants.SuccessMsg;
 import com.westlake.air.propro.constants.TaskTemplate;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
+import com.westlake.air.propro.domain.bean.peptide.Fragment;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
-import com.westlake.air.propro.domain.db.ExperimentDO;
-import com.westlake.air.propro.domain.db.LibraryDO;
-import com.westlake.air.propro.domain.db.ProjectDO;
-import com.westlake.air.propro.domain.db.TaskDO;
+import com.westlake.air.propro.domain.db.*;
+import com.westlake.air.propro.domain.params.Exp;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.ProjectQuery;
+import com.westlake.air.propro.parser.model.traml.Peptide;
+import com.westlake.air.propro.service.AnalyseDataService;
+import com.westlake.air.propro.service.AnalyseOverviewService;
+import com.westlake.air.propro.service.PeptideService;
 import com.westlake.air.propro.service.ProjectService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +30,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by James Lu MiaoShan
@@ -39,6 +42,12 @@ public class ProjectController extends BaseController {
 
     @Autowired
     ProjectService projectService;
+    @Autowired
+    AnalyseDataService analyseDataService;
+    @Autowired
+    AnalyseOverviewService analyseOverviewService;
+    @Autowired
+    PeptideService peptideService;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -89,7 +98,7 @@ public class ProjectController extends BaseController {
         model.addAttribute("type", type);
 
         File file = new File(repository);
-        if(!file.exists()){
+        if (!file.exists()) {
             file.mkdirs();
         }
 
@@ -152,7 +161,6 @@ public class ProjectController extends BaseController {
         } else {
             return "redirect:/task/list";
         }
-
     }
 
     @RequestMapping(value = "/irt")
@@ -167,7 +175,7 @@ public class ProjectController extends BaseController {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.PROJECT_NOT_EXISTED);
             return "redirect:/project/list";
         }
-        model.addAttribute("exps",expList);
+        model.addAttribute("exps", expList);
         model.addAttribute("project", resultDO.getModel());
         model.addAttribute("iRtLibraryId", iRtLibraryId);
         model.addAttribute("libraries", getLibraryList(1));
@@ -305,6 +313,99 @@ public class ProjectController extends BaseController {
         return "redirect:/task/list";
     }
 
+    @RequestMapping(value = "/portionSelector")
+    String portionSelector(Model model,
+                           @RequestParam(value = "id", required = true) String id,
+                           RedirectAttributes redirectAttributes) {
+        ResultDO<ProjectDO> resultDO = projectService.getById(id);
+        if (resultDO.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED);
+            return "redirect:/project/list";
+        }
+        List<ExperimentDO> expList = experimentService.getAllByProjectName(resultDO.getModel().getName());
+        model.addAttribute("project", resultDO.getModel());
+        model.addAttribute("expList", expList);
+        return "project/portionSelector";
+    }
+
+    @RequestMapping(value = "/overview")
+    String overview(Model model,
+                    @RequestParam(value = "id", required = true) String projectId,
+//                                 @RequestParam(value = "batchName", required = false) String batchName,
+                    @RequestParam(value = "peptideRefInfo", required = false) String peptideRefInfo,
+                    HttpServletRequest request,
+                    RedirectAttributes redirectAttributes) {
+
+        //get project name
+        ResultDO<ProjectDO> resultDO = projectService.getById(projectId);
+        if (resultDO.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED);
+            return "redirect:/project/list";
+        }
+        String projectName = resultDO.getModel().getName()+"("+resultDO.getModel().getId() +")";
+        //get corresponding experiments
+        List<ExperimentDO> expList = experimentService.getAllByProjectName(resultDO.getModel().getName());
+        String libraryId = "";
+        String libName = "";
+        List<String> analyseOverviewIdList = new ArrayList<>();
+        List<String> expNameList = new ArrayList<>();
+        for (ExperimentDO experimentDO : expList) {
+            String checkState = request.getParameter(experimentDO.getId());
+            if (checkState != null && checkState.equals("on")) {
+                //analyse checked experiments
+                AnalyseOverviewDO analyseOverviewDO = analyseOverviewService.getAllByExpId(experimentDO.getId()).get(0);
+                libraryId = analyseOverviewDO.getLibraryId();
+                libName = analyseOverviewDO.getLibraryName() + "(" + libraryId + ")";
+                analyseOverviewIdList.add(analyseOverviewDO.getId());
+                expNameList.add(experimentDO.getName());
+            }
+        }
+        String[] peptideRefs = peptideRefInfo.split(";");
+        HashMap<String, HashMap<String, List<Integer>>> pepFragIntListMap = new HashMap<>();
+        List<String> protNameList = new ArrayList<>();
+        for (String peptideRef : peptideRefs) {
+            PeptideDO peptideDO = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, false);
+            //protein name
+            protNameList.add(peptideDO.getProteinName());
+            //fragment cutInfo list
+            Set<String> cutInfoSet = peptideDO.getFragmentMap().keySet();
+            //experiments
+            HashMap<String, List<Integer>> fragIntListMap = new HashMap<>();
+            for (String analyseOverviewId: analyseOverviewIdList) {
+                //get fragment intensity map
+                AnalyseDataDO analyseDataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(analyseOverviewId, peptideRef, false);
+                HashMap<String, Double> fragIntMap;
+                if (analyseDataDO == null){
+                    fragIntMap = new HashMap<>();
+                }else {
+                    fragIntMap = analyseDataDO.getFragIntMap();
+                }
+
+                //get fragment intensity list map
+                for (String cutInfo : cutInfoSet) {
+                    if (fragIntListMap.get(cutInfo) == null) {
+                        List<Integer> newList = new ArrayList<>();
+                        newList.add(fragIntMap.get(cutInfo) == null ? 0 : (int) Math.round(fragIntMap.get(cutInfo)));
+                        fragIntListMap.put(cutInfo, newList);
+                    } else {
+                        fragIntListMap.get(cutInfo).add(fragIntMap.get(cutInfo) == null ? 0 : (int) Math.round(fragIntMap.get(cutInfo)));
+                    }
+                }
+            }
+            pepFragIntListMap.put(peptideRef, fragIntListMap);
+        }
+
+        //横坐标实验，纵坐标不同pep
+        model.addAttribute("projectName", projectName);
+        model.addAttribute("libraryId", libraryId);
+        model.addAttribute("libName", libName);
+        model.addAttribute("peptideRefs", peptideRefs);
+        model.addAttribute("protNameList", protNameList);
+        model.addAttribute("pepFragIntListMap", pepFragIntListMap);
+        model.addAttribute("expNameList", expNameList);
+
+        return "project/overview";
+    }
 
     private List<ExperimentDO> getAllExperimentsByProjectId(String id) {
         ResultDO<ProjectDO> resultDO = projectService.getById(id);
