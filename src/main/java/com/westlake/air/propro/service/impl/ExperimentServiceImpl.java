@@ -431,7 +431,14 @@ public class ExperimentServiceImpl implements ExperimentService {
             //Step1.获取窗口信息.
             ScanIndexDO scanIndexDO = scanIndexService.getSwathIndex(exp.getId(), peptide.getMz().floatValue());
             //Step2.获取该窗口内的谱图Map,key值代表了RT
-            TreeMap<Float, MzIntensityPairs> rtMap = airdFileParser.parseSwathBlockValues(raf, scanIndexDO , exp.getByteOrderClass());
+            TreeMap<Float, MzIntensityPairs> rtMap;
+            try{
+                rtMap = airdFileParser.parseSwathBlockValues(raf, scanIndexDO , exp.getByteOrderClass());
+            }catch (Exception e){
+                logger.error("PrecursorMZ:"+scanIndexDO.getPrecursorMz());
+                throw e;
+            }
+
             TargetPeptide tp = new TargetPeptide(peptide);
             Double rt = peptide.getRt();
             if (rtExtractorWindow == -1) {
@@ -490,7 +497,13 @@ public class ExperimentServiceImpl implements ExperimentService {
                 //Step3.提取指定原始谱图
                 ScanIndexDO index = swathMap.get(range.getStart());
                 if(index != null){
-                    rtMap = airdFileParser.parseSwathBlockValues(raf, index, exp.getByteOrderClass());
+                    try{
+                        rtMap = airdFileParser.parseSwathBlockValues(raf, index, exp.getByteOrderClass());
+                    }catch (Exception e){
+                        logger.error("PrecursorMZStart:"+index.getPrecursorMzStart());
+                        throw e;
+                    }
+
                 }else{
                     continue;
                 }
@@ -614,7 +627,9 @@ public class ExperimentServiceImpl implements ExperimentService {
         }
         //Step3.提取指定原始谱图
         long start = System.currentTimeMillis();
+
         rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex, lumsParams.getExperimentDO().getByteOrderClass());
+
         logger.info("IO及解码耗时:" + (System.currentTimeMillis() - start));
         if (lumsParams.isUseEpps()) {
             return eppsAndInsert(coordinates, rtMap, overviewId, lumsParams);

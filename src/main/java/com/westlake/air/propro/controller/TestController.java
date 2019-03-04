@@ -1,6 +1,7 @@
 package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.algorithm.Airus;
 import com.westlake.air.propro.algorithm.FragmentFactory;
@@ -21,6 +22,7 @@ import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.parser.AirdFileParser;
 import com.westlake.air.propro.service.*;
+import com.westlake.air.propro.utils.CompressUtil;
 import com.westlake.air.propro.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -31,7 +33,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.*;
 import java.nio.ByteOrder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 /**
  * Created by James Lu MiaoShan
@@ -76,13 +80,22 @@ public class TestController extends BaseController {
     String test(Model model, RedirectAttributes redirectAttributes) {
 
         try {
-            String airdFilePath = "\\\\RS1219\\ProproNAS\\data\\SGS\\napedro_L120224_010_SW.aird";
-            String airdIndexFilePath = FileUtil.getAirdIndexFilePath(airdFilePath);
-            File file = new File(airdIndexFilePath);
-            String airdInfoJson = FileUtil.readFile(file);
-            AirdInfo airdInfo = JSONObject.parseObject(airdInfoJson, AirdInfo.class);
-            List scanList = airdInfo.getScanIndexList();
-            List blockList = airdInfo.getSwathIndexList();
+
+            ResultDO<ExperimentDO> expResult = experimentService.getById("5c75f7d9fc6f9e20a85e961a");
+            ExperimentDO exp = expResult.getModel();
+            RandomAccessFile raf = new RandomAccessFile(new File(exp.getAirdPath()), "r");
+            HashMap<Float, ScanIndexDO> scanIndexMap = scanIndexService.getSwathIndexList("5c75f7d9fc6f9e20a85e961a");
+            for (ScanIndexDO scanIndexDO : scanIndexMap.values()) {
+                if (scanIndexDO.getPrecursorMzStart() == 400) {
+                    try {
+                        TreeMap map = airdFileParser.parseSwathBlockValues(raf, scanIndexDO, ByteOrder.LITTLE_ENDIAN);
+                        System.out.println(scanIndexDO.getPrecursorMzStart() + ":" + map.size());
+                    } catch (Exception e) {
+                        logger.error("PrecursorMzStart: " + scanIndexDO.getPrecursorMzStart());
+                        logger.error("Blocks: " + JSONArray.toJSONString(scanIndexDO.getBlocks()));
+                    }
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -94,23 +107,31 @@ public class TestController extends BaseController {
     @RequestMapping("test2")
     @ResponseBody
     String test2(Model model, RedirectAttributes redirectAttributes) {
-        ExperimentDO experimentDO = experimentService.getById("5b89029258487f0e14a62b75").getModel();
-        ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(experimentDO, "5b88fece58487f13f0609019", MZ_EXTRACT_WINDOW, SigmaSpacing.create());
-        if (resultDO.isFailed()) {
-            return JSON.toJSONString(resultDO);
-        }
-        SlopeIntercept slopeIntercept = resultDO.getModel();
-        long start = System.currentTimeMillis();
-        LumsParams input = new LumsParams();
-        input.setExperimentDO(experimentDO);
-        input.setLibraryId("5b88feb758487f13f05f7083");
-        input.setSlopeIntercept(slopeIntercept);
-        input.setCreator("陆妙善");
-        input.setRtExtractWindow(RT_EXTRACT_WINDOW);
-        input.setMzExtractWindow(MZ_EXTRACT_WINDOW);
-        ResultDO finalRes = experimentService.extract(input);
-        logger.info("卷积耗时总计:" + (System.currentTimeMillis() - start));
-        return JSON.toJSONString(finalRes);
+        int[] mzArray = new int[21];
+        mzArray[0] = 84960;
+        mzArray[1] = 123015;
+        mzArray[2] = 136919;
+        mzArray[3] = 149015;
+        mzArray[4] = 161057;
+        mzArray[5] = 165694;
+        mzArray[6] = 195918;
+        mzArray[7] = 243131;
+        mzArray[8] = 254097;
+        mzArray[9] = 290156;
+        mzArray[10] = 333144;
+        mzArray[11] = 348147;
+        mzArray[12] = 357035;
+        mzArray[13] = 357232;
+        mzArray[14] = 365206;
+        mzArray[15] = 367164;
+        mzArray[16] = 379980;
+        mzArray[17] = 387205;
+        mzArray[18] = 388134;
+        mzArray[19] = 413090;
+        mzArray[20] = 620326;
+        int[] mzCompressedArray = CompressUtil.compressForSortedInt(mzArray);
+        return "";
+
     }
 
     @RequestMapping("test3")
@@ -135,27 +156,10 @@ public class TestController extends BaseController {
     @RequestMapping("test6")
     @ResponseBody
     String test6(Model model, RedirectAttributes redirectAttributes) throws IOException {
-//        AnalyseDataQuery query = new AnalyseDataQuery("5c1ba15dcb15b6e1c4f20c63");
-        AnalyseDataQuery query = new AnalyseDataQuery("5c1c9a5acb15b6bb244d985e");
-        query.setFdrEnd(0.01);
-        query.setIsDecoy(false);
-        List<AnalyseDataDO> dataList = analyseDataService.getAll(query);
-        logger.info("总计识别肽段:" + dataList.size() + "个");
-        int count = 0;
-        for (AnalyseDataDO data : dataList) {
-            for (FeatureScores featureScores : data.getFeatureScoresList()) {
-                if (featureScores.getRt().equals(data.getBestRt())) {
-                    if (featureScores.get(ScoreType.XcorrShapeWeighted) < 0.7 && featureScores.get(ScoreType.XcorrShape) < 0.7) {
-                        logger.info("该肽段异常:" + data.getPeptideRef());
-                        count++;
-                    }
-                    break;
-                }
-            }
-        }
-
-        return count + "";
-
+        String jsonTest = "{\"start\": 482.14798,\"end\": 483.348,\"interval\": 1.20001221}";
+        HashMap test = JSONObject.parseObject(jsonTest, HashMap.class);
+        System.out.println(test.size());
+        return null;
     }
 
     @RequestMapping("test8")
