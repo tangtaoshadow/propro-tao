@@ -42,7 +42,12 @@ public class AirdFileParser extends BaseParser {
             start = start + blockSizes.get(i);
             byte[] intensity = ArrayUtils.subarray(result, start, start + blockSizes.get(i + 1));
             start = start + blockSizes.get(i + 1);
-            pairsList.add(new MzIntensityPairs(getMzValues(mz, byteOrder), getIntValues(intensity, byteOrder)));
+            try{
+                pairsList.add(new MzIntensityPairs(getMzValues(mz, byteOrder), getIntValues(intensity, byteOrder)));
+            }catch (Exception e){
+                logger.error("Block error index:"+i);
+            }
+
         }
         if (rts.size() != pairsList.size()) {
             logger.error("RTs Length not equals to pairsList length!!!");
@@ -76,7 +81,7 @@ public class AirdFileParser extends BaseParser {
 
             Float[] intensityArray = getValues(reader, Constants.AIRD_PRECISION_32, true, order);
             return new MzIntensityPairs(mzArray, intensityArray);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

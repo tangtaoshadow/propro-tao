@@ -3,7 +3,6 @@ package com.westlake.air.propro.parser;
 import com.westlake.air.propro.utils.CompressUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.util.control.Exception;
 
 import java.nio.*;
 
@@ -47,7 +46,7 @@ public class BaseParser {
     }
 
     //默认为BIG_ENDIAN
-    public Float[] getMzValues(byte[] value) {
+    public Float[] getMzValues(byte[] value) throws Exception{
         return getMzValues(value, ByteOrder.BIG_ENDIAN);
     }
 
@@ -56,28 +55,32 @@ public class BaseParser {
      * @param value
      * @return
      */
-    public Float[] getMzValues(byte[] value, ByteOrder order) {
+    public Float[] getMzValues(byte[] value, ByteOrder order) throws Exception {
 
-        ByteBuffer byteBuffer = ByteBuffer.wrap(value);
-        byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(byteBuffer.array()));
-        byteBuffer.order(order);
+        try{
+            ByteBuffer byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(value));
+            byteBuffer.order(order);
 
-        IntBuffer ints = byteBuffer.asIntBuffer();
-        int[] intValues = new int[ints.capacity()];
-        for (int i = 0; i < ints.capacity(); i++) {
-            intValues[i] = ints.get(i);
+            IntBuffer ints = byteBuffer.asIntBuffer();
+            int[] intValues = new int[ints.capacity()];
+            for (int i = 0; i < ints.capacity(); i++) {
+                intValues[i] = ints.get(i);
+            }
+            intValues = CompressUtil.decompressForSortedInt(intValues);
+            Float[] floatValues = new Float[intValues.length];
+            for (int index = 0; index < intValues.length; index++) {
+                floatValues[index] = (float) intValues[index] / 1000;
+            }
+            byteBuffer.clear();
+            return floatValues;
+        }catch (Exception e){
+            throw e;
         }
-        intValues = CompressUtil.decompressForSortedInt(intValues);
-        Float[] floatValues = new Float[intValues.length];
-        for (int index = 0; index < intValues.length; index++) {
-            floatValues[index] = (float) intValues[index] / 1000;
-        }
-        byteBuffer.clear();
-        return floatValues;
+
     }
 
     //默认为BIG_ENDIAN
-    public Float[] getIntValues(byte[] value) {
+    public Float[] getIntValues(byte[] value) throws Exception{
         return getIntValues(value, ByteOrder.BIG_ENDIAN);
     }
 
@@ -86,19 +89,23 @@ public class BaseParser {
      * @param value
      * @return
      */
-    public Float[] getIntValues(byte[] value, ByteOrder order) {
-        ByteBuffer byteBuffer = ByteBuffer.wrap(value);
-        byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(byteBuffer.array()));
-        byteBuffer.order(order);
+    public Float[] getIntValues(byte[] value, ByteOrder order) throws Exception{
+        try{
+            ByteBuffer byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(value));
+            byteBuffer.order(order);
 
-        FloatBuffer intensities = byteBuffer.asFloatBuffer();
-        Float[] intValues = new Float[intensities.capacity()];
-        for (int i = 0; i < intensities.capacity(); i++) {
-            intValues[i] = intensities.get(i);
+            FloatBuffer intensities = byteBuffer.asFloatBuffer();
+            Float[] intValues = new Float[intensities.capacity()];
+            for (int i = 0; i < intensities.capacity(); i++) {
+                intValues[i] = intensities.get(i);
+            }
+
+            byteBuffer.clear();
+            return intValues;
+        }catch (Exception e){
+            throw e;
         }
 
-        byteBuffer.clear();
-        return intValues;
     }
 
 }

@@ -1,5 +1,0 @@
-1. 生成的伪肽段如果和原始的真实肽段有重复,在某些场景下使用HashMap作为数据结构会有问题.
-比如说在Airus算法的com.westlake.air.pecs.utils.ArrayUtils.getGroupNumId函数中,默认认为传入的GroupNumId是各不相同的,
-这个在以往的算法里面不存在这个问题,因为他们使用了Decoy_作为Decoy伪肽段的前缀.但是在PECS系统中使用了PeptideRef作为唯一key值就会有这个问题
-这个问题需要保证生成的伪肽段与真实肽段没有重复并且伪肽段自己也没有PeptideRef的重复,目前为了保证数据的准确性没有使用HashMap,依旧使用了数组这种
-难懂的数据结构来表达算法
