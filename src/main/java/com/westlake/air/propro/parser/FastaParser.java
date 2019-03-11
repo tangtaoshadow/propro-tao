@@ -15,7 +15,7 @@ import java.util.*;
  * <p>
  * Fasta文件的存储格式为（一行Protein信息，跟着多行该protein的完整序列）
  */
-@Component
+@Component("fastaParser")
 public class FastaParser {
 
     int minPepLen = 0;
@@ -91,20 +91,6 @@ public class FastaParser {
             }
         }
         return peptideSet;
-    }
-
-    @Test
-    public void test(){
-        long startTime = System.currentTimeMillis();
-        File file = new File("D:\\data\\swissprot_human_20180209_target_IRT_contaminant.fasta");
-        try {
-            InputStream in = new FileInputStream(file);
-            HashSet<String> uniquePeptide = getUniquePeptide(in).getModel();
-            System.out.println("parseFinished.");
-            System.out.println("time used: " + (System.currentTimeMillis() - startTime));
-        }catch (Exception e){
-            e.printStackTrace();
-        }
     }
 
 }
