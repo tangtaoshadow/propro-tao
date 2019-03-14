@@ -80,7 +80,6 @@ public class TestController extends BaseController {
     String test(Model model, RedirectAttributes redirectAttributes) {
 
         try {
-
             ResultDO<ExperimentDO> expResult = experimentService.getById("5c75f7d9fc6f9e20a85e961a");
             ExperimentDO exp = expResult.getModel();
             RandomAccessFile raf = new RandomAccessFile(new File(exp.getAirdPath()), "r");
