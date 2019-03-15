@@ -54,7 +54,7 @@ public class Airus {
     XGBoostLearner xgBoostLearner;
 
     public FinalResult doAirus(String overviewId, AirusParams airusParams) {
-        double fdrThreshold = 0.01;
+        String type = "";
         FinalResult finalResult = new FinalResult();
         logger.info("开始清理已识别的肽段数目");
         ResultDO<AnalyseOverviewDO> overviewDOResultDO = analyseOverviewService.getById(overviewId);
@@ -65,9 +65,7 @@ public class Airus {
                 overviewDO.setMatchedPeptideCount(null);
             }
             analyseOverviewService.update(overviewDO);
-            if(overviewDO.getType().equals("1")){
-                fdrThreshold = 0.001;
-            }
+            type = overviewDO.getType();
         }
         logger.info("开始获取打分数据");
 
@@ -81,37 +79,64 @@ public class Airus {
         HashMap<String, Integer> peptideHitMap = new HashMap<>();
         if (airusParams.getClassifier().equals(Classifier.lda)) {
             logger.info("开始训练学习数据权重");
-            weightsMap = LDALearn(scores, peptideHitMap, airusParams);
+            weightsMap = LDALearn(scores, peptideHitMap, airusParams, type);
             logger.info("开始计算合并打分");
             ldaLearner.score(scores, weightsMap);
             finalResult.setWeightsMap(weightsMap);
         } else if (airusParams.getClassifier().equals(Classifier.xgboost)) {
+//            for (SimpleScores simpleScores: scores){
+//                for (FeatureScores featureScores: simpleScores.getFeatureScoresList()){
+//                    for (Double score:featureScores.getScoresMap().values()){
+//                        if (score.isNaN() || score.isInfinite()){
+//                            System.out.println("debugHere");
+//                        }
+//                    }
+//                }
+//            }
 //            logger.info("开始训练XGBooster");
             XGBLearn(scores, airusParams);
         }
         List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName());
+        int hit = 0, count = 0;
+        if (type.equals("PRM")){
+            double maxDecoy = Double.MIN_VALUE;
+            for (SimpleFeatureScores simpleFeatureScores: featureScoresList){
+                if (simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy){
+                    maxDecoy = simpleFeatureScores.getMainScore();
+                }
+            }
+            for (SimpleFeatureScores simpleFeatureScores: featureScoresList){
+                if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy){
+                    simpleFeatureScores.setFdr(0d);
+                    count ++;
+                }else {
+                    simpleFeatureScores.setFdr(1d);
+                }
+            }
 
-        ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
+        }else {
 
-        finalResult.setAllInfo(errorStat);
+            ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
 
+            finalResult.setAllInfo(errorStat);
+            count = AirusUtil.checkFdr(finalResult);
+        }
         //对于最终的打分结果和选峰结果保存到数据库中
-        int hit = 0;
-        logger.info("将合并打分及定量结果反馈更新到数据库中,总计:"+featureScoresList.size()+"条数据");
+        logger.info("将合并打分及定量结果反馈更新到数据库中,总计:" + featureScoresList.size() + "条数据");
         for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
             AnalyseDataDO dataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
             dataDO.setBestRt(simpleFeatureScores.getRt());
-            dataDO.setFdr(simpleFeatureScores.getFdr());
             dataDO.setIntensitySum(simpleFeatureScores.getIntensitySum());
             dataDO.setFragIntMap(simpleFeatureScores.getFragIntMap());
+            dataDO.setFdr(simpleFeatureScores.getFdr());
             if (!simpleFeatureScores.getIsDecoy()) {
-                if (simpleFeatureScores.getFdr() <= fdrThreshold) {
-                    Integer count = peptideHitMap.get(simpleFeatureScores.getPeptideRef());
-                    if (count != null && count >= airusParams.getTrainTimes()/2) {
+                if (simpleFeatureScores.getFdr() <= 0.01) {
+                    Integer hitCount = peptideHitMap.get(simpleFeatureScores.getPeptideRef());
+                    if (hitCount != null && hitCount >= airusParams.getTrainTimes() / 2) {
                         hit++;
                     }
                 }
-                dataDO.setIdentifiedStatus(simpleFeatureScores.getFdr() <= fdrThreshold ? AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS : AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
+                dataDO.setIdentifiedStatus(simpleFeatureScores.getFdr() <= 0.01 ? AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS : AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
             }
             ResultDO r = analyseDataService.update(dataDO);
             if (r.isFailed()) {
@@ -120,7 +145,6 @@ public class Airus {
         }
         logger.info("采用加权法获得的肽段数目为:" + hit);
         logger.info("打分反馈更新完毕");
-        int count = AirusUtil.checkFdr(finalResult);
         finalResult.setMatchedPeptideCount(count);
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         if (overviewResult.isSuccess()) {
@@ -154,7 +178,7 @@ public class Airus {
         return new ResultDO(true);
     }
 
-    public HashMap<String, Double> LDALearn(List<SimpleScores> scores, HashMap<String, Integer> peptideHitMap, AirusParams airusParams) {
+    public HashMap<String, Double> LDALearn(List<SimpleScores> scores, HashMap<String, Integer> peptideHitMap, AirusParams airusParams, String type) {
         int neval = airusParams.getTrainTimes();
 //        test(scores);
         List<HashMap<String, Double>> weightsMapList = new ArrayList<>();
@@ -167,22 +191,40 @@ public class Airus {
             }
             ldaLearner.score(scores, ldaLearnData.getWeightsMap());
             List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName());
-            ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
+            int count = 0;
+            if (type.equals("PRM")){
+                double maxDecoy = Double.MIN_VALUE;
+                for (SimpleFeatureScores simpleFeatureScores: featureScoresList){
+                    if (simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy){
+                        maxDecoy = simpleFeatureScores.getMainScore();
+                    }
+                }
+                for (SimpleFeatureScores simpleFeatureScores: featureScoresList){
+                    if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy){
+                        count ++;
+                        simpleFeatureScores.setFdr(0d);
+                    }else {
+                        simpleFeatureScores.setFdr(1d);
+                    }
+                }
+            }else {
+                ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
+                count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
+            }
             for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
                 if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getFdr() <= 0.01) {
-                    Integer count = peptideHitMap.get(simpleFeatureScores.getPeptideRef());
-                    if (count == null) {
-                        count = 0;
+                    Integer hitCount = peptideHitMap.get(simpleFeatureScores.getPeptideRef());
+                    if (hitCount == null) {
+                        hitCount = 0;
                     }
-                    count++;
-                    peptideHitMap.put(simpleFeatureScores.getPeptideRef(), count);
+                    hitCount++;
+                    peptideHitMap.put(simpleFeatureScores.getPeptideRef(), hitCount);
                 }
             }
-            int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
+
             if (count > 0) {
                 logger.info("本轮尝试有效果:检测结果:" + count + "个");
             }
-
             weightsMapList.add(ldaLearnData.getWeightsMap());
             if (airusParams.isDebug()) {
                 break;

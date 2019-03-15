@@ -101,8 +101,8 @@
                             </button>
                             <div class="dropdown-menu" aria-labelledby="scoresBtn">
                                 <a class="dropdown-item" th:href="@{/score/airus(overviewId=${overview.id},classifier=lda)}" th:text="#{label_identified_score_with_lda}"></a>
-                                <!--<a class="dropdown-item" th:href="|@{/score/airus?overviewId=${overview.id},classifier=xgboost}|">XGBoost合并打分</a>-->
-                                <a class="dropdown-item" onclick="alert('Not Open!')" th:text="#{label_identified_score_with_xgboost}"></a>
+                                <a class="dropdown-item" th:href="@{/score/airus(overviewId=${overview.id},classifier=xgboost)}">XGBoost合并打分</a>
+                                <!--<a class="dropdown-item" onclick="alert('Not Open!')" th:text="#{label_identified_score_with_xgboost}"></a>-->
                             </div>
                         </div>
                     </td>

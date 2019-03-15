@@ -1,5 +1,6 @@
 package com.westlake.air.propro.scorer;
 
+import com.westlake.air.propro.algorithm.IntensityScore;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
@@ -39,18 +40,21 @@ public class LibraryScorer {
         List<Double> experimentIntensity = new ArrayList<>(peakGroup.getIonIntensity().values());
         assert experimentIntensity.size() == normedLibIntMap.size();
 
+        List<Double> normedLibInt = new ArrayList<>(normedLibIntMap.values());
+        List<Double> normedExpInt = ScoreUtil.normalizeSumDouble(experimentIntensity, peakGroup.getPeakGroupInt());
         //library_norm_manhattan
         //占比差距平均
-        List<Double> normedLibInt = new ArrayList<>(normedLibIntMap.values());
-        double[] normedExpInt = ScoreUtil.normalizeSumDouble(experimentIntensity, peakGroup.getPeakGroupInt());
         if(scoreTypes == null || scoreTypes.contains(ScoreType.LibraryRsmd.getTypeName())){
             double sum = 0.0d;
             for (int i = 0; i < normedLibInt.size(); i++) {
-                sum += Math.abs(normedLibInt.get(i) - normedExpInt[i]);
+                sum += Math.abs(normedLibInt.get(i) - normedExpInt.get(i));
             }
             scores.put(ScoreType.LibraryRsmd,sum / normedLibInt.size());
         }
 
+        if (scoreTypes == null || scoreTypes.contains(ScoreType.NewScore.getTypeName())){
+            scores.put(ScoreType.NewScore, new IntensityScore().getIntensityScore(normedLibInt, normedExpInt));
+        }
 
         double experimentSum = 0.0d, librarySum = 0.0d, experiment2Sum = 0.0d, library2Sum = 0.0d, dotprod = 0.0d;
         for (int i = 0; i < normedLibInt.size(); i++) {
@@ -70,9 +74,6 @@ public class LibraryScorer {
             }else {
                 double pearsonR = dotprod - experimentSum * librarySum / normedLibInt.size();
                 pearsonR /= FastMath.sqrt(expDeno * libDeno);
-                if(Double.isNaN(pearsonR) || Double.isInfinite(pearsonR)){
-                    System.out.println("");
-                }
                 scores.put(ScoreType.LibraryCorr, pearsonR);
             }
 
@@ -126,7 +127,7 @@ public class LibraryScorer {
         if(scoreTypes == null ||scoreTypes.contains(ScoreType.LibraryRootmeansquare.getTypeName())){
             double rms = 0;
             for (int i = 0; i < normedLibInt.size(); i++) {
-                rms += (normedLibInt.get(i) - normedExpInt[i]) * (normedLibInt.get(i) - normedExpInt[i]);
+                rms += (normedLibInt.get(i) - normedExpInt.get(i)) * (normedLibInt.get(i) - normedExpInt.get(i));
             }
             rms = Math.sqrt(rms / normedLibInt.size());
             scores.put(ScoreType.LibraryRootmeansquare, rms);

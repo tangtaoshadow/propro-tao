@@ -22,6 +22,7 @@ import com.westlake.air.propro.feature.FeatureExtractor;
 import com.westlake.air.propro.feature.GaussFilter;
 import com.westlake.air.propro.feature.SignalToNoiseEstimator;
 import com.westlake.air.propro.scorer.ChromatographicScorer;
+import com.westlake.air.propro.scorer.LibraryScorer;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.CompressUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -76,6 +77,8 @@ public class AnalyseController extends BaseController {
     FeatureExtractor featureExtractor;
     @Autowired
     ChromatographicScorer chromatographicScorer;
+    @Autowired
+    LibraryScorer libraryScorer;
 
     @RequestMapping(value = "/overview/list")
     String overviewList(Model model,
@@ -487,7 +490,7 @@ public class AnalyseController extends BaseController {
                         @RequestParam(value = "expId", required = false) String expId,
                         @RequestParam(value = "libraryId", required = false) String libraryId,
                         @RequestParam(value = "useGaussFilter", required = false, defaultValue = "false") Boolean useGaussFilter,
-                        @RequestParam(value = "sigma", required = false, defaultValue = "6.25") Float sigma,
+                        @RequestParam(value = "sigma", required = false, defaultValue = "3.75") Float sigma,
                         @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
                         @RequestParam(value = "useNoise", required = false, defaultValue = "false") Boolean useNoise,
                         @RequestParam(value = "noise", required = false, defaultValue = "1000") Integer noise,
@@ -636,6 +639,7 @@ public class AnalyseController extends BaseController {
             for (PeakGroup peakGroupFeature : peptideFeature.getPeakGroupList()) {
                 FeatureScores featureScores = new FeatureScores();
                 chromatographicScorer.calculateChromatographicScores(peakGroupFeature, peptideFeature.getNormedLibIntMap(), featureScores, null);
+                libraryScorer.calculateLibraryScores(peakGroupFeature, peptideFeature.getNormedLibIntMap(), featureScores, null);
                 rtShapeScoreMap.put(peakGroupFeature.getApexRt(), featureScores.get(ScoreType.XcorrShape));
             }
             model.addAttribute("rtShapeScoreMap", rtShapeScoreMap);

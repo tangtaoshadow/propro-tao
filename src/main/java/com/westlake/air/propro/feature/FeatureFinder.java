@@ -104,6 +104,9 @@ public class FeatureFinder {
                 signalToNoiseSum += noise1000Map.get(cutInfo)[maxSpectrumIndex];
             }
 //            List<Double> ionIntList = new ArrayList<>(ionIntensity.values());
+            if (peakGroupInt == 0D){
+                continue;
+            }
             peakGroup.setIonCount(ionPeaks.size());
             peakGroup.setIonHullRt(rasteredRt);
             peakGroup.setIonHullInt(ionHullInt);

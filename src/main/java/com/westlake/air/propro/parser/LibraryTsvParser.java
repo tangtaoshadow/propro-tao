@@ -7,6 +7,7 @@ import com.westlake.air.propro.domain.db.FragmentInfo;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.TaskDO;
+import com.westlake.air.propro.parser.model.traml.Peptide;
 import com.westlake.air.propro.service.TaskService;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
@@ -52,7 +53,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
     private static String Quantifying = "quantifying_transition";
 
     @Override
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashSet<String> prmPeptideRefSet, TaskDO taskDO) {
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashSet<String> prmPeptideRefSet, String libraryId, TaskDO taskDO) {
 
         ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
         try {
@@ -98,12 +99,33 @@ public class LibraryTsvParser extends BaseLibraryParser {
             if(!fastaUniqueSet.isEmpty()) {
                 logger.info("fasta额外检出：" + fastaDropPep.size() + "个PeptideSequence");
             }
+
+            for (PeptideDO peptideDO: map.values()){
+                prmPeptideRefSet.remove(peptideDO.getPeptideRef());
+            }
             library.setFastaDeWeightPepCount(fastaDropPep.size());
             library.setFastaDeWeightProtCount(getDropCount(fastaDropProt, uniqueProt));
             library.setLibraryDeWeightPepCount(libraryDropPep.size());
             library.setLibraryDeWeightProtCount(getDropCount(libraryDropProt, uniqueProt));
 
             List<PeptideDO> peptides = new ArrayList<>(map.values());
+            if (libraryId != null && !libraryId.isEmpty()) {
+                List<PeptideDO> irtPeps = peptideService.getAllByLibraryId(libraryId);
+                for (PeptideDO peptideDO: irtPeps){
+                    if (map.containsKey(peptideDO.getPeptideRef()+"_"+peptideDO.getIsDecoy())){
+                        continue;
+                    }
+                    if (prmPeptideRefSet.contains(peptideDO.getPeptideRef())){
+                        prmPeptideRefSet.remove(peptideDO.getPeptideRef());
+                    }
+                    peptideDO.setProteinName("IRT");
+                    peptideDO.setId(null);
+                    peptideDO.setLibraryId(library.getId());
+                    peptideDO.setLibraryName(library.getName());
+                    peptides.add(peptideDO);
+                }
+            }
+
             peptideService.insertAll(peptides, false);
             tranResult.setModel(peptides);
             taskDO.addLog(peptides.size() + "条肽段数据插入成功,其中蛋白质种类有" + uniqueProt.size() + "个");
@@ -213,7 +235,10 @@ public class LibraryTsvParser extends BaseLibraryParser {
             HashSet<String> prmPeptideRefSet = new HashSet<>();
             while ((line = reader.readLine()) != null) {
                 columns = line.split(",");
-                String sequence = columns[isFormat1 ? columnMap.get("compound") : columnMap.get("comment")].replace(" (light)","").replace("[+57.021464]","(UniMod:4)");
+                String sequence = columns[isFormat1 ? columnMap.get("compound") : columnMap.get("comment")]
+                        .replace(" (light)","")
+                        .replace("[+57.021464]","(UniMod:4)")
+                        .replace("[+15.994915]", "(UniMod:35)");
                 String charge = columns[isFormat1 ? columnMap.get("z") : columnMap.get("cs[z]")];
                 prmPeptideRefSet.add(sequence + "_" + charge);
             }

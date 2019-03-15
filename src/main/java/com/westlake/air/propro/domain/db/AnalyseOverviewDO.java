@@ -94,6 +94,8 @@ public class AnalyseOverviewDO extends BaseDO {
     //对应标准库中的肽段数目
     Integer libraryPeptideCount;
 
+    Long peakCount = 0L;
+
     //备忘录
     String note;
 }

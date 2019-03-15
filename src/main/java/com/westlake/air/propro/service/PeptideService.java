@@ -22,6 +22,8 @@ public interface PeptideService {
 
     List<PeptideDO> getAllByLibraryIdAndIsDecoy(String libraryId, boolean isDecoy);
 
+    List<PeptideDO> getAllByLibraryIdAndProteinNameAndIsDecoy(String libraryId, String proteinName, boolean isDecoy);
+
     Long count(PeptideQuery query);
 
     ResultDO<List<PeptideDO>> getList(PeptideQuery peptideQuery);

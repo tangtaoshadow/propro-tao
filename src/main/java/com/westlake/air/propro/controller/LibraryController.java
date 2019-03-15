@@ -15,6 +15,7 @@ import com.westlake.air.propro.domain.query.LibraryQuery;
 import com.westlake.air.propro.domain.query.PeptideQuery;
 import com.westlake.air.propro.parser.TraMLParser;
 import com.westlake.air.propro.parser.LibraryTsvParser;
+import com.westlake.air.propro.scorer.LibraryScorer;
 import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.PeptideService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -93,6 +95,12 @@ public class LibraryController extends BaseController {
 
     @RequestMapping(value = "/create")
     String create(Model model) {
+        List<LibraryDO> libraryDOList = getLibraryList(1);
+        LibraryDO libraryDO = new LibraryDO();
+        libraryDO.setName("");
+        libraryDO.setId("");
+        libraryDOList.add(0,libraryDO);
+        model.addAttribute("libraries", libraryDOList);
         return "library/create";
     }
 
@@ -104,6 +112,7 @@ public class LibraryController extends BaseController {
                @RequestParam(value = "libFile", required = true) MultipartFile libFile,
                @RequestParam(value = "prmFile", required = false) MultipartFile prmFile,
                @RequestParam(value = "fastaFile", required = false) MultipartFile fastaFile,
+               @RequestParam(value = "libraryId", required = false) String libraryId,
                RedirectAttributes redirectAttributes) {
 
         if (libFile == null || libFile.getOriginalFilename() == null || libFile.getOriginalFilename().isEmpty()) {
@@ -135,7 +144,7 @@ public class LibraryController extends BaseController {
                 fastaFileStream = fastaFile.getInputStream();
             }
 
-            libraryTask.saveLibraryTask(library, libFileStream, libFile.getOriginalFilename(), fastaFileStream, prmFileStream, taskDO);
+            libraryTask.saveLibraryTask(library, libFileStream, libFile.getOriginalFilename(), fastaFileStream, prmFileStream, libraryId, taskDO);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -164,6 +173,12 @@ public class LibraryController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/library/list";
         } else {
+            List<LibraryDO> libraryDOList = getLibraryList(1);
+            LibraryDO libraryDO = new LibraryDO();
+            libraryDO.setName("");
+            libraryDO.setId("");
+            libraryDOList.add(0,libraryDO);
+            model.addAttribute("libraries", libraryDOList);
             model.addAttribute("library", resultDO.getModel());
             return "library/edit";
         }
@@ -199,6 +214,7 @@ public class LibraryController extends BaseController {
                   @RequestParam(value = "libFile") MultipartFile libFile,
                   @RequestParam(value = "prmFile", required = false) MultipartFile prmFile,
                   @RequestParam(value = "fastaFile", required = false) MultipartFile fastaFile,
+                  @RequestParam(value = "libraryId", required = false) String libraryId,
                   RedirectAttributes redirectAttributes) {
 
         String redirectListUrl = null;
@@ -242,7 +258,7 @@ public class LibraryController extends BaseController {
                 fastaFileStream = fastaFile.getInputStream();
             }
 
-            libraryTask.saveLibraryTask(library, libFileStream, libFile.getOriginalFilename(), fastaFileStream, prmFileStream, taskDO);
+            libraryTask.saveLibraryTask(library, libFileStream, libFile.getOriginalFilename(), fastaFileStream, prmFileStream, libraryId, taskDO);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -6,6 +6,7 @@ import com.westlake.air.propro.algorithm.learner.LDALearner;
 import com.westlake.air.propro.algorithm.learner.XGBoostLearner;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.domain.bean.airus.*;
+import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.simple.SimpleScores;
 import com.westlake.air.propro.utils.AirusUtil;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -41,7 +43,8 @@ public class SemiSupervised {
             TrainData trainData = AirusUtil.split(scores, airusParams.getTrainTestRatio(), airusParams.isDebug());
 
             //第一次训练数据集使用指定的主分数(默认为MainScore)进行训练
-            TrainPeaks trainPeaks = selectTrainPeaks(trainData, airusParams.getMainScore(), airusParams, airusParams.getSsInitialFdr());
+//            TrainPeaks trainPeaks = selectTrainPeaks(trainData, airusParams.getMainScore(), airusParams, airusParams.getSsInitialFdr());
+            TrainPeaks trainPeaks = selectFirstTrainPeaks(trainData);
 
             HashMap<String, Double> weightsMap = ldaLearner.learn(trainPeaks, airusParams.getMainScore());
             logger.info("Train Weight:" + JSONArray.toJSONString(weightsMap));
@@ -116,6 +119,46 @@ public class SemiSupervised {
         TrainPeaks trainPeaks = new TrainPeaks();
         trainPeaks.setBestTargets(bestTargetPeaks);
         trainPeaks.setTopDecoys(topDecoyPeaks);
+        return trainPeaks;
+    }
+
+    private TrainPeaks selectFirstTrainPeaks(TrainData trainData){
+        List<SimpleFeatureScores> decoyPeaks = new ArrayList<>();
+        for (SimpleScores simpleScores: trainData.getDecoys()){
+            for (FeatureScores featureScores : simpleScores.getFeatureScoresList()){
+                SimpleFeatureScores simpleFeatureScores = new SimpleFeatureScores();
+                simpleFeatureScores.setScoresMap(featureScores.getScoresMap());
+                decoyPeaks.add(simpleFeatureScores);
+            }
+        }
+        TrainPeaks trainPeaks = new TrainPeaks();
+        trainPeaks.setTopDecoys(decoyPeaks);
+        HashMap<String, Double> bestScoreMap = new HashMap<>();
+        bestScoreMap.put(ScoreType.XcorrShape.getTypeName(), 1d);
+        bestScoreMap.put(ScoreType.XcorrShapeWeighted.getTypeName(), 1d);
+        bestScoreMap.put(ScoreType.XcorrCoelution.getTypeName(), 0d);
+        bestScoreMap.put(ScoreType.XcorrCoelutionWeighted.getTypeName(), 0d);
+        bestScoreMap.put(ScoreType.LibraryCorr.getTypeName(), 1d);
+        bestScoreMap.put(ScoreType.LibraryRsmd.getTypeName(), 0d);
+        bestScoreMap.put(ScoreType.LibraryManhattan.getTypeName(), 0d);
+        bestScoreMap.put(ScoreType.LibraryDotprod.getTypeName(), 1d);
+        bestScoreMap.put(ScoreType.LibrarySangle.getTypeName(), 0d);
+        bestScoreMap.put(ScoreType.LibraryRootmeansquare.getTypeName(), 0d);
+        bestScoreMap.put(ScoreType.LogSnScore.getTypeName(), 5d);
+        bestScoreMap.put(ScoreType.NormRtScore.getTypeName(), 0d);
+        bestScoreMap.put(ScoreType.IntensityScore.getTypeName(), 1d);
+        bestScoreMap.put(ScoreType.IsotopeCorrelationScore.getTypeName(), 1d);
+        bestScoreMap.put(ScoreType.IsotopeOverlapScore.getTypeName(), 0d);
+        bestScoreMap.put(ScoreType.MassdevScore.getTypeName(), 0d);
+        bestScoreMap.put(ScoreType.MassdevScoreWeighted.getTypeName(), 0d);
+        bestScoreMap.put(ScoreType.BseriesScore.getTypeName(), 10d);
+        bestScoreMap.put(ScoreType.YseriesScore.getTypeName(), 10d);
+        bestScoreMap.put(ScoreType.NewScore.getTypeName(), 1d);
+        SimpleFeatureScores bestTargetScore = new SimpleFeatureScores();
+        bestTargetScore.setScoresMap(bestScoreMap);
+        List<SimpleFeatureScores> bestTargets = new ArrayList<>();
+        bestTargets.add(bestTargetScore);
+        trainPeaks.setBestTargets(bestTargets);
         return trainPeaks;
     }
 }

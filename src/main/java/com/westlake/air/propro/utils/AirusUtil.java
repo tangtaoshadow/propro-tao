@@ -396,8 +396,8 @@ public class AirusUtil {
             Collections.shuffle(decoys);
         }
 
-        int targetLength = (int) (targets.size() * fraction) + 1;
-        int decoyLength = (int) (decoys.size() * fraction) + 1;
+        int targetLength = (int) Math.ceil(targets.size() * fraction);
+        int decoyLength = (int) Math.ceil(decoys.size() * fraction);
 
         TrainData td = new TrainData(targets.subList(0, targetLength), decoys.subList(0, decoyLength));
         return td;

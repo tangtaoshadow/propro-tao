@@ -1,5 +1,6 @@
 package com.westlake.air.propro.algorithm;
 
+import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.airus.AirusParams;
 import com.westlake.air.propro.domain.bean.airus.ErrorStat;
@@ -119,7 +120,7 @@ public class Stats {
                 w = AirusUtil.countOverThreshold(targets, lambda[i]);
                 mse[i] = (w / (Math.pow(numOfPvalue, 2) * Math.pow((1 - lambda[i]), 2))) * (1 - (double) w / numOfPvalue) + Math.pow((pi0Lambda[i] - sortedPi0Lambda[0]), 2);
             }
-            double min = 100;
+            double min = Double.MAX_VALUE;
             int index = 0;
             for (int i = 0; i < mse.length; i++) {
                 if (pi0Lambda[i] > 0 && mse[i] < min) {
@@ -277,12 +278,17 @@ public class Stats {
         } else {
             pEmpirical(sortedTargets, sortedDecoys);
         }
-
-        //estimate pi0;
-        Pi0Est pi0Est = pi0Est(sortedTargets, airusParams.getPi0Lambda(), airusParams.getPi0Method(), airusParams.isPi0SmoothLogPi0());
-        if (pi0Est == null) {
-            return null;
+        Pi0Est pi0Est = new Pi0Est();
+        if (sortedTargets.get(0).getMainScore() > sortedDecoys.get(sortedDecoys.size()-1).getMainScore()){
+            pi0Est.setPi0(1d/Constants.PRECISION);
+        }else {
+            //estimate pi0;
+            pi0Est = pi0Est(sortedTargets, airusParams.getPi0Lambda(), airusParams.getPi0Method(), airusParams.isPi0SmoothLogPi0());
+            if (pi0Est == null) {
+                return null;
+            }
         }
+
         //compute q-value;
         qvalue(sortedTargets, pi0Est.getPi0(), airusParams.isPFdr());
         //compute other metrics;
