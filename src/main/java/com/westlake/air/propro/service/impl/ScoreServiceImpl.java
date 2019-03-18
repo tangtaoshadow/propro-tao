@@ -189,7 +189,7 @@ public class ScoreServiceImpl implements ScoreService {
             AnalyseDataUtil.decompress(dataDO);
         }
 
-        if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() < 3) {
+        if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() <= 3) {
             logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
             return;
@@ -201,6 +201,7 @@ public class ScoreServiceImpl implements ScoreService {
         PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(dataDO, peptide.buildIntensityMap(), input.getSigmaSpacing());
         if (!peptideFeature.isFeatureFound()) {
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
+            logger.info("肽段没有被选中的特征：PeptideRef: " + dataDO.getPeptideRef());
             return;
         }
         List<FeatureScores> featureScoresList = new ArrayList<>();
@@ -250,12 +251,16 @@ public class ScoreServiceImpl implements ScoreService {
                 if (mzIntensityPairs != null) {
                     Float[] spectrumMzArray = mzIntensityPairs.getMzArray();
                     Float[] spectrumIntArray = mzIntensityPairs.getIntensityArray();
-                    diaScorer.calculateDiaIsotopeScores(peakGroupFeature, productMzMap, spectrumMzArray, spectrumIntArray, productChargeMap, featureScores);
+                    if (input.getScoreTypes().contains(ScoreType.IsotopeCorrelationScore.getTypeName()) || input.getScoreTypes().contains(ScoreType.IsotopeOverlapScore.getTypeName())) {
+                        diaScorer.calculateDiaIsotopeScores(peakGroupFeature, productMzMap, spectrumMzArray, spectrumIntArray, productChargeMap, featureScores);
+                    }
 //                    if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.IsotopeCorrelationScore) < 0.5){
 //                        continue;
 //                    }
-                    diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
-                    diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, normedLibIntMap, featureScores);
+                    if (input.getScoreTypes().contains(ScoreType.BseriesScore.getTypeName()) || input.getScoreTypes().contains(ScoreType.YseriesScore.getTypeName())) {
+                        diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
+                    }
+                    diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, normedLibIntMap, featureScores, input.getScoreTypes());
 
                 }
             }
@@ -271,6 +276,9 @@ public class ScoreServiceImpl implements ScoreService {
             }
 
             libraryScorer.calculateLibraryScores(peakGroupFeature, normedLibIntMap, featureScores, input.getScoreTypes());
+            if (dataDO.getIsDecoy() && featureScores.get(ScoreType.NewScore)>0.9){
+                System.out.println(dataDO.getPeptideRef());
+            }
             if (input.getScoreTypes().contains(ScoreType.NormRtScore.getTypeName())) {
                 libraryScorer.calculateNormRtScore(peakGroupFeature, input.getSlopeIntercept(), dataDO.getRt(), featureScores);
             }
@@ -285,6 +293,7 @@ public class ScoreServiceImpl implements ScoreService {
 
         if (featureScoresList.size() == 0) {
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
+            logger.info("肽段没有被选中的Peak：PeptideRef: " + dataDO.getPeptideRef());
             return;
         }
 

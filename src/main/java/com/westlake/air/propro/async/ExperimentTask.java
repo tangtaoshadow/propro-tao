@@ -123,7 +123,7 @@ public class ExperimentTask extends BaseTask {
         taskDO.addLog("开始进行合并打分");
         taskService.update(taskDO);
         FinalResult finalResult = airus.doAirus(lumsParams.getOverviewId(), new AirusParams());
-        int matchedPeptideCount = AirusUtil.checkFdr(finalResult);
+        int matchedPeptideCount = finalResult.getMatchedPeptideCount();
         taskDO.addLog("合并打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为" + matchedPeptideCount);
         taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);

@@ -159,13 +159,13 @@ public class ScorerTest extends BaseTest {
         HashMap<String, Double> normedLibIntMap = new HashMap<>();
         normedLibIntMap.put("1", 0.7d);
         normedLibIntMap.put("2", 0.3d);
-        FeatureScores scores = new FeatureScores();
-        diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, normedLibIntMap, scores);
+    FeatureScores scores = new FeatureScores();
+        diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, normedLibIntMap, scores, null);
 
         assert isSimilar(scores.get(ScoreType.MassdevScore), 13.33d, Math.pow(10, -1));
         assert isSimilar(scores.get(ScoreType.MassdevScoreWeighted), 7.38d, Math.pow(10, -1));
         System.out.println("MassdevScore Test PASSED.");
-    }
+}
 
     @Test
     public void calcElutionScore(){

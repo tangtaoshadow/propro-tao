@@ -85,8 +85,14 @@ public class ExperimentController extends BaseController {
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
         ResultDO<List<ExperimentDO>> resultDO = experimentService.getList(query);
+        HashMap<String, AnalyseOverviewDO> analyseOverviewDOMap = new HashMap<>();
+        for (ExperimentDO experimentDO: resultDO.getModel()){
+            AnalyseOverviewDO analyseOverviewDO = analyseOverviewService.getAllByExpId(experimentDO.getId()).get(0);
+            analyseOverviewDOMap.put(experimentDO.getId(), analyseOverviewDO);
+        }
 
         model.addAttribute("experiments", resultDO.getModel());
+        model.addAttribute("analyseOverviewDOMap", analyseOverviewDOMap);
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
         return "experiment/list";
@@ -316,6 +322,19 @@ public class ExperimentController extends BaseController {
         return "redirect:/experiment/list";
 
     }
+    @RequestMapping(value = "/deleteAll/{id}")
+    String deleteAll(Model model, @PathVariable("id") String id,
+                     RedirectAttributes redirectAttributes) {
+        ResultDO<ExperimentDO> exp = experimentService.getById(id);
+        List<AnalyseOverviewDO> overviewDOList = analyseOverviewService.getAllByExpId(id);
+        for (AnalyseOverviewDO overviewDO : overviewDOList) {
+            analyseDataService.deleteAllByOverviewId(overviewDO.getId());
+        }
+        analyseOverviewService.deleteAllByExpId(id);
+        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
+        return "redirect:/experiment/list";
+
+    }
 
     @RequestMapping(value = "/swath")
     String swath(Model model) {
@@ -399,7 +418,7 @@ public class ExperimentController extends BaseController {
 //            HashSet<String> prm
 //        }
         model.addAttribute("useEpps", true);
-        model.addAttribute("uniqueOnly", false);
+//        model.addAttribute("uniqueOnly", false);
         model.addAttribute("libraries", getLibraryList(0));
         model.addAttribute("experiment", resultDO.getModel());
         model.addAttribute("scoreTypes", ScoreType.getShownTypes());
@@ -412,13 +431,13 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "id", required = true) String id,
                      @RequestParam(value = "creator", required = false) String creator,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
-                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "800") Float rtExtractWindow,
+                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
                      @RequestParam(value = "slope", required = false) Double slope,
                      @RequestParam(value = "intercept", required = false) Double intercept,
                      @RequestParam(value = "note", required = false) String note,
                      //打分相关的入参
-                     @RequestParam(value = "sigma", required = false, defaultValue = "6.25") Float sigma,
+                     @RequestParam(value = "sigma", required = false, defaultValue = "3.75") Float sigma,
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
                      @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.6") Float shapeScoreThreshold,
                      @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.8") Float shapeWeightScoreThreshold,

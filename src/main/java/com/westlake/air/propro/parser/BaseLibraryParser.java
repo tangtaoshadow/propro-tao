@@ -37,7 +37,7 @@ public abstract class BaseLibraryParser {
     boolean drop = true;
     public static final Pattern unimodPattern = Pattern.compile("([a-z])[\\(]unimod[\\:](\\d*)[\\)]");
 
-    public abstract ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashSet<String> prmPeptideRefSet, TaskDO taskDO);
+    public abstract ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashSet<String> prmPeptideRefSet, String libraryId, TaskDO taskDO);
 
     protected ResultDO<Annotation> parseAnnotation(String annotations) {
         ResultDO<Annotation> resultDO = new ResultDO<>(true);

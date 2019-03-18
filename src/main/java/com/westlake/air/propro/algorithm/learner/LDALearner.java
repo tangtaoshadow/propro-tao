@@ -27,7 +27,7 @@ public class LDALearner extends Learner {
 
         int totalLength = trainPeaks.getBestTargets().size() + trainPeaks.getTopDecoys().size();
 
-        HashMap<String, Double> scoreMapSample = trainPeaks.getBestTargets().get(0).getScoresMap();
+        HashMap<String, Double> scoreMapSample = trainPeaks.getTopDecoys().get(0).getScoresMap();
         int scoreTypes = 0;
         Set<String> keySet = scoreMapSample.keySet();
         if (keySet.contains(skipScoreType)) {

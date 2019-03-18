@@ -18,6 +18,7 @@ import java.util.*;
 @Component("fastaParser")
 public class FastaParser {
 
+    //TODO: params
     int minPepLen = 0;
     int maxPepLen = 100;
 

@@ -15,13 +15,13 @@ public class AirusParams {
 //    Learner.classifier classifier = Learner.classifier.XgbLearner;
     Classifier classifier = Classifier.lda;
 
-    double trainTestRatio = 0.5;
+    double trainTestRatio = 1;
 
     int xevalNumIter = 20;
 
     double ssInitialFdr = 0.15;
 
-    double ssIterationFdr = 0.05;
+    double ssIterationFdr = 0.05; //0.1 3310; 0.08 3300; 0.05 3276
 
     double xgbInitialFdr = 0.01;
 
