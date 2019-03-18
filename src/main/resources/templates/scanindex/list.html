@@ -176,7 +176,8 @@
                 document.getElementById("currentPage").value = num;
                 document.getElementById("searchForm").submit();
             });
-            chart = echarts.init(document.getElementById('modal-body'), null, {renderer: 'svg'});
+            chart = echarts.init(document.getElementById('modal-body'));
+
             // chart = echarts.init(document.getElementById('modal-body'));
         });
 

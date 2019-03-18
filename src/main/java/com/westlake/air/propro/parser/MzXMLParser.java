@@ -19,15 +19,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.*;
 
 /**
+ * 本类用于解析mzXML
  * Created by James Lu MiaoShan
  * Time: 2018-07-19 16:50
  */
@@ -44,6 +42,53 @@ public class MzXMLParser extends BaseParser {
     ExperimentService experimentService;
 
     public MzXMLParser() {
+    }
+
+    /**
+     * 解析MzXML原始文件,不做持久化落盘
+     * compressionType 必须是zlib, 精度必须是32位float类型
+     * @param file
+     * @return
+     */
+    public List<ScanIndexDO> index(File file, float overlap) {
+        RandomAccessFile raf = null;
+        List<ScanIndexDO> list = null;
+        try {
+            raf = new RandomAccessFile(file, "r");
+            list = indexForSwath(file);
+            int count = 0;
+            ScanIndexDO currentMS1 = null;
+            for (ScanIndexDO scanIndex : list) {
+                parseAttribute(raf, overlap, scanIndex);
+                if (scanIndex.getMsLevel() == 1) {
+                    currentMS1 = scanIndex;
+                } else {
+                    if (currentMS1 == null) {
+                        continue;
+                    } else {
+                        scanIndex.setParentNum(currentMS1.getNum());
+                    }
+                }
+
+                count++;
+                if (count % 10000 == 0) {
+                    logger.info("已扫描索引:" + count + "/" + list.size() + "条");
+                }
+            }
+            logger.info("全部扫描完毕!");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (raf != null) {
+                    raf.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return list;
     }
 
     /**
@@ -269,6 +314,7 @@ public class MzXMLParser extends BaseParser {
      * 获取mzXML文件中索引块的开始结束的位置
      * 使用FileInputStream读取,效率最高
      * 注意本函数需要由外部调用方负责关闭文件流
+     *
      * @param file
      * @return
      * @throws IOException
@@ -291,6 +337,38 @@ public class MzXMLParser extends BaseParser {
         return 0L;
     }
 
+    public void parseForSwathIndexes(File file) throws FileNotFoundException {
+        List<ScanIndexDO> scanIndexes = indexForSwath(file);
+        HashMap<Float, List<ScanIndexDO>> swathMap = new HashMap<>();
+        for (ScanIndexDO index : scanIndexes) {
+            if (index.getMsLevel().equals(2)) {
+                List<ScanIndexDO> indexes = swathMap.get(index.getPrecursorMzStart());
+                if (indexes == null) {
+                    indexes = new ArrayList<>();
+                }
+                indexes.add(index);
+            }
+        }
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(file, "r");
+
+            int i = 1;
+            for (List<ScanIndexDO> indexes : swathMap.values()) {
+                long start = System.currentTimeMillis();
+                for (ScanIndexDO scanIndex : indexes) {
+                    MzIntensityPairs pairs = parseValue(raf, scanIndex.getPosStart(PositionType.MZXML), scanIndex.getPosEnd(PositionType.MZXML), "zlib", "32");
+                }
+                logger.info("第"+i+"批,耗时:"+(System.currentTimeMillis() - start));
+                i++;
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        } finally {
+            FileUtil.close(raf);
+        }
+    }
+
     /**
      * 本算法得到的ScanIndex的End包含了换行符
      * ">"的byte编码是62
@@ -301,7 +379,7 @@ public class MzXMLParser extends BaseParser {
      * @return
      * @throws IOException
      */
-    private List<ScanIndexDO> index(File file) {
+    public List<ScanIndexDO> index(File file) {
 
         List<ScanIndexDO> indexList = new ArrayList<>();
         RandomAccessFile raf = null;
@@ -409,6 +487,7 @@ public class MzXMLParser extends BaseParser {
 
         return indexList;
     }
+
 
     /**
      * 本算法专门为Swath格式的mzXML优化,由于Swath的MzXML中是以Circle进行扫描到,即扫描的结果应该是MS1,MS2,MS2.....,MS1,MS2,MS2....这样的循环
@@ -558,9 +637,9 @@ public class MzXMLParser extends BaseParser {
                 if (tmpStr.startsWith("windowWideness")) {
                     scanIndexDO.setWindowWideness(Float.parseFloat(tmpStr.split("=")[1].replace("\"", "")));
                     //在通过overlap调整前先保存原始的值
-                    float delta = Math.round(scanIndexDO.getWindowWideness() / 2 * 1000)/1000f;//防止出现奇怪的尾数
-                    scanIndexDO.setOriginalPrecursorMzStart((scanIndexDO.getPrecursorMz() - delta)*1000/1000f);
-                    scanIndexDO.setOriginalPrecursorMzEnd((scanIndexDO.getPrecursorMz() + delta)*1000/1000f);
+                    float delta = Math.round(scanIndexDO.getWindowWideness() / 2 * 1000) / 1000f;//防止出现奇怪的尾数
+                    scanIndexDO.setOriginalPrecursorMzStart((scanIndexDO.getPrecursorMz() - delta) * 1000 / 1000f);
+                    scanIndexDO.setOriginalPrecursorMzEnd((scanIndexDO.getPrecursorMz() + delta) * 1000 / 1000f);
                     scanIndexDO.setOriginalWindowWideness(scanIndexDO.getWindowWideness());
                     if (overlap != null) {
                         scanIndexDO.setWindowWideness(scanIndexDO.getWindowWideness() - overlap);
@@ -569,14 +648,14 @@ public class MzXMLParser extends BaseParser {
                 }
             }
 
-            float delta = Math.round(scanIndexDO.getWindowWideness() / 2 * 1000)/1000f;//防止出现奇怪的尾数
+            float delta = Math.round(scanIndexDO.getWindowWideness() / 2 * 1000) / 1000f;//防止出现奇怪的尾数
             //解决某些情况下在计算了Overlap以后窗口左区间大于400的情况,这个时候可以强制补齐到400
             if (Math.abs(scanIndexDO.getPrecursorMz() - delta - 400) <= 1) {
                 scanIndexDO.setPrecursorMzStart(400f);
             } else {
-                scanIndexDO.setPrecursorMzStart((scanIndexDO.getPrecursorMz() - delta)*1000/1000f);
+                scanIndexDO.setPrecursorMzStart((scanIndexDO.getPrecursorMz() - delta) * 1000 / 1000f);
             }
-            scanIndexDO.setPrecursorMzEnd((scanIndexDO.getPrecursorMz() + delta)*1000/1000f);
+            scanIndexDO.setPrecursorMzEnd((scanIndexDO.getPrecursorMz() + delta) * 1000 / 1000f);
         }
 
         String scan = read.substring(0, read.indexOf(">"));
@@ -604,7 +683,7 @@ public class MzXMLParser extends BaseParser {
 
     }
 
-    private String parseValue(RandomAccessFile raf, long start, long end) {
+    public String parseValue(RandomAccessFile raf, long start, long end) {
         try {
             raf.seek(start);
             byte[] reader = new byte[(int) (end - start)];

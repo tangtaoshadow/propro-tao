@@ -23,8 +23,10 @@ public class AirdReadSpeedTest extends BaseTest {
     @Test
     public void airdReadSpeed() throws Exception {
         System.out.println("------ Aird Read Test ------");
-        String filePath = "\\\\ProproNas\\ProproNAS\\data\\hye\\data\\HYE110_TTOF6600_32fix_lgillet_I160308_001.aird";
-        String indexFilePath = "\\\\ProproNas\\ProproNAS\\data\\hye\\data\\HYE110_TTOF6600_32fix_lgillet_I160308_001.json";
+        String filePath = "\\\\ProproNas\\ProproNAS\\data\\hye\\aird\\HYE110_TTOF6600_32fix_lgillet_I160308_001.aird";
+        File file = new File(filePath);
+        System.out.println(file.exists());
+        String indexFilePath = "\\\\ProproNas\\ProproNAS\\data\\hye\\aird\\HYE110_TTOF6600_32fix_lgillet_I160308_001.json";
         String jsonIndex = FileUtil.readFile(indexFilePath);
         AirdInfo airdInfo = JSONObject.parseObject(jsonIndex, AirdInfo.class);
         RandomAccessFile raf = new RandomAccessFile(new File(filePath), "r");
@@ -36,6 +38,5 @@ public class AirdReadSpeedTest extends BaseTest {
             start = System.currentTimeMillis();;
             i++;
         }
-
     }
 }

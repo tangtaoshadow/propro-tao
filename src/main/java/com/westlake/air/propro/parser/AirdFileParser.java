@@ -11,9 +11,12 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteOrder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.logging.SimpleFormatter;
 
 @Component("airdFileParser")
 public class AirdFileParser extends BaseParser {
