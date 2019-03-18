@@ -21,9 +21,11 @@ import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.parser.AirdFileParser;
+import com.westlake.air.propro.parser.MzXMLParser;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.CompressUtil;
 import com.westlake.air.propro.utils.FileUtil;
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,6 +35,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.*;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
@@ -69,6 +72,8 @@ public class TestController extends BaseController {
     LumsTask lumsTask;
     @Autowired
     AirdFileParser airdFileParser;
+    @Autowired
+    MzXMLParser mzXMLParser;
 
     public static float MZ_EXTRACT_WINDOW = 0.05f;
     public static float RT_EXTRACT_WINDOW = 1200f;
@@ -163,29 +168,75 @@ public class TestController extends BaseController {
 
     @RequestMapping("test8")
     @ResponseBody
-    String test8(Model model, RedirectAttributes redirectAttributes) throws IOException {
-
-        AnalyseDataQuery query = new AnalyseDataQuery();
-        query.setIsDecoy(false);
-        query.setFdrEnd(0.01);
-        query.setOverviewId("5c1c9a5acb15b6bb244d985e");
-        query.setSortColumn("fdr");
-        query.setPageSize(5000);
-        ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
-
-
-        File file = new File("D://MatchedPeptide.txt");
-        file.createNewFile();
-        StringBuilder content = new StringBuilder();
-        for (AnalyseDataDO data : resultDO.getModel()) {
-            content.append(data.getPeptideRef()).append(",").append(data.getBestRt()).append("\r\n");
+    String test8(Model model, RedirectAttributes redirectAttributes) throws Exception {
+        System.out.println("------ Aird Read Test ------");
+        String filePath = "\\\\ProproNas\\ProproNAS\\data\\SGS\\aird\\napedro_L120420_010_SW.aird";
+        String indexFilePath = "\\\\ProproNas\\ProproNAS\\data\\SGS\\aird\\napedro_L120420_010_SW.json";
+        String jsonIndex = FileUtil.readFile(indexFilePath);
+        AirdInfo airdInfo = JSONObject.parseObject(jsonIndex, AirdInfo.class);
+        File jsonFile = new File(filePath);
+        RandomAccessFile raf = new RandomAccessFile(jsonFile, "r");
+        long start = System.currentTimeMillis();
+        int i=1;
+        System.out.println("napedro_L120224_010_SW.aird");
+        for(ScanIndexDO index : airdInfo.getSwathIndexList()){
+            TreeMap<Float, MzIntensityPairs> result = airdFileParser.parseSwathBlockValues(raf, index, ByteOrder.LITTLE_ENDIAN);
+            System.out.println("第"+i+"批数据,读取耗时:"+(System.currentTimeMillis() - start));
+            start = System.currentTimeMillis();
+            i++;
         }
 
-        byte[] b = content.toString().getBytes();
-        int l = b.length;
-        OutputStream os = new FileOutputStream(file);
-        os.write(b, 0, l);
-        os.close();
-        return "success";
+        FileUtil.close(raf);
+        return null;
     }
+
+    @RequestMapping("test9")
+    @ResponseBody
+    String test9(Model model, RedirectAttributes redirectAttributes) throws IOException {
+
+        File file = new File("\\\\ProproNas\\ProproNAS\\data\\SGS\\mzxml\\napedro_L120224_010_SW.mzxml");
+        List<ScanIndexDO> scanIndexes = mzXMLParser.index(file, 1);
+        HashMap<Float, List<ScanIndexDO>> swathMap = new HashMap<>();
+        for (ScanIndexDO index : scanIndexes) {
+            if (index.getMsLevel().equals(2)) {
+                List<ScanIndexDO> indexes = swathMap.get(index.getPrecursorMzStart());
+                if (indexes == null) {
+                    indexes = new ArrayList<>();
+                    swathMap.put(index.getPrecursorMzStart(), indexes);
+                }
+                indexes.add(index);
+            }
+        }
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(file, "r");
+
+            int i = 1;
+            for (List<ScanIndexDO> indexes : swathMap.values()) {
+                long start = System.currentTimeMillis();
+                for (ScanIndexDO scanIndex : indexes) {
+                    String value = mzXMLParser.parseValue(raf, scanIndex.getPosStart(PositionType.MZXML), scanIndex.getPosEnd(PositionType.MZXML));
+                    Float[] values = mzXMLParser.getValues(new Base64().decode(value), 32, true, ByteOrder.BIG_ENDIAN);
+                    List<Float> mzList = new ArrayList<>();
+                    List<Float> intensityList = new ArrayList<>();
+                    for (int peakIndex = 0; peakIndex < values.length - 1; peakIndex += 2) {
+                        Float mz = values[peakIndex];
+                        Float intensity = values[peakIndex + 1];
+                        mzList.add(mz);
+                        intensityList.add(intensity);
+                    }
+                }
+                logger.info("第"+i+"批,耗时:"+(System.currentTimeMillis() - start));
+                i++;
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        } finally {
+            FileUtil.close(raf);
+        }
+
+        return null;
+    }
+
+
 }
