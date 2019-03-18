@@ -68,10 +68,10 @@
                     </th>
                     <th width="5%" th:text="#{label_exp_type}">
                     </th>
-                    <th width="10%" th:text="#{label_file_path}">
+                    <th width="15%" th:text="#{label_file_path}">
                     </th>
-                    <th width="5%" th:text="#{label_is_aird_existed}">
-                    </th>
+                    <!--<th width="5%" th:text="#{label_is_aird_existed}">-->
+                    <!--</th>-->
                     <!--<th width="5%" th:text="#{label_compression_type}">-->
                     <!--</th>-->
                     <!--<th width="5%" th:text="#{label_data_precision}">-->
@@ -95,14 +95,14 @@
                     <td th:text="|${experiment.name}(${experiment.id})|"></td>
                     <td th:text="${experiment.type}"></td>
                     <td th:text="${experiment.airdPath}"></td>
-                    <td th:if="!${experiment.hasAirusFile}">
-                        <span class="m-badge m-badge--danger m-badge--wide" th:text="#{label_uncompressed}">
-                        </span>
-                    </td>
-                    <td th:if="${experiment.hasAirusFile}">
-                       <span class="m-badge m-badge--success m-badge--wide" th:text="#{label_compressed}">
-                       </span>
-                    </td>
+                    <!--<td th:if="!${experiment.hasAirusFile}">-->
+                        <!--<span class="m-badge m-badge&#45;&#45;danger m-badge&#45;&#45;wide" th:text="#{label_uncompressed}">-->
+                        <!--</span>-->
+                    <!--</td>-->
+                    <!--<td th:if="${experiment.hasAirusFile}">-->
+                       <!--<span class="m-badge m-badge&#45;&#45;success m-badge&#45;&#45;wide" th:text="#{label_compressed}">-->
+                       <!--</span>-->
+                    <!--</td>-->
                     <!--<td th:text="${experiment.compressionType}"></td>-->
                     <!--<td th:text="${experiment.precision}"></td>-->
                     <td th:text="|${experiment.slope} -> ${experiment.intercept}|"></td>
@@ -126,9 +126,9 @@
                         <a th:href="@{/scanindex/list(experimentId=${experiment.id})}"
                            class="btn btn-info btn-sm" th:text="#{label_spectrum_list}">
                         </a>
-                        <a th:if="${experiment.type}!='0'" th:href="@{/experiment/compress(expId=${experiment.id})}"
-                           class="btn btn-danger btn-sm" th:text="#{btn_start_aird_compression}">
-                        </a>
+                        <!--<a th:if="${experiment.type}!='0'" th:href="@{/experiment/compress(expId=${experiment.id})}"-->
+                           <!--class="btn btn-danger btn-sm" th:text="#{btn_start_aird_compression}">-->
+                        <!--</a>-->
                         <a th:href="@{/analyse/overview/list(expId=${experiment.id})}"
                            class="btn btn-warning btn-sm" th:text="#{label_convolution_data}">
                         </a>

@@ -309,7 +309,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             }
             experimentDO.setWindowRanges(airdInfo.getRangeList());
             experimentDO.setByteOrder(airdInfo.getByteOrder());
-            experimentDO.setCompressStrategy(airdInfo.getCompressStrategy());
+            experimentDO.setStrategies(airdInfo.getStrategies());
             experimentDO.setOverlap(airdInfo.getOverlap());
 
             for (ScanIndexDO scanIndex : airdInfo.getScanIndexList()) {

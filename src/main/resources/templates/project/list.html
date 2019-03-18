@@ -59,7 +59,7 @@
                         <a th:href="@{/experiment/batchcreate(projectName=${project?.name})}"
                            class="btn btn-danger btn-sm" th:text="#{label_add_exp}"></a>
                         <a th:href="@{/experiment/list(projectName=${project.name})}" class="btn btn-primary btn-sm" th:text="#{label_project_exps}"></a>
-                        <a th:href="@{/project/aird/{id}(id=${project?.id})}" class="btn btn-warning btn-sm" th:text="#{label_batch_aird_compression}"></a>
+                        <!--<a th:href="@{/project/aird/{id}(id=${project?.id})}" class="btn btn-warning btn-sm" th:text="#{label_batch_aird_compression}"></a>-->
                         <a th:href="@{/project/irt(id=${project.id})}" class="btn btn-success btn-sm" th:text="#{label_batch_irt}"></a>
                         <a th:href="@{/project/extractor(id=${project.id})}" class="btn btn-info btn-sm" th:text="#{label_batch_convolution_and_score}"></a>
                         <a th:href="@{/project/portionSelector(id=${project.id})}" class="btn btn-focus btn-sm" th:text="#{label_show_result_overview}"></a>

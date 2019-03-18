@@ -45,7 +45,7 @@ public class BaseParser {
         return floatValues;
     }
 
-    //默认为BIG_ENDIAN
+    //默认为BIG_ENDIAN,精度为小数点后三位
     public Float[] getMzValues(byte[] value) throws Exception{
         return getMzValues(value, ByteOrder.BIG_ENDIAN);
     }
