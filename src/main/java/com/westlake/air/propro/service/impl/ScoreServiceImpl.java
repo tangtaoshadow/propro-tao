@@ -254,9 +254,9 @@ public class ScoreServiceImpl implements ScoreService {
                     if (input.getScoreTypes().contains(ScoreType.IsotopeCorrelationScore.getTypeName()) || input.getScoreTypes().contains(ScoreType.IsotopeOverlapScore.getTypeName())) {
                         diaScorer.calculateDiaIsotopeScores(peakGroupFeature, productMzMap, spectrumMzArray, spectrumIntArray, productChargeMap, featureScores);
                     }
-//                    if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.IsotopeCorrelationScore) < 0.5){
-//                        continue;
-//                    }
+                    if (!dataDO.getIsDecoy() && featureScores.get(ScoreType.IsotopeCorrelationScore) >= 0.05){
+                        continue;
+                    }
                     if (input.getScoreTypes().contains(ScoreType.BseriesScore.getTypeName()) || input.getScoreTypes().contains(ScoreType.YseriesScore.getTypeName())) {
                         diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
                     }
@@ -293,7 +293,7 @@ public class ScoreServiceImpl implements ScoreService {
 
         if (featureScoresList.size() == 0) {
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
-            logger.info("肽段没有被选中的Peak：PeptideRef: " + dataDO.getPeptideRef());
+            logger.info("肽段没有被选中的Peak, PeptideRef:" + dataDO.getPeptideRef());
             return;
         }
 

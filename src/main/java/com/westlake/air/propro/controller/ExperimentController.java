@@ -87,8 +87,11 @@ public class ExperimentController extends BaseController {
         ResultDO<List<ExperimentDO>> resultDO = experimentService.getList(query);
         HashMap<String, AnalyseOverviewDO> analyseOverviewDOMap = new HashMap<>();
         for (ExperimentDO experimentDO: resultDO.getModel()){
-            AnalyseOverviewDO analyseOverviewDO = analyseOverviewService.getAllByExpId(experimentDO.getId()).get(0);
-            analyseOverviewDOMap.put(experimentDO.getId(), analyseOverviewDO);
+            List<AnalyseOverviewDO> analyseOverviewDOList = analyseOverviewService.getAllByExpId(experimentDO.getId());
+            if (analyseOverviewDOList.isEmpty()){
+                continue;
+            }
+            analyseOverviewDOMap.put(experimentDO.getId(), analyseOverviewDOList.get(0));
         }
 
         model.addAttribute("experiments", resultDO.getModel());
@@ -413,12 +416,7 @@ public class ExperimentController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OBJECT_NOT_EXISTED);
             return "redirect:/experiment/list";
         }
-//        List<ScoreType> scoreType = ScoreType.getShownTypes();
-//        if(resultDO.getModel().getType().equals("1")){
-//            HashSet<String> prm
-//        }
         model.addAttribute("useEpps", true);
-//        model.addAttribute("uniqueOnly", false);
         model.addAttribute("libraries", getLibraryList(0));
         model.addAttribute("experiment", resultDO.getModel());
         model.addAttribute("scoreTypes", ScoreType.getShownTypes());

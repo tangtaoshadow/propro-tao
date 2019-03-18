@@ -108,7 +108,7 @@
                     <td th:text="|${experiment.slope} -> ${experiment.intercept}|"></td>
                     <td th:text="${#dates.format(experiment.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(experiment.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
-                    <td th:text="|${analyseOverviewDOMap.get(experiment.id).matchedPeptideCount}/${analyseOverviewDOMap.get(experiment.id).totalPeptideCount}/${analyseOverviewDOMap.get(experiment.id).libraryPeptideCount}|"></td>
+                    <td th:text="|${analyseOverviewDOMap.get(experiment.id)?.matchedPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.totalPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.libraryPeptideCount}|"></td>
 
                     <td>
                         <a th:href="@{/experiment/edit/{id}(id=${experiment.id})}"
