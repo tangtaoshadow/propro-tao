@@ -254,9 +254,6 @@ public class ScoreServiceImpl implements ScoreService {
                     if (input.getScoreTypes().contains(ScoreType.IsotopeCorrelationScore.getTypeName()) || input.getScoreTypes().contains(ScoreType.IsotopeOverlapScore.getTypeName())) {
                         diaScorer.calculateDiaIsotopeScores(peakGroupFeature, productMzMap, spectrumMzArray, spectrumIntArray, productChargeMap, featureScores);
                     }
-                    if (!dataDO.getIsDecoy() && featureScores.get(ScoreType.IsotopeCorrelationScore) >= 0.05){
-                        continue;
-                    }
                     if (input.getScoreTypes().contains(ScoreType.BseriesScore.getTypeName()) || input.getScoreTypes().contains(ScoreType.YseriesScore.getTypeName())) {
                         diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
                     }

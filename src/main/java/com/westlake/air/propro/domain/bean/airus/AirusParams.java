@@ -28,7 +28,7 @@ public class AirusParams {
     double xgbIterationFdr = 0.008;
 
     //训练数据集的次数
-    int trainTimes = 20;
+    int trainTimes = 1;
 
     String ssMainScore = "var_xcorr_shape";
 
