@@ -140,31 +140,6 @@ public class ProjectController extends BaseController {
         return "redirect:/project/list";
     }
 
-    @RequestMapping(value = "/aird/{id}")
-    String aird(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
-
-        List<ExperimentDO> expList = getAllExperimentsByProjectId(id);
-        if (expList == null) {
-            redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.NO_EXPERIMENT_UNDER_PROJECT);
-            return "redirect:/project/list";
-        }
-        int count = 0;
-        for (ExperimentDO exp : expList) {
-            if (exp.getHasAirusFile() == null || !exp.getHasAirusFile()) {
-                TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, exp.getName() + ":" + exp.getId());
-                taskService.insert(taskDO);
-                experimentTask.compress(exp, taskDO);
-                count++;
-            }
-        }
-        if (count == 0) {
-            redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.ALL_FILES_UNDER_THIS_PROJECT_ARE_ALREADY_COMPRESSED);
-            return "redirect:/project/list";
-        } else {
-            return "redirect:/task/list";
-        }
-    }
-
     @RequestMapping(value = "/irt")
     String irt(Model model,
                @RequestParam(value = "id", required = true) String id,

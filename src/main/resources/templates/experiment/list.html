@@ -93,7 +93,10 @@
                     <td th:text="|${experiment.projectName}|"></td>
                     <td th:text="|${experiment.batchName}|"></td>
                     <td th:text="|${experiment.name}(${experiment.id})|"></td>
-                    <td th:text="${experiment.type}"></td>
+                    <td>
+                        <span class="m-badge m-badge--success m-badge--wide" th:text="${experiment.type}">
+                        </span>
+                    </td>
                     <td th:text="${experiment.airdPath}"></td>
                     <!--<td th:if="!${experiment.hasAirusFile}">-->
                         <!--<span class="m-badge m-badge&#45;&#45;danger m-badge&#45;&#45;wide" th:text="#{label_uncompressed}">-->

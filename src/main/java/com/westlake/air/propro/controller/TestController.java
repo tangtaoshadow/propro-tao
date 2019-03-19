@@ -1,25 +1,17 @@
 package com.westlake.air.propro.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.algorithm.Airus;
 import com.westlake.air.propro.algorithm.FragmentFactory;
-import com.westlake.air.propro.async.LumsTask;
 import com.westlake.air.propro.constants.PositionType;
-import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.constants.TaskTemplate;
 import com.westlake.air.propro.dao.AnalyseDataDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.bean.compressor.AirdInfo;
-import com.westlake.air.propro.domain.bean.scanindex.Position;
-import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.params.LumsParams;
-import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
-import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.parser.AirdFileParser;
 import com.westlake.air.propro.parser.MzXMLParser;
 import com.westlake.air.propro.service.*;
@@ -68,8 +60,6 @@ public class TestController extends BaseController {
     PeptideService peptideService;
     @Autowired
     FragmentFactory fragmentFactory;
-    @Autowired
-    LumsTask lumsTask;
     @Autowired
     AirdFileParser airdFileParser;
     @Autowired
@@ -136,25 +126,6 @@ public class TestController extends BaseController {
         int[] mzCompressedArray = CompressUtil.compressForSortedInt(mzArray);
         return "";
 
-    }
-
-    @RequestMapping("test3")
-    @ResponseBody
-    String test3(Model model, RedirectAttributes redirectAttributes) {
-        ExperimentDO experimentDO = experimentService.getById("5b738f19e63cc81c44325169").getModel();
-
-        LumsParams input = new LumsParams();
-        input.setExperimentDO(experimentDO);
-        input.setIRtLibraryId("5b67136d2ada5f15749a0140");
-        input.setLibraryId("5b84bc9c58487f1060fa0c23");
-        input.setCreator("陆妙善");
-        input.setRtExtractWindow(RT_EXTRACT_WINDOW);
-        input.setMzExtractWindow(MZ_EXTRACT_WINDOW);
-
-        TaskDO taskDO = new TaskDO(TaskTemplate.TEST, "LMS-TEMP2");
-        taskService.insert(taskDO);
-        lumsTask.swath(input, taskDO);
-        return "OK";
     }
 
     @RequestMapping("test6")

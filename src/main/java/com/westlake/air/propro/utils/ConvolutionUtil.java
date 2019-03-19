@@ -47,9 +47,6 @@ public class ConvolutionUtil {
         if (experimentDO == null) {
             return ResultDO.buildError(ResultCode.EXPERIMENT_NOT_EXISTED);
         }
-        if (!experimentDO.getHasAirusFile()) {
-            return ResultDO.buildError(ResultCode.EXPERIMENT_MZXML_FILE_MUST_BE_CONVERTED_TO_AIRD_FORMAT_FILE_FIRST);
-        }
         if (experimentDO.getAirdPath() == null || experimentDO.getAirdPath().isEmpty()) {
             return ResultDO.buildError(ResultCode.FILE_NOT_EXISTED);
         }

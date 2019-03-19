@@ -291,7 +291,6 @@ public class ExperimentServiceImpl implements ExperimentService {
             return;
         }
 
-        experimentDO.setHasAirusFile(true);
         experimentDO.setAirdPath(airdFilePath);
 
         String airdIndexPath = FileUtil.getAirdIndexFilePath(airdFilePath);
