@@ -34,6 +34,8 @@ public class SimpleFeatureScores {
 
     HashMap<String, Double> fragIntMap;
 
+    Boolean thresholdPassed = true;
+
     public SimpleFeatureScores(){}
 
     public SimpleFeatureScores(String peptideRef, Boolean isDecoy){

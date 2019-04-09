@@ -40,6 +40,10 @@ public class AnalyseDataQuery extends PageQuery{
 
     Double fdrEnd;
 
+    Double qValueStart;
+
+    Double qValueEnd;
+
     public AnalyseDataQuery(){}
 
     public AnalyseDataQuery(String overviewId){

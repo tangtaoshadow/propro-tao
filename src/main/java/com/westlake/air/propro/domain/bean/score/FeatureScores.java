@@ -54,6 +54,8 @@ public class FeatureScores {
 
     Double finalScore;
 
+    Boolean thresholdPassed = true;
+
     public void put(String typeName, Double score) {
         if (scoresMap == null) {
             scoresMap = new HashMap<>();

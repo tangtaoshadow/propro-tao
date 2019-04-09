@@ -33,6 +33,18 @@ public class IndexValue<T extends Comparable> implements Comparable<IndexValue<T
         return indexValues;
     }
 
+    public List<IndexValue<T>> buildList(List<T> arrays) {
+        if (arrays == null || arrays.size() == 0) {
+            return null;
+        }
+
+        List<IndexValue<T>> indexValues = new ArrayList<>();
+        for (int i = 0; i < arrays.size(); i++) {
+            indexValues.add(new IndexValue<>(i, arrays.get(i)));
+        }
+        return indexValues;
+    }
+
     @Override
     public int compareTo(@NotNull IndexValue<T> o) {
 

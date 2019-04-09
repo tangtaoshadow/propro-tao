@@ -95,7 +95,7 @@ public class SemiSupervised {
                 xgBoostLearner.predict(booster, trainData, ScoreType.WeightedTotalScore.getTypeName());
             }
             logger.info("总时间：" +(System.currentTimeMillis()-startTime));
-            List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName());
+            List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), false);
             ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
             int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
             logger.info("Train count:" + count);
@@ -109,8 +109,8 @@ public class SemiSupervised {
 
     private TrainPeaks selectTrainPeaks(TrainData trainData, String usedScoreType, AirusParams airusParams, Double cutoff) {
 
-        List<SimpleFeatureScores> topTargetPeaks = AirusUtil.findTopFeatureScores(trainData.getTargets(), usedScoreType);
-        List<SimpleFeatureScores> topDecoyPeaks = AirusUtil.findTopFeatureScores(trainData.getDecoys(), usedScoreType);
+        List<SimpleFeatureScores> topTargetPeaks = AirusUtil.findTopFeatureScores(trainData.getTargets(), usedScoreType, true);
+        List<SimpleFeatureScores> topDecoyPeaks = AirusUtil.findTopFeatureScores(trainData.getDecoys(), usedScoreType, false);
 
         // find cutoff fdr from scores and only use best target peaks:
         Double cutoffNew = stats.findCutoff(topTargetPeaks, topDecoyPeaks, airusParams, cutoff);

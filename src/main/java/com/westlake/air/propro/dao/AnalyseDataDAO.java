@@ -140,6 +140,9 @@ public class AnalyseDataDAO {
         if (analyseDataQuery.getFdrStart() != null || analyseDataQuery.getFdrEnd() != null) {
             query.addCriteria(where("fdr").gte(analyseDataQuery.getFdrStart()==null?0:analyseDataQuery.getFdrStart()).lte(analyseDataQuery.getFdrEnd()==null?1:analyseDataQuery.getFdrEnd()));
         }
+        if (analyseDataQuery.getQValueStart() != null || analyseDataQuery.getQValueEnd() != null) {
+            query.addCriteria(where("qValue").gte(analyseDataQuery.getQValueStart()==null?0:analyseDataQuery.getQValueStart()).lte(analyseDataQuery.getQValueEnd()==null?1:analyseDataQuery.getQValueEnd()));
+        }
         if (analyseDataQuery.getIdentifiedStatus() != null) {
             query.addCriteria(where("identifiedStatus").in(analyseDataQuery.getIdentifiedStatus()));
         }

@@ -18,6 +18,7 @@ import com.westlake.air.propro.service.ScoreService;
 import com.westlake.air.propro.utils.AirusUtil;
 import com.westlake.air.propro.utils.ArrayUtil;
 import com.westlake.air.propro.utils.MathUtil;
+import com.westlake.air.propro.utils.SortUtil;
 import ml.dmlc.xgboost4j.java.Booster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +76,9 @@ public class Airus {
             finalResult.setErrorInfo(resultDO.getMsgInfo());
             return finalResult;
         }
+        if (type.equals("PRM")) {
+            cleanScore(scores);
+        }
         HashMap<String, Double> weightsMap = new HashMap<>();
         HashMap<String, Integer> peptideHitMap = new HashMap<>();
         if (airusParams.getClassifier().equals(Classifier.lda)) {
@@ -96,7 +100,7 @@ public class Airus {
 //            logger.info("开始训练XGBooster");
             XGBLearn(scores, airusParams);
         }
-        List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName());
+        List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), false);
         int hit = 0, count = 0;
         if (type.equals("PRM")){
             double maxDecoy = Double.MIN_VALUE;
@@ -106,7 +110,7 @@ public class Airus {
                 }
             }
             for (SimpleFeatureScores simpleFeatureScores: featureScoresList){
-                if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy){
+                if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy && simpleFeatureScores.getThresholdPassed()){
                     simpleFeatureScores.setFdr(0d);
                     count ++;
                 }else {
@@ -123,20 +127,29 @@ public class Airus {
         }
         //对于最终的打分结果和选峰结果保存到数据库中
         logger.info("将合并打分及定量结果反馈更新到数据库中,总计:" + featureScoresList.size() + "条数据");
+        giveDecoyFdr(featureScoresList);
         for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
             AnalyseDataDO dataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
             dataDO.setBestRt(simpleFeatureScores.getRt());
             dataDO.setIntensitySum(simpleFeatureScores.getIntensitySum());
             dataDO.setFragIntMap(simpleFeatureScores.getFragIntMap());
             dataDO.setFdr(simpleFeatureScores.getFdr());
+            dataDO.setQValue(simpleFeatureScores.getQValue());
             if (!simpleFeatureScores.getIsDecoy()) {
                 if (simpleFeatureScores.getFdr() <= 0.01) {
+//                    if (type.equals("PRM") && !simpleFeatureScores.getThresholdPassed()){
+////                        System.out.println("没有通过阈值：" + overviewId + dataDO.getPeptideRef());
+//                        dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
+//                        continue;
+//                    }
                     Integer hitCount = peptideHitMap.get(simpleFeatureScores.getPeptideRef());
                     if (hitCount != null && hitCount >= airusParams.getTrainTimes() / 2) {
                         hit++;
                     }
+                    dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS);
+                }else {
+                    dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
                 }
-                dataDO.setIdentifiedStatus(simpleFeatureScores.getFdr() <= 0.01 ? AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS : AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
             }
             ResultDO r = analyseDataService.update(dataDO);
             if (r.isFailed()) {
@@ -190,7 +203,7 @@ public class Airus {
                 continue;
             }
             ldaLearner.score(scores, ldaLearnData.getWeightsMap());
-            List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName());
+            List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), false);
             int count = 0;
             if (type.equals("PRM")){
                 double maxDecoy = Double.MIN_VALUE;
@@ -200,7 +213,7 @@ public class Airus {
                     }
                 }
                 for (SimpleFeatureScores simpleFeatureScores: featureScoresList){
-                    if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy){
+                    if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy && simpleFeatureScores.getThresholdPassed()){
                         count ++;
                         simpleFeatureScores.setFdr(0d);
                     }else {
@@ -244,7 +257,7 @@ public class Airus {
             logger.error("XGBooster Predict All Fail.\n");
             e.printStackTrace();
         }
-        List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName());
+        List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), false);
         ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
         int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
         if (count > 0) {
@@ -338,13 +351,76 @@ public class Airus {
         }
     }
 
-    private void test(List<SimpleScores> scores){
-        for(SimpleScores simpleScores: scores){
-            for(ScoreType scoreType: ScoreType.values()){
-                for(FeatureScores featureScores: simpleScores.getFeatureScoresList()){
-                    if(featureScores.get(scoreType).isNaN()|| featureScores.get(scoreType).isInfinite()){
-                        System.out.println("");
+    private void giveDecoyFdr(List<SimpleFeatureScores> featureScoresList){
+        List<SimpleFeatureScores> sortedAll = SortUtil.sortByMainScore(featureScoresList, false);
+        SimpleFeatureScores leftFeatureScore = null;
+        SimpleFeatureScores rightFeatureScore;
+        List<SimpleFeatureScores> decoyPartList = new ArrayList<>();
+        for (SimpleFeatureScores simpleFeatureScores: sortedAll){
+            if (simpleFeatureScores.getIsDecoy()){
+                decoyPartList.add(simpleFeatureScores);
+            }else {
+                rightFeatureScore = simpleFeatureScores;
+                if (leftFeatureScore != null && !decoyPartList.isEmpty()) {
+                    for (SimpleFeatureScores decoy : decoyPartList) {
+                        if (decoy.getMainScore() - leftFeatureScore.getMainScore() < rightFeatureScore.getMainScore() - decoy.getMainScore()) {
+                            decoy.setFdr(leftFeatureScore.getFdr());
+                            decoy.setQValue(leftFeatureScore.getQValue());
+                        } else {
+                            decoy.setFdr(rightFeatureScore.getFdr());
+                            decoy.setQValue(rightFeatureScore.getQValue());
+                        }
                     }
+                }
+                leftFeatureScore = rightFeatureScore;
+                decoyPartList.clear();
+            }
+        }
+        if (leftFeatureScore != null && !decoyPartList.isEmpty()){
+            for (SimpleFeatureScores decoy: decoyPartList){
+                decoy.setFdr(leftFeatureScore.getFdr());
+                decoy.setQValue(leftFeatureScore.getQValue());
+            }
+        }
+    }
+
+    private void cleanScore(List<SimpleScores> scoresList){
+        for (SimpleScores simpleScores: scoresList){
+            if (simpleScores.getIsDecoy()){
+                continue;
+            }
+            for (FeatureScores featureScores: simpleScores.getFeatureScoresList()){
+                int count = 0;
+                if (featureScores.get(ScoreType.NormRtScore.getTypeName()) > 8){
+                    count ++;
+                }
+                if (featureScores.get(ScoreType.LogSnScore.getTypeName()) < 3){
+                    count ++;
+                }
+                if (featureScores.get(ScoreType.IsotopeCorrelationScore.getTypeName()) < 0.8){
+                    count ++;
+                }
+                if (featureScores.get(ScoreType.IsotopeOverlapScore.getTypeName()) > 0.2){
+                    count ++;
+                }
+                if (featureScores.get(ScoreType.MassdevScoreWeighted.getTypeName()) > 15){
+                    count ++;
+                }
+                if (featureScores.get(ScoreType.BseriesScore.getTypeName()) < 1){
+                    count ++;
+                }
+                if (featureScores.get(ScoreType.YseriesScore.getTypeName()) < 5){
+                    count ++;
+                }
+                if (featureScores.get(ScoreType.XcorrShapeWeighted.getTypeName()) < 0.6){
+                    count ++;
+                }
+                if (featureScores.get(ScoreType.XcorrShape.getTypeName()) < 0.5){
+                    count ++;
+                }
+
+                if (count > 1){
+                    featureScores.setThresholdPassed(false);
                 }
             }
         }
