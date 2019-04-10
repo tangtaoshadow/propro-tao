@@ -96,6 +96,11 @@ public class AnalyseDataDO extends BaseDO {
     @JSONField(serialize=false)
     Double fdr;
 
+    //最终给出的qValue
+    @Indexed
+    @JSONField(serialize=false)
+    Double qValue;
+
     @JSONField(serialize=false)
     List<FeatureScores> featureScoresList;
 
@@ -103,9 +108,9 @@ public class AnalyseDataDO extends BaseDO {
     @JSONField(serialize=false)
     Double bestRt;
 
-    //最终的定量值
     @JSONField(serialize=false)
     Double intensitySum;
+    //最终的定量值
 
     @JSONField(serialize=false)
     HashMap<String, Double> fragIntMap;

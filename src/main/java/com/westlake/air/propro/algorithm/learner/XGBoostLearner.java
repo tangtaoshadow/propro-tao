@@ -23,17 +23,25 @@ public class XGBoostLearner extends Learner {
 
     Map<String, Object> params = new HashMap<String, Object>() {
         {
+            //original params
+//            put("booster", "gbtree");
+//            put("min_child_weight", 10);
+//            put("eta", 0.6);
+//            put("max_depth", 4);
+//            put("objective", "binary:logistic");
+//            put("eval_metric", "auc");
+//            put("seed", "23");
             put("booster", "gbtree");
-//            put("gamma", 0);
-            put("min_child_weight", 10);
-            put("eta", 0.6);
-            put("max_depth", 4);
+            put("min_child_weight", 10);//cv
+            put("eta", 0.1);//0.01-0.2
+            put("max_depth", 4);//3-10,与max_leaf_nodes互斥
 //            put("silent", 0);
 //            put("alpha", 1);
 //            put("lambda", 0.5);// 用于逻辑回归的时候L2正则选项
-            put("objective", "binary:logistic");
-            put("eval_metric", "auc");
+            put("objective", "binary:logitraw");
+            put("eval_metric", "error");
             put("seed", "23");
+            put("subsample",0.5);
         }
     };
     int nRounds = 100;
@@ -44,8 +52,7 @@ public class XGBoostLearner extends Learner {
         Map<String, DMatrix> watches = new HashMap<>();
         watches.put("train", trainMat);
 
-        Booster booster = XGBoost.train(trainMat, this.params,100, watches, null, null);
-//        booster.saveModel("D:\\model.bin");
+        Booster booster = XGBoost.train(trainMat, this.params,500, watches, null, null);
         return booster;
     }
 

@@ -147,7 +147,7 @@
                                         <tr>
                                             <th>RT</th>
                                             <th>MainXxSwathPrelimScore+</th>
-                                            <th>VarBseriesScore+-</th>
+                                            <th>VarBseriesScore+</th>
                                             <th>VarElutionModelFitScore+</th>
                                             <th>VarIntensityScore+</th>
                                             <th>VarIsotopeCorrelationScore+</th>
@@ -168,6 +168,7 @@
                                             <th>VarLibrarySangle-</th>
                                             <th>VarLibraryRootmeansquare-</th>
                                             <th>VarManhattScore+</th>
+                                            <th>NewScore+</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -308,6 +309,11 @@
                                                 th:text="${featureScore.get('ManhattScore')}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
                                                 th:text="${featureScore.get('ManhattScore')}"></td>
+                                            <td th:if="${score.bestRt==featureScore.rt}"
+                                                th:style="'background-color:#bbc1f1'"
+                                                th:text="${featureScore.get('NewScore')}"></td>
+                                            <td th:unless="${score.bestRt==featureScore.rt}"
+                                                th:text="${featureScore.get('NewScore')}"></td>
                                         </tr>
                                         </tbody>
                                     </table>

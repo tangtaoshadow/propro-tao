@@ -314,6 +314,22 @@ public class ArrayUtil {
     }
 
     /**
+     * Get ascend sort index of list.
+     */
+    public static int[] indexAfterSort(List<Double> array) {
+        List<IndexValue<Double>> indexValues = new IndexValue<Double>().buildList(array);
+        Collections.sort(indexValues);
+
+        int n = array.size();
+        int[] result = new int[n];
+
+        for (int i = 0; i < n; i++) {
+            result[i] = indexValues.get(i).getIndex();
+        }
+        return result;
+    }
+
+    /**
      * Get ascend sort index of array[].
      */
     public static Integer[] indexAfterSort(Integer[] array) {

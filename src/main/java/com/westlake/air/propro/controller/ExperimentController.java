@@ -3,8 +3,6 @@ package com.westlake.air.propro.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.westlake.air.propro.async.LumsTask;
-import com.westlake.air.propro.compressor.AirdCompressor;
 import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.dao.ScanIndexDAO;
 import com.westlake.air.propro.domain.ResultDO;
@@ -53,10 +51,6 @@ public class ExperimentController extends BaseController {
     @Autowired
     ScanIndexService scanIndexService;
     @Autowired
-    AirdCompressor airdCompressor;
-    @Autowired
-    LumsTask lumsTask;
-    @Autowired
     ProjectService projectService;
     @Autowired
     ScanIndexDAO scanIndexDAO;
@@ -85,8 +79,17 @@ public class ExperimentController extends BaseController {
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
         ResultDO<List<ExperimentDO>> resultDO = experimentService.getList(query);
+        HashMap<String, AnalyseOverviewDO> analyseOverviewDOMap = new HashMap<>();
+        for (ExperimentDO experimentDO: resultDO.getModel()){
+            List<AnalyseOverviewDO> analyseOverviewDOList = analyseOverviewService.getAllByExpId(experimentDO.getId());
+            if (analyseOverviewDOList.isEmpty()){
+                continue;
+            }
+            analyseOverviewDOMap.put(experimentDO.getId(), analyseOverviewDOList.get(0));
+        }
 
         model.addAttribute("experiments", resultDO.getModel());
+        model.addAttribute("analyseOverviewDOMap", analyseOverviewDOMap);
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
         return "experiment/list";
@@ -316,6 +319,19 @@ public class ExperimentController extends BaseController {
         return "redirect:/experiment/list";
 
     }
+    @RequestMapping(value = "/deleteAll/{id}")
+    String deleteAll(Model model, @PathVariable("id") String id,
+                     RedirectAttributes redirectAttributes) {
+        ResultDO<ExperimentDO> exp = experimentService.getById(id);
+        List<AnalyseOverviewDO> overviewDOList = analyseOverviewService.getAllByExpId(id);
+        for (AnalyseOverviewDO overviewDO : overviewDOList) {
+            analyseDataService.deleteAllByOverviewId(overviewDO.getId());
+        }
+        analyseOverviewService.deleteAllByExpId(id);
+        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
+        return "redirect:/experiment/list";
+
+    }
 
     @RequestMapping(value = "/swath")
     String swath(Model model) {
@@ -326,60 +342,6 @@ public class ExperimentController extends BaseController {
         model.addAttribute("iRtLibraries", iRtlist);
         model.addAttribute("experiments", experimentList);
         return "experiment/swath";
-    }
-
-    @RequestMapping(value = "/doswath")
-    String doSwath(Model model,
-                   @RequestParam(value = "libraryId", required = false) String libraryId,
-                   @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
-                   @RequestParam(value = "expId", required = false) String expId,
-                   @RequestParam(value = "rtExtractWindow", defaultValue = "1200") Float rtExtractWindow,
-                   @RequestParam(value = "mzExtractWindow", defaultValue = "0.05") Float mzExtractWindow,
-                   @RequestParam(value = "sigma", defaultValue = "6.25") Float sigma,
-                   @RequestParam(value = "spacing", defaultValue = "0.01") Float spacing
-    ) {
-        if (libraryId != null) {
-            model.addAttribute("libraryId", libraryId);
-        }
-        if (iRtLibraryId != null) {
-            model.addAttribute("iRtLibraryId", iRtLibraryId);
-        }
-        if (expId != null) {
-            model.addAttribute("expId", expId);
-        }
-        model.addAttribute("rtExtractWindow", rtExtractWindow);
-        model.addAttribute("mzExtractWindow", mzExtractWindow);
-        model.addAttribute("sigma", sigma);
-        model.addAttribute("spacing", spacing);
-
-        List<LibraryDO> slist = getLibraryList(0);
-        List<LibraryDO> iRtlist = getLibraryList(1);
-        List<ExperimentDO> experimentList = getExperimentList();
-        model.addAttribute("libraries", slist);
-        model.addAttribute("iRtLibraries", iRtlist);
-        model.addAttribute("experiments", experimentList);
-
-        ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
-        if (expResult.isFailed()) {
-            return "experiment/swath";
-        }
-
-        ExperimentDO exp = expResult.getModel();
-
-        TaskDO taskDO = new TaskDO(TaskTemplate.SWATH_WORKFLOW, "expId:" + expId + ";libId:" + libraryId + ";iRtLib:" + iRtLibraryId);
-        taskService.insert(taskDO);
-
-        LumsParams lumsParams = new LumsParams();
-        lumsParams.setExperimentDO(exp);
-        lumsParams.setIRtLibraryId(iRtLibraryId);
-        lumsParams.setLibraryId(libraryId);
-        lumsParams.setCreator("Admin");
-        lumsParams.setRtExtractWindow(rtExtractWindow);
-        lumsParams.setMzExtractWindow(mzExtractWindow);
-        lumsParams.setSigmaSpacing(new SigmaSpacing(sigma, spacing));
-
-        lumsTask.swath(lumsParams, taskDO);
-        return "redirect:/task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/extractor")
@@ -394,12 +356,7 @@ public class ExperimentController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OBJECT_NOT_EXISTED);
             return "redirect:/experiment/list";
         }
-//        List<ScoreType> scoreType = ScoreType.getShownTypes();
-//        if(resultDO.getModel().getType().equals("1")){
-//            HashSet<String> prm
-//        }
         model.addAttribute("useEpps", true);
-        model.addAttribute("uniqueOnly", false);
         model.addAttribute("libraries", getLibraryList(0));
         model.addAttribute("experiment", resultDO.getModel());
         model.addAttribute("scoreTypes", ScoreType.getShownTypes());
@@ -412,13 +369,13 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "id", required = true) String id,
                      @RequestParam(value = "creator", required = false) String creator,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
-                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "800") Float rtExtractWindow,
+                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
                      @RequestParam(value = "slope", required = false) Double slope,
                      @RequestParam(value = "intercept", required = false) Double intercept,
                      @RequestParam(value = "note", required = false) String note,
                      //打分相关的入参
-                     @RequestParam(value = "sigma", required = false, defaultValue = "6.25") Float sigma,
+                     @RequestParam(value = "sigma", required = false, defaultValue = "3.75") Float sigma,
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
                      @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.6") Float shapeScoreThreshold,
                      @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.8") Float shapeWeightScoreThreshold,
@@ -633,27 +590,5 @@ public class ExperimentController extends BaseController {
         res.put("max", (int)Math.ceil(max/10d)*10d);
         resultDO.setModel(res);
         return resultDO;
-    }
-
-    @RequestMapping(value = "/compress")
-    String compress(Model model,
-                    @RequestParam(value = "expId", required = true) String expId,
-                    RedirectAttributes redirectAttributes) {
-
-        ResultDO<ExperimentDO> resultDO = experimentService.getById(expId);
-        if (resultDO.isFailed()) {
-            redirectAttributes.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
-            return "redirect:/experiment/list";
-        }
-        ExperimentDO experimentDO = resultDO.getModel();
-        if(experimentDO.getType().equals(Constants.EXP_TYPE_DIA_SWATH)){
-            redirectAttributes.addAttribute(ERROR_MSG, ResultCode.NO_AIRD_COMPRESSION_FOR_DIA_SWATH.getMessage());
-            return "redirect:/experiment/list";
-        }
-        TaskDO taskDO = new TaskDO(TaskTemplate.COMPRESSOR_AND_SORT, experimentDO.getName() + ":" + expId);
-        taskService.insert(taskDO);
-        experimentTask.compress(experimentDO, taskDO);
-
-        return "redirect:/task/detail/" + taskDO.getId();
     }
 }

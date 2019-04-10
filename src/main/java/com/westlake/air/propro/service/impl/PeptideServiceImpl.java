@@ -55,6 +55,10 @@ public class PeptideServiceImpl implements PeptideService {
     public List<PeptideDO> getAllByLibraryIdAndIsDecoy(String libraryId, boolean isDecoy) {
         return peptideDAO.getAllByLibraryIdAndIsDecoy(libraryId, isDecoy);
     }
+    @Override
+    public List<PeptideDO> getAllByLibraryIdAndProteinNameAndIsDecoy(String libraryId, String proteinName, boolean isDecoy) {
+        return peptideDAO.getAllByLibraryIdAndProteinNameAndIsDecoy(libraryId, proteinName, isDecoy);
+    }
 
     @Override
     public Long count(PeptideQuery query) {

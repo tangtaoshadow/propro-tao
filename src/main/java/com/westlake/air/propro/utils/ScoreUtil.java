@@ -5,6 +5,7 @@ import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -68,10 +69,10 @@ public class ScoreUtil {
         }
         return normalizedIntensity;
     }
-    public static double[] normalizeSumDouble(List<Double> intensityList, double sum) {
-        double[] normalizedIntensity = new double[intensityList.size()];
+    public static List<Double> normalizeSumDouble(List<Double> intensityList, double sum) {
+        List<Double> normalizedIntensity = new ArrayList<>();
         for (int i = 0; i < intensityList.size(); i++) {
-            normalizedIntensity[i] = (intensityList.get(i) / sum);
+            normalizedIntensity.add(intensityList.get(i) / sum);
         }
         return normalizedIntensity;
     }

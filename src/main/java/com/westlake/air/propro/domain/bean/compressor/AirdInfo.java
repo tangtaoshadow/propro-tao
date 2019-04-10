@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 @Data
@@ -15,6 +16,12 @@ public class AirdInfo {
     String compressStrategy = "mz:pfor,zlib;intensity:zlib";
     //枚举值,LITTLE_ENDIAN和BIG_ENDIAN两种
     String byteOrder = "LITTLE_ENDIAN";
+
+    //使用的压缩策略,MZ数组和Intensity数组分别采用的压缩策略,Propro1.0采用的是mz:pfor,zlib:1000;intensity:zlib:1000
+    HashMap<String, Strategy> strategies = new HashMap<>();
+
+    //是否忽略Intensity为0的键值对
+    Boolean ignoreZeroIntensity = true;
 
     //转换压缩后的aird的文件路径,默认读取的是同目录下同文件名的aird文件,如果不存在则读取本字段
     String airdPath;

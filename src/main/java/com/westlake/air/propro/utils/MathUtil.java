@@ -422,6 +422,13 @@ public class MathUtil {
         }
         return sum;
     }
+    public static double sum(List<Double> array) {
+        double sum = 0;
+        for (double value : array) {
+            sum += value;
+        }
+        return sum;
+    }
     public static double sum(Collection<Float> array) {
         double sum = 0;
         for (float value : array) {
@@ -694,6 +701,6 @@ public class MathUtil {
      * @return
      */
     public static double keepLength(double d, int keepLength){
-        return (double)(Math.round(d * keepLength) / keepLength);
+        return ((double)Math.round(d * keepLength) / keepLength);
     }
 }

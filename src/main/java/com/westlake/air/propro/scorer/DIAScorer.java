@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -55,7 +56,7 @@ public class DIAScorer {
      * @param normedLibIntMap  unNormalized library intensity(in peptidepeptide)
      * @param scores           scoreForAll for Airus
      */
-    public void calculateDiaMassDiffScore(HashMap<String, Float> productMzArray, Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<String, Double> normedLibIntMap, FeatureScores scores) {
+    public void calculateDiaMassDiffScore(HashMap<String, Float> productMzArray, Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<String, Double> normedLibIntMap, FeatureScores scores, HashSet<String> scoreTypes) {
 
         double ppmScore = 0.0d;
         double ppmScoreWeighted = 0.0d;
@@ -75,8 +76,12 @@ public class DIAScorer {
                 e.printStackTrace();
             }
         }
-        scores.put(ScoreType.MassdevScore, ppmScore);
-        scores.put(ScoreType.MassdevScoreWeighted, ppmScoreWeighted);
+        if (scoreTypes == null || scoreTypes.contains(ScoreType.MassdevScore.getTypeName())) {
+            scores.put(ScoreType.MassdevScore, ppmScore);
+        }
+        if (scoreTypes == null || scoreTypes.contains(ScoreType.MassdevScoreWeighted.getTypeName())) {
+            scores.put(ScoreType.MassdevScoreWeighted, ppmScoreWeighted);
+        }
     }
 
 

@@ -238,7 +238,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         List<Float> precursorUniqueMz = new ArrayList<>();
 
         for(ScanIndexDO ms2Index : ms2Indexes){
-            float precursorMz = ms2Index.getPrecursorMz();
+            Float precursorMz = ms2Index.getPrecursorMz();
             if(precursorUniqueMz.contains(precursorMz)){
                 continue;
             }
@@ -291,7 +291,6 @@ public class ExperimentServiceImpl implements ExperimentService {
             return;
         }
 
-        experimentDO.setHasAirusFile(true);
         experimentDO.setAirdPath(airdFilePath);
 
         String airdIndexPath = FileUtil.getAirdIndexFilePath(airdFilePath);
@@ -309,7 +308,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             }
             experimentDO.setWindowRanges(airdInfo.getRangeList());
             experimentDO.setByteOrder(airdInfo.getByteOrder());
-            experimentDO.setCompressStrategy(airdInfo.getCompressStrategy());
+            experimentDO.setStrategies(airdInfo.getStrategies());
             experimentDO.setOverlap(airdInfo.getOverlap());
 
             for (ScanIndexDO scanIndex : airdInfo.getScanIndexList()) {
@@ -391,10 +390,15 @@ public class ExperimentServiceImpl implements ExperimentService {
 
             //核心函数在这里
             List<AnalyseDataDO> totalDataList = extract(raf, bos, overviewDO.getId(), lumsParams);
+            Long count = 0L;
+            for (AnalyseDataDO dataDO: totalDataList){
+                count += dataDO.getFeatureScoresList().size();
+            }
             overviewDO.setTotalPeptideCount(totalDataList.size());
             overviewDO.setAircIndexPath(aircIndexPath);
             overviewDO.setAircPath(aircFilePath);
             overviewDO.setHasAircFile(true);
+            overviewDO.setPeakCount(count);
             //将AircInfo写入到本地文件
             AircInfo aircInfo = new AircInfo();
             aircInfo.setOverview(overviewDO);
@@ -563,6 +567,9 @@ public class ExperimentServiceImpl implements ExperimentService {
             long startPosition = 0;
             for (WindowRange range : rangs) {
                 long start = System.currentTimeMillis();
+//                if (swathMap.get(range.getStart()) == null){
+//                    System.out.println("");
+//                }
                 List<AnalyseDataDO> dataList = doExtract(raf, swathMap.get(range.getStart()), range, overviewId, lumsParams);
                 if (dataList != null) {
                     totalDataList.addAll(dataList);
@@ -581,7 +588,6 @@ public class ExperimentServiceImpl implements ExperimentService {
                             startPosition = startPosition + data.getConvIntensityMap().get(key).length;
                             intensityAll = ArrayUtils.addAll(intensityAll, data.getConvIntensityMap().get(key));
                         }
-
 
                         byte[] result = ArrayUtils.addAll(rtArray, intensityAll);
 
@@ -625,6 +631,9 @@ public class ExperimentServiceImpl implements ExperimentService {
             logger.warn("No Coordinates Found,Rang:" + range.getStart() + ":" + range.getEnd());
             return null;
         }
+        if (coordinates.size() != 2){
+            logger.warn("coordinate size != 2,Rang:" + range.getStart() + ":" + range.getEnd());
+        }
         //Step3.提取指定原始谱图
         long start = System.currentTimeMillis();
 
@@ -632,9 +641,9 @@ public class ExperimentServiceImpl implements ExperimentService {
 
         logger.info("IO及解码耗时:" + (System.currentTimeMillis() - start));
         if (lumsParams.isUseEpps()) {
-            return eppsAndInsert(coordinates, rtMap, overviewId, lumsParams);
+            return epps(coordinates, rtMap, overviewId, lumsParams);
         } else {
-            return extractAndInsert(coordinates, rtMap, overviewId, lumsParams.getRtExtractWindow(), lumsParams.getMzExtractWindow());
+            return extract(coordinates, rtMap, overviewId, lumsParams.getRtExtractWindow(), lumsParams.getMzExtractWindow());
         }
     }
 
@@ -662,7 +671,7 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @param mzExtractWindow
      * @return
      */
-    private List<AnalyseDataDO> extractAndInsert(List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow) {
+    private List<AnalyseDataDO> extract(List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow) {
         List<AnalyseDataDO> dataList = new ArrayList<>();
         long start = System.currentTimeMillis();
         for (TargetPeptide ms : coordinates) {
@@ -687,7 +696,7 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @param lumsParams
      * @return
      */
-    private List<AnalyseDataDO> eppsAndInsert(List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, LumsParams lumsParams) {
+    private List<AnalyseDataDO> epps(List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, LumsParams lumsParams) {
         List<AnalyseDataDO> dataList = new ArrayList<>();
         long start = System.currentTimeMillis();
 
@@ -702,9 +711,13 @@ public class ExperimentServiceImpl implements ExperimentService {
             //Step1. 常规卷积,卷积结果不进行压缩处理
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, lumsParams.getMzExtractWindow(), lumsParams.getRtExtractWindow(), overviewId);
             if (dataDO == null) {
-//                logger.info("未卷积到任何片段,PeptideRef:"+tp.getPeptideRef());
+                logger.info("未卷积到任何片段,PeptideRef:"+tp.getPeptideRef());
                 continue;
             }
+//            if (dataDO.getRtArray().length < 20){
+//                logger.info("卷积谱图时间太短,PeptideRef:" + tp.getPeptideRef());
+//                continue;
+//            }
             //Step2. 常规选峰及打分
             scoreService.scoreForOne(dataDO, tp, rtMap, lumsParams);
             if (dataDO.getFeatureScoresList() == null) {
@@ -717,7 +730,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         }
         for (TargetPeptide tp : decoyList) {
             //如果伪肽段在忽略列表里面,那么直接忽略
-            if (targetIgnorePeptides.contains(tp.getPeptideRef())) {
+            if (targetIgnorePeptides.contains(tp.getPeptideRef()) && !lumsParams.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM)) {
                 continue;
             }
             //Step1. 常规卷积,卷积结果不进行压缩处理
@@ -826,7 +839,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
             if (isAllZero) {
                 continue;
-//                dataDO.getIntensityMap().put(fi.getCutInfo(), null);
+                //                dataDO.getIntensityMap().put(fi.getCutInfo(), null);
             } else {
                 isHit = true;
                 dataDO.getIntensityMap().put(fi.getCutInfo(), intArray);

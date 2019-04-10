@@ -3,6 +3,7 @@ package com.westlake.air.propro.controller;
 import com.westlake.air.propro.async.ExperimentTask;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
+import com.westlake.air.propro.domain.query.PageQuery;
 import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.TaskService;
@@ -10,6 +11,7 @@ import com.westlake.air.propro.async.LibraryTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -43,5 +45,13 @@ public class BaseController {
     public static String ERROR_MSG = "error_msg";
     public static String SUCCESS_MSG = "success_msg";
 
+    public void buildPageQuery(PageQuery query, Integer currentPage, Integer pageSize){
+        if(currentPage != null){
+            query.setPageNo(currentPage);
+        }
+        if(pageSize != null){
+            query.setPageSize(pageSize);
+        }
+    }
 
 }

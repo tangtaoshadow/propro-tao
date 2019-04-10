@@ -166,7 +166,7 @@ public class TraMLParser extends BaseLibraryParser {
     }
 
     @Override
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashSet<String> prmPeptideRefSet, TaskDO taskDO) {
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashSet<String> prmPeptideRefSet, String libraryId, TaskDO taskDO) {
         TraML traML = parse(in);
 
         HashMap<String, Peptide> peptideMap = makePeptideMap(traML.getCompoundList().getPeptideList());
@@ -198,10 +198,12 @@ public class TraMLParser extends BaseLibraryParser {
                     tranResult.addErrorMsg(resultDO.getMsgInfo());
                     continue;
                 }
-
                 PeptideDO peptide = resultDO.getModel();
                 setUnique(peptide, fastaUniqueSet, fastaDropPep, libraryDropPep, fastaDropProt, libraryDropProt, uniqueProt);
                 addFragment(peptide, map);
+            }
+            for (PeptideDO peptideDO: map.values()){
+                prmPeptideRefSet.remove(peptideDO.getPeptideRef());
             }
             library.setFastaDeWeightPepCount(fastaDropPep.size());
             library.setFastaDeWeightProtCount(getDropCount(fastaDropProt, uniqueProt));
@@ -211,11 +213,27 @@ public class TraMLParser extends BaseLibraryParser {
                 System.out.println("fasta额外检出：" + fastaDropPep.size() + "个Peptide");
             }
             ArrayList<PeptideDO> peptides = new ArrayList<PeptideDO>(map.values());
+            if (libraryId != null && !libraryId.isEmpty()) {
+                List<PeptideDO> irtPeps = peptideService.getAllByLibraryId(libraryId);
+                for (PeptideDO peptideDO: irtPeps){
+                    if (map.containsKey(peptideDO.getPeptideRef()+"_"+peptideDO.getIsDecoy())){
+                        continue;
+                    }
+                    if (prmPeptideRefSet.contains(peptideDO.getPeptideRef())){
+                        prmPeptideRefSet.remove(peptideDO.getPeptideRef());
+                    }
+                    peptideDO.setProteinName("IRT");
+                    peptideDO.setId(null);
+                    peptideDO.setLibraryId(library.getId());
+                    peptideDO.setLibraryName(library.getName());
+                    peptides.add(peptideDO);
+                }
+            }
             peptideService.insertAll(peptides, false);
             tranResult.setModel(peptides);
             taskDO.addLog(peptides.size() + "条数据插入成功");
             taskService.update(taskDO);
-            logger.info(peptides.size() + "条肽段数据插入成功,其中蛋白质种类有" + uniqueProt.size() + "个");
+            logger.info(peptides.size() + "条肽段数据插入成功,其中Unique蛋白质种类有" + uniqueProt.size() + "个");
         } catch (Exception e) {
             e.printStackTrace();
         }

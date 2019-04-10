@@ -20,7 +20,7 @@
 
 <div class="m-content" layout:fragment="content">
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <!--begin::Portlet-->
             <div class="m-portlet m-portlet--tab">
                 <div class="m-portlet__head">
@@ -55,8 +55,8 @@
 
                 <!--th:href="@{/peptide/list(libraryId=${libraryId},peptideRef=${peptideRef})}"-->
 
-                <div th:each="peptideRef,status:${peptideRefs}">
-                    <div th:id="plot+${status.index}" class="m-portlet__body" style="width: auto;height:400px;"></div>
+                <div th:each="peptideRef,status:${pepFragIntListMap.keySet()}">
+                    <div th:id="plot+${status.index}" class="m-portlet__body" style="width: auto;height:600px;"></div>
                     <script th:src="|${url}/assets/js/echarts/echarts.min.js|" type="text/javascript"></script>
                     <script th:src="|${url}/assets/js/echarts/dark.js|" type="text/javascript"></script>
 
@@ -68,6 +68,7 @@
                         var fragList = [[${pepFragIntListMap.get(peptideRef).keySet()}]];
                         var fragIntList = [[${pepFragIntListMap.get(peptideRef).values()}]];
                         var expNameList = [[${expNameList}]];
+                        var identifyList = [[${identifyMap.get(peptideRef)}]];
                         window.onload = init(peptideRef, protName, fragList, fragIntList, expNameList);
 
 
@@ -102,7 +103,8 @@
                                         type : 'category',
                                         data : expNameList,
                                         axisLabel :{
-                                            rotate:15
+                                            rotate:45,
+                                            fontSize: 10
                                         }
                                     }
                                 ],
@@ -111,7 +113,11 @@
                                         type : 'value'
                                     }
                                 ],
-                                series: []
+                                series: [],
+                                animationEasing: 'elasticOut',
+                                animationDelayUpdate: function (idx) {
+                                    return idx * 5;
+                                }
                             };
                             for (var i = 0; i < fragList.length; i++){
                                 option.series.push(
@@ -119,7 +125,10 @@
                                         name: fragList[i],
                                         type:'bar',
                                         stack: 'fragments',
-                                        data: fragIntList[i]
+                                        data: fragIntList[i],
+                                        animationDelay: function (idx) {
+                                            return idx * 20;
+                                        }
                                     }
                                 )
                             }
@@ -128,7 +137,17 @@
                         var chart = echarts.init(document.getElementById('plot'+ index));
                         chart.setOption(option);
                     </script>
-
+                    <form class="m-form m-form--fit m-form--label-align-right">
+                        <div class="m-portlet__body">
+                            <div class="form-group m-form__group row">
+                                <label for="intensity" class="col-1 col-form-label" th:text="Intensity"></label>
+                                <div class="col-10">
+                                    <input type="text" class="form-control m-input" id="intensity" readonly name="intensity"
+                                           th:value="${intMap.get(peptideRef)}">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <!--begin::Form-->
                 <!--<form class="m-form m-form&#45;&#45;fit m-form&#45;&#45;label-align-right">-->
