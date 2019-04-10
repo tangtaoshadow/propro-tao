@@ -228,18 +228,20 @@ public class LibraryTsvParser extends BaseLibraryParser {
             }
             boolean isFormat1 = columnMap.containsKey("compound") && columnMap.containsKey("z");
             boolean isFormat2 = columnMap.containsKey("comment") && columnMap.containsKey("cs[z]");
-            if (!isFormat1 && !isFormat2) {
+            boolean isFormat3 = columnMap.containsKey("peptide modified sequence") && columnMap.containsKey("precursor charge");
+            if (!isFormat1 && !isFormat2 && !isFormat3) {
                 return ResultDO.buildError(ResultCode.PRM_FILE_FORMAT_NOT_SUPPORTED);
             }
 
             HashSet<String> prmPeptideRefSet = new HashSet<>();
             while ((line = reader.readLine()) != null) {
                 columns = line.split(",");
-                String sequence = columns[isFormat1 ? columnMap.get("compound") : columnMap.get("comment")]
+                String sequence = columns[isFormat1 ? columnMap.get("compound") : (isFormat2 ? columnMap.get("comment") : columnMap.get("peptide modified sequence"))]
                         .replace(" (light)","")
                         .replace("[+57.021464]","(UniMod:4)")
+                        .replace("[+57]","(UniMod:4)")
                         .replace("[+15.994915]", "(UniMod:35)");
-                String charge = columns[isFormat1 ? columnMap.get("z") : columnMap.get("cs[z]")];
+                String charge = columns[isFormat1 ? columnMap.get("z") : (isFormat2 ? columnMap.get("cs[z]") : columnMap.get("precursor charge"))];
                 prmPeptideRefSet.add(sequence + "_" + charge);
             }
             return new ResultDO<HashSet<String>>(true).setModel(prmPeptideRefSet);
