@@ -273,9 +273,9 @@ public class ScoreServiceImpl implements ScoreService {
             }
 
             libraryScorer.calculateLibraryScores(peakGroupFeature, normedLibIntMap, featureScores, input.getScoreTypes());
-            if (dataDO.getIsDecoy() && featureScores.get(ScoreType.NewScore)>0.9){
-                System.out.println(dataDO.getPeptideRef());
-            }
+//            if (dataDO.getIsDecoy() && featureScores.get(ScoreType.NewScore)>0.9){
+//                System.out.println(dataDO.getPeptideRef());
+//            }
             if (input.getScoreTypes().contains(ScoreType.NormRtScore.getTypeName())) {
                 libraryScorer.calculateNormRtScore(peakGroupFeature, input.getSlopeIntercept(), dataDO.getRt(), featureScores);
             }

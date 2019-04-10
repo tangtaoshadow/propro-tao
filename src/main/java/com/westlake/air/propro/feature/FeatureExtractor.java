@@ -60,9 +60,8 @@ public class FeatureExtractor {
      * @return
      */
     public PeptideFeature getExperimentFeature(AnalyseDataDO dataDO, HashMap<String, Float> intensityMap, SigmaSpacing sigmaSpacing) {
-        boolean featureFound = true;
         if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() == 0) {
-            featureFound = false;
+            return new PeptideFeature(false);
         }
 
         HashMap<String, RtIntensityPairsDouble> ionPeaks = new HashMap<>();
@@ -114,7 +113,7 @@ public class FeatureExtractor {
 
             //根据信噪比和最高峰选择谱图
             if (maxPeakPairs == null) {
-                logger.info("Error: MaxPeakPairs were null!");
+                logger.info("Error: MaxPeakPairs were null!"+rtDoubleArray.length);
                 continue;
             }
             List<IonPeak> ionPeakList = chromatogramPicker.pickChromatogram(rtDoubleArray, intensitiesMap.get(cutInfo), smoothIntensitiesMap.get(cutInfo), noisesOri1000, maxPeakPairs);
@@ -124,10 +123,13 @@ public class FeatureExtractor {
             noise1000Map.put(cutInfo, noisesOri1000);
             normedLibIntMap.put(cutInfo, intensityMap.get(cutInfo)/libIntSum);
         }
+        if (ionPeakParams.size() == 0){
+            return new PeptideFeature(false);
+        }
 
         List<PeakGroup> peakGroupFeatureList = featureFinder.findFeaturesNew(peptideSpectrum, ionPeaks, ionPeakParams,noise1000Map);
 
-        PeptideFeature featureResult = new PeptideFeature(featureFound);
+        PeptideFeature featureResult = new PeptideFeature(true);
         featureResult.setPeakGroupList(peakGroupFeatureList);
         featureResult.setNormedLibIntMap(normedLibIntMap);
 

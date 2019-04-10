@@ -714,6 +714,10 @@ public class ExperimentServiceImpl implements ExperimentService {
                 logger.info("未卷积到任何片段,PeptideRef:"+tp.getPeptideRef());
                 continue;
             }
+//            if (dataDO.getRtArray().length < 20){
+//                logger.info("卷积谱图时间太短,PeptideRef:" + tp.getPeptideRef());
+//                continue;
+//            }
             //Step2. 常规选峰及打分
             scoreService.scoreForOne(dataDO, tp, rtMap, lumsParams);
             if (dataDO.getFeatureScoresList() == null) {
