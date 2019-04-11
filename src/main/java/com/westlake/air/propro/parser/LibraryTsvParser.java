@@ -7,10 +7,8 @@ import com.westlake.air.propro.domain.db.FragmentInfo;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.TaskDO;
-import com.westlake.air.propro.parser.model.traml.Peptide;
 import com.westlake.air.propro.service.TaskService;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +17,11 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -228,7 +228,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
             }
             boolean isFormat1 = columnMap.containsKey("compound") && columnMap.containsKey("z");
             boolean isFormat2 = columnMap.containsKey("comment") && columnMap.containsKey("cs[z]");
-            boolean isFormat3 = columnMap.containsKey("peptide modified sequence") && columnMap.containsKey("precursor charge");
+            boolean isFormat3 = columnMap.containsKey("peptidemodifiedsequence") && columnMap.containsKey("precursorcharge");
             if (!isFormat1 && !isFormat2 && !isFormat3) {
                 return ResultDO.buildError(ResultCode.PRM_FILE_FORMAT_NOT_SUPPORTED);
             }
@@ -236,12 +236,12 @@ public class LibraryTsvParser extends BaseLibraryParser {
             HashSet<String> prmPeptideRefSet = new HashSet<>();
             while ((line = reader.readLine()) != null) {
                 columns = line.split(",");
-                String sequence = columns[isFormat1 ? columnMap.get("compound") : (isFormat2 ? columnMap.get("comment") : columnMap.get("peptide modified sequence"))]
+                String sequence = columns[isFormat1 ? columnMap.get("compound") : (isFormat2 ? columnMap.get("comment") : columnMap.get("peptidemodifiedsequence"))]
                         .replace(" (light)","")
                         .replace("[+57.021464]","(UniMod:4)")
                         .replace("[+57]","(UniMod:4)")
                         .replace("[+15.994915]", "(UniMod:35)");
-                String charge = columns[isFormat1 ? columnMap.get("z") : (isFormat2 ? columnMap.get("cs[z]") : columnMap.get("precursor charge"))];
+                String charge = columns[isFormat1 ? columnMap.get("z") : (isFormat2 ? columnMap.get("cs[z]") : columnMap.get("precursorcharge"))];
                 prmPeptideRefSet.add(sequence + "_" + charge);
             }
             return new ResultDO<HashSet<String>>(true).setModel(prmPeptideRefSet);

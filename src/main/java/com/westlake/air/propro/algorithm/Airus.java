@@ -419,7 +419,7 @@ public class Airus {
                     count ++;
                 }
 
-                if (count > 1){
+                if (count > 3){
                     featureScores.setThresholdPassed(false);
                 }
             }
