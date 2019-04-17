@@ -51,16 +51,25 @@ public class SemiSupervised {
 
             //根据weightsMap计算子分数的加权总分
             ldaLearner.score(trainData, weightsMap);
+            weightsMap = new HashMap<>();
+            HashMap<String, Double> lastWeightsMap = new HashMap<>();
             for (int times = 0; times < airusParams.getXevalNumIter(); times++) {
                 TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, ScoreType.WeightedTotalScore.getTypeName(), airusParams, airusParams.getSsIterationFdr());
-                if(trainPeaksTemp.getBestTargets().size() == 0){
-                    System.out.println("emmm");
-                }
+//                if(trainPeaksTemp.getBestTargets().size() == 0){
+//                    System.out.println("emmm");
+//                }
+                lastWeightsMap = weightsMap;
                 weightsMap = ldaLearner.learn(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName());
+                logger.info("Train Weight:" + JSONArray.toJSONString(weightsMap));
                 for(Double value: weightsMap.values()){
                     if(value == null || Double.isNaN(value)){
                         logger.info("本轮训练一坨屎:"+ JSON.toJSONString(weightsMap));
                         continue;
+                    }
+                }
+                if (lastWeightsMap.size() !=0) {
+                    for (String key : weightsMap.keySet()) {
+                        weightsMap.put(key, (weightsMap.get(key) + lastWeightsMap.get(key)) / 2);
                     }
                 }
                 ldaLearner.score(trainData, weightsMap);
@@ -112,13 +121,30 @@ public class SemiSupervised {
         List<SimpleFeatureScores> topTargetPeaks = AirusUtil.findTopFeatureScores(trainData.getTargets(), usedScoreType, true);
         List<SimpleFeatureScores> topDecoyPeaks = AirusUtil.findTopFeatureScores(trainData.getDecoys(), usedScoreType, false);
 
-        // find cutoff fdr from scores and only use best target peaks:
-        Double cutoffNew = stats.findCutoff(topTargetPeaks, topDecoyPeaks, airusParams, cutoff);
+        Double cutoffNew;
+        if (topTargetPeaks.size() < 200){
+            Double decoyMax = Double.MIN_VALUE, targetMax = Double.MIN_VALUE;
+            for (SimpleFeatureScores scores: topDecoyPeaks){
+                if (scores.getMainScore() > decoyMax){
+                    decoyMax = scores.getMainScore();
+                }
+            }
+            for (SimpleFeatureScores scores: topTargetPeaks){
+                if (scores.getMainScore() > targetMax){
+                    targetMax = scores.getMainScore();
+                }
+            }
+            cutoffNew = (decoyMax + targetMax)/2;
+        }else {
+            // find cutoff fdr from scores and only use best target peaks:
+            cutoffNew = stats.findCutoff(topTargetPeaks, topDecoyPeaks, airusParams, cutoff);
+        }
         List<SimpleFeatureScores> bestTargetPeaks = AirusUtil.peaksFilter(topTargetPeaks, cutoffNew);
 
         TrainPeaks trainPeaks = new TrainPeaks();
         trainPeaks.setBestTargets(bestTargetPeaks);
         trainPeaks.setTopDecoys(topDecoyPeaks);
+        System.out.println(topTargetPeaks.size() + " " + topDecoyPeaks.size() + " " + cutoffNew + " " + bestTargetPeaks.size());
         return trainPeaks;
     }
 
@@ -151,9 +177,9 @@ public class SemiSupervised {
         bestScoreMap.put(ScoreType.IsotopeOverlapScore.getTypeName(), 0d);
         bestScoreMap.put(ScoreType.MassdevScore.getTypeName(), 0d);
         bestScoreMap.put(ScoreType.MassdevScoreWeighted.getTypeName(), 0d);
-        bestScoreMap.put(ScoreType.BseriesScore.getTypeName(), 10d);
+        bestScoreMap.put(ScoreType.BseriesScore.getTypeName(), 4d);
         bestScoreMap.put(ScoreType.YseriesScore.getTypeName(), 10d);
-        bestScoreMap.put(ScoreType.NewScore.getTypeName(), 1d);
+        bestScoreMap.put(ScoreType.NewScore.getTypeName(), 0d);
         SimpleFeatureScores bestTargetScore = new SimpleFeatureScores();
         bestTargetScore.setScoresMap(bestScoreMap);
         List<SimpleFeatureScores> bestTargets = new ArrayList<>();

@@ -217,6 +217,7 @@ public class TraMLParser extends BaseLibraryParser {
                 List<PeptideDO> irtPeps = peptideService.getAllByLibraryId(libraryId);
                 for (PeptideDO peptideDO: irtPeps){
                     if (map.containsKey(peptideDO.getPeptideRef()+"_"+peptideDO.getIsDecoy())){
+                        map.get(peptideDO.getPeptideRef()+"_"+peptideDO.getIsDecoy()).setProteinName("IRT");
                         continue;
                     }
                     if (prmPeptideRefSet.contains(peptideDO.getPeptideRef())){

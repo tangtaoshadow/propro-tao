@@ -96,13 +96,32 @@ public class MathUtil {
         return bisectionLowHigh;
     }
 
-    public static int findNearestIndex(Double[] x, double value){
-        BisectionLowHigh bisectionLowHigh = bisection(x, value);
-        if(x[bisectionLowHigh.getHigh()] - value > value - x[bisectionLowHigh.getLow()]){
-            return bisectionLowHigh.getLow();
-        }else {
-            return bisectionLowHigh.getHigh();
+    public static BisectionLowHigh bisection(Float[] x, float value) {
+        if(x.length ==1){
+            return new BisectionLowHigh(0,0);
         }
+        BisectionLowHigh bisectionLowHigh = new BisectionLowHigh();
+        int high = x.length - 1;
+        int low = 0;
+        int mid;
+
+        if (value < x[0]) {
+            high = 0;
+        } else if (value > x[x.length - 1]) {
+            low = x.length - 1;
+        } else {
+            while (high - low != 1) {
+                mid = low + (high - low + 1) / 2;
+                if (x[mid] < value) {
+                    low = mid;
+                } else {
+                    high = mid;
+                }
+            }
+        }
+        bisectionLowHigh.setLow(low);
+        bisectionLowHigh.setHigh(high);
+        return bisectionLowHigh;
     }
 
     public static BisectionLowHigh bisectionBD(List<BigDecimal> x, double value) {

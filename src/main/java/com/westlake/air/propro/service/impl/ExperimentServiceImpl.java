@@ -674,6 +674,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     private List<AnalyseDataDO> extract(List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow) {
         List<AnalyseDataDO> dataList = new ArrayList<>();
         long start = System.currentTimeMillis();
+        //PRM use adaptiveWindow
         for (TargetPeptide ms : coordinates) {
             AnalyseDataDO dataDO = extractForOne(ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
             if (dataDO == null) {
@@ -792,7 +793,10 @@ public class ExperimentServiceImpl implements ExperimentService {
     private AnalyseDataDO extractForOne(TargetPeptide tp, TreeMap<Float, MzIntensityPairs> rtMap, Float mzExtractWindow, Float rtExtractWindow, String overviewId) {
         float mzStart = 0;
         float mzEnd = -1;
-
+        boolean useAdaptiveWindow = false;
+        if (mzExtractWindow == -1){
+            useAdaptiveWindow = true;
+        }
         //所有的碎片共享同一个RT数组
         ArrayList<Float> rtList = new ArrayList<>();
         for (Float rt : rtMap.keySet()) {
@@ -829,14 +833,17 @@ public class ExperimentServiceImpl implements ExperimentService {
                 MzIntensityPairs pairs = rtMap.get(rtArray[i]);
                 Float[] pairMzArray = pairs.getMzArray();
                 Float[] pairIntensityArray = pairs.getIntensityArray();
-                float acc = ConvolutionUtil.accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd);
+                float acc;
+                if (useAdaptiveWindow){
+                    acc = ConvolutionUtil.adaptiveAccumulation(pairMzArray, pairIntensityArray, fi.getMz().floatValue());
+                }else {
+                    acc = ConvolutionUtil.accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd);
+                }
                 if (acc != 0) {
                     isAllZero = false;
                 }
                 intArray[i] = acc;
             }
-
-
             if (isAllZero) {
                 continue;
                 //                dataDO.getIntensityMap().put(fi.getCutInfo(), null);

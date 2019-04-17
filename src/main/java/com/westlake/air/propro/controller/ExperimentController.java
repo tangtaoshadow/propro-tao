@@ -110,8 +110,7 @@ public class ExperimentController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED.getMessage());
             return "redirect:/project/list";
         }
-        model.addAttribute("projectName", projectName);
-        model.addAttribute("repository",result.getModel().getRepository());
+        model.addAttribute("project", result.getModel());
         return "experiment/batchcreate";
     }
 
@@ -377,8 +376,8 @@ public class ExperimentController extends BaseController {
                      //打分相关的入参
                      @RequestParam(value = "sigma", required = false, defaultValue = "3.75") Float sigma,
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
-                     @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.6") Float shapeScoreThreshold,
-                     @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.8") Float shapeWeightScoreThreshold,
+                     @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.5") Float shapeScoreThreshold,
+                     @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.6") Float shapeWeightScoreThreshold,
                      @RequestParam(value = "useEpps", required = false, defaultValue = "true") Boolean useEpps,
                      @RequestParam(value = "uniqueOnly", required = false, defaultValue = "false") Boolean uniqueOnly,
                      HttpServletRequest request,

@@ -23,7 +23,7 @@ public class GaussParamGuesser  {
     //percentage of k gaining or losing percent threshold to define hidden peaks
     private final double margin = 0.5;
     private final double weight = 100;
-    private final Strategy strategy = Strategy.Gradient;
+    private final Strategy strategy = Strategy.Intensity;
     public enum Strategy{Count, Intensity, Gradient};
 
     public GaussParamGuesser(Collection<WeightedObservedPoint> observations, int count) {

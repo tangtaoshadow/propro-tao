@@ -69,7 +69,7 @@ public enum ScoreType {
             false, true),
     ManhattScore("ManhattScore", "var_ManhattScore",
             "",
-            null, true),
+            null, false),
     YseriesScore("YseriesScore", "var_YseriesScore",
             "peptideRt对应的spectrumArray中，检测到的y离子的数量",
             true, true),

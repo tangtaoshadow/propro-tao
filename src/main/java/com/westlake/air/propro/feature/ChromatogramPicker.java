@@ -2,9 +2,8 @@ package com.westlake.air.propro.feature;
 
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.domain.bean.analyse.RtIntensityPairsDouble;
-import com.westlake.air.propro.domain.bean.math.BisectionLowHigh;
 import com.westlake.air.propro.domain.bean.score.IonPeak;
-import com.westlake.air.propro.utils.MathUtil;
+import com.westlake.air.propro.utils.PeakUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -43,7 +42,7 @@ public class ChromatogramPicker {
         List<IonPeak> ionPeakList = new ArrayList<>();
         for (int i = 0; i < maxPeakSize; i++) {
             double centralPeakRt = maxPeakPairs.getRtArray()[i];
-            closestPeakIndex = findClosestPeak(rtArray, centralPeakRt);
+            closestPeakIndex = PeakUtil.findNearestIndex(rtArray, centralPeakRt);
             //to the left
             leftIndex = closestPeakIndex - 1;
             while (leftIndex > 0 &&
@@ -73,17 +72,6 @@ public class ChromatogramPicker {
         return ionPeakList;
     }
 
-    private int findClosestPeak(Double[] rtArray, double rt) {
-        BisectionLowHigh bisectionLowHigh = MathUtil.bisection(rtArray, rt);
-        int low = bisectionLowHigh.getLow();
-        int high = bisectionLowHigh.getHigh();
-
-        if (Math.abs(rtArray[low] - rt) < Math.abs(rtArray[high] - rt)) {
-            return low;
-        } else {
-            return high;
-        }
-    }
 
     private double integratePeaks(Double[] intensityArray, int leftIndex, int rightIndex) {
         double intensity = 0d;

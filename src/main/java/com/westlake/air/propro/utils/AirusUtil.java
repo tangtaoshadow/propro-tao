@@ -178,10 +178,10 @@ public class AirusUtil {
     public static List<SimpleFeatureScores> findTopFeatureScores(List<SimpleScores> scores, String scoreType, Boolean strict) {
         List<SimpleFeatureScores> bestFeatureScoresList = new ArrayList<>();
         for (SimpleScores score : scores) {
-            SimpleFeatureScores bestFeatureScores = new SimpleFeatureScores(score.getPeptideRef(), score.getIsDecoy());
             if(score.getFeatureScoresList() == null || score.getFeatureScoresList().size() == 0){
                 continue;
             }
+            SimpleFeatureScores bestFeatureScores = new SimpleFeatureScores(score.getPeptideRef(), score.getIsDecoy());
             for (FeatureScores featureScores : score.getFeatureScoresList()) {
                 if (!featureScores.getThresholdPassed()){
                     continue;
@@ -329,6 +329,15 @@ public class AirusUtil {
                 peakScores.add(i);
             }
         }
+//        if (peakScores.size() == 0){
+//            SimpleFeatureScores scores = trainTargets.get(0);
+//            for (SimpleFeatureScores simpleFeatureScores: trainTargets){
+//                if (simpleFeatureScores.getMainScore() > scores.getMainScore()){
+//                    scores = simpleFeatureScores;
+//                }
+//            }
+//            peakScores.add(scores);
+//        }
 
         return peakScores;
     }

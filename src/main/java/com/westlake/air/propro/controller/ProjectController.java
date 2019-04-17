@@ -8,9 +8,13 @@ import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
+import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
+import com.westlake.air.propro.domain.params.Exp;
 import com.westlake.air.propro.domain.params.LumsParams;
+import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.ProjectQuery;
+import com.westlake.air.propro.parser.model.traml.Peptide;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.service.AnalyseDataService;
 import com.westlake.air.propro.service.AnalyseOverviewService;
@@ -22,12 +26,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.util.*;
 
 /**
@@ -191,15 +199,16 @@ public class ProjectController extends BaseController {
             return "redirect:/task/list";
         }
     }
+
     @RequestMapping(value = "/deleteirt/{id}")
     String deleteIrt(@PathVariable("id") String id,
-                     RedirectAttributes redirectAttributes){
+                     RedirectAttributes redirectAttributes) {
         List<ExperimentDO> expList = getAllExperimentsByProjectId(id);
         if (expList == null) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.NO_EXPERIMENT_UNDER_PROJECT);
             return "redirect:/project/list";
         }
-        for (ExperimentDO experimentDO: expList){
+        for (ExperimentDO experimentDO : expList) {
             experimentDO.setSlope(null);
             experimentDO.setIntercept(null);
             experimentService.update(experimentDO);
@@ -211,10 +220,10 @@ public class ProjectController extends BaseController {
 
     @RequestMapping(value = "/deleteAll/{id}")
     String deleteAll(@PathVariable("id") String id,
-                     RedirectAttributes redirectAttributes){
+                     RedirectAttributes redirectAttributes) {
         String name = projectService.getById(id).getModel().getName();
         List<ExperimentDO> expList = experimentService.getAllByProjectName(name);
-        for (ExperimentDO experimentDO: expList){
+        for (ExperimentDO experimentDO : expList) {
             String expId = experimentDO.getId();
             experimentService.delete(expId);
             scanIndexService.deleteAllByExperimentId(expId);
@@ -230,10 +239,10 @@ public class ProjectController extends BaseController {
 
     @RequestMapping(value = "/deleteAnalyse/{id}")
     String deleteAnalyse(@PathVariable("id") String id,
-                     RedirectAttributes redirectAttributes){
+                         RedirectAttributes redirectAttributes) {
         String name = projectService.getById(id).getModel().getName();
         List<ExperimentDO> expList = experimentService.getAllByProjectName(name);
-        for (ExperimentDO experimentDO: expList){
+        for (ExperimentDO experimentDO : expList) {
             String expId = experimentDO.getId();
             List<AnalyseOverviewDO> overviewDOList = analyseOverviewService.getAllByExpId(expId);
             for (AnalyseOverviewDO overviewDO : overviewDOList) {
@@ -273,15 +282,15 @@ public class ProjectController extends BaseController {
                      @RequestParam(value = "id", required = true) String id,
                      @RequestParam(value = "creator", required = false) String creator,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
-                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "800") Float rtExtractWindow,
+                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
                      @RequestParam(value = "note", required = false) String note,
                      //打分相关的入参
-                     @RequestParam(value = "sigma", required = false, defaultValue = "6.25") Float sigma,
+                     @RequestParam(value = "sigma", required = false, defaultValue = "3.75") Float sigma,
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
-                     @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.6") Float shapeScoreThreshold,
-                     @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.8") Float shapeWeightScoreThreshold,
-                     @RequestParam(value = "useEpps", required = false, defaultValue = "true") Boolean useEpps,
+                     @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.5") Float shapeScoreThreshold,
+                     @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.6") Float shapeWeightScoreThreshold,
+                     @RequestParam(value = "useEpps", required = false, defaultValue = "false") Boolean useEpps,
                      HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
 
@@ -373,7 +382,7 @@ public class ProjectController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED);
             return "redirect:/project/list";
         }
-        String projectName = resultDO.getModel().getName()+"("+resultDO.getModel().getId() +")";
+        String projectName = resultDO.getModel().getName() + "(" + resultDO.getModel().getId() + ")";
         //get corresponding experiments
         List<ExperimentDO> expList = experimentService.getAllByProjectName(resultDO.getModel().getName());
         String libraryId = "";
@@ -412,7 +421,7 @@ public class ProjectController extends BaseController {
         }
 
         HashMap<String, List<Boolean>> identifyMap = new HashMap<>();
-        for (PeptideDO peptideDO: peptideDOMap.values()){
+        for (PeptideDO peptideDO : peptideDOMap.values()) {
             //protein name
             protNameList.add(peptideDO.getProteinName());
             //fragment cutInfo list
@@ -421,17 +430,17 @@ public class ProjectController extends BaseController {
             HashMap<String, List<Integer>> fragIntListMap = new HashMap<>();
             String intOverall = "";
             List<Boolean> identifyStatList = new ArrayList<>();
-            for (String analyseOverviewId: analyseOverviewIdList) {
+            for (String analyseOverviewId : analyseOverviewIdList) {
                 //get fragment intensity map
                 AnalyseDataDO analyseDataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(analyseOverviewId, peptideDO.getPeptideRef(), false);
                 HashMap<String, Double> fragIntMap;
-                if (analyseDataDO == null){
+                if (analyseDataDO == null) {
                     fragIntMap = new HashMap<>();
                     identifyStatList.add(false);
-                }else {
-                    if (analyseDataDO.getIdentifiedStatus() == 0){
+                } else {
+                    if (analyseDataDO.getIdentifiedStatus() == 0) {
                         identifyStatList.add(true);
-                    }else {
+                    } else {
                         identifyStatList.add(false);
                     }
                     fragIntMap = analyseDataDO.getFragIntMap();
@@ -449,7 +458,7 @@ public class ProjectController extends BaseController {
                     }
                 }
             }
-            if (intOverall.isEmpty()){
+            if (intOverall.isEmpty()) {
                 intOverall = "0";
             }
             identifyMap.put(peptideDO.getPeptideRef(), identifyStatList);
@@ -469,6 +478,99 @@ public class ProjectController extends BaseController {
         model.addAttribute("identifyMap", identifyMap);
 
         return "project/overview";
+    }
+
+    @RequestMapping(value = "/writeToFile")
+    String writeToFile(Model model,
+                       @RequestParam(value = "id", required = true) String id,
+                       RedirectAttributes redirectAttributes) {
+
+        ProjectDO projectDO = projectService.getById(id).getModel();
+        List<ExperimentDO> experimentDOList = getAllExperimentsByProjectId(id);
+        String defaultOutputPath = projectDO.getRepository() + "/Propro_" + projectDO.getName() + ".tsv";
+        model.addAttribute("expList", experimentDOList);
+        model.addAttribute("project", projectDO);
+        model.addAttribute("defaultPathName", defaultOutputPath);
+        model.addAttribute("outputAllPeptides", false);
+        return "project/outputSelector";
+    }
+
+    @RequestMapping(value = "/doWriteToFile", method = RequestMethod.POST)
+    String doWriteToFile(Model model,
+                         @RequestParam(value = "projectId", required = true) String projectId,
+                         @RequestParam(value = "pathName", required = true) String pathName,
+                         @RequestParam(value = "outputAllPeptides", required = false, defaultValue = "false") Boolean outputAllPeptides,
+                         HttpServletRequest request,
+                         RedirectAttributes redirectAttributes) {
+
+        List<ExperimentDO> experimentDOList = getAllExperimentsByProjectId(projectId);
+        HashMap<String, HashMap<String, String>> intensityMap = new HashMap<>();
+        HashMap<String, String> pepToProt = new HashMap<>();
+        if (outputAllPeptides) {
+            List<PeptideDO> peptideDOList = peptideService.getAllByLibraryIdAndIsDecoy(analyseOverviewService.getAllByExpId(experimentDOList.get(0).getId()).get(0).getLibraryId(), false);
+            for (PeptideDO peptideDO: peptideDOList){
+                intensityMap.put(peptideDO.getPeptideRef(), new HashMap<>());
+                pepToProt.put(peptideDO.getPeptideRef(), peptideDO.getProteinName());
+            }
+            for (ExperimentDO experimentDO : experimentDOList) {
+                String checkState = request.getParameter(experimentDO.getId());
+                if (checkState != null && checkState.equals("on")) {
+                    List<AnalyseDataDO> analyseDataDOList = analyseDataService.getAllByOverviewId(analyseOverviewService.getAllByExpId(experimentDO.getId()).get(0).getId());
+                    for (AnalyseDataDO analyseDataDO : analyseDataDOList) {
+                        if (analyseDataDO.getIdentifiedStatus() == AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS){
+                            intensityMap.get(analyseDataDO.getPeptideRef()).put(experimentDO.getName(), analyseDataDO.getIntensitySum().toString());
+                        }else {
+                            intensityMap.get(analyseDataDO.getPeptideRef()).put(experimentDO.getName(), "Unidentified");
+                        }
+                    }
+                }
+            }
+        }else {
+            for (ExperimentDO experimentDO : experimentDOList) {
+                String checkState = request.getParameter(experimentDO.getId());
+                if (checkState != null && checkState.equals("on")) {
+                    List<AnalyseDataDO> analyseDataDOList = analyseDataService.getAllByOverviewId(analyseOverviewService.getAllByExpId(experimentDO.getId()).get(0).getId());
+                    for (AnalyseDataDO analyseDataDO: analyseDataDOList){
+                        if (analyseDataDO.getIdentifiedStatus() == AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS){
+                            if (intensityMap.containsKey(analyseDataDO.getPeptideRef())){
+                                intensityMap.get(analyseDataDO.getPeptideRef()).put(experimentDO.getName(), analyseDataDO.getIntensitySum().toString());
+                            }else {
+                                HashMap<String, String> map = new HashMap<>();
+                                map.put(experimentDO.getName(), analyseDataDO.getIntensitySum().toString());
+                                intensityMap.put(analyseDataDO.getPeptideRef(), map);
+                                pepToProt.put(analyseDataDO.getPeptideRef(), analyseDataDO.getProteinName());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        try {
+            File file = new File(pathName);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
+            writer.append("ProteinName").append("\t").append("PeptideRef");
+            for (ExperimentDO experimentDO: experimentDOList){
+                writer.append("\t").append(experimentDO.getName());
+            }
+            writer.append("\r");
+            for (String peptideRef: intensityMap.keySet()){
+                writer.append(pepToProt.get(peptideRef)).append("\t").append(peptideRef);
+                for (ExperimentDO experimentDO: experimentDOList){
+                    if (intensityMap.get(peptideRef).containsKey(experimentDO.getName())){
+                        writer.append("\t").append(intensityMap.get(peptideRef).get(experimentDO.getName()));
+                    }else {
+                        writer.append("\t");
+                    }
+                }
+                writer.append("\r");
+            }
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return "redirect:/project/list";
     }
 
     private List<ExperimentDO> getAllExperimentsByProjectId(String id) {

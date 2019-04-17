@@ -7,6 +7,7 @@ import com.westlake.air.propro.domain.bean.score.IonPeak;
 import com.westlake.air.propro.domain.bean.score.PeakGroup;
 import com.westlake.air.propro.utils.ArrayUtil;
 import com.westlake.air.propro.utils.MathUtil;
+import com.westlake.air.propro.utils.PeakUtil;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.util.FastMath;
 import org.slf4j.Logger;
@@ -83,7 +84,7 @@ public class FeatureFinder {
             //取得[bestLeft,bestRight]对应范围的Rt
             Double[] rasteredRt = new Double[rightIndex - leftIndex + 1];
             System.arraycopy(rtArray, leftIndex, rasteredRt, 0, rightIndex - leftIndex + 1);
-            int maxSpectrumIndex = MathUtil.findNearestIndex(rasteredRt,apexRt) + leftIndex;
+            int maxSpectrumIndex = PeakUtil.findNearestIndex(rasteredRt,apexRt) + leftIndex;
             //取得[bestLeft,bestRight]对应范围的Intensity
             HashMap<String, Double[]> ionHullInt = new HashMap<>();
             HashMap<String, Double> ionIntensity = new HashMap<>();
@@ -181,7 +182,7 @@ public class FeatureFinder {
             //取得[bestLeft,bestRight]对应范围的Rt
             Double[] rasteredRt = new Double[rightIndex - leftIndex + 1];
             System.arraycopy(rtArray, leftIndex, rasteredRt, 0, rightIndex - leftIndex + 1);
-            int nearestRtIndex = MathUtil.findNearestIndex(rasteredRt,apexRt);
+            int nearestRtIndex = PeakUtil.findNearestIndex(rasteredRt,apexRt);
             int maxSpectrumIndex = nearestRtIndex + leftIndex;
             //取得[bestLeft,bestRight]对应范围的Intensity
             HashMap<String, Double[]> ionHullInt = new HashMap<>();
