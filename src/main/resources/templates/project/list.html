@@ -41,8 +41,8 @@
                     <th width="5%" th:text="#{label_creator}"></th>
                     <th width="10%" th:text="#{label_detail_description}"></th>
                     <th width="10%" th:text="#{label_create_date}"></th>
-                    <th width="10%" th:text="#{label_last_modified_date}"></th>
-                    <th width="30%" th:text="#{label_operation}"></th>
+                    <!--<th width="10%" th:text="#{label_last_modified_date}"></th>-->
+                    <th width="40%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -53,15 +53,15 @@
                     <td th:text="${project.ownerName}"></td>
                     <td th:text="${project.description}"></td>
                     <td th:text="${#dates.format(project.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
-                    <td th:text="${#dates.format(project.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
+<!--                    <td th:text="${#dates.format(project.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>-->
                     <td>
                         <!--<a th:href="|@{/project/delete/${project.id}}|" class="btn btn-danger btn-sm">删除</a>-->
                         <a th:href="@{/experiment/batchcreate(projectName=${project?.name})}"
                            class="btn btn-danger btn-sm" th:text="#{label_add_exp}"></a>
                         <a th:href="@{/experiment/list(projectName=${project.name})}" class="btn btn-primary btn-sm" th:text="#{label_project_exps}"></a>
-                        <!--<a th:href="@{/project/aird/{id}(id=${project?.id})}" class="btn btn-warning btn-sm" th:text="#{label_batch_aird_compression}"></a>-->
+                        <!--<a th:href="@{/project/all(id=${project.id})}" class="btn btn-info btn-sm" th:text="#{label_do_complete_workflow}"></a>-->
                         <a th:href="@{/project/irt(id=${project.id})}" class="btn btn-success btn-sm" th:text="#{label_batch_irt}"></a>
-                        <a th:href="@{/project/extractor(id=${project.id})}" class="btn btn-info btn-sm" th:text="#{label_batch_convolution_and_score}"></a>
+                        <a th:href="@{/project/extractor(id=${project.id})}" class="btn btn-info btn-sm" th:text="#{label_do_complete_workflow}"></a>
                         <a th:href="@{/project/portionSelector(id=${project.id})}" class="btn btn-focus btn-sm" th:text="#{label_show_result_overview}"></a>
                         <a th:href="@{/project/writeToFile(id=${project.id})}" class="btn btn-accent btn-sm" th:text="#{btn_write_to_file}"></a>
                     </td>

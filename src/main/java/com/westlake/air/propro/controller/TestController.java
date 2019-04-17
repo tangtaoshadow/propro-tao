@@ -45,6 +45,8 @@ public class TestController extends BaseController {
     @Autowired
     ExperimentService experimentService;
     @Autowired
+    ProjectService projectService;
+    @Autowired
     ScanIndexService scanIndexService;
     @Autowired
     TaskService taskService;
@@ -79,20 +81,12 @@ public class TestController extends BaseController {
     String test(Model model, RedirectAttributes redirectAttributes) {
 
         try {
-            ResultDO<ExperimentDO> expResult = experimentService.getById("5c75f7d9fc6f9e20a85e961a");
-            ExperimentDO exp = expResult.getModel();
-            RandomAccessFile raf = new RandomAccessFile(new File(exp.getAirdPath()), "r");
-            HashMap<Float, ScanIndexDO> scanIndexMap = scanIndexService.getSwathIndexList("5c75f7d9fc6f9e20a85e961a");
-            for (ScanIndexDO scanIndexDO : scanIndexMap.values()) {
-                if (scanIndexDO.getPrecursorMzStart() == 400) {
-                    try {
-                        TreeMap map = airdFileParser.parseSwathBlockValues(raf, scanIndexDO, ByteOrder.LITTLE_ENDIAN);
-                        System.out.println(scanIndexDO.getPrecursorMzStart() + ":" + map.size());
-                    } catch (Exception e) {
-                        logger.error("PrecursorMzStart: " + scanIndexDO.getPrecursorMzStart());
-                        logger.error("Blocks: " + JSONArray.toJSONString(scanIndexDO.getBlocks()));
-                    }
-                }
+            List<ExperimentDO> expList = experimentService.getAllByProjectName("HYE124_TTOF6600_32fix");
+            for (ExperimentDO exp : expList) {
+                String json = FileUtil.readFile(exp.getAirdIndexPath());
+                AirdInfo airdInfo = JSONObject.parseObject(json, AirdInfo.class);
+                exp.setDescription("rawId:"+airdInfo.getRawId()+";"+exp.getDescription());
+                experimentService.update(exp);
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -8,14 +8,6 @@
 <!-- end::Head -->
 <!-- end::Body -->
 <body>
-<!--<div class="m-subheader ">-->
-    <!--<div class="d-flex align-items-center">-->
-        <!--<div class="mr-auto">-->
-            <!--<h3 class="m-subheader__title m-subheader__title&#45;&#45;separator" th:text="#{label_batch_convolution}">-->
-            <!--</h3>-->
-        <!--</div>-->
-    <!--</div>-->
-<!--</div>-->
 
 <div class="m-content" layout:fragment="content">
 
@@ -34,7 +26,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text" th:text="#{label_convolution_panel}"></h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_operation_panel}"></h3>
                         </div>
                     </div>
                 </div>
@@ -51,6 +43,17 @@
                                 </div>
                             </div>
                             <div class="form-group m-form__group row">
+                                <label for="iRtLibraryId" class="col-2 col-form-label" th:text="#{label_irt_library}"></label>
+                                <div class="col-10">
+                                    <select class="form-control m-input" id="iRtLibraryId" name="iRtLibraryId">
+                                        <option value="" th:text="#{label_no_irt}"></option>
+                                        <option th:each="library:${iRtLibraries}" th:value="${library.id}"
+                                                th:text="|${library.name}(${library.id})|"
+                                                th:selected="${iRtLibraryId}==${library.id}?true:false"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group m-form__group row">
                                 <label for="library" class="col-2 col-form-label" th:text="#{label_library}"></label>
                                 <div class="col-10">
                                     <select class="form-control m-input" id="library" name="libraryId">
@@ -60,6 +63,7 @@
                                     </select>
                                 </div>
                             </div>
+
                             <div class="form-group m-form__group row">
                                 <label for="rtExtractWindow" class="col-2 col-form-label" th:text="#{label_rt_extract_window}"></label>
                                 <div class="col-10">

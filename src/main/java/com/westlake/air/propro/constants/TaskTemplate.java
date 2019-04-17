@@ -26,7 +26,11 @@ public enum TaskTemplate {
      */
     EXTRACTOR("EXTRACTOR", "experiment/extractor"),
 
+    IRT_EXTRACTOR("IRT_EXTRACTOR", "experiment/extractor"),
+
     EXTRACT_PEAKPICK_SCORE("EXTRACT_PEAKPICK_SCORE", "experiment/extractor"),
+
+    IRT_EXTRACT_PEAKPICK_SCORE("IRT_EXTRACT_PEAKPICK_SCORE", "experiment/extractor"),
 
     /**
      * compute irt for slope and intercept

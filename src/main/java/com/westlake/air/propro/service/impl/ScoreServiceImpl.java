@@ -189,8 +189,8 @@ public class ScoreServiceImpl implements ScoreService {
             AnalyseDataUtil.decompress(dataDO);
         }
 
-        if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() <= 3) {
-            logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
+        if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() <= 2) {
+            logger.info((dataDO.getIsDecoy()?"[Decoy]":"[Target]")+"数据的离子片段少于2个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
             return;
         }

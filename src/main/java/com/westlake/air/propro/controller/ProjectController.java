@@ -1,5 +1,6 @@
 package com.westlake.air.propro.controller;
 
+import akka.util.Switch;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.constants.SuccessMsg;
@@ -258,8 +259,10 @@ public class ProjectController extends BaseController {
     String extractor(Model model,
                      @RequestParam(value = "id", required = true) String id,
                      @RequestParam(value = "libraryId", required = false) String libraryId,
+                     @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
                      RedirectAttributes redirectAttributes) {
         model.addAttribute("libraryId", libraryId);
+        model.addAttribute("iRtLibraryId", iRtLibraryId);
 
         ResultDO<ProjectDO> resultDO = projectService.getById(id);
         List<ExperimentDO> expList = experimentService.getAllByProjectName(resultDO.getModel().getName());
@@ -271,6 +274,7 @@ public class ProjectController extends BaseController {
         model.addAttribute("exps", expList);
         model.addAttribute("useEpps", true);
         model.addAttribute("libraries", getLibraryList(0));
+        model.addAttribute("iRtLibraries", getLibraryList(1));
         model.addAttribute("project", resultDO.getModel());
         model.addAttribute("scoreTypes", ScoreType.getShownTypes());
 
@@ -281,6 +285,7 @@ public class ProjectController extends BaseController {
     String doExtract(Model model,
                      @RequestParam(value = "id", required = true) String id,
                      @RequestParam(value = "creator", required = false) String creator,
+                     @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
                      @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
@@ -296,12 +301,24 @@ public class ProjectController extends BaseController {
 
         ResultDO<ProjectDO> projectResult = projectService.getById(id);
         if (projectResult.isFailed()) {
-            return "redirect:/extractor?id=" + id;
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED.getMessage());
+            return "redirect:/project/extractor?id=" + id;
         }
 
         ResultDO<LibraryDO> libResult = libraryService.getById(libraryId);
         if (libResult.isFailed()) {
-            return "redirect:/extractor?id=" + id;
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED.getMessage());
+            return "redirect:/project/extractor?id=" + id;
+        }
+
+        boolean doIrt = false;
+        if (iRtLibraryId != null && !iRtLibraryId.isEmpty()) {
+            ResultDO<LibraryDO> iRtLibResult = libraryService.getById(iRtLibraryId);
+            if (iRtLibResult.isFailed()) {
+                redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.IRT_LIBRARY_NOT_EXISTED.getMessage());
+                return "redirect:/project/extractor?id=" + id;
+            }
+            doIrt = true;
         }
 
         HashSet<String> scoreTypes = new HashSet<>();
@@ -314,24 +331,42 @@ public class ProjectController extends BaseController {
 
         List<ExperimentDO> exps = getAllExperimentsByProjectId(id);
         if (exps == null) {
-            redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.NO_EXPERIMENT_UNDER_PROJECT);
+            redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.NO_EXPERIMENT_UNDER_PROJECT.getMessage());
             return "redirect:/project/list";
         }
         String errorInfo = "";
+        TaskTemplate template = null;
+        if (doIrt && useEpps) {
+            template = TaskTemplate.IRT_EXTRACT_PEAKPICK_SCORE;
+        } else if (!doIrt && useEpps) {
+            template = TaskTemplate.EXTRACT_PEAKPICK_SCORE;
+        } else if (doIrt && !useEpps) {
+            template = TaskTemplate.IRT_EXTRACTOR;
+        } else {
+            template = TaskTemplate.EXTRACTOR;
+        }
+
         for (ExperimentDO exp : exps) {
-            if (exp.getSlope() == null || exp.getIntercept() == null) {
+            if (!doIrt && (exp.getSlope() == null || exp.getIntercept() == null)) {
                 errorInfo = errorInfo + ResultCode.IRT_FIRST + ":" + exp.getName() + "(" + exp.getId() + ")";
                 continue;
             }
-            TaskDO taskDO = new TaskDO(useEpps ? TaskTemplate.EXTRACT_PEAKPICK_SCORE : TaskTemplate.EXTRACTOR, exp.getName() + ":" + libResult.getModel().getName() + "(" + libraryId + ")");
+
+            TaskDO taskDO = new TaskDO(template, exp.getName() + ":" + libResult.getModel().getName() + "(" + libraryId + ")");
             taskService.insert(taskDO);
-            SlopeIntercept si = new SlopeIntercept(exp.getSlope(), exp.getIntercept());
-            SigmaSpacing ss = new SigmaSpacing(sigma, spacing);
 
             LumsParams input = new LumsParams();
+            SigmaSpacing ss = new SigmaSpacing(sigma, spacing);
+            input.setSigmaSpacing(ss);
             input.setExperimentDO(exp);
+            if (doIrt) {
+                input.setIRtLibraryId(iRtLibraryId);
+            } else {
+                SlopeIntercept si = new SlopeIntercept(exp.getSlope(), exp.getIntercept());
+                input.setSlopeIntercept(si);
+            }
             input.setLibraryId(libraryId);
-            input.setSlopeIntercept(si);
+
             if (StringUtils.isEmpty(creator)) {
                 creator = projectResult.getModel().getOwnerName();
             }
@@ -340,7 +375,7 @@ public class ProjectController extends BaseController {
             input.setMzExtractWindow(mzExtractWindow);
             input.setUseEpps(useEpps);
             input.setScoreTypes(scoreTypes);
-            input.setSigmaSpacing(ss);
+
             input.setXcorrShapeThreshold(shapeScoreThreshold);
             input.setXcorrShapeWeightThreshold(shapeWeightScoreThreshold);
             experimentTask.extract(input, taskDO);

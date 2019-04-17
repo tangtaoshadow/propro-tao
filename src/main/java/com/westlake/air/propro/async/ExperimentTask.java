@@ -14,6 +14,7 @@ import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.service.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -52,9 +53,9 @@ public class ExperimentTask extends BaseTask {
         taskService.update(taskDO);
         experimentService.uploadFile(experimentDO, file, taskDO);
         List<WindowRange> rangs;
-        if(experimentDO.getType().equals(Constants.EXP_TYPE_DIA_SWATH)){
+        if (experimentDO.getType().equals(Constants.EXP_TYPE_DIA_SWATH)) {
             rangs = experimentService.getPrmWindows(experimentDO.getId());
-        }else {
+        } else {
             rangs = experimentService.getWindows(experimentDO.getId());
         }
         experimentDO.setWindowRanges(rangs);
@@ -83,6 +84,7 @@ public class ExperimentTask extends BaseTask {
      * sigmaSpacing
      * shapeScoreThreshold
      * shapeScoreWeightThreshold
+     *
      * @return
      */
     @Async(value = "extractorExecutor")
@@ -91,24 +93,42 @@ public class ExperimentTask extends BaseTask {
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
 
-        taskDO.addLog("录入有斜率:" + lumsParams.getSlopeIntercept().getSlope() + "截距:" + lumsParams.getSlopeIntercept().getIntercept());
         taskDO.addLog("mz卷积窗口:" + lumsParams.getMzExtractWindow() + ",RT卷积窗口:" + lumsParams.getRtExtractWindow());
         taskDO.addLog("Sigma:" + lumsParams.getSigmaSpacing().getSigma() + ",Spacing:" + lumsParams.getSigmaSpacing().getSpacing());
         taskDO.addLog("使用标准库ID:" + lumsParams.getLibraryId());
         taskDO.addLog("Note:" + lumsParams.getNote());
-        taskDO.addLog("使用限制阈值Shape/ShapeWeight:" + lumsParams.getXcorrShapeThreshold()+"/"+lumsParams.getXcorrShapeWeightThreshold());
+        taskDO.addLog("使用限制阈值Shape/ShapeWeight:" + lumsParams.getXcorrShapeThreshold() + "/" + lumsParams.getXcorrShapeWeightThreshold());
+
+        long start = System.currentTimeMillis();
+        if (StringUtils.isNotEmpty(lumsParams.getIRtLibraryId())) {
+            taskDO.addLog("开始卷积IRT校准库并且计算iRT值");
+            taskService.update(taskDO);
+            ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(lumsParams.getExperimentDO(), lumsParams.getIRtLibraryId(), lumsParams.getMzExtractWindow(), lumsParams.getSigmaSpacing());
+            if(resultDO.isFailed()){
+                taskDO.addLog("iRT计算失败:"+resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
+                taskDO.finish(TaskStatus.FAILED.getName());
+                taskService.update(taskDO);
+                return;
+            }
+            SlopeIntercept si = resultDO.getModel();
+            lumsParams.setSlopeIntercept(si);
+            taskDO.addLog("iRT计算完毕");
+            taskDO.addLog("斜率:" + si.getSlope() + "截距:" + si.getIntercept());
+
+        }else{
+            taskDO.addLog("斜率:" + lumsParams.getSlopeIntercept().getSlope() + "截距:" + lumsParams.getSlopeIntercept().getIntercept());
+        }
+
         taskDO.addLog("入参准备完毕,开始卷积(打分),时间可能较长");
         taskService.update(taskDO);
-        long start = System.currentTimeMillis();
         experimentService.extract(lumsParams);
         taskDO.addLog("处理完毕,卷积(打分)总耗时:" + (System.currentTimeMillis() - start));
-        logger.info("处理完毕,卷积(打分)总耗时:" + (System.currentTimeMillis() - start));
-        start = System.currentTimeMillis();
         taskDO.addLog("开始进行合并打分");
         taskService.update(taskDO);
         FinalResult finalResult = airus.doAirus(lumsParams.getOverviewId(), new AirusParams());
         int matchedPeptideCount = finalResult.getMatchedPeptideCount();
-        taskDO.addLog("合并打分完毕,耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为" + matchedPeptideCount);
+
+        taskDO.addLog("流程执行完毕,总耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为" + matchedPeptideCount);
         taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
     }
@@ -116,14 +136,14 @@ public class ExperimentTask extends BaseTask {
     @Async(value = "extractorExecutor")
     public void convAndIrt(ExperimentDO experimentDO, String iRtLibraryId, Float mzExtractWindow, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
         taskDO.start();
-        taskDO.addLog("开始卷积IRT校准库并且计算iRT值");
+        taskDO.addLog("开始卷积IRT校准库并且计算iRT值,iRT Library ID:" + iRtLibraryId);
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
 
         ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(experimentDO, iRtLibraryId, mzExtractWindow, sigmaSpacing);
         if (resultDO.isFailed()) {
-            taskDO.addLog(resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
-            taskDO.finish(TaskStatus.SUCCESS.getName());
+            taskDO.addLog("iRT计算失败:"+resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
+            taskDO.finish(TaskStatus.FAILED.getName());
             taskService.update(taskDO);
             return;
         }

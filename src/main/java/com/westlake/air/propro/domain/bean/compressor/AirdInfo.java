@@ -23,6 +23,8 @@ public class AirdInfo {
     //是否忽略Intensity为0的键值对
     Boolean ignoreZeroIntensity = true;
 
+    //对应的raw文件中的id
+    String rawId;
     //转换压缩后的aird的文件路径,默认读取的是同目录下同文件名的aird文件,如果不存在则读取本字段
     String airdPath;
     //实验的描述

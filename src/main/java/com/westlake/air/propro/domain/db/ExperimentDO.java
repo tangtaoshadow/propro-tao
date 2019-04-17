@@ -51,8 +51,6 @@ public class ExperimentDO extends BaseDO {
     //mzxml的文件路径
     String filePath;
 
-    //原始文件是否已经被压缩为aird文件了
-//    Boolean hasAirusFile;
     //转换压缩后的aird的文件名称
     String airdPath;
     //转换压缩后aird的文件路径

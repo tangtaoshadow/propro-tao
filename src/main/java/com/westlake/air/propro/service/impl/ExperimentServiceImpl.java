@@ -310,7 +310,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             experimentDO.setByteOrder(airdInfo.getByteOrder());
             experimentDO.setStrategies(airdInfo.getStrategies());
             experimentDO.setOverlap(airdInfo.getOverlap());
-
+            experimentDO.setDescription("rawId:"+airdInfo.getRawId()+";"+experimentDO.getDescription());
             for (ScanIndexDO scanIndex : airdInfo.getScanIndexList()) {
                 scanIndex.setExperimentId(experimentDO.getId());
             }
