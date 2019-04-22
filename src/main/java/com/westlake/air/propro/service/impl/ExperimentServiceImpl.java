@@ -60,6 +60,8 @@ public class ExperimentServiceImpl implements ExperimentService {
     @Autowired
     AnalyseOverviewService analyseOverviewService;
     @Autowired
+    ExperimentService experimentService;
+    @Autowired
     TaskService taskService;
     @Autowired
     ScanIndexService scanIndexService;
@@ -246,6 +248,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             WindowRange rang = new WindowRange();
             rang.setStart(ms2Index.getPrecursorMzStart());
             rang.setEnd(ms2Index.getPrecursorMzEnd());
+            rang.setMz(ms2Index.getPrecursorMz());
             windowRangs.add(rang);
         }
         return windowRangs;
@@ -493,7 +496,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                 //Step2.获取标准库的目标肽段片段的坐标
                 //key为rt
                 TreeMap<Float, MzIntensityPairs> rtMap;
-                List<TargetPeptide> coordinates = peptideService.buildMS2Coordinates(iRtLibraryId, SlopeIntercept.create(), -1, range.getStart(), range.getEnd(), exp.getType(), false);
+                List<TargetPeptide> coordinates = peptideService.buildMS2Coordinates(iRtLibraryId, SlopeIntercept.create(), -1, range, null, exp.getType(), false);
                 if (coordinates.size() == 0) {
                     logger.warn("No iRT Coordinates Found,Rang:" + range.getStart() + ":" + range.getEnd());
                     continue;
@@ -544,6 +547,27 @@ public class ExperimentServiceImpl implements ExperimentService {
         }
     }
 
+    public HashMap<Float, Float[]> getPrmRtWindowMap(String expId){
+        ScanIndexQuery query = new ScanIndexQuery();
+        query.setExperimentId(expId);
+        query.setMsLevel(2);
+        List<ScanIndexDO> msAllIndexes = scanIndexDAO.getAll(query);
+        HashMap<Float, Float[]> peptideMap = new HashMap<>();
+        for(ScanIndexDO scanIndexDO: msAllIndexes){
+            float precursorMz = Math.round(scanIndexDO.getPrecursorMz() * 1000) / 1000f;
+            if (!peptideMap.containsKey(precursorMz)) {
+                peptideMap.put(precursorMz, new Float[]{Float.MAX_VALUE, Float.MIN_VALUE});
+            }
+            if(scanIndexDO.getRt()>peptideMap.get(precursorMz)[1]){
+                peptideMap.get(precursorMz)[1] = scanIndexDO.getRt();
+            }
+            if(scanIndexDO.getRt()<peptideMap.get(precursorMz)[0]){
+                peptideMap.get(precursorMz)[0] = scanIndexDO.getRt();
+            }
+        }
+        return peptideMap;
+    }
+
     /**
      * 卷积MS2图谱并且输出最终结果,不返回最终的卷积结果以减少内存的使用
      *
@@ -558,7 +582,11 @@ public class ExperimentServiceImpl implements ExperimentService {
         logger.info("获取Swath窗口信息");
         List<WindowRange> rangs = lumsParams.getExperimentDO().getWindowRanges();
         HashMap<Float, ScanIndexDO> swathMap = scanIndexService.getSwathIndexList(lumsParams.getExperimentDO().getId());
-
+        HashMap<Float, Float[]> rtRangeMap = null;
+        if (lumsParams.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM)){
+            String expId = analyseOverviewService.getById(overviewId).getModel().getExpId();
+            rtRangeMap = experimentService.getPrmRtWindowMap(expId);
+        }
         //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
         logger.info("总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
         int count = 1;
@@ -570,7 +598,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 //                if (swathMap.get(range.getStart()) == null){
 //                    System.out.println("");
 //                }
-                List<AnalyseDataDO> dataList = doExtract(raf, swathMap.get(range.getStart()), range, overviewId, lumsParams);
+                List<AnalyseDataDO> dataList = doExtract(raf, swathMap.get(range.getStart()), range, rtRangeMap, overviewId, lumsParams);
                 if (dataList != null) {
                     totalDataList.addAll(dataList);
                     //将卷积的核心数据压缩以后存储到本地
@@ -622,11 +650,19 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @return
      * @throws Exception
      */
-    private List<AnalyseDataDO> doExtract(RandomAccessFile raf, ScanIndexDO swathIndex, WindowRange range, String overviewId, LumsParams lumsParams) throws Exception {
+    private List<AnalyseDataDO> doExtract(RandomAccessFile raf, ScanIndexDO swathIndex, WindowRange range, HashMap<Float, Float[]> rtRangeMap, String overviewId, LumsParams lumsParams) throws Exception {
         List<TargetPeptide> coordinates;
         TreeMap<Float, MzIntensityPairs> rtMap;
         //Step2.获取标准库的目标肽段片段的坐标
-        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibraryId(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), range.getStart(), range.getEnd(), lumsParams.getExperimentDO().getType(),lumsParams.isUniqueOnly());
+        Float[] rtRange = null;
+        if (rtRangeMap != null){
+            float precursorMz = (range.getStart() + range.getEnd()) / 2;
+            rtRange = rtRangeMap.get(Math.round(precursorMz * 1000)/1000f);
+        }
+        if (rtRange == null){
+            System.out.println("debug here");
+        }
+        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibraryId(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), range, rtRange, lumsParams.getExperimentDO().getType(),lumsParams.isUniqueOnly());
         if (coordinates.isEmpty()) {
             logger.warn("No Coordinates Found,Rang:" + range.getStart() + ":" + range.getEnd());
             return null;

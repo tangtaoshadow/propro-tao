@@ -207,6 +207,7 @@ public class FeatureFinder {
 
                 //离子峰强度
                 Double ionIntTemp = MathUtil.sum(rasteredInt);
+//                Double ionIntTemp = getIonIntensity(rasteredInt, localMaxIntensity * 2);
 //                Double ionIntTemp = (intArray[maxSpectrumIndex]+1) * Math.min(maxSpectrumIndex - leftIndex, rightIndex - maxSpectrumIndex) * Constants.SQRT_2PI / 2d;
                 peakGroupInt += ionIntTemp;
                 ionIntensity.put(cutInfo, ionIntTemp);
@@ -337,4 +338,15 @@ public class FeatureFinder {
         return result;
     }
 
+    private Double getIonIntensity(Double[] intArray, double localMax){
+        Double result = 0d;
+        for (Double intensity: intArray){
+            if (intensity > localMax){
+                result += localMax;
+            }else {
+                result += intensity;
+            }
+        }
+        return result;
+    }
 }

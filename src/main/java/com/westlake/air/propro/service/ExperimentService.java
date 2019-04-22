@@ -9,6 +9,7 @@ import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -45,6 +46,8 @@ public interface ExperimentService {
      */
     List<WindowRange> getWindows(String expId);
     List<WindowRange> getPrmWindows(String expId);
+
+    HashMap<Float, Float[]> getPrmRtWindowMap(String expId);
 
     void uploadFile(ExperimentDO experimentDO, File file, TaskDO taskDO);
 

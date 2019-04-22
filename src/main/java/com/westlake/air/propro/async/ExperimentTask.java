@@ -53,7 +53,7 @@ public class ExperimentTask extends BaseTask {
         taskService.update(taskDO);
         experimentService.uploadFile(experimentDO, file, taskDO);
         List<WindowRange> rangs;
-        if (experimentDO.getType().equals(Constants.EXP_TYPE_DIA_SWATH)) {
+        if (experimentDO.getType().equals(Constants.EXP_TYPE_PRM)) {
             rangs = experimentService.getPrmWindows(experimentDO.getId());
         } else {
             rangs = experimentService.getWindows(experimentDO.getId());

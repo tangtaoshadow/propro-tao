@@ -6,12 +6,14 @@ import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.dao.LibraryDAO;
 import com.westlake.air.propro.dao.PeptideDAO;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.simple.Protein;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
 import com.westlake.air.propro.domain.query.PeptideQuery;
+import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.TaskService;
 import com.westlake.air.propro.service.PeptideService;
 import org.slf4j.Logger;
@@ -38,6 +40,8 @@ public class PeptideServiceImpl implements PeptideService {
     PeptideDAO peptideDAO;
     @Autowired
     LibraryDAO libraryDAO;
+    @Autowired
+    ExperimentService experimentService;
     @Autowired
     TaskService taskService;
 
@@ -225,23 +229,58 @@ public class PeptideServiceImpl implements PeptideService {
     }
 
     @Override
-    public List<TargetPeptide> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, float precursorMzStart, float precursorMzEnd, String type, boolean uniqueCheck) {
+    public List<TargetPeptide> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange mzRange, Float[] rtRange, String type, boolean uniqueCheck) {
 
         long start = System.currentTimeMillis();
         PeptideQuery query = new PeptideQuery(libraryId);
+        float precursorMz = (mzRange.getStart() + mzRange.getEnd()) / 2;
         if(type.equals(Constants.EXP_TYPE_PRM)){
-            float precursorMz = (precursorMzEnd + precursorMzStart)/2;
-            query.setMzStart(precursorMz - 0.0002d);
-            query.setMzEnd(precursorMz + 0.0002d);
+            //TODO: PRM
+            query.setMzStart(precursorMz - 0.0006d);
+            query.setMzEnd(precursorMz + 0.0006d);
         }else {
-            query.setMzStart((double) precursorMzStart);
-            query.setMzEnd((double) precursorMzEnd);
+            query.setMzStart((double) mzRange.getStart());
+            query.setMzEnd((double) mzRange.getEnd());
         }
         if(uniqueCheck){
             query.setIsUnique(true);
         }
 
         List<TargetPeptide> targetList = peptideDAO.getTPAll(query);
+        if (!targetList.isEmpty() && type.equals(Constants.EXP_TYPE_PRM)){
+            //PRM模式下, rtRange不为空;
+            TargetPeptide bestTarget = null, bestDecoy = null;
+            float mzDistance = Float.MAX_VALUE;
+            for (TargetPeptide peptide: targetList){
+
+//                check time
+                if (rtExtractionWindows != -1){
+                    float iRt = (peptide.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue();
+                    if (iRt < rtRange[0] - 30 || iRt > rtRange[1] + 30){
+                        continue;
+                    }
+                }
+                float tempMzDistance = Math.abs(peptide.getMz() - precursorMz);
+                if (tempMzDistance <= mzDistance){
+                    if (peptide.getIsDecoy()){
+                        bestDecoy = peptide;
+                    }else {
+                        bestTarget = peptide;
+                    }
+                    mzDistance = tempMzDistance;
+                }
+            }
+            targetList.clear();
+            if (bestTarget != null){
+                targetList.add(bestTarget);
+            }
+            if (bestDecoy != null){
+                targetList.add(bestDecoy);
+            }
+            if (mzDistance >= 0.0002f && bestTarget!=null){
+                System.out.println("Coordinate: " + bestTarget.getPeptideRef() + " " + mzDistance);
+            }
+        }
         long readDB = System.currentTimeMillis() - start;
         if (rtExtractionWindows != -1) {
             for (TargetPeptide targetPeptide : targetList) {

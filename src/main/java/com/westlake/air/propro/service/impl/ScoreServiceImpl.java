@@ -167,7 +167,9 @@ public class ScoreServiceImpl implements ScoreService {
         }
 
         if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() < 3) {
-            logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
+            if (!dataDO.getIsDecoy()){
+                logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
+            }
             return null;
         }
         List<FeatureScores> featureScoresList = new ArrayList<>();
@@ -290,7 +292,9 @@ public class ScoreServiceImpl implements ScoreService {
 
         if (featureScoresList.size() == 0) {
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
-            logger.info("肽段没有被选中的Peak, PeptideRef:" + dataDO.getPeptideRef());
+            if (!dataDO.getIsDecoy()){
+                logger.info("肽段没有被选中的Peak, PeptideRef:" + dataDO.getPeptideRef());
+            }
             return;
         }
 

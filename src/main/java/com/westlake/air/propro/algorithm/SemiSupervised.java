@@ -60,6 +60,7 @@ public class SemiSupervised {
 //                }
                 lastWeightsMap = weightsMap;
                 weightsMap = ldaLearner.learn(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName());
+                cleanWeightsMap(weightsMap);
                 logger.info("Train Weight:" + JSONArray.toJSONString(weightsMap));
                 for(Double value: weightsMap.values()){
                     if(value == null || Double.isNaN(value)){
@@ -186,5 +187,41 @@ public class SemiSupervised {
         bestTargets.add(bestTargetScore);
         trainPeaks.setBestTargets(bestTargets);
         return trainPeaks;
+    }
+
+    private void cleanWeightsMap(HashMap<String, Double> weightsMap){
+        String[] positive = new String[]{
+                ScoreType.XcorrShape.getTypeName(),
+                ScoreType.XcorrShapeWeighted.getTypeName(),
+                ScoreType.LibraryCorr.getTypeName(),
+                ScoreType.LibraryDotprod.getTypeName(),
+                ScoreType.BseriesScore.getTypeName(),
+                ScoreType.YseriesScore.getTypeName(),
+                ScoreType.IntensityScore.getTypeName(),
+                ScoreType.IsotopeCorrelationScore.getTypeName(),
+                ScoreType.LogSnScore.getTypeName()
+        };
+        String[] negative = new String[]{
+                ScoreType.IsotopeOverlapScore.getTypeName(),
+                ScoreType.MassdevScore.getTypeName(),
+                ScoreType.MassdevScoreWeighted.getTypeName(),
+                ScoreType.LibraryRsmd.getTypeName(),
+                ScoreType.NormRtScore.getTypeName(),
+                ScoreType.XcorrCoelution.getTypeName(),
+                ScoreType.XcorrCoelutionWeighted.getTypeName(),
+                ScoreType.LibraryManhattan.getTypeName(),
+                ScoreType.LibrarySangle.getTypeName(),
+                ScoreType.LibraryRootmeansquare.getTypeName()
+        };
+        for (String key: positive){
+            if (weightsMap.get(key) < 0){
+                weightsMap.put(key, 0d);
+            }
+        }
+        for (String key: negative){
+            if (weightsMap.get(key) > 0){
+                weightsMap.put(key, 0d);
+            }
+        }
     }
 }

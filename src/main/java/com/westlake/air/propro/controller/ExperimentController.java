@@ -514,24 +514,13 @@ public class ExperimentController extends BaseController {
     @ResponseBody
     ResultDO<JSONObject> getPrmWindows(Model model, @RequestParam(value = "expId", required = true) String expId){
 
-        ScanIndexQuery query = new ScanIndexQuery();
-        query.setExperimentId(expId);
-        query.setMsLevel(2);
-        List<ScanIndexDO> msAllIndexes = scanIndexDAO.getAll(query);
-        HashMap<Float, Float[]> peptideMap = new HashMap<>();
-        for(ScanIndexDO scanIndexDO: msAllIndexes){
-            if (!peptideMap.containsKey(scanIndexDO.getPrecursorMz())) {
-                peptideMap.put(scanIndexDO.getPrecursorMz(), new Float[]{Float.MAX_VALUE, Float.MIN_VALUE});
-            }
-            if(scanIndexDO.getRt()>peptideMap.get(scanIndexDO.getPrecursorMz())[1]){
-                peptideMap.get(scanIndexDO.getPrecursorMz())[1] = scanIndexDO.getRt();
-            }
-            if(scanIndexDO.getRt()<peptideMap.get(scanIndexDO.getPrecursorMz())[0]){
-                peptideMap.get(scanIndexDO.getPrecursorMz())[0] = scanIndexDO.getRt();
-            }
-        }
+        HashMap<Float, Float[]> peptideMap = experimentService.getPrmRtWindowMap(expId);
         JSONArray peptideMs1List = new JSONArray();
         for(Float precursorMz: peptideMap.keySet()){
+            if (Math.abs(peptideMap.get(precursorMz)[0] - peptideMap.get(precursorMz)[1]) < 20){
+//                System.out.println(precursorMz);
+                continue;
+            }
             JSONArray peptide = new JSONArray();
             peptide.add(new Float[]{peptideMap.get(precursorMz)[0] ,precursorMz});
             peptide.add(new Float[]{peptideMap.get(precursorMz)[1] ,precursorMz});
