@@ -13,23 +13,12 @@ public class WindowRange {
     Float start;
     //precursor mz end
     Float end;
+    //precursor mz
+    Float mz;
     //precursor mz interval
     Float interval;
 
-    Float mz;
-
     public WindowRange() {}
-
-    public WindowRange(Float start, Float end){
-        this.start = start;
-        this.end = end;
-    }
-
-    public WindowRange(Float start, Float end, Float interval){
-        this.start = start;
-        this.end = end;
-        this.interval = interval;
-    }
 
     @Override
     public boolean equals(Object obj) {
