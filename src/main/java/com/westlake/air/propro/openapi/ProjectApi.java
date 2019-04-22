@@ -3,8 +3,11 @@ package com.westlake.air.propro.openapi;
 import com.westlake.air.propro.controller.BaseController;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
+import com.westlake.air.propro.domain.db.ProjectDO;
 import com.westlake.air.propro.domain.query.LibraryQuery;
+import com.westlake.air.propro.domain.query.ProjectQuery;
 import com.westlake.air.propro.service.LibraryService;
+import com.westlake.air.propro.service.ProjectService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -16,44 +19,44 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "api/library")
+@RequestMapping(value = "api/project")
 @Api("OpenAPI 1.0-Beta for Propro")
-public class LibraryApi extends BaseController {
+public class ProjectApi extends BaseController {
 
     @Autowired
-    LibraryService libraryService;
+    ProjectService projectService;
 
     @ResponseBody
     @RequestMapping(value = "getById", method = RequestMethod.GET)
-    @ApiOperation(value = "Get Library by Id", notes = "根据ID获取标准库或者是iRT库对象")
+    @ApiOperation(value = "Get Project by Id", notes = "根据ID获取项目对象")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "library id", dataType = "string", required = true)
+            @ApiImplicitParam(name = "id", value = "project id", dataType = "string", required = true)
     })
-    public ResultDO<LibraryDO> getById(Model model,
-                                              @RequestParam(value = "id", required = true) String id) {
-        ResultDO<LibraryDO> resultDO = libraryService.getById(id);
+    public ResultDO<ProjectDO> getById(Model model,
+                                       @RequestParam(value = "id", required = true) String id) {
+        ResultDO<ProjectDO> resultDO = projectService.getById(id);
         return resultDO;
     }
 
     @ResponseBody
     @RequestMapping(value = "getList", method = RequestMethod.GET)
-    @ApiOperation(value = "Get Library List", notes = "根据条件获取标准库或者是iRT库列表")
+    @ApiOperation(value = "Get Project List", notes = "根据条件获取项目列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "type", value = "library type", dataType = "int", required = false),
+            @ApiImplicitParam(name = "name", value = "project name", dataType = "string", required = false),
             @ApiImplicitParam(name = "pageSize", value = "page size", dataType = "int", required = false, defaultValue = "50"),
             @ApiImplicitParam(name = "currentPage", value = "current page", dataType = "int", required = false, defaultValue = "1")
     })
-    public ResultDO<List<LibraryDO>> getList(Model model,
-                                                    @RequestParam(value = "type", required = false, defaultValue = "1") Integer type,
+    public ResultDO<List<ProjectDO>> getList(Model model,
+                                                    @RequestParam(value = "name", required = false) String name,
                                                     @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                                                     @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize) {
-        LibraryQuery libraryQuery = new LibraryQuery();
-        if (type != null) {
-            libraryQuery.setType(type);
+        ProjectQuery query = new ProjectQuery();
+        if (name != null) {
+            query.setName(name);
         }
 
-        buildPageQuery(libraryQuery, currentPage, pageSize);
-        ResultDO<List<LibraryDO>> resultDO = libraryService.getList(libraryQuery);
+        buildPageQuery(query, currentPage, pageSize);
+        ResultDO<List<ProjectDO>> resultDO = projectService.getList(query);
         return resultDO;
     }
 }

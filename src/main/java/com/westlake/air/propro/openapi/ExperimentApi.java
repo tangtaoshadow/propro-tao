@@ -25,42 +25,18 @@ public class ExperimentApi extends BaseController {
 
     @Autowired
     ExperimentService experimentService;
-    @Autowired
-    ScanIndexService scanIndexService;
-    @Autowired
-    LibraryService libraryService;
-    @Autowired
-    PeptideService peptideService;
 
-    /**
-     * 根据ID获取实验对象
-     *
-     * @param model
-     * @param id
-     * @return
-     */
-    @ApiOperation(value = "Get Id by experiment object", notes = "根据ID获取实验对象")
+    @ApiOperation(value = "Get Experiment by Id", notes = "根据ID获取实验对象")
     @RequestMapping(value = "getById", method = RequestMethod.GET)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "experiment id", dataType = "string", required = true)
     })
-    public ResultDO<ExperimentDO> getExperimentById(Model model,
+    public ResultDO<ExperimentDO> getById(Model model,
                                                     @RequestParam(value = "id", required = true) String id) {
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         return resultDO;
     }
 
-    /**
-     * 根据条件批量分页获取实验列表
-     *
-     * @param model
-     * @param currentPage
-     * @param pageSize
-     * @param projectName
-     * @param batchName
-     * @param expName
-     * @return
-     */
     @ResponseBody
     @RequestMapping(value = "getList", method = RequestMethod.GET)
     @ApiOperation(value = "Get Experiment List", notes = "根据条件获取实验列表")
@@ -71,7 +47,7 @@ public class ExperimentApi extends BaseController {
             @ApiImplicitParam(name = "pageSize", value = "page size", dataType = "int", required = false, defaultValue = "50"),
             @ApiImplicitParam(name = "currentPage", value = "current page", dataType = "int", required = false, defaultValue = "1")
     })
-    public ResultDO<List<ExperimentDO>> getExperimentList(Model model,
+    public ResultDO<List<ExperimentDO>> getList(Model model,
                                                           @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                                                           @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
                                                           @RequestParam(value = "projectName", required = false) String projectName,
@@ -87,8 +63,7 @@ public class ExperimentApi extends BaseController {
         if (batchName != null && !batchName.isEmpty()) {
             query.setBatchName(batchName);
         }
-        query.setPageSize(pageSize);
-        query.setPageNo(currentPage);
+        buildPageQuery(query, currentPage, pageSize);
         ResultDO<List<ExperimentDO>> resultDO = experimentService.getList(query);
 
         return resultDO;

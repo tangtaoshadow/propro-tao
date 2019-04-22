@@ -4,9 +4,6 @@ import com.westlake.air.propro.controller.BaseController;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.ScanIndexDO;
 import com.westlake.air.propro.domain.query.ScanIndexQuery;
-import com.westlake.air.propro.service.ExperimentService;
-import com.westlake.air.propro.service.LibraryService;
-import com.westlake.air.propro.service.PeptideService;
 import com.westlake.air.propro.service.ScanIndexService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -24,22 +21,8 @@ import java.util.List;
 public class ScanIndexApi extends BaseController {
 
     @Autowired
-    ExperimentService experimentService;
-    @Autowired
     ScanIndexService scanIndexService;
-    @Autowired
-    LibraryService libraryService;
-    @Autowired
-    PeptideService peptideService;
 
-
-    /**
-     * 根据ID获取索引对象
-     *
-     * @param model
-     * @param id
-     * @return
-     */
     @ResponseBody
     @RequestMapping(value = "getById", method = RequestMethod.GET)
     @ApiOperation(value = "Get ScanIndex by Id", notes = "根据ID获取索引对象")
@@ -52,14 +35,6 @@ public class ScanIndexApi extends BaseController {
         return resultDO;
     }
 
-    /**
-     * 根据ID获取标准库对象(包含iRT库)
-     *
-     * @param model
-     * @param currentPage
-     * @param pageSize
-     * @return
-     */
     @ResponseBody
     @RequestMapping(value = "getList", method = RequestMethod.GET)
     @ApiOperation(value = "Get ScanIndex List", notes = "根据条件获取索引列表")
