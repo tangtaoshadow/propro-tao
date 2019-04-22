@@ -12,6 +12,7 @@ import com.westlake.air.propro.parser.AirdFileParser;
 import com.westlake.air.propro.parser.MzXMLParser;
 import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.ScanIndexService;
+import com.westlake.air.propro.utils.ByteUtil;
 import com.westlake.air.propro.utils.FileUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,7 +126,7 @@ public class SpectrumController extends BaseController {
         try {
             File file = new File(experimentDO.getAirdPath());
             raf = new RandomAccessFile(file, "r");
-            pairs = airdFileParser.parseValue(raf, scanIndexDO.getPositionMap().get(PositionType.AIRD_MZ), scanIndexDO.getPositionMap().get(PositionType.AIRD_INTENSITY), experimentDO.getByteOrderClass());
+            pairs = airdFileParser.parseValue(raf, scanIndexDO.getPositionMap().get(PositionType.AIRD_MZ), scanIndexDO.getPositionMap().get(PositionType.AIRD_INTENSITY), ByteUtil.getByteOrder(experimentDO.getByteOrder()));
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

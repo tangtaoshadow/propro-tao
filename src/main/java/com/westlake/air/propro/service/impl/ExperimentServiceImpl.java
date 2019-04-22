@@ -440,7 +440,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             //Step2.获取该窗口内的谱图Map,key值代表了RT
             TreeMap<Float, MzIntensityPairs> rtMap;
             try{
-                rtMap = airdFileParser.parseSwathBlockValues(raf, scanIndexDO , exp.getByteOrderClass());
+                rtMap = airdFileParser.parseSwathBlockValues(raf, scanIndexDO , ByteUtil.getByteOrder(exp.getByteOrder()));
             }catch (Exception e){
                 logger.error("PrecursorMZ:"+scanIndexDO.getPrecursorMz());
                 throw e;
@@ -505,7 +505,7 @@ public class ExperimentServiceImpl implements ExperimentService {
                 ScanIndexDO index = swathMap.get(range.getStart());
                 if(index != null){
                     try{
-                        rtMap = airdFileParser.parseSwathBlockValues(raf, index, exp.getByteOrderClass());
+                        rtMap = airdFileParser.parseSwathBlockValues(raf, index, ByteUtil.getByteOrder(exp.getByteOrder()));
                     }catch (Exception e){
                         logger.error("PrecursorMZStart:"+index.getPrecursorMzStart());
                         throw e;
@@ -673,7 +673,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         //Step3.提取指定原始谱图
         long start = System.currentTimeMillis();
 
-        rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex, lumsParams.getExperimentDO().getByteOrderClass());
+        rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex, ByteUtil.getByteOrder(lumsParams.getExperimentDO().getByteOrder()));
 
         logger.info("IO及解码耗时:" + (System.currentTimeMillis() - start));
         if (lumsParams.isUseEpps()) {
