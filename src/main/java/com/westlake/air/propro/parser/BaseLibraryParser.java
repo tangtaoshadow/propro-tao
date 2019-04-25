@@ -64,6 +64,10 @@ public abstract class BaseLibraryParser {
             String[] forCharge = forDeviation[0].split("\\^");
             if (forCharge.length == 2) {
                 annotation.setCharge(Integer.parseInt(forCharge[1]));
+            }else if (forDeviation[0].contains("(")){
+                String[] msmsCutoff = forDeviation[0].split("\\(");
+                annotation.setCharge(Integer.parseInt(msmsCutoff[1].substring(0,1)));
+                forCharge[0] = msmsCutoff[0];
             }
             //默认为负,少数情况下校准值为正
             String nOrP = "-";
@@ -180,5 +184,14 @@ public abstract class BaseLibraryParser {
                 existedPeptide.putFragment(key, peptide.getFragmentMap().get(key));
             }
         }
+    }
+
+    protected HashMap<String, Integer> parseColumns(String line) {
+        String[] columns = line.split("\t");
+        HashMap<String, Integer> columnMap = new HashMap<>();
+        for (int i = 0; i < columns.length; i++) {
+            columnMap.put(StringUtils.deleteWhitespace(columns[i].toLowerCase()), i);
+        }
+        return columnMap;
     }
 }

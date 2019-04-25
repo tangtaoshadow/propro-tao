@@ -9,6 +9,7 @@ import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.query.LibraryQuery;
 import com.westlake.air.propro.domain.query.PeptideQuery;
 import com.westlake.air.propro.parser.FastaParser;
+import com.westlake.air.propro.parser.MsmsParser;
 import com.westlake.air.propro.parser.TraMLParser;
 import com.westlake.air.propro.parser.LibraryTsvParser;
 import com.westlake.air.propro.service.LibraryService;
@@ -43,6 +44,8 @@ public class LibraryServiceImpl implements LibraryService {
     LibraryTsvParser tsvParser;
     @Autowired
     TraMLParser traMLParser;
+    @Autowired
+    MsmsParser msmsParser;
     @Autowired
     TaskService taskService;
     @Autowired
@@ -204,6 +207,8 @@ public class LibraryServiceImpl implements LibraryService {
             resultDO = tsvParser.parseAndInsert(libFileStream, library, fastaUniqueSet, prmPeptideRefSet, libraryId, taskDO);
         } else if (fileName.toLowerCase().endsWith("traml")) {
             resultDO = traMLParser.parseAndInsert(libFileStream, library, fastaUniqueSet, prmPeptideRefSet, libraryId, taskDO);
+        } else if (fileName.toLowerCase().endsWith("txt")){
+            resultDO = msmsParser.parseAndInsert(libFileStream, library, fastaUniqueSet, prmPeptideRefSet, libraryId, taskDO);
         } else {
             return ResultDO.buildError(ResultCode.INPUT_FILE_TYPE_MUST_BE_TSV_OR_TRAML);
         }

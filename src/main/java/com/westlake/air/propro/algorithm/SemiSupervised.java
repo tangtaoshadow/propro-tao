@@ -60,7 +60,7 @@ public class SemiSupervised {
 //                }
                 lastWeightsMap = weightsMap;
                 weightsMap = ldaLearner.learn(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName());
-                cleanWeightsMap(weightsMap);
+//                cleanWeightsMap(weightsMap);
                 logger.info("Train Weight:" + JSONArray.toJSONString(weightsMap));
                 for(Double value: weightsMap.values()){
                     if(value == null || Double.isNaN(value)){
@@ -75,6 +75,8 @@ public class SemiSupervised {
                 }
                 ldaLearner.score(trainData, weightsMap);
             }
+//            cleanWeightsMap(weightsMap);
+//            System.out.println(JSONArray.toJSONString(weightsMap));
             //每一轮结束后要将这一轮打出的加权总分删除掉,以免影响下一轮打分
 //            trainData.removeWeightedTotalScore();
             ldaLearnData.setWeightsMap(weightsMap);
@@ -123,7 +125,7 @@ public class SemiSupervised {
         List<SimpleFeatureScores> topDecoyPeaks = AirusUtil.findTopFeatureScores(trainData.getDecoys(), usedScoreType, false);
 
         Double cutoffNew;
-        if (topTargetPeaks.size() < 200){
+        if (topTargetPeaks.size() < 100){
             Double decoyMax = Double.MIN_VALUE, targetMax = Double.MIN_VALUE;
             for (SimpleFeatureScores scores: topDecoyPeaks){
                 if (scores.getMainScore() > decoyMax){
@@ -215,12 +217,12 @@ public class SemiSupervised {
         };
         for (String key: positive){
             if (weightsMap.get(key) < 0){
-                weightsMap.put(key, 0d);
+                weightsMap.put(key, -weightsMap.get(key));
             }
         }
         for (String key: negative){
             if (weightsMap.get(key) > 0){
-                weightsMap.put(key, 0d);
+                weightsMap.put(key, -weightsMap.get(key));
             }
         }
     }

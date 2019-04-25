@@ -554,7 +554,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         List<ScanIndexDO> msAllIndexes = scanIndexDAO.getAll(query);
         HashMap<Float, Float[]> peptideMap = new HashMap<>();
         for(ScanIndexDO scanIndexDO: msAllIndexes){
-            float precursorMz = Math.round(scanIndexDO.getPrecursorMz() * 1000) / 1000f;
+            float precursorMz = scanIndexDO.getPrecursorMz();
             if (!peptideMap.containsKey(precursorMz)) {
                 peptideMap.put(precursorMz, new Float[]{Float.MAX_VALUE, Float.MIN_VALUE});
             }
@@ -656,8 +656,8 @@ public class ExperimentServiceImpl implements ExperimentService {
         //Step2.获取标准库的目标肽段片段的坐标
         Float[] rtRange = null;
         if (rtRangeMap != null){
-            float precursorMz = (range.getStart() + range.getEnd()) / 2;
-            rtRange = rtRangeMap.get(Math.round(precursorMz * 1000)/1000f);
+            float precursorMz = range.getMz();
+            rtRange = rtRangeMap.get(precursorMz);
         }
         if (rtRange == null){
             System.out.println("debug here");

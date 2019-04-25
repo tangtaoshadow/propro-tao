@@ -233,7 +233,7 @@ public class PeptideServiceImpl implements PeptideService {
 
         long start = System.currentTimeMillis();
         PeptideQuery query = new PeptideQuery(libraryId);
-        float precursorMz = (mzRange.getStart() + mzRange.getEnd()) / 2;
+        float precursorMz = mzRange.getMz();
         if(type.equals(Constants.EXP_TYPE_PRM)){
             //TODO: PRM
             query.setMzStart(precursorMz - 0.0006d);

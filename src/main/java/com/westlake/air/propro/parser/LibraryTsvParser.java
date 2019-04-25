@@ -57,7 +57,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
 
         ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
         try {
-            InputStreamReader isr = new InputStreamReader(in, "UTF-8");
+            InputStreamReader isr = new InputStreamReader(in, StandardCharsets.UTF_8);
             BufferedReader reader = new BufferedReader(isr);
             String line = reader.readLine();
             if (line == null) {
@@ -135,15 +135,6 @@ public class LibraryTsvParser extends BaseLibraryParser {
             e.printStackTrace();
         }
         return tranResult;
-    }
-
-    private HashMap<String, Integer> parseColumns(String line) {
-        String[] columns = line.split("\t");
-        HashMap<String, Integer> columnMap = new HashMap<>();
-        for (int i = 0; i < columns.length; i++) {
-            columnMap.put(StringUtils.deleteWhitespace(columns[i].toLowerCase()), i);
-        }
-        return columnMap;
     }
 
     /**

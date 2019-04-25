@@ -9,6 +9,7 @@ import com.westlake.air.propro.domain.db.FragmentInfo;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.parser.model.chemistry.AminoAcid;
 import com.westlake.air.propro.utils.TransitionUtil;
+import groovyjarjarpicocli.CommandLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,6 +118,9 @@ public class ShuffleGenerator extends BaseGenerator {
             decoyFi.setAnnotations(targetFi.getAnnotation().toAnnoInfo());
             Annotation oneAnno = targetFi.getAnnotation();
             List<String> unimodIds = new ArrayList<>();
+            if (oneAnno.getType() == null){
+                System.out.println("debug");
+            }
             List<AminoAcid> acids = fragmentFactory.getFragmentSequence(bestDecoy, oneAnno.getType(), oneAnno.getLocation());
             for (AminoAcid aminoAcid : acids) {
                 if (aminoAcid.getModId() != null) {
