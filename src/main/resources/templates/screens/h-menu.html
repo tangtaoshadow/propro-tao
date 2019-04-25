@@ -166,24 +166,36 @@
             </div>
         </li>
 
-        <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel" data-menu-submenu-toggle="click"
-            aria-haspopup="true">
-            <a href="#" class="m-menu__link m-menu__toggle">
-                <span class="m-menu__link-text" th:text="#{menu_documents}"></span>
-                <i class="m-menu__hor-arrow la la-angle-down"></i>
-                <i class="m-menu__ver-arrow la la-angle-right"></i>
+<!--        <li class="m-menu__item  m-menu__item&#45;&#45;submenu m-menu__item&#45;&#45;rel" data-menu-submenu-toggle="click"-->
+<!--            aria-haspopup="true">-->
+<!--            <a href="#" class="m-menu__link m-menu__toggle">-->
+<!--                <span class="m-menu__link-text" th:text="#{menu_documents}"></span>-->
+<!--                <i class="m-menu__hor-arrow la la-angle-down"></i>-->
+<!--                <i class="m-menu__ver-arrow la la-angle-right"></i>-->
+<!--            </a>-->
+<!--            <div class="m-menu__submenu m-menu__submenu&#45;&#45;classic m-menu__submenu&#45;&#45;left">-->
+<!--                <span class="m-menu__arrow m-menu__arrow&#45;&#45;adjust"></span>-->
+<!--                <ul class="m-menu__subnav">-->
+<!--                    <li class="m-menu__item " data-redirect="true" aria-haspopup="true">-->
+<!--                        <a href="https://www.yuque.com/proteomicspro/documentation" class="m-menu__link ">-->
+<!--                            <i class="m-menu__link-icon flaticon-diagram"></i>-->
+<!--                            <span class="m-menu__link-text" th:text="#{menu_manual}"></span>-->
+<!--                        </a>-->
+<!--                    </li>-->
+<!--                    <li class="m-menu__item " data-redirect="true" aria-haspopup="true">-->
+<!--                        <a th:href="@{/swagger-ui.html}" class="m-menu__link ">-->
+<!--                            <i class="m-menu__link-icon flaticon-diagram"></i>-->
+<!--                            <span class="m-menu__link-text" th:text="#{openapi}"></span>-->
+<!--                        </a>-->
+<!--                    </li>-->
+<!--                </ul>-->
+<!--            </div>-->
+<!--        </li>-->
+
+        <li class="m-menu__item  m-menu__item--submenu m-menu__item--rel">
+            <a th:href="@{/swagger-ui.html}" class="m-menu__link ">
+                <span class="m-menu__link-text" th:text="#{openapi}"></span>
             </a>
-            <div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left">
-                <span class="m-menu__arrow m-menu__arrow--adjust"></span>
-                <ul class="m-menu__subnav">
-                    <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
-                        <a href="https://www.yuque.com/proteomicspro/documentation" class="m-menu__link ">
-                            <i class="m-menu__link-icon flaticon-diagram"></i>
-                            <span class="m-menu__link-text" th:text="#{menu_manual}"></span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
         </li>
     </ul>
 </div>

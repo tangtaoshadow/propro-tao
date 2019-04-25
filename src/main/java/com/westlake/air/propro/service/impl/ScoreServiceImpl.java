@@ -19,6 +19,7 @@ import com.westlake.air.propro.rtnormalizer.RtNormalizerScorer;
 import com.westlake.air.propro.scorer.*;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.AnalyseDataUtil;
+import com.westlake.air.propro.utils.ByteUtil;
 import com.westlake.air.propro.utils.FileUtil;
 import com.westlake.air.propro.utils.MathUtil;
 import org.apache.commons.lang3.tuple.Pair;
@@ -142,7 +143,7 @@ public class ScoreServiceImpl implements ScoreService {
 
             TreeMap<Float, MzIntensityPairs> rtMap = null;
             if (input.isUsedDIAScores()) {
-                rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex, exp.getByteOrderClass());
+                rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex, ByteUtil.getByteOrder(exp.getByteOrder()));
             }
 
             for (AnalyseDataDO dataDO : dataList) {
