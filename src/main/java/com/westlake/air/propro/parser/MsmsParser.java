@@ -105,10 +105,7 @@ public class MsmsParser extends BaseLibraryParser {
             irtLibrary.setType(LibraryDO.TYPE_IRT);
             libraryService.insert(irtLibrary);
 
-            for (PeptideDO peptideDO: irtPepList){
-                peptideDO.setLibraryId(irtLibrary.getId());
-                peptideDO.setLibraryName(irtLibrary.getName());
-            }
+
 
 //                ResultDO<PeptideDO> resultDO = parseMsmsLine(line, columnMap, library);
 
@@ -147,6 +144,12 @@ public class MsmsParser extends BaseLibraryParser {
             }
 
             peptideService.insertAll(new ArrayList<>(libPepMap.values()), false);
+            for (PeptideDO peptideDO: irtPepList){
+                peptideDO.setLibraryId(irtLibrary.getId());
+                peptideDO.setLibraryName(irtLibrary.getName());
+                peptideDO.setId(null);
+            }
+            peptideService.insertAll(irtPepList, false);
             libraryService.countAndUpdateForLibrary(irtLibrary);
 //            taskDO.addLog(libPepMap.size() + "条肽段数据插入成功,其中蛋白质种类有" + uniqueProt.size() + "个");
             taskService.update(taskDO);

@@ -100,6 +100,9 @@ public class ScoreServiceImpl implements ScoreService {
             }
             double groupRt = dataDO.getRt();
             List<ScoreRtPair> scoreRtPairs = rtNormalizerScorer.score(peptideFeature.getPeakGroupList(), peptideFeature.getNormedLibIntMap(), groupRt);
+            if (scoreRtPairs.size() == 0){
+                continue;
+            }
             scoreRtList.add(scoreRtPairs);
             compoundRt.add(groupRt);
         }
