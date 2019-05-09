@@ -24,6 +24,9 @@ public class LibraryDO extends BaseDO {
     @Id
     String id;
 
+    //Official
+    String label;
+
     @Indexed(unique = true)
     String name;
 

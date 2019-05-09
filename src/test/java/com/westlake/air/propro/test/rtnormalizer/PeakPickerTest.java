@@ -1,8 +1,8 @@
 package com.westlake.air.propro.test.rtnormalizer;
 
 import com.westlake.air.propro.domain.bean.analyse.RtIntensityPairsDouble;
-import com.westlake.air.propro.feature.PeakPicker;
-import com.westlake.air.propro.feature.SignalToNoiseEstimator;
+import com.westlake.air.propro.algorithm.feature.PeakPicker;
+import com.westlake.air.propro.algorithm.feature.SignalToNoiseEstimator;
 import com.westlake.air.propro.test.BaseTest;
 import com.westlake.air.propro.utils.FileUtil;
 import org.junit.Test;

@@ -7,7 +7,7 @@ import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.propro.domain.db.ScanIndexDO;
 import com.westlake.air.propro.domain.query.ScanIndexQuery;
-import com.westlake.air.propro.parser.AirdFileParser;
+import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.service.ScanIndexService;
 import com.westlake.air.propro.utils.ConvolutionUtil;
 import org.slf4j.Logger;

@@ -1,6 +1,6 @@
 package com.westlake.air.propro.dao;
 
-import com.westlake.air.propro.parser.model.chemistry.Unimod;
+import com.westlake.air.propro.algorithm.parser.model.chemistry.Unimod;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

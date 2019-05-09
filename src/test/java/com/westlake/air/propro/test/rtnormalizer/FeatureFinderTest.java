@@ -1,6 +1,6 @@
 package com.westlake.air.propro.test.rtnormalizer;
 
-import com.westlake.air.propro.feature.*;
+import com.westlake.air.propro.algorithm.feature.*;
 import com.westlake.air.propro.test.BaseTest;
 import org.springframework.beans.factory.annotation.Autowired;
 

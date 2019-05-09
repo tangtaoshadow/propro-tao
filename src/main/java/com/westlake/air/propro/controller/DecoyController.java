@@ -1,7 +1,7 @@
 package com.westlake.air.propro.controller;
 
-import com.westlake.air.propro.algorithm.FragmentFactory;
-import com.westlake.air.propro.decoy.generator.ShuffleGenerator;
+import com.westlake.air.propro.algorithm.formula.FragmentFactory;
+import com.westlake.air.propro.algorithm.decoy.generator.ShuffleGenerator;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.peptide.FragmentResult;
 import com.westlake.air.propro.domain.db.LibraryDO;

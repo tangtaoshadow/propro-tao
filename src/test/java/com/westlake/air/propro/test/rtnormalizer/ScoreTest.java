@@ -1,7 +1,7 @@
 package com.westlake.air.propro.test.rtnormalizer;
 
-import com.westlake.air.propro.feature.*;
-import com.westlake.air.propro.rtnormalizer.RtNormalizerScorer;
+import com.westlake.air.propro.algorithm.feature.*;
+import com.westlake.air.propro.algorithm.rtnormalizer.RtNormalizerScorer;
 import com.westlake.air.propro.test.BaseTest;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Test;

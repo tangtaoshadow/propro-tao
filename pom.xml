@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.westlake.air</groupId>
+    <groupId>com.westlake.propro</groupId>
     <artifactId>propro</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -42,9 +42,9 @@
         </dependency>
 
         <!--<dependency>-->
-            <!--<groupId>org.springframework.data</groupId>-->
-            <!--<artifactId>spring-data-mongodb</artifactId>-->
-            <!--<version>2.1.0.RC1</version>-->
+        <!--<groupId>org.springframework.data</groupId>-->
+        <!--<artifactId>spring-data-mongodb</artifactId>-->
+        <!--<version>2.1.0.RC1</version>-->
         <!--</dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -61,13 +61,13 @@
             <artifactId>spring-boot-starter-jersey</artifactId>
         </dependency>
         <!--<dependency>-->
-            <!--<groupId>org.springframework.boot</groupId>-->
-            <!--<artifactId>spring-boot-starter-quartz</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
         <!--<groupId>org.springframework.boot</groupId>-->
-        <!--<artifactId>spring-boot-starter-security</artifactId>-->
+        <!--<artifactId>spring-boot-starter-quartz</artifactId>-->
         <!--</dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-security</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -213,12 +213,6 @@
             <artifactId>JavaFastPFOR</artifactId>
             <version>0.1.12</version>
         </dependency>
-
-        <!--<dependency>-->
-            <!--<groupId>org.dcache</groupId>-->
-            <!--<artifactId>nfs4j-core</artifactId>-->
-            <!--<version>0.17.2</version>-->
-        <!--</dependency>-->
     </dependencies>
 
     <repositories>
@@ -246,12 +240,12 @@
     <build>
         <finalName>propro</finalName>
         <!--<resources>-->
-            <!--<resource>-->
-                <!--<directory>src/main/resources</directory>-->
-                <!--<includes>-->
-                    <!--<include>**/**</include>-->
-                <!--</includes>-->
-            <!--</resource>-->
+        <!--<resource>-->
+        <!--<directory>src/main/resources</directory>-->
+        <!--<includes>-->
+        <!--<include>**/**</include>-->
+        <!--</includes>-->
+        <!--</resource>-->
         <!--</resources>-->
         <plugins>
             <plugin>

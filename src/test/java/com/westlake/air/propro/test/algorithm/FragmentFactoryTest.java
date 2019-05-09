@@ -1,13 +1,13 @@
 package com.westlake.air.propro.test.algorithm;
 
-import com.westlake.air.propro.algorithm.FormulaCalculator;
-import com.westlake.air.propro.algorithm.FragmentFactory;
+import com.westlake.air.propro.algorithm.formula.FormulaCalculator;
+import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.domain.bean.analyse.MzResult;
 import com.westlake.air.propro.domain.bean.peptide.Fragment;
 import com.westlake.air.propro.domain.bean.peptide.FragmentResult;
 import com.westlake.air.propro.domain.db.FragmentInfo;
 import com.westlake.air.propro.domain.db.PeptideDO;
-import com.westlake.air.propro.parser.model.chemistry.AminoAcid;
+import com.westlake.air.propro.algorithm.parser.model.chemistry.AminoAcid;
 import com.westlake.air.propro.service.PeptideService;
 import com.westlake.air.propro.test.BaseTest;
 import org.junit.Test;

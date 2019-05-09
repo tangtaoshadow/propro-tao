@@ -1,6 +1,6 @@
 package com.westlake.air.propro.test.algorithm;
 
-import com.westlake.air.propro.algorithm.Airus;
+import com.westlake.air.propro.algorithm.learner.Airus;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.PeptideService;

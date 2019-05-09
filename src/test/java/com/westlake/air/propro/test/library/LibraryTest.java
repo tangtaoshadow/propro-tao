@@ -4,7 +4,7 @@ import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
-import com.westlake.air.propro.parser.TraMLParser;
+import com.westlake.air.propro.algorithm.parser.TraMLParser;
 import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.PeptideService;
 import com.westlake.air.propro.test.BaseTest;
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.HashSet;
 import java.util.List;
 
 /**

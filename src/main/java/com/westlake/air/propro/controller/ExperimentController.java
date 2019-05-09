@@ -15,7 +15,7 @@ import com.westlake.air.propro.domain.params.ExpVO;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.ScanIndexQuery;
-import com.westlake.air.propro.parser.MzXMLParser;
+import com.westlake.air.propro.algorithm.parser.MzXMLParser;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;

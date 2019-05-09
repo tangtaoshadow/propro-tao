@@ -2,7 +2,7 @@ package com.westlake.air.propro.test.rtnormalizer;
 
 import com.westlake.air.propro.domain.bean.analyse.RtIntensityPairs;
 import com.westlake.air.propro.domain.bean.analyse.RtIntensityPairsDouble;
-import com.westlake.air.propro.feature.PeakSpline;
+import com.westlake.air.propro.algorithm.feature.PeakSpline;
 import com.westlake.air.propro.test.BaseTest;
 import org.junit.Test;
 

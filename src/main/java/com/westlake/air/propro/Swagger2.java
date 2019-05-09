@@ -11,6 +11,9 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+/**
+ * 自动化Open API文档生成模块
+ */
 @EnableSwagger2
 @Configuration
 public class Swagger2 {

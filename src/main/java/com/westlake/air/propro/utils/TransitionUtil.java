@@ -1,7 +1,7 @@
 package com.westlake.air.propro.utils;
 
 import com.westlake.air.propro.domain.db.PeptideDO;
-import com.westlake.air.propro.parser.model.chemistry.AminoAcid;
+import com.westlake.air.propro.algorithm.parser.model.chemistry.AminoAcid;
 
 import java.util.List;
 

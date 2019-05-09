@@ -1,12 +1,10 @@
 package com.westlake.air.propro.test.parser;
 
-import com.westlake.air.propro.parser.MzXMLParser;
+import com.westlake.air.propro.algorithm.parser.MzXMLParser;
 import com.westlake.air.propro.test.BaseTest;
 import org.apache.commons.io.FilenameUtils;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.*;
 import java.util.ArrayList;
 
 public class MzXMLParserTest extends BaseTest {

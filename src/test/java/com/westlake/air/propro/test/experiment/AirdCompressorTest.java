@@ -1,6 +1,6 @@
 package com.westlake.air.propro.test.experiment;
 
-import com.westlake.air.propro.parser.AirdFileParser;
+import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.ScanIndexService;
 import com.westlake.air.propro.test.BaseTest;

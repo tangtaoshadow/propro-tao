@@ -1,7 +1,7 @@
 package com.westlake.air.propro.dao;
 
 import com.alibaba.fastjson.JSONObject;
-import com.westlake.air.propro.parser.model.chemistry.Residue;
+import com.westlake.air.propro.algorithm.parser.model.chemistry.Residue;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

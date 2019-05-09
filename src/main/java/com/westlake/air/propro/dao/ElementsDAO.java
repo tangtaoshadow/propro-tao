@@ -2,7 +2,7 @@ package com.westlake.air.propro.dao;
 
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.constants.Constants;
-import com.westlake.air.propro.parser.model.chemistry.Element;
+import com.westlake.air.propro.algorithm.parser.model.chemistry.Element;
 import com.westlake.air.propro.utils.ElementUtil;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;

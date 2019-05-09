@@ -2,7 +2,7 @@ package com.westlake.air.propro.domain.db;
 
 import com.westlake.air.propro.domain.BaseDO;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
-import com.westlake.air.propro.parser.model.chemistry.AminoAcid;
+import com.westlake.air.propro.algorithm.parser.model.chemistry.AminoAcid;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;

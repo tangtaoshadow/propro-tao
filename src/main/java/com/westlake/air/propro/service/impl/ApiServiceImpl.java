@@ -1,6 +1,6 @@
 package com.westlake.air.propro.service.impl;
 
-import com.westlake.air.propro.algorithm.Airus;
+import com.westlake.air.propro.algorithm.learner.Airus;
 import com.westlake.air.propro.domain.bean.airus.AirusParams;
 import com.westlake.air.propro.domain.bean.airus.FinalResult;
 import com.westlake.air.propro.service.ApiService;

@@ -1,7 +1,7 @@
 package com.westlake.air.propro.async;
 
-import com.westlake.air.propro.algorithm.Airus;
-import com.westlake.air.propro.algorithm.FragmentFactory;
+import com.westlake.air.propro.algorithm.learner.Airus;
+import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.TaskStatus;
 import com.westlake.air.propro.domain.ResultDO;

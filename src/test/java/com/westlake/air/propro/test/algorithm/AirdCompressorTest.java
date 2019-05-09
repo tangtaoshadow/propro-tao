@@ -1,6 +1,6 @@
 package com.westlake.air.propro.test.algorithm;
 
-import com.westlake.air.propro.parser.MzXMLParser;
+import com.westlake.air.propro.algorithm.parser.MzXMLParser;
 import com.westlake.air.propro.test.BaseTest;
 import com.westlake.air.propro.utils.CompressUtil;
 import org.junit.Test;

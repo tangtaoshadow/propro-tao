@@ -1,7 +1,7 @@
 package com.westlake.air.propro.test;
 
 import com.alibaba.fastjson.JSON;
-import com.westlake.air.propro.MainPlatformApplication;
+import com.westlake.air.propro.ProproApplication;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -18,7 +18,7 @@ import java.io.FileInputStream;
  * Time: 2018-08-08 19:32
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = MainPlatformApplication.class)
+@SpringBootTest(classes = ProproApplication.class)
 @WebAppConfiguration
 public class BaseTest {
 

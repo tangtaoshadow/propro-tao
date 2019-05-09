@@ -1,9 +1,9 @@
 package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.westlake.air.propro.algorithm.FormulaCalculator;
-import com.westlake.air.propro.algorithm.FragmentFactory;
-import com.westlake.air.propro.decoy.generator.ShuffleGenerator;
+import com.westlake.air.propro.algorithm.formula.FormulaCalculator;
+import com.westlake.air.propro.algorithm.formula.FragmentFactory;
+import com.westlake.air.propro.algorithm.decoy.generator.ShuffleGenerator;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.simple.Protein;
