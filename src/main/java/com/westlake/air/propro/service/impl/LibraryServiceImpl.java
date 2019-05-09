@@ -5,6 +5,7 @@ import com.westlake.air.propro.constants.TaskStatus;
 import com.westlake.air.propro.dao.LibraryDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
+import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.query.LibraryQuery;
 import com.westlake.air.propro.domain.query.PeptideQuery;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -189,14 +191,14 @@ public class LibraryServiceImpl implements LibraryService {
         }
 
         //parse prm
-        HashSet<String> prmPeptideRefSet = new HashSet<>();
+        HashMap<String, PeptideDO> prmPeptideRefMap = new HashMap<>();
         if(prmFileStream != null) {
             try {
-                ResultDO<HashSet<String>> prmResultDO = tsvParser.getPrmPeptideRef(prmFileStream);
+                ResultDO<HashMap<String, PeptideDO>> prmResultDO = tsvParser.getPrmPeptideRef(prmFileStream);
                 if (prmResultDO.isFailed()) {
                     logger.warn(prmResultDO.getMsgInfo());
                 }
-                prmPeptideRefSet = prmResultDO.getModel();
+                prmPeptideRefMap = prmResultDO.getModel();
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -204,19 +206,19 @@ public class LibraryServiceImpl implements LibraryService {
 
 
         if (fileName.toLowerCase().endsWith("tsv") || fileName.toLowerCase().endsWith("csv")) {
-            resultDO = tsvParser.parseAndInsert(libFileStream, library, fastaUniqueSet, prmPeptideRefSet, libraryId, taskDO);
+            resultDO = tsvParser.parseAndInsert(libFileStream, library, fastaUniqueSet, prmPeptideRefMap, libraryId, taskDO);
         } else if (fileName.toLowerCase().endsWith("traml")) {
-            resultDO = traMLParser.parseAndInsert(libFileStream, library, fastaUniqueSet, prmPeptideRefSet, libraryId, taskDO);
+            resultDO = traMLParser.parseAndInsert(libFileStream, library, fastaUniqueSet, prmPeptideRefMap, libraryId, taskDO);
         } else if (fileName.toLowerCase().endsWith("txt")){
-            resultDO = msmsParser.parseAndInsert(libFileStream, library, fastaUniqueSet, prmPeptideRefSet, libraryId, taskDO);
+            resultDO = msmsParser.parseAndInsert(libFileStream, library, fastaUniqueSet, prmPeptideRefMap, libraryId, taskDO);
         } else {
             return ResultDO.buildError(ResultCode.INPUT_FILE_TYPE_MUST_BE_TSV_OR_TRAML);
         }
-        if (prmPeptideRefSet.size() > 0){
-            for (String peptideRef: prmPeptideRefSet){
-                logger.warn("Library中不包含所选Peptide: " + peptideRef);
-            }
-        }
+//        if (prmPeptideRefMap.size() > 0){
+//            for (String peptideRef: prmPeptideRefSet){
+//                logger.warn("Library中不包含所选Peptide: " + peptideRef);
+//            }
+//        }
 
         return resultDO;
     }

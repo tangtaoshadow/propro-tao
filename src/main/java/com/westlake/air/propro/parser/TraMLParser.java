@@ -166,7 +166,7 @@ public class TraMLParser extends BaseLibraryParser {
     }
 
     @Override
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashSet<String> prmPeptideRefSet, String libraryId, TaskDO taskDO) {
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashMap<String, PeptideDO> prmPepMap, String libraryId, TaskDO taskDO) {
         TraML traML = parse(in);
 
         HashMap<String, Peptide> peptideMap = makePeptideMap(traML.getCompoundList().getPeptideList());
@@ -188,6 +188,7 @@ public class TraMLParser extends BaseLibraryParser {
             HashSet<String> fastaDropProt = new HashSet<>();
             HashSet<String> libraryDropProt = new HashSet<>();
             HashSet<String> uniqueProt = new HashSet<>();
+            HashSet<String> prmPeptideRefSet = new HashSet<>(prmPepMap.keySet());
             for (Transition transition : traML.getTransitionList()) {
                 if(!prmPeptideRefSet.isEmpty() && !isPrmPeptideRef(transition, peptideMap, prmPeptideRefSet)){
                     continue;

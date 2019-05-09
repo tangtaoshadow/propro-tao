@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static com.westlake.air.propro.constants.Constants.MAX_PAGE_SIZE_FOR_FRAGMENT;
+import static com.westlake.air.propro.constants.Constants.Y_SIDE_MASS;
 
 /**
  * Created by James Lu MiaoShan
@@ -60,12 +61,12 @@ public class FragmentFactory {
         //bSeries 若要提高精度，提高json的精度
         List<Double> bSeries = new ArrayList<>();
         double monoWeight = Constants.PROTON_MASS_U * charge;
-        if (unimodHashMap != null && unimodHashMap.containsKey(0)) {
-            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(0));
-            if (unimod != null) {
-                monoWeight += unimod.getMonoMass();
-            }
-        }
+//        if (unimodHashMap != null && unimodHashMap.containsKey(0)) {
+//            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(0));
+//            if (unimod != null) {
+//                monoWeight += unimod.getMonoMass();
+//            }
+//        }
 
         char[] acidCodeArray = sequence.toCharArray();
         for (int i = 0; i < acidCodeArray.length - 1; i++) {
@@ -73,29 +74,40 @@ public class FragmentFactory {
             if (aa == null) {
                 continue;
             }
-            if (i == 0) {
-                monoWeight += aa.getMonoIsotopicMass();
-                continue;
+            if (unimodHashMap != null && unimodHashMap.containsKey(i)) {
+                Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(i));
+                if (unimod != null) {
+                    monoWeight += unimod.getMonoMass();
+                }
             }
             monoWeight += aa.getMonoIsotopicMass();
+//            if (i == 0) {
+//                continue;
+//            }
             bSeries.add(monoWeight);
         }
 
         //ySeries
         List<Double> ySeries = new ArrayList<>();
         monoWeight = Constants.PROTON_MASS_U * charge;
-        if (unimodHashMap != null && unimodHashMap.containsKey(acidCodeArray.length - 1)) {
-            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(acidCodeArray.length - 1));
-            if (unimod != null) {
-                monoWeight += unimod.getMonoMass();
-            }
-        }
+//        if (unimodHashMap != null && unimodHashMap.containsKey(acidCodeArray.length - 1)) {
+//            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(acidCodeArray.length - 1));
+//            if (unimod != null) {
+//                monoWeight += unimod.getMonoMass();
+//            }
+//        }
 
         double h2oWeight = elementsDAO.getMonoWeight(ElementsDAO.H2O);
         for (int i = acidCodeArray.length - 1; i > 0; i--) {
-            com.westlake.air.propro.parser.model.chemistry.AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCodeArray[i]));
+            AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCodeArray[i]));
             if (aa == null) {
                 continue;
+            }
+            if (unimodHashMap != null && unimodHashMap.containsKey(i)) {
+                Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(i));
+                if (unimod != null) {
+                    monoWeight += unimod.getMonoMass();
+                }
             }
             monoWeight += aa.getMonoIsotopicMass();
             ySeries.add(monoWeight + h2oWeight);
@@ -136,6 +148,22 @@ public class FragmentFactory {
         }
 
         return bySeriesMap;
+    }
+
+    public double getTheoryMass(HashMap<Integer, String> unimodHashMap, String sequence){
+        double totalMass = Constants.B_SIDE_MASS + Y_SIDE_MASS;
+        char[] acidCodeArray = sequence.toCharArray();
+        for (char acidCode: acidCodeArray) {
+            AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCode));
+            totalMass += aa.getMonoIsotopicMass();
+        }
+        for (String unimodCode: unimodHashMap.values()){
+            Unimod unimod = unimodDAO.getUnimod(unimodCode);
+            if (unimod != null) {
+                totalMass += unimod.getMonoMass();
+            }
+        }
+        return totalMass;
     }
 
     public Fragment getFragment(PeptideDO peptide, FragmentInfo fragmentInfo) {

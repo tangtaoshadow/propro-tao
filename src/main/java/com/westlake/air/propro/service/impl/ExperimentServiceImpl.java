@@ -220,6 +220,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             WindowRange rang = new WindowRange();
             rang.setStart(ms2Indexes.get(i).getPrecursorMzStart());
             rang.setEnd(ms2Indexes.get(i).getPrecursorMzEnd());
+            rang.setMz(ms2Indexes.get(i).getPrecursorMz());
             rang.setInterval(ms2Interval);
             windowRangs.add(rang);
         }

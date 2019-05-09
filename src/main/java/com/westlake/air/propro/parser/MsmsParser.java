@@ -1,9 +1,13 @@
 package com.westlake.air.propro.parser;
 
+import afu.org.checkerframework.checker.igj.qual.I;
+import com.westlake.air.propro.algorithm.FragmentFactory;
+import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.Unimod;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.peptide.Annotation;
+import com.westlake.air.propro.domain.bean.score.BYSeries;
 import com.westlake.air.propro.domain.db.FragmentInfo;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
@@ -35,10 +39,12 @@ public class MsmsParser extends BaseLibraryParser {
     TaskService taskService;
     @Autowired
     LibraryService libraryService;
+    @Autowired
+    FragmentFactory fragmentFactory;
 
     public final Logger logger = LoggerFactory.getLogger(MsmsParser.class);
     @Override
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashSet<String> prmPeptideRefSet, String libraryId, TaskDO taskDO) {
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashMap<String, PeptideDO> prmPepMap, String libraryId, TaskDO taskDO) {
 
         ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
         try {
@@ -68,13 +74,14 @@ public class MsmsParser extends BaseLibraryParser {
 
 
             HashSet<String> prmSequenceSet = new HashSet<>();
-            for (String prmPeptideRef : prmPeptideRefSet) {
-                prmSequenceSet.add(removeUnimod(prmPeptideRef.split("_")[0]));
+            for (PeptideDO peptideDO : prmPepMap.values()) {
+                prmSequenceSet.add(peptideDO.getSequence());
             }
             String lastSequence = "";
             List<String[]> sequenceInExps = new ArrayList<>();
             HashMap<String, PeptideDO> libPepMap = new HashMap<>();
             List<PeptideDO> irtPepList = new ArrayList<>();
+            PeptideDO currentPeptideDO;
             while ((line = reader.readLine()) != null) {
                 String[] row = line.split("\t");
                 String sequence = row[columnMap.get("sequence")];
@@ -86,7 +93,7 @@ public class MsmsParser extends BaseLibraryParser {
                         continue;
                     }
                 } else {
-                    HashMap<String, PeptideDO> peptideDOMap = parseSequence(sequenceInExps, columnMap, library);
+                    HashMap<String, PeptideDO> peptideDOMap = parseSequence(sequenceInExps, columnMap, prmPepMap, library);
                     List<PeptideDO> peptideList = new ArrayList<>(peptideDOMap.values());
                     if (!peptideList.isEmpty() && peptideList.get(0).getProteinName().equals("iRT")){
                         irtPepList.addAll(peptideList);
@@ -159,7 +166,7 @@ public class MsmsParser extends BaseLibraryParser {
         return tranResult;
     }
 
-    private HashMap<String, PeptideDO> parseSequence(List<String[]> sequenceInExps, HashMap<String, Integer> columnMap, LibraryDO library){
+    private HashMap<String, PeptideDO> parseSequence(List<String[]> sequenceInExps, HashMap<String, Integer> columnMap, HashMap<String, PeptideDO> prmPepMap, LibraryDO library){
         HashMap<String, Float> scoreMap = new HashMap<>();
         HashMap<String,String[]> peptideRefMap = new HashMap<>();
         for (String[] row: sequenceInExps){
@@ -180,7 +187,9 @@ public class MsmsParser extends BaseLibraryParser {
         for (String peptideRef: peptideRefMap.keySet()){
             PeptideDO peptideDO = new PeptideDO();
             String[] row = peptideRefMap.get(peptideRef);
-            setFragmentInfo(peptideDO, row[columnMap.get("matches")].split(";"), row[columnMap.get("intensities")].split(";"), row[columnMap.get("masses")].split(";"));
+            String[] ionArray = row[columnMap.get("matches")].split(";");
+            String[] massArray = row[columnMap.get("masses")].split(";");
+            setFragmentInfo(peptideDO, ionArray, row[columnMap.get("intensities")].split(";"), massArray);
             peptideDO.setMz(Double.parseDouble(row[columnMap.get("m/z")]));
             peptideDO.setPeptideRef(peptideRef);
             String protName = row[columnMap.get("proteins")];
@@ -229,4 +238,115 @@ public class MsmsParser extends BaseLibraryParser {
             peptideDO.getFragmentMap().put(cutInfo, fragmentInfo);
         }
     }
+
+    private void verifyUnimod(String[] ionArray, String[] massArray, HashMap<Integer, String> unimodMap, String sequence, int charge, Double mass){
+        //check total mass
+        double theoryMass = fragmentFactory.getTheoryMass(unimodMap, sequence);
+        if (Math.abs(theoryMass - mass) < Constants.ELEMENT_TOLERANCE){
+            return;
+        }
+        //get b,y map; default y2,y3,b2,b3
+        for (int i = 0; i < ionArray.length; i++){
+            if (ionArray[i].contains("-") || ionArray[i].contains("+")){
+                continue;
+            }
+            if (ionArray[i].startsWith("b")){
+
+            }
+        }
+
+        BYSeries bySeries = fragmentFactory.getBYSeries(unimodMap, sequence, charge);
+        List<Double> bSeries = bySeries.getBSeries();
+        List<Double> ySeries = bySeries.getYSeries();
+        String[] bModInfoArray = new String[sequence.length()];
+        String[] yModInfoArray = new String[sequence.length()];
+        Double bCompensateMz = 0d, yCompensateMz = 0d;
+        int lastBPosition = 0, lastYPosition = 0;
+        HashMap<String, Double> posMzMap = new HashMap<>();
+        for (int i = 0; i < ionArray.length; i++){
+            String cutInfo = ionArray[i];
+            if (cutInfo.contains("-") || cutInfo.contains("+")){
+                continue;
+            }
+            double fragmentMz = Double.parseDouble(massArray[i]);
+            int position = Integer.parseInt(ionArray[i].substring(1));
+            if (cutInfo.startsWith("b")){
+                double theoMz = bSeries.get(position - 1) + bCompensateMz;
+                double mzDiff = fragmentMz - theoMz;
+                //TODO: @Nico infer all kinds of unimods
+                if (mzDiff > Constants.ELEMENT_TOLERANCE){
+                    String roundModMz = Long.toString(Math.round(mzDiff));
+                    if (position - lastBPosition == 1){
+                        bModInfoArray[position - 1] = "1;" + roundModMz;
+                    }else {
+                        for (int pos = lastBPosition; pos < position; pos ++){
+                            bModInfoArray[pos] = "2;" + lastBPosition + ";" + roundModMz;
+                        }
+                    }
+                }
+                lastBPosition = position;
+                bCompensateMz += mzDiff;
+                continue;
+            }
+            if (cutInfo.startsWith("y")){
+                double theoMz = ySeries.get(position - 1) + yCompensateMz;
+                double mzDiff = fragmentMz - theoMz;
+                if (mzDiff > Constants.ELEMENT_TOLERANCE){
+                    String roundModMz = Long.toString(Math.round(mzDiff));
+                    if (position - lastYPosition == 1){
+                        yModInfoArray[sequence.length() - position] = "1;" + roundModMz;
+                    }else {
+                        for (int pos = lastYPosition; pos < position; pos ++){
+                            yModInfoArray[sequence.length() - lastYPosition - 1] = "2;" + lastYPosition + ";" + roundModMz;
+                        }
+                    }
+                }
+                lastYPosition = position;
+                yCompensateMz += mzDiff;
+            }
+        }
+        String[] modInfoArray = new String[sequence.length()];
+        for (int i = 0; i < sequence.length(); i++){
+            if (bModInfoArray[i] == null || yModInfoArray[i] == null){
+                continue;
+            }
+            if (bModInfoArray[i].startsWith("1") && yModInfoArray[i].startsWith("1")){
+                int roundModMz = Integer.parseInt(bModInfoArray[i].split(";")[1]);
+                unimodIntepreter(i, roundModMz, unimodMap);
+                continue;
+            }
+            if (bModInfoArray[i].startsWith("1") && yModInfoArray[i].startsWith("2")){
+                int bRoundModMz = Integer.parseInt(bModInfoArray[i].split(";")[2]);
+                int yRoundModMz = Integer.parseInt(yModInfoArray[i].split(";")[2]);
+                unimodIntepreter(i, bRoundModMz, unimodMap);
+                int newRoundModMz = 0;
+                if (bRoundModMz != yRoundModMz){
+                    newRoundModMz = yRoundModMz - bRoundModMz;
+                }
+                String groupIdentifier = yModInfoArray[i].split(";")[1];
+                int groupIter = i + 1;
+                while (groupIter < sequence.length() && yModInfoArray[groupIter].startsWith("2")){
+                    String[] modInfo = yModInfoArray[groupIter].split(";");
+                    if (!modInfo[1].equals(groupIdentifier)){
+                        break;
+                    }
+                    if (newRoundModMz == 0){
+                        yModInfoArray[groupIter] = null;
+                    }else {
+                        yModInfoArray[groupIter] = "2;" + groupIdentifier + ";" + newRoundModMz;
+                    }
+                    groupIter ++;
+                }
+            }
+        }
+    }
+
+    private void unimodIntepreter(int index, int roundModMz, HashMap<Integer, String> unimodMap){
+        if (roundModMz == 57){
+            unimodMap.put(index, "4");
+        }else {
+            logger.info("Modification is not UniMod:4");
+        }
+    }
+
 }

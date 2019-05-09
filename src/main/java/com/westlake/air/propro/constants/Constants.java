@@ -1,5 +1,7 @@
 package com.westlake.air.propro.constants;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-06-27 21:05
@@ -74,6 +76,9 @@ public class Constants {
     public static final double S = 0.0417d;
     public static final double P = 0d;
     public static final double PROTON_MASS_U = 1.007276466771d;
+    public static final double Y_SIDE_MASS = 19.01784153d;
+    public static final double B_SIDE_MASS = 1.007276466771d;
+    public static final double ELEMENT_TOLERANCE = 0.5d;
 
     public static final int SCORE_RANGE = 20;
 
