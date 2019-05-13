@@ -12,6 +12,7 @@ public class SuccessMsg {
     public static String EXTRACT_DATA_SUCCESS = "卷积提取数据成功! Data Extract Success!";
     public static String DELETE_SUCCESS = "删除成功! Delete Success!";
     public static String UPDATE_SUCCESS = "更新成功! Update Success!";
+    public static String CHANGE_PASSWORD_SUCCESS = "密码更新成功! Update Password Success!";
 
     public static String ALL_FILES_UNDER_THIS_PROJECT_ARE_ALREADY_COMPRESSED = "ALL_FILES_UNDER_THIS_PROJECT_ARE_ALREADY_COMPRESSED!该项目下的所有文件均已经被转化为Aird压缩文件";
     public static String ALL_EXPERIMENTS_UNDER_THIS_PROJECT_ARE_ALREADY_COMPUTE_IRT = "ALL_EXPERIMENTS_UNDER_THIS_PROJECT_ARE_ALREADY_COMPUTE_IRT!该项目下的所有实验IRT均已经计算完毕";

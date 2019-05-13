@@ -151,10 +151,12 @@ public enum ResultCode implements Serializable {
 
     /**
      * ******
-     * SQL-COMMON
+     * User
      * *******
      */
     EMAIL_ALREADY_EXISTED("EMAIL_ALREADY_EXISTED","该邮箱已被注册"),
+    OLD_PASSWORD_ERROR("OLD_PASSWORD_ERROR","原密码错误"),
+    NEW_PASSWORD_NOT_EQUALS_WITH_REPEAT_PASSWORD("NEW_PASSWORD_NOT_EQUALS_WITH_REPEAT_PASSWORD","两次密码不一致"),
     /**
      * ******
      * SQL-COMMON

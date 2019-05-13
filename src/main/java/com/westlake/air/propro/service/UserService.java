@@ -9,6 +9,8 @@ public interface UserService {
 
     UserDO findByUsername(String username);
 
+    UserDO update(UserDO userDO);
+
     Set<String> getRoleByUserId(String uid);
 
     Set<String> getPermsByUserId(String uid);

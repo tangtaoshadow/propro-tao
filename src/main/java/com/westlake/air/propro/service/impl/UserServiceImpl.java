@@ -24,6 +24,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDO update(UserDO userDO) {
+        return userDAO.update(userDO);
+    }
+
+    @Override
     public Set<String> getRoleByUserId(String uid) {
         UserDO user = userDAO.getById(uid);
         if(user != null){

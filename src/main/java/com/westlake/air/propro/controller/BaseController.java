@@ -3,11 +3,13 @@ package com.westlake.air.propro.controller;
 import com.westlake.air.propro.async.ExperimentTask;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
+import com.westlake.air.propro.domain.db.UserDO;
 import com.westlake.air.propro.domain.query.PageQuery;
 import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.TaskService;
 import com.westlake.air.propro.async.LibraryTask;
+import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +35,11 @@ public class BaseController {
     ExperimentTask experimentTask;
 
     //0:标准库,1:irt校准库
-    public List<LibraryDO> getLibraryList(Integer type){
+    public List<LibraryDO> getLibraryList(Integer type) {
         return libraryService.getSimpleAll(type);
     }
 
-    public List<ExperimentDO> getExperimentList(){
+    public List<ExperimentDO> getExperimentList() {
         return experimentService.getSimpleAll();
     }
 
@@ -45,12 +47,39 @@ public class BaseController {
     public static String ERROR_MSG = "error_msg";
     public static String SUCCESS_MSG = "success_msg";
 
-    public void buildPageQuery(PageQuery query, Integer currentPage, Integer pageSize){
-        if(currentPage != null){
+    public void buildPageQuery(PageQuery query, Integer currentPage, Integer pageSize) {
+        if (currentPage != null) {
             query.setPageNo(currentPage);
         }
-        if(pageSize != null){
+        if (pageSize != null) {
             query.setPageSize(pageSize);
+        }
+    }
+
+    public UserDO getCurrentUser() {
+        Object object = SecurityUtils.getSubject().getPrincipal();
+        if (object != null) {
+            return (UserDO) object;
+        }
+
+        return null;
+    }
+
+    public String getCurrentUsername() {
+        UserDO user = getCurrentUser();
+        if (user != null) {
+            return user.getUsername();
+        } else {
+            return null;
+        }
+    }
+
+    public boolean isAdmin() {
+        UserDO user = getCurrentUser();
+        if (user != null && user.getRoles() != null && user.getRoles().contains("admin")) {
+            return true;
+        } else {
+            return false;
         }
     }
 
