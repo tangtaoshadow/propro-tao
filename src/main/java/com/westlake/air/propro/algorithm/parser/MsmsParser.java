@@ -1,9 +1,12 @@
 package com.westlake.air.propro.algorithm.parser;
 
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
+import com.westlake.air.propro.algorithm.parser.model.chemistry.AminoAcid;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.Unimod;
+import com.westlake.air.propro.dao.AminoAcidDAO;
+import com.westlake.air.propro.dao.UnimodDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.peptide.Annotation;
 import com.westlake.air.propro.domain.bean.score.BYSeries;
@@ -13,10 +16,12 @@ import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.TaskService;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import scala.Int;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -235,30 +240,22 @@ public class MsmsParser extends BaseLibraryParser {
         }
     }
 
-    private void verifyUnimod(String[] ionArray, String[] massArray, HashMap<Integer, String> unimodMap, String sequence, int charge, Double mass){
+    public boolean verifyUnimod(String[] ionArray, String[] massArray, HashMap<Integer, String> unimodMap, String sequence, Double mass){
         //check total mass
-        double theoryMass = fragmentFactory.getTheoryMass(unimodMap, sequence);
-        if (Math.abs(theoryMass - mass) < Constants.ELEMENT_TOLERANCE){
-            return;
-        }
-        //get b,y map; default y2,y3,b2,b3
-        for (int i = 0; i < ionArray.length; i++){
-            if (ionArray[i].contains("-") || ionArray[i].contains("+")){
-                continue;
-            }
-            if (ionArray[i].startsWith("b")){
-
-            }
+        double massDiff = mass - fragmentFactory.getTheoryMass(unimodMap, sequence);
+        if (massDiff < Constants.ELEMENT_TOLERANCE){
+            return true;
         }
 
-        BYSeries bySeries = fragmentFactory.getBYSeries(unimodMap, sequence, charge);
+        BYSeries bySeries = fragmentFactory.getBYSeries(unimodMap, sequence, 1);
         List<Double> bSeries = bySeries.getBSeries();
         List<Double> ySeries = bySeries.getYSeries();
         String[] bModInfoArray = new String[sequence.length()];
         String[] yModInfoArray = new String[sequence.length()];
         Double bCompensateMz = 0d, yCompensateMz = 0d;
         int lastBPosition = 0, lastYPosition = 0;
-        HashMap<String, Double> posMzMap = new HashMap<>();
+        int bMax = 0, yMax = 0;
+        //get b,y map; default y2,y3,b2,b3
         for (int i = 0; i < ionArray.length; i++){
             String cutInfo = ionArray[i];
             if (cutInfo.contains("-") || cutInfo.contains("+")){
@@ -267,6 +264,9 @@ public class MsmsParser extends BaseLibraryParser {
             double fragmentMz = Double.parseDouble(massArray[i]);
             int position = Integer.parseInt(ionArray[i].substring(1));
             if (cutInfo.startsWith("b")){
+                if (position > bMax){
+                    bMax = position;
+                }
                 double theoMz = bSeries.get(position - 1) + bCompensateMz;
                 double mzDiff = fragmentMz - theoMz;
                 //TODO: @Nico infer all kinds of unimods
@@ -285,6 +285,9 @@ public class MsmsParser extends BaseLibraryParser {
                 continue;
             }
             if (cutInfo.startsWith("y")){
+                if (position > yMax){
+                    yMax = position;
+                }
                 double theoMz = ySeries.get(position - 1) + yCompensateMz;
                 double mzDiff = fragmentMz - theoMz;
                 if (mzDiff > Constants.ELEMENT_TOLERANCE){
@@ -301,48 +304,259 @@ public class MsmsParser extends BaseLibraryParser {
                 yCompensateMz += mzDiff;
             }
         }
-        String[] modInfoArray = new String[sequence.length()];
+        //deal with unknown part
+        int unknownBMz = (int) Math.round(massDiff - bCompensateMz);
+        int unknownYMz = (int) Math.round(massDiff - yCompensateMz);
+        if (bMax < sequence.length() && unknownBMz > 0){
+            for (int i = bMax; i < sequence.length(); i++){
+                bModInfoArray[i] = "2;" + bMax + ";" + unknownBMz;
+            }
+        }
+        if (yMax < sequence.length() && unknownYMz > 0){
+            for (int i = yMax; i < sequence.length(); i++){
+                yModInfoArray[sequence.length() - i - 1] = "2;" + yMax + ";" + unknownYMz;
+            }
+        }
+
+        HashMap<String, Integer> positionMzDiffMap = new HashMap<>();
+        boolean isSuccess = true;
         for (int i = 0; i < sequence.length(); i++){
             if (bModInfoArray[i] == null || yModInfoArray[i] == null){
                 continue;
             }
             if (bModInfoArray[i].startsWith("1") && yModInfoArray[i].startsWith("1")){
                 int roundModMz = Integer.parseInt(bModInfoArray[i].split(";")[1]);
-                unimodIntepreter(i, roundModMz, unimodMap);
+                boolean success = certainIntepreter(i, roundModMz, unimodMap);
+                if (!success){
+                    isSuccess = false;
+                }
                 continue;
             }
             if (bModInfoArray[i].startsWith("1") && yModInfoArray[i].startsWith("2")){
+                boolean success = semicertainIntepreter(bModInfoArray, yModInfoArray, unimodMap, i);
+                if (!success){
+                    isSuccess = false;
+                }
+                continue;
+            }
+            if (bModInfoArray[i].startsWith("2") && yModInfoArray[i].startsWith("1")){
+                boolean success = semicertainIntepreter(yModInfoArray, bModInfoArray, unimodMap, i);
+                if (!success){
+                    isSuccess = false;
+                }
+                continue;
+            }
+            if (bModInfoArray[i].startsWith("2") && yModInfoArray[i].startsWith("2")){
                 int bRoundModMz = Integer.parseInt(bModInfoArray[i].split(";")[2]);
                 int yRoundModMz = Integer.parseInt(yModInfoArray[i].split(";")[2]);
-                unimodIntepreter(i, bRoundModMz, unimodMap);
-                int newRoundModMz = 0;
-                if (bRoundModMz != yRoundModMz){
-                    newRoundModMz = yRoundModMz - bRoundModMz;
-                }
-                String groupIdentifier = yModInfoArray[i].split(";")[1];
-                int groupIter = i + 1;
-                while (groupIter < sequence.length() && yModInfoArray[groupIter].startsWith("2")){
-                    String[] modInfo = yModInfoArray[groupIter].split(";");
-                    if (!modInfo[1].equals(groupIdentifier)){
-                        break;
+                if (bRoundModMz == yRoundModMz){
+                    int groupIter = i + 1;
+                    String bInfo = bModInfoArray[i].split(";")[1];
+                    String yInfo = yModInfoArray[i].split(";")[1];
+                    while (groupIter < bModInfoArray.length
+                            && bModInfoArray[groupIter] != null && bModInfoArray[groupIter].split(";")[1].equals(bInfo)
+                            && yModInfoArray[groupIter] != null && yModInfoArray[groupIter].split(";")[1].equals(yInfo)){
+                        groupIter ++;
                     }
-                    if (newRoundModMz == 0){
-                        yModInfoArray[groupIter] = null;
-                    }else {
-                        yModInfoArray[groupIter] = "2;" + groupIdentifier + ";" + newRoundModMz;
-                    }
-                    groupIter ++;
+                    positionMzDiffMap.put(i + ";" + (groupIter-1), bRoundModMz);
+                    i = groupIter - 1;
+                } else if(bRoundModMz > yRoundModMz){
+                    i = findModPosition(bModInfoArray, yModInfoArray, bRoundModMz, yRoundModMz, positionMzDiffMap, i);
+                } else {
+                    i = findModPosition(yModInfoArray, bModInfoArray, yRoundModMz, bRoundModMz, positionMzDiffMap, i);
                 }
             }
         }
+        boolean success = analysePosMzDiffMap(positionMzDiffMap, sequence, unimodMap);
+        if (!success){
+            isSuccess = false;
+        }
+        return isSuccess;
     }
 
-    private void unimodIntepreter(int index, int roundModMz, HashMap<Integer, String> unimodMap){
+    private boolean certainIntepreter(int index, int roundModMz, HashMap<Integer, String> unimodMap){
         if (roundModMz == 57){
             unimodMap.put(index, "4");
+            return true;
         }else {
             logger.info("Modification is not UniMod:4");
+            return false;
         }
     }
+
+    private boolean semicertainIntepreter(String[] certainList, String[] uncertainList, HashMap<Integer, String> unimodMap, int i){
+        int cRoundModMz = Integer.parseInt(certainList[i].split(";")[1]);
+        int uncRoundModMz = Integer.parseInt(uncertainList[i].split(";")[2]);
+        int newRoundModMz = 0;
+        if (cRoundModMz != uncRoundModMz){
+            newRoundModMz = uncRoundModMz - cRoundModMz;
+        }
+        String groupIdentifier = uncertainList[i].split(";")[1];
+        int groupIter = i + 1;
+        while (groupIter < certainList.length && uncertainList[groupIter] != null &&  uncertainList[groupIter].startsWith("2")){
+            String[] modInfo = uncertainList[groupIter].split(";");
+            if (!modInfo[1].equals(groupIdentifier)){
+                break;
+            }
+            if (newRoundModMz == 0){
+                uncertainList[groupIter] = null;
+            }else {
+                uncertainList[groupIter] = "2;" + groupIdentifier + ";" + newRoundModMz;
+            }
+            groupIter ++;
+        }
+        return certainIntepreter(i, cRoundModMz, unimodMap);
+    }
+
+    private boolean uncertainIntepreter(int start, int end, int roundMzDiff, String sequence, HashMap<Integer, String> unimodMap){
+        //count C
+        int count = 0;
+        char[] charList = sequence.toCharArray();
+        for (int i = start; i <= end; i++){
+            if (charList[i] == 'C'){
+                count ++;
+            }
+        }
+        if (roundMzDiff/57 == count){
+            for (int i = start; i <= end; i++){
+                if (charList[i] == 'C'){
+                    unimodMap.put(i, "4");
+                }
+            }
+            return true;
+        }else {
+            logger.info("Multi Modification is not UniMod:4");
+            return false;
+        }
+    }
+
+    /**
+     *
+     * @param bigInfoArray      String[] bigInfoArray = new String[]{"2;1;114","2;1;114","2;1;114","2;1;114"};
+     * @param smallInfoArray    String[] smallInfoArray = new String[]{"2;1;57","2;1;57",null,null};
+     * @param bigRoundMz        114
+     * @param smallRoundMz      57
+     * @param positionMzDiffMap
+     * @param i                 begin index of info arrays
+     * @return                  new start position for info arrays
+     */
+    private int findModPosition(String[] bigInfoArray, String[] smallInfoArray, int bigRoundMz, int smallRoundMz, HashMap<String, Integer> positionMzDiffMap, int i){
+        int groupIter = i;
+        int rightBoundary = i;
+        String bigInfo = bigInfoArray[i].split(";")[1];
+        String smallInfo = smallInfoArray[i].split(";")[1];
+        while (groupIter < bigInfoArray.length && bigInfoArray[groupIter] != null && bigInfoArray[groupIter].split(";")[1].equals(bigInfo)){
+            bigInfoArray[groupIter] = "2;" + bigInfo + ";" + (bigRoundMz - smallRoundMz);
+            if (smallInfoArray[groupIter] != null && smallInfoArray[groupIter].split(";")[1].equals(smallInfo)){
+                rightBoundary = groupIter;
+            }
+            groupIter ++;
+        }
+        positionMzDiffMap.put(i + ";" + rightBoundary, smallRoundMz);
+        return rightBoundary;
+    }
+
+    private boolean analysePosMzDiffMap(HashMap<String, Integer> positionMzDiffMap, String sequence, HashMap<Integer, String> unimodMap){
+        boolean isSuccess = true;
+        for (String key: positionMzDiffMap.keySet()){
+            String[] startEnd = key.split(";");
+            int startPosition = Integer.parseInt(startEnd[0]);
+            int endPosition = Integer.parseInt(startEnd[1]);
+            boolean success = analysePosMzDiff(startPosition, endPosition, positionMzDiffMap.get(key), sequence, unimodMap);
+            if (!success){
+                isSuccess = false;
+            }
+        }
+        return isSuccess;
+    }
+
+    private boolean analysePosMzDiff(int start, int end, int roundMzDiff, String sequence, HashMap<Integer, String> unimodMap){
+        if (start == end){
+            return certainIntepreter(start, roundMzDiff, unimodMap);
+        }else {
+            return uncertainIntepreter(start, end, roundMzDiff, sequence, unimodMap);
+        }
+    }
+
+//    private Integer[] getCutIndex(String[] ionArray, int seqLen){
+//
+//        HashSet<Integer> cutIndexSet = new HashSet<>();
+//        for (int i = 0; i < ionArray.length; i++) {
+//            String cutInfo = ionArray[i];
+//            if (cutInfo.contains("-") || cutInfo.contains("+")) {
+//                continue;
+//            }
+//            if (cutInfo.startsWith("b")){
+//                cutIndexSet.add(Integer.parseInt(ionArray[i].substring(1)) - 1);
+//            }
+//            if (cutInfo.startsWith("y")){
+//                cutIndexSet.add(seqLen - Integer.parseInt(ionArray[i].substring(1)) - 1);
+//            }
+//        }
+//        cutIndexSet.add(seqLen - 1);
+//        Integer[] cutIndexArray = cutIndexSet.toArray(new Integer[0]);
+//        Arrays.sort(cutIndexArray);
+//        return cutIndexArray;
+//    }
+//
+//    private double[] getTheoCutMz(Integer[] cutIndexArray, String sequence, HashMap<Integer, String> unimodMap){
+//        double[] theoMzArray = new double[cutIndexArray.length];
+//        double[] aaMzArray = fragmentFactory.getAaMzArray(unimodMap, sequence);
+//        int startIndex = 0;
+//        for (int i = 0; i < cutIndexArray.length; i++){
+//            double fragMz = 0d;
+//            for (int j = startIndex; j <= cutIndexArray[i]; j++){
+//                fragMz += aaMzArray[j];
+//            }
+//            theoMzArray[i] = fragMz;
+//            startIndex = cutIndexArray[i] + 1;
+//        }
+//        return theoMzArray;
+//    }
+
+//    private void locateUnimod(Integer[] cutIndexArray, double[] theoMzArray, String[] ionArray, String[] massArray){
+//
+//        List<Integer> bIndexArray = new ArrayList<>();
+//        List<Integer> yIndexArray = new ArrayList<>();
+//        for (int i = 0; i < ionArray.length; i++){
+//            String cutInfo = ionArray[i];
+//            if (cutInfo.contains("-") || cutInfo.contains("+")) {
+//                continue;
+//            }
+//            if (ionArray[i].startsWith("b")){
+//                bIndexArray.add(i);
+//            }
+//            if (ionArray[i].startsWith("y")){
+//                yIndexArray.add(i);
+//            }
+//        }
+//        int lastBNum = 0, startCutIndex = 0, endCutIndex = 0;
+//        double lastBMass = 0d;
+//        for (int index: bIndexArray){
+//            int bNum = Integer.parseInt(ionArray[index].substring(1));
+//            double mass = Double.parseDouble(massArray[index]) - Constants.B_SIDE_MASS - lastBMass;
+//            double massAcc = 0d;
+//            for (int cutIndex = startCutIndex; cutIndexArray[cutIndex] < bNum; cutIndex ++){
+//                massAcc += theoMzArray[cutIndex];
+//                endCutIndex = cutIndex;
+//            }
+//            lastBMass = mass;
+//            int massRoundDiff = (int) Math.round(mass - massAcc);
+//            for (int i = startCutIndex; i<= endCutIndex; i++){
+//                cutMzDiff[i] = massRoundDiff
+//            }
+//            for (int num = lastBNum; num <= bNum; )
+//        }
+//        for (int index: yIndexArray){
+//
+//        }
+//
+//        for (int i = 0; i < expCutIndex.length; i++){
+//
+//        }
+//    }
+
+
+
 
 }

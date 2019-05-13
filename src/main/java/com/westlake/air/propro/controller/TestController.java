@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.algorithm.learner.Airus;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.algorithm.merger.Tric;
+import com.westlake.air.propro.algorithm.parser.MsmsParser;
 import com.westlake.air.propro.constants.PositionType;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.dao.AnalyseDataDAO;
@@ -65,6 +66,8 @@ public class TestController extends BaseController {
     MzXMLParser mzXMLParser;
     @Autowired
     Tric tric;
+    @Autowired
+    MsmsParser msmsParser;
 
     public static float MZ_EXTRACT_WINDOW = 0.05f;
     public static float RT_EXTRACT_WINDOW = 1200f;
@@ -471,5 +474,22 @@ public class TestController extends BaseController {
 //        System.out.println("decoy: " + decoyScoreList);
 //        System.out.println("matchT:" + matchTargetScoreList);
     }
-
+    @RequestMapping("unimodTest")
+    @ResponseBody
+    String unimodTest(){
+        String ions = "y1;y2;y3;y4;y5;y6;y7;y8;y10;y11;y12;y13;y14;y1-NH3;y10-NH3;y12-NH3;a2;b2;b3;b4;b5;b6;b4-H2O;b5-H2O;b6-H2O;b2-NH3;b3-NH3;b4-NH3;b5-NH3;b6-NH3";
+        String masses = "175.118884156693;274.187250304226;345.224394442742;444.292854866413;557.375588788621;656.444166686439;784.505751506767;841.52493583811;1066.63664456707;1226.66811647301;1354.7271638755;1517.78644819324;1604.80365912874;158.092634757598;1049.61643693022;1337.69097318547;158.092634757598;186.087369617932;333.155702330992;420.186860855073;583.251564047471;711.309312644877;402.176596411266;565.241284287495;693.299642703383;169.060406174275;316.129241761169;403.159458030056;566.224076957964;694.287204682172";
+        String sequence = "QGFSYQCPQGQVIVAVR";
+        double mass = 1935.9625d;
+        String[] ionArray = ions.split(";");
+        String[] massArray = masses.split(";");
+//        String[] ionArray = new String[]{"y1","y2","y3","y4","y5","y6","y7","y1-NH3","y4-NH3","a2","b2"};
+//        String[] massArray = new String[]{"147.112657326583","294.180859636222","441.248324375729","569.308401130061","716.375457170649","817.422756693449","914.476593996905","130.086118895367","552.283287471936","264.083145995217","292.077582498917"};
+//        String sequence = "CMPTFQFFK";
+//        double mass = 1204.5409d;
+        HashMap<Integer, String> unimodMap = new HashMap<>();
+        boolean isSuccess = msmsParser.verifyUnimod(ionArray, massArray, unimodMap, sequence, mass);
+        System.out.println(isSuccess);
+        return null;
+    }
 }
