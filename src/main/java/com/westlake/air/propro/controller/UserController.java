@@ -31,6 +31,7 @@ public class UserController extends BaseController {
             UserDO userDO = userService.findByUsername(((UserDO) object).getUsername());
 
             model.addAttribute("user", userDO);
+
             model.addAttribute("projectCount", projectService.count(new ProjectQuery(userDO.getUsername())));
             model.addAttribute("expCount", experimentService.count(new ExperimentQuery(userDO.getUsername())));
         }
