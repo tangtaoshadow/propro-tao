@@ -1,4 +1,4 @@
-package com.westlake.air.propro.algorithm.peakSplitter;
+package com.westlake.air.propro.algorithm.peaksplitter;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
