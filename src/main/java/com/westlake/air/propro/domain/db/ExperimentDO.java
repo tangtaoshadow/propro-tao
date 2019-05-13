@@ -42,10 +42,14 @@ public class ExperimentDO extends BaseDO {
     @Indexed
     String batchName;
 
+    //实验的创建者,外键 username
+    @Indexed
+    String creator;
+
     //必填,实验名称
     String name;
 
-    //DIA-Swath, PRM, @see Constants
+    //DIA_SWATH, PRM, @see Constants
     String type;
 
     //mzxml的文件路径
@@ -58,9 +62,6 @@ public class ExperimentDO extends BaseDO {
 
     //实验的描述
     String description;
-
-    //实验的创建者
-    String creator = "Admin";
 
     //实验的创建日期
     Date createDate;

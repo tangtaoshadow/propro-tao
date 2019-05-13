@@ -107,6 +107,12 @@ public class ExperimentDAO {
         if (experimentQuery.getBatchName() != null) {
             query.addCriteria(where("batchName").is(experimentQuery.getBatchName()));
         }
+        if (experimentQuery.getType() != null) {
+            query.addCriteria(where("type").is(experimentQuery.getType()));
+        }
+        if (experimentQuery.getCreator() != null) {
+            query.addCriteria(where("creator").is(experimentQuery.getCreator()));
+        }
         return query;
     }
 }

@@ -3,6 +3,7 @@ package com.westlake.air.propro.controller;
 import com.westlake.air.propro.constants.SuccessMsg;
 import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.domain.db.ConfigDO;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.tomcat.util.buf.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -44,6 +45,8 @@ public class ConfigController extends BaseController {
         return "redirect:/";
     }
 
+    
+    @RequiresRoles({"admin"})
     @RequestMapping(value = "/config")
     String config(Model model) {
         ConfigDO configDO = configDAO.getConfig();
@@ -52,6 +55,7 @@ public class ConfigController extends BaseController {
         return "config";
     }
 
+    @RequiresRoles({"admin"})
     @RequestMapping(value = "/update")
     String update(Model model,
                   @RequestParam(value = "repoUrls", required = false) String repoUrls

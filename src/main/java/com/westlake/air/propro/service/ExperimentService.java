@@ -21,6 +21,8 @@ public interface ExperimentService {
 
     ResultDO<List<ExperimentDO>> getList(ExperimentQuery query);
 
+    long count(ExperimentQuery query);
+
     List<ExperimentDO> getAll(ExperimentQuery query);
 
     List<ExperimentDO> getAllByProjectName(String projectName);

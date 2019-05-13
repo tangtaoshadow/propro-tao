@@ -61,11 +61,13 @@ public class ExperimentController extends BaseController {
                 @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
                 @RequestParam(value = "projectName", required = false) String projectName,
                 @RequestParam(value = "batchName", required = false) String batchName,
+                @RequestParam(value = "type", required = false) String type,
                 @RequestParam(value = "expName", required = false) String expName) {
         model.addAttribute("expName", expName);
         model.addAttribute("projectName", projectName);
         model.addAttribute("batchName", batchName);
         model.addAttribute("pageSize", pageSize);
+        model.addAttribute("type", type);
         ExperimentQuery query = new ExperimentQuery();
         if (expName != null && !expName.isEmpty()) {
             query.setName(expName);
@@ -75,6 +77,9 @@ public class ExperimentController extends BaseController {
         }
         if(batchName != null && !batchName.isEmpty()){
             query.setBatchName(batchName);
+        }
+        if(type != null && !type.isEmpty()){
+            query.setType(type);
         }
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);

@@ -124,4 +124,9 @@ public class ProjectServiceImpl implements ProjectService {
             return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
     }
+
+    @Override
+    public long count(ProjectQuery query) {
+        return projectDAO.count(query);
+    }
 }

@@ -25,9 +25,6 @@ public class ProjectDO extends BaseDO {
     //项目仓库路径(存储项目所有元数据的地方)
     String repository;
 
-    //项目负责人ID
-    String ownerId;
-
     //项目负责人名称
     String ownerName;
 

@@ -3,6 +3,7 @@ package com.westlake.air.propro.domain.db;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.westlake.air.propro.domain.BaseDO;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;

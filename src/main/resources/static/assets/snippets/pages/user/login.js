@@ -71,9 +71,8 @@ var SnippetLogin = function() {
 
             form.validate({
                 rules: {
-                    email: {
-                        required: true,
-                        email: true
+                    username: {
+                        required: true
                     },
                     password: {
                         required: true
@@ -88,7 +87,7 @@ var SnippetLogin = function() {
             btn.addClass('m-loader m-loader--right m-loader--light').attr('disabled', true);
 
             form.ajaxSubmit({
-                url: '/login',
+                url: '/login/dologin',
                 success: function(response, status, xhr, $form) {
                     btn.removeClass('m-loader m-loader--right m-loader--light').attr('disabled', false);
                     if(response.status === "error"){
@@ -101,8 +100,8 @@ var SnippetLogin = function() {
         });
     };
 
-    var handleSignUpFormSubmit = function() {
-        $('#m_login_signup_submit').click(function(e) {
+    var handleApplyFormSubmit = function() {
+        $('#m_login_apply_submit').click(function(e) {
             e.preventDefault();
 
             var btn = $(this);
@@ -117,13 +116,10 @@ var SnippetLogin = function() {
                         required: true,
                         email: true
                     },
-                    password: {
+                    telephone: {
                         required: true
                     },
-                    rpassword: {
-                        required: true
-                    },
-                    agree: {
+                    organization: {
                         required: true
                     }
                 }
@@ -136,7 +132,7 @@ var SnippetLogin = function() {
             btn.addClass('m-loader m-loader--right m-loader--light').attr('disabled', true);
 
             form.ajaxSubmit({
-                url: '',
+                url: '/login/apply',
                 success: function(response, status, xhr, $form) {
                 	// similate 2s delay
                 	setTimeout(function() {
@@ -207,7 +203,7 @@ var SnippetLogin = function() {
         init: function() {
             handleFormSwitch();
             handleSignInFormSubmit();
-            handleSignUpFormSubmit();
+            handleApplyFormSubmit();
             handleForgetPasswordFormSubmit();
         }
     };

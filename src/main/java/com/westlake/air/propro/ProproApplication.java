@@ -30,4 +30,5 @@ public class ProproApplication extends SpringBootServletInitializer {
         slr.setDefaultLocale(Locale.CHINA);
         return slr;
     }
+
 }

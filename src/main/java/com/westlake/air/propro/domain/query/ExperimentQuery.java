@@ -20,13 +20,21 @@ public class ExperimentQuery extends PageQuery {
 
     String projectName;
 
+    String type;
+
     String batchName;
+
+    String creator;
 
     Date createDate;
 
     Date lastModifiedDate;
 
     public ExperimentQuery(){}
+
+    public ExperimentQuery(String creator){
+        this.creator = creator;
+    }
 
     public ExperimentQuery(int pageNo, int pageSize, Sort.Direction direction, String sortColumn){
         super(pageNo, pageSize, direction, sortColumn);

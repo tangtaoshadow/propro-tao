@@ -84,9 +84,6 @@ public class ProjectDAO {
         if (projectQuery.getName() != null) {
             query.addCriteria(where("name").is(projectQuery.getName()));
         }
-        if (projectQuery.getOwnerId() != null) {
-            query.addCriteria(where("ownerId").is(projectQuery.getOwnerId()));
-        }
         if (projectQuery.getOwnerName() != null) {
             query.addCriteria(where("ownerName").is(projectQuery.getOwnerName()));
         }

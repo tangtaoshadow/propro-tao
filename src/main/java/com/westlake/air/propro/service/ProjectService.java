@@ -21,4 +21,6 @@ public interface ProjectService {
     ResultDO<ProjectDO> getById(String id);
 
     ResultDO<ProjectDO> getByName(String name);
+
+    long count(ProjectQuery query);
 }

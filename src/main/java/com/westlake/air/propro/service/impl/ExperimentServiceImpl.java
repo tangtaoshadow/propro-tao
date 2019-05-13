@@ -96,6 +96,11 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     @Override
+    public long count(ExperimentQuery query) {
+        return experimentDAO.count(query);
+    }
+
+    @Override
     public List<ExperimentDO> getAll(ExperimentQuery query) {
         return experimentDAO.getAll(query);
     }
