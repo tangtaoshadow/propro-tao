@@ -29,30 +29,23 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .allowCredentials(false).maxAge(3600);
     }
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addWebRequestInterceptor(new WebRequestInterceptor() {
-            @Override
-            public void preHandle(WebRequest webRequest) throws Exception {
-
-            }
-
-            @Override
-            public void postHandle(WebRequest webRequest, ModelMap modelMap) throws Exception {
-                Object user = SecurityUtils.getSubject().getPrincipal();
-                if(user != null && modelMap != null){
-                    UserDO currentUser = (UserDO) user;
-                    modelMap.addAttribute("username", currentUser.getUsername());
-                    modelMap.addAttribute("userEmail", currentUser.getEmail());
-                    modelMap.addAttribute("userId", currentUser.getId());
-                    modelMap.addAttribute("telephone", currentUser.getTelephone());
-                }
-            }
-
-            @Override
-            public void afterCompletion(WebRequest webRequest, Exception e) throws Exception {
-
-            }
-        });
-    }
+//    @Override
+//    public void addInterceptors(InterceptorRegistry registry) {
+//        registry.addWebRequestInterceptor(new WebRequestInterceptor() {
+//            @Override
+//            public void preHandle(WebRequest webRequest) throws Exception {
+//
+//            }
+//
+//            @Override
+//            public void postHandle(WebRequest webRequest, ModelMap modelMap) throws Exception {
+//
+//            }
+//
+//            @Override
+//            public void afterCompletion(WebRequest webRequest, Exception e) throws Exception {
+//
+//            }
+//        });
+//    }
 }

@@ -12,7 +12,7 @@
 <!--						<img th:src="@{/assets/avatar.jpg}" class="m&#45;&#45;img-rounded m&#45;&#45;marginless m&#45;&#45;img-centered" alt=""/>-->
 <!--					</span>-->
                     <i class="m-nav__link-icon flaticon-user"></i>
-                    <span class="m-topbar__username" style="color: black; text-transform: none;" th:text="${username}"></span>
+                    <span class="m-topbar__username" style="color: black; text-transform: none;"><shiro:principal property="username"/></span>
                 </a>
                 <div class="m-dropdown__wrapper">
                     <span class="m-dropdown__arrow m-dropdown__arrow--right m-dropdown__arrow--adjust"></span>
@@ -24,9 +24,9 @@
 <!--                                    <img th:src="@{/assets/avatar.jpg}" class="m&#45;&#45;img-rounded m&#45;&#45;marginless" alt=""/>-->
 <!--                                </div>-->
                                 <div class="m-card-user__details">
-                                    <span class="m-card-user__name m--font-weight-500" th:text="${username}"></span>
-                                    <span class="m-card-user__email m--font-weight-500" th:text="${userEmail}"></span></br>
-                                    <span class="m-card-user__email m--font-weight-500" th:text="${telephone}"></span>
+                                    <span class="m-card-user__name m--font-weight-500" ><shiro:principal property="username"/></span>
+                                    <span class="m-card-user__email m--font-weight-500"><shiro:principal property="email"/></span></br>
+                                    <span class="m-card-user__email m--font-weight-500"><shiro:principal property="telephone"/></span>
                                 </div>
                             </div>
                         </div>
