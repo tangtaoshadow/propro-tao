@@ -57,7 +57,7 @@
                     <td>
                         <!--<a th:href="|@{/project/delete/${project.id}}|" class="btn btn-danger btn-sm">删除</a>-->
                         <a th:href="@{/experiment/batchcreate(projectName=${project?.name})}"
-                           class="btn btn-default btn-sm" th:text="#{label_add_exp}"></a>
+                           class="btn btn-danger btn-sm" th:text="#{label_add_exp}"></a>
                         <a th:href="@{/experiment/list(projectName=${project.name})}" class="btn btn-primary btn-sm" th:text="#{label_project_exps}"></a>
                         <!--<a th:href="@{/project/all(id=${project.id})}" class="btn btn-info btn-sm" th:text="#{label_do_complete_workflow}"></a>-->
                         <a th:href="@{/project/irt(id=${project.id})}" class="btn btn-success btn-sm" th:text="#{label_batch_irt}"></a>

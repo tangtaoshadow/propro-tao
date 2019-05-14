@@ -77,9 +77,6 @@
                             <li class="nav-item m-tabs__item">
                                 <a id="tabChangePwd" class="nav-link m-tabs__link" data-toggle="tab" href="#m_user_change_pwd" role="tab" th:text="#{label_change_pwd}"></a>
                             </li>
-                            <li class="nav-item m-tabs__item" shiro:hasRole="admin">
-                                <a id="tabUserManager" class="nav-link m-tabs__link" data-toggle="tab" href="#m_user_manager" role="tab" th:text="#{label_user_manager}"></a>
-                            </li>
                         </ul>
                     </div>
                 </div>
@@ -88,8 +85,7 @@
                         <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/user/update}" th:method="post">
                             <div class="m-portlet__body">
                                 <div class="form-group m-form__group m--margin-top-10 m--hide">
-                                    <div class="alert m-alert m-alert--default" role="alert">
-                                    </div>
+                                    <div class="alert m-alert m-alert--default" role="alert"></div>
                                 </div>
                                 <div class="form-group m-form__group row">
                                     <label for="username" class="col-2 col-form-label" th:text="#{label_username}"></label>
@@ -176,7 +172,6 @@
                             </div>
                         </form>
                     </div>
-                    <div class="tab-pane " id="m_user_manager" shiro:hasRole="admin"></div>
                 </div>
             </div>
         </div>
@@ -202,12 +197,6 @@
                     var tabChangePwdContent = document.getElementById("m_user_change_pwd");
                     tabChangePwd.classList.add("active");
                     tabChangePwdContent.classList.add("active");
-                    break;
-                case "usermanager":
-                    var tabUserManager = document.getElementById("tabUserManager");
-                    var tabUserManagerContent = document.getElementById("m_user_manager");
-                    tabUserManager.classList.add("active");
-                    tabUserManagerContent.classList.add("active");
                     break;
                 default:
                     var tabUserProfile = document.getElementById("tabUserProfile");

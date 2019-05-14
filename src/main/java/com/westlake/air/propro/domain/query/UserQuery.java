@@ -8,4 +8,12 @@ public class UserQuery extends PageQuery {
     String id;
 
     String username;
+
+    String email;
+
+    String nick;
+
+    String telephone;
+
+    String university;
 }

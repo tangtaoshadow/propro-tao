@@ -2,13 +2,17 @@ package com.westlake.air.propro.controller;
 
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.SuccessMsg;
+import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.UserDO;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.ProjectQuery;
+import com.westlake.air.propro.domain.query.UserQuery;
 import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.ProjectService;
 import com.westlake.air.propro.service.UserService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Md5Hash;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("user")
@@ -34,7 +40,7 @@ public class UserController extends BaseController {
     String profile(Model model, RedirectAttributes redirectAttributes) {
         Object object = SecurityUtils.getSubject().getPrincipal();
         if (object != null) {
-            UserDO userDO = userService.findByUsername(((UserDO) object).getUsername());
+            UserDO userDO = userService.getByUsername(((UserDO) object).getUsername());
 
             model.addAttribute("user", userDO);
 
@@ -62,7 +68,7 @@ public class UserController extends BaseController {
             return "redirect:/login/login";
         }
 
-        UserDO user = userService.findByUsername(username);
+        UserDO user = userService.getByUsername(username);
         if(user == null){
             SecurityUtils.getSubject().logout();
             return "redirect:/login/login";
@@ -88,7 +94,7 @@ public class UserController extends BaseController {
             return "redirect:/login/login";
         }
 
-        UserDO user = userService.findByUsername(username);
+        UserDO user = userService.getByUsername(username);
         if(user == null){
             SecurityUtils.getSubject().logout();
             return "redirect:/login/login";
@@ -116,5 +122,36 @@ public class UserController extends BaseController {
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
         redirectAttributes.addFlashAttribute("tab","changepwd");
         return "redirect:/user/profile";
+    }
+
+    @RequiresRoles({"admin"})
+    @RequestMapping(value = "/list")
+    String list(Model model,
+                @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+                @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
+                @RequestParam(value = "nick", required = false) String nick,
+                @RequestParam(value = "username", required = false) String username,
+                @RequestParam(value = "email", required = false) String email,
+                @RequestParam(value = "telephone", required = false) String telephone,
+                @RequestParam(value = "university", required = false) String university,
+                RedirectAttributes redirectAttributes) {
+        UserQuery query = new UserQuery();
+        if(StringUtils.isNotEmpty(username)){
+            query.setUsername(username);
+        }
+        if(StringUtils.isNotEmpty(email)){
+            query.setEmail(email);
+        }
+        if(StringUtils.isNotEmpty(telephone)){
+            query.setTelephone(telephone);
+        }
+        if(StringUtils.isNotEmpty(university)){
+            query.setUniversity(university);
+        }
+        query.setPageNo(currentPage);
+        query.setPageSize(pageSize);
+        ResultDO<List<UserDO>> userList = userService.getList(query);
+        model.addAttribute("users", userList);
+        return "user/list";
     }
 }

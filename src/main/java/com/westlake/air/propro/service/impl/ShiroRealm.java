@@ -38,7 +38,7 @@ public class ShiroRealm extends AuthorizingRealm {
 
         UsernamePasswordToken userToken = (UsernamePasswordToken) token;
         //根据登录名查询用户，这里不用校验密码，因为密码的校验是交给shiro来完成的
-        UserDO userInfo = userService.findByUsername(userToken.getUsername());
+        UserDO userInfo = userService.getByUsername(userToken.getUsername());
 
         if (userInfo == null) {
             throw new IncorrectCredentialsException("Username or password error");
