@@ -114,17 +114,15 @@
                     <td th:text="|${scanIndex.precursorMzStart}/${scanIndex.precursorMzEnd}|">
                     <td th:text="|${scanIndex.originalWindowWideness}/${scanIndex.windowWideness}|"></td>
                     <td>
-                        <a th:href="@{/scanindex/detail/{id}(id=${scanIndex.id})}"
-                           class="btn btn-success btn-sm" th:text="#{btn_detail}">
-                        </a>
                         <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
                                 data-target="#m_modal_spectrum" th:data1="${scanIndex.id}" th:data2="${experiment.id}"
                                 th:onclick="query(this.getAttribute('data1'),this.getAttribute('data2'),'aird')" th:text="#{label_aird_spectrum}">
                         </button>
-                        <!--<button type="button" class="btn btn-sm btn-brand" data-toggle="modal"-->
-                                <!--data-target="#m_modal_spectrum" th:data1="${scanIndex.id}" th:data2="${experiment.id}"-->
-                                <!--th:onclick="query(query(this.getAttribute('data1'),this.getAttribute('data2'),'mzxml')" th:text="#{label_mzxml_spectrum}">-->
-                        <!--</button>-->
+                        <a th:href="@{/scanindex/detail/{id}(id=${scanIndex.id})}" data-toggle="m-tooltip"
+                           th:title="#{btn_detail}"
+                           class="btn btn-warning m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-wpforms"></i>
+                        </a>
                     </td>
                 </tr>
                 </tbody>

@@ -42,34 +42,20 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="5%" th:text="#{label_analyse_overview_id}">
-                    </th>
-                    <th width="10%" th:text="#{label_analyse_code}">
-                    </th>
-                    <th width="5%" th:text="#{label_exp_name}">
-                    </th>
-                    <th width="5%" th:text="#{label_library_name}">
-                    </th>
-                    <th width="5%" th:text="#{label_mz_rt_extract_window}">
-                    </th>
-                    <th width="5%" th:text="#{label_sigma_spacing}">
-                    </th>
-                    <th width="5%" th:text="#{label_threshold_for_shape_and_shape_weight}">
-                    </th>
-                    <th width="10%" th:text="#{label_create_date}">
-                    </th>
-                    <th width="5%" th:text="#{label_classifier}">
-                    </th>
-                    <th width="5%" th:text="#{label_slope_intercept}">
-                    </th>
-                    <th width="5%" th:text="#{label_reco_conv_total}">
-                    </th>
-                    <th width="5%" th:text="#{label_creator}">
-                    </th>
-                    <th width="5%" th:text="#{label_note}">
-                    </th>
-                    <th width="30%" th:text="#{label_operation}">
-                    </th>
+                    <th width="5%" th:text="#{label_analyse_overview_id}"></th>
+                    <th width="10%" th:text="#{label_analyse_code}"></th>
+                    <th width="5%" th:text="#{label_exp_name}"></th>
+                    <th width="5%" th:text="#{label_library_name}"></th>
+                    <th width="5%" th:text="#{label_mz_rt_extract_window}"></th>
+                    <th width="5%" th:text="#{label_sigma_spacing}"></th>
+                    <th width="5%" th:text="#{label_threshold_for_shape_and_shape_weight}"></th>
+                    <th width="10%" th:text="#{label_create_date}"></th>
+                    <th width="5%" th:text="#{label_classifier}"></th>
+                    <th width="5%" th:text="#{label_slope_intercept}"></th>
+                    <th width="5%" th:text="#{label_reco_conv_total}"></th>
+                    <th width="5%" th:text="#{label_creator}"></th>
+                    <th width="5%" th:text="#{label_note}"></th>
+                    <th width="30%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -88,13 +74,37 @@
                     <td th:text="${overview.creator}"></td>
                     <td th:text="${overview?.note}"></td>
                     <td>
-                        <a th:href="@{/analyse/overview/detail/{id}(id=${overview?.id})}" class="btn btn-success btn-sm" th:text="#{label_analyse_report}"></a>
-                        <a th:href="@{/score/report(overviewId=${overview.id})}" class="btn btn-success btn-sm" th:text="#{label_check_recognized_result}"></a>
-                        <a th:href="@{/analyse/data/list(overviewId=${overview.id})}"
-                           class="btn btn-info btn-sm" th:text="#{label_convolution_data}"></a>
-                        <a th:href="@{/score/list(overviewId=${overview.id},isDecoy=No)}" class="btn btn-brand btn-sm" th:text="#{label_see_score_data}"></a>
-                        <a th:href="@{/score/result/list(overviewId=${overview.id})}" class="btn btn-focus btn-sm" th:text="#{label_see_protein_identification_result}"></a>
-                        <a th:href="@{/analyse/overview/export/{id}(id=${overview?.id})}" class="btn btn-warning btn-sm" th:text="#{label_export_recognized_peptides}"></a>
+                        <a th:href="@{/analyse/overview/detail/{id}(id=${overview?.id})}" data-toggle="m-tooltip"
+                           th:title="#{label_analyse_report}"
+                           class="btn btn-warning m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-wpforms"></i>
+                        </a>
+                        <a th:href="@{/score/report(overviewId=${overview.id})}" data-toggle="m-tooltip"
+                           th:title="#{label_check_recognized_result}"
+                           class="btn btn-brand m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-mixcloud"></i>
+                        </a>
+                        <a th:href="@{/analyse/data/list(overviewId=${overview.id})}" data-toggle="m-tooltip"
+                           th:title="#{label_convolution_data}"
+                           class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-list"></i>
+                        </a>
+                        <a th:href="@{/score/list(overviewId=${overview.id},isDecoy=No)}" data-toggle="m-tooltip"
+                           th:title="#{label_see_score_data}"
+                           class="btn btn-primary m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-list-ol"></i>
+                        </a>
+                        <a th:href="@{/score/result/list(overviewId=${overview.id})}" data-toggle="m-tooltip"
+                           th:title="#{label_see_protein_identification_result}"
+                           class="btn btn-accent m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-th"></i>
+                        </a>
+                        <a th:href="@{/analyse/overview/export/{id}(id=${overview?.id})}" data-toggle="m-tooltip"
+                           th:title="#{label_export_recognized_peptides}"
+                           class="btn btn-brand m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-th-list"></i>
+                        </a>
+
                         <div class="btn-group dropright" role="group">
                             <button id="scoresBtnGroup" type="button" class="btn btn-sm dropdown-toggle"
                                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" th:text="#{label_do_identified_score}">

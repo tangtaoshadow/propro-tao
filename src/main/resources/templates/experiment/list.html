@@ -60,32 +60,16 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="5%" th:text="#{label_project_name}">
-                    </th>
-                    <th width="5%" th:text="#{label_batch_name}">
-                    </th>
-                    <th width="10%" th:text="#{label_exp_name}">
-                    </th>
-                    <th width="5%" th:text="#{label_exp_type}">
-                    </th>
-                    <th width="15%" th:text="#{label_file_path}">
-                    </th>
-                    <!--<th width="5%" th:text="#{label_is_aird_existed}">-->
-                    <!--</th>-->
-                    <!--<th width="5%" th:text="#{label_compression_type}">-->
-                    <!--</th>-->
-                    <!--<th width="5%" th:text="#{label_data_precision}">-->
-                    <!--</th>-->
-                    <th width="8%" th:text="#{label_slope_intercept}">
-                    </th>
-                    <th width="8%" th:text="#{label_create_date}">
-                    </th>
-                    <th width="8%" th:text="#{label_last_modified_date}">
-                    </th>
-                    <th width="6%" th:text="#{label_reco_conv_total}">
-                    </th>
-                    <th width="20%" th:text="#{label_operation}">
-                    </th>
+                    <th width="5%" th:text="#{label_project_name}"></th>
+                    <th width="5%" th:text="#{label_batch_name}"></th>
+                    <th width="10%" th:text="#{label_exp_name}"></th>
+                    <th width="5%" th:text="#{label_exp_type}"></th>
+                    <th width="20%" th:text="#{label_file_path}"></th>
+                    <th width="8%" th:text="#{label_slope_intercept}"></th>
+                    <th width="8%" th:text="#{label_create_date}"></th>
+                    <th width="8%" th:text="#{label_last_modified_date}"></th>
+                    <th width="6%" th:text="#{label_reco_conv_total}"></th>
+                    <th width="15%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -98,42 +82,40 @@
                         </span>
                     </td>
                     <td th:text="${experiment.airdPath}"></td>
-                    <!--<td th:if="!${experiment.hasAirusFile}">-->
-                        <!--<span class="m-badge m-badge&#45;&#45;danger m-badge&#45;&#45;wide" th:text="#{label_uncompressed}">-->
-                        <!--</span>-->
-                    <!--</td>-->
-                    <!--<td th:if="${experiment.hasAirusFile}">-->
-                       <!--<span class="m-badge m-badge&#45;&#45;success m-badge&#45;&#45;wide" th:text="#{label_compressed}">-->
-                       <!--</span>-->
-                    <!--</td>-->
-                    <!--<td th:text="${experiment.compressionType}"></td>-->
-                    <!--<td th:text="${experiment.precision}"></td>-->
                     <td th:text="|${experiment.slope} -> ${experiment.intercept}|"></td>
                     <td th:text="${#dates.format(experiment.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(experiment.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="|${analyseOverviewDOMap.get(experiment.id)?.matchedPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.totalPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.libraryPeptideCount}|"></td>
-
                     <td>
-                        <a th:href="@{/experiment/edit/{id}(id=${experiment.id})}"
-                           class="btn btn-primary btn-sm" th:text="#{btn_modify}">
+                        <a th:href="@{/experiment/edit/{id}(id=${experiment.id})}" data-toggle="m-tooltip"
+                           th:title="#{btn_modify}"
+                           class="btn btn-warning m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-edit"></i>
                         </a>
-                        <a th:href="@{/experiment/detail/{id}(id=${experiment.id})}"
-                           class="btn btn-success btn-sm" th:text="#{btn_detail}">
+                        <a th:href="@{/experiment/detail/{id}(id=${experiment.id})}" data-toggle="m-tooltip"
+                           th:title="#{btn_detail}"
+                           class="btn btn-accent m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-wpforms"></i>
                         </a>
-                        <a th:href="@{/experiment/extractor(id=${experiment.id})}"
-                           class="btn btn-brand btn-sm" th:text="#{btn_start_convolution}">
+                        <a th:href="@{/experiment/extractor(id=${experiment.id})}" data-toggle="m-tooltip"
+                           th:title="#{btn_start_convolution}"
+                           class="btn btn-brand m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-dropbox"></i>
                         </a>
-                        <a th:href="@{/experiment/irt(id=${experiment.id})}"
-                           class="btn btn-accent btn-sm" th:text="#{btn_start_irt}">
+                        <a th:href="@{/experiment/irt(id=${experiment.id})}" data-toggle="m-tooltip"
+                           th:title="#{btn_start_irt}"
+                           class="btn btn-info m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-calculator"></i>
                         </a>
-                        <a th:href="@{/scanindex/list(experimentId=${experiment.id})}"
-                           class="btn btn-info btn-sm" th:text="#{label_spectrum_list}">
+                        <a th:href="@{/scanindex/list(experimentId=${experiment.id})}" data-toggle="m-tooltip"
+                           th:title="#{label_spectrum_list}"
+                           class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-th-list"></i>
                         </a>
-                        <!--<a th:if="${experiment.type}!='0'" th:href="@{/experiment/compress(expId=${experiment.id})}"-->
-                           <!--class="btn btn-danger btn-sm" th:text="#{btn_start_aird_compression}">-->
-                        <!--</a>-->
-                        <a th:href="@{/analyse/overview/list(expId=${experiment.id})}"
-                           class="btn btn-warning btn-sm" th:text="#{label_convolution_data}">
+                        <a th:href="@{/analyse/overview/list(expId=${experiment.id})}" data-toggle="m-tooltip"
+                           th:title="#{label_convolution_data}"
+                           class="btn btn-warning m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-list-ol"></i>
                         </a>
                     </td>
                 </tr>

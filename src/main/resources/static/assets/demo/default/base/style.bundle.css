@@ -12395,7 +12395,7 @@ code {
     font-size: 1.3rem; }
   .m-btn--icon.m-btn--icon-only [class^="fa-"],
   .m-btn--icon.m-btn--icon-only [class*=" fa-"] {
-    font-size: 1.1rem; }
+    font-size: 1.5rem; }
   .m-btn--icon.m-btn--icon-only [class^="flaticon-"],
   .m-btn--icon.m-btn--icon-only [class*=" flaticon-"] {
     font-size: 1.3rem; }
@@ -12413,7 +12413,7 @@ code {
       font-size: 1.5rem; }
     .m-btn--icon.m-btn--icon-only.btn-lg [class^="fa-"], .btn-group-lg > .m-btn--icon.m-btn--icon-only.btn [class^="fa-"],
     .m-btn--icon.m-btn--icon-only.btn-lg [class*=" fa-"], .btn-group-lg > .m-btn--icon.m-btn--icon-only.btn [class*=" fa-"] {
-      font-size: 1.3rem; }
+      font-size: 1.8rem; }
     .m-btn--icon.m-btn--icon-only.btn-lg [class^="flaticon-"], .btn-group-lg > .m-btn--icon.m-btn--icon-only.btn [class^="flaticon-"],
     .m-btn--icon.m-btn--icon-only.btn-lg [class*=" flaticon-"], .btn-group-lg > .m-btn--icon.m-btn--icon-only.btn [class*=" flaticon-"] {
       font-size: 1.5rem; }
