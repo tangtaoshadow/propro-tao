@@ -57,7 +57,7 @@ var SnippetLogin = function() {
             displaySignUpForm();
         });
 
-        $('#m_login_signup_cancel').click(function(e) {
+        $('#m_login_apply_cancel').click(function(e) {
             e.preventDefault();
             displaySignInForm();
         });
