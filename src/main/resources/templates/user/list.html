@@ -16,12 +16,12 @@
     <div class="m-portlet__body">
         <!--begin: Search Form -->
         <div class="clearfix">
-            <form id="searchForm" method="post" role="form" class="form-inline" th:action="@{/project/list}">
+            <form id="searchForm" method="post" role="form" class="form-inline" th:action="@{/user/list}">
                 <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                 <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
                 <div class="form-group m-form__group">
                     <div class="input-group">
-                        <input type="text" class="form-control" id="name" name="name" th:placeholder="#{label_project_name}" th:value="${name}">
+                        <input type="text" class="form-control" id="name" name="name" th:placeholder="#{label_username}" th:value="${username}">
                         <div class="input-group-append">
                             <button class="btn btn-primary" type="submit" th:text="#{btn_search}"></button>
                         </div>
@@ -35,35 +35,31 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="15%" th:text="#{label_project_name}"></th>
-                    <th width="5%" th:text="#{label_project_type}"></th>
-                    <th width="15%" th:text="#{label_project_repository}"></th>
-                    <th width="5%" th:text="#{label_creator}"></th>
-                    <th width="10%" th:text="#{label_detail_description}"></th>
-                    <th width="10%" th:text="#{label_create_date}"></th>
-                    <!--<th width="10%" th:text="#{label_last_modified_date}"></th>-->
-                    <th width="40%" th:text="#{label_operation}"></th>
+                    <th width="10%" th:text="#{label_user_id}"></th>
+                    <th width="10%" th:text="#{label_username}"></th>
+                    <th width="10%" th:text="#{label_role}"></th>
+                    <th width="10%" th:text="#{label_email}"></th>
+                    <th width="10%" th:text="#{label_nick}"></th>
+                    <th width="10%" th:text="#{label_telephone}"></th>
+                    <th width="15%" th:text="#{label_university}"></th>
+                    <th width="15%" th:text="#{label_create_date}"></th>
+                    <th width="20%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="project:${projectList}">
-                    <td th:text="|${project.name}(${project.id})|"></td>
-                    <td th:text="${project.type}"></td>
-                    <td th:text="${project.repository}"></td>
-                    <td th:text="${project.ownerName}"></td>
-                    <td th:text="${project.description}"></td>
-                    <td th:text="${#dates.format(project.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
-<!--                    <td th:text="${#dates.format(project.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>-->
+                <tr th:each="user:${users}">
+                    <td th:text="${user.id}"></td>
+                    <td th:text="${user.username}"></td>
+                    <td th:text="${user.roles}"></td>
+                    <td th:text="${user.email}"></td>
+                    <td th:text="${user.nick}"></td>
+                    <td th:text="${user.telephone}"></td>
+                    <td th:text="${user.university}"></td>
+                    <td th:text="${#dates.format(user.created,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
-                        <!--<a th:href="|@{/project/delete/${project.id}}|" class="btn btn-danger btn-sm">删除</a>-->
-                        <a th:href="@{/experiment/batchcreate(projectName=${project?.name})}"
-                           class="btn btn-danger btn-sm" th:text="#{label_add_exp}"></a>
-                        <a th:href="@{/experiment/list(projectName=${project.name})}" class="btn btn-primary btn-sm" th:text="#{label_project_exps}"></a>
-                        <!--<a th:href="@{/project/all(id=${project.id})}" class="btn btn-info btn-sm" th:text="#{label_do_complete_workflow}"></a>-->
-                        <a th:href="@{/project/irt(id=${project.id})}" class="btn btn-success btn-sm" th:text="#{label_batch_irt}"></a>
-                        <a th:href="@{/project/extractor(id=${project.id})}" class="btn btn-info btn-sm" th:text="#{label_do_complete_workflow}"></a>
-                        <a th:href="@{/project/portionSelector(id=${project.id})}" class="btn btn-focus btn-sm" th:text="#{label_show_result_overview}"></a>
-                        <a th:href="@{/project/writeToFile(id=${project.id})}" class="btn btn-accent btn-sm" th:text="#{btn_write_to_file}"></a>
+                        <a th:href="@{/user/edit/{id}(id=${user.id})}" class="btn btn-primary btn-sm" th:text="#{btn_edit}"></a>
+                        <a th:href="@{/user/setasadmin/{id}(id=${user.id})}" class="btn btn-success btn-sm" th:text="#{label_set_as_admin}"></a>
+                        <a th:href="@{/user/delete/{id}(id=${user.id})}" class="btn btn-danger btn-sm" th:text="#{btn_delete}"></a>
                     </td>
                 </tr>
                 </tbody>

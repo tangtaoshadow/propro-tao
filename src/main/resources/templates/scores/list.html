@@ -35,7 +35,8 @@
                       th:action="@{/score/list}">
                     <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                     <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
-                    <input id="overviewId" type="hidden" th:value="${overview.id}" class="form-control" name="overviewId">
+                    <input id="overviewId" type="hidden" th:value="${overview.id}" class="form-control"
+                           name="overviewId">
 
                     <div class="form-group m-form__group row">
                         <div class="input-group col-lg-2">
@@ -105,7 +106,8 @@
                 <div class="m-portlet__head">
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
-                            <h3 class="m-portlet__head-text" th:text="|#{label_analyse_overview}:${overview.name},ID:${overview.id},Total:${totalNum} Group Scores|">
+                            <h3 class="m-portlet__head-text"
+                                th:text="|#{label_analyse_overview}:${overview.name},ID:${overview.id},Total:${totalNum} Group Scores|">
                             </h3>
                         </div>
                     </div>
@@ -122,9 +124,11 @@
                                 <!--<span th:if="${scoreForAll.isDecoy}" class="m-accordion__item-icon"><i class="fa fa-bomb"></i></span>-->
                                 <span th:if="${!score.isDecoy}" class="m-accordion__item-icon"><i
                                         class="fa fa-diamond"></i></span>
-                                <span th:if="${!score.isDecoy&&score.identifiedStatus==0}" class="m-accordion__item-icon"><i
+                                <span th:if="${!score.isDecoy&&score.identifiedStatus==0}"
+                                      class="m-accordion__item-icon"><i
                                         class="fa fa-check"></i></span>
-                                <span th:if="${!score.isDecoy&&score.identifiedStatus!=0}" class="m-accordion__item-icon"><i
+                                <span th:if="${!score.isDecoy&&score.identifiedStatus!=0}"
+                                      class="m-accordion__item-icon"><i
                                         class="fa fa-close"></i></span>
                                 <span class="m-accordion__item-title"
                                       th:text="|(${score?.featureScoresList?.size()})[#{label_predict} RT:${score?.rt}][FDR:${score?.fdr}]${score.isDecoy?'Decoy':'Target'}:${score?.peptideRef}|"></span>
@@ -137,10 +141,12 @@
                                     <a th:href="@{/score/list(overviewId=${overviewId},peptideRef=${score?.peptideRef})}"
                                        class="btn btn-primary btn-sm" th:text="#{btn_view_peptide_score}"></a>
                                     <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
-                                            data-target="#m_modal_group" th:data1 = "${score.id}"
-                                            th:onclick="queryGroup(this.getAttribute('data1'), false, false)" th:text="#{btn_group_chromatograms}">
+                                            data-target="#m_modal_group" th:data1="${score.id}"
+                                            th:onclick="queryGroup(this.getAttribute('data1'), false, false)"
+                                            th:text="#{btn_group_chromatograms}">
                                     </button>
-                                    <a th:if="${!score.isDecoy}" target="_blank" th:href="@{/analyse/consultation(dataId=${score.id},allCutInfo=true)}"
+                                    <a th:if="${!score.isDecoy}" target="_blank"
+                                       th:href="@{/analyse/consultation(dataId=${score.id},allCutInfo=true)}"
                                        class="btn btn-danger btn-sm" th:text="#{btn_peptide_clinic}"></a>
                                     <table class="table table-bordered table-hover" style="table-layout:fixed;">
                                         <thead>
@@ -336,7 +342,8 @@
                         <button type="button" class="btn btn-sm btn-warning"
                                 th:onclick="queryGroup(null,true,false)" th:text="#{btn_gauss_filter}"></button>
                         <button type="button" class="btn btn-sm btn-info"
-                                th:onclick="queryGroup(null,true, true)" th:text="#{btn_denoising_gauss_filter}"></button>
+                                th:onclick="queryGroup(null,true, true)"
+                                th:text="#{btn_denoising_gauss_filter}"></button>
                         <button type="button" class="btn btn-sm btn-brand"
                                 th:onclick="queryGroup(null,false, false)" th:text="#{btn_original_data}"></button>
                         <button type="button" class="btn btn-sm btn-accent"

@@ -21,7 +21,11 @@ public class ProproApplication extends SpringBootServletInitializer {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(ProproApplication.class, args);
+        SpringApplication springApplication = new SpringApplication(ProproApplication.class);
+        springApplication.addListeners(new StartUpListener());
+        springApplication.run(args);
+//        SpringApplication.run(ProproApplication.class, args);
+
     }
 
     @Bean

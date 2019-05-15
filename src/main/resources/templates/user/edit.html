@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="layouts/layout">
+<!-- begin::Head -->
+<head>
+    <title th:text="#{title_welcome_to_propro}"></title>
+</head>
+<!-- end::Head -->
+<!-- end::Body -->
+<body>
+<div class="m-content" layout:fragment="content">
+
+    <div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <!--begin::Portlet-->
+            <div class="m-portlet m-portlet--tab">
+                <div class="m-portlet__head">
+                    <div class="m-portlet__head-caption">
+                        <div class="m-portlet__head-title">
+                            <span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
+                            <h3 class="m-portlet__head-text" th:text="#{label_update_exp_info}"></h3>
+                        </div>
+                    </div>
+                </div>
+                <!--begin::Form-->
+                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/user/update}"
+                      th:method="post" enctype="multipart/form-data">
+                    <div class="m-portlet__body">
+
+                        <div class="form-group m-form__group row">
+                            <label for="username" class="col-2 col-form-label" th:text="#{label_username}"></label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" name="username" id="username"
+                                       th:value="${user?.username}">
+                            </div>
+                            <label for="nick" class="col-2 col-form-label" th:text="#{label_nick}"></label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="nick" name="nick"
+                                       th:value="${user?.nick}">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="email" class="col-2 col-form-label" th:text="#{label_email}"></label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="email" name="email"
+                                       th:value="${user?.email}">
+                            </div>
+                            <label for="university" class="col-2 col-form-label" th:text="#{label_university}"></label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="university" name="university"
+                                   th:value="${user?.university}">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="telephone" class="col-2 col-form-label" th:text="#{label_telephone}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="telephone" name="telephone"
+                                       th:value="${user?.telephone}">
+                            </div>
+                            <label for="name" class="col-2 col-form-label" th:text="#{label_exp_name}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="name" name="name"
+                                       th:value="${experiment?.name}">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="type" class="col-2 col-form-label" th:text="#{label_exp_type}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="type" name="type"
+                                       th:value="${experiment?.type}">
+                            </div>
+                            <label for="overlap" class="col-2 col-form-label" th:text="#{label_swath_window_overlap}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="overlap" readonly
+                                       th:placeholder="#{label_absoluted_value_between_windows}" name="overlap"
+                                       th:value="${experiment?.overlap}">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="iRtLibraryId" class="col-2 col-form-label" th:text="#{label_irt_library_id}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="iRtLibraryId" name="iRtLibraryId"
+                                       th:value="${experiment?.iRtLibraryId}">
+                            </div>
+                            <label for="slope" class="col-2 col-form-label" th:text="#{label_slope}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="slope" name="slope"
+                                       th:value="${experiment?.slope}">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="intercept" class="col-2 col-form-label" th:text="#{label_intercept}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="intercept" name="intercept"
+                                       th:value="${experiment?.intercept}">
+                            </div>
+                            <label for="compressionType" class="col-2 col-form-label"
+                                   th:text="#{label_compression_type}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="compressionType"
+                                       name="compressionType"
+                                       th:value="${experiment?.compressionType}">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="compressionType" class="col-2 col-form-label" th:text="#{label_data_precision}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="precision" name="precision"
+                                       th:value="${experiment?.precision}">
+                            </div>
+                            <label for="filePath" class="col-2 col-form-label" th:text="#{label_file_path}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="filePath" name="filePath"
+                                       th:value="${experiment?.filePath}">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="airdPath" class="col-2 col-form-label" th:text="#{label_aird_file_path}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="airdPath" name="airdPath"
+                                       th:value="${experiment?.airdPath}">
+                            </div>
+                            <label for="airdIndexPath" class="col-2 col-form-label"
+                                   th:text="#{label_aird_index_file_path}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="airdIndexPath" name="airdIndexPath"
+                                       th:value="${experiment?.airdIndexPath}">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="description" class="col-2 col-form-label" th:text="#{label_detail_description}">
+                            </label>
+                            <div class="col-4">
+                            <textarea class="form-control m-input" id="description" name="description" rows="3"
+                                      th:text="${experiment?.description}"></textarea>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="m-portlet__foot m-portlet__foot--fit">
+                        <div class="m-form__actions">
+                            <button type="submit" class="btn btn-primary" th:text="#{btn_update}">
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <!--end::Form-->
+            </div>
+            <!--end::Portlet-->
+        </div>
+    </div>
+
+</div>
+
+
+</body>
+
+<!-- end::Body -->
+</html>

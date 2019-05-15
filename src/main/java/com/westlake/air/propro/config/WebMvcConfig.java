@@ -1,15 +1,7 @@
 package com.westlake.air.propro.config;
 
-import com.westlake.air.propro.domain.db.UserDO;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -28,24 +20,4 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "DELETE", "PUT", "OPTIONS")
                 .allowCredentials(false).maxAge(3600);
     }
-
-//    @Override
-//    public void addInterceptors(InterceptorRegistry registry) {
-//        registry.addWebRequestInterceptor(new WebRequestInterceptor() {
-//            @Override
-//            public void preHandle(WebRequest webRequest) throws Exception {
-//
-//            }
-//
-//            @Override
-//            public void postHandle(WebRequest webRequest, ModelMap modelMap) throws Exception {
-//
-//            }
-//
-//            @Override
-//            public void afterCompletion(WebRequest webRequest, Exception e) throws Exception {
-//
-//            }
-//        });
-//    }
 }

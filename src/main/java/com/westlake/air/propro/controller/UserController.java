@@ -18,6 +18,7 @@ import org.apache.shiro.crypto.hash.Md5Hash;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -135,6 +136,13 @@ public class UserController extends BaseController {
                 @RequestParam(value = "telephone", required = false) String telephone,
                 @RequestParam(value = "university", required = false) String university,
                 RedirectAttributes redirectAttributes) {
+
+        model.addAttribute("username",username);
+        model.addAttribute("nick",nick);
+        model.addAttribute("email",email);
+        model.addAttribute("telephone",telephone);
+        model.addAttribute("university",university);
+
         UserQuery query = new UserQuery();
         if(StringUtils.isNotEmpty(username)){
             query.setUsername(username);
@@ -150,8 +158,34 @@ public class UserController extends BaseController {
         }
         query.setPageNo(currentPage);
         query.setPageSize(pageSize);
-        ResultDO<List<UserDO>> userList = userService.getList(query);
-        model.addAttribute("users", userList);
+        ResultDO<List<UserDO>> resultDO = userService.getList(query);
+
+        model.addAttribute("projectList", resultDO.getModel());
+        model.addAttribute("totalPage", resultDO.getTotalPage());
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("users", resultDO.getModel());
         return "user/list";
+    }
+
+    @RequiresRoles({"admin"})
+    @RequestMapping(value = "/edit/{id}")
+    String edit(Model model,
+                @PathVariable("id") String id,
+                RedirectAttributes redirectAttributes) {
+
+        ResultDO<UserDO> resultDO = userService.getById(id);
+        model.addAttribute("user", resultDO.getModel());
+        return "user/edit";
+    }
+
+    @RequiresRoles({"admin"})
+    @RequestMapping(value = "/delete/{id}")
+    String delete(Model model,
+                  @PathVariable("id") String id,
+                RedirectAttributes redirectAttributes) {
+
+        userService.delete(id);
+        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
+        return "redirect:/user/list";
     }
 }

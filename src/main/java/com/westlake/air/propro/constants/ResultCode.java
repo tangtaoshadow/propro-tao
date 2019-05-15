@@ -33,7 +33,6 @@ public enum ResultCode implements Serializable {
     UPDATE_ERROR("UPDATE_ERROR", "更新数据失败"),
     DELETE_ERROR("UPDATE_ERROR", "删除数据失败"),
     PARSE_ERROR("PARSE_ERROR", "解析错误"),
-    USER_NOT_EXISTED("USER_NOT_EXISTED", "该用户不存在"),
     ID_CANNOT_BE_NULL_OR_ZERO("ID_CANNOT_BE_NULL_OR_ZERO", "ID不能为空或者0"),
     LINE_IS_EMPTY("LINE_IS_EMPTY", "内容为空"),
     EXTRACT_FAILED("EXTRACT_FAILED", "解压缩失败"),
@@ -157,6 +156,12 @@ public enum ResultCode implements Serializable {
     EMAIL_ALREADY_EXISTED("EMAIL_ALREADY_EXISTED","该邮箱已被注册"),
     OLD_PASSWORD_ERROR("OLD_PASSWORD_ERROR","原密码错误"),
     NEW_PASSWORD_NOT_EQUALS_WITH_REPEAT_PASSWORD("NEW_PASSWORD_NOT_EQUALS_WITH_REPEAT_PASSWORD","两次密码不一致"),
+    USER_NOT_EXISTED("USER_NOT_EXISTED", "该用户不存在"),
+    UNKNOWN_ACCOUNT("UNKNOWN_ACCOUNT", "未知的账户"),
+    USERNAME_OR_PASSWORD_ERROR("USERNAME_OR_PASSWORD_ERROR", "未知的账户"),
+    ACCOUNT_IS_LOCKED("ACCOUNT_IS_LOCKED", "账户已被锁定"),
+    TRY_TOO_MANY_TIMES("TRY_TOO_MANY_TIMES", "尝试次数过多"),
+
     /**
      * ******
      * SQL-COMMON

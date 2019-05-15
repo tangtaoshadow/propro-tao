@@ -1,5 +1,7 @@
 package com.westlake.air.propro.controller;
 
+import com.westlake.air.propro.constants.ResultCode;
+import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.UserDO;
 import com.westlake.air.propro.service.UserService;
 import org.apache.shiro.SecurityUtils;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -30,7 +33,9 @@ public class LoginController extends BaseController {
     UserService userService;
 
     @RequestMapping(value = "/dologin")
-    public ModelAndView login(UserDO user, RedirectAttributes redirectAttributes, boolean remember) {
+    @ResponseBody
+    public ResultDO login(UserDO user, boolean remember) {
+        ResultDO result = new ResultDO();
         ModelAndView view = new ModelAndView();
         String username = user.getUsername();
         Subject currentUser = SecurityUtils.getSubject();
@@ -41,29 +46,24 @@ public class LoginController extends BaseController {
                     token.setRememberMe(true);
                 }
                 currentUser.login(token);
-                view.setViewName("redirect:/");
+                result.setSuccess(true);
             } catch (UnknownAccountException uae) {
-                logger.info("对用户[" + username + "]进行登录验证..验证未通过,未知账户");
-                redirectAttributes.addFlashAttribute("message", "unknown Account");
+                result.setErrorResult(ResultCode.USER_NOT_EXISTED);
             } catch (IncorrectCredentialsException ice) {
-                logger.info("对用户[" + username + "]进行登录验证..验证未通过,错误的凭证");
-                redirectAttributes.addFlashAttribute("message", "username or password error");
+                result.setErrorResult(ResultCode.USERNAME_OR_PASSWORD_ERROR);
             } catch (LockedAccountException lae) {
-                logger.info("对用户[" + username + "]进行登录验证..验证未通过,账户已锁定");
-                redirectAttributes.addFlashAttribute("message", "account is locked");
+                result.setErrorResult(ResultCode.ACCOUNT_IS_LOCKED);
             } catch (ExcessiveAttemptsException eae) {
-                logger.info("对用户[" + username + "]进行登录验证..验证未通过,错误次数过多");
-                redirectAttributes.addFlashAttribute("message", "too many errors");
+                result.setErrorResult(ResultCode.TRY_TOO_MANY_TIMES);
             } catch (AuthenticationException ae) {
                 //通过处理Shiro的运行时AuthenticationException就可以控制用户登录失败或密码错误时的情景
                 logger.info("对用户[" + username + "]进行登录验证..验证未通过,堆栈轨迹如下");
                 ae.printStackTrace();
-                redirectAttributes.addFlashAttribute("message", "username or password error");
+                result.setErrorResult(ResultCode.USERNAME_OR_PASSWORD_ERROR);
             }
         }
 
-        view.setViewName("redirect:/login/login");
-        return view;
+        return result;
     }
 
     @RequestMapping(value = "/login")
