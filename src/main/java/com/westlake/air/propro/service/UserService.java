@@ -13,7 +13,7 @@ public interface UserService {
 
     ResultDO<List<UserDO>> getList(UserQuery query);
 
-    ResultDO<UserDO> getById(String userId);
+    UserDO getById(String userId);
 
     ResultDO delete(String userId);
 

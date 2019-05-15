@@ -3,5 +3,6 @@ package com.westlake.air.propro.constants;
 public class Roles {
 
     public static final String ROLE_ADMIN = "admin";
-    public static final String ROLE_USER = "user";
+    public static final String ROLE_MEMBER = "member";
+    public static final String ROLE_GUEST = "guest";
 }

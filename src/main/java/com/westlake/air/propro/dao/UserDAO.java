@@ -76,8 +76,20 @@ public class UserDAO {
         if (targetQuery.getId() != null) {
             query.addCriteria(where("id").is(targetQuery.getId()));
         }
+        if (targetQuery.getNick() != null) {
+            query.addCriteria(where("nick").is(targetQuery.getNick()));
+        }
         if (targetQuery.getUsername() != null) {
             query.addCriteria(where("username").is(targetQuery.getUsername()));
+        }
+        if (targetQuery.getEmail() != null) {
+            query.addCriteria(where("email").is(targetQuery.getEmail()));
+        }
+        if (targetQuery.getTelephone() != null) {
+            query.addCriteria(where("telephone").is(targetQuery.getTelephone()));
+        }
+        if (targetQuery.getUniversity() != null) {
+            query.addCriteria(where("university").is(targetQuery.getUniversity()));
         }
 
         return query;

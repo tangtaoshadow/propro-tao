@@ -88,6 +88,7 @@ var SnippetLogin = function() {
 
             form.ajaxSubmit({
                 url: '/login/dologin',
+                type:'post',
                 success: function(response, status, xhr, $form) {
                     btn.removeClass('m-loader m-loader--right m-loader--light').attr('disabled', false);
                     if(response.status === "error"){
@@ -109,7 +110,7 @@ var SnippetLogin = function() {
 
             form.validate({
                 rules: {
-                    fullname: {
+                    username: {
                         required: true
                     },
                     email: {
@@ -119,7 +120,7 @@ var SnippetLogin = function() {
                     telephone: {
                         required: true
                     },
-                    organization: {
+                    university: {
                         required: true
                     }
                 }
@@ -132,6 +133,7 @@ var SnippetLogin = function() {
             btn.addClass('m-loader m-loader--right m-loader--light').attr('disabled', true);
 
             form.ajaxSubmit({
+                type:'post',
                 url: '/login/apply',
                 success: function(response, status, xhr, $form) {
                 	// similate 2s delay
@@ -176,6 +178,7 @@ var SnippetLogin = function() {
             btn.addClass('m-loader m-loader--right m-loader--light').attr('disabled', true);
 
             form.ajaxSubmit({
+                type:'post',
                 url: '',
                 success: function(response, status, xhr, $form) { 
                 	// similate 2s delay

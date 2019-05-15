@@ -25,7 +25,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDO getByUsername(String username) {
-        return userDAO.getByUsername(username);
+        if (username == null || username.isEmpty()) {
+            return null;
+        }
+
+        try {
+            return userDAO.getByUsername(username);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return null;
+        }
     }
 
     @Override
@@ -40,21 +49,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResultDO<UserDO> getById(String userId) {
+    public UserDO getById(String userId) {
         if (userId == null || userId.isEmpty()) {
-            return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
+            return null;
         }
 
         try {
-            UserDO user = userDAO.getById(userId);
-            if (user == null) {
-                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
-            } else {
-                return ResultDO.build(user);
-            }
+            return userDAO.getById(userId);
         } catch (Exception e) {
-            logger.warn(e.getMessage());
-            return ResultDO.buildError(ResultCode.QUERY_ERROR);
+            logger.error(e.getMessage());
+            return null;
         }
     }
 
@@ -97,9 +101,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResultDO<UserDO> register(UserDO userDO) {
-        UserDO existed = getByUsername(userDO.getEmail());
+        UserDO existed = getByUsername(userDO.getUsername());
         if (existed != null) {
-            return ResultDO.buildError(ResultCode.EMAIL_ALREADY_EXISTED);
+            return ResultDO.buildError(ResultCode.USER_ALREADY_EXISTED);
         }
         userDO.setCreated(new Date());
         userDO.setUpdated(new Date());

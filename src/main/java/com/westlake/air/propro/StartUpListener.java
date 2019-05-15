@@ -1,5 +1,7 @@
 package com.westlake.air.propro;
 
+import com.westlake.air.propro.config.VMProperties;
+import com.westlake.air.propro.constants.Roles;
 import com.westlake.air.propro.domain.db.UserDO;
 import com.westlake.air.propro.service.UserService;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
@@ -15,16 +17,17 @@ public class StartUpListener implements ApplicationListener<ContextRefreshedEven
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         UserService userService = contextRefreshedEvent.getApplicationContext().getBean(UserService.class);
-        UserDO userDO = userService.getByUsername("Admin");
+        VMProperties vmProperties = contextRefreshedEvent.getApplicationContext().getBean(VMProperties.class);
+        UserDO userDO = userService.getByUsername(vmProperties.getAdminUsername());
         if(userDO == null){
             userDO = new UserDO();
-            userDO.setUsername("Admin");
+            userDO.setUsername(vmProperties.getAdminUsername());
             String randomSalt = new SecureRandomNumberGenerator().nextBytes().toHex();
-            String result = new Md5Hash("propro", randomSalt, 3).toString();
+            String result = new Md5Hash(vmProperties.getAdminPassword(), randomSalt, 3).toString();
             userDO.setSalt(randomSalt);
             userDO.setPassword(result);
             Set<String> roles = new HashSet<>();
-            roles.add("admin");
+            roles.add(Roles.ROLE_ADMIN);
             userDO.setRoles(roles);
             userService.register(userDO);
         }

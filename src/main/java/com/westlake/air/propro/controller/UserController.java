@@ -10,6 +10,7 @@ import com.westlake.air.propro.domain.query.UserQuery;
 import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.ProjectService;
 import com.westlake.air.propro.service.UserService;
+import com.westlake.air.propro.utils.PasswordUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -107,15 +108,15 @@ public class UserController extends BaseController {
             return "redirect:/user/profile";
         }
 
-        String oldMD5Pwd = new Md5Hash(oldPwd, user.getSalt(), 3).toString();
+        String oldMD5Pwd = PasswordUtil.getHashPassword(oldPwd, user.getSalt());
         if(!user.getPassword().equals(oldMD5Pwd)){
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OLD_PASSWORD_ERROR.getMessage());
             redirectAttributes.addFlashAttribute("tab","changepwd");
             return "redirect:/user/profile";
         }
 
-        String randomSalt = new SecureRandomNumberGenerator().nextBytes().toHex();
-        String result = new Md5Hash(newPwd, randomSalt, 3).toString();
+        String randomSalt = PasswordUtil.getRandomSalt();
+        String result = PasswordUtil.getHashPassword(newPwd, randomSalt);
         user.setSalt(randomSalt);
         user.setPassword(result);
         userService.update(user);
@@ -123,69 +124,5 @@ public class UserController extends BaseController {
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
         redirectAttributes.addFlashAttribute("tab","changepwd");
         return "redirect:/user/profile";
-    }
-
-    @RequiresRoles({"admin"})
-    @RequestMapping(value = "/list")
-    String list(Model model,
-                @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
-                @RequestParam(value = "nick", required = false) String nick,
-                @RequestParam(value = "username", required = false) String username,
-                @RequestParam(value = "email", required = false) String email,
-                @RequestParam(value = "telephone", required = false) String telephone,
-                @RequestParam(value = "university", required = false) String university,
-                RedirectAttributes redirectAttributes) {
-
-        model.addAttribute("username",username);
-        model.addAttribute("nick",nick);
-        model.addAttribute("email",email);
-        model.addAttribute("telephone",telephone);
-        model.addAttribute("university",university);
-
-        UserQuery query = new UserQuery();
-        if(StringUtils.isNotEmpty(username)){
-            query.setUsername(username);
-        }
-        if(StringUtils.isNotEmpty(email)){
-            query.setEmail(email);
-        }
-        if(StringUtils.isNotEmpty(telephone)){
-            query.setTelephone(telephone);
-        }
-        if(StringUtils.isNotEmpty(university)){
-            query.setUniversity(university);
-        }
-        query.setPageNo(currentPage);
-        query.setPageSize(pageSize);
-        ResultDO<List<UserDO>> resultDO = userService.getList(query);
-
-        model.addAttribute("projectList", resultDO.getModel());
-        model.addAttribute("totalPage", resultDO.getTotalPage());
-        model.addAttribute("currentPage", currentPage);
-        model.addAttribute("users", resultDO.getModel());
-        return "user/list";
-    }
-
-    @RequiresRoles({"admin"})
-    @RequestMapping(value = "/edit/{id}")
-    String edit(Model model,
-                @PathVariable("id") String id,
-                RedirectAttributes redirectAttributes) {
-
-        ResultDO<UserDO> resultDO = userService.getById(id);
-        model.addAttribute("user", resultDO.getModel());
-        return "user/edit";
-    }
-
-    @RequiresRoles({"admin"})
-    @RequestMapping(value = "/delete/{id}")
-    String delete(Model model,
-                  @PathVariable("id") String id,
-                RedirectAttributes redirectAttributes) {
-
-        userService.delete(id);
-        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
-        return "redirect:/user/list";
     }
 }

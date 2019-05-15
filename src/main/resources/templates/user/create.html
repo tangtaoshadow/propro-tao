@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
-      xmlns:shiro="http://www.w3.org/1999/xhtml"
       layout:decorator="layouts/layout">
 <!-- begin::Head -->
 <head>
@@ -21,26 +20,25 @@
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
                             <span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
-                            <h3 class="m-portlet__head-text" th:text="#{label_update_user_info}"></h3>
+                            <h3 class="m-portlet__head-text" th:text="#{btn_add_user}"></h3>
                         </div>
                     </div>
                 </div>
                 <!--begin::Form-->
-                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/admin/user/update}"
+                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/admin/user/add}"
                       th:method="post" enctype="multipart/form-data">
                     <div class="m-portlet__body">
-                        <input type="text" class="form-control m-input" readonly name="userId" hidden
-                               th:value="${user?.id}">
+
                         <div class="form-group m-form__group row">
                             <label for="username" class="col-2 col-form-label" th:text="#{label_username}"></label>
                             <div class="col-4">
-                                <input type="text" class="form-control m-input" readonly name="username" id="username"
-                                       th:value="${user?.username}">
+                                <input type="text" class="form-control m-input" name="username" id="username"
+                                       th:value="${username}">
                             </div>
-                            <label for="nick" class="col-2 col-form-label" th:text="#{label_nick}"></label>
+                            <label for="password" class="col-2 col-form-label" th:text="#{label_password}"></label>
                             <div class="col-4">
-                                <input type="text" class="form-control m-input" id="nick" name="nick"
-                                       th:value="${user?.nick}">
+                                <input type="text" class="form-control m-input" name="password" id="password"
+                                       th:value="${password}">
                             </div>
                         </div>
 
@@ -48,12 +46,12 @@
                             <label for="email" class="col-2 col-form-label" th:text="#{label_email}"></label>
                             <div class="col-4">
                                 <input type="text" class="form-control m-input" id="email" name="email"
-                                       th:value="${user?.email}">
+                                       th:value="${email}">
                             </div>
                             <label for="university" class="col-2 col-form-label" th:text="#{label_university}"></label>
                             <div class="col-4">
                                 <input type="text" class="form-control m-input" id="university" name="university"
-                                       th:value="${user?.university}">
+                                       th:value="${university}">
                             </div>
                         </div>
 
@@ -62,28 +60,31 @@
                             </label>
                             <div class="col-4">
                                 <input type="text" class="form-control m-input" id="telephone" name="telephone"
-                                       th:value="${user?.telephone}">
+                                       th:value="${telephone}">
+                            </div>
+                            <label for="nick" class="col-2 col-form-label" th:text="#{label_nick}"></label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="nick" name="nick"
+                                       th:value="${nick}">
                             </div>
                         </div>
-                        <div class="form-group m-form__group row" shiro:hasrole="admin">
+
+                        <div class="form-group m-form__group row">
                             <label for="role" class="col-2 col-form-label" th:text="#{label_role}">
                             </label>
                             <div class="col-4">
                                 <!--<input type="text" class="form-control m-input" id="type" name="type" placeholder="0:Library,1:iRT-Library" th:value="${library?.type}">-->
                                 <select class="form-control m-input" id="role" name="role">
-                                    <option th:text="#{label_admin}" value="admin"
-                                            th:selected="${#lists.contains(user?.roles,'admin')}?true:false"></option>
-                                    <option th:text="#{label_member}" value="member"
-                                            th:selected="${#lists.contains(user?.roles,'member')}?true:false"></option>
-                                    <option th:text="#{label_guest}" value="guest"
-                                            th:selected="${#lists.contains(user?.roles,'guest')}?true:false"></option>
+                                    <option th:text="#{label_admin}" th:value="admin" th:selected="${role}=='admin'?true:false"></option>
+                                    <option th:text="#{label_member}" th:value="member" th:selected="${role}=='member'?true:false"></option>
+                                    <option th:text="#{label_guest}" th:value="guest" th:selected="${role}=='guest'?true:false"></option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     <div class="m-portlet__foot m-portlet__foot--fit">
                         <div class="m-form__actions">
-                            <button type="submit" class="btn btn-primary" th:text="#{btn_update}"></button>
+                            <button type="submit" class="btn btn-primary" th:text="#{btn_add_user}"></button>
                         </div>
                     </div>
                 </form>

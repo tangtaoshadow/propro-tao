@@ -1,7 +1,5 @@
 package com.westlake.air.propro.constants;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-06-27 21:05
@@ -103,4 +101,6 @@ public class Constants {
 
     public static final String EXP_TYPE_DIA_SWATH = "DIA_SWATH";
     public static final String EXP_TYPE_PRM = "PRM";
+
+    public static final String RESET_PASSWORD = "propro";
 }
