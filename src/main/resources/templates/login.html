@@ -54,22 +54,19 @@
                 <div class="m-login__contanier">
                     <div class="m-login__signin">
                         <div class="m-login__head">
-                            <h1 class="m-login__title" style="font-size: 20px;">
-                                Login To Your Propro Account
-                            </h1>
+                            <h1 class="m-login__title" style="font-size: 20px;" th:text="#{label_welcome_to_propro}"></h1>
                         </div>
                         <form class="m-login__form m-form" action="">
                             <div class="form-group m-form__group">
-                                <input class="form-control m-input" type="text" placeholder="Username" name="username">
+                                <input class="form-control m-input" type="text" th:placeholder="#{label_username}" name="username">
                             </div>
                             <div class="form-group m-form__group">
-                                <input class="form-control m-input m-login__form-input--last" type="Password" placeholder="Password" name="password">
+                                <input class="form-control m-input m-login__form-input--last" type="Password" th:placeholder="#{label_password}" name="password">
                             </div>
                             <div class="row m-login__form-sub">
                                 <div class="col m--align-left">
                                     <label class="m-checkbox m-checkbox--focus">
-                                        <input type="checkbox" name="remember">
-                                        Remember me
+                                        <input type="checkbox" name="remember" th:text="#{label_remember_me}">
                                         <span></span>
                                     </label>
                                 </div>
@@ -80,39 +77,33 @@
 <!--                                </div>-->
                             </div>
                             <div class="m-login__form-action">
-                                <button id="m_login_signin_submit" class="btn btn-focus m-btn m-btn--pill m-btn--custom m-btn--air" style="font-size: 16px;">
-                                    Sign In
-                                </button>
-                                <button type="button" id="m_login_signup" class="btn btn-outline-focus m-btn--pill" style="font-size: 16px;">
-                                    Apply
-                                </button>
+                                <button id="m_login_signin_submit" class="btn btn-focus m-btn m-btn--pill m-btn--custom m-btn--air" style="font-size: 16px;" th:text="#{btn_login}"></button>
+                                <button type="button" id="m_login_signup" class="btn btn-outline-focus m-btn--pill" style="font-size: 16px;" th:text="#{label_apply}"></button>
                             </div>
                         </form>
                     </div>
                     <div class="m-login__signup">
                         <div class="m-login__head">
-                            <h3 class="m-login__title" style="font-size: 20px;">
-                                Apply for One Propro Account
-                            </h3>
-                            <div class="m-login__desc" style="font-size: 16px;">
-                                enter some information to apply
-                            </div>
+                            <h3 class="m-login__title" style="font-size: 20px;" th:text="#{label_apply}"></h3>
+<!--                            <div class="m-login__desc" style="font-size: 16px;">-->
+<!--                                enter some necessary information to apply-->
+<!--                            </div>-->
                         </div>
                         <form class="m-login__form m-form" action="">
                             <div class="form-group m-form__group">
-                                <input class="form-control m-input" type="text" placeholder="Fullname" name="fullname">
+                                <input class="form-control m-input" type="text" th:placeholder="|#{label_username}[#{label_required}]|" name="username">
                             </div>
                             <div class="form-group m-form__group">
-                                <input class="form-control m-input" type="text" placeholder="Email" name="email" autocomplete="off">
-                            </div>
-<!--                            <div class="form-group m-form__group">-->
-<!--                                <input class="form-control m-input" type="text" placeholder="DingTalk ID" name="DingTalk Id" autocomplete="off">-->
-<!--                            </div>-->
-                            <div class="form-group m-form__group">
-                                <input class="form-control m-input" type="text" placeholder="Telephone" name="telephone">
+                                <input class="form-control m-input" type="text" th:placeholder="|#{label_email}[#{label_required}]|" name="email">
                             </div>
                             <div class="form-group m-form__group">
-                                <input class="form-control m-input m-login__form-input--last" type="text" placeholder="Organization" name="organization">
+                                <input class="form-control m-input" type="text" th:placeholder="|#{label_telephone}[#{label_required}]|" name="telephone">
+                            </div>
+                            <div class="form-group m-form__group">
+                                <input class="form-control m-input" type="text" th:placeholder="#{label_dingtalk_id}" name="dingtalkId">
+                            </div>
+                            <div class="form-group m-form__group">
+                                <input class="form-control m-input m-login__form-input--last" type="text" th:placeholder="#{label_university}" name="university">
                             </div>
 <!--                            <div class="m-login__form-sub">-->
 <!--                                <label class="m-checkbox m-checkbox&#45;&#45;focus">-->
@@ -127,12 +118,8 @@
 <!--                                <span class="m-form__help"></span>-->
 <!--                            </div>-->
                             <div class="m-login__form-action">
-                                <button id="m_login_signup_submit" class="btn btn-focus m-btn m-btn--pill m-btn--custom m-btn--air" style="font-size: 16px;">
-                                    Apply
-                                </button>
-                                <button id="m_login_signup_cancel" class="btn btn-outline-focus m-btn m-btn--pill m-btn--custom" style="font-size: 16px;">
-                                    Cancel
-                                </button>
+                                <button id="m_login_apply_submit" class="btn btn-focus m-btn m-btn--pill m-btn--custom m-btn--air" style="font-size: 16px;" th:text="#{btn_confirm}"></button>
+                                <button id="m_login_apply_cancel" class="btn btn-outline-focus m-btn m-btn--pill m-btn--custom" style="font-size: 16px;" th:text="#{btn_cancel}"></button>
                             </div>
                         </form>
                     </div>

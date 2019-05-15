@@ -58,17 +58,16 @@ public class ProjectController extends BaseController {
     String list(Model model,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
-                @RequestParam(value = "name", required = false) String name,
-                @RequestParam(value = "ownerName", required = false) String ownerName) {
+                @RequestParam(value = "name", required = false) String name) {
         model.addAttribute("name", name);
-        model.addAttribute("ownerName", ownerName);
         model.addAttribute("pageSize", pageSize);
         ProjectQuery query = new ProjectQuery();
         if (name != null && !name.isEmpty()) {
             query.setName(name);
         }
-        if (ownerName != null && !ownerName.isEmpty()) {
-            query.setOwnerName(ownerName);
+        String username = getCurrentUsername();
+        if (username != null && !username.isEmpty()) {
+            query.setOwnerName(username);
         }
 
         query.setPageSize(pageSize);

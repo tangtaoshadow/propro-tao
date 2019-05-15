@@ -91,8 +91,8 @@ var SnippetLogin = function() {
                 type:'post',
                 success: function(response, status, xhr, $form) {
                     btn.removeClass('m-loader m-loader--right m-loader--light').attr('disabled', false);
-                    if(response.status === "error"){
-                        showErrorMsg(form, 'danger', response.msg);
+                    if(response.success === false){
+                        showErrorMsg(form, 'danger', response.msgInfo);
                     }else{
                         window.location.href="/";
                     }
@@ -119,9 +119,6 @@ var SnippetLogin = function() {
                     },
                     telephone: {
                         required: true
-                    },
-                    university: {
-                        required: true
                     }
                 }
             });
@@ -136,20 +133,15 @@ var SnippetLogin = function() {
                 type:'post',
                 url: '/login/apply',
                 success: function(response, status, xhr, $form) {
-                	// similate 2s delay
-                	setTimeout(function() {
-	                    btn.removeClass('m-loader m-loader--right m-loader--light').attr('disabled', false);
-	                    form.clearForm();
-	                    form.validate().resetForm();
+                    btn.removeClass('m-loader m-loader--right m-loader--light').attr('disabled', false);
+                    form.clearForm();
+                    form.validate().resetForm();
+                    displaySignInForm();
+                    var signInForm = login.find('.m-login__signin form');
+                    signInForm.clearForm();
+                    signInForm.validate().resetForm();
 
-	                    // display signup form
-	                    displaySignInForm();
-	                    var signInForm = login.find('.m-login__signin form');
-	                    signInForm.clearForm();
-	                    signInForm.validate().resetForm();
-
-	                    showErrorMsg(signInForm, 'success', 'Thank you. To complete your registration please check your email.');
-	                }, 2000);
+                    showErrorMsg(signInForm, 'success', 'Thank you for applying, please wait for 1-2 days, Propro will contact with you. 申请成功,请等候1-2个工作日,Propro会主动联系您');
                 }
             });
         });

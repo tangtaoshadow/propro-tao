@@ -16,6 +16,9 @@ public class VMProperties {
     @Value("${admin.password}")
     private String adminPassword;
 
+    @Value("${dingtalk_robot}")
+    private String dingtalkRobot;
+
     public String getDbpath() {
         if(StringUtils.isEmpty(dbpath)){
             dbpath = "localhost:27017";
@@ -25,6 +28,17 @@ public class VMProperties {
 
     public void setDbpath(String dbpath) {
         this.dbpath = dbpath;
+    }
+
+    public String getDingtalkRobot() {
+        if(StringUtils.isEmpty(dingtalkRobot)){
+            dbpath = "https://oapi.dingtalk.com/robot/send?access_token=f2fb029431f174e678106b30c2db5fb0e40e921999386a61031bf864f18beb77";
+        }
+        return dingtalkRobot;
+    }
+
+    public void setDingtalkRobot(String dingtalkRobot) {
+        this.dingtalkRobot = dingtalkRobot;
     }
 
     public String getAdminUsername() {

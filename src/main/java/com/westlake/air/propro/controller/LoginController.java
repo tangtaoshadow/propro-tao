@@ -1,27 +1,27 @@
 package com.westlake.air.propro.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.westlake.air.propro.config.VMProperties;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.message.ApplyMessage;
+import com.westlake.air.propro.domain.bean.message.DingtalkMessage;
 import com.westlake.air.propro.domain.db.UserDO;
 import com.westlake.air.propro.service.UserService;
+import com.westlake.air.propro.service.impl.HttpClient;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
-import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.apache.shiro.crypto.SecureRandomNumberGenerator;
-import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashSet;
-import java.util.Set;
 
 @Controller
 @RequestMapping("login")
@@ -32,11 +32,16 @@ public class LoginController extends BaseController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    VMProperties vmProperties;
+
+    @Autowired
+    HttpClient httpClient;
+
     @RequestMapping(value = "/dologin")
     @ResponseBody
     public ResultDO login(UserDO user, boolean remember) {
         ResultDO result = new ResultDO();
-        ModelAndView view = new ModelAndView();
         String username = user.getUsername();
         Subject currentUser = SecurityUtils.getSubject();
         if (!currentUser.isAuthenticated()) {
@@ -68,7 +73,7 @@ public class LoginController extends BaseController {
 
     @RequestMapping(value = "/login")
     public String login(HttpServletRequest request) {
-
+        logger.info("可能被重定向了");
         try {
             if ((null != SecurityUtils.getSubject() && SecurityUtils.getSubject().isAuthenticated()) || (SecurityUtils.getSubject() != null && SecurityUtils.getSubject().isRemembered())) {
                 return "redirect:/";
@@ -82,6 +87,28 @@ public class LoginController extends BaseController {
         return "login";
     }
 
+    @RequestMapping("apply")
+    @ResponseBody
+    public ResultDO apply(Model model,
+                          @RequestParam(value = "username", required = true) String username,
+                          @RequestParam(value = "email", required = true) String email,
+                          @RequestParam(value = "telephone", required = true) String telephone,
+                          @RequestParam(value = "dingtalkId", required = false) String dingtalkId,
+                          @RequestParam(value = "university", required = false) String university) {
+        ResultDO resultDO = new ResultDO(true);
+        String dingtalkRobot = vmProperties.getDingtalkRobot();
+        ApplyMessage am = new ApplyMessage();
+        am.setUsername(username);
+        am.setEmail(email);
+        am.setTelephone(telephone);
+        am.setUniversity(university);
+        am.setDingtalkId(dingtalkId);
+        DingtalkMessage message = new DingtalkMessage("账号申请", am.markdown());
+        String response = httpClient.client(dingtalkRobot, JSON.toJSONString(message));
+        logger.info(response);
+        return resultDO;
+    }
+
     @RequestMapping(value = "/logout")
     public String logout(HttpServletRequest request) {
         Subject subject = SecurityUtils.getSubject();
@@ -91,14 +118,4 @@ public class LoginController extends BaseController {
 
         return "login/login";
     }
-
-    @RequiresRoles({"admin"})
-    @RequestMapping("xiao")
-    public ModelAndView xiao() {
-        ModelAndView view = new ModelAndView("index");
-        System.out.println("来到了xiao方法。。。");
-
-        return view;
-    }
-
 }
