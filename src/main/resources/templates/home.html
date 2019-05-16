@@ -15,11 +15,10 @@
                 <div class="col-md-12 col-lg-6 col-xl-2">
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title" th:text="#{menu_project}"></h2>
+                            <a th:href="@{/project/list}"><h2 class="m-widget24__title" th:text="#{menu_project}"></h2></a>
                             <br>
-                            <span class="m-widget24__desc"><a class="btn btn-primary btn-sm" th:href="@{/project/list}" th:text="|See All|"></a></span>
                             <span class="m-widget24__stats m--font-brand" th:text="${projectCount}"></span>
-                            <div class="m--space-10"></div>
+
                             <div class="m-widget2">
                                 <div th:each="project:${projects}" class="m-widget2__item m-widget2__item--warning">
                                     <div class="m-widget2__checkbox"></div>
@@ -92,7 +91,6 @@
                         <div class="m-widget24__item">
                             <h2 class="m-widget24__title" th:text="#{label_analyse_overview}"></h2>
                             <br>
-                            <span class="m-widget24__desc">The chromatogram data</span>
                             <span class="m-widget24__stats m--font-danger" th:text="${overviewCount}"></span>
                             <div class="m--space-10"></div>
                             <div class="m-widget2">
@@ -117,7 +115,6 @@
                         <div class="m-widget24__item">
                             <h2 class="m-widget24__title" th:text="#{label_library}"></h2>
                             <br>
-                            <span class="m-widget24__desc">Include Standard and iRT libraries</span>
                             <span class="m-widget24__stats m--font-info" th:text="${libCount}"></span>
                             <div class="m--space-10"></div>
                             <div class="m-widget2">
@@ -143,10 +140,9 @@
                         <div class="m-widget24__item">
                             <h2 class="m-widget24__title" th:text="#{label_task}"></h2>
                             <br>
-                            <span class="m-widget24__desc">Running Tasks</span>
                             <span class="m-widget24__stats m--font-success" th:text="${taskRunningCount}"></span>
                             <div class="m--space-10"></div>
-                            <div class="m-widget2">ss
+                            <div class="m-widget2">
                                 <div th:each="task:${runningTasks}" class="m-widget2__item m-widget2__item--success">
                                     <div class="m-widget2__checkbox"></div>
                                     <div class="m-widget2__desc">

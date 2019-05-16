@@ -130,14 +130,14 @@ public class AdminController extends BaseController {
 
     @RequestMapping(value = "/user/update",method = RequestMethod.POST)
     String update(Model model,
-                  @RequestParam(value = "userId", required = true) String userId,
+                  @RequestParam(value = "id", required = true) String id,
                   @RequestParam(value = "nick", required = false) String nick,
                   @RequestParam(value = "email", required = false) String email,
                   @RequestParam(value = "role", required = true) String role,
                   @RequestParam(value = "telephone", required = false) String telephone,
                   @RequestParam(value = "university", required = false) String university,
                   RedirectAttributes redirectAttributes) {
-        UserDO user = userService.getById(userId);
+        UserDO user = userService.getById(id);
         if(user == null){
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.USER_NOT_EXISTED.getMessage());
             return "redirect:/admin/user/list";

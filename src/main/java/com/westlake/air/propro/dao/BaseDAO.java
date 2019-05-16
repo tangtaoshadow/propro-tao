@@ -1,8 +1,6 @@
 package com.westlake.air.propro.dao;
 
-import com.westlake.air.propro.domain.db.ScanIndexDO;
 import com.westlake.air.propro.domain.query.PageQuery;
-import com.westlake.air.propro.domain.query.ScanIndexQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
