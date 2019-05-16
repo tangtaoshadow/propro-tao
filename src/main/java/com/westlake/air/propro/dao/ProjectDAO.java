@@ -17,66 +17,27 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
  * Time: 2019-01-10 13:16
  */
 @Service
-public class ProjectDAO {
+public class ProjectDAO extends BaseDAO<ProjectDO, ProjectQuery>{
 
     public static String CollectionName = "project";
 
-    @Autowired
-    MongoTemplate mongoTemplate;
-
-    public long count(ProjectQuery query) {
-        return mongoTemplate.count(buildQueryWithoutPage(query), ProjectDO.class);
+    @Override
+    protected String getCollectionName() {
+        return CollectionName;
     }
 
-    public List<ProjectDO> getList(ProjectQuery query) {
-        return mongoTemplate.find(buildQuery(query), ProjectDO.class, CollectionName);
+    @Override
+    protected Class getDomainClass() {
+        return ProjectDO.class;
     }
 
-    public List<ProjectDO> getAll() {
-        return mongoTemplate.findAll(ProjectDO.class, CollectionName);
+    @Override
+    protected boolean allowSort() {
+        return true;
     }
 
-    public ProjectDO getById(String id) {
-        return mongoTemplate.findById(id, ProjectDO.class, CollectionName);
-    }
-
-    public ProjectDO getByName(String name) {
-        ProjectQuery query = new ProjectQuery();
-        query.setName(name);
-        return mongoTemplate.findOne(buildQuery(query), ProjectDO.class, CollectionName);
-    }
-
-    public ProjectDO insert(ProjectDO project) {
-        mongoTemplate.insert(project, CollectionName);
-        return project;
-    }
-
-    public ProjectDO update(ProjectDO project) {
-        mongoTemplate.save(project, CollectionName);
-        return project;
-    }
-
-    public List<ProjectDO> insertAll(List<ProjectDO> projectList) {
-        mongoTemplate.insert(projectList, CollectionName);
-        return projectList;
-    }
-
-    public void delete(String id) {
-        Query query = new Query(where("id").is(id));
-        mongoTemplate.remove(query, ProjectDO.class, CollectionName);
-    }
-
-    private Query buildQuery(ProjectQuery projectQuery) {
-        Query query = buildQueryWithoutPage(projectQuery);
-        query.skip((projectQuery.getPageNo() - 1) * projectQuery.getPageSize());
-        query.limit(projectQuery.getPageSize());
-        if(projectQuery.getSortColumn() != null){
-            query.with(new Sort(projectQuery.getOrderBy(), projectQuery.getSortColumn()));
-        }
-        return query;
-    }
-
-    private Query buildQueryWithoutPage(ProjectQuery projectQuery) {
+    @Override
+    protected Query buildQueryWithoutPage(ProjectQuery projectQuery) {
         Query query = new Query();
         if (projectQuery.getId() != null) {
             query.addCriteria(where("id").is(projectQuery.getId()));
@@ -88,5 +49,11 @@ public class ProjectDAO {
             query.addCriteria(where("ownerName").is(projectQuery.getOwnerName()));
         }
         return query;
+    }
+
+    public ProjectDO getByName(String name) {
+        ProjectQuery query = new ProjectQuery();
+        query.setName(name);
+        return mongoTemplate.findOne(buildQuery(query), ProjectDO.class, CollectionName);
     }
 }

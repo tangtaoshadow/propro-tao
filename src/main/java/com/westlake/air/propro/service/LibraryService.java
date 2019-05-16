@@ -18,8 +18,6 @@ public interface LibraryService {
 
     ResultDO<List<LibraryDO>> getList(LibraryQuery query);
 
-    List<LibraryDO> getAll();
-
     List<LibraryDO> getSimpleAll(Integer type);
 
     ResultDO insert(LibraryDO libraryDO);

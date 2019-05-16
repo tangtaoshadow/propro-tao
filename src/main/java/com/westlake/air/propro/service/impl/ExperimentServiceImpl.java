@@ -75,11 +75,6 @@ public class ExperimentServiceImpl implements ExperimentService {
     ProjectService projectService;
 
     @Override
-    public List<ExperimentDO> getAll() {
-        return experimentDAO.getAll();
-    }
-
-    @Override
     public List<ExperimentDO> getSimpleAll() {
         return experimentDAO.getSimpleAll();
     }

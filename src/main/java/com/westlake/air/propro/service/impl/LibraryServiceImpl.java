@@ -54,11 +54,6 @@ public class LibraryServiceImpl implements LibraryService {
     FastaParser fastaParser;
 
     @Override
-    public List<LibraryDO> getAll() {
-        return libraryDAO.getAll();
-    }
-
-    @Override
     public List<LibraryDO> getSimpleAll(Integer type) {
         return libraryDAO.getSimpleAll(type);
     }

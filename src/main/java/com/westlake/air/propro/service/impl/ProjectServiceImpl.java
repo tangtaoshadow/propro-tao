@@ -34,11 +34,6 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDO> getAll() {
-        return projectDAO.getAll();
-    }
-
-    @Override
     public ResultDO insert(ProjectDO project) {
         if (project.getName() == null || project.getName().isEmpty()) {
             return ResultDO.buildError(ResultCode.PROJECT_NAME_CANNOT_BE_EMPTY);

@@ -18,91 +18,27 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
  * Time: 2018-07-11 20:04
  */
 @Service
-public class ScanIndexDAO {
+public class ScanIndexDAO extends BaseDAO<ScanIndexDO, ScanIndexQuery>{
 
     public static String CollectionName = "scanIndex";
 
-    @Autowired
-    MongoTemplate mongoTemplate;
-
-    public long count(ScanIndexQuery query) {
-        return mongoTemplate.count(buildQueryWithoutPage(query), ScanIndexDO.class);
+    @Override
+    protected String getCollectionName() {
+        return CollectionName;
     }
 
-    public List<ScanIndexDO> getAllByExperimentId(String experimentId) {
-        Query query = new Query(where("experimentId").is(experimentId));
-        return mongoTemplate.find(query, ScanIndexDO.class, CollectionName);
+    @Override
+    protected Class getDomainClass() {
+        return ScanIndexDO.class;
     }
 
-    public List<ScanIndexDO> getList(ScanIndexQuery query) {
-        return mongoTemplate.find(buildQuery(query), ScanIndexDO.class, CollectionName);
+    @Override
+    protected boolean allowSort() {
+        return false;
     }
 
-    public List<ScanIndexDO> getAll(ScanIndexQuery query) {
-        return mongoTemplate.find(buildQueryWithoutPage(query), ScanIndexDO.class, CollectionName);
-    }
-
-    public ScanIndexDO getOne(ScanIndexQuery query) {
-        return mongoTemplate.findOne(buildQueryWithoutPage(query), ScanIndexDO.class, CollectionName);
-    }
-
-    public List<ScanIndexDO> getAllForOutput(ScanIndexQuery query) {
-        return mongoTemplate.find(buildQueryWithoutPage(query), ScanIndexDO.class, CollectionName);
-    }
-
-    public List<SimpleScanIndex> getSimpleAll(ScanIndexQuery query) {
-        return mongoTemplate.find(buildQueryWithoutPage(query), SimpleScanIndex.class, CollectionName);
-    }
-
-    public List<SimpleScanIndex> getSimpleList(ScanIndexQuery query) {
-        return mongoTemplate.find(buildQuery(query), SimpleScanIndex.class, CollectionName);
-    }
-
-    public ScanIndexDO getById(String id) {
-        return mongoTemplate.findById(id, ScanIndexDO.class, CollectionName);
-    }
-
-    public ScanIndexDO insert(ScanIndexDO scanIndexDO) {
-        mongoTemplate.insert(scanIndexDO, CollectionName);
-        return scanIndexDO;
-    }
-
-    public List<ScanIndexDO> insert(List<ScanIndexDO> scanIndexList) {
-        mongoTemplate.insert(scanIndexList, CollectionName);
-        return scanIndexList;
-    }
-
-    public ScanIndexDO update(ScanIndexDO scanIndexDO) {
-        mongoTemplate.save(scanIndexDO, CollectionName);
-        return scanIndexDO;
-    }
-
-    public void delete(String id) {
-        Query query = new Query(where("id").is(id));
-        mongoTemplate.remove(query, ScanIndexDO.class, CollectionName);
-    }
-
-    public void deleteAllByExperimentId(String experimentId) {
-        Query query = new Query(where("experimentId").is(experimentId));
-        mongoTemplate.remove(query, ScanIndexDO.class, CollectionName);
-    }
-
-    public void deleteAllSwathIndexByExperimentId(String experimentId) {
-        Query query = new Query();
-        query.addCriteria(where("experimentId").is(experimentId));
-        query.addCriteria(where("msLevel").is(0));
-        mongoTemplate.remove(query, ScanIndexDO.class, CollectionName);
-    }
-
-    private Query buildQuery(ScanIndexQuery scanIndexQuery) {
-        Query query = buildQueryWithoutPage(scanIndexQuery);
-        query.skip((scanIndexQuery.getPageNo() - 1) * scanIndexQuery.getPageSize());
-        query.limit(scanIndexQuery.getPageSize());
-//        query.with(new Sort(scanIndexQuery.getOrderBy(), scanIndexQuery.getSortColumn()));
-        return query;
-    }
-
-    private Query buildQueryWithoutPage(ScanIndexQuery scanIndexQuery) {
+    @Override
+    protected Query buildQueryWithoutPage(ScanIndexQuery scanIndexQuery) {
         Query query = new Query();
         if (scanIndexQuery.getExperimentId() != null) {
             query.addCriteria(where("experimentId").is(scanIndexQuery.getExperimentId()));
@@ -145,4 +81,32 @@ public class ScanIndexDAO {
         }
         return query;
     }
+
+
+    public List<ScanIndexDO> getAllByExperimentId(String experimentId) {
+        Query query = new Query(where("experimentId").is(experimentId));
+        return mongoTemplate.find(query, ScanIndexDO.class, CollectionName);
+    }
+
+    public List<SimpleScanIndex> getSimpleAll(ScanIndexQuery query) {
+        return mongoTemplate.find(buildQueryWithoutPage(query), SimpleScanIndex.class, CollectionName);
+    }
+
+    public List<SimpleScanIndex> getSimpleList(ScanIndexQuery query) {
+        return mongoTemplate.find(buildQuery(query), SimpleScanIndex.class, CollectionName);
+    }
+
+    public void deleteAllByExperimentId(String experimentId) {
+        Query query = new Query(where("experimentId").is(experimentId));
+        mongoTemplate.remove(query, ScanIndexDO.class, CollectionName);
+    }
+
+    public void deleteAllSwathIndexByExperimentId(String experimentId) {
+        Query query = new Query();
+        query.addCriteria(where("experimentId").is(experimentId));
+        query.addCriteria(where("msLevel").is(0));
+        mongoTemplate.remove(query, ScanIndexDO.class, CollectionName);
+    }
+
+
 }

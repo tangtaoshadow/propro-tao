@@ -10,8 +10,6 @@ public interface ProjectService {
 
     ResultDO<List<ProjectDO>> getList(ProjectQuery query);
 
-    List<ProjectDO> getAll();
-
     ResultDO insert(ProjectDO project);
 
     ResultDO update(ProjectDO projectDO);

@@ -27,8 +27,6 @@ public interface ExperimentService {
 
     List<ExperimentDO> getAllByProjectName(String projectName);
 
-    List<ExperimentDO> getAll();
-
     List<ExperimentDO> getSimpleAll();
 
     ResultDO insert(ExperimentDO experimentDO);

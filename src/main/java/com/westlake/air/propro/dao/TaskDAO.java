@@ -19,58 +19,27 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
  * Time: 2018-06-07 20:50
  */
 @Service
-public class TaskDAO {
+public class TaskDAO extends BaseDAO<TaskDO, TaskQuery>{
 
     public static String CollectionName = "task";
 
-    @Autowired
-    MongoTemplate mongoTemplate;
-
-    public List<TaskDO> getList(TaskQuery taskQuery) {
-        return mongoTemplate.find(buildQuery(taskQuery), TaskDO.class, CollectionName);
+    @Override
+    protected String getCollectionName() {
+        return CollectionName;
     }
 
-    public long count(TaskQuery query) {
-        return mongoTemplate.count(buildQueryWithoutPage(query), AnalyseOverviewDO.class, CollectionName);
+    @Override
+    protected Class getDomainClass() {
+        return TaskDO.class;
     }
 
-    public TaskDO getById(String id) {
-        return mongoTemplate.findById(id, TaskDO.class, CollectionName);
+    @Override
+    protected boolean allowSort() {
+        return true;
     }
 
-    public TaskDO insert(TaskDO taskDO) {
-        mongoTemplate.insert(taskDO, CollectionName);
-        return taskDO;
-    }
-
-    public List<TaskDO> insert(List<TaskDO> taskList) {
-        mongoTemplate.insert(taskList, CollectionName);
-        return taskList;
-    }
-
-    public TaskDO update(TaskDO taskDO) {
-        mongoTemplate.save(taskDO, CollectionName);
-        return taskDO;
-    }
-
-    public void delete(String id) {
-        Query query = new Query(where("id").is(id));
-        mongoTemplate.remove(query, TaskDO.class, CollectionName);
-    }
-
-    private Query buildQuery(TaskQuery targetQuery) {
-        Query query = buildQueryWithoutPage(targetQuery);
-
-        query.skip((targetQuery.getPageNo() - 1) * targetQuery.getPageSize());
-        query.limit(targetQuery.getPageSize());
-        //默认没有排序功能(排序会带来极大的性能开销)
-        if(!StringUtils.isEmpty(targetQuery.getSortColumn())){
-            query.with(new Sort(targetQuery.getOrderBy(), targetQuery.getSortColumn()));
-        }
-        return query;
-    }
-
-    private Query buildQueryWithoutPage(TaskQuery targetQuery) {
+    @Override
+    protected Query buildQueryWithoutPage(TaskQuery targetQuery) {
         Query query = new Query();
         if (targetQuery.getId() != null) {
             query.addCriteria(where("id").is(targetQuery.getId()));
