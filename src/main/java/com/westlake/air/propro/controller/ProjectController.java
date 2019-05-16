@@ -65,10 +65,10 @@ public class ProjectController extends BaseController {
         if (name != null && !name.isEmpty()) {
             query.setName(name);
         }
-        String username = getCurrentUsername();
-        if (username != null && !username.isEmpty()) {
-            query.setOwnerName(username);
-        }
+//        String username = getCurrentUsername();
+//        if (username != null && !username.isEmpty()) {
+//            query.setOwnerName(username);
+//        }
 
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
