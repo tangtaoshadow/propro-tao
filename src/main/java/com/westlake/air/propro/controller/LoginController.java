@@ -73,12 +73,10 @@ public class LoginController extends BaseController {
 
     @RequestMapping(value = "/login")
     public String login(HttpServletRequest request) {
-        logger.info("可能被重定向了");
         try {
             if ((null != SecurityUtils.getSubject() && SecurityUtils.getSubject().isAuthenticated()) || (SecurityUtils.getSubject() != null && SecurityUtils.getSubject().isRemembered())) {
                 return "redirect:/";
             } else {
-                logger.info("--进行登录验证..验证开始");
                 return "login";
             }
         } catch (Exception e) {
