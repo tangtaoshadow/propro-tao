@@ -86,7 +86,6 @@ public class AnalyseController extends BaseController {
                         @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                         @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize) {
 
-
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("expId", expId);
 
@@ -98,6 +97,7 @@ public class AnalyseController extends BaseController {
             }
             model.addAttribute("experiment", expResult.getModel());
         }
+
 
         AnalyseOverviewQuery query = new AnalyseOverviewQuery();
         query.setPageSize(pageSize);

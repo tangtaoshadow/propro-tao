@@ -2,13 +2,24 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <!-- begin::Footer -->
-<footer class="m-grid__item m-footer ">
+<footer class="m-grid__item m-footer">
     <div class="m-container m-container--fluid m-container--full-height m-page__container">
-        <div class="m-stack m-stack--flex-tablet-and-mobile m-stack--ver m-stack--desktop">
+        <div class="m-stack m-stack--flex-tablet-and-mobile m-stack--ver m-stack--desktop" style="width: 100%">
             <div class="m-stack__item m-stack__item--left m-stack__item--middle m-stack__item--last">
-				<span class="m-footer__copyright">
+                <span class="m-footer__copyright">
 					2020 &copy; Propro Server Developed by Propro Studio from Westlake University
 				</span>
+            </div>
+            <div class="m-stack__item m-stack__item--right m-stack__item--middle m-stack__item--first">
+                <ul class="m-footer__nav m-nav m-nav--inline m--pull-right">
+
+                        <a class="m-nav__link" href="http://www.wias.org.cn/"><img style="height: 40px; width: 120px; " th:src="|${url}/assets/logo/university-blue-logo.jpg|" ></a>
+
+                        <a class="m-nav__link" href="https://yu-lab.gitee.io/yulab/"><img style="height: 40px; width: 160px; margin-left: 10px;" th:src="|${url}/assets/logo/propro-team-brand.png|"></a>
+
+                        <a class="m-nav__link" href="http://www.guomics.com"><img style="height: 40px; width: 40px; margin-left: 10px;" th:src="|${url}/assets/logo/guomics-logo.png|"></a>
+
+                </ul>
             </div>
         </div>
     </div>

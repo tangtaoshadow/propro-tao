@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.w3.org/1999/xhtml" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" layout:decorator="layouts/layout">
-<!-- begin::Head -->
 <head>
     <title th:text="#{title_welcome_to_propro}"></title>
 </head>
-<!-- end::Head -->
 <body>
 
 <div class="m-content" layout:fragment="content">
@@ -17,8 +15,9 @@
                         <div class="m-widget24__item">
                             <a th:href="@{/project/list}"><h2 class="m-widget24__title" th:text="#{menu_project}"></h2></a>
                             <br>
+                            <span class="m-widget24__desc">All Projects</span>
                             <span class="m-widget24__stats m--font-brand" th:text="${projectCount}"></span>
-
+                            <div class="m--space-15"></div>
                             <div class="m-widget2">
                                 <div th:each="project:${projects}" class="m-widget2__item m-widget2__item--warning">
                                     <div class="m-widget2__checkbox"></div>
@@ -39,11 +38,11 @@
                 <div class="col-md-12 col-lg-6 col-xl-2">
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">DIA/SWATH</h2>
+                            <a th:href="@{/experiment/list?type=DIA_SWATH}"><h2 class="m-widget24__title">DIA/SWATH</h2></a>
                             <br>
-                            <span class="m-widget24__desc"><a class="btn btn-primary btn-sm" th:href="@{/experiment/list?type=DIA_SWATH}" th:text="|See All|"></a></span>
+                            <span class="m-widget24__desc">DIA/SWATH type experiments</span>
                             <span class="m-widget24__stats m--font-brand" th:text="${expSWATHCount}"></span>
-                            <div class="m--space-10"></div>
+                            <div class="m--space-15"></div>
                             <div class="m-widget2">
                                 <div th:each="exp:${expsSWATH}" class="m-widget2__item m-widget2__item--warning">
                                     <div class="m-widget2__checkbox"></div>
@@ -64,11 +63,11 @@
                 <div class="col-md-12 col-lg-6 col-xl-2">
                     <div class="m-widget24">
                         <div class="m-widget24__item">
-                            <h2 class="m-widget24__title">PRM</h2>
+                            <a th:href="@{/experiment/list?type=PRM}"><h2 class="m-widget24__title">PRM</h2></a>
                             <br>
-                            <span class="m-widget24__desc"><a class="btn btn-primary btn-sm" th:href="@{/experiment/list?type=PRM}" th:text="|See All|"></a></span>
+                            <span class="m-widget24__desc">PRM type experiments</span>
                             <span class="m-widget24__stats m--font-brand" th:text="${expPRMCount}"></span>
-                            <div class="m--space-10"></div>
+                            <div class="m--space-15"></div>
                             <div class="m-widget2">
                                 <div th:each="exp:${expsPRM}" class="m-widget2__item m-widget2__item--warning">
                                     <div class="m-widget2__checkbox"></div>
@@ -91,8 +90,9 @@
                         <div class="m-widget24__item">
                             <h2 class="m-widget24__title" th:text="#{label_analyse_overview}"></h2>
                             <br>
-                            <span class="m-widget24__stats m--font-danger" th:text="${overviewCount}"></span>
-                            <div class="m--space-10"></div>
+                            <span class="m-widget24__desc">analysis results after extracting</span>
+                            <span class="m-widget24__stats m--font-brand" th:text="${overviewCount}"></span>
+                            <div class="m--space-15"></div>
                             <div class="m-widget2">
                                 <div th:each="overview:${overviews}" class="m-widget2__item m-widget2__item--accent">
                                     <div class="m-widget2__checkbox"></div>
@@ -115,8 +115,9 @@
                         <div class="m-widget24__item">
                             <h2 class="m-widget24__title" th:text="#{label_library}"></h2>
                             <br>
+                            <span class="m-widget24__desc">running tasks</span>
                             <span class="m-widget24__stats m--font-info" th:text="${libCount}"></span>
-                            <div class="m--space-10"></div>
+                            <div class="m--space-15"></div>
                             <div class="m-widget2">
                                 <div th:each="lib:${libs}" class="m-widget2__item m-widget2__item--info">
                                     <div class="m-widget2__checkbox"></div>
@@ -141,7 +142,7 @@
                             <h2 class="m-widget24__title" th:text="#{label_task}"></h2>
                             <br>
                             <span class="m-widget24__stats m--font-success" th:text="${taskRunningCount}"></span>
-                            <div class="m--space-10"></div>
+                            <div class="m--space-15"></div>
                             <div class="m-widget2">
                                 <div th:each="task:${runningTasks}" class="m-widget2__item m-widget2__item--success">
                                     <div class="m-widget2__checkbox"></div>
