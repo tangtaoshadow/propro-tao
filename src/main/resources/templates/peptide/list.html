@@ -99,36 +99,16 @@
                     <th width="2%">
                         No.
                     </th>
-                    <th width="8%">
-                        对应标准库名称
-                    </th>
-                    <th width="10%">
-                        蛋白质名称
-                    </th>
-                    <th width="10%">
-                        PeptideRef
-                    </th>
-                    <th width="5%">
-                        肽段序列(伪肽段序列)
-                    </th>
-                    <th width="10%">
-                        肽段全名
-                    </th>
-                    <th width="5%">
-                        肽段荷质比
-                    </th>
-                    <th width="5%">
-                        归一化RT
-                    </th>
-                    <th width="5%">
-                        是否伪肽段
-                    </th>
-                    <th width="35%">
-                        片段信息
-                    </th>
-                    <th width="5%">
-                        操作
-                    </th>
+                    <th width="8%" th:text="#{label_library_name}"></th>
+                    <th width="10%" th:text="#{label_protein_name}"></th>
+                    <th width="10%">PeptideRef</th>
+                    <th width="5%" th:text="#{label_peptide_sequence}"></th>
+                    <th width="10%" th:text="#{label_peptide_full_name}"></th>
+                    <th width="5%" th:text="#{label_peptide_mz}"></th>
+                    <th width="5%">RT</th>
+                    <th width="5%" th:text="#{label_is_decoy}"></th>
+                    <th width="35%" th:text="#{label_fragment}"></th>
+                    <th width="5%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
