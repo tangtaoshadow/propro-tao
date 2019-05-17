@@ -13,6 +13,24 @@
                 <div class="col-md-12 col-lg-6 col-xl-3">
                     <div class="m-widget24">
                         <div class="m-widget24__item">
+                            <a th:href="@{/project/list}"><h2 class="m-widget24__title m--font-success" th:text="#{label_public_project}"></h2></a>
+                            <br>
+                            <span class="m-widget24__desc">Public Projects</span>
+                            <span class="m-widget24__stats m--font-brand" th:text="${projectCount}"></span>
+                            <div class="m--space-5"></div>
+                            <div class="m-widget2" style="padding-left: 5px; padding-bottom: 5px;">
+                                <a th:href="@{/project/list}" data-toggle="m-tooltip"
+                                   th:title="#{label_project_list}"
+                                   class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
+                                    <i class="fa fa-list"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 col-lg-6 col-xl-3">
+                    <div class="m-widget24">
+                        <div class="m-widget24__item">
                             <a th:href="@{/project/list}"><h2 class="m-widget24__title" th:text="#{menu_project}"></h2></a>
                             <br>
                             <span class="m-widget24__desc">All Projects</span>
@@ -72,24 +90,6 @@
                                 </a>
                                 <a th:href="@{/experiment/list?type=PRM}" data-toggle="m-tooltip"
                                    th:title="#{label_exp_list}"
-                                   class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
-                                    <i class="fa fa-list"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-12 col-lg-6 col-xl-3">
-                    <div class="m-widget24">
-                        <div class="m-widget24__item">
-                            <a th:href="@{/analyse/overview/list}"><h2 class="m-widget24__title" th:text="#{label_analyse_overview}"></h2></a>
-                            <br>
-                            <span class="m-widget24__desc">analysis results after extracting</span>
-                            <span class="m-widget24__stats m--font-brand" th:text="${overviewCount}"></span>
-                            <div class="m--space-5"></div>
-                            <div class="m-widget2" style="padding-left: 5px; padding-bottom: 5px;">
-                                <a th:href="@{/analyse/overview/list}" data-toggle="m-tooltip"
-                                   th:title="#{menu_analyse_overview_list}"
                                    class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
                                     <i class="fa fa-list"></i>
                                 </a>
@@ -160,6 +160,30 @@
                                 </a>
                                 <a th:href="@{/library/listIrt}" data-toggle="m-tooltip"
                                    th:title="#{menu_irt_library_list}"
+                                   class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
+                                    <i class="fa fa-list"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="m-portlet">
+        <div class="m-portlet__body m-portlet__body--no-padding">
+            <div class="row m-row--no-padding m-row--col-separator-xl">
+                <div class="col-md-12 col-lg-6 col-xl-3">
+                    <div class="m-widget24">
+                        <div class="m-widget24__item">
+                            <a th:href="@{/analyse/overview/list}"><h2 class="m-widget24__title" th:text="#{label_analyse_overview}"></h2></a>
+                            <br>
+                            <span class="m-widget24__desc">analysis results after extracting</span>
+                            <span class="m-widget24__stats m--font-brand" th:text="${overviewCount}"></span>
+                            <div class="m--space-5"></div>
+                            <div class="m-widget2" style="padding-left: 5px; padding-bottom: 5px;">
+                                <a th:href="@{/analyse/overview/list}" data-toggle="m-tooltip"
+                                   th:title="#{menu_analyse_overview_list}"
                                    class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
                                     <i class="fa fa-list"></i>
                                 </a>
