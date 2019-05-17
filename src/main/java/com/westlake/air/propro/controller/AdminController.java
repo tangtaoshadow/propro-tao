@@ -92,7 +92,7 @@ public class AdminController extends BaseController {
 
         UserDO user = new UserDO();
         if(PrivateUsernames.privates.contains(username)){
-            model.addAttribute(ERROR_MSG, ResultCode.USER_NOT_EXISTED.getMessage());
+            model.addAttribute(ERROR_MSG, ResultCode.USERNAME_CANNOT_BE_USED.getMessage());
             return "user/create";
         }
         user.setUsername(username);
