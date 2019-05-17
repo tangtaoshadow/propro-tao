@@ -6,7 +6,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -24,13 +26,15 @@ public class LibraryDO extends BaseDO {
     @Id
     String id;
 
-    //Official
-    String label;
+    //是否设置为公共项目
+    @Indexed
+    boolean doPublic = false;
+
+    //项目标签
+    List<String> labels = new ArrayList<>();
 
     @Indexed(unique = true)
     String name;
-
-    String fatherId;
 
     //0:标准库,1:iRT校准库
     Integer type;

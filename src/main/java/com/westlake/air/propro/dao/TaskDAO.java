@@ -1,16 +1,9 @@
 package com.westlake.air.propro.dao;
 
-import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.query.TaskQuery;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 

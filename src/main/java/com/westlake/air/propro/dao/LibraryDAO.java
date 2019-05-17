@@ -3,9 +3,6 @@ package com.westlake.air.propro.dao;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.query.LibraryQuery;
 import org.bson.Document;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -49,6 +46,9 @@ public class LibraryDAO extends BaseDAO<LibraryDO, LibraryQuery>{
         }
         if (libraryQuery.getType() != null) {
             query.addCriteria(where("type").is(libraryQuery.getType()));
+        }
+        if (libraryQuery.getDoPublic() != null) {
+            query.addCriteria(where("doPublic").is(libraryQuery.getDoPublic()));
         }
         return query;
     }

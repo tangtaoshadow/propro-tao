@@ -7,32 +7,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class VMProperties {
 
-    @Value("${dbpath}")
-    private String dbpath;
-
     @Value("${admin.username}")
     private String adminUsername;
 
     @Value("${admin.password}")
     private String adminPassword;
 
-    @Value("${dingtalk_robot}")
+    @Value("${dingtalk.robot}")
     private String dingtalkRobot;
-
-    public String getDbpath() {
-        if(StringUtils.isEmpty(dbpath)){
-            dbpath = "localhost:27017";
-        }
-        return dbpath;
-    }
-
-    public void setDbpath(String dbpath) {
-        this.dbpath = dbpath;
-    }
 
     public String getDingtalkRobot() {
         if(StringUtils.isEmpty(dingtalkRobot)){
-            dbpath = "https://oapi.dingtalk.com/robot/send?access_token=f2fb029431f174e678106b30c2db5fb0e40e921999386a61031bf864f18beb77";
+            dingtalkRobot = "https://oapi.dingtalk.com/robot/send?access_token=f2fb029431f174e678106b30c2db5fb0e40e921999386a61031bf864f18beb77";
         }
         return dingtalkRobot;
     }

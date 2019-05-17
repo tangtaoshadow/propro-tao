@@ -16,6 +16,8 @@ public class ProjectQuery extends PageQuery {
     //项目负责人名称
     String ownerName;
 
+    Boolean doPublic;
+
     public ProjectQuery(){}
 
     public ProjectQuery(String ownerName){

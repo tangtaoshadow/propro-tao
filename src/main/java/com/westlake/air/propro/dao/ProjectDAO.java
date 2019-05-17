@@ -2,13 +2,8 @@ package com.westlake.air.propro.dao;
 
 import com.westlake.air.propro.domain.db.ProjectDO;
 import com.westlake.air.propro.domain.query.ProjectQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
@@ -47,6 +42,9 @@ public class ProjectDAO extends BaseDAO<ProjectDO, ProjectQuery>{
         }
         if (projectQuery.getOwnerName() != null) {
             query.addCriteria(where("ownerName").is(projectQuery.getOwnerName()));
+        }
+        if (projectQuery.getDoPublic() != null) {
+            query.addCriteria(where("doPublic").is(projectQuery.getDoPublic()));
         }
         return query;
     }
