@@ -1,9 +1,6 @@
 package com.westlake.air.propro.controller;
 
-import com.westlake.air.propro.constants.Constants;
-import com.westlake.air.propro.constants.ResultCode;
-import com.westlake.air.propro.constants.Roles;
-import com.westlake.air.propro.constants.SuccessMsg;
+import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.UserDO;
 import com.westlake.air.propro.domain.query.UserQuery;
@@ -94,6 +91,10 @@ public class AdminController extends BaseController {
         model.addAttribute("university", university);
 
         UserDO user = new UserDO();
+        if(PrivateUsernames.privates.contains(username)){
+            model.addAttribute(ERROR_MSG, ResultCode.USER_NOT_EXISTED.getMessage());
+            return "user/create";
+        }
         user.setUsername(username);
         user.setNick(nick);
         Set<String> roles = new HashSet<>();
