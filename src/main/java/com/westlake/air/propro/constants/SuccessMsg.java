@@ -14,6 +14,7 @@ public class SuccessMsg {
     public static String UPDATE_SUCCESS = "更新成功! Update Success!";
     public static String CHANGE_PASSWORD_SUCCESS = "密码更新成功! Update Password Success!";
     public static String ADD_USER_SUCCESS = "新增用户成功! Add User Success!";
+    public static String SET_PUBLIC_SUCCESS = "设置为公共资源成功! Set Public Success!";
 
     public static String ALL_FILES_UNDER_THIS_PROJECT_ARE_ALREADY_COMPRESSED = "ALL_FILES_UNDER_THIS_PROJECT_ARE_ALREADY_COMPRESSED!该项目下的所有文件均已经被转化为Aird压缩文件";
     public static String ALL_EXPERIMENTS_UNDER_THIS_PROJECT_ARE_ALREADY_COMPUTE_IRT = "ALL_EXPERIMENTS_UNDER_THIS_PROJECT_ARE_ALREADY_COMPUTE_IRT!该项目下的所有实验IRT均已经计算完毕";

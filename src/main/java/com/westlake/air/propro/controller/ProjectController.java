@@ -196,6 +196,23 @@ public class ProjectController extends BaseController {
         }
     }
 
+    @RequestMapping(value = "/setPublic/{id}")
+    String setPublic(@PathVariable("id") String id,
+                     RedirectAttributes redirectAttributes) {
+        ResultDO<ProjectDO> resultDO = projectService.getById(id);
+        if(resultDO.isFailed()){
+            redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
+            return "redirect:/project/list";
+        }
+
+        ProjectDO project = resultDO.getModel();
+        project.setDoPublic(true);
+        projectService.update(project);
+
+        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.SET_PUBLIC_SUCCESS);
+        return "redirect:/project/list";
+    }
+
     @RequestMapping(value = "/deleteirt/{id}")
     String deleteIrt(@PathVariable("id") String id,
                      RedirectAttributes redirectAttributes) {
