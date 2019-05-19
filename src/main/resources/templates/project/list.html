@@ -37,13 +37,14 @@
                 <thead>
                 <tr>
                     <th width="20%" th:text="#{label_project_name}"></th>
-                    <th width="10%" th:text="#{label_do_public}"></th>
+                    <th width="5%" th:text="#{label_do_public}"></th>
                     <th width="5%" th:text="#{label_project_type}"></th>
-                    <th width="30%" th:text="#{label_project_repository}"></th>
+                    <th width="20%" th:text="#{label_project_repository}"></th>
                     <th width="5%" th:text="#{label_creator}"></th>
+                    <th width="10%" th:text="#{label_labels}"></th>
                     <th width="10%" th:text="#{label_create_date}"></th>
                     <!--<th width="10%" th:text="#{label_last_modified_date}"></th>-->
-                    <th width="20%" th:text="#{label_operation}"></th>
+                    <th width="25%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -58,7 +59,9 @@
                     <td th:text="${project.type}"></td>
                     <td th:text="${project.repository}"></td>
                     <td th:text="${project.ownerName}"></td>
-<!--                    <td th:text="${project.description}"></td>-->
+                    <td>
+                        <span th:each="label:${project.labels}" class="m-badge m-badge--brand m-badge--wide" th:text="${label}"></span>
+                    </td>
                     <td th:text="${#dates.format(project.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <!--                    <td th:text="${#dates.format(project.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>-->
                     <td>
