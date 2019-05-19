@@ -92,14 +92,14 @@ public class LoginController extends BaseController {
                           @RequestParam(value = "email", required = true) String email,
                           @RequestParam(value = "telephone", required = true) String telephone,
                           @RequestParam(value = "dingtalkId", required = false) String dingtalkId,
-                          @RequestParam(value = "university", required = false) String university) {
+                          @RequestParam(value = "organization", required = false) String organization) {
         ResultDO resultDO = new ResultDO(true);
         String dingtalkRobot = vmProperties.getDingtalkRobot();
         ApplyMessage am = new ApplyMessage();
         am.setUsername(username);
         am.setEmail(email);
         am.setTelephone(telephone);
-        am.setUniversity(university);
+        am.setOrganization(organization);
         am.setDingtalkId(dingtalkId);
         DingtalkMessage message = new DingtalkMessage("账号申请", am.markdown());
         String response = httpClient.client(dingtalkRobot, JSON.toJSONString(message));

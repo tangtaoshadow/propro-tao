@@ -62,7 +62,7 @@ public class UserController extends BaseController {
                   @RequestParam(value = "nick", required = false) String nick,
                   @RequestParam(value = "email", required = false) String email,
                   @RequestParam(value = "telephone", required = false) String telephone,
-                  @RequestParam(value = "university", required = false) String university,
+                  @RequestParam(value = "organization", required = false) String organization,
                   RedirectAttributes redirectAttributes) {
         String username = getCurrentUsername();
         if(username == null){
@@ -79,7 +79,7 @@ public class UserController extends BaseController {
         user.setNick(nick);
         user.setEmail(email);
         user.setTelephone(telephone);
-        user.setUniversity(university);
+        user.setOrganization(organization);
         userService.update(user);
         return "redirect:/user/profile?tab=userprofile";
     }

@@ -123,7 +123,7 @@ public class HomeController extends BaseController {
         roles.add("admin");
         userDO.setRoles(roles);
         userDO.setTelephone("13185022599");
-        userDO.setUniversity("Westlake University");
+        userDO.setOrganization("Westlake University");
         userService.register(userDO);
 
         return "home";

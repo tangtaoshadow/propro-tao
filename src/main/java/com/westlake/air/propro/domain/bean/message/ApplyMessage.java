@@ -14,7 +14,7 @@ public class ApplyMessage {
 
     String dingtalkId;
 
-    String university;
+    String organization;
 
     String telephone;
 
@@ -36,8 +36,8 @@ public class ApplyMessage {
         sb.append(this.telephone);
         sb.append("\n");
 
-        sb.append("- **学校:**");
-        sb.append(this.university);
+        sb.append("- **组织:**");
+        sb.append(this.organization);
 
         return sb.toString();
     }

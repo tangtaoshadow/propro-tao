@@ -45,8 +45,8 @@ public class UserDAO extends BaseDAO<UserDO, UserQuery>{
         if (targetQuery.getTelephone() != null) {
             query.addCriteria(where("telephone").is(targetQuery.getTelephone()));
         }
-        if (targetQuery.getUniversity() != null) {
-            query.addCriteria(where("university").is(targetQuery.getUniversity()));
+        if (targetQuery.getOrganization() != null) {
+            query.addCriteria(where("organization").is(targetQuery.getOrganization()));
         }
 
         return query;

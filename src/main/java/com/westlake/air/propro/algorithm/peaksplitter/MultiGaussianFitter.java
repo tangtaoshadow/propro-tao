@@ -1,4 +1,4 @@
-package com.westlake.air.propro.algorithm.peaksplitter;
+package com.westlake.air.propro.algorithm.peakSplitter;
 
 import org.apache.commons.math3.analysis.ParametricUnivariateFunction;
 import org.apache.commons.math3.exception.*;

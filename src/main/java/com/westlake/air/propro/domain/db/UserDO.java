@@ -31,7 +31,7 @@ public class UserDO extends BaseDO {
 
     String telephone;
 
-    String university;
+    String organization;
 
     String salt;
 

@@ -36,13 +36,13 @@ public class AdminController extends BaseController {
                 @RequestParam(value = "username", required = false) String username,
                 @RequestParam(value = "email", required = false) String email,
                 @RequestParam(value = "telephone", required = false) String telephone,
-                @RequestParam(value = "university", required = false) String university,
+                @RequestParam(value = "organization", required = false) String organization,
                 RedirectAttributes redirectAttributes) {
 
         model.addAttribute("username", username);
         model.addAttribute("email", email);
         model.addAttribute("telephone", telephone);
-        model.addAttribute("university", university);
+        model.addAttribute("organization", organization);
 
         UserQuery query = new UserQuery();
         if (StringUtils.isNotEmpty(username)) {
@@ -54,8 +54,8 @@ public class AdminController extends BaseController {
         if (StringUtils.isNotEmpty(telephone)) {
             query.setTelephone(telephone);
         }
-        if (StringUtils.isNotEmpty(university)) {
-            query.setUniversity(university);
+        if (StringUtils.isNotEmpty(organization)) {
+            query.setOrganization(organization);
         }
         query.setPageNo(currentPage);
         query.setPageSize(pageSize);
@@ -80,7 +80,7 @@ public class AdminController extends BaseController {
                @RequestParam(value = "role", required = true) String role,
                @RequestParam(value = "email", required = false) String email,
                @RequestParam(value = "telephone", required = false) String telephone,
-               @RequestParam(value = "university", required = false) String university,
+               @RequestParam(value = "organization", required = false) String organization,
                RedirectAttributes redirectAttributes) {
         model.addAttribute("username", username);
         model.addAttribute("nick", nick);
@@ -88,7 +88,7 @@ public class AdminController extends BaseController {
         model.addAttribute("role", role);
         model.addAttribute("email", email);
         model.addAttribute("telephone", telephone);
-        model.addAttribute("university", university);
+        model.addAttribute("organization", organization);
 
         UserDO user = new UserDO();
         if(PrivateUsernames.privates.contains(username)){
@@ -102,7 +102,7 @@ public class AdminController extends BaseController {
         user.setRoles(roles);
         user.setEmail(email);
         user.setTelephone(telephone);
-        user.setUniversity(university);
+        user.setOrganization(organization);
         String salt = PasswordUtil.getRandomSalt();
         String hashPassword = PasswordUtil.getHashPassword(password, salt);
         user.setPassword(hashPassword);
@@ -136,7 +136,7 @@ public class AdminController extends BaseController {
                   @RequestParam(value = "email", required = false) String email,
                   @RequestParam(value = "role", required = true) String role,
                   @RequestParam(value = "telephone", required = false) String telephone,
-                  @RequestParam(value = "university", required = false) String university,
+                  @RequestParam(value = "organization", required = false) String organization,
                   RedirectAttributes redirectAttributes) {
         UserDO user = userService.getById(id);
         if(user == null){
@@ -149,7 +149,7 @@ public class AdminController extends BaseController {
         user.setNick(nick);
         user.setEmail(email);
         user.setTelephone(telephone);
-        user.setUniversity(university);
+        user.setOrganization(organization);
         userService.update(user);
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.UPDATE_SUCCESS);
         return "redirect:/admin/user/list";

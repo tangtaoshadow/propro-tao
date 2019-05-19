@@ -15,5 +15,5 @@ public class UserQuery extends PageQuery {
 
     String telephone;
 
-    String university;
+    String organization;
 }

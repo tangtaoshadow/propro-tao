@@ -1,4 +1,4 @@
-package com.westlake.air.propro.algorithm.peaksplitter;
+package com.westlake.air.propro.algorithm.peakSplitter;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
@@ -16,7 +16,7 @@ import java.util.*;
  * Created by Nico Wang
  * Time: 2018-12-20 13:13
  */
-public class GaussParamGuesser  {
+public class GaussParamGuesser {
     private final List<Double> norm = new ArrayList<>();
     private final List<Double> mean = new ArrayList<>();
     private final List<Double> sigma = new ArrayList<>();
@@ -24,7 +24,8 @@ public class GaussParamGuesser  {
     private final double margin = 0.5;
     private final double weight = 100;
     private final Strategy strategy = Strategy.Intensity;
-    public enum Strategy{Count, Intensity, Gradient};
+
+    public enum Strategy {Count, Intensity, Gradient}
 
     public GaussParamGuesser(Collection<WeightedObservedPoint> observations, int count) {
         if (observations == null) {
@@ -34,27 +35,27 @@ public class GaussParamGuesser  {
         } else {
             double[] params;
             List<WeightedObservedPoint> sorted;
-            switch (strategy){
+            switch (strategy) {
                 case Count:
                     sorted = this.sortObservations(observations);
                     params = this.basicGuess(sorted.toArray(new WeightedObservedPoint[0]));
                     System.out.println(JSON.toJSON(params));
-                    for(int i=0; i<count; i++){
+                    for (int i = 0; i < count; i++) {
                         this.norm.add(params[0]);
-                        this.mean.add((sorted.get(sorted.size()-1).getX() - sorted.get(0).getX()) / count*(i + 1) + sorted.get(0).getX());
+                        this.mean.add((sorted.get(sorted.size() - 1).getX() - sorted.get(0).getX()) / count * (i + 1) + sorted.get(0).getX());
                         this.sigma.add(params[2]);
                     }
                     break;
                 case Intensity:
                     List<WeightedObservedPoint> tmpObs = new ArrayList<>();
                     boolean downHill = false;
-                    WeightedObservedPoint lastPoint = new WeightedObservedPoint(0,0,0);
+                    WeightedObservedPoint lastPoint = new WeightedObservedPoint(0, 0, 0);
 
-                    for(WeightedObservedPoint point: observations){
-                        if(point.getY() < lastPoint.getY()){
+                    for (WeightedObservedPoint point : observations) {
+                        if (point.getY() < lastPoint.getY()) {
                             downHill = true;
                         }
-                        if(downHill && point.getY() > lastPoint.getY()){
+                        if (downHill && point.getY() > lastPoint.getY()) {
                             downHill = false;
                             sorted = this.sortObservations(tmpObs);
                             params = this.basicGuess(sorted.toArray(new WeightedObservedPoint[0]));
@@ -81,53 +82,53 @@ public class GaussParamGuesser  {
 //                    List<Double> localMaxX = new ArrayList<>();
                     List<Double> localBoundaryX = new ArrayList<>();
                     //get residual
-                    residualList.add(obsList.get(1).getY()-obsList.get(0).getY());
+                    residualList.add(obsList.get(1).getY() - obsList.get(0).getY());
                     localBoundaryX.add(obsList.get(0).getX());
-                    localBoundaryX.add(obsList.get(obsList.size()-1).getX());
-                    for(int i=1; i<obsList.size()-1; i++){
-                        residualList.add(obsList.get(i+1).getY() - obsList.get(i).getY());
-                        if(obsList.get(i).getY() == 0){
+                    localBoundaryX.add(obsList.get(obsList.size() - 1).getX());
+                    for (int i = 1; i < obsList.size() - 1; i++) {
+                        residualList.add(obsList.get(i + 1).getY() - obsList.get(i).getY());
+                        if (obsList.get(i).getY() == 0) {
                             localBoundaryX.add(obsList.get(i).getX());
                         }
                     }
                     //find local max index
                     double left, mid = 0, right = 0;
-                    for (int i=1; i<residualList.size()-1; i++){
-                        left = residualList.get(i-1);
+                    for (int i = 1; i < residualList.size() - 1; i++) {
+                        left = residualList.get(i - 1);
                         mid = residualList.get(i);
-                        right = residualList.get(i+1);
+                        right = residualList.get(i + 1);
                         //
-                        if (left > 0){
-                            if (mid < 0){
+                        if (left > 0) {
+                            if (mid < 0) {
                                 this.mean.add(obsList.get(i).getX());
                                 this.norm.add(obsList.get(i).getY());
-                            } else if (mid == 0 && right < 0){
-                                this.mean.add((obsList.get(i).getX() + obsList.get(i+1).getX())/2.0D);
+                            } else if (mid == 0 && right < 0) {
+                                this.mean.add((obsList.get(i).getX() + obsList.get(i + 1).getX()) / 2.0D);
                                 this.norm.add(obsList.get(i).getY());
                                 i++;
-                            } else if (mid >=0 && right >0 && mid <= left*(1-margin) && mid <= right*(1-margin)){
+                            } else if (mid >= 0 && right > 0 && mid <= left * (1 - margin) && mid <= right * (1 - margin)) {
                                 this.mean.add(obsList.get(i).getX());
                                 this.norm.add(obsList.get(i).getY());
-                                localBoundaryX.add(obsList.get(i+1).getX());
+                                localBoundaryX.add(obsList.get(i + 1).getX());
                                 i++;
                             }
-                        } else if (left == 0){
-                            if (mid > 0){
+                        } else if (left == 0) {
+                            if (mid > 0) {
                                 localBoundaryX.add(obsList.get(i).getX());
-                            } else if (mid < 0){
+                            } else if (mid < 0) {
                                 this.mean.add(obsList.get(i).getX());
                                 this.norm.add(obsList.get(i).getY());
                             }
-                        } else if (left < 0){
-                            if(mid > 0){
+                        } else if (left < 0) {
+                            if (mid > 0) {
                                 localBoundaryX.add(obsList.get(i).getX());
-                            } else if (mid == 0 && right > 0){
-                                localBoundaryX.add((obsList.get(i).getX() + obsList.get(i+1).getX())/2.0D);
+                            } else if (mid == 0 && right > 0) {
+                                localBoundaryX.add((obsList.get(i).getX() + obsList.get(i + 1).getX()) / 2.0D);
                                 i++;
-                            } else if (mid <= 0 && right < 0 && mid >= left*(1-margin) && mid >= right*(1-margin)){
+                            } else if (mid <= 0 && right < 0 && mid >= left * (1 - margin) && mid >= right * (1 - margin)) {
                                 localBoundaryX.add(obsList.get(i).getX());
-                                this.mean.add(obsList.get(i+1).getX());
-                                this.norm.add(obsList.get(i+1).getY());
+                                this.mean.add(obsList.get(i + 1).getX());
+                                this.norm.add(obsList.get(i + 1).getY());
                                 i++;
                             }
                         }
@@ -145,8 +146,8 @@ public class GaussParamGuesser  {
 //                        }
                     }
                     Collections.sort(localBoundaryX);
-                    int i=0;
-                    for(int j=0; i<this.mean.size(); j++){
+                    int i = 0;
+                    for (int j = 0; i < this.mean.size(); j++) {
                         if (localBoundaryX.get(j) > this.mean.get(i)) {
                             this.sigma.add((localBoundaryX.get(j) - localBoundaryX.get(j - 1)) / (2.0D * FastMath.sqrt(2.0D * FastMath.log(2.0D))));
                             i++;
@@ -207,7 +208,7 @@ public class GaussParamGuesser  {
     public double[] guess() {
         int length = this.norm.size();
         double[] result = new double[length * 3];
-        for(int i=0; i<length; i++){
+        for (int i = 0; i < length; i++) {
             result[3 * i] = this.norm.get(i);
             result[3 * i + 1] = this.mean.get(i);
             result[3 * i + 2] = this.sigma.get(i);
@@ -276,7 +277,7 @@ public class GaussParamGuesser  {
     private int findMaxY(WeightedObservedPoint[] points) {
         int maxYIdx = 0;
 
-        for(int i = 1; i < points.length; ++i) {
+        for (int i = 1; i < points.length; ++i) {
             if (points[i].getY() > points[maxYIdx].getY()) {
                 maxYIdx = i;
             }
@@ -306,7 +307,7 @@ public class GaussParamGuesser  {
         } else {
             int i = startIdx;
 
-            while(true) {
+            while (true) {
                 if (idxStep < 0) {
                     if (i + idxStep < 0) {
                         break;
