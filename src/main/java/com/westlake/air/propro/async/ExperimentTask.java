@@ -76,7 +76,7 @@ public class ExperimentTask extends BaseTask {
      * experimentDO
      * libraryId
      * slopeIntercept
-     * creator
+     * ownerName
      * rtExtractWindow
      * mzExtractWindow
      * useEpps

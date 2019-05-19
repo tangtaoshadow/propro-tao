@@ -3,9 +3,6 @@ package com.westlake.air.propro.dao;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import org.bson.Document;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -50,14 +47,11 @@ public class ExperimentDAO extends BaseDAO<ExperimentDO, ExperimentQuery>{
         if (experimentQuery.getProjectName() != null) {
             query.addCriteria(where("projectName").is(experimentQuery.getProjectName()));
         }
-        if (experimentQuery.getBatchName() != null) {
-            query.addCriteria(where("batchName").is(experimentQuery.getBatchName()));
-        }
         if (experimentQuery.getType() != null) {
             query.addCriteria(where("type").is(experimentQuery.getType()));
         }
-        if (experimentQuery.getCreator() != null) {
-            query.addCriteria(where("creator").is(experimentQuery.getCreator()));
+        if (experimentQuery.getOwnerName() != null) {
+            query.addCriteria(where("ownerName").is(experimentQuery.getOwnerName()));
         }
         return query;
     }

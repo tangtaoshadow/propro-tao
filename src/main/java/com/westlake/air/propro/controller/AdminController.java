@@ -2,8 +2,13 @@ package com.westlake.air.propro.controller;
 
 import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.db.ExperimentDO;
+import com.westlake.air.propro.domain.db.ProjectDO;
 import com.westlake.air.propro.domain.db.UserDO;
+import com.westlake.air.propro.domain.query.ProjectQuery;
 import com.westlake.air.propro.domain.query.UserQuery;
+import com.westlake.air.propro.service.ExperimentService;
+import com.westlake.air.propro.service.ProjectService;
 import com.westlake.air.propro.service.UserService;
 import com.westlake.air.propro.utils.PasswordUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -11,10 +16,7 @@ import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashSet;
@@ -28,6 +30,10 @@ public class AdminController extends BaseController {
 
     @Autowired
     UserService userService;
+    @Autowired
+    ProjectService projectService;
+    @Autowired
+    ExperimentService experimentService;
 
     @RequestMapping(value = "/user/list")
     String list(Model model,
@@ -194,5 +200,22 @@ public class AdminController extends BaseController {
         }
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.UPDATE_SUCCESS);
         return "redirect:/admin/user/list";
+    }
+
+    @RequestMapping(value = "/repair")
+    @ResponseBody
+    public String repair(){
+        //修复ProjectService的ProjectId字段
+        List<ProjectDO> projects = projectService.getAll(new ProjectQuery());
+        for(ProjectDO project : projects){
+            List<ExperimentDO> exps = experimentService.getAllByProjectName(project.getName());
+            for(ExperimentDO exp : exps){
+                exp.setProjectId(project.getId());
+                exp.setOwnerName(project.getOwnerName());
+                experimentService.update(exp);
+            }
+        }
+
+        return "Success";
     }
 }

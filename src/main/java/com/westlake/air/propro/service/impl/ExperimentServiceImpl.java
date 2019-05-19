@@ -918,7 +918,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             overviewDO.setName(input.getExperimentDO().getName() + "-" + name + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
         }
 
-        overviewDO.setCreator(input.getCreator());
+        overviewDO.setOwnerName(input.getOwnerName());
         overviewDO.setCreateDate(new Date());
         overviewDO.setNote(input.getNote());
         overviewDO.setRtExtractWindow(input.getRtExtractWindow());
@@ -950,7 +950,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             overviewDO.setName(input.getExperimentDO().getName() + "- Farther Overview Id:" + fatherOverviewId + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
         }
 
-        overviewDO.setCreator(input.getCreator());
+        overviewDO.setOwnerName(input.getOwnerName());
         overviewDO.setCreateDate(new Date());
         overviewDO.setRtExtractWindow(input.getRtExtractWindow());
         overviewDO.setMzExtractWindow(input.getMzExtractWindow());

@@ -40,24 +40,6 @@
                                         <div class="m-form__control">
                                             <input type="text" class="form-control m-input" name="projectName"
                                                    placeholder="Enter Project Name" th:value="${project.name}">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="m-form__group m-form__group--inline">
-                                        <div class="m-form__label">
-                                            <label th:text="#{label_batch_name}"></label>
-                                        </div>
-                                        <div class="m-form__control">
-                                            <input type="text" class="form-control m-input" name="batchName"
-                                                   placeholder="Enter Batch Name" th:value="${batchName}">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <div class="m-form__group m-form__group--inline">
-                                        <div class="m-form__control">
                                             <a th:href="@{/project/create}" class="btn btn-warning" th:text="#{label_click_me_to_create_a_new_project}"></a>
                                         </div>
                                     </div>

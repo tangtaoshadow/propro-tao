@@ -66,6 +66,8 @@ public class LoginController extends BaseController {
                 ae.printStackTrace();
                 result.setErrorResult(ResultCode.USERNAME_OR_PASSWORD_ERROR);
             }
+        }else{
+            result.setSuccess(true);
         }
 
         return result;

@@ -20,11 +20,11 @@ public class ExperimentQuery extends PageQuery {
 
     String projectName;
 
+    String projectId;
+
     String type;
 
-    String batchName;
-
-    String creator;
+    String ownerName;
 
     Date createDate;
 
@@ -32,8 +32,8 @@ public class ExperimentQuery extends PageQuery {
 
     public ExperimentQuery(){}
 
-    public ExperimentQuery(String creator){
-        this.creator = creator;
+    public ExperimentQuery(String ownerName){
+        this.ownerName = ownerName;
     }
 
     public ExperimentQuery(int pageNo, int pageSize, Sort.Direction direction, String sortColumn){

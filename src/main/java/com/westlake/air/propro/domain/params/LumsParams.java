@@ -37,7 +37,7 @@ public class LumsParams {
     /**
      * 流程的创建人
      */
-    String creator;
+    String ownerName;
 
     HashSet<String> scoreTypes = new HashSet<>();
 

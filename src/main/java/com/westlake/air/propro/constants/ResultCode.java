@@ -36,6 +36,7 @@ public enum ResultCode implements Serializable {
     ID_CANNOT_BE_NULL_OR_ZERO("ID_CANNOT_BE_NULL_OR_ZERO", "ID不能为空或者0"),
     LINE_IS_EMPTY("LINE_IS_EMPTY", "内容为空"),
     EXTRACT_FAILED("EXTRACT_FAILED", "解压缩失败"),
+    UNAUTHORIZED_ACCESS("UNAUTHORIZED_ACCESS", "未经授权的非法访问"),
 
     /**
      * ******

@@ -3,6 +3,7 @@ package com.westlake.air.propro.domain.db;
 import com.westlake.air.propro.domain.BaseDO;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -19,7 +20,11 @@ public class AnalyseOverviewDO extends BaseDO {
     @Id
     String id;
 
+    @Indexed
+    String projectId;
+
     //对应实验的id
+    @Indexed
     String expId;
 
     //对应实验的名称
@@ -65,7 +70,7 @@ public class AnalyseOverviewDO extends BaseDO {
     Float mzExtractWindow;
 
     //卷积实验的创建者
-    String creator = "Admin";
+    String ownerName = "Admin";
 
     //最终使用的分类器:lda, xgboost
     String classifier = "lda";

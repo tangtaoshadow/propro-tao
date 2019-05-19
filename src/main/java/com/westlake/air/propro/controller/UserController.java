@@ -67,13 +67,13 @@ public class UserController extends BaseController {
         String username = getCurrentUsername();
         if(username == null){
             SecurityUtils.getSubject().logout();
-            return "redirect:/login/login";
+            return redirectToLoginPage;
         }
 
         UserDO user = userService.getByUsername(username);
         if(user == null){
             SecurityUtils.getSubject().logout();
-            return "redirect:/login/login";
+            return redirectToLoginPage;
         }
 
         user.setNick(nick);
@@ -93,13 +93,13 @@ public class UserController extends BaseController {
         String username = getCurrentUsername();
         if(username == null){
             SecurityUtils.getSubject().logout();
-            return "redirect:/login/login";
+            return redirectToLoginPage;
         }
 
         UserDO user = userService.getByUsername(username);
         if(user == null){
             SecurityUtils.getSubject().logout();
-            return "redirect:/login/login";
+            return redirectToLoginPage;
         }
 
         if(!newPwd.equals(repeatPwd)){

@@ -1,6 +1,5 @@
 package com.westlake.air.propro.domain.db;
 
-import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.domain.BaseDO;
 import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import com.westlake.air.propro.domain.bean.compressor.Strategy;
@@ -9,13 +8,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.nio.ByteOrder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
-import static com.westlake.air.propro.constants.Constants.EXP_TYPE_DIA_SWATH;
-import static com.westlake.air.propro.constants.Constants.EXP_TYPE_PRM;
 
 /**
  * Created by James Lu MiaoShan
@@ -30,21 +25,14 @@ public class ExperimentDO extends BaseDO {
     @Id
     String id;
 
-    //所属的公开组织名称
     @Indexed
-    String publicName;
+    String projectId;
 
-    //实验项目名称
     @Indexed
+    String ownerName;
+
     String projectName;
 
-    //批次名
-    @Indexed
-    String batchName;
-
-    //实验的创建者,外键 username
-    @Indexed
-    String creator;
 
     //必填,实验名称
     String name;

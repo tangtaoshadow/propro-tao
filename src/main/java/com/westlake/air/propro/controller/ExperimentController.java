@@ -60,12 +60,10 @@ public class ExperimentController extends BaseController {
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
                 @RequestParam(value = "projectName", required = false) String projectName,
-                @RequestParam(value = "batchName", required = false) String batchName,
                 @RequestParam(value = "type", required = false) String type,
                 @RequestParam(value = "expName", required = false) String expName) {
         model.addAttribute("expName", expName);
         model.addAttribute("projectName", projectName);
-        model.addAttribute("batchName", batchName);
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("type", type);
         ExperimentQuery query = new ExperimentQuery();
@@ -74,9 +72,6 @@ public class ExperimentController extends BaseController {
         }
         if(projectName != null && !projectName.isEmpty()){
             query.setProjectName(projectName);
-        }
-        if(batchName != null && !batchName.isEmpty()){
-            query.setBatchName(batchName);
         }
         if(type != null && !type.isEmpty()){
             query.setType(type);
@@ -123,7 +118,6 @@ public class ExperimentController extends BaseController {
     String add(Model model,
                @RequestParam(value = "name", required = true) String name,
                @RequestParam(value = "projectName", required = true) String projectName,
-               @RequestParam(value = "batchName", required = false) String batchName,
                @RequestParam(value = "filePath", required = true) String filePath,
                @RequestParam(value = "description", required = false) String description,
                @RequestParam(value = "overlap", required = false) Float overlap,
@@ -158,7 +152,6 @@ public class ExperimentController extends BaseController {
         experimentDO.setOverlap(overlap);
         experimentDO.setFilePath(filePath);
         experimentDO.setProjectName(projectName);
-        experimentDO.setBatchName(batchName);
         experimentDO.setType(projectResult.getModel().getType());
 
         ResultDO result = experimentService.insert(experimentDO);
@@ -182,7 +175,6 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/batchadd", method = {RequestMethod.POST})
     String batchAdd(Model model,
                     @RequestParam(value = "projectName", required = false) String projectName,
-                    @RequestParam(value = "batchName", required = false) String batchName,
                     ExpVO exps,
                     RedirectAttributes redirectAttributes) {
 
@@ -202,7 +194,6 @@ public class ExperimentController extends BaseController {
             ResultDO<ProjectDO> projectResult = projectService.getByName(projectName);
             ExperimentDO experimentDO = new ExperimentDO();
             experimentDO.setProjectName(projectName);
-            experimentDO.setBatchName(batchName);
             experimentDO.setName(exp.getName());
             experimentDO.setDescription(exp.getDescription());
             experimentDO.setOverlap(exp.getOverlap());
@@ -274,7 +265,6 @@ public class ExperimentController extends BaseController {
                   @RequestParam(value = "compressionType") String compressionType,
                   @RequestParam(value = "precision") String precision,
                   @RequestParam(value = "projectName") String projectName,
-                  @RequestParam(value = "batchName") String batchName,
                   RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
@@ -287,7 +277,6 @@ public class ExperimentController extends BaseController {
         experimentDO.setName(name);
         experimentDO.setType(type);
         experimentDO.setProjectName(projectName);
-        experimentDO.setBatchName(batchName);
         experimentDO.setFilePath(filePath);
         experimentDO.setAirdPath(airdPath);
         experimentDO.setAirdIndexPath(airdIndexPath);
@@ -371,7 +360,7 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/doextract")
     String doExtract(Model model,
                      @RequestParam(value = "id", required = true) String id,
-                     @RequestParam(value = "creator", required = false) String creator,
+                     @RequestParam(value = "ownerName", required = false) String ownerName,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
                      @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
@@ -420,7 +409,7 @@ public class ExperimentController extends BaseController {
         input.setLibraryId(libraryId);
         input.setSlopeIntercept(si);
         input.setNote(note);
-        input.setCreator(creator);
+        input.setOwnerName(ownerName);
         input.setRtExtractWindow(rtExtractWindow);
         input.setMzExtractWindow(mzExtractWindow);
         input.setUseEpps(useEpps);

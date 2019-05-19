@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.HashSet;
 
 /**
  * Created by James Lu MiaoShan
@@ -73,7 +72,7 @@ public class ExperimentTest extends BaseTest {
         input.setExperimentDO(experimentDO);
         input.setLibraryId(libraryDO.getId());
         input.setSlopeIntercept(SlopeIntercept.create());
-        input.setCreator("Admin");
+        input.setOwnerName("Admin");
         input.setRtExtractWindow(-1f);
         input.setMzExtractWindow(0.05f);
 

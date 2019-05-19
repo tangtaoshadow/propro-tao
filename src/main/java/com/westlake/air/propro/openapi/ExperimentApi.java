@@ -42,7 +42,6 @@ public class ExperimentApi extends BaseController {
     @ApiOperation(value = "Get Experiment List", notes = "根据条件获取实验列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "expName", value = "experiment name", dataType = "string", required = false),
-            @ApiImplicitParam(name = "batchName", value = "experiment batch name", dataType = "string", required = false),
             @ApiImplicitParam(name = "projectName", value = "experiment project name", dataType = "string", required = false),
             @ApiImplicitParam(name = "pageSize", value = "page size", dataType = "int", required = false, defaultValue = "50"),
             @ApiImplicitParam(name = "currentPage", value = "current page", dataType = "int", required = false, defaultValue = "1")
@@ -51,7 +50,6 @@ public class ExperimentApi extends BaseController {
                                                           @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                                                           @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
                                                           @RequestParam(value = "projectName", required = false) String projectName,
-                                                          @RequestParam(value = "batchName", required = false) String batchName,
                                                           @RequestParam(value = "expName", required = false) String expName) {
         ExperimentQuery query = new ExperimentQuery();
         if (expName != null && !expName.isEmpty()) {
@@ -59,9 +57,6 @@ public class ExperimentApi extends BaseController {
         }
         if (projectName != null && !projectName.isEmpty()) {
             query.setProjectName(projectName);
-        }
-        if (batchName != null && !batchName.isEmpty()) {
-            query.setBatchName(batchName);
         }
         buildPageQuery(query, currentPage, pageSize);
         ResultDO<List<ExperimentDO>> resultDO = experimentService.getList(query);

@@ -34,6 +34,9 @@ public class ProjectDO extends BaseDO {
     //项目负责人名称
     String ownerName;
 
+    //被授权的合作者
+    List<String> collaborators;
+
     //项目标签
     List<String> labels = new ArrayList<>();
 
