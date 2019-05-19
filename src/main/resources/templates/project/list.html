@@ -37,7 +37,7 @@
                 <thead>
                 <tr>
                     <th width="20%" th:text="#{label_project_name}"></th>
-                    <th width="10%" th:text="#{la}"></th>
+                    <th width="10%" th:text="#{label_do_public}"></th>
                     <th width="5%" th:text="#{label_project_type}"></th>
                     <th width="30%" th:text="#{label_project_repository}"></th>
                     <th width="5%" th:text="#{label_creator}"></th>
@@ -49,6 +49,12 @@
                 <tbody>
                 <tr th:each="project:${projectList}">
                     <td th:text="|${project.name}(${project.id})|"></td>
+                    <td th:if="${project.doPublic}">
+                        <span class="m-badge m-badge--success m-badge--wide">Public</span>
+                    </td>
+                    <td th:if="${!project.doPublic}">
+                        <span class="m-badge m-badge--danger m-badge--wide">Private</span>
+                    </td>
                     <td th:text="${project.type}"></td>
                     <td th:text="${project.repository}"></td>
                     <td th:text="${project.ownerName}"></td>

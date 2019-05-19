@@ -90,10 +90,12 @@ public class ProjectController extends BaseController {
     String add(Model model,
                @RequestParam(value = "name", required = true) String name,
                @RequestParam(value = "repository", required = true) String repository,
-               @RequestParam(value = "ownerName", required = false) String ownerName,
+//               @RequestParam(value = "ownerName", required = false) String ownerName,
                @RequestParam(value = "description", required = false) String description,
                @RequestParam(value = "type", required = true) String type,
                RedirectAttributes redirectAttributes) {
+
+        String ownerName = getCurrentUsername();
 
         model.addAttribute("repository", repository);
         model.addAttribute("ownerName", ownerName);
