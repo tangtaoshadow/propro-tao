@@ -2,11 +2,13 @@ package com.westlake.air.propro.controller;
 
 import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.ProjectDO;
 import com.westlake.air.propro.domain.db.UserDO;
 import com.westlake.air.propro.domain.query.ProjectQuery;
 import com.westlake.air.propro.domain.query.UserQuery;
+import com.westlake.air.propro.service.AnalyseOverviewService;
 import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.ProjectService;
 import com.westlake.air.propro.service.UserService;
@@ -34,6 +36,8 @@ public class AdminController extends BaseController {
     ProjectService projectService;
     @Autowired
     ExperimentService experimentService;
+    @Autowired
+    AnalyseOverviewService analyseOverviewService;
 
     @RequestMapping(value = "/user/list")
     String list(Model model,
@@ -213,6 +217,12 @@ public class AdminController extends BaseController {
                 exp.setProjectId(project.getId());
                 exp.setOwnerName(project.getOwnerName());
                 experimentService.update(exp);
+
+                List<AnalyseOverviewDO> overviews = analyseOverviewService.getAllByExpId(exp.getId());
+                for(AnalyseOverviewDO overview : overviews){
+                    overview.setOwnerName(project.getOwnerName());
+                    analyseOverviewService.update(overview);
+                }
             }
         }
 
