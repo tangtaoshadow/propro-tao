@@ -16,8 +16,11 @@ import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.ScanIndexQuery;
 import com.westlake.air.propro.algorithm.parser.MzXMLParser;
+import com.westlake.air.propro.exception.UnauthorizedAccessException;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.FileUtil;
+import com.westlake.air.propro.utils.PermissionUtil;
+import org.apache.shiro.authz.aop.PermissionAnnotationMethodInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -62,6 +65,7 @@ public class ExperimentController extends BaseController {
                 @RequestParam(value = "projectName", required = false) String projectName,
                 @RequestParam(value = "type", required = false) String type,
                 @RequestParam(value = "expName", required = false) String expName) {
+
         model.addAttribute("expName", expName);
         model.addAttribute("projectName", projectName);
         model.addAttribute("pageSize", pageSize);
@@ -75,6 +79,9 @@ public class ExperimentController extends BaseController {
         }
         if(type != null && !type.isEmpty()){
             query.setType(type);
+        }
+        if(!isAdmin()){
+            query.setOwnerName(getCurrentUsername());
         }
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
@@ -110,6 +117,7 @@ public class ExperimentController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED.getMessage());
             return "redirect:/project/list";
         }
+        PermissionUtil.check(result.getModel());
         model.addAttribute("project", result.getModel());
         return "experiment/batchcreate";
     }
@@ -133,6 +141,7 @@ public class ExperimentController extends BaseController {
             model.addAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED.getMessage());
             return "experiment/create";
         }
+        PermissionUtil.check(projectResult.getModel());
         //Check Params Start
         if (filePath == null || filePath.isEmpty()) {
             model.addAttribute(ERROR_MSG, ResultCode.FILE_LOCATION_CANNOT_BE_EMPTY.getMessage());
@@ -148,6 +157,8 @@ public class ExperimentController extends BaseController {
 
         ExperimentDO experimentDO = new ExperimentDO();
         experimentDO.setName(name);
+        experimentDO.setOwnerName(projectResult.getModel().getOwnerName());
+        experimentDO.setProjectId(projectResult.getModel().getId());
         experimentDO.setDescription(description);
         experimentDO.setOverlap(overlap);
         experimentDO.setFilePath(filePath);
@@ -180,6 +191,10 @@ public class ExperimentController extends BaseController {
 
         String errorInfo = "";
         List<Exp> expList = exps.getExps();
+        ResultDO<ProjectDO> projectResult = projectService.getByName(projectName);
+        PermissionUtil.check(projectResult.getModel());
+        ProjectDO project = projectResult.getModel();
+
         for (Exp exp : expList) {
             if (exp.getFilePath() == null || exp.getFilePath().isEmpty()) {
                 errorInfo += ResultCode.FILE_LOCATION_CANNOT_BE_EMPTY.getMessage() + ":" + exp.getName() + "\r\n";
@@ -191,10 +206,11 @@ public class ExperimentController extends BaseController {
                 continue;
             }
 
-            ResultDO<ProjectDO> projectResult = projectService.getByName(projectName);
             ExperimentDO experimentDO = new ExperimentDO();
             experimentDO.setProjectName(projectName);
             experimentDO.setName(exp.getName());
+            experimentDO.setProjectId(project.getId());
+            experimentDO.setOwnerName(project.getOwnerName());
             experimentDO.setDescription(exp.getDescription());
             experimentDO.setOverlap(exp.getOverlap());
             experimentDO.setFilePath(exp.getFilePath());
@@ -233,6 +249,7 @@ public class ExperimentController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/experiment/list";
         } else {
+            PermissionUtil.check(resultDO.getModel());
             model.addAttribute("experiment", resultDO.getModel());
             return "experiment/edit";
         }
@@ -242,6 +259,7 @@ public class ExperimentController extends BaseController {
     String detail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isSuccess()) {
+            PermissionUtil.check(resultDO.getModel());
             model.addAttribute("experiment", resultDO.getModel());
             return "experiment/detail";
         } else {
@@ -273,10 +291,24 @@ public class ExperimentController extends BaseController {
             return "redirect:/experiment/list";
         }
         ExperimentDO experimentDO = resultDO.getModel();
+        PermissionUtil.check(resultDO.getModel());
+
+        ResultDO<ProjectDO> projectResult = projectService.getByName(projectName);
+        if (projectResult.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
+            return "redirect:/experiment/list";
+        }
+        try{
+            PermissionUtil.check(projectResult.getModel());
+        }catch (UnauthorizedAccessException e){
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.UNAUTHORIZED_ACCESS.getMessage());
+            return "redirect:/experiment/list";
+        }
 
         experimentDO.setName(name);
         experimentDO.setType(type);
         experimentDO.setProjectName(projectName);
+        experimentDO.setProjectId(projectResult.getModel().getId());
         experimentDO.setFilePath(filePath);
         experimentDO.setAirdPath(airdPath);
         experimentDO.setAirdIndexPath(airdIndexPath);
@@ -298,6 +330,7 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/delete/{id}")
     String delete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<ExperimentDO> exp = experimentService.getById(id);
+        PermissionUtil.check(exp.getModel());
         experimentService.delete(id);
         scanIndexService.deleteAllByExperimentId(id);
         List<AnalyseOverviewDO> overviewDOList = analyseOverviewService.getAllByExpId(id);
@@ -316,6 +349,7 @@ public class ExperimentController extends BaseController {
     String deleteAll(Model model, @PathVariable("id") String id,
                      RedirectAttributes redirectAttributes) {
         ResultDO<ExperimentDO> exp = experimentService.getById(id);
+        PermissionUtil.check(exp.getModel());
         List<AnalyseOverviewDO> overviewDOList = analyseOverviewService.getAllByExpId(id);
         for (AnalyseOverviewDO overviewDO : overviewDOList) {
             analyseDataService.deleteAllByOverviewId(overviewDO.getId());
@@ -324,17 +358,6 @@ public class ExperimentController extends BaseController {
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
         return "redirect:/experiment/list";
 
-    }
-
-    @RequestMapping(value = "/swath")
-    String swath(Model model) {
-        List<LibraryDO> slist = getLibraryList(0);
-        List<LibraryDO> iRtlist = getLibraryList(1);
-        List<ExperimentDO> experimentList = getExperimentList();
-        model.addAttribute("libraries", slist);
-        model.addAttribute("iRtLibraries", iRtlist);
-        model.addAttribute("experiments", experimentList);
-        return "experiment/swath";
     }
 
     @RequestMapping(value = "/extractor")
@@ -349,6 +372,7 @@ public class ExperimentController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OBJECT_NOT_EXISTED);
             return "redirect:/experiment/list";
         }
+        PermissionUtil.check(resultDO.getModel());
         model.addAttribute("useEpps", true);
         model.addAttribute("libraries", getLibraryList(0));
         model.addAttribute("experiment", resultDO.getModel());
@@ -360,7 +384,6 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/doextract")
     String doExtract(Model model,
                      @RequestParam(value = "id", required = true) String id,
-                     @RequestParam(value = "ownerName", required = false) String ownerName,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
                      @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
@@ -382,6 +405,9 @@ public class ExperimentController extends BaseController {
             return "redirect:/extractor?id=" + id;
         }
 
+        PermissionUtil.check(resultDO.getModel());
+
+        //TODO Library 暂时未作校验
         ResultDO<LibraryDO> libResult = libraryService.getById(libraryId);
         if (libResult.isFailed()) {
             return "redirect:/extractor?id=" + id;
@@ -409,7 +435,7 @@ public class ExperimentController extends BaseController {
         input.setLibraryId(libraryId);
         input.setSlopeIntercept(si);
         input.setNote(note);
-        input.setOwnerName(ownerName);
+        input.setOwnerName(getCurrentUsername());
         input.setRtExtractWindow(rtExtractWindow);
         input.setMzExtractWindow(mzExtractWindow);
         input.setUseEpps(useEpps);
@@ -432,6 +458,8 @@ public class ExperimentController extends BaseController {
                         @RequestParam(value = "peptideRef", required = true) String peptideRef) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(expId);
+        PermissionUtil.check(resultDO.getModel());
+
         PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, false);
 
 
@@ -452,7 +480,7 @@ public class ExperimentController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OBJECT_NOT_EXISTED);
             return "redirect:/experiment/list";
         }
-
+        PermissionUtil.check(resultDO.getModel());
         model.addAttribute("libraries", getLibraryList(1));
         model.addAttribute("experiment", resultDO.getModel());
         return "experiment/irt";
@@ -471,7 +499,7 @@ public class ExperimentController extends BaseController {
         if (resultDO.isFailed()) {
             return "redirect:/irt/" + id;
         }
-
+        PermissionUtil.check(resultDO.getModel());
         TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName() + ":" + iRtLibraryId);
         taskService.insert(taskDO);
 
@@ -484,6 +512,10 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/getWindows")
     @ResponseBody
     ResultDO<JSONObject> getWindows(Model model, @RequestParam(value = "expId", required = true) String expId) {
+
+        ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
+        PermissionUtil.check(expResult.getModel());
+
         List<WindowRange> rangs = experimentService.getWindows(expId);
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
 
@@ -508,6 +540,9 @@ public class ExperimentController extends BaseController {
     @ResponseBody
     ResultDO<JSONObject> getPrmWindows(Model model, @RequestParam(value = "expId", required = true) String expId){
 
+        ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
+        PermissionUtil.check(expResult.getModel());
+
         HashMap<Float, Float[]> peptideMap = experimentService.getPrmRtWindowMap(expId);
         JSONArray peptideMs1List = new JSONArray();
         for(Float precursorMz: peptideMap.keySet()){
@@ -530,6 +565,10 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/getPrmDensity")
     @ResponseBody
     ResultDO<JSONObject> getPrmDensity(Model model, @RequestParam(value = "expId", required = true) String expId){
+
+        ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
+        PermissionUtil.check(expResult.getModel());
+
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
         JSONArray ms2Density = new JSONArray();
         ScanIndexQuery query = new ScanIndexQuery();
