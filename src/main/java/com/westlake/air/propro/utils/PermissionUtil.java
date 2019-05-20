@@ -53,6 +53,23 @@ public class PermissionUtil {
         }
     }
 
+    public static boolean check(TaskDO taskDO) throws UnauthorizedAccessException{
+        UserDO user = getCurrentUser();
+        if(taskDO == null || user == null){
+            throw new UnauthorizedAccessException("redirect:/task/list");
+        }
+
+        if(user.getRoles().contains(Roles.ROLE_ADMIN)){
+            return true;
+        }
+
+        if (taskDO.getCreator().equals(user.getUsername())) {
+            throw new UnauthorizedAccessException("redirect:/task/list");
+        } else {
+            return true;
+        }
+    }
+
     public static boolean check(ExperimentDO experiment) throws UnauthorizedAccessException{
         UserDO user = getCurrentUser();
         if(experiment == null || user == null){

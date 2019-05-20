@@ -14,6 +14,7 @@ import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.ScanIndexService;
 import com.westlake.air.propro.utils.ByteUtil;
 import com.westlake.air.propro.utils.FileUtil;
+import com.westlake.air.propro.utils.PermissionUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -103,17 +104,17 @@ public class SpectrumController extends BaseController {
                               @RequestParam(value = "indexId", required = false) String indexId,
                               @RequestParam(value = "type", required = false) String type,
                               @RequestParam(value = "expId", required = false) String expId) {
-
-        ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
-        ResultDO<ScanIndexDO> indexResult = scanIndexService.getById(indexId);
-
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
         MzIntensityPairs pairs = null;
+
+        ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
         if (expResult.isFailed()) {
             resultDO.setErrorResult(ResultCode.EXPERIMENT_NOT_EXISTED);
             return resultDO;
         }
+        PermissionUtil.check(expResult.getModel());
 
+        ResultDO<ScanIndexDO> indexResult = scanIndexService.getById(indexId);
         if (indexResult.isFailed()) {
             resultDO.setErrorResult(ResultCode.SCAN_INDEX_NOT_EXISTED);
             return resultDO;
@@ -159,17 +160,18 @@ public class SpectrumController extends BaseController {
     ResultDO<JSONObject> viewMzXML(Model model,
                                    @RequestParam(value = "indexId", required = false) String indexId,
                                    @RequestParam(value = "expId", required = false) String expId) {
-
-        ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
-        ResultDO<ScanIndexDO> indexResult = scanIndexService.getById(indexId);
-
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
         MzIntensityPairs pairs = null;
+
+        ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
         if (expResult.isFailed()) {
             resultDO.setErrorResult(ResultCode.EXPERIMENT_NOT_EXISTED);
             return resultDO;
         }
+        PermissionUtil.check(expResult.getModel());
 
+
+        ResultDO<ScanIndexDO> indexResult = scanIndexService.getById(indexId);
         if (indexResult.isFailed()) {
             resultDO.setErrorResult(ResultCode.SCAN_INDEX_NOT_EXISTED);
             return resultDO;

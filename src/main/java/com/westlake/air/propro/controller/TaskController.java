@@ -8,6 +8,7 @@ import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.query.TaskQuery;
 import com.westlake.air.propro.service.TaskService;
+import com.westlake.air.propro.utils.PermissionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
@@ -53,6 +54,9 @@ public class TaskController extends BaseController {
         if(taskStatus != null && !taskStatus.isEmpty() && !taskStatus.equals("All")){
             query.setStatus(taskStatus);
         }
+        if(!isAdmin()){
+            query.setCreator(getCurrentUsername());
+        }
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
         query.setSortColumn("createDate");
@@ -83,6 +87,8 @@ public class TaskController extends BaseController {
             model.addAttribute(ERROR_MSG, ResultCode.OBJECT_NOT_EXISTED.getMessage());
             return "task/detail";
         }
+        PermissionUtil.check(resultDO.getModel());
+
         TaskDO taskDO = resultDO.getModel();
         model.addAttribute("task", taskDO);
         model.addAttribute("taskId", taskDO.getId());
@@ -99,6 +105,7 @@ public class TaskController extends BaseController {
     String getTaskInfo(Model model, @PathVariable("id") String id) {
         ResultDO<TaskDO> resultDO = taskService.getById(id);
         if (resultDO.isSuccess() && resultDO.getModel() != null) {
+            PermissionUtil.check(resultDO.getModel());
             return JSON.toJSONString(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(resultDO.getModel().getLastModifiedDate()));
         } else {
             return null;
@@ -107,6 +114,8 @@ public class TaskController extends BaseController {
 
     @RequestMapping(value = "/delete/{id}")
     String delete(Model model, @PathVariable("id") String id) {
+        ResultDO<TaskDO> resultDO = taskService.getById(id);
+        PermissionUtil.check(resultDO.getModel());
         taskService.delete(id);
         return "redirect:/task/list";
     }
