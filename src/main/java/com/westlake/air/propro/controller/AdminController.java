@@ -2,10 +2,8 @@ package com.westlake.air.propro.controller;
 
 import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
-import com.westlake.air.propro.domain.db.ExperimentDO;
-import com.westlake.air.propro.domain.db.ProjectDO;
-import com.westlake.air.propro.domain.db.UserDO;
+import com.westlake.air.propro.domain.db.*;
+import com.westlake.air.propro.domain.query.LibraryQuery;
 import com.westlake.air.propro.domain.query.ProjectQuery;
 import com.westlake.air.propro.domain.query.UserQuery;
 import com.westlake.air.propro.service.AnalyseOverviewService;
@@ -226,6 +224,13 @@ public class AdminController extends BaseController {
             }
         }
 
+
+        List<LibraryDO> libraries = libraryService.getAll(new LibraryQuery());
+        for(LibraryDO library : libraries){
+            if (!library.isDoPublic()){
+                libraryService.update(library);
+            }
+        }
         return "Success";
     }
 }

@@ -31,7 +31,7 @@ public class LibraryDO extends BaseDO {
     boolean doPublic = false;
 
     @Indexed
-    String creator = "Admin";
+    String creator;
 
     //项目标签
     List<String> labels = new ArrayList<>();

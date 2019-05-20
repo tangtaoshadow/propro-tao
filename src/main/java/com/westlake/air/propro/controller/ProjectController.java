@@ -160,7 +160,7 @@ public class ProjectController extends BaseController {
         model.addAttribute("exps", expList);
         model.addAttribute("project", resultDO.getModel());
         model.addAttribute("iRtLibraryId", iRtLibraryId);
-        model.addAttribute("libraries", getLibraryList(1));
+        model.addAttribute("libraries", getLibraryList(1, true));
 
         return "project/irt";
     }
@@ -304,8 +304,8 @@ public class ProjectController extends BaseController {
 
         model.addAttribute("exps", expList);
         model.addAttribute("useEpps", true);
-        model.addAttribute("libraries", getLibraryList(0));
-        model.addAttribute("iRtLibraries", getLibraryList(1));
+        model.addAttribute("libraries", getLibraryList(0, true));
+        model.addAttribute("iRtLibraries", getLibraryList(1, true));
         model.addAttribute("project", resultDO.getModel());
         model.addAttribute("scoreTypes", ScoreType.getShownTypes());
 

@@ -38,18 +38,26 @@ public class BaseController {
     @Autowired
     ExperimentTask experimentTask;
 
-    //0:标准库,1:irt校准库
-    public List<LibraryDO> getLibraryList(Integer type) {
-        return libraryService.getSimpleAll(type);
-    }
-
-    public List<ExperimentDO> getExperimentList() {
-        return experimentService.getSimpleAll();
-    }
-
     public final Logger logger = LoggerFactory.getLogger(getClass());
     public static String ERROR_MSG = "error_msg";
     public static String SUCCESS_MSG = "success_msg";
+
+    //0:标准库,1:irt校准库
+    public List<LibraryDO> getLibraryList(Integer type, boolean includePublic) {
+        String username = null;
+        //如果是管理员的话不要设置指定的用户名
+        if(!isAdmin()){
+            username = getCurrentUsername();
+        }
+        if(!includePublic){
+            return libraryService.getSimpleAll(username, type, null);
+        }else{
+            List<LibraryDO> libraries = libraryService.getSimpleAll(username, type, false);
+            List<LibraryDO> publicLibraries = libraryService.getAllPublic(type);
+            libraries.addAll(publicLibraries);
+            return libraries;
+        }
+    }
 
     public void buildPageQuery(PageQuery query, Integer currentPage, Integer pageSize) {
         if (currentPage != null) {

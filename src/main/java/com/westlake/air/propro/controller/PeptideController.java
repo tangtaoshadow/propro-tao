@@ -5,10 +5,12 @@ import com.westlake.air.propro.algorithm.formula.FormulaCalculator;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.algorithm.decoy.generator.ShuffleGenerator;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.simple.Protein;
 import com.westlake.air.propro.domain.query.PeptideQuery;
 import com.westlake.air.propro.service.PeptideService;
+import com.westlake.air.propro.utils.PermissionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -48,13 +50,16 @@ public class PeptideController extends BaseController {
                 @RequestParam(value = "uniqueFilter", required = false, defaultValue = "All") String uniqueFilter,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
         long startTime = System.currentTimeMillis();
+        ResultDO<LibraryDO> temp = libraryService.getById(libraryId);
+        PermissionUtil.check(temp.getModel());
+
         model.addAttribute("libraryId", libraryId);
         model.addAttribute("proteinName", proteinName);
         model.addAttribute("peptideRef", peptideRef);
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("decoyFilter", decoyFilter);
         model.addAttribute("uniqueFilter", uniqueFilter);
-        model.addAttribute("libraries",getLibraryList(null));
+        model.addAttribute("libraries",getLibraryList(null, true));
         model.addAttribute("sequence",sequence);
 
         PeptideQuery query = new PeptideQuery();
@@ -106,6 +111,10 @@ public class PeptideController extends BaseController {
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
         long startTime = System.currentTimeMillis();
+
+        ResultDO<LibraryDO> temp = libraryService.getById(libraryId);
+        PermissionUtil.check(temp.getModel());
+
         model.addAttribute("libraryId", libraryId);
         model.addAttribute("pageSize", pageSize);
 
@@ -133,6 +142,10 @@ public class PeptideController extends BaseController {
     String detail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<PeptideDO> resultDO = peptideService.getById(id);
         if (resultDO.isSuccess()) {
+
+            ResultDO<LibraryDO> temp = libraryService.getById(resultDO.getModel().getLibraryId());
+            PermissionUtil.check(temp.getModel());
+
             model.addAttribute("peptide", resultDO.getModel());
             return "peptide/detail";
         } else {
@@ -149,6 +162,9 @@ public class PeptideController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/peptide/list";
         }
+
+        ResultDO<LibraryDO> temp = libraryService.getById(resultDO.getModel().getLibraryId());
+        PermissionUtil.check(temp.getModel());
 
         PeptideDO peptideDO = shuffleGenerator.generate(resultDO.getModel());
         if(peptideDO != null){

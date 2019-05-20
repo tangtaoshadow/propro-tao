@@ -374,7 +374,7 @@ public class ExperimentController extends BaseController {
         }
         PermissionUtil.check(resultDO.getModel());
         model.addAttribute("useEpps", true);
-        model.addAttribute("libraries", getLibraryList(0));
+        model.addAttribute("libraries", getLibraryList(0, true));
         model.addAttribute("experiment", resultDO.getModel());
         model.addAttribute("scoreTypes", ScoreType.getShownTypes());
 
@@ -481,7 +481,7 @@ public class ExperimentController extends BaseController {
             return "redirect:/experiment/list";
         }
         PermissionUtil.check(resultDO.getModel());
-        model.addAttribute("libraries", getLibraryList(1));
+        model.addAttribute("libraries", getLibraryList(1, true));
         model.addAttribute("experiment", resultDO.getModel());
         return "experiment/irt";
     }

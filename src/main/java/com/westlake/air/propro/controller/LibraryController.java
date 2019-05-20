@@ -85,7 +85,9 @@ public class LibraryController extends BaseController {
         if (!isAdmin()) {
             query.setCreator(getCurrentUsername());
         }
-
+        if (!isAdmin()) {
+            query.setCreator(getCurrentUsername());
+        }
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
         query.setType(1);
@@ -145,7 +147,7 @@ public class LibraryController extends BaseController {
 
     @RequestMapping(value = "/create")
     String create(Model model) {
-        List<LibraryDO> libraryDOList = getLibraryList(1);
+        List<LibraryDO> libraryDOList = getLibraryList(1, true);
         LibraryDO libraryDO = new LibraryDO();
         libraryDO.setName("");
         libraryDO.setId("");
@@ -225,7 +227,7 @@ public class LibraryController extends BaseController {
             return "redirect:/library/list";
         } else {
             PermissionUtil.check(resultDO.getModel());
-            List<LibraryDO> libraryDOList = getLibraryList(1);
+            List<LibraryDO> libraryDOList = getLibraryList(1, false);
             LibraryDO libraryDO = new LibraryDO();
             libraryDO.setName("");
             libraryDO.setId("");

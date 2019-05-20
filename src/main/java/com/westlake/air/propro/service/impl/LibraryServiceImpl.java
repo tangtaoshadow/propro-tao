@@ -54,8 +54,13 @@ public class LibraryServiceImpl implements LibraryService {
     FastaParser fastaParser;
 
     @Override
-    public List<LibraryDO> getSimpleAll(Integer type) {
-        return libraryDAO.getSimpleAll(type);
+    public List<LibraryDO> getSimpleAll(String username, Integer type, Boolean doPublic) {
+        return libraryDAO.getSimpleAll(username, type, doPublic);
+    }
+
+    @Override
+    public List<LibraryDO> getAllPublic(Integer type) {
+        return libraryDAO.getPublicSimpleAll(type);
     }
 
     @Override
@@ -72,6 +77,11 @@ public class LibraryServiceImpl implements LibraryService {
         resultDO.setTotalNum(totalCount);
         resultDO.setPageSize(query.getPageSize());
         return resultDO;
+    }
+
+    @Override
+    public List<LibraryDO> getAll(LibraryQuery query) {
+        return libraryDAO.getAll(query);
     }
 
     @Override

@@ -16,7 +16,7 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
  * Time: 2018-06-13 13:16
  */
 @Service
-public class LibraryDAO extends BaseDAO<LibraryDO, LibraryQuery>{
+public class LibraryDAO extends BaseDAO<LibraryDO, LibraryQuery> {
 
     public static String CollectionName = "library";
 
@@ -56,16 +56,34 @@ public class LibraryDAO extends BaseDAO<LibraryDO, LibraryQuery>{
         return query;
     }
 
-    public List<LibraryDO> getSimpleAll(Integer type) {
+    public List<LibraryDO> getSimpleAll(String username, Integer type, Boolean doPublic) {
         Document queryDoc = new Document();
-        if(type != null){
-            queryDoc.put("type",type);
+        if (type != null) {
+            queryDoc.put("type", type);
         }
+        if (username != null) {
+            queryDoc.put("creator", username);
+        }
+        if (doPublic != null) {
+            queryDoc.put("doPublic", doPublic);
+        }
+        Document fieldsDoc = new Document();
+        fieldsDoc.put("id", true);
+        fieldsDoc.put("name", true);
+        Query query = new BasicQuery(queryDoc, fieldsDoc);
+        return mongoTemplate.find(query, LibraryDO.class, CollectionName);
+    }
+
+    public List<LibraryDO> getPublicSimpleAll(Integer type) {
+        Document queryDoc = new Document();
+        if (type != null) {
+            queryDoc.put("type", type);
+        }
+        queryDoc.put("doPublic", true);
 
         Document fieldsDoc = new Document();
-        fieldsDoc.put("id",true);
-        fieldsDoc.put("name",true);
-
+        fieldsDoc.put("id", true);
+        fieldsDoc.put("name", true);
         Query query = new BasicQuery(queryDoc, fieldsDoc);
         return mongoTemplate.find(query, LibraryDO.class, CollectionName);
     }
