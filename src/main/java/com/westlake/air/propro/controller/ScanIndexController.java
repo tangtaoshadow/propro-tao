@@ -7,6 +7,7 @@ import com.westlake.air.propro.domain.db.ScanIndexDO;
 import com.westlake.air.propro.domain.query.ScanIndexQuery;
 import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.ScanIndexService;
+import com.westlake.air.propro.utils.PermissionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -63,6 +64,7 @@ public class ScanIndexController extends BaseController {
             model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
             return "scanindex/list";
         }
+        PermissionUtil.check(expResult.getModel());
         model.addAttribute("experiment", expResult.getModel());
         ScanIndexQuery query = new ScanIndexQuery();
         query.setExperimentId(experimentId);
@@ -103,6 +105,9 @@ public class ScanIndexController extends BaseController {
     String detail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<ScanIndexDO> resultDO = scanIndexService.getById(id);
         if (resultDO.isSuccess()) {
+            ResultDO<ExperimentDO> expResult = experimentService.getById(resultDO.getModel().getExperimentId());
+            PermissionUtil.check(expResult.getModel());
+
             model.addAttribute("scanIndex", resultDO.getModel());
             return "scanindex/detail";
         } else {

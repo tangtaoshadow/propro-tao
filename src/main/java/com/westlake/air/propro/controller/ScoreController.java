@@ -20,6 +20,7 @@ import com.westlake.air.propro.service.AnalyseDataService;
 import com.westlake.air.propro.service.AnalyseOverviewService;
 import com.westlake.air.propro.service.ScoreService;
 import com.westlake.air.propro.utils.AnalyseDataUtil;
+import com.westlake.air.propro.utils.PermissionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -100,13 +101,17 @@ public class ScoreController extends BaseController {
         query.setPageSize(30);
         query.setPageNo(currentPage);
 //        query.setSortColumn("fdr");
-        ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
-
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         if (overviewResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
             return "redirect:/analyse/overview/list";
         }
+
+        PermissionUtil.check(overviewResult.getModel());
+
+        ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
+
+
         model.addAttribute("overview", overviewResult.getModel());
         model.addAttribute("scores", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
@@ -114,6 +119,7 @@ public class ScoreController extends BaseController {
         model.addAttribute("totalNum", resultDO.getTotalNum());
         return "scores/list";
     }
+
     @RequestMapping(value = "/result/list")
     String resultList(Model model,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
@@ -129,6 +135,10 @@ public class ScoreController extends BaseController {
         model.addAttribute("peptideRef", peptideRef);
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("isIdentified", isIdentified);
+
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        PermissionUtil.check(overviewResult.getModel());
+
         AnalyseDataQuery query = new AnalyseDataQuery();
         query.setIsDecoy(false);
         if (peptideRef != null && !peptideRef.isEmpty()) {
@@ -170,7 +180,6 @@ public class ScoreController extends BaseController {
         }
 
         model.addAttribute("protMap", pageProtMap);
-        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         model.addAttribute("overview", overviewResult.getModel());
         model.addAttribute("totalPage", totalPage);
         model.addAttribute("currentPage", currentPage);
@@ -192,6 +201,13 @@ public class ScoreController extends BaseController {
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("fdrStart", fdrStart);
         model.addAttribute("fdrEnd", fdrEnd);
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+        if (overviewResult.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
+            return "redirect:/analyse/overview/list";
+        }
+        PermissionUtil.check(overviewResult.getModel());
+
         AnalyseDataQuery query = new AnalyseDataQuery();
         if (peptideRef != null && !peptideRef.isEmpty()) {
             query.setPeptideRef(peptideRef);
@@ -214,13 +230,8 @@ public class ScoreController extends BaseController {
 
         for(AnalyseDataDO data : resultDO.getModel()){
             AnalyseDataUtil.decompress(data);
+        }
 
-        }
-        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
-        if (overviewResult.isFailed()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-            return "redirect:/analyse/overview/list";
-        }
         model.addAttribute("overview", overviewResult.getModel());
         model.addAttribute("dataList", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
@@ -237,6 +248,8 @@ public class ScoreController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
             return "redirect:/analyse/overview/list";
         }
+        PermissionUtil.check(overviewResult.getModel());
+
         model.addAttribute("scoreTypes", ScoreType.getUsedTypes());
         model.addAttribute("scoreTypeArray", JSONArray.parseArray(JSON.toJSONString(ScoreType.getUsedTypes())));
         model.addAttribute("overview", overviewResult.getModel());
@@ -254,6 +267,8 @@ public class ScoreController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
             return "redirect:/analyse/overview/list";
         }
+        PermissionUtil.check(overviewResult.getModel());
+
         TaskDO taskDO = new TaskDO(TaskTemplate.AIRUS, overviewResult.getModel().getName() + "(" + overviewResult.getModel().getId() + ")-classifier:" + classifier);
         taskService.insert(taskDO);
         AirusParams airusParams = new AirusParams();
