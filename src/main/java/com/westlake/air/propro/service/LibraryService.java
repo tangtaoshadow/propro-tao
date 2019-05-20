@@ -20,6 +20,8 @@ public interface LibraryService {
 
     List<LibraryDO> getSimpleAll(Integer type);
 
+    long count(LibraryQuery query);
+
     ResultDO insert(LibraryDO libraryDO);
 
     ResultDO update(LibraryDO libraryDO);

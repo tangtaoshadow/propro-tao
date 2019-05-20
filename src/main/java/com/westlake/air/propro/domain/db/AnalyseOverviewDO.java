@@ -27,6 +27,10 @@ public class AnalyseOverviewDO extends BaseDO {
     @Indexed
     String expId;
 
+    //卷积实验的创建者
+    @Indexed
+    String ownerName = "Admin";
+
     //对应实验的名称
     String expName;
 
@@ -68,9 +72,6 @@ public class AnalyseOverviewDO extends BaseDO {
 
     //mz卷积窗口,一般设定为0.05或者0.03,一般来源于experimentDO对象,也可以在执行单独的卷积步骤自由设定
     Float mzExtractWindow;
-
-    //卷积实验的创建者
-    String ownerName = "Admin";
 
     //最终使用的分类器:lda, xgboost
     String classifier = "lda";

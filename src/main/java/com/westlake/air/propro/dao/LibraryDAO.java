@@ -50,6 +50,9 @@ public class LibraryDAO extends BaseDAO<LibraryDO, LibraryQuery>{
         if (libraryQuery.getDoPublic() != null) {
             query.addCriteria(where("doPublic").is(libraryQuery.getDoPublic()));
         }
+        if (libraryQuery.getCreator() != null) {
+            query.addCriteria(where("creator").is(libraryQuery.getCreator()));
+        }
         return query;
     }
 

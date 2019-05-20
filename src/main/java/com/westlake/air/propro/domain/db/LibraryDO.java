@@ -30,6 +30,9 @@ public class LibraryDO extends BaseDO {
     @Indexed
     boolean doPublic = false;
 
+    @Indexed
+    String creator = "Admin";
+
     //项目标签
     List<String> labels = new ArrayList<>();
 
@@ -66,6 +69,6 @@ public class LibraryDO extends BaseDO {
 
     Date lastModifiedDate;
 
-    String creator = "Admin";
+
 
 }

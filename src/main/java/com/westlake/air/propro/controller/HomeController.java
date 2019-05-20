@@ -51,47 +51,56 @@ public class HomeController extends BaseController {
 
     @RequestMapping("/")
     String home(Model model) {
-        LibraryQuery libraryQuery = new LibraryQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");
-        ResultDO<List<LibraryDO>> libRes = libraryService.getList(libraryQuery);
+        ResultDO<List<LibraryDO>> libRes = libraryService.getList(new LibraryQuery());
+        String username = getCurrentUsername();
 
-        ExperimentQuery experimentQuery = new ExperimentQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");
+        ExperimentQuery experimentQuery = new ExperimentQuery();
+        experimentQuery.setOwnerName(username);
         experimentQuery.setType(Constants.EXP_TYPE_DIA_SWATH);
-        ResultDO<List<ExperimentDO>> expSWATH = experimentService.getList(experimentQuery);
+        long expSWATHCount = experimentService.count(experimentQuery);
         experimentQuery.setType(Constants.EXP_TYPE_PRM);
-        ResultDO<List<ExperimentDO>> expPRM = experimentService.getList(experimentQuery);
+        long expPRMCount = experimentService.count(experimentQuery);
 
-        AnalyseOverviewQuery overviewQuery = new AnalyseOverviewQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");
-        ResultDO<List<AnalyseOverviewDO>> overviewRes = analyseOverviewService.getList(overviewQuery);
+        AnalyseOverviewQuery analyseOverviewQuery = new AnalyseOverviewQuery();
 
-        ProjectQuery projectQuery = new ProjectQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");
-        ResultDO<List<ProjectDO>> projectsRes = projectService.getList(projectQuery);
+        long overviewCount = analyseOverviewService.count(analyseOverviewQuery);
 
-        TaskQuery query = new TaskQuery(1, SHOW_NUM, Sort.Direction.DESC, "createDate");
-//        ResultDO<List<TaskDO>> taskTotalRes = taskService.getList(query);
+        ProjectQuery projectQuery = new ProjectQuery();
+        long projectCount = projectService.count(projectQuery);
+        projectQuery.setDoPublic(true);
+        long publicProjectCount = projectService.count(projectQuery);
+
+        TaskQuery query = new TaskQuery();
         query.setStatus(TaskStatus.RUNNING.getName());
-        ResultDO<List<TaskDO>> taskRunningRes = taskService.getList(query);
-        ConfigDO configDO = configDAO.getConfig();
+        long taskRunningCount = taskService.count(query);
 
-        List<LibraryDO> slist = getLibraryList(0);
-        List<LibraryDO> iRtlist = getLibraryList(1);
-        model.addAttribute("libraries", slist);
-        model.addAttribute("iRtLibraries", iRtlist);
+        LibraryQuery libraryQuery = new LibraryQuery(0);
+        libraryQuery.setCreator(username);
+        long libCount = libraryService.count(libraryQuery);
+        libraryQuery.setType(1);
+        long iRtLibCount = libraryService.count(libraryQuery);
 
-        model.addAttribute("taskRunningCount", taskRunningRes.getTotalNum());
-//        model.addAttribute("taskTotalCount", taskTotalRes.getTotalNum());
-        model.addAttribute("libCount", libRes.getTotalNum());
-        model.addAttribute("expSWATHCount", expSWATH.getTotalNum());
-        model.addAttribute("expPRMCount", expPRM.getTotalNum());
-        model.addAttribute("projectCount", projectsRes.getTotalNum());
-        model.addAttribute("overviewCount", overviewRes.getTotalNum());
-        model.addAttribute("runningTasks", taskRunningRes.getModel());
-//        model.addAttribute("tasks", taskRunningRes.getModel());
-        model.addAttribute("libs", libRes.getModel());
-        model.addAttribute("projects", projectsRes.getModel());
-        model.addAttribute("expsSWATH", expSWATH.getModel());
-        model.addAttribute("expsPRM", expPRM.getModel());
-        model.addAttribute("overviews", overviewRes.getModel());
-        model.addAttribute("config", configDO);
+        libraryQuery = new LibraryQuery(0);
+        libraryQuery.setDoPublic(true);
+        long publicLibCount = libraryService.count(libraryQuery);
+        libraryQuery.setType(1);
+        long publicIrtCount = libraryService.count(libraryQuery);
+
+        model.addAttribute("taskRunningCount", taskRunningCount);
+
+        model.addAttribute("libCount", libCount);
+        model.addAttribute("iRtLibCount", iRtLibCount);
+        model.addAttribute("publicLibCount", publicLibCount);
+        model.addAttribute("publicIrtCount", publicIrtCount);
+
+        model.addAttribute("expSWATHCount", expSWATHCount);
+        model.addAttribute("expPRMCount", expPRMCount);
+
+        model.addAttribute("projectCount", projectCount);
+        model.addAttribute("publicProjectCount", publicProjectCount);
+
+        model.addAttribute("overviewCount", overviewCount);
+
         return "home";
     }
 

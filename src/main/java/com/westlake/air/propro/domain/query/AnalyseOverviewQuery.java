@@ -14,6 +14,8 @@ public class AnalyseOverviewQuery extends PageQuery {
 
     String expId;
 
+    String ownerName;
+
     String libraryId;
 
     public AnalyseOverviewQuery(){}

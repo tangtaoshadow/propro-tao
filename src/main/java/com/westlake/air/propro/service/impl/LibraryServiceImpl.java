@@ -59,6 +59,11 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
+    public long count(LibraryQuery query) {
+        return libraryDAO.count(query);
+    }
+
+    @Override
     public ResultDO<List<LibraryDO>> getList(LibraryQuery query) {
         List<LibraryDO> libraryDOS = libraryDAO.getList(query);
         long totalCount = libraryDAO.count(query);

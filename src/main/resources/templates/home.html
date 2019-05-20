@@ -16,7 +16,7 @@
                             <a th:href="@{/project/list}"><h2 class="m-widget24__title m--font-success" th:text="#{label_public_project}"></h2></a>
                             <br>
                             <span class="m-widget24__desc">Public Projects</span>
-                            <span class="m-widget24__stats m--font-brand" th:text="${projectCount}"></span>
+                            <span class="m-widget24__stats m--font-brand" th:text="${publicProjectCount}"></span>
                             <div class="m--space-5"></div>
                             <div class="m-widget2" style="padding-left: 15px; padding-bottom: 5px;">
                                 <a th:href="@{/project/list}" data-toggle="m-tooltip"
@@ -109,7 +109,25 @@
                             <a th:href="@{/library/listStandard}"><h2 class="m-widget24__title m--font-success" th:text="#{label_public_library}"></h2></a>
                             <br>
                             <span class="m-widget24__desc">standard libraries</span>
-                            <span class="m-widget24__stats m--font-info" th:text="${libCount}"></span>
+                            <span class="m-widget24__stats m--font-info" th:text="${publicLibCount}"></span>
+                            <div class="m--space-5"></div>
+                            <div class="m-widget2" style="padding-left: 15px; padding-bottom: 5px;">
+                                <a th:href="@{/library/listStandard}" data-toggle="m-tooltip"
+                                   th:title="#{menu_library_list}"
+                                   class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
+                                    <i class="fa fa-list"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 col-lg-6 col-xl-3">
+                    <div class="m-widget24">
+                        <div class="m-widget24__item">
+                            <a th:href="@{/library/listIrt}"><h2 class="m-widget24__title m--font-success" th:text="#{label_public_irt_library}"></h2></a>
+                            <br>
+                            <span class="m-widget24__desc">standard libraries</span>
+                            <span class="m-widget24__stats m--font-info" th:text="${publicIrtLibCount}"></span>
                             <div class="m--space-5"></div>
                             <div class="m-widget2" style="padding-left: 15px; padding-bottom: 5px;">
                                 <a th:href="@{/library/listStandard}" data-toggle="m-tooltip"

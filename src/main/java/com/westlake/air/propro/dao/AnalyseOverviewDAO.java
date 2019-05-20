@@ -45,6 +45,9 @@ public class AnalyseOverviewDAO extends BaseDAO<AnalyseOverviewDO, AnalyseOvervi
         if (targetQuery.getLibraryId() != null) {
             query.addCriteria(where("libraryId").is(targetQuery.getLibraryId()));
         }
+        if (targetQuery.getOwnerName() != null) {
+            query.addCriteria(where("ownerName").is(targetQuery.getOwnerName()));
+        }
 
         return query;
     }

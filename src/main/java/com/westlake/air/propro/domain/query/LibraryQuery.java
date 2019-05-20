@@ -18,6 +18,8 @@ public class LibraryQuery extends PageQuery {
 
     String name;
 
+    String creator;
+
     Boolean doPublic;
     
     //0:标准库,1:iRT校准库
@@ -28,6 +30,10 @@ public class LibraryQuery extends PageQuery {
     Date lastModifiedDate;
 
     public LibraryQuery(){}
+
+    public LibraryQuery(Integer type){
+        this.type = type;
+    }
 
     public LibraryQuery(int pageNo, int pageSize, Sort.Direction direction, String sortColumn){
         super(pageNo, pageSize, direction, sortColumn);
