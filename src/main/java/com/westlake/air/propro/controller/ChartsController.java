@@ -11,6 +11,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping(value = "charts")
+@Deprecated
 public class ChartsController extends BaseController {
 
     @RequestMapping(value = "/readSpeed")

@@ -15,6 +15,7 @@ import com.westlake.air.propro.domain.bean.score.PeakGroup;
 import com.westlake.air.propro.domain.bean.score.PeptideFeature;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
+import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.domain.query.AnalyseOverviewQuery;
@@ -25,6 +26,7 @@ import com.westlake.air.propro.algorithm.scorer.ChromatographicScorer;
 import com.westlake.air.propro.algorithm.scorer.LibraryScorer;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.CompressUtil;
+import com.westlake.air.propro.utils.PermissionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -95,15 +97,18 @@ public class AnalyseController extends BaseController {
                 model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED);
                 return "analyse/overview/list";
             }
+            PermissionUtil.check(expResult.getModel());
             model.addAttribute("experiment", expResult.getModel());
         }
-
 
         AnalyseOverviewQuery query = new AnalyseOverviewQuery();
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
         if (StringUtils.isNotEmpty(expId)) {
             query.setExpId(expId);
+        }
+        if(!isAdmin()){
+            query.setOwnerName(getCurrentUsername());
         }
         query.setOrderBy(Sort.Direction.DESC);
         query.setSortColumn("createDate");
@@ -121,6 +126,7 @@ public class AnalyseController extends BaseController {
         ResultDO<AnalyseOverviewDO> resultDO = analyseOverviewService.getById(id);
 
         if (resultDO.isSuccess()) {
+            PermissionUtil.check(resultDO.getModel());
             model.addAttribute("overview", resultDO.getModel());
             model.addAttribute("slopeIntercept", resultDO.getModel().getSlope() + "/" + resultDO.getModel().getIntercept());
             return "analyse/overview/detail";
@@ -134,10 +140,12 @@ public class AnalyseController extends BaseController {
     String overviewExport(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) throws IOException {
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(id);
+
         if (overviewResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
             return "redirect:/analyse/overview/list";
         }
+        PermissionUtil.check(overviewResult.getModel());
         ResultDO<ExperimentDO> experimentResult = experimentService.getById(overviewResult.getModel().getExpId());
         if (experimentResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED);
@@ -190,7 +198,11 @@ public class AnalyseController extends BaseController {
 
     @RequestMapping(value = "/overview/delete/{id}")
     String overviewDelete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
-        analyseOverviewService.deleteAll(id);
+
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(id);
+        PermissionUtil.check(overviewResult.getModel());
+
+        analyseOverviewService.delete(id);
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
         return "redirect:/analyse/overview/list";
     }
@@ -235,7 +247,14 @@ public class AnalyseController extends BaseController {
             return "redirect:/analyse/overview/select";
         }
 
-        ComparisonResult result = analyseOverviewService.comparison(overviewIds);
+        List<AnalyseOverviewDO> overviews = new ArrayList<>();
+        for (String overviewId : overviewIds) {
+            ResultDO<AnalyseOverviewDO> tempResult = analyseOverviewService.getById(overviewId);
+            PermissionUtil.check(tempResult.getModel());
+            overviews.add(tempResult.getModel());
+        }
+
+        ComparisonResult result = analyseOverviewService.comparison(overviews);
         model.addAttribute("samePeptides", result.getSamePeptides());
         model.addAttribute("diffPeptides", result.getDiffPeptides());
         model.addAttribute("identifiesMap", result.getIdentifiesMap());
@@ -257,9 +276,10 @@ public class AnalyseController extends BaseController {
         model.addAttribute("peptideRef", peptideRef);
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
-        if (overviewResult.isSuccess()) {
-            model.addAttribute("overview", overviewResult.getModel());
-        }
+
+        PermissionUtil.check(overviewResult.getModel());
+        model.addAttribute("overview", overviewResult.getModel());
+
         AnalyseDataQuery query = new AnalyseDataQuery();
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
@@ -301,6 +321,7 @@ public class AnalyseController extends BaseController {
         }
 
         AnalyseOverviewDO overviewDO = resultDO.getModel();
+        PermissionUtil.check(overviewDO);
         model.addAttribute("overview", overviewDO);
         model.addAttribute("slope", overviewDO.getSlope());
         model.addAttribute("intercept", overviewDO.getIntercept());
@@ -338,6 +359,7 @@ public class AnalyseController extends BaseController {
         }
 
         AnalyseOverviewDO overviewDO = overviewResult.getModel();
+        PermissionUtil.check(overviewDO);
         model.addAttribute("overview", overviewDO);
 
         ResultDO<ExperimentDO> expResult = experimentService.getById(overviewDO.getExpId());
@@ -381,6 +403,10 @@ public class AnalyseController extends BaseController {
         }
 
         AnalyseDataDO dataDO = dataResult.getModel();
+
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(dataDO.getOverviewId());
+        PermissionUtil.check(overviewResult.getModel());
+
         JSONObject res = new JSONObject();
         JSONArray rtArray = new JSONArray();
         JSONArray intensityArray = new JSONArray();
@@ -420,8 +446,8 @@ public class AnalyseController extends BaseController {
         }
 
         AnalyseDataDO data = dataResult.getModel();
-
-
+        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(data.getOverviewId());
+        PermissionUtil.check(overviewResult.getModel());
 
         JSONObject res = new JSONObject();
         JSONArray rtArray = new JSONArray();
@@ -437,12 +463,6 @@ public class AnalyseController extends BaseController {
 
             Float[] pairIntensityArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvIntensityMap().get(cutInfo)));
             if (isGaussFilter) {
-                ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(data.getOverviewId());
-                if (overviewResult == null || overviewResult.isFailed()) {
-                    resultDO.setErrorResult(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
-                    return resultDO;
-                }
-
                 AnalyseOverviewDO overview = overviewResult.getModel();
                 pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, cutInfo, pairIntensityArray,new SigmaSpacing(overview.getSigma(), overview.getSpacing()));
             }
@@ -540,6 +560,8 @@ public class AnalyseController extends BaseController {
                 model.addAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
                 return "analyse/data/consultation";
             }
+            //校验权限
+            PermissionUtil.check(overviewResult.getModel());
             targetExpId = overviewResult.getModel().getExpId();
             targetLibraryId = overviewResult.getModel().getLibraryId();
             targetPeptideRef = data.getPeptideRef();
@@ -569,6 +591,8 @@ public class AnalyseController extends BaseController {
             model.addAttribute(ERROR_MSG, ResultCode.AIRD_COMPRESSION_FIRST.getMessage());
             return "analyse/data/consultation";
         }
+        //校验权限
+        PermissionUtil.check(experimentResult.getModel());
 
         libraryResult = libraryService.getById(targetLibraryId);
         if (libraryResult.isFailed()) {
@@ -705,6 +729,10 @@ public class AnalyseController extends BaseController {
             if (overviewId == null || overviewId.isEmpty()) {
                 continue;
             }
+            //校验权限
+            ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+            PermissionUtil.check(overviewResult.getModel());
+
             AnalyseDataDO dataForId = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, peptideRef, false);
             if (dataForId == null) {
                 continue;
@@ -727,12 +755,6 @@ public class AnalyseController extends BaseController {
                 }
                 Float[] pairIntensityArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvIntensityMap().get(cutInfo)));
                 if (isGaussFilter) {
-
-                    ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(data.getOverviewId());
-                    if (overviewResult == null || overviewResult.isFailed()) {
-                        resultDO.setErrorResult(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED);
-                        return resultDO;
-                    }
                     AnalyseOverviewDO overview = overviewResult.getModel();
                     pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, cutInfo, pairIntensityArray,new SigmaSpacing(overview.getSigma(), overview.getSpacing()));
                 }

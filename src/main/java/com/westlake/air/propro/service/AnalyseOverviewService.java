@@ -26,13 +26,11 @@ public interface AnalyseOverviewService {
 
     ResultDO delete(String id);
 
-    ResultDO deleteAll(String id);
-
     ResultDO deleteAllByExpId(String expId);
 
     ResultDO<AnalyseOverviewDO> getById(String id);
 
     ResultDO<AnalyseOverviewDO> getFirstByExpId(String expId);
 
-    ComparisonResult comparison(HashSet<String> overviewIds);
+    ComparisonResult comparison(List<AnalyseOverviewDO> overviews);
 }

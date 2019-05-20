@@ -37,12 +37,9 @@ public class AnalyseDataDO extends BaseDO {
     String overviewId;
 
     @Indexed
-    String projectId;
+    String peptideRef;
 
     String proteinName;
-
-    @Indexed
-    String peptideRef;
 
     Boolean isUnique;
 

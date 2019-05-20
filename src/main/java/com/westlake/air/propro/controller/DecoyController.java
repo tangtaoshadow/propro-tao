@@ -8,6 +8,7 @@ import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.query.PeptideQuery;
 import com.westlake.air.propro.service.PeptideService;
+import com.westlake.air.propro.utils.PermissionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,6 +37,10 @@ public class DecoyController extends BaseController {
 
     @RequestMapping(value = "/overview/{id}")
     String overview(Model model, @PathVariable("id") String id) {
+
+        ResultDO<LibraryDO> libraryResult = libraryService.getById(id);
+        PermissionUtil.check(libraryResult.getModel());
+
         FragmentResult result = fragmentFactory.decoyOverview(id);
 
         model.addAttribute(SUCCESS_MSG, result.getMsgInfo());
@@ -45,15 +50,12 @@ public class DecoyController extends BaseController {
         return "decoy/overview";
     }
 
-    @RequestMapping(value = "/manager")
-    String manager(Model model) {
-        model.addAttribute("libraries", getLibraryList(LibraryDO.TYPE_STANDARD));
-        return "decoy/manager";
-    }
-
     @RequestMapping(value = "/delete")
-    String delete(Model model,
-                        @RequestParam(value = "id", required = true) String id) {
+    String delete(Model model, @RequestParam(value = "id", required = true) String id) {
+
+        ResultDO<LibraryDO> libraryResult = libraryService.getById(id);
+        PermissionUtil.check(libraryResult.getModel());
+
         peptideService.deleteAllDecoyByLibraryId(id);
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
         LibraryDO library = resultDO.getModel();
@@ -64,6 +66,9 @@ public class DecoyController extends BaseController {
     @RequestMapping(value = "/generate")
     String generate(Model model,
                     @RequestParam(value = "id", required = true) String id) {
+
+        ResultDO<LibraryDO> libraryResult = libraryService.getById(id);
+        PermissionUtil.check(libraryResult.getModel());
 
         logger.info("正在删除原有伪肽段");
         //删除原有的伪肽段

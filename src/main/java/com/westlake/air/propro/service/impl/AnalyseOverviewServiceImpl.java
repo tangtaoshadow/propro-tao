@@ -7,6 +7,7 @@ import com.westlake.air.propro.domain.bean.analyse.ComparisonResult;
 import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
 import com.westlake.air.propro.domain.query.AnalyseOverviewQuery;
+import com.westlake.air.propro.exception.UnauthorizedAccessException;
 import com.westlake.air.propro.service.AnalyseDataService;
 import com.westlake.air.propro.service.AnalyseOverviewService;
 import com.westlake.air.propro.service.ScoreService;
@@ -84,38 +85,24 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
         }
     }
 
+
     @Override
     public ResultDO delete(String id) {
         if (id == null || id.isEmpty()) {
             return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
         }
         try {
-            analyseOverviewDAO.delete(id);
-            return new ResultDO(true);
-        } catch (Exception e) {
-            logger.warn(e.getMessage());
-            return ResultDO.buildError(ResultCode.DELETE_ERROR);
-        }
-    }
-
-
-    @Override
-    public ResultDO deleteAll(String id) {
-        if (id == null || id.isEmpty()) {
-            return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
-        }
-        try {
             AnalyseOverviewDO overview = analyseOverviewDAO.getById(id);
-            if(overview != null){
-                if(overview.getAircPath() != null && !overview.getAircPath().isEmpty()){
+            if (overview != null) {
+                if (overview.getAircPath() != null && !overview.getAircPath().isEmpty()) {
                     File file = new File(overview.getAircPath());
-                    if(file.exists()){
+                    if (file.exists()) {
                         file.delete();
                     }
                 }
-                if(overview.getAircIndexPath() != null && !overview.getAircIndexPath().isEmpty()){
+                if (overview.getAircIndexPath() != null && !overview.getAircIndexPath().isEmpty()) {
                     File file = new File(overview.getAircIndexPath());
-                    if(file.exists()){
+                    if (file.exists()) {
                         file.delete();
                     }
                 }
@@ -177,24 +164,23 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
     }
 
     @Override
-    public ComparisonResult comparison(HashSet<String> overviewIds) {
+    public ComparisonResult comparison(List<AnalyseOverviewDO> overviews) {
         ComparisonResult resultMap = new ComparisonResult();
 
         HashMap<String, HashSet<MatchedPeptide>> map = new HashMap<>();
         HashMap<String, AnalyseOverviewDO> overviewMap = new HashMap<>();
         HashMap<AnalyseOverviewDO, List<Boolean>> identifiesMap = new HashMap<>();
 
-        for (String overviewId : overviewIds) {
-            AnalyseOverviewDO temp = analyseOverviewDAO.getById(overviewId);
-            if (temp != null) {
-                //如果MatchedPeptideCount为空,则表明分析还没有完成,无法参与横向比对
-                if (temp.getMatchedPeptideCount() != null) {
-                    overviewMap.put(temp.getId(), temp);
-                    List<MatchedPeptide> peptides = analyseDataService.getAllSuccessMatchedPeptides(overviewId);
-                    map.put(temp.getId(), new HashSet<>(peptides));
-                    identifiesMap.put(temp, new ArrayList<Boolean>());
-                }
+        for (AnalyseOverviewDO overview : overviews) {
+
+            //如果MatchedPeptideCount为空,则表明分析还没有完成,无法参与横向比对
+            if (overview.getMatchedPeptideCount() != null) {
+                overviewMap.put(overview.getId(), overview);
+                List<MatchedPeptide> peptides = analyseDataService.getAllSuccessMatchedPeptides(overview.getId());
+                map.put(overview.getId(), new HashSet<>(peptides));
+                identifiesMap.put(overview, new ArrayList<Boolean>());
             }
+
         }
         List<MatchedPeptide> samePeptides = new ArrayList<>();
         List<MatchedPeptide> diffPeptides = new ArrayList<>();

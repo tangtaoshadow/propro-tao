@@ -2,10 +2,7 @@ package com.westlake.air.propro.utils;
 
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.Roles;
-import com.westlake.air.propro.domain.db.ExperimentDO;
-import com.westlake.air.propro.domain.db.LibraryDO;
-import com.westlake.air.propro.domain.db.ProjectDO;
-import com.westlake.air.propro.domain.db.UserDO;
+import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.exception.UnauthorizedAccessException;
 import org.apache.shiro.SecurityUtils;
 
@@ -68,6 +65,23 @@ public class PermissionUtil {
 
         if (experiment.getOwnerName().equals(user.getUsername())) {
             throw new UnauthorizedAccessException("redirect:/experiment/list");
+        } else {
+            return true;
+        }
+    }
+
+    public static boolean check(AnalyseOverviewDO overview) throws UnauthorizedAccessException{
+        UserDO user = getCurrentUser();
+        if(overview == null || user == null){
+            throw new UnauthorizedAccessException("redirect:/analyse/overview/list");
+        }
+
+        if(user.getRoles().contains(Roles.ROLE_ADMIN)){
+            return true;
+        }
+
+        if (overview.getOwnerName().equals(user.getUsername())) {
+            throw new UnauthorizedAccessException("redirect:/analyse/overview/list");
         } else {
             return true;
         }
