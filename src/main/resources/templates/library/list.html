@@ -45,7 +45,8 @@
                     <th width="5%" th:text="#{label_target_peptides_count}"></th>
                     <th width="5%" th:text="#{label_decoy_peptides_count}"></th>
                     <th width="15%" th:text="#{label_create_date}"></th>
-                    <th width="15%" th:text="#{label_last_modified_date}"></th>
+                    <th width="15%" th:text="#{label_creator}"></th>
+<!--                    <th width="15%" th:text="#{label_last_modified_date}"></th>-->
                     <th width="15%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
@@ -63,7 +64,8 @@
                     <td th:text="${library.totalTargetCount}"></td>
                     <td th:text="${library.totalDecoyCount}"></td>
                     <td th:text="${#dates.format(library.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
-                    <td th:text="${#dates.format(library.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
+                    <td th:text="${library.creator}"></td>
+                    <!--                    <td th:text="${#dates.format(library.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>-->
                     <td>
                         <a th:href="@{/library/edit/{id}(id=${library.id})}" data-toggle="m-tooltip"
                            th:title="#{btn_modify}"

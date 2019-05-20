@@ -86,15 +86,15 @@
                            class="btn btn-accent m-btn m-btn--icon m-btn--icon-only">
                             <i class="fa fa-wpforms"></i>
                         </a>
-                        <a th:href="@{/experiment/extractor(id=${experiment.id})}" data-toggle="m-tooltip"
-                           th:title="#{btn_start_convolution}"
-                           class="btn btn-brand m-btn m-btn--icon m-btn--icon-only">
-                            <i class="fa fa-dropbox"></i>
-                        </a>
                         <a th:href="@{/experiment/irt(id=${experiment.id})}" data-toggle="m-tooltip"
                            th:title="#{btn_start_irt}"
                            class="btn btn-info m-btn m-btn--icon m-btn--icon-only">
                             <i class="fa fa-calculator"></i>
+                        </a>
+                        <a th:href="@{/experiment/extractor(id=${experiment.id})}" data-toggle="m-tooltip"
+                           th:title="#{btn_start_convolution}"
+                           class="btn btn-brand m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-dropbox"></i>
                         </a>
                         <a th:href="@{/scanindex/list(experimentId=${experiment.id})}" data-toggle="m-tooltip"
                            th:title="#{label_spectrum_list}"
