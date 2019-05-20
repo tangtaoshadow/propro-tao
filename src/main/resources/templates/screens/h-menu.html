@@ -80,6 +80,18 @@
                             <span class="m-menu__link-text" th:text="#{menu_irt_library_list}"></span>
                         </a>
                     </li>
+                    <li class="m-menu__item " aria-haspopup="true">
+                        <a th:href="@{/library/listPublic}" class="m-menu__link ">
+                            <i class="m-menu__link-icon flaticon-file"></i>
+                            <span class="m-menu__link-text" th:text="#{label_public_library}"></span>
+                        </a>
+                    </li>
+                    <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
+                        <a th:href="@{/library/listPublicIrt}" class="m-menu__link ">
+                            <i class="m-menu__link-icon flaticon-diagram"></i>
+                            <span class="m-menu__link-text" th:text="#{label_public_irt_library}"></span>
+                        </a>
+                    </li>
                     <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
                         <a th:href="@{/peptide/list}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-map"></i>

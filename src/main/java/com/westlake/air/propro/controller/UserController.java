@@ -57,7 +57,7 @@ public class UserController extends BaseController {
         return "user/profile";
     }
 
-    @RequestMapping(value = "/update",method = RequestMethod.POST)
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
     String update(Model model,
                   @RequestParam(value = "nick", required = false) String nick,
                   @RequestParam(value = "email", required = false) String email,
@@ -65,13 +65,13 @@ public class UserController extends BaseController {
                   @RequestParam(value = "organization", required = false) String organization,
                   RedirectAttributes redirectAttributes) {
         String username = getCurrentUsername();
-        if(username == null){
+        if (username == null) {
             SecurityUtils.getSubject().logout();
             return redirectToLoginPage;
         }
 
         UserDO user = userService.getByUsername(username);
-        if(user == null){
+        if (user == null) {
             SecurityUtils.getSubject().logout();
             return redirectToLoginPage;
         }
@@ -84,34 +84,34 @@ public class UserController extends BaseController {
         return "redirect:/user/profile?tab=userprofile";
     }
 
-    @RequestMapping(value = "/changepwd",method = RequestMethod.POST)
+    @RequestMapping(value = "/changepwd", method = RequestMethod.POST)
     String changePwd(Model model,
-                  @RequestParam(value = "oldPwd", required = false) String oldPwd,
-                  @RequestParam(value = "newPwd", required = false) String newPwd,
-                  @RequestParam(value = "repeatPwd", required = false) String repeatPwd,
-                  RedirectAttributes redirectAttributes) {
+                     @RequestParam(value = "oldPwd", required = false) String oldPwd,
+                     @RequestParam(value = "newPwd", required = false) String newPwd,
+                     @RequestParam(value = "repeatPwd", required = false) String repeatPwd,
+                     RedirectAttributes redirectAttributes) {
         String username = getCurrentUsername();
-        if(username == null){
+        if (username == null) {
             SecurityUtils.getSubject().logout();
             return redirectToLoginPage;
         }
 
         UserDO user = userService.getByUsername(username);
-        if(user == null){
+        if (user == null) {
             SecurityUtils.getSubject().logout();
             return redirectToLoginPage;
         }
 
-        if(!newPwd.equals(repeatPwd)){
+        if (!newPwd.equals(repeatPwd)) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.NEW_PASSWORD_NOT_EQUALS_WITH_REPEAT_PASSWORD.getMessage());
-            redirectAttributes.addFlashAttribute("tab","changepwd");
+            redirectAttributes.addFlashAttribute("tab", "changepwd");
             return "redirect:/user/profile";
         }
 
         String oldMD5Pwd = PasswordUtil.getHashPassword(oldPwd, user.getSalt());
-        if(!user.getPassword().equals(oldMD5Pwd)){
+        if (!user.getPassword().equals(oldMD5Pwd)) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OLD_PASSWORD_ERROR.getMessage());
-            redirectAttributes.addFlashAttribute("tab","changepwd");
+            redirectAttributes.addFlashAttribute("tab", "changepwd");
             return "redirect:/user/profile";
         }
 
@@ -122,7 +122,7 @@ public class UserController extends BaseController {
         userService.update(user);
 
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
-        redirectAttributes.addFlashAttribute("tab","changepwd");
+        redirectAttributes.addFlashAttribute("tab", "changepwd");
         return "redirect:/user/profile";
     }
 }
