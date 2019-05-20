@@ -16,12 +16,13 @@
     <div class="m-portlet__body">
         <!--begin: Search Form -->
         <div class="clearfix">
-            <form id="searchForm" method="post" role="form" class="form-inline" th:action="@{/library/listStandard}">
+            <form id="searchForm" method="post" role="form" class="form-inline" th:action="@{/library/list}">
                 <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                 <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
                 <div class="form-group m-form__group">
                     <div class="input-group">
-                        <input type="text" class="form-control" id="searchName" name="searchName" th:placeholder="#{label_library_name}"
+                        <input type="text" class="form-control" id="searchName" name="searchName"
+                               th:placeholder="#{label_library_name}"
                                th:value="${searchName}">
                         <div class="input-group-append">
                             <button class="btn btn-primary" type="submit" th:text="#{btn_search}">
@@ -38,18 +39,25 @@
                 <thead>
                 <tr>
                     <th width="20%" th:text="#{label_library_name}"></th>
+                    <th width="5%" th:text="#{label_do_public}"></th>
                     <th width="5%" th:text="#{label_proteins_count}"></th>
                     <th width="5%" th:text="#{label_peptides_count}"></th>
                     <th width="5%" th:text="#{label_target_peptides_count}"></th>
                     <th width="5%" th:text="#{label_decoy_peptides_count}"></th>
                     <th width="15%" th:text="#{label_create_date}"></th>
                     <th width="15%" th:text="#{label_last_modified_date}"></th>
-                    <th width="20%" th:text="#{label_operation}"></th>
+                    <th width="15%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="library:${libraryList}">
                     <td th:text="|${library.name}(${library.id})|"></td>
+                    <td th:if="${library.doPublic}">
+                        <span class="m-badge m-badge--success m-badge--wide">Public</span>
+                    </td>
+                    <td th:if="${!library.doPublic}">
+                        <span class="m-badge m-badge--danger m-badge--wide">Private</span>
+                    </td>
                     <td th:text="${library.proteinCount}"></td>
                     <td th:text="${library.totalCount}"></td>
                     <td th:text="${library.totalTargetCount}"></td>
@@ -57,10 +65,31 @@
                     <td th:text="${#dates.format(library.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(library.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
-                        <a th:href="@{/library/edit/{id}(id=${library.id})}" class="btn btn-primary btn-sm" th:text="#{btn_modify}"></a>
-                        <a th:href="@{/library/detail/{id}(id=${library.id})}" class="btn btn-success btn-sm" th:text="#{btn_detail}"></a>
-                        <a th:href="@{/peptide/list(libraryId=${library.id})}" class="btn btn-info btn-sm" th:text="#{menu_peptide_list}"></a>
-                        <a th:href="@{/peptide/protein(libraryId=${library.id})}" class="btn btn-success btn-sm" th:text="#{label_protein_list}"></a>
+                        <a th:href="@{/library/edit/{id}(id=${library.id})}" data-toggle="m-tooltip"
+                           th:title="#{btn_modify}"
+                           class="btn btn-warning m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                        <a th:href="@{/library/detail/{id}(id=${library.id})}" data-toggle="m-tooltip"
+                           th:title="#{btn_detail}"
+                           class="btn btn-accent m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-wpforms"></i>
+                        </a>
+                        <a th:href="@{/library/setPublic/{id}(id=${library.id})}" data-toggle="m-tooltip"
+                           th:title="#{btn_set_public}"
+                           class="btn btn-danger m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-opencart"></i>
+                        </a>
+                        <a th:href="@{/peptide/list(libraryId=${library.id})}" data-toggle="m-tooltip"
+                           th:title="#{menu_peptide_list}"
+                           class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-th-list"></i>
+                        </a>
+                        <a th:href="@{/peptide/protein(libraryId=${library.id})}" data-toggle="m-tooltip"
+                           th:title="#{label_protein_list}"
+                           class="btn btn-warning m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-list-ol"></i>
+                        </a>
                     </td>
                 </tr>
                 </tbody>

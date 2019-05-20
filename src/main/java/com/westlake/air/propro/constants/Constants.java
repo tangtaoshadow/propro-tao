@@ -103,4 +103,7 @@ public class Constants {
     public static final String EXP_TYPE_PRM = "PRM";
 
     public static final String RESET_PASSWORD = "propro";
+
+    public static final Integer LIBRARY_TYPE_STANDARD = 0;
+    public static final Integer LIBRARY_TYPE_IRT = 1;
 }

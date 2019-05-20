@@ -37,25 +37,25 @@
                 <thead>
                 <tr>
                     <th width="20%" th:text="#{label_project_name}"></th>
-                    <th width="5%" th:text="#{label_do_public}"></th>
+<!--                    <th width="5%" th:text="#{label_do_public}"></th>-->
                     <th width="5%" th:text="#{label_project_type}"></th>
                     <th width="20%" th:text="#{label_project_repository}"></th>
                     <th width="5%" th:text="#{label_owner}"></th>
                     <th width="10%" th:text="#{label_labels}"></th>
                     <th width="10%" th:text="#{label_create_date}"></th>
                     <!--<th width="10%" th:text="#{label_last_modified_date}"></th>-->
-                    <th width="25%" th:text="#{label_operation}"></th>
+                    <th width="30%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="project:${projectList}">
                     <td th:text="|${project.name}(${project.id})|"></td>
-                    <td th:if="${project.doPublic}">
-                        <span class="m-badge m-badge--success m-badge--wide">Public</span>
-                    </td>
-                    <td th:if="${!project.doPublic}">
-                        <span class="m-badge m-badge--danger m-badge--wide">Private</span>
-                    </td>
+<!--                    <td th:if="${project.doPublic}">-->
+<!--                        <span class="m-badge m-badge&#45;&#45;success m-badge&#45;&#45;wide">Public</span>-->
+<!--                    </td>-->
+<!--                    <td th:if="${!project.doPublic}">-->
+<!--                        <span class="m-badge m-badge&#45;&#45;danger m-badge&#45;&#45;wide">Private</span>-->
+<!--                    </td>-->
                     <td th:text="${project.type}"></td>
                     <td th:text="${project.repository}"></td>
                     <td th:text="${project.ownerName}"></td>
@@ -95,11 +95,11 @@
                            class="btn btn-info m-btn m-btn--icon m-btn--icon-only">
                             <i class="fa fa-server"></i>
                         </a>
-                        <a th:href="@{/project/setPublic/{id}(id=${project.id})}" data-toggle="m-tooltip"
-                           th:title="#{btn_set_public}"
-                           class="btn btn-danger m-btn m-btn--icon m-btn--icon-only">
-                            <i class="fa fa-opencart"></i>
-                        </a>
+<!--                        <a th:href="@{/project/setPublic/{id}(id=${project.id})}" data-toggle="m-tooltip"-->
+<!--                           th:title="#{btn_set_public}"-->
+<!--                           class="btn btn-danger m-btn m-btn&#45;&#45;icon m-btn&#45;&#45;icon-only">-->
+<!--                            <i class="fa fa-opencart"></i>-->
+<!--                        </a>-->
                         <a th:href="@{/project/delete/{id}(id=${project.id})}" data-toggle="m-tooltip"
                            th:title="#{btn_delete}"
                            class="btn btn-danger m-btn m-btn--icon m-btn--icon-only">

@@ -102,11 +102,14 @@ public class ShiroConfig {
 //		设置路径映射，注意这里要用LinkedHashMap 保证有序
         LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         filterChainDefinitionMap.put("/assets/**", "anon");
+//        filterChainDefinitionMap.put("/instances", "roles[admin]");
+//        filterChainDefinitionMap.put("/actuator/**", "roles[admin]");
 //        filterChainDefinitionMap.put("/welcome", "anon");
         filterChainDefinitionMap.put("/login/**", "anon");
 //        filterChainDefinitionMap.put("/login/logout", "logout");
 //        filterChainDefinitionMap.put("/user", "roles[user]");
         filterChainDefinitionMap.put("/register", "roles[admin]");
+
         filterChainDefinitionMap.put("/**", "user");//user允许 记住我和授权用户 访问，但在进行下单和支付时建议使用authc
 
         return filterChainDefinitionMap;

@@ -13,6 +13,7 @@ import java.util.Locale;
 
 @SpringBootApplication
 @EnableAsync
+//@EnableAdminServer
 public class ProproApplication extends SpringBootServletInitializer {
 
     @Override
@@ -25,7 +26,6 @@ public class ProproApplication extends SpringBootServletInitializer {
         springApplication.addListeners(new StartUpListener());
         springApplication.run(args);
 //        SpringApplication.run(ProproApplication.class, args);
-
     }
 
     @Bean

@@ -67,8 +67,6 @@ public class HomeController extends BaseController {
 
         ProjectQuery projectQuery = new ProjectQuery();
         long projectCount = projectService.count(projectQuery);
-        projectQuery.setDoPublic(true);
-        long publicProjectCount = projectService.count(projectQuery);
 
         TaskQuery query = new TaskQuery();
         query.setStatus(TaskStatus.RUNNING.getName());
@@ -89,7 +87,7 @@ public class HomeController extends BaseController {
         model.addAttribute("taskRunningCount", taskRunningCount);
 
         model.addAttribute("libCount", libCount);
-        model.addAttribute("iRtLibCount", iRtLibCount);
+        model.addAttribute("libIrtCount", iRtLibCount);
         model.addAttribute("publicLibCount", publicLibCount);
         model.addAttribute("publicIrtCount", publicIrtCount);
 
@@ -97,7 +95,6 @@ public class HomeController extends BaseController {
         model.addAttribute("expPRMCount", expPRMCount);
 
         model.addAttribute("projectCount", projectCount);
-        model.addAttribute("publicProjectCount", publicProjectCount);
 
         model.addAttribute("overviewCount", overviewCount);
 

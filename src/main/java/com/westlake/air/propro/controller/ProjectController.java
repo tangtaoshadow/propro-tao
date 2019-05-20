@@ -78,7 +78,6 @@ public class ProjectController extends BaseController {
         return "project/create";
     }
 
-
     @RequestMapping(value = "/add")
     String add(Model model,
                @RequestParam(value = "name", required = true) String name,

@@ -2,21 +2,20 @@ package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.SuccessMsg;
 import com.westlake.air.propro.constants.TaskTemplate;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.WindowRange;
-import com.westlake.air.propro.domain.db.ExperimentDO;
-import com.westlake.air.propro.domain.db.LibraryDO;
-import com.westlake.air.propro.domain.db.PeptideDO;
-import com.westlake.air.propro.domain.db.TaskDO;
+import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.query.LibraryQuery;
 import com.westlake.air.propro.domain.query.PeptideQuery;
 import com.westlake.air.propro.algorithm.parser.TraMLParser;
 import com.westlake.air.propro.algorithm.parser.LibraryTsvParser;
 import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.PeptideService;
+import com.westlake.air.propro.utils.PermissionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,16 +44,20 @@ public class LibraryController extends BaseController {
     @Autowired
     PeptideService peptideService;
 
-    @RequestMapping(value = "/listStandard")
-    String listStandard(Model model,
-                        @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                        @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
-                        @RequestParam(value = "searchName", required = false) String searchName) {
+    @RequestMapping(value = "/list")
+    String list(Model model,
+                @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+                @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
+                @RequestParam(value = "searchName", required = false) String searchName) {
         model.addAttribute("searchName", searchName);
         model.addAttribute("pageSize", pageSize);
         LibraryQuery query = new LibraryQuery();
         if (searchName != null && !searchName.isEmpty()) {
             query.setName(searchName);
+        }
+
+        if (!isAdmin()) {
+            query.setCreator(getCurrentUsername());
         }
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
@@ -64,7 +67,7 @@ public class LibraryController extends BaseController {
         model.addAttribute("libraryList", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
-        return "library/listStandard";
+        return "library/list";
     }
 
     @RequestMapping(value = "/listIrt")
@@ -78,6 +81,11 @@ public class LibraryController extends BaseController {
         if (searchName != null && !searchName.isEmpty()) {
             query.setName(searchName);
         }
+
+        if (!isAdmin()) {
+            query.setCreator(getCurrentUsername());
+        }
+
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
         query.setType(1);
@@ -89,13 +97,59 @@ public class LibraryController extends BaseController {
         return "library/listIrt";
     }
 
+    @RequestMapping(value = "/listPublic")
+    String listPublic(Model model,
+                      @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+                      @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
+                      @RequestParam(value = "searchName", required = false) String searchName) {
+        model.addAttribute("searchName", searchName);
+        model.addAttribute("pageSize", pageSize);
+        LibraryQuery query = new LibraryQuery();
+        if (searchName != null && !searchName.isEmpty()) {
+            query.setName(searchName);
+        }
+        query.setDoPublic(true);
+        query.setPageSize(pageSize);
+        query.setPageNo(currentPage);
+        query.setType(0);
+        ResultDO<List<LibraryDO>> resultDO = libraryService.getList(query);
+
+        model.addAttribute("libraryList", resultDO.getModel());
+        model.addAttribute("totalPage", resultDO.getTotalPage());
+        model.addAttribute("currentPage", currentPage);
+        return "library/listPublic";
+    }
+
+    @RequestMapping(value = "/listPublicIrt")
+    String listPublicIrt(Model model,
+                         @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+                         @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
+                         @RequestParam(value = "searchName", required = false) String searchName) {
+        model.addAttribute("searchName", searchName);
+        model.addAttribute("pageSize", pageSize);
+        LibraryQuery query = new LibraryQuery();
+        if (searchName != null && !searchName.isEmpty()) {
+            query.setName(searchName);
+        }
+        query.setDoPublic(true);
+        query.setPageSize(pageSize);
+        query.setPageNo(currentPage);
+        query.setType(1);
+        ResultDO<List<LibraryDO>> resultDO = libraryService.getList(query);
+
+        model.addAttribute("libraryList", resultDO.getModel());
+        model.addAttribute("totalPage", resultDO.getTotalPage());
+        model.addAttribute("currentPage", currentPage);
+        return "library/listPublicIrt";
+    }
+
     @RequestMapping(value = "/create")
     String create(Model model) {
         List<LibraryDO> libraryDOList = getLibraryList(1);
         LibraryDO libraryDO = new LibraryDO();
         libraryDO.setName("");
         libraryDO.setId("");
-        libraryDOList.add(0,libraryDO);
+        libraryDOList.add(0, libraryDO);
         model.addAttribute("libraries", libraryDOList);
         return "library/create";
     }
@@ -119,7 +173,7 @@ public class LibraryController extends BaseController {
         library.setName(name);
         library.setDescription(description);
         library.setType(type);
-
+        library.setCreator(getCurrentUsername());
         ResultDO resultDO = libraryService.insert(library);
         TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_LIBRARY_FILE, library.getName());
         taskService.insert(taskDO);
@@ -132,11 +186,11 @@ public class LibraryController extends BaseController {
         try {
             InputStream libFileStream = libFile.getInputStream();
             InputStream prmFileStream = null;
-            if(!prmFile.isEmpty()){
+            if (!prmFile.isEmpty()) {
                 prmFileStream = prmFile.getInputStream();
             }
             InputStream fastaFileStream = null;
-            if(!fastaFile.isEmpty()){
+            if (!fastaFile.isEmpty()) {
                 fastaFileStream = fastaFile.getInputStream();
             }
 
@@ -151,6 +205,7 @@ public class LibraryController extends BaseController {
     String aggregate(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
 
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
+        PermissionUtil.check(resultDO.getModel());
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/library/list";
@@ -169,11 +224,12 @@ public class LibraryController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/library/list";
         } else {
+            PermissionUtil.check(resultDO.getModel());
             List<LibraryDO> libraryDOList = getLibraryList(1);
             LibraryDO libraryDO = new LibraryDO();
             libraryDO.setName("");
             libraryDO.setId("");
-            libraryDOList.add(0,libraryDO);
+            libraryDOList.add(0, libraryDO);
             model.addAttribute("libraries", libraryDOList);
             model.addAttribute("library", resultDO.getModel());
             return "library/edit";
@@ -185,6 +241,7 @@ public class LibraryController extends BaseController {
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
 
         if (resultDO.isSuccess()) {
+            PermissionUtil.check(resultDO.getModel());
             if (resultDO.getModel().getType().equals(LibraryDO.TYPE_IRT)) {
                 Double[] range = peptideService.getRTRange(id);
                 if (range != null && range.length == 2) {
@@ -196,7 +253,7 @@ public class LibraryController extends BaseController {
             return "library/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/library/listStandard";
+            return "redirect:/library/list";
         }
     }
 
@@ -217,7 +274,7 @@ public class LibraryController extends BaseController {
         if (type == 1) {
             redirectListUrl = "redirect:/library/listIrt";
         } else {
-            redirectListUrl = "redirect:/library/listStandard";
+            redirectListUrl = "redirect:/library/list";
         }
 
         ResultDO<LibraryDO> resultDO = libraryService.getById(id);
@@ -226,6 +283,7 @@ public class LibraryController extends BaseController {
             return redirectListUrl;
         }
 
+        PermissionUtil.check(resultDO.getModel());
         LibraryDO library = resultDO.getModel();
         library.setDescription(description);
         library.setType(type);
@@ -246,11 +304,11 @@ public class LibraryController extends BaseController {
         try {
             InputStream libFileStream = libFile.getInputStream();
             InputStream prmFileStream = null;
-            if(!prmFile.isEmpty()){
+            if (!prmFile.isEmpty()) {
                 prmFileStream = prmFile.getInputStream();
             }
             InputStream fastaFileStream = null;
-            if(!prmFile.isEmpty()){
+            if (!prmFile.isEmpty()) {
                 fastaFileStream = fastaFile.getInputStream();
             }
 
@@ -267,16 +325,17 @@ public class LibraryController extends BaseController {
                   RedirectAttributes redirectAttributes) {
         ResultDO<LibraryDO> res = libraryService.getById(id);
         int type = 0;
-        if(res.isFailed()){
+        if (res.isFailed()) {
             type = res.getModel().getType();
         }
+        PermissionUtil.check(res.getModel());
         ResultDO resultDO = libraryService.delete(id);
 
         String redirectListUrl = null;
         if (type == 1) {
             redirectListUrl = "redirect:/library/listIrt";
         } else {
-            redirectListUrl = "redirect:/library/listStandard";
+            redirectListUrl = "redirect:/library/list";
         }
         peptideService.deleteAllByLibraryId(id);
         if (resultDO.isSuccess()) {
@@ -288,6 +347,29 @@ public class LibraryController extends BaseController {
         }
     }
 
+    @RequestMapping(value = "/setPublic/{id}")
+    String setPublic(@PathVariable("id") String id,
+                     RedirectAttributes redirectAttributes) {
+        ResultDO<LibraryDO> resultDO = libraryService.getById(id);
+        if (resultDO.isFailed()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
+            return "redirect:/library/list";
+        }
+
+        LibraryDO library = resultDO.getModel();
+        PermissionUtil.check(library);
+
+        library.setDoPublic(true);
+        libraryService.update(library);
+
+        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.SET_PUBLIC_SUCCESS);
+        if (library.getType().equals(Constants.LIBRARY_TYPE_STANDARD)) {
+            return "redirect:/library/list";
+        } else {
+            return "redirect:/library/listIrt";
+        }
+    }
+
     @RequestMapping(value = "/search")
     @ResponseBody
     ResultDO<JSONObject> search(Model model,
@@ -295,12 +377,15 @@ public class LibraryController extends BaseController {
                                 @RequestParam(value = "precursorMz", required = false) Float precursorMz,
                                 @RequestParam(value = "experimentId", required = false) String experimentId,
                                 @RequestParam(value = "libraryId", required = false) String libraryId) {
-
         if (fragmentSequence.length() < 3) {
             return ResultDO.buildError(ResultCode.SEARCH_FRAGMENT_LENGTH_MUST_BIGGER_THAN_3);
         }
 
+        ResultDO<LibraryDO> LibResult = libraryService.getById(libraryId);
+        PermissionUtil.check(LibResult.getModel());
+
         ResultDO<ExperimentDO> expResult = experimentService.getById(experimentId);
+        PermissionUtil.check(expResult.getModel());
         if (expResult.isFailed()) {
             return ResultDO.buildError(ResultCode.EXPERIMENT_NOT_EXISTED);
         }
@@ -325,7 +410,7 @@ public class LibraryController extends BaseController {
         List<PeptideDO> peptides = peptideService.getAll(query);
 
         JSONArray peptidesArray = new JSONArray();
-        for(PeptideDO peptide : peptides){
+        for (PeptideDO peptide : peptides) {
             peptidesArray.add(peptide.getPeptideRef());
         }
         JSONObject res = new JSONObject();
@@ -338,6 +423,9 @@ public class LibraryController extends BaseController {
     @RequestMapping(value = "overview/{id}")
     @ResponseBody
     String overview(Model model, @PathVariable("id") String id) {
+        ResultDO<LibraryDO> LibResult = libraryService.getById(id);
+        PermissionUtil.check(LibResult.getModel());
+
         List<PeptideDO> peptides = peptideService.getAllByLibraryId(id);
         int count = 0;
         for (PeptideDO peptide : peptides) {
