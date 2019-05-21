@@ -1,7 +1,9 @@
 package com.westlake.air.propro.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.compressor.AirdInfo;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.query.LibraryQuery;
 import com.westlake.air.propro.domain.query.ProjectQuery;
@@ -10,6 +12,7 @@ import com.westlake.air.propro.service.AnalyseOverviewService;
 import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.ProjectService;
 import com.westlake.air.propro.service.UserService;
+import com.westlake.air.propro.utils.FileUtil;
 import com.westlake.air.propro.utils.PasswordUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -19,6 +22,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -230,6 +234,19 @@ public class AdminController extends BaseController {
             if (!library.isDoPublic()){
                 libraryService.update(library);
             }
+        }
+        return "Success";
+    }
+
+    @RequestMapping(value = "/fillInfo")
+    @ResponseBody
+    public String fillInfo() throws IOException {
+        ProjectDO project = projectService.getById("5c737f50dfdfdd7abcdb1e4d").getModel();
+        List<ExperimentDO> experiments = experimentService.getAllByProjectName(project.getName());
+        for(ExperimentDO exp : experiments){
+            String jsonIndex = FileUtil.readFile(exp.getAirdIndexPath());
+            AirdInfo airdInfo = JSONObject.parseObject(jsonIndex, AirdInfo.class);
+            System.out.println(airdInfo.getRangeList());
         }
         return "Success";
     }
