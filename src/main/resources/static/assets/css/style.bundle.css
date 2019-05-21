@@ -90,7 +90,6 @@ article, aside, dialog, figcaption, figure, footer, header, hgroup, main, nav, s
 
 body {
   margin: 0;
-  font-family: "微软雅黑";
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
@@ -1103,7 +1102,7 @@ pre {
   border: 1px solid #f4f5f8; }
   .table-bordered th,
   .table-bordered td {
-      font-size: 6px;
+      font-size: 12px;
     border: 1px solid #f4f5f8; }
   .table-bordered thead th,
   .table-bordered thead td {
@@ -7520,7 +7519,6 @@ body {
   height: 100%;
   margin: 0px;
   padding: 0px;
-  font-size: 10px;
   font-weight: 300;
   font-family: "微软雅黑",Poppins;
   -ms-text-size-adjust: 100%;
