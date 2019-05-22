@@ -22,7 +22,7 @@ public class PermissionUtil {
             return;
         }
 
-        if (library.getCreator().equals(user.getUsername())) {
+        if (!library.getCreator().equals(user.getUsername())) {
             if(library.getType().equals(Constants.LIBRARY_TYPE_IRT)){
                 throw new UnauthorizedAccessException("redirect:/library/listIrt");
             }
@@ -46,7 +46,7 @@ public class PermissionUtil {
             return;
         }
 
-        if (project.getOwnerName().equals(user.getUsername())) {
+        if (!project.getOwnerName().equals(user.getUsername())) {
             throw new UnauthorizedAccessException("redirect:/project/list");
         } else {
             return;
@@ -63,7 +63,7 @@ public class PermissionUtil {
             return true;
         }
 
-        if (taskDO.getCreator().equals(user.getUsername())) {
+        if (!taskDO.getCreator().equals(user.getUsername())) {
             throw new UnauthorizedAccessException("redirect:/task/list");
         } else {
             return true;
@@ -80,7 +80,7 @@ public class PermissionUtil {
             return true;
         }
 
-        if (experiment.getOwnerName().equals(user.getUsername())) {
+        if (!experiment.getOwnerName().equals(user.getUsername())) {
             throw new UnauthorizedAccessException("redirect:/experiment/list");
         } else {
             return true;
@@ -97,7 +97,7 @@ public class PermissionUtil {
             return true;
         }
 
-        if (overview.getOwnerName().equals(user.getUsername())) {
+        if (!overview.getOwnerName().equals(user.getUsername())) {
             throw new UnauthorizedAccessException("redirect:/analyse/overview/list");
         } else {
             return true;

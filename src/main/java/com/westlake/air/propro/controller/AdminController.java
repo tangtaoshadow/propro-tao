@@ -228,7 +228,6 @@ public class AdminController extends BaseController {
             }
         }
 
-
         List<LibraryDO> libraries = libraryService.getAll(new LibraryQuery());
         for(LibraryDO library : libraries){
             if (!library.isDoPublic()){
@@ -244,9 +243,12 @@ public class AdminController extends BaseController {
         ProjectDO project = projectService.getById("5c737f50dfdfdd7abcdb1e4d").getModel();
         List<ExperimentDO> experiments = experimentService.getAllByProjectName(project.getName());
         for(ExperimentDO exp : experiments){
-            String jsonIndex = FileUtil.readFile(exp.getAirdIndexPath());
-            AirdInfo airdInfo = JSONObject.parseObject(jsonIndex, AirdInfo.class);
-            System.out.println(airdInfo.getRangeList());
+            if(exp.getWindowRanges().get(0).getMz() == null){
+                String jsonIndex = FileUtil.readFile(exp.getAirdIndexPath());
+                AirdInfo airdInfo = JSONObject.parseObject(jsonIndex, AirdInfo.class);
+                exp.setWindowRanges(airdInfo.getRangeList());
+                experimentService.update(exp);
+            }
         }
         return "Success";
     }

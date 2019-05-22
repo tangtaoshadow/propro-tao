@@ -195,67 +195,6 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     @Override
-    public List<WindowRange> getWindows(String expId) {
-        ScanIndexQuery query = new ScanIndexQuery();
-        query.setPageSize(1);
-        query.setMsLevel(1);
-        query.setExperimentId(expId);
-        List<ScanIndexDO> indexes = scanIndexDAO.getList(query);
-        if (indexes == null || indexes.size() == 0) {
-            return null;
-        }
-        //得到任意的一个MS1
-        ScanIndexDO ms1Index = indexes.get(0);
-        //根据这个MS1获取他下面所有的MS2
-        query.setMsLevel(2);
-        query.setParentNum(ms1Index.getNum());
-        List<ScanIndexDO> ms2Indexes = scanIndexDAO.getAll(query);
-        if (ms2Indexes == null || ms2Indexes.size() <= 1) {
-            return null;
-        }
-
-        List<WindowRange> windowRangs = new ArrayList<>();
-        float ms2Interval = Math.round((ms2Indexes.get(1).getRt() - ms2Indexes.get(0).getRt()) * 100000) / 100000f;
-        for (int i = 0; i < ms2Indexes.size(); i++) {
-            WindowRange rang = new WindowRange();
-            rang.setStart(ms2Indexes.get(i).getPrecursorMzStart());
-            rang.setEnd(ms2Indexes.get(i).getPrecursorMzEnd());
-            rang.setMz(ms2Indexes.get(i).getPrecursorMz());
-            rang.setInterval(ms2Interval);
-            windowRangs.add(rang);
-        }
-        return windowRangs;
-    }
-
-    @Override
-    public List<WindowRange> getPrmWindows(String expId) {
-        ScanIndexQuery query = new ScanIndexQuery();
-        query.setMsLevel(2);
-        query.setExperimentId(expId);
-        List<ScanIndexDO> ms2Indexes = scanIndexDAO.getAll(query);
-        if (ms2Indexes == null || ms2Indexes.size() == 0) {
-            return null;
-        }
-
-        List<WindowRange> windowRangs = new ArrayList<>();
-        List<Float> precursorUniqueMz = new ArrayList<>();
-
-        for(ScanIndexDO ms2Index : ms2Indexes){
-            Float precursorMz = ms2Index.getPrecursorMz();
-            if(precursorUniqueMz.contains(precursorMz)){
-                continue;
-            }
-            precursorUniqueMz.add(precursorMz);
-            WindowRange rang = new WindowRange();
-            rang.setStart(ms2Index.getPrecursorMzStart());
-            rang.setEnd(ms2Index.getPrecursorMzEnd());
-            rang.setMz(ms2Index.getPrecursorMz());
-            windowRangs.add(rang);
-        }
-        return windowRangs;
-    }
-
-    @Override
     public void uploadFile(ExperimentDO experimentDO, File file, TaskDO taskDO) {
         try {
             List<ScanIndexDO> indexList = null;

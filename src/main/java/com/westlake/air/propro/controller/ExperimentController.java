@@ -128,10 +128,10 @@ public class ExperimentController extends BaseController {
                @RequestParam(value = "projectName", required = true) String projectName,
                @RequestParam(value = "filePath", required = true) String filePath,
                @RequestParam(value = "description", required = false) String description,
-               @RequestParam(value = "overlap", required = false) Float overlap,
+//               @RequestParam(value = "overlap", required = false) Float overlap,
                RedirectAttributes redirectAttributes) {
 
-        model.addAttribute("overlap", overlap);
+//        model.addAttribute("overlap", overlap);
         model.addAttribute("name", name);
         model.addAttribute("description", description);
 
@@ -160,7 +160,7 @@ public class ExperimentController extends BaseController {
         experimentDO.setOwnerName(projectResult.getModel().getOwnerName());
         experimentDO.setProjectId(projectResult.getModel().getId());
         experimentDO.setDescription(description);
-        experimentDO.setOverlap(overlap);
+//        experimentDO.setOverlap(overlap);
         experimentDO.setFilePath(filePath);
         experimentDO.setProjectName(projectName);
         experimentDO.setType(projectResult.getModel().getType());
@@ -174,12 +174,7 @@ public class ExperimentController extends BaseController {
         TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_EXPERIMENT_FILE, experimentDO.getName());
         taskService.insert(taskDO);
 
-        if(FileUtil.isMzXMLFile(filePath)){
-            experimentTask.saveExperimentTask(experimentDO, file, taskDO);
-        }else{
-            experimentTask.saveAirdTask(experimentDO, file.getPath(), taskDO);
-        }
-
+        experimentTask.saveAirdTask(experimentDO, file.getPath(), taskDO);
         return "redirect:/task/detail/" + taskDO.getId();
     }
 
@@ -227,11 +222,7 @@ public class ExperimentController extends BaseController {
                 taskDO.finish(TaskStatus.FAILED.getName());
             } else {
                 taskService.insert(taskDO);
-                if(FileUtil.isMzXMLFile(file.getPath())){
-                    experimentTask.saveExperimentTask(experimentDO, file, taskDO);
-                }else{
-                    experimentTask.saveAirdTask(experimentDO, file.getPath(), taskDO);
-                }
+                experimentTask.saveAirdTask(experimentDO, file.getPath(), taskDO);
             }
         }
 
@@ -516,7 +507,7 @@ public class ExperimentController extends BaseController {
         ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
         PermissionUtil.check(expResult.getModel());
 
-        List<WindowRange> rangs = experimentService.getWindows(expId);
+        List<WindowRange> rangs = expResult.getModel().getWindowRanges();
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
 
         JSONObject res = new JSONObject();
@@ -536,6 +527,7 @@ public class ExperimentController extends BaseController {
         resultDO.setModel(res);
         return resultDO;
     }
+
     @RequestMapping(value = "/getPrmWindows")
     @ResponseBody
     ResultDO<JSONObject> getPrmWindows(Model model, @RequestParam(value = "expId", required = true) String expId){

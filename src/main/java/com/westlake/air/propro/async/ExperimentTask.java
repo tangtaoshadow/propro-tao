@@ -47,22 +47,6 @@ public class ExperimentTask extends BaseTask {
     AnalyseOverviewService analyseOverviewService;
 
     @Async(value = "uploadFileExecutor")
-    public void saveExperimentTask(ExperimentDO experimentDO, File file, TaskDO taskDO) {
-        taskDO.start();
-        taskDO.setStatus(TaskStatus.RUNNING.getName());
-        taskService.update(taskDO);
-        experimentService.uploadFile(experimentDO, file, taskDO);
-        List<WindowRange> rangs;
-        if (experimentDO.getType().equals(Constants.EXP_TYPE_PRM)) {
-            rangs = experimentService.getPrmWindows(experimentDO.getId());
-        } else {
-            rangs = experimentService.getWindows(experimentDO.getId());
-        }
-        experimentDO.setWindowRanges(rangs);
-        experimentService.update(experimentDO);
-    }
-
-    @Async(value = "uploadFileExecutor")
     public void saveAirdTask(ExperimentDO experimentDO, String airdFilePath, TaskDO taskDO) {
         taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());

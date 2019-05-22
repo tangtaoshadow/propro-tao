@@ -39,14 +39,6 @@ public interface ExperimentService {
 
     ResultDO<ExperimentDO> getByName(String name);
 
-    /**
-     * 获取一个实验的Swath Windows窗口信息
-     * @param expId
-     * @return
-     */
-    List<WindowRange> getWindows(String expId);
-    List<WindowRange> getPrmWindows(String expId);
-
     HashMap<Float, Float[]> getPrmRtWindowMap(String expId);
 
     void uploadFile(ExperimentDO experimentDO, File file, TaskDO taskDO);
