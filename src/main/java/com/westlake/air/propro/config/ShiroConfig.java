@@ -102,8 +102,8 @@ public class ShiroConfig {
 //		设置路径映射，注意这里要用LinkedHashMap 保证有序
         LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         filterChainDefinitionMap.put("/assets/**", "anon");
-//        filterChainDefinitionMap.put("/instances", "roles[admin]");
-//        filterChainDefinitionMap.put("/actuator/**", "roles[admin]");
+        filterChainDefinitionMap.put("/instances", "anon");
+        filterChainDefinitionMap.put("/actuator/**", "anon");
 //        filterChainDefinitionMap.put("/welcome", "anon");
         filterChainDefinitionMap.put("/login/**", "anon");
 //        filterChainDefinitionMap.put("/login/logout", "logout");
