@@ -6,6 +6,7 @@ import com.westlake.air.propro.domain.BaseDO;
 import com.westlake.air.propro.domain.bean.task.MachineInfo;
 import com.westlake.air.propro.domain.bean.task.TaskLog;
 import lombok.Data;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -26,7 +27,7 @@ public class TaskDO extends BaseDO {
 
     String name;
 
-    String creator = "Admin";
+    String creator;
 
     String status;
 
@@ -52,6 +53,7 @@ public class TaskDO extends BaseDO {
     }
 
     public TaskDO(TaskTemplate taskTemplate, String taskSuffixName) {
+        this.creator = ((UserDO)SecurityUtils.getSubject().getPrincipal()).getUsername();
         this.taskTemplate = taskTemplate.getName();
         this.status = TaskStatus.WAITING.getName();
         this.name = taskTemplate.getName() + "-" + taskSuffixName;
