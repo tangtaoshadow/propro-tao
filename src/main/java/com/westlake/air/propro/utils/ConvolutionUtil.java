@@ -140,7 +140,7 @@ public class ConvolutionUtil {
                 return tmp;
             }
         }
-        return rightIndex;
+        return leftIndex;
     }
 
     /**

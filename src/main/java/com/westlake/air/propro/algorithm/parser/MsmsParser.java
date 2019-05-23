@@ -137,13 +137,13 @@ public class MsmsParser extends BaseLibraryParser {
                 List<PeptideDO> irtPeps = peptideService.getAllByLibraryId(libraryId);
                 for (PeptideDO peptideDO: irtPeps){
                     if (libPepMap.containsKey(peptideDO.getPeptideRef())){
-                        libPepMap.get(peptideDO.getPeptideRef()).setProteinName("IRT");
+                        libPepMap.get(peptideDO.getPeptideRef()).setProteinName("iRT");
                         continue;
                     }
 //                    if (prmPeptideRefSet.contains(peptideDO.getPeptideRef())){
 //                        prmPeptideRefSet.remove(peptideDO.getPeptideRef());
 //                    }
-                    peptideDO.setProteinName("IRT");
+                    peptideDO.setProteinName("iRT");
                     peptideDO.setId(null);
                     peptideDO.setLibraryId(library.getId());
                     peptideDO.setLibraryName(library.getName());
@@ -192,19 +192,20 @@ public class MsmsParser extends BaseLibraryParser {
             String[] massArray = row[columnMap.get("masses")].split(";");
             setFragmentInfo(peptideDO, ionArray, row[columnMap.get("intensities")].split(";"), massArray);
             peptideDO.setMz(Double.parseDouble(row[columnMap.get("m/z")]));
-            peptideDO.setPeptideRef(peptideRef);
             String protName = row[columnMap.get("proteins")];
             peptideDO.setProteinName(protName.startsWith("sp|iRT") ? "iRT" : protName);
             peptideDO.setLibraryName(library.getName());
             peptideDO.setLibraryId(library.getId());
-            peptideDO.setFullName(peptideRef.split("_")[0]);
             peptideDO.setSequence(row[columnMap.get("sequence")]);
             peptideDO.setTargetSequence(row[columnMap.get("sequence")]);
             peptideDO.setIsDecoy(false);
             peptideDO.setCharge(Integer.parseInt(row[columnMap.get("charge")]));
             peptideDO.setRt(Double.parseDouble(row[columnMap.get("retentiontime")]));
             parseModification(peptideDO);
-            peptideDOMap.put(peptideRef, peptideDO);
+            verifyUnimod(ionArray, massArray, peptideDO.getUnimodMap(), peptideDO.getSequence(), Double.parseDouble(row[columnMap.get("mass")]));
+            peptideDO.setPeptideRef(getPeptideRef(peptideDO.getSequence(), peptideDO.getUnimodMap()));
+            peptideDO.setFullName(peptideDO.getPeptideRef().split("_")[0]);
+            peptideDOMap.put(peptideDO.getPeptideRef(), peptideDO);
         }
         return peptideDOMap;
     }
@@ -238,6 +239,18 @@ public class MsmsParser extends BaseLibraryParser {
             }
             peptideDO.getFragmentMap().put(cutInfo, fragmentInfo);
         }
+    }
+
+    private String getPeptideRef(String sequence, HashMap<Integer, String> unimodMap){
+        int length = sequence.length();
+        int offset = 0;
+        for (int i=0; i<length; i++){
+            if (unimodMap.get(i) != null){
+                sequence = sequence.substring(0, i + offset + 1) + "(UniMod:" + unimodMap.get(i) + ")" + sequence.substring(i + offset + 1);
+                offset = unimodMap.get(i).length() + 9;
+            }
+        }
+        return sequence;
     }
 
     public boolean verifyUnimod(String[] ionArray, String[] massArray, HashMap<Integer, String> unimodMap, String sequence, Double mass){

@@ -2,23 +2,29 @@ package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.westlake.air.propro.algorithm.fitting.LinearFitting;
 import com.westlake.air.propro.algorithm.learner.Airus;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.algorithm.merger.Tric;
 import com.westlake.air.propro.algorithm.parser.MsmsParser;
+import com.westlake.air.propro.algorithm.scorer.DIAScorer;
 import com.westlake.air.propro.constants.PositionType;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.dao.AnalyseDataDAO;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.bean.compressor.AirdInfo;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
+import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.algorithm.parser.MzXMLParser;
 import com.westlake.air.propro.service.*;
+import com.westlake.air.propro.service.impl.ScoreServiceImpl;
 import com.westlake.air.propro.utils.CompressUtil;
 import com.westlake.air.propro.utils.FileUtil;
+import com.westlake.air.propro.utils.MathUtil;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -68,6 +74,12 @@ public class TestController extends BaseController {
     Tric tric;
     @Autowired
     MsmsParser msmsParser;
+    @Autowired
+    ScoreServiceImpl scoreServiceImpl;
+    @Autowired
+    DIAScorer diaScorer;
+    @Autowired
+    LinearFitting linearFitting;
 
     public static float MZ_EXTRACT_WINDOW = 0.05f;
     public static float RT_EXTRACT_WINDOW = 1200f;
@@ -320,7 +332,7 @@ public class TestController extends BaseController {
         //only file decoy:     [514,247,190,66,50,36]
         //only propro target:  [1968,1239,890,175,126,75]
         //only propro decoy:   [333,185,185,152,162,200]
-        BufferedReader reader = new BufferedReader(new FileReader("C:/E1603141355_feature_alignment.tsv"));
+        BufferedReader reader = new BufferedReader(new FileReader("C:/E1603141345_feature_alignment.tsv"));
         reader.readLine();//第一行信息，为标题信息
         String line;
         HashMap<String, Integer> fileTargetMap = new HashMap<>();
@@ -492,4 +504,66 @@ public class TestController extends BaseController {
         System.out.println(isSuccess);
         return null;
     }
+
+    @RequestMapping("iRT1")
+    @ResponseBody
+    String iRTTest1(){
+        List<Pair<Double,Double>> pairs = new ArrayList<>();
+        pairs.add(Pair.of(10d,1000d));
+        pairs.add(Pair.of(20d,200d));
+        pairs.add(Pair.of(30d,900d));
+        pairs.add(Pair.of(40d,400d));
+        pairs.add(Pair.of(50d,500d));
+        pairs.add(Pair.of(60d,600d));
+        pairs.add(Pair.of(70d,700d));
+        pairs.add(Pair.of(80d,800d));
+        pairs.add(Pair.of(90d,900d));
+        pairs.add(Pair.of(100d,100d));
+        Long startTime = System.currentTimeMillis();
+        List<Pair<Double,Double>> pairsCorrected = scoreServiceImpl.chooseReliablePairs(pairs);
+        SlopeIntercept slopeIntercept = linearFitting.proproFit(pairsCorrected);
+        System.out.println(System.currentTimeMillis()-startTime);
+        return null;
+    }
+    @RequestMapping("iRT2")
+    @ResponseBody
+    String iRTTest2(){
+        List<Pair<Double,Double>> pairs = new ArrayList<>();
+        pairs.add(Pair.of(10d,100d));
+        pairs.add(Pair.of(20d,200d));
+        pairs.add(Pair.of(30d,300d));
+        pairs.add(Pair.of(40d,500d));
+        pairs.add(Pair.of(50d,500d));
+        pairs.add(Pair.of(60d,600d));
+        pairs.add(Pair.of(70d,700d));
+        Long startTime = System.currentTimeMillis();
+        List<Pair<Double,Double>> pairsCorrected = scoreServiceImpl.chooseReliablePairs(pairs);
+        SlopeIntercept slopeIntercept = linearFitting.proproFit(pairsCorrected);
+        double rsq = MathUtil.getRsq(pairs);
+        System.out.println(System.currentTimeMillis()-startTime);
+        return null;
+    }
+    @RequestMapping("byScore")
+    @ResponseBody
+    String byScoreTest(){
+        try{
+            String file = FileUtil.readFile("C:\\workspace\\java\\test\\byscore.txt");
+            String[] mz = file.split("\n")[0].split(",");
+            String[] intensity = file.split("\n")[1].split(",");
+            assert mz.length == intensity.length;
+            Float[] mzArray = new Float[mz.length];
+            Float[] intArray = new Float[mz.length];
+            for (int i=0; i<mz.length; i++){
+                mzArray[i] = Float.parseFloat(mz[i]);
+                intArray[i] = Float.parseFloat(intensity[i]);
+            }
+            FeatureScores featureScores = new FeatureScores();
+            diaScorer.calculateBYIonScore(mzArray, intArray, new HashMap<>(), "AAMTLVQSLLNGNK", 2, featureScores);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
 }

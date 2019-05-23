@@ -119,6 +119,60 @@ public class FragmentFactory {
         return bySeries;
     }
 
+    public BYSeries getBYSeriesOld(HashMap<Integer, String> unimodHashMap, String sequence, int charge) {
+
+        BYSeries bySeries = new BYSeries();
+
+        //bSeries 若要提高精度，提高json的精度
+        List<Double> bSeries = new ArrayList<>();
+        double monoWeight = Constants.PROTON_MASS_U * charge;
+        if (unimodHashMap != null && unimodHashMap.containsKey(0)) {
+            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(0));
+            if (unimod != null) {
+                monoWeight += unimod.getMonoMass();
+            }
+        }
+
+        char[] acidCodeArray = sequence.toCharArray();
+        for (int i = 0; i < acidCodeArray.length - 1; i++) {
+            AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCodeArray[i]));
+            if (aa == null) {
+                continue;
+            }
+            if (i == 0) {
+                monoWeight += aa.getMonoIsotopicMass();
+                continue;
+            }
+            monoWeight += aa.getMonoIsotopicMass();
+            bSeries.add(monoWeight);
+        }
+
+        //ySeries
+        List<Double> ySeries = new ArrayList<>();
+        monoWeight = Constants.PROTON_MASS_U * charge;
+        if (unimodHashMap != null && unimodHashMap.containsKey(acidCodeArray.length - 1)) {
+            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(acidCodeArray.length - 1));
+            if (unimod != null) {
+                monoWeight += unimod.getMonoMass();
+            }
+        }
+
+        double h2oWeight = elementsDAO.getMonoWeight(ElementsDAO.H2O);
+        for (int i = acidCodeArray.length - 1; i > 0; i--) {
+            AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCodeArray[i]));
+            if (aa == null) {
+                continue;
+            }
+            monoWeight += aa.getMonoIsotopicMass();
+            ySeries.add(monoWeight + h2oWeight);
+        }
+
+        bySeries.setBSeries(bSeries);
+        bySeries.setYSeries(ySeries);
+
+        return bySeries;
+    }
+
     /**
      * 标准库中的PeptideDO对象生成该肽段所有B,Y类型的排列组合的离子MZ的Map,key为cutInfo
      *

@@ -1,6 +1,7 @@
 package com.westlake.air.propro.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.westlake.air.propro.algorithm.fitting.LinearFitting;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.ScoreType;
@@ -29,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.io.RandomAccessFile;
 import java.util.*;
 
@@ -84,6 +84,8 @@ public class ScoreServiceImpl implements ScoreService {
     ConfigDAO configDAO;
     @Autowired
     AirdFileParser airdFileParser;
+    @Autowired
+    LinearFitting linearFitting;
 
     @Override
     public ResultDO<SlopeIntercept> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing) {
@@ -108,15 +110,23 @@ public class ScoreServiceImpl implements ScoreService {
         }
 
         List<Pair<Double,Double>> pairs = simpleFindBestFeature(scoreRtList, compoundRt);
-        List<Pair<Double,Double>> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE);
+//        List<Pair<Double,Double>> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE);
+        List<Pair<Double,Double>> pairsCorrected = chooseReliablePairs(pairs);
+        int choosedPointCount = pairsCorrected.size();
+        if (choosedPointCount <= 3){
 
-        if (pairsCorrected == null || pairsCorrected.size() < 2) {
-            logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
-            resultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
-            return resultDO;
+        }else if (choosedPointCount <= pairs.size()/2){
+
         }
-
-        SlopeIntercept slopeIntercept = fitRTPairs(pairsCorrected);
+        System.out.println("choose finish ------------------------");
+//        if (pairsCorrected == null || pairsCorrected.size() < 2) {
+//            logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
+//            resultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
+//            return resultDO;
+//        }
+//
+//        SlopeIntercept slopeIntercept = fitRTPairs(pairsCorrected);
+        SlopeIntercept slopeIntercept = linearFitting.proproFit(pairsCorrected);
         resultDO.setSuccess(true);
         resultDO.setModel(slopeIntercept);
 
@@ -420,23 +430,22 @@ public class ScoreServiceImpl implements ScoreService {
         return binFilled >= minBinsFilled;
     }
 
-    /**
-     * 最小二乘法线性拟合RTPairs
-     *
-     * @param rtPairs <exp_rt, theor_rt>
-     *                Pair<TheoryRt, ExpRt>
-     * @return 斜率和截距
-     */
-    private SlopeIntercept fitRTPairs(List<Pair<Double,Double>> rtPairs) {
-        WeightedObservedPoints obs = new WeightedObservedPoints();
-        for (Pair<Double,Double> rtPair : rtPairs) {
-            obs.add(rtPair.getRight(), rtPair.getLeft());
+
+
+    public List<Pair<Double,Double>> chooseReliablePairs(List<Pair<Double,Double>> rtPairs){
+        SlopeIntercept slopeIntercept = linearFitting.huberFit(rtPairs);
+        TreeMap<Double, Pair<Double,Double>> errorMap = new TreeMap<>();
+        for (Pair<Double, Double> pair: rtPairs){
+            errorMap.put(Math.abs(pair.getRight() * slopeIntercept.getSlope() + slopeIntercept.getIntercept() - pair.getLeft()), pair);
         }
-        PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
-        double[] coeff = fitter.fit(obs.toList());
-        SlopeIntercept slopeIntercept = new SlopeIntercept();
-        slopeIntercept.setSlope(coeff[1]);
-        slopeIntercept.setIntercept(coeff[0]);
-        return slopeIntercept;
+        List<Pair<Double,Double>> sortedPairs = new ArrayList<>(errorMap.values());
+        int cutLine = 2;
+        for (int i = sortedPairs.size(); i > 2; i--){
+            if (MathUtil.getRsq(sortedPairs.subList(0,i)) >= 0.95){
+                cutLine = i;
+                break;
+            }
+        }
+        return sortedPairs.subList(0,cutLine);
     }
 }

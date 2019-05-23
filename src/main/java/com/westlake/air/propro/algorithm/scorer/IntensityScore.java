@@ -25,15 +25,14 @@ public class IntensityScore {
         return score;
     }
 
-    private double getSlope(List<Double> libIntList, List<Double> expIntList){
-        double initSlope = MathUtil.sum(expIntList) / MathUtil.sum(libIntList);
-//        double loss = getLoss(libIntList, expIntList, initSlope);
-        double slope = initSlope;
+    public double getSlope(List<Double> libIntList, List<Double> expIntList){
+        double slope = MathUtil.sum(expIntList) / MathUtil.sum(libIntList);
+//        double loss = getLoss(libIntList, expIntList, slope);
         double lastSlope = Double.MAX_VALUE;
 //        System.out.println("Slope: "+slope+", loss: " + loss);
         while (Math.abs(slope - lastSlope) >= slopeThreshold) {
             lastSlope = slope;
-            slope = gd(libIntList, expIntList, slope);
+            slope = updateSlope(libIntList, expIntList, slope);
 //            loss = getLoss(libIntList, expIntList, slope);
 //            System.out.println("Slope: "+slope+", loss: " + loss);
         }
@@ -80,7 +79,7 @@ public class IntensityScore {
         return deltaLoss/deltaSlope/2d;
     }
 
-    private double gd(List<Double> libIntList, List<Double> expIntList, double slope){
+    private double updateSlope(List<Double> libIntList, List<Double> expIntList, double slope){
         double gradient = getGradient(libIntList, expIntList, slope);
 //        slope -= gradient * slopeStep;
         slope -= Math.random() * gradient * slopeStep;
