@@ -1,12 +1,11 @@
-package com.westlake.air.propro.algorithm.feature;
+package com.westlake.air.propro.algorithm.peak;
 
 import com.westlake.air.propro.domain.bean.analyse.*;
 import com.westlake.air.propro.domain.bean.score.IonPeak;
 import com.westlake.air.propro.domain.bean.score.PeptideFeature;
 import com.westlake.air.propro.domain.bean.score.PeakGroup;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
-import com.westlake.air.propro.algorithm.rtnormalizer.ChromatogramFilter;
-import com.westlake.air.propro.algorithm.rtnormalizer.RtNormalizerScorer;
+import com.westlake.air.propro.algorithm.feature.RtNormalizerScorer;
 import com.westlake.air.propro.service.AnalyseDataService;
 import com.westlake.air.propro.service.AnalyseOverviewService;
 import com.westlake.air.propro.service.TaskService;
@@ -49,8 +48,6 @@ public class FeatureExtractor {
     RtNormalizerScorer RTNormalizerScorer;
     @Autowired
     TaskService taskService;
-    @Autowired
-    ChromatogramFilter chromatogramFilter;
 
     /**
      *

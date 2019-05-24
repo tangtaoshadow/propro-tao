@@ -1,9 +1,7 @@
-package com.westlake.air.propro.algorithm.rtnormalizer;
+package com.westlake.air.propro.algorithm.feature;
 
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.domain.bean.score.*;
-import com.westlake.air.propro.algorithm.scorer.ChromatographicScorer;
-import com.westlake.air.propro.algorithm.scorer.LibraryScorer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

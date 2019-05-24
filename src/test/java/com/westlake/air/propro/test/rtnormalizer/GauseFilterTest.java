@@ -3,7 +3,7 @@ package com.westlake.air.propro.test.rtnormalizer;
 import com.westlake.air.propro.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.test.BaseTest;
-import com.westlake.air.propro.algorithm.feature.GaussFilter;
+import com.westlake.air.propro.algorithm.peak.GaussFilter;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

@@ -1,4 +1,4 @@
-package com.westlake.air.propro.algorithm.scorer;
+package com.westlake.air.propro.algorithm.feature;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;

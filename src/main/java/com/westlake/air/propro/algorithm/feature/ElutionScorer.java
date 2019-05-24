@@ -1,4 +1,4 @@
-package com.westlake.air.propro.algorithm.scorer;
+package com.westlake.air.propro.algorithm.feature;
 
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ScoreType;

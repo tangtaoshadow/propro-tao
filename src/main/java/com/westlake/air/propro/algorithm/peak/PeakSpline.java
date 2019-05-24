@@ -1,4 +1,4 @@
-package com.westlake.air.propro.algorithm.feature;
+package com.westlake.air.propro.algorithm.peak;
 
 import com.westlake.air.propro.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.propro.utils.MathUtil;

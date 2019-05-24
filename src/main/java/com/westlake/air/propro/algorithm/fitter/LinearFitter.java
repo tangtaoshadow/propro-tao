@@ -1,4 +1,4 @@
-package com.westlake.air.propro.algorithm.fitting;
+package com.westlake.air.propro.algorithm.fitter;
 
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import org.apache.commons.lang3.tuple.Pair;
@@ -12,8 +12,8 @@ import java.util.List;
  * Created by Nico Wang
  * Time: 2019-05-23 22:34
  */
-@Component("linearFitting")
-public class LinearFitting {
+@Component("linearFitter")
+public class LinearFitter {
 
     /**
      * 最小二乘法线性拟合RTPairs

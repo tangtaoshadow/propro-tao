@@ -1,4 +1,4 @@
-package com.westlake.air.propro.algorithm.scorer;
+package com.westlake.air.propro.algorithm.feature;
 
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ScoreType;
@@ -52,7 +52,7 @@ public class LibraryScorer {
         }
 
         if (scoreTypes == null || scoreTypes.contains(ScoreType.NewScore.getTypeName())){
-            scores.put(ScoreType.NewScore, new IntensityScore().getIntensityScore(normedLibInt, normedExpInt));
+            scores.put(ScoreType.NewScore, new TestScore().getIntensityScore(normedLibInt, normedExpInt));
         }
 
         double experimentSum = 0.0d, librarySum = 0.0d, experiment2Sum = 0.0d, library2Sum = 0.0d, dotprod = 0.0d;

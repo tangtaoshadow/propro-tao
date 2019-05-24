@@ -2,12 +2,12 @@ package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.westlake.air.propro.algorithm.fitting.LinearFitting;
+import com.westlake.air.propro.algorithm.fitter.LinearFitter;
 import com.westlake.air.propro.algorithm.learner.Airus;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.algorithm.merger.Tric;
 import com.westlake.air.propro.algorithm.parser.MsmsParser;
-import com.westlake.air.propro.algorithm.scorer.DIAScorer;
+import com.westlake.air.propro.algorithm.feature.DIAScorer;
 import com.westlake.air.propro.constants.PositionType;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.dao.AnalyseDataDAO;
@@ -79,7 +79,7 @@ public class TestController extends BaseController {
     @Autowired
     DIAScorer diaScorer;
     @Autowired
-    LinearFitting linearFitting;
+    LinearFitter linearFitter;
 
     public static float MZ_EXTRACT_WINDOW = 0.05f;
     public static float RT_EXTRACT_WINDOW = 1200f;
@@ -521,7 +521,7 @@ public class TestController extends BaseController {
         pairs.add(Pair.of(100d,100d));
         Long startTime = System.currentTimeMillis();
         List<Pair<Double,Double>> pairsCorrected = scoreServiceImpl.chooseReliablePairs(pairs);
-        SlopeIntercept slopeIntercept = linearFitting.proproFit(pairsCorrected);
+        SlopeIntercept slopeIntercept = linearFitter.proproFit(pairsCorrected);
         System.out.println(System.currentTimeMillis()-startTime);
         return null;
     }
@@ -538,7 +538,7 @@ public class TestController extends BaseController {
         pairs.add(Pair.of(70d,700d));
         Long startTime = System.currentTimeMillis();
         List<Pair<Double,Double>> pairsCorrected = scoreServiceImpl.chooseReliablePairs(pairs);
-        SlopeIntercept slopeIntercept = linearFitting.proproFit(pairsCorrected);
+        SlopeIntercept slopeIntercept = linearFitter.proproFit(pairsCorrected);
         double rsq = MathUtil.getRsq(pairs);
         System.out.println(System.currentTimeMillis()-startTime);
         return null;

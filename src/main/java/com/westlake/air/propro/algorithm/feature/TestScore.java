@@ -1,4 +1,4 @@
-package com.westlake.air.propro.algorithm.scorer;
+package com.westlake.air.propro.algorithm.feature;
 
 import com.westlake.air.propro.utils.MathUtil;
 
@@ -9,7 +9,7 @@ import java.util.List;
  * Created by Nico Wang
  * Time: 2019-03-01 20:08
  */
-public class IntensityScore {
+public class TestScore {
     private double delta = 0.1d;
     private double deltaSlope = 0.01d;
     private double slopeStep = 0.2d;

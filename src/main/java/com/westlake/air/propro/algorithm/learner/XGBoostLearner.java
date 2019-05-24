@@ -18,7 +18,7 @@ import java.util.*;
  * Created by Nico Wang
  * Time: 2018-12-07 10:21
  */
-@Component
+@Component("xgboostLearner")
 public class XGBoostLearner extends Learner {
 
     Map<String, Object> params = new HashMap<String, Object>() {

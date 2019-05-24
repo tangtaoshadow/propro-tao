@@ -1,9 +1,8 @@
 package com.westlake.air.propro.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.westlake.air.propro.algorithm.fitting.LinearFitting;
+import com.westlake.air.propro.algorithm.fitter.LinearFitter;
 import com.westlake.air.propro.constants.Constants;
-import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.domain.ResultDO;
@@ -13,11 +12,10 @@ import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.bean.score.*;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.query.PeptideQuery;
-import com.westlake.air.propro.algorithm.feature.*;
+import com.westlake.air.propro.algorithm.peak.*;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
-import com.westlake.air.propro.algorithm.rtnormalizer.ChromatogramFilter;
-import com.westlake.air.propro.algorithm.rtnormalizer.RtNormalizerScorer;
-import com.westlake.air.propro.algorithm.scorer.*;
+import com.westlake.air.propro.algorithm.feature.RtNormalizerScorer;
+import com.westlake.air.propro.algorithm.feature.*;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.AnalyseDataUtil;
 import com.westlake.air.propro.utils.ByteUtil;
@@ -65,8 +63,6 @@ public class ScoreServiceImpl implements ScoreService {
     @Autowired
     TaskService taskService;
     @Autowired
-    ChromatogramFilter chromatogramFilter;
-    @Autowired
     FeatureExtractor featureExtractor;
     @Autowired
     ExperimentService experimentService;
@@ -85,7 +81,7 @@ public class ScoreServiceImpl implements ScoreService {
     @Autowired
     AirdFileParser airdFileParser;
     @Autowired
-    LinearFitting linearFitting;
+    LinearFitter linearFitter;
 
     @Override
     public ResultDO<SlopeIntercept> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing) {
@@ -126,7 +122,7 @@ public class ScoreServiceImpl implements ScoreService {
 //        }
 //
 //        SlopeIntercept slopeIntercept = fitRTPairs(pairsCorrected);
-        SlopeIntercept slopeIntercept = linearFitting.proproFit(pairsCorrected);
+        SlopeIntercept slopeIntercept = linearFitter.proproFit(pairsCorrected);
         resultDO.setSuccess(true);
         resultDO.setModel(slopeIntercept);
 
@@ -433,7 +429,7 @@ public class ScoreServiceImpl implements ScoreService {
 
 
     public List<Pair<Double,Double>> chooseReliablePairs(List<Pair<Double,Double>> rtPairs){
-        SlopeIntercept slopeIntercept = linearFitting.huberFit(rtPairs);
+        SlopeIntercept slopeIntercept = linearFitter.huberFit(rtPairs);
         TreeMap<Double, Pair<Double,Double>> errorMap = new TreeMap<>();
         for (Pair<Double, Double> pair: rtPairs){
             errorMap.put(Math.abs(pair.getRight() * slopeIntercept.getSlope() + slopeIntercept.getIntercept() - pair.getLeft()), pair);

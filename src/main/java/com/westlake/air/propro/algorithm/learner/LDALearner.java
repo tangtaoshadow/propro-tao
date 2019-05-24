@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Set;
 
-@Component
+@Component("ldaLearner")
 public class LDALearner extends Learner {
 
     public final Logger logger = LoggerFactory.getLogger(LDALearner.class);
