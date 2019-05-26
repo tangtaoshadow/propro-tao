@@ -115,7 +115,7 @@ public class ScoreServiceImpl implements ScoreService {
 //        }
 
 //        SlopeIntercept slopeIntercept = linearFitter.leastSquare(pairsCorrected);
-        List<Pair<Double,Double>> pairsCorrected = chooseReliablePairs(pairs);
+        List<Pair<Double,Double>> pairsCorrected = chooseReliablePairs(pairs, 5d);
         int choosedPointCount = pairsCorrected.size();
         if (choosedPointCount <= 3){
 
@@ -123,7 +123,7 @@ public class ScoreServiceImpl implements ScoreService {
 
         }
         System.out.println("choose finish ------------------------");
-        SlopeIntercept slopeIntercept = linearFitter.proproFit(pairsCorrected);
+        SlopeIntercept slopeIntercept = linearFitter.proproFit(pairsCorrected, 5d);
         resultDO.setSuccess(true);
         resultDO.setModel(slopeIntercept);
 
@@ -429,8 +429,8 @@ public class ScoreServiceImpl implements ScoreService {
 
 
 
-    public List<Pair<Double,Double>> chooseReliablePairs(List<Pair<Double,Double>> rtPairs){
-        SlopeIntercept slopeIntercept = linearFitter.huberFit(rtPairs);
+    private List<Pair<Double,Double>> chooseReliablePairs(List<Pair<Double,Double>> rtPairs, double delta){
+        SlopeIntercept slopeIntercept = linearFitter.huberFit(rtPairs, delta);
         TreeMap<Double, Pair<Double,Double>> errorMap = new TreeMap<>();
         for (Pair<Double, Double> pair: rtPairs){
             errorMap.put(Math.abs(pair.getRight() * slopeIntercept.getSlope() + slopeIntercept.getIntercept() - pair.getLeft()), pair);

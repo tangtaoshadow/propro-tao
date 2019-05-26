@@ -75,8 +75,6 @@ public class TestController extends BaseController {
     @Autowired
     MsmsParser msmsParser;
     @Autowired
-    ScoreServiceImpl scoreServiceImpl;
-    @Autowired
     DIAScorer diaScorer;
     @Autowired
     LinearFitter linearFitter;
@@ -505,44 +503,6 @@ public class TestController extends BaseController {
         return null;
     }
 
-    @RequestMapping("iRT1")
-    @ResponseBody
-    String iRTTest1(){
-        List<Pair<Double,Double>> pairs = new ArrayList<>();
-        pairs.add(Pair.of(10d,1000d));
-        pairs.add(Pair.of(20d,200d));
-        pairs.add(Pair.of(30d,900d));
-        pairs.add(Pair.of(40d,400d));
-        pairs.add(Pair.of(50d,500d));
-        pairs.add(Pair.of(60d,600d));
-        pairs.add(Pair.of(70d,700d));
-        pairs.add(Pair.of(80d,800d));
-        pairs.add(Pair.of(90d,900d));
-        pairs.add(Pair.of(100d,100d));
-        Long startTime = System.currentTimeMillis();
-        List<Pair<Double,Double>> pairsCorrected = scoreServiceImpl.chooseReliablePairs(pairs);
-        SlopeIntercept slopeIntercept = linearFitter.proproFit(pairsCorrected);
-        System.out.println(System.currentTimeMillis()-startTime);
-        return null;
-    }
-    @RequestMapping("iRT2")
-    @ResponseBody
-    String iRTTest2(){
-        List<Pair<Double,Double>> pairs = new ArrayList<>();
-        pairs.add(Pair.of(10d,100d));
-        pairs.add(Pair.of(20d,200d));
-        pairs.add(Pair.of(30d,300d));
-        pairs.add(Pair.of(40d,500d));
-        pairs.add(Pair.of(50d,500d));
-        pairs.add(Pair.of(60d,600d));
-        pairs.add(Pair.of(70d,700d));
-        Long startTime = System.currentTimeMillis();
-        List<Pair<Double,Double>> pairsCorrected = scoreServiceImpl.chooseReliablePairs(pairs);
-        SlopeIntercept slopeIntercept = linearFitter.proproFit(pairsCorrected);
-        double rsq = MathUtil.getRsq(pairs);
-        System.out.println(System.currentTimeMillis()-startTime);
-        return null;
-    }
     @RequestMapping("byScore")
     @ResponseBody
     String byScoreTest(){
