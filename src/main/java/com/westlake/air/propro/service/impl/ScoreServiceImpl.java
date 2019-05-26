@@ -3,7 +3,6 @@ package com.westlake.air.propro.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.propro.algorithm.fitter.LinearFitter;
 import com.westlake.air.propro.constants.Constants;
-import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.domain.ResultDO;
@@ -92,12 +91,19 @@ public class ScoreServiceImpl implements ScoreService {
         List<List<ScoreRtPair>> scoreRtList = new ArrayList<>();
         List<Double> compoundRt = new ArrayList<>();
         ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
+        double minGroupRt = Double.MAX_VALUE, maxGroupRt = Double.MIN_VALUE;
         for (AnalyseDataDO dataDO : dataList) {
             PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(dataDO, ttMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()).buildIntensityMap(), sigmaSpacing);
             if (!peptideFeature.isFeatureFound()) {
                 continue;
             }
             double groupRt = dataDO.getRt();
+            if (groupRt > maxGroupRt){
+                maxGroupRt = groupRt;
+            }
+            if (groupRt < minGroupRt){
+                minGroupRt = groupRt;
+            }
             List<ScoreRtPair> scoreRtPairs = rtNormalizerScorer.score(peptideFeature.getPeakGroupList(), peptideFeature.getNormedLibIntMap(), groupRt);
             if (scoreRtPairs.size() == 0){
                 continue;
@@ -115,7 +121,8 @@ public class ScoreServiceImpl implements ScoreService {
 //        }
 
 //        SlopeIntercept slopeIntercept = linearFitter.leastSquare(pairsCorrected);
-        List<Pair<Double,Double>> pairsCorrected = chooseReliablePairs(pairs, 5d);
+        double delta = (maxGroupRt - minGroupRt)/30d;
+        List<Pair<Double,Double>> pairsCorrected = chooseReliablePairs(pairs, delta);
         int choosedPointCount = pairsCorrected.size();
         if (choosedPointCount <= 3){
 
@@ -123,7 +130,7 @@ public class ScoreServiceImpl implements ScoreService {
 
         }
         System.out.println("choose finish ------------------------");
-        SlopeIntercept slopeIntercept = linearFitter.proproFit(pairsCorrected, 5d);
+        SlopeIntercept slopeIntercept = linearFitter.proproFit(pairsCorrected, delta);
         resultDO.setSuccess(true);
         resultDO.setModel(slopeIntercept);
 
