@@ -3,6 +3,7 @@ package com.westlake.air.propro.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.propro.algorithm.fitter.LinearFitter;
 import com.westlake.air.propro.constants.Constants;
+import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.domain.ResultDO;
@@ -107,6 +108,13 @@ public class ScoreServiceImpl implements ScoreService {
 
         List<Pair<Double,Double>> pairs = simpleFindBestFeature(scoreRtList, compoundRt);
 //        List<Pair<Double,Double>> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE);
+//        if (pairsCorrected == null || pairsCorrected.size() < 2) {
+//            logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
+//            resultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
+//            return resultDO;
+//        }
+
+//        SlopeIntercept slopeIntercept = linearFitter.leastSquare(pairsCorrected);
         List<Pair<Double,Double>> pairsCorrected = chooseReliablePairs(pairs);
         int choosedPointCount = pairsCorrected.size();
         if (choosedPointCount <= 3){
@@ -115,13 +123,6 @@ public class ScoreServiceImpl implements ScoreService {
 
         }
         System.out.println("choose finish ------------------------");
-//        if (pairsCorrected == null || pairsCorrected.size() < 2) {
-//            logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
-//            resultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
-//            return resultDO;
-//        }
-//
-//        SlopeIntercept slopeIntercept = fitRTPairs(pairsCorrected);
         SlopeIntercept slopeIntercept = linearFitter.proproFit(pairsCorrected);
         resultDO.setSuccess(true);
         resultDO.setModel(slopeIntercept);

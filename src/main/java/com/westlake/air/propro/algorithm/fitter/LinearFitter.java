@@ -58,7 +58,7 @@ public class LinearFitter {
         return slopeIntercept;
     }
     private double getHuberLoss(List<Pair<Double, Double>> rtPairs, double slope, double intercept){
-        double loss = 0d, delta = 1d;
+        double loss = 0d, delta = 5d;
         for (Pair<Double,Double> rtPair: rtPairs){
             double tempDiff = Math.abs(rtPair.getRight() * slope + intercept - rtPair.getLeft());
             if (tempDiff <= delta){
@@ -71,7 +71,7 @@ public class LinearFitter {
     }
 
     private double getProproLoss(List<Pair<Double, Double>> rtPairs, double slope, double intercept){
-        double loss = 0d, delta = 1d;
+        double loss = 0d, delta = 5d;
         for (Pair<Double,Double> rtPair: rtPairs){
             double tempDiff = Math.abs(rtPair.getRight() * slope + intercept - rtPair.getLeft());
             if (tempDiff <= delta){
