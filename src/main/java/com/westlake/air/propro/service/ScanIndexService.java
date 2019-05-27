@@ -6,6 +6,9 @@ import com.westlake.air.propro.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.propro.domain.db.ScanIndexDO;
 import com.westlake.air.propro.domain.query.ScanIndexQuery;
 
+import java.io.File;
+import java.io.RandomAccessFile;
+import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
@@ -39,8 +42,6 @@ public interface ScanIndexService {
 
     ResultDO deleteAllByExperimentId(String experimentId);
 
-    ResultDO deleteAllSwathIndexByExperimentId(String experimentId);
-
     ResultDO<ScanIndexDO> getById(String id);
 
     /**
@@ -57,4 +58,6 @@ public interface ScanIndexService {
      * @return
      */
     ScanIndexDO getSwathIndex(String expId, Float targetPrecursorMz);
+
+    MzIntensityPairs getSpectrum(ScanIndexDO scanIndex, RandomAccessFile raf, ByteOrder byteOrder);
 }
