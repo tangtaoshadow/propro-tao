@@ -185,13 +185,13 @@ public class ProjectController extends BaseController {
         }
         int count = 0;
         for (ExperimentDO exp : expList) {
-            if (exp.getSlope() == null || exp.getIntercept() == null) {
+//            if (exp.getSlope() == null || exp.getIntercept() == null) {
                 TaskDO taskDO = new TaskDO(TaskTemplate.IRT, exp.getName() + ":" + iRtLibraryId);
                 taskService.insert(taskDO);
                 SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);
                 experimentTask.convAndIrt(exp, iRtLibraryId, mzExtractWindow, sigmaSpacing, taskDO);
                 count++;
-            }
+//            }
         }
         if (count == 0) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.ALL_EXPERIMENTS_UNDER_THIS_PROJECT_ARE_ALREADY_COMPUTE_IRT);

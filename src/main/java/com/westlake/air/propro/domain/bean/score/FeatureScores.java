@@ -6,8 +6,8 @@ import lombok.Data;
 import java.util.HashMap;
 
 /**
- * Created by Nico Wang Ruimin
  * Time: 2018-08-05 22:42
+ * @author Nico Wang Ruimin
  */
 @Data
 public class FeatureScores {
@@ -38,7 +38,9 @@ public class FeatureScores {
      * scores.weighted_massdev_score 按spectrum intensity加权的mz与product mz的偏差ppm百分比按libraryIntensity加权之和
      */
 
-    //检测出的该峰的峰顶的rt时间
+    /**
+     * 检测出的该峰的峰顶的rt时间
+     */
     Double rt;
 
     //rt begin;rt end
@@ -50,7 +52,10 @@ public class FeatureScores {
     //HashMap --> String
     String fragIntFeature;
 
-    //key为子分数类型
+    /**
+     * key为子分数类型
+     * @see ScoreType
+     */
     HashMap<String, Double> scoresMap;
 
     Double finalScore;

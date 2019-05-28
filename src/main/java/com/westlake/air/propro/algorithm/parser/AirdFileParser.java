@@ -67,7 +67,7 @@ public class AirdFileParser extends BaseParser {
      * @param intPos
      * @return
      */
-    public MzIntensityPairs parseValue(RandomAccessFile raf, Position mzPos, Position intPos,ByteOrder order) {
+    public MzIntensityPairs parseValue(RandomAccessFile raf, Position mzPos, Position intPos, ByteOrder order) {
 
         try {
             raf.seek(mzPos.getStart());

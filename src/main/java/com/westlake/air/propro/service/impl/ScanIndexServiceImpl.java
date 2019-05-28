@@ -1,13 +1,14 @@
 package com.westlake.air.propro.service.impl;
 
+import com.westlake.air.propro.algorithm.parser.AirdFileParser;
+import com.westlake.air.propro.constants.PositionType;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.dao.ScanIndexDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
-import com.westlake.air.propro.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.propro.domain.db.ScanIndexDO;
+import com.westlake.air.propro.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.propro.domain.query.ScanIndexQuery;
-import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.service.ScanIndexService;
 import com.westlake.air.propro.utils.ConvolutionUtil;
 import org.slf4j.Logger;
@@ -15,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.RandomAccessFile;
+import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
@@ -135,16 +138,6 @@ public class ScanIndexServiceImpl implements ScanIndexService {
     }
 
     @Override
-    public ResultDO deleteAllSwathIndexByExperimentId(String experimentId) {
-        try {
-            scanIndexDAO.deleteAllSwathIndexByExperimentId(experimentId);
-            return new ResultDO(true);
-        } catch (Exception e) {
-            return ResultDO.buildError(ResultCode.DELETE_ERROR);
-        }
-    }
-
-    @Override
     public ResultDO<ScanIndexDO> getById(String id) {
         try {
             ScanIndexDO scanIndexDO = scanIndexDAO.getById(id);
@@ -181,5 +174,10 @@ public class ScanIndexServiceImpl implements ScanIndexService {
         ScanIndexDO index = scanIndexDAO.getOne(query);
 
         return index;
+    }
+
+    @Override
+    public MzIntensityPairs getSpectrum(ScanIndexDO scanIndex, RandomAccessFile raf, ByteOrder byteOrder) {
+        return airdFileParser.parseValue(raf, scanIndex.getPositionMap().get(PositionType.AIRD_MZ), scanIndex.getPositionMap().get(PositionType.AIRD_INTENSITY), byteOrder);
     }
 }

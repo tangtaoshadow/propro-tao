@@ -2,25 +2,29 @@ package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.westlake.air.propro.algorithm.fitter.LinearFitter;
-import com.westlake.air.propro.algorithm.learner.Airus;
-import com.westlake.air.propro.algorithm.formula.FragmentFactory;
-import com.westlake.air.propro.algorithm.merger.Tric;
-import com.westlake.air.propro.algorithm.parser.MsmsParser;
+import com.google.common.collect.Lists;
 import com.westlake.air.propro.algorithm.feature.DIAScorer;
+import com.westlake.air.propro.algorithm.fitter.LinearFitter;
+import com.westlake.air.propro.algorithm.formula.FragmentFactory;
+import com.westlake.air.propro.algorithm.learner.Airus;
+import com.westlake.air.propro.algorithm.merger.Tric;
+import com.westlake.air.propro.algorithm.parser.AirdFileParser;
+import com.westlake.air.propro.algorithm.parser.MsmsParser;
+import com.westlake.air.propro.algorithm.parser.MzXMLParser;
 import com.westlake.air.propro.constants.PositionType;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.dao.AnalyseDataDAO;
+import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.bean.compressor.AirdInfo;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
-import com.westlake.air.propro.domain.db.*;
-import com.westlake.air.propro.algorithm.parser.AirdFileParser;
-import com.westlake.air.propro.algorithm.parser.MzXMLParser;
+import com.westlake.air.propro.domain.db.AnalyseDataDO;
+import com.westlake.air.propro.domain.db.ExperimentDO;
+import com.westlake.air.propro.domain.db.ScanIndexDO;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.service.impl.ScoreServiceImpl;
-import com.westlake.air.propro.utils.CompressUtil;
+import com.westlake.air.propro.utils.ByteUtil;
 import com.westlake.air.propro.utils.FileUtil;
 import com.westlake.air.propro.utils.MathUtil;
 import org.apache.commons.codec.binary.Base64;
@@ -88,50 +92,78 @@ public class TestController extends BaseController {
     @ResponseBody
     String test(Model model, RedirectAttributes redirectAttributes) {
 
+        /**
+         * 5c9c2269dfdfdd356065d2ac
+         * mz unique:456789
+         * intensity unique:45366
+         *
+         * 5c9c226adfdfdd356065d2ae
+         * mz unique:456790
+         * intensity unique:46730
+         *
+         * 5c9c226adfdfdd356065d2b2
+         * mz unique:456790
+         * intensity unique:48352
+         *
+         * 5c9c226adfdfdd356065d2b0
+         * mz unique:456791
+         * intensity unique:46707
+         *
+         * 5c9c226adfdfdd356065d2b6
+         * mz unique:456790
+         * intensity unique:48202
+         */
+        HashSet<Float> uniqueMz = new HashSet<>();
+        HashSet<Float> uniqueIntensity = new HashSet<>();
+        test(uniqueMz, uniqueIntensity, "5ce7814620fa1d0908210385");
+
+        System.out.println("mz unique:" + uniqueMz.size());
+        System.out.println("intensity unique:" + uniqueIntensity.size());
+
+        return "success";
+    }
+
+    private void test(HashSet<Float> uniqueMz, HashSet<Float> uniqueIntensity, String expId){
+        System.out.println("exp Id: " + expId);
         try {
-            List<ExperimentDO> expList = experimentService.getAllByProjectName("HYE124_TTOF6600_32fix");
-            for (ExperimentDO exp : expList) {
-                String json = FileUtil.readFile(exp.getAirdIndexPath());
-                AirdInfo airdInfo = JSONObject.parseObject(json, AirdInfo.class);
-                exp.setDescription("rawId:"+airdInfo.getRawId()+";"+exp.getDescription());
-                experimentService.update(exp);
+            ResultDO<ExperimentDO> result = experimentService.getById(expId);
+            ExperimentDO exp = result.getModel();
+            List<ScanIndexDO> scanIndexes = scanIndexService.getAllByExperimentId(expId);
+            RandomAccessFile raf = new RandomAccessFile(new File(exp.getAirdPath()), "r");
+            System.out.println("总计Scan数:" + scanIndexes.size());
+            long count = 0;
+            for (ScanIndexDO scanIndex : scanIndexes) {
+                if (count % 10000 == 0) {
+                    System.out.println("Processing:" + count);
+                }
+                count++;
+
+                if (scanIndex.getMsLevel() != 2) {
+                    continue;
+                }
+                MzIntensityPairs pairs = scanIndexService.getSpectrum(scanIndex, raf, ByteUtil.getByteOrder(exp.getByteOrder()));
+                uniqueMz.addAll(Lists.newArrayList(pairs.getMzArray()));
+                uniqueIntensity.addAll(Lists.newArrayList(pairs.getIntensityArray()));
+
             }
+            System.out.println("mz unique:" + uniqueMz.size());
+            System.out.println("intensity unique:" + uniqueIntensity.size());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return null;
     }
 
     //计算iRT
     @RequestMapping("test2")
     @ResponseBody
     String test2(Model model, RedirectAttributes redirectAttributes) {
-        int[] mzArray = new int[21];
-        mzArray[0] = 84960;
-        mzArray[1] = 123015;
-        mzArray[2] = 136919;
-        mzArray[3] = 149015;
-        mzArray[4] = 161057;
-        mzArray[5] = 165694;
-        mzArray[6] = 195918;
-        mzArray[7] = 243131;
-        mzArray[8] = 254097;
-        mzArray[9] = 290156;
-        mzArray[10] = 333144;
-        mzArray[11] = 348147;
-        mzArray[12] = 357035;
-        mzArray[13] = 357232;
-        mzArray[14] = 365206;
-        mzArray[15] = 367164;
-        mzArray[16] = 379980;
-        mzArray[17] = 387205;
-        mzArray[18] = 388134;
-        mzArray[19] = 413090;
-        mzArray[20] = 620326;
-        int[] mzCompressedArray = CompressUtil.compressForSortedInt(mzArray);
-        return "";
-
+        List<ExperimentDO> exps = experimentService.getAllByProjectName("SGS");
+        exps.forEach(exp->{
+            exp.setOwnerName("lms");
+            experimentService.update(exp);
+        });
+        return "success";
     }
 
     @RequestMapping("test6")
@@ -176,11 +208,7 @@ public class TestController extends BaseController {
         HashMap<Float, List<ScanIndexDO>> swathMap = new HashMap<>();
         for (ScanIndexDO index : scanIndexes) {
             if (index.getMsLevel().equals(2)) {
-                List<ScanIndexDO> indexes = swathMap.get(index.getPrecursorMzStart());
-                if (indexes == null) {
-                    indexes = new ArrayList<>();
-                    swathMap.put(index.getPrecursorMzStart(), indexes);
-                }
+                List<ScanIndexDO> indexes = swathMap.computeIfAbsent(index.getPrecursorMzStart(), k -> new ArrayList<>());
                 indexes.add(index);
             }
         }
@@ -217,7 +245,7 @@ public class TestController extends BaseController {
 
     @RequestMapping("scoreTest")
     @ResponseBody
-    String scoreTest(){
+    String scoreTest() {
         List<String> experimentIdList = new ArrayList<>();
         experimentIdList.add("5c7e6d13dfdfdd2e3430a110");
         experimentIdList.add("5c7e6d13dfdfdd2e3430a112");
@@ -228,18 +256,18 @@ public class TestController extends BaseController {
         experimentIdList.add("5c7e6d13dfdfdd2e3430a11c");
         experimentIdList.add("5c7e6d13dfdfdd2e3430a11e");
         List<Double> targetScoreList = new ArrayList<>();
-        for (String expId: experimentIdList) {
+        for (String expId : experimentIdList) {
             String overviewId = analyseOverviewService.getAllByExpId(expId).get(0).getId();
             List<AnalyseDataDO> analyseDataDOList = analyseDataService.getAllByOverviewId(overviewId);
-            for (AnalyseDataDO analyseDataDO: analyseDataDOList){
-                if (analyseDataDO.getIdentifiedStatus() != AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS){
+            for (AnalyseDataDO analyseDataDO : analyseDataDOList) {
+                if (analyseDataDO.getIdentifiedStatus() != AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS) {
                     continue;
                 }
                 List<FeatureScores> featureScoresList = analyseDataDO.getFeatureScoresList();
-                for (FeatureScores featureScores: featureScoresList){
-                    if (featureScores.getRt().equals(analyseDataDO.getBestRt())){
+                for (FeatureScores featureScores : featureScoresList) {
+                    if (featureScores.getRt().equals(analyseDataDO.getBestRt())) {
                         double score = featureScores.getScoresMap().get(ScoreType.XcorrShapeWeighted.getTypeName());
-                        if (score < 0.7 && score > 0.6){
+                        if (score < 0.7 && score > 0.6) {
                             System.out.println(expId + " + " + analyseDataDO.getPeptideRef() + " + " + score);
                         }
                         targetScoreList.add(score);
@@ -344,23 +372,23 @@ public class TestController extends BaseController {
         aList.add("0_0");
         aList.add("0_2");
         aList.add("0_4");
-        while((line=reader.readLine())!=null) {
-            if (aList.contains(line.split("\t")[2])){
+        while ((line = reader.readLine()) != null) {
+            if (aList.contains(line.split("\t")[2])) {
                 continue;
             }
             String item[] = line.split("\t")[0].split("_");
-            if (item[0].equals("DECOY")){
-                String peptideRef = item[0] + "_" + item[2] +"_" + item[3];
-                if (fileDecoyMap.containsKey(peptideRef)){
+            if (item[0].equals("DECOY")) {
+                String peptideRef = item[0] + "_" + item[2] + "_" + item[3];
+                if (fileDecoyMap.containsKey(peptideRef)) {
                     fileDecoyMap.put(peptideRef, fileDecoyMap.get(peptideRef) + 1);
-                }else {
+                } else {
                     fileDecoyMap.put(peptideRef, 1);
                 }
-            }else {
+            } else {
                 String peptideRef = item[1] + "_" + item[2];
-                if (fileTargetMap.containsKey(peptideRef)){
+                if (fileTargetMap.containsKey(peptideRef)) {
                     fileTargetMap.put(peptideRef, fileTargetMap.get(peptideRef) + 1);
-                }else {
+                } else {
                     fileTargetMap.put(peptideRef, 1);
                 }
             }
@@ -375,30 +403,30 @@ public class TestController extends BaseController {
         HashMap<String, Integer> fileOnlyTarget = new HashMap<>();
         HashMap<String, Integer> fileOnlyDecoy = new HashMap<>();
 
-        for (String peptideRef: proproPepRef.keySet()){
-            if (peptideRef.startsWith("DECOY_")){
-                if (fileDecoyMap.containsKey(peptideRef)){
+        for (String peptideRef : proproPepRef.keySet()) {
+            if (peptideRef.startsWith("DECOY_")) {
+                if (fileDecoyMap.containsKey(peptideRef)) {
                     proproMatchDecoy.put(peptideRef, proproPepRef.get(peptideRef));
                     fileMatchDecoy.put(peptideRef, fileDecoyMap.get(peptideRef));
-                }else {
+                } else {
                     proproOnlyDecoy.put(peptideRef, proproPepRef.get(peptideRef));
                 }
-            }else {
-                if (fileTargetMap.containsKey(peptideRef)){
+            } else {
+                if (fileTargetMap.containsKey(peptideRef)) {
                     proproMatchTarget.put(peptideRef, proproPepRef.get(peptideRef));
                     fileMatchTarget.put(peptideRef, fileTargetMap.get(peptideRef));
-                }else {
+                } else {
                     proproOnlyTarget.put(peptideRef, proproPepRef.get(peptideRef));
                 }
             }
         }
-        for (String peptideRef: fileTargetMap.keySet()){
-            if (!fileMatchTarget.containsKey(peptideRef)){
+        for (String peptideRef : fileTargetMap.keySet()) {
+            if (!fileMatchTarget.containsKey(peptideRef)) {
                 fileOnlyTarget.put(peptideRef, fileTargetMap.get(peptideRef));
             }
         }
-        for (String peptideRef: fileDecoyMap.keySet()){
-            if (!fileMatchDecoy.containsKey(peptideRef)){
+        for (String peptideRef : fileDecoyMap.keySet()) {
+            if (!fileMatchDecoy.containsKey(peptideRef)) {
                 fileOnlyDecoy.put(peptideRef, fileDecoyMap.get(peptideRef));
             }
         }
@@ -422,20 +450,20 @@ public class TestController extends BaseController {
         return null;
     }
 
-    private int[] getHitMap(HashMap<String, Integer> countMap, int dimension){
+    private int[] getHitMap(HashMap<String, Integer> countMap, int dimension) {
         int[] hitMap = new int[dimension];
 //        List<Integer> errorCountList = new ArrayList<>();
-        for (String peptideRef: countMap.keySet()){
+        for (String peptideRef : countMap.keySet()) {
             int count = countMap.get(peptideRef);
 //            if (count > 6){
 //                errorCountList.add(count);
 //            }
-            int i=2;
-            while (count > dimension){
+            int i = 2;
+            while (count > dimension) {
                 count = count / i;
                 i++;
             }
-            hitMap[count - 1] ++;
+            hitMap[count - 1]++;
         }
 //        System.out.println("error List: " + errorCountList.size() + errorCountList);
         return hitMap;
@@ -444,23 +472,23 @@ public class TestController extends BaseController {
     private void printScoreDistribution(List<String> analyseOverviewIdList, HashMap<String, Integer> peptideRefMap, String scoreType, int cutOff) throws IOException {
         List<Double> decoyScoreList = new ArrayList<>();
         List<Double> matchTargetScoreList = new ArrayList<>();
-        for (String analyseOverviewId: analyseOverviewIdList){
+        for (String analyseOverviewId : analyseOverviewIdList) {
             List<AnalyseDataDO> dataDOList = analyseDataService.getAllByOverviewId(analyseOverviewId);
-            for (AnalyseDataDO dataDO: dataDOList){
-                if (dataDO.getIsDecoy()){
+            for (AnalyseDataDO dataDO : dataDOList) {
+                if (dataDO.getIsDecoy()) {
                     List<FeatureScores> featureScoresList = dataDO.getFeatureScoresList();
                     double bestRt = dataDO.getBestRt();
-                    for (FeatureScores featureScores: featureScoresList){
-                        if (featureScores.getRt() == bestRt){
+                    for (FeatureScores featureScores : featureScoresList) {
+                        if (featureScores.getRt() == bestRt) {
                             decoyScoreList.add(featureScores.getScoresMap().get(scoreType));
                         }
                     }
-                }else {
-                    if (dataDO.getIdentifiedStatus() == AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS && peptideRefMap.containsKey(dataDO.getPeptideRef()) && peptideRefMap.get(dataDO.getPeptideRef()) > cutOff){
+                } else {
+                    if (dataDO.getIdentifiedStatus() == AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS && peptideRefMap.containsKey(dataDO.getPeptideRef()) && peptideRefMap.get(dataDO.getPeptideRef()) > cutOff) {
                         List<FeatureScores> featureScoresList = dataDO.getFeatureScoresList();
                         double bestRt = dataDO.getBestRt();
-                        for (FeatureScores featureScores: featureScoresList){
-                            if (featureScores.getRt() == bestRt){
+                        for (FeatureScores featureScores : featureScoresList) {
+                            if (featureScores.getRt() == bestRt) {
                                 matchTargetScoreList.add(featureScores.getScoresMap().get(scoreType));
                             }
                         }
@@ -471,11 +499,11 @@ public class TestController extends BaseController {
         File file = new File("D:/test.tsv");
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
         writer.append("decoy");
-        for (Double value: decoyScoreList){
+        for (Double value : decoyScoreList) {
             writer.append("\t").append(value.toString());
         }
         writer.append("\r").append("target");
-        for (Double value: matchTargetScoreList){
+        for (Double value : matchTargetScoreList) {
             writer.append("\t").append(value.toString());
         }
         writer.append("\r");
@@ -484,9 +512,10 @@ public class TestController extends BaseController {
 //        System.out.println("decoy: " + decoyScoreList);
 //        System.out.println("matchT:" + matchTargetScoreList);
     }
+
     @RequestMapping("unimodTest")
     @ResponseBody
-    String unimodTest(){
+    String unimodTest() {
         String ions = "y1;y2;y3;y4;y5;y6;y7;y8;y10;y11;y12;y13;y14;y1-NH3;y10-NH3;y12-NH3;a2;b2;b3;b4;b5;b6;b4-H2O;b5-H2O;b6-H2O;b2-NH3;b3-NH3;b4-NH3;b5-NH3;b6-NH3";
         String masses = "175.118884156693;274.187250304226;345.224394442742;444.292854866413;557.375588788621;656.444166686439;784.505751506767;841.52493583811;1066.63664456707;1226.66811647301;1354.7271638755;1517.78644819324;1604.80365912874;158.092634757598;1049.61643693022;1337.69097318547;158.092634757598;186.087369617932;333.155702330992;420.186860855073;583.251564047471;711.309312644877;402.176596411266;565.241284287495;693.299642703383;169.060406174275;316.129241761169;403.159458030056;566.224076957964;694.287204682172";
         String sequence = "QGFSYQCPQGQVIVAVR";
