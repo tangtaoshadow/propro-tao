@@ -25,8 +25,10 @@ import com.westlake.air.propro.algorithm.feature.ChromatographicScorer;
 import com.westlake.air.propro.algorithm.feature.LibraryScorer;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.CompressUtil;
+import com.westlake.air.propro.utils.FeatureUtil;
 import com.westlake.air.propro.utils.PermissionUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
@@ -36,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import scala.tools.nsc.backend.jvm.BTypes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -486,8 +489,9 @@ public class AnalyseController extends BaseController {
         JSONArray leftRtList = new JSONArray();
         JSONArray rightRtList = new JSONArray();
         for(FeatureScores scores :data.getFeatureScoresList()){
-            leftRtList.add(scores.getLeftSideRt());
-            rightRtList.add(scores.getRightSideRt());
+            Pair<Double, Double> rtRange = FeatureUtil.toDoublePair(scores.getRtRangeFeature());
+            leftRtList.add(rtRange.getLeft());
+            rightRtList.add(rtRange.getRight());
         }
         res.put("leftRtList", leftRtList);
         res.put("rightRtList", rightRtList);
@@ -777,8 +781,9 @@ public class AnalyseController extends BaseController {
             JSONArray leftRtList = new JSONArray();
             JSONArray rightRtList = new JSONArray();
             for(FeatureScores scores :data.getFeatureScoresList()){
-                leftRtList.add(scores.getLeftSideRt());
-                rightRtList.add(scores.getRightSideRt());
+                Pair<Double, Double> rtRange = FeatureUtil.toDoublePair(scores.getRtRangeFeature());
+                leftRtList.add(rtRange.getLeft());
+                rightRtList.add(rtRange.getRight());
             }
             group.put("leftRtList", leftRtList);
             group.put("rightRtList", rightRtList);

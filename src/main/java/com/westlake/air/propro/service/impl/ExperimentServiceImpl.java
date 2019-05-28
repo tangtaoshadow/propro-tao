@@ -526,6 +526,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         if (lumsParams.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM)){
             String expId = analyseOverviewService.getById(overviewId).getModel().getExpId();
             rtRangeMap = experimentService.getPrmRtWindowMap(expId);
+            lumsParams.setRtRangeMap(rtRangeMap);
         }
         //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
         logger.info("总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
@@ -538,7 +539,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 //                if (swathMap.get(range.getStart()) == null){
 //                    System.out.println("");
 //                }
-                List<AnalyseDataDO> dataList = doExtract(raf, swathMap.get(range.getStart()), range, rtRangeMap, overviewId, lumsParams);
+                List<AnalyseDataDO> dataList = doExtract(raf, swathMap.get(range.getStart()), range, overviewId, lumsParams);
                 if (dataList != null) {
                     totalDataList.addAll(dataList);
                     //将卷积的核心数据压缩以后存储到本地
@@ -590,17 +591,14 @@ public class ExperimentServiceImpl implements ExperimentService {
      * @return
      * @throws Exception
      */
-    private List<AnalyseDataDO> doExtract(RandomAccessFile raf, ScanIndexDO swathIndex, WindowRange range, HashMap<Float, Float[]> rtRangeMap, String overviewId, LumsParams lumsParams) throws Exception {
+    private List<AnalyseDataDO> doExtract(RandomAccessFile raf, ScanIndexDO swathIndex, WindowRange range, String overviewId, LumsParams lumsParams) throws Exception {
         List<TargetPeptide> coordinates;
         TreeMap<Float, MzIntensityPairs> rtMap;
         //Step2.获取标准库的目标肽段片段的坐标
         Float[] rtRange = null;
-        if (rtRangeMap != null){
+        if (lumsParams.getRtRangeMap() != null){
             float precursorMz = range.getMz();
-            rtRange = rtRangeMap.get(precursorMz);
-        }
-        if (rtRange == null){
-            System.out.println("debug here");
+            rtRange = lumsParams.getRtRangeMap().get(precursorMz);
         }
         coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibraryId(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), range, rtRange, lumsParams.getExperimentDO().getType(),lumsParams.isUniqueOnly());
         if (coordinates.isEmpty()) {

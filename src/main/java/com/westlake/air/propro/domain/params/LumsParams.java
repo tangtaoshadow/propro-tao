@@ -6,6 +6,7 @@ import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import lombok.Data;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -62,6 +63,8 @@ public class LumsParams {
     //上下文备忘录
     String note;
 
+    //用于PRM, <precursor mz, [rt start, rt end]>
+    HashMap<Float, Float[]> rtRangeMap;
     public LumsParams(){
         scoreTypes.add(ScoreType.IntensityScore.getTypeName());
         scoreTypes.add(ScoreType.LibraryCorr.getTypeName());

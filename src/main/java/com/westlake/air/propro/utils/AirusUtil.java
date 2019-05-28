@@ -191,7 +191,7 @@ public class AirusUtil {
                     bestFeatureScores.setScoresMap(featureScores.getScoresMap());
                     bestFeatureScores.setRt(featureScores.getRt());
                     bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
-                    bestFeatureScores.setFragIntMap(featureScores.getFragIntMap());
+                    bestFeatureScores.setFragIntFeature(featureScores.getFragIntFeature());
                 } else {
                     Double featureMainScore = featureScores.get(scoreType);
                     if (featureMainScore > bestFeatureScores.getMainScore()) {
@@ -199,7 +199,7 @@ public class AirusUtil {
                         bestFeatureScores.setScoresMap(featureScores.getScoresMap());
                         bestFeatureScores.setRt(featureScores.getRt());
                         bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
-                        bestFeatureScores.setFragIntMap(featureScores.getFragIntMap());
+                        bestFeatureScores.setFragIntFeature(featureScores.getFragIntFeature());
                     }
                 }
             }
@@ -213,7 +213,7 @@ public class AirusUtil {
                             bestFeatureScores.setScoresMap(featureScores.getScoresMap());
                             bestFeatureScores.setRt(featureScores.getRt());
                             bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
-                            bestFeatureScores.setFragIntMap(featureScores.getFragIntMap());
+                            bestFeatureScores.setFragIntFeature(featureScores.getFragIntFeature());
                         } else {
                             Double featureMainScore = featureScores.get(scoreType);
                             if (featureMainScore > bestFeatureScores.getMainScore()) {
@@ -221,7 +221,7 @@ public class AirusUtil {
                                 bestFeatureScores.setScoresMap(featureScores.getScoresMap());
                                 bestFeatureScores.setRt(featureScores.getRt());
                                 bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
-                                bestFeatureScores.setFragIntMap(featureScores.getFragIntMap());
+                                bestFeatureScores.setFragIntFeature(featureScores.getFragIntFeature());
                             }
                         }
                     }

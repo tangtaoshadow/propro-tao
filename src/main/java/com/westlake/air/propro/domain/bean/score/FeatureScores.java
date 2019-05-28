@@ -41,13 +41,14 @@ public class FeatureScores {
     //检测出的该峰的峰顶的rt时间
     Double rt;
 
-    Double leftSideRt;
-    Double rightSideRt;
+    //rt begin;rt end
+    String rtRangeFeature;
 
     //定量值
     Double intensitySum;
 
-    HashMap<String, Double> fragIntMap;
+    //HashMap --> String
+    String fragIntFeature;
 
     //key为子分数类型
     HashMap<String, Double> scoresMap;

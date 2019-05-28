@@ -114,5 +114,5 @@ public class AnalyseDataDO extends BaseDO {
     //最终的定量值
 
     @JSONField(serialize=false)
-    HashMap<String, Double> fragIntMap;
+    String fragIntFeature;
 }

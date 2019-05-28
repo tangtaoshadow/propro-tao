@@ -32,7 +32,7 @@ public class SimpleFeatureScores {
 
     Double fdr;
 
-    HashMap<String, Double> fragIntMap;
+    String fragIntFeature;
 
     Boolean thresholdPassed = true;
 

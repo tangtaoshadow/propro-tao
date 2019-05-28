@@ -17,10 +17,7 @@ import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.algorithm.feature.RtNormalizerScorer;
 import com.westlake.air.propro.algorithm.feature.*;
 import com.westlake.air.propro.service.*;
-import com.westlake.air.propro.utils.AnalyseDataUtil;
-import com.westlake.air.propro.utils.ByteUtil;
-import com.westlake.air.propro.utils.FileUtil;
-import com.westlake.air.propro.utils.MathUtil;
+import com.westlake.air.propro.utils.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
@@ -301,10 +298,9 @@ public class ScoreServiceImpl implements ScoreService {
             }
             swathLDAScorer.calculateSwathLdaPrescore(featureScores);
             featureScores.setRt(peakGroupFeature.getApexRt());
-            featureScores.setLeftSideRt(peakGroupFeature.getBestLeftRt());
-            featureScores.setRightSideRt(peakGroupFeature.getBestRightRt());
+            featureScores.setRtRangeFeature(FeatureUtil.toString(peakGroupFeature.getBestLeftRt(), peakGroupFeature.getBestRightRt()));
             featureScores.setIntensitySum(peakGroupFeature.getPeakGroupInt());
-            featureScores.setFragIntMap(peakGroupFeature.getIonIntensity());
+            featureScores.setFragIntFeature(FeatureUtil.toString(peakGroupFeature.getIonIntensity()));
             featureScoresList.add(featureScores);
         }
 

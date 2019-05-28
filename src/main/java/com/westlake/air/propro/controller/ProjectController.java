@@ -12,6 +12,7 @@ import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.ProjectQuery;
 import com.westlake.air.propro.service.*;
+import com.westlake.air.propro.utils.FeatureUtil;
 import com.westlake.air.propro.utils.PermissionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -504,7 +505,7 @@ public class ProjectController extends BaseController {
             for (String analyseOverviewId : analyseOverviewIdList) {
                 //get fragment intensity map
                 AnalyseDataDO analyseDataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(analyseOverviewId, peptideDO.getPeptideRef(), false);
-                HashMap<String, Double> fragIntMap;
+                Map<String, Double> fragIntMap;
                 if (analyseDataDO == null) {
                     fragIntMap = new HashMap<>();
                     identifyStatList.add(false);
@@ -514,7 +515,7 @@ public class ProjectController extends BaseController {
                     } else {
                         identifyStatList.add(false);
                     }
-                    fragIntMap = analyseDataDO.getFragIntMap();
+                    fragIntMap = FeatureUtil.toMap(analyseDataDO.getFragIntFeature());
                     intOverall += analyseDataDO.getIntensitySum() + ", ";
                 }
 

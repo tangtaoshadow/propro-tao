@@ -130,7 +130,7 @@ public class Airus {
             AnalyseDataDO dataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
             dataDO.setBestRt(simpleFeatureScores.getRt());
             dataDO.setIntensitySum(simpleFeatureScores.getIntensitySum());
-            dataDO.setFragIntMap(simpleFeatureScores.getFragIntMap());
+            dataDO.setFragIntFeature(simpleFeatureScores.getFragIntFeature());
             dataDO.setFdr(simpleFeatureScores.getFdr());
             dataDO.setQValue(simpleFeatureScores.getQValue());
             if (!simpleFeatureScores.getIsDecoy()) {
