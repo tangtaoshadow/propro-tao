@@ -488,6 +488,9 @@ public class ProjectController extends BaseController {
             String[] peptideRefs = peptideRefInfo.split(";");
             for (String peptideRef : peptideRefs) {
                 PeptideDO peptideDO = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, false);
+                if (peptideDO == null){
+                    continue;
+                }
                 peptideDOMap.put(peptideRef, peptideDO);
             }
         }

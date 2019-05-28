@@ -53,7 +53,7 @@ public class FeatureUtil {
      */
     public static final Map<String, Double> toMap(String str) {
         Map<String, Double> attrs = new HashMap<>();
-        if (!str.isEmpty()) {
+        if (str != null) {
             String[] arr = str.split(SP);
             for (String kv : arr) {
                 String[] ar = kv.split(SSP);
