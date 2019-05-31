@@ -3,8 +3,6 @@ package com.westlake.air.propro.dao;
 import com.westlake.air.propro.domain.db.simple.SimpleScanIndex;
 import com.westlake.air.propro.domain.db.ScanIndexDO;
 import com.westlake.air.propro.domain.query.ScanIndexQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -40,8 +38,8 @@ public class ScanIndexDAO extends BaseDAO<ScanIndexDO, ScanIndexQuery>{
     @Override
     protected Query buildQueryWithoutPage(ScanIndexQuery scanIndexQuery) {
         Query query = new Query();
-        if (scanIndexQuery.getExperimentId() != null) {
-            query.addCriteria(where("experimentId").is(scanIndexQuery.getExperimentId()));
+        if (scanIndexQuery.getExpId() != null) {
+            query.addCriteria(where("expId").is(scanIndexQuery.getExpId()));
         }
         if (scanIndexQuery.getId() != null) {
             query.addCriteria(where("id").is(scanIndexQuery.getId()));
@@ -83,8 +81,8 @@ public class ScanIndexDAO extends BaseDAO<ScanIndexDO, ScanIndexQuery>{
     }
 
 
-    public List<ScanIndexDO> getAllByExperimentId(String experimentId) {
-        Query query = new Query(where("experimentId").is(experimentId));
+    public List<ScanIndexDO> getAllByExpId(String experimentId) {
+        Query query = new Query(where("expId").is(experimentId));
         return mongoTemplate.find(query, ScanIndexDO.class, CollectionName);
     }
 
@@ -97,7 +95,7 @@ public class ScanIndexDAO extends BaseDAO<ScanIndexDO, ScanIndexQuery>{
     }
 
     public void deleteAllByExperimentId(String experimentId) {
-        Query query = new Query(where("experimentId").is(experimentId));
+        Query query = new Query(where("expId").is(experimentId));
         mongoTemplate.remove(query, ScanIndexDO.class, CollectionName);
     }
 

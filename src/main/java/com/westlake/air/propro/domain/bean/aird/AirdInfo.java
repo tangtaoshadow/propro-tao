@@ -1,6 +1,7 @@
-package com.westlake.air.propro.domain.bean.compressor;
+package com.westlake.air.propro.domain.bean.aird;
 
 import com.westlake.air.propro.domain.bean.analyse.WindowRange;
+import com.westlake.air.propro.domain.bean.compressor.Strategy;
 import com.westlake.air.propro.domain.db.ScanIndexDO;
 import lombok.Data;
 

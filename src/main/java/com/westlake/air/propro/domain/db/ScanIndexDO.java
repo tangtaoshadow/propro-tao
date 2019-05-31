@@ -34,7 +34,7 @@ public class ScanIndexDO extends BaseDO {
     Float rt;
 
     @Indexed
-    String experimentId;
+    String expId;
 
     //key为对应的文件类型, @see PositionType.class
     @JSONField(name = "pos")
@@ -42,9 +42,6 @@ public class ScanIndexDO extends BaseDO {
 
     //在mzxml中的序号
     Integer num;
-
-//    //RT(Time)S格式
-//    String rtStr;
 
     @JSONField(name = "pNum")
     Integer parentNum;

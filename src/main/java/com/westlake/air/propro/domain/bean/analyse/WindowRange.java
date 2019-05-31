@@ -15,8 +15,6 @@ public class WindowRange {
     Float end;
     //precursor mz
     Float mz;
-    //precursor mz interval
-    Float interval;
 
     public WindowRange() {}
 

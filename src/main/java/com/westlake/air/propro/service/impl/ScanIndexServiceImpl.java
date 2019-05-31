@@ -38,7 +38,7 @@ public class ScanIndexServiceImpl implements ScanIndexService {
 
     @Override
     public List<ScanIndexDO> getAllByExperimentId(String experimentId) {
-        return scanIndexDAO.getAllByExperimentId(experimentId);
+        return scanIndexDAO.getAllByExpId(experimentId);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class ScanIndexServiceImpl implements ScanIndexService {
         }
         try {
             if (isDeleteOld) {
-                scanIndexDAO.deleteAllByExperimentId(scanIndexes.get(0).getExperimentId());
+                scanIndexDAO.deleteAllByExperimentId(scanIndexes.get(0).getExpId());
             }
             scanIndexDAO.insert(scanIndexes);
             return new ResultDO(true);

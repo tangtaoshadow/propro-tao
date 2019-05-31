@@ -33,7 +33,6 @@ public class ExperimentDO extends BaseDO {
 
     String projectName;
 
-
     //必填,实验名称
     String name;
 
@@ -77,6 +76,7 @@ public class ExperimentDO extends BaseDO {
 
     //新增的三个字段,用以支持最新的数据格式,仅支持MzXML格式的文件
     String compressionType;
+
     //压缩的数值精度,一般为32或者64,代表Float类型和Double类型
     String precision;
 

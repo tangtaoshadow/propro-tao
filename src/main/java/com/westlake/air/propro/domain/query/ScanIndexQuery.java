@@ -3,8 +3,8 @@ package com.westlake.air.propro.domain.query;
 import lombok.Data;
 
 /**
- * Created by James Lu MiaoShan
  * Time: 2018-07-04 21:16
+ * @author James Lu MiaoShan
  */
 @Data
 public class ScanIndexQuery extends PageQuery {
@@ -13,7 +13,7 @@ public class ScanIndexQuery extends PageQuery {
 
     String id;
 
-    String experimentId;
+    String expId;
 
     Integer numStart;
 
@@ -46,13 +46,13 @@ public class ScanIndexQuery extends PageQuery {
     public ScanIndexQuery() {
     }
 
-    public ScanIndexQuery(String experimentId, Integer msLevel) {
-        this.experimentId = experimentId;
+    public ScanIndexQuery(String expId, Integer msLevel) {
+        this.expId = expId;
         this.msLevel = msLevel;
     }
 
-    public ScanIndexQuery(String experimentId, Integer msLevel, Float precursorMzStart, Float precursorMzEnd) {
-        this.experimentId = experimentId;
+    public ScanIndexQuery(String expId, Integer msLevel, Float precursorMzStart, Float precursorMzEnd) {
+        this.expId = expId;
         this.msLevel = msLevel;
         this.precursorMzStart = precursorMzStart;
         this.precursorMzEnd = precursorMzEnd;

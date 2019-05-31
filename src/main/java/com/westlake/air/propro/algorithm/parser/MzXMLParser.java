@@ -127,7 +127,7 @@ public class MzXMLParser extends BaseParser {
             ScanIndexDO currentMS1 = null;
             for (ScanIndexDO scanIndex : list) {
                 parseAttribute(raf, experimentDO.getOverlap(), scanIndex);
-                scanIndex.setExperimentId(experimentDO.getId());
+                scanIndex.setExpId(experimentDO.getId());
 
                 if (scanIndex.getMsLevel() == 1) {
                     currentMS1 = scanIndex;

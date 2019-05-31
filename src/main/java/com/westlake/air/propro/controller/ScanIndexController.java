@@ -67,7 +67,7 @@ public class ScanIndexController extends BaseController {
         PermissionUtil.check(expResult.getModel());
         model.addAttribute("experiment", expResult.getModel());
         ScanIndexQuery query = new ScanIndexQuery();
-        query.setExperimentId(experimentId);
+        query.setExpId(experimentId);
         if (msLevel != null) {
             query.setMsLevel(msLevel);
         }
@@ -105,7 +105,7 @@ public class ScanIndexController extends BaseController {
     String detail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<ScanIndexDO> resultDO = scanIndexService.getById(id);
         if (resultDO.isSuccess()) {
-            ResultDO<ExperimentDO> expResult = experimentService.getById(resultDO.getModel().getExperimentId());
+            ResultDO<ExperimentDO> expResult = experimentService.getById(resultDO.getModel().getExpId());
             PermissionUtil.check(expResult.getModel());
 
             model.addAttribute("scanIndex", resultDO.getModel());

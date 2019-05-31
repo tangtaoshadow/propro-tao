@@ -55,7 +55,7 @@ public class ScanIndexApi extends BaseController {
                                                         @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize) {
         ScanIndexQuery query = new ScanIndexQuery();
         query.setMsLevel(msLevel);
-        query.setExperimentId(expId);
+        query.setExpId(expId);
         if (rtStart != null) {
             query.setRtStart(rtStart);
         }

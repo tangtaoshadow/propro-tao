@@ -12,7 +12,7 @@ import com.westlake.air.propro.dao.ScanIndexDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.WindowRange;
 import com.westlake.air.propro.domain.bean.compressor.AircInfo;
-import com.westlake.air.propro.domain.bean.compressor.AirdInfo;
+import com.westlake.air.propro.domain.bean.aird.AirdInfo;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
@@ -255,10 +255,10 @@ public class ExperimentServiceImpl implements ExperimentService {
             experimentDO.setOverlap(airdInfo.getOverlap());
             experimentDO.setDescription("rawId:"+airdInfo.getRawId()+";"+experimentDO.getDescription());
             for (ScanIndexDO scanIndex : airdInfo.getScanIndexList()) {
-                scanIndex.setExperimentId(experimentDO.getId());
+                scanIndex.setExpId(experimentDO.getId());
             }
             for (ScanIndexDO swathIndex : airdInfo.getSwathIndexList()) {
-                swathIndex.setExperimentId(experimentDO.getId());
+                swathIndex.setExpId(experimentDO.getId());
             }
 
             scanIndexService.insertAll(airdInfo.getScanIndexList(), false);
@@ -489,7 +489,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     public HashMap<Float, Float[]> getPrmRtWindowMap(String expId){
         ScanIndexQuery query = new ScanIndexQuery();
-        query.setExperimentId(expId);
+        query.setExpId(expId);
         query.setMsLevel(2);
         List<ScanIndexDO> msAllIndexes = scanIndexDAO.getAll(query);
         HashMap<Float, Float[]> peptideMap = new HashMap<>();

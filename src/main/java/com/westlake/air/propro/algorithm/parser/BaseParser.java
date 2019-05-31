@@ -20,7 +20,7 @@ public class BaseParser {
 
         if (isCompression) {
             byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(value));
-        }else{
+        } else {
             byteBuffer = ByteBuffer.wrap(value);
         }
 
@@ -46,51 +46,47 @@ public class BaseParser {
     }
 
     //默认为BIG_ENDIAN,精度为小数点后三位
-    public Float[] getMzValues(byte[] value) throws Exception{
+    public Float[] getMzValues(byte[] value) throws Exception {
         return getMzValues(value, ByteOrder.BIG_ENDIAN);
     }
 
     /**
      * get mz values only for aird file
+     *
      * @param value
      * @return
      */
     public Float[] getMzValues(byte[] value, ByteOrder order) throws Exception {
+        ByteBuffer byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(value));
+        byteBuffer.order(order);
 
-        try{
-            ByteBuffer byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(value));
-            byteBuffer.order(order);
-
-            IntBuffer ints = byteBuffer.asIntBuffer();
-            int[] intValues = new int[ints.capacity()];
-            for (int i = 0; i < ints.capacity(); i++) {
-                intValues[i] = ints.get(i);
-            }
-            intValues = CompressUtil.decompressForSortedInt(intValues);
-            Float[] floatValues = new Float[intValues.length];
-            for (int index = 0; index < intValues.length; index++) {
-                floatValues[index] = (float) intValues[index] / 1000;
-            }
-            byteBuffer.clear();
-            return floatValues;
-        }catch (Exception e){
-            throw e;
+        IntBuffer ints = byteBuffer.asIntBuffer();
+        int[] intValues = new int[ints.capacity()];
+        for (int i = 0; i < ints.capacity(); i++) {
+            intValues[i] = ints.get(i);
         }
-
+        intValues = CompressUtil.decompressForSortedInt(intValues);
+        Float[] floatValues = new Float[intValues.length];
+        for (int index = 0; index < intValues.length; index++) {
+            floatValues[index] = (float) intValues[index] / 1000;
+        }
+        byteBuffer.clear();
+        return floatValues;
     }
 
     //默认为BIG_ENDIAN
-    public Float[] getIntValues(byte[] value) throws Exception{
+    public Float[] getIntValues(byte[] value) throws Exception {
         return getIntValues(value, ByteOrder.BIG_ENDIAN);
     }
 
     /**
      * get mz values only for aird file
+     *
      * @param value
      * @return
      */
-    public Float[] getIntValues(byte[] value, ByteOrder order) throws Exception{
-        try{
+    public Float[] getIntValues(byte[] value, ByteOrder order) throws Exception {
+        try {
             ByteBuffer byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(value));
             byteBuffer.order(order);
 
@@ -102,7 +98,7 @@ public class BaseParser {
 
             byteBuffer.clear();
             return intValues;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw e;
         }
 

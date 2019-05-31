@@ -3,7 +3,7 @@ package com.westlake.air.propro.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.compressor.AirdInfo;
+import com.westlake.air.propro.domain.bean.aird.AirdInfo;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.query.LibraryQuery;
 import com.westlake.air.propro.domain.query.ProjectQuery;

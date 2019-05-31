@@ -18,9 +18,7 @@ import com.westlake.air.propro.domain.query.ScanIndexQuery;
 import com.westlake.air.propro.algorithm.parser.MzXMLParser;
 import com.westlake.air.propro.exception.UnauthorizedAccessException;
 import com.westlake.air.propro.service.*;
-import com.westlake.air.propro.utils.FileUtil;
 import com.westlake.air.propro.utils.PermissionUtil;
-import org.apache.shiro.authz.aop.PermissionAnnotationMethodInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -511,15 +509,13 @@ public class ExperimentController extends BaseController {
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
 
         JSONObject res = new JSONObject();
-        JSONArray indexArray = new JSONArray();
         JSONArray mzStartArray = new JSONArray();
         JSONArray mzRangArray = new JSONArray();
         for (int i = 0; i < rangs.size(); i++) {
-            indexArray.add((int) (rangs.get(i).getInterval() * 1000) + "ms");
+
             mzStartArray.add(rangs.get(i).getStart());
             mzRangArray.add((rangs.get(i).getEnd() - rangs.get(i).getStart()));
         }
-        res.put("indexes", indexArray);
         res.put("starts", mzStartArray);
         res.put("rangs", mzRangArray);
         res.put("min", rangs.get(0).getStart());
@@ -564,7 +560,7 @@ public class ExperimentController extends BaseController {
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
         JSONArray ms2Density = new JSONArray();
         ScanIndexQuery query = new ScanIndexQuery();
-        query.setExperimentId(expId);
+        query.setExpId(expId);
 
         query.setMsLevel(1);
         List<ScanIndexDO> ms1Indexs = scanIndexDAO.getAll(query);

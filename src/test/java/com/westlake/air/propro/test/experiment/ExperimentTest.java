@@ -42,7 +42,7 @@ public class ExperimentTest extends BaseTest {
         experimentService.uploadFile(experimentDO, file, new TaskDO());
 
         ScanIndexQuery query = new ScanIndexQuery();
-        query.setExperimentId(experimentDO.getId());
+        query.setExpId(experimentDO.getId());
         assert 59 == scanIndexService.count(query);
 
         scanIndexService.deleteAllByExperimentId(experimentDO.getId());

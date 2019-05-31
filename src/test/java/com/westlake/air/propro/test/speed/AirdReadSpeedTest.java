@@ -2,7 +2,7 @@ package com.westlake.air.propro.test.speed;
 
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
-import com.westlake.air.propro.domain.bean.compressor.AirdInfo;
+import com.westlake.air.propro.domain.bean.aird.AirdInfo;
 import com.westlake.air.propro.domain.db.ScanIndexDO;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.test.BaseTest;
