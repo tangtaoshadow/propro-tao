@@ -50,8 +50,8 @@ public class PeptideController extends BaseController {
                 @RequestParam(value = "uniqueFilter", required = false, defaultValue = "All") String uniqueFilter,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
         long startTime = System.currentTimeMillis();
-        ResultDO<LibraryDO> temp = libraryService.getById(libraryId);
-        PermissionUtil.check(temp.getModel());
+        LibraryDO temp = libraryService.getById(libraryId);
+        PermissionUtil.check(temp);
 
         model.addAttribute("libraryId", libraryId);
         model.addAttribute("proteinName", proteinName);
@@ -112,8 +112,8 @@ public class PeptideController extends BaseController {
                 @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
         long startTime = System.currentTimeMillis();
 
-        ResultDO<LibraryDO> temp = libraryService.getById(libraryId);
-        PermissionUtil.check(temp.getModel());
+        LibraryDO temp = libraryService.getById(libraryId);
+        PermissionUtil.check(temp);
 
         model.addAttribute("libraryId", libraryId);
         model.addAttribute("pageSize", pageSize);
@@ -143,8 +143,8 @@ public class PeptideController extends BaseController {
         ResultDO<PeptideDO> resultDO = peptideService.getById(id);
         if (resultDO.isSuccess()) {
 
-            ResultDO<LibraryDO> temp = libraryService.getById(resultDO.getModel().getLibraryId());
-            PermissionUtil.check(temp.getModel());
+            LibraryDO temp = libraryService.getById(resultDO.getModel().getLibraryId());
+            PermissionUtil.check(temp);
 
             model.addAttribute("peptide", resultDO.getModel());
             return "peptide/detail";
@@ -163,8 +163,8 @@ public class PeptideController extends BaseController {
             return "redirect:/peptide/list";
         }
 
-        ResultDO<LibraryDO> temp = libraryService.getById(resultDO.getModel().getLibraryId());
-        PermissionUtil.check(temp.getModel());
+        LibraryDO temp = libraryService.getById(resultDO.getModel().getLibraryId());
+        PermissionUtil.check(temp);
 
         PeptideDO peptideDO = shuffleGenerator.generate(resultDO.getModel());
         if(peptideDO != null){

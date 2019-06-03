@@ -2,7 +2,6 @@ package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.async.AirusTask;
 import com.westlake.air.propro.async.ScoreTask;
 import com.westlake.air.propro.constants.Classifier;
@@ -19,7 +18,7 @@ import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.service.AnalyseDataService;
 import com.westlake.air.propro.service.AnalyseOverviewService;
 import com.westlake.air.propro.service.ScoreService;
-import com.westlake.air.propro.utils.AnalyseDataUtil;
+import com.westlake.air.propro.utils.AnalyseUtil;
 import com.westlake.air.propro.utils.PermissionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -229,7 +227,7 @@ public class ScoreController extends BaseController {
         ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getListWithConvolutionData(query);
 
         for(AnalyseDataDO data : resultDO.getModel()){
-            AnalyseDataUtil.decompress(data);
+            AnalyseUtil.decompress(data);
         }
 
         model.addAttribute("overview", overviewResult.getModel());

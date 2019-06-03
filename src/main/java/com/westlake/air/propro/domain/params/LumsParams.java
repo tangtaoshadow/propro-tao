@@ -65,6 +65,7 @@ public class LumsParams {
 
     //用于PRM, <precursor mz, [rt start, rt end]>
     HashMap<Float, Float[]> rtRangeMap;
+
     public LumsParams(){
         scoreTypes.add(ScoreType.IntensityScore.getTypeName());
         scoreTypes.add(ScoreType.LibraryCorr.getTypeName());

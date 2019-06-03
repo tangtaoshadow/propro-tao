@@ -1,7 +1,7 @@
 package com.westlake.air.propro.utils;
 
 import com.google.common.collect.Ordering;
-import com.westlake.air.propro.domain.bean.analyse.WindowRange;
+import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.PeptideDO;

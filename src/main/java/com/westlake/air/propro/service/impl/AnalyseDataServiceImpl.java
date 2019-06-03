@@ -12,7 +12,7 @@ import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
 import com.westlake.air.propro.domain.db.simple.SimpleScores;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.service.AnalyseDataService;
-import com.westlake.air.propro.utils.AnalyseDataUtil;
+import com.westlake.air.propro.utils.AnalyseUtil;
 import com.westlake.air.propro.utils.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,7 +202,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
                     return ResultDO.buildError(ResultCode.POSITION_DELTA_LIST_LENGTH_NOT_EQUAL_TO_MZMAP_PLUS_ONE);
                 }
                 raf = new RandomAccessFile(file, "r");
-                ResultDO<AnalyseDataDO> result = AnalyseDataUtil.readConvDataFromFile(analyseDataDO, raf);
+                ResultDO<AnalyseDataDO> result = AnalyseUtil.readConvDataFromFile(analyseDataDO, raf);
                 return result;
             }
         } catch (Exception e) {
@@ -232,7 +232,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
 
             raf = new RandomAccessFile(file, "r");
             for (AnalyseDataDO analyseDataDO : dataList) {
-                ResultDO<AnalyseDataDO> res = AnalyseDataUtil.readConvDataFromFile(analyseDataDO, raf);
+                ResultDO<AnalyseDataDO> res = AnalyseUtil.readConvDataFromFile(analyseDataDO, raf);
                 if(res.isFailed()){
                     logger.error(res.getMsgInfo());
                 }

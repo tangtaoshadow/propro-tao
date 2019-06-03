@@ -88,40 +88,26 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ResultDO<ProjectDO> getById(String id) {
-        if (id == null || id.isEmpty()) {
-            return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
-        }
+    public ProjectDO getById(String id) {
 
         try {
             ProjectDO project = projectDAO.getById(id);
-            if (project == null) {
-                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
-            } else {
-                return ResultDO.build(project);
-            }
+            return project;
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            return ResultDO.buildError(ResultCode.QUERY_ERROR);
+            return null;
         }
     }
 
     @Override
-    public ResultDO<ProjectDO> getByName(String name) {
-        if (name == null || name.isEmpty()) {
-            return ResultDO.buildError(ResultCode.PROJECT_NAME_CANNOT_BE_EMPTY);
-        }
+    public ProjectDO getByName(String name) {
 
         try {
             ProjectDO project = projectDAO.getByName(name);
-            if (project == null) {
-                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
-            } else {
-                return ResultDO.build(project);
-            }
+            return project;
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            return ResultDO.buildError(ResultCode.QUERY_ERROR);
+            return null;
         }
     }
 

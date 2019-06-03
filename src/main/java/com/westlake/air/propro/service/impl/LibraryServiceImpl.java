@@ -138,40 +138,24 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public ResultDO<LibraryDO> getById(String id) {
-        if (id == null || id.isEmpty()) {
-            return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
-        }
+    public LibraryDO getById(String id) {
 
         try {
-            LibraryDO libraryDO = libraryDAO.getById(id);
-            if (libraryDO == null) {
-                return ResultDO.buildError(ResultCode.LIBRARY_NOT_EXISTED);
-            } else {
-                return ResultDO.build(libraryDO);
-            }
+            return libraryDAO.getById(id);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            return ResultDO.buildError(ResultCode.QUERY_ERROR);
+            return null;
         }
     }
 
     @Override
-    public ResultDO<LibraryDO> getByName(String name) {
-        if (name == null || name.isEmpty()) {
-            return ResultDO.buildError(ResultCode.LIBRARY_NAME_CANNOT_BE_EMPTY);
-        }
+    public LibraryDO getByName(String name) {
 
         try {
-            LibraryDO libraryDO = libraryDAO.getByName(name);
-            if (libraryDO == null) {
-                return ResultDO.buildError(ResultCode.LIBRARY_NOT_EXISTED);
-            } else {
-                return ResultDO.build(libraryDO);
-            }
+            return libraryDAO.getByName(name);
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            return ResultDO.buildError(ResultCode.QUERY_ERROR);
+            return null;
         }
     }
 

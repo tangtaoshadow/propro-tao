@@ -1,5 +1,6 @@
 package com.westlake.air.propro.openapi;
 
+import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.controller.BaseController;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
@@ -34,7 +35,12 @@ public class ProjectApi extends BaseController {
     })
     public ResultDO<ProjectDO> getById(Model model,
                                        @RequestParam(value = "id", required = true) String id) {
-        ResultDO<ProjectDO> resultDO = projectService.getById(id);
+        ProjectDO library = projectService.getById(id);
+        if (library == null){
+            return ResultDO.buildError(ResultCode.PROJECT_NOT_EXISTED);
+        }
+        ResultDO<ProjectDO> resultDO = new ResultDO<>(true);
+        resultDO.setModel(library);
         return resultDO;
     }
 
@@ -56,7 +62,6 @@ public class ProjectApi extends BaseController {
         }
 
         buildPageQuery(query, currentPage, pageSize);
-        ResultDO<List<ProjectDO>> resultDO = projectService.getList(query);
-        return resultDO;
+        return projectService.getList(query);
     }
 }

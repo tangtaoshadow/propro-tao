@@ -54,25 +54,38 @@
                 <tr>
                     <th width="5%" th:text="#{label_project_name}"></th>
                     <th width="10%" th:text="#{label_exp_name}"></th>
+                    <th width="10%" th:text="#{label_exp_id}"></th>
                     <th width="5%" th:text="#{label_exp_type}"></th>
-                    <th width="20%" th:text="#{label_file_path}"></th>
+                    <th width="8%">Aird Size(Bin/Index)</th>
+                    <th width="8%" th:text="#{label_vendor_file_size}"></th>
+                    <th width="5%" th:text="#{label_swath_windows_count}"></th>
                     <th width="8%" th:text="#{label_slope_intercept}"></th>
-                    <th width="8%" th:text="#{label_create_date}"></th>
+                    <th width="10%" th:text="#{label_instrument_model}"></th>
                     <th width="8%" th:text="#{label_last_modified_date}"></th>
-                    <th width="6%" th:text="#{label_reco_conv_total}"></th>
-                    <th width="20%" th:text="#{label_operation}"></th>
+                    <th width="10%" th:text="#{label_reco_conv_total}"></th>
+                    <th width="15%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="experiment:${experiments}">
                     <td th:text="|${experiment.projectName}|"></td>
-                    <td th:text="|${experiment.name}(${experiment.id})|"></td>
-                    <td>
-                        <span class="m-badge m-badge--success m-badge--wide" th:text="${experiment.type}"></span>
+                    <td th:text="|${experiment.name}|"></td>
+                    <td th:text="|${experiment.id}|"></td>
+                    <td th:text="${experiment.type}">
                     </td>
-                    <td th:text="${experiment.airdPath}"></td>
-                    <td th:text="|${experiment.slope} -> ${experiment.intercept}|"></td>
-                    <td th:text="${#dates.format(experiment.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
+                    <td>
+                        <span class="m-badge m-badge--success m-badge--wide" th:text="|${(experiment.airdSize+experiment.airdIndexSize)/1024/1024}MB|"></span>
+                    </td>
+                    <td>
+                        <span th:if="${experiment.vendorFileSize}" class="m-badge m-badge--success m-badge--wide" th:text="|${experiment.vendorFileSize/1024/1024}MB|"></span>
+                    </td>
+                    <td >
+                        <span class="m-badge m-badge--brand m-badge--wide" th:text="${experiment.windowRanges?.size()}"></span>
+                    </td>
+                    <td th:text="|${experiment.irtResult?.si?.slope} -> ${experiment.irtResult?.si?.intercept}|"></td>
+                    <td>
+                        <span class="m-badge m-badge--success m-badge--wide" th:text="|${experiment.instrument?.manufacturer} ${experiment.instrument?.model}|"></span>
+                    </td>
                     <td th:text="${#dates.format(experiment.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="|${analyseOverviewDOMap.get(experiment.id)?.matchedPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.totalPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.libraryPeptideCount}|"></td>
                     <td>
@@ -96,7 +109,7 @@
                            class="btn btn-brand m-btn m-btn--icon m-btn--icon-only">
                             <i class="fa fa-dropbox"></i>
                         </a>
-                        <a th:href="@{/scanindex/list(experimentId=${experiment.id})}" data-toggle="m-tooltip"
+                        <a th:href="@{/swathindex/list(expId=${experiment.id})}" data-toggle="m-tooltip"
                            th:title="#{label_spectrum_list}"
                            class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
                             <i class="fa fa-th-list"></i>

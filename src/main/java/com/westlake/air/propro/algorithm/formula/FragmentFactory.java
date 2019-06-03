@@ -37,7 +37,7 @@ import static com.westlake.air.propro.constants.Constants.Y_SIDE_MASS;
  * Created by James Lu MiaoShan
  * Time: 2018-06-12 10:32
  */
-@Component
+@Component("fragmentFactory")
 public class FragmentFactory {
 
     public final Logger logger = LoggerFactory.getLogger(FragmentFactory.class);

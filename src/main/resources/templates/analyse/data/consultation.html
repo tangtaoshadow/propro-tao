@@ -196,7 +196,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-10" id="chart" style="height: 800px;">
+                            <div class="col-10" id="chart" style="height: 600px;">
 
                             </div>
                         </div>
@@ -223,7 +223,7 @@
                             <label for="slopeIntercept" class="col-3 col-form-label" th:text="#{label_slope_intercept}"></label>
                             <div class="col-9">
                                 <input type="text" class="form-control m-input" id="slopeIntercept" readonly
-                                       th:value="|${exp?.slope}/${exp?.intercept}|">
+                                       th:value="|${exp?.irtResult?.si?.slope}/${exp?.irtResult?.si?.intercept}|">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -251,7 +251,7 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                                <h3 class="m-portlet__head-text" th:text="#{label_search_by_similar_peptide}"></span></h3>
+                                <h3 class="m-portlet__head-text" th:text="#{label_search_by_similar_peptide}"></h3>
                             </div>
                         </div>
                     </div>

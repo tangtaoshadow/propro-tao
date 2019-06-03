@@ -32,9 +32,9 @@ public interface LibraryService {
 
     ResultDO delete(String id);
 
-    ResultDO<LibraryDO> getById(String id);
+    LibraryDO getById(String id);
 
-    ResultDO<LibraryDO> getByName(String name);
+    LibraryDO getByName(String name);
 
     String getNameById(String id);
 

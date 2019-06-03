@@ -1,14 +1,15 @@
 package com.westlake.air.propro.async;
 
+import com.westlake.air.propro.algorithm.extract.Extractor;
+import com.westlake.air.propro.algorithm.irt.Irt;
 import com.westlake.air.propro.algorithm.learner.Airus;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
-import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.TaskStatus;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.airus.AirusParams;
 import com.westlake.air.propro.domain.bean.airus.FinalResult;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.propro.domain.bean.analyse.WindowRange;
+import com.westlake.air.propro.domain.bean.irt.IrtResult;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.TaskDO;
@@ -18,9 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
-import java.io.File;
-import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -45,6 +43,10 @@ public class ExperimentTask extends BaseTask {
     LibraryService libraryService;
     @Autowired
     AnalyseOverviewService analyseOverviewService;
+    @Autowired
+    Irt irt;
+    @Autowired
+    Extractor extractor;
 
     @Async(value = "uploadFileExecutor")
     public void saveAirdTask(ExperimentDO experimentDO, String airdFilePath, TaskDO taskDO) {
@@ -87,7 +89,7 @@ public class ExperimentTask extends BaseTask {
         if (StringUtils.isNotEmpty(lumsParams.getIRtLibraryId())) {
             taskDO.addLog("开始卷积IRT校准库并且计算iRT值");
             taskService.update(taskDO);
-            ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(lumsParams.getExperimentDO(), lumsParams.getIRtLibraryId(), lumsParams.getMzExtractWindow(), lumsParams.getSigmaSpacing());
+            ResultDO<SlopeIntercept> resultDO = irt.convAndIrt(lumsParams.getExperimentDO(), lumsParams.getIRtLibraryId(), lumsParams.getMzExtractWindow(), lumsParams.getSigmaSpacing());
             if(resultDO.isFailed()){
                 taskDO.addLog("iRT计算失败:"+resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
                 taskDO.finish(TaskStatus.FAILED.getName());
@@ -105,7 +107,7 @@ public class ExperimentTask extends BaseTask {
 
         taskDO.addLog("入参准备完毕,开始卷积(打分),时间可能较长");
         taskService.update(taskDO);
-        experimentService.extract(lumsParams);
+        extractor.extract(lumsParams);
         taskDO.addLog("处理完毕,卷积(打分)总耗时:" + (System.currentTimeMillis() - start));
         taskDO.addLog("开始进行合并打分");
         taskService.update(taskDO);
@@ -124,7 +126,7 @@ public class ExperimentTask extends BaseTask {
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
 
-        ResultDO<SlopeIntercept> resultDO = experimentService.convAndIrt(experimentDO, iRtLibraryId, mzExtractWindow, sigmaSpacing);
+        ResultDO<SlopeIntercept> resultDO = irt.convAndIrt(experimentDO, iRtLibraryId, mzExtractWindow, sigmaSpacing);
         if (resultDO.isFailed()) {
             taskDO.addLog("iRT计算失败:"+resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
             taskDO.finish(TaskStatus.FAILED.getName());
@@ -132,9 +134,9 @@ public class ExperimentTask extends BaseTask {
             return;
         }
         SlopeIntercept slopeIntercept = resultDO.getModel();
-
-        experimentDO.setSlope(slopeIntercept.getSlope());
-        experimentDO.setIntercept(slopeIntercept.getIntercept());
+        IrtResult irtResult = new IrtResult();
+        irtResult.setSi(slopeIntercept);
+        experimentDO.setIrtResult(irtResult);
         experimentDO.setIRtLibraryId(iRtLibraryId);
         experimentService.update(experimentDO);
 

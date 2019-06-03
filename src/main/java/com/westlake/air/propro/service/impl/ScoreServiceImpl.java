@@ -6,6 +6,7 @@ import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.analyse.*;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
 import com.westlake.air.propro.domain.params.LumsParams;
@@ -42,8 +43,6 @@ public class ScoreServiceImpl implements ScoreService {
     @Autowired
     AnalyseOverviewService analyseOverviewService;
     @Autowired
-    ScanIndexService scanIndexService;
-    @Autowired
     PeptideService peptideService;
     @Autowired
     GaussFilter gaussFilter;
@@ -79,6 +78,8 @@ public class ScoreServiceImpl implements ScoreService {
     AirdFileParser airdFileParser;
     @Autowired
     LinearFitter linearFitter;
+    @Autowired
+    SwathIndexService swathIndexService;
 
     @Override
     public ResultDO<SlopeIntercept> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing) {
@@ -135,20 +136,19 @@ public class ScoreServiceImpl implements ScoreService {
     }
 
     @Override
-    public void scoreForAll(List<AnalyseDataDO> dataList, WindowRange rang, ScanIndexDO swathIndex, LumsParams input) {
+    public void scoreForAll(List<AnalyseDataDO> dataList, SwathIndexDO swathIndex, LumsParams input) {
 
         if (dataList == null || dataList.size() == 0) {
             return;
         }
         input.setOverviewId(dataList.get(0).getOverviewId());//取一个AnalyseDataDO的OverviewId
-
+        WindowRange range = swathIndex.getRange();
         //标准库按照PeptideRef分组
         PeptideQuery query = new PeptideQuery(input.getLibraryId());
-        query.setMzStart(Double.parseDouble(rang.getStart().toString()));
-        query.setMzEnd(Double.parseDouble(rang.getEnd().toString()));
+        query.setMzStart(Double.parseDouble(range.getStart().toString()));
+        query.setMzEnd(Double.parseDouble(range.getEnd().toString()));
         HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(query);
 
-        int count = 0;
         //为每一组PeptideRef卷积结果打分
         ExperimentDO exp = input.getExperimentDO();
         RandomAccessFile raf = null;
@@ -157,11 +157,11 @@ public class ScoreServiceImpl implements ScoreService {
 
             TreeMap<Float, MzIntensityPairs> rtMap = null;
             if (input.isUsedDIAScores()) {
-                rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex, ByteUtil.getByteOrder(exp.getByteOrder()));
+                rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex);
             }
 
             for (AnalyseDataDO dataDO : dataList) {
-                AnalyseDataUtil.decompress(dataDO);
+                AnalyseUtil.decompress(dataDO);
                 scoreForOne(dataDO, ttMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()), rtMap, input);
                 analyseDataService.update(dataDO);
             }
@@ -178,7 +178,7 @@ public class ScoreServiceImpl implements ScoreService {
 
         if (dataDO.isCompressed()) {
             logger.warn("进入本函数前的AnalyseDataDO需要提前被解压缩!!!!!");
-            AnalyseDataUtil.decompress(dataDO);
+            AnalyseUtil.decompress(dataDO);
         }
 
         if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() < 3) {
@@ -203,7 +203,7 @@ public class ScoreServiceImpl implements ScoreService {
 
         if (dataDO.isCompressed()) {
             logger.warn("进入本函数前的AnalyseDataDO需要提前被解压缩!!!!!");
-            AnalyseDataUtil.decompress(dataDO);
+            AnalyseUtil.decompress(dataDO);
         }
 
         if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() <= 2) {
@@ -264,7 +264,7 @@ public class ScoreServiceImpl implements ScoreService {
             }
             //根据RT时间和前体MZ获取最近的一个原始谱图
             if (input.isUsedDIAScores()) {
-                MzIntensityPairs mzIntensityPairs = scanIndexService.getNearestSpectrumByRt(rtMap, peakGroupFeature.getApexRt());
+                MzIntensityPairs mzIntensityPairs = swathIndexService.getNearestSpectrumByRt(rtMap, peakGroupFeature.getApexRt());
                 if (mzIntensityPairs != null) {
                     Float[] spectrumMzArray = mzIntensityPairs.getMzArray();
                     Float[] spectrumIntArray = mzIntensityPairs.getIntensityArray();
@@ -425,7 +425,9 @@ public class ScoreServiceImpl implements ScoreService {
         //判断分布是否覆盖
         int binFilled = 0;
         for (int binCount : binCounter) {
-            if (binCount >= minPeptidesPerBin) binFilled++;
+            if(binCount >= minPeptidesPerBin) {
+                binFilled++;
+            }
         }
         return binFilled >= minBinsFilled;
     }

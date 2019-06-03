@@ -1,4 +1,4 @@
-package com.westlake.air.propro.domain.bean.analyse;
+package com.westlake.air.propro.domain.bean.aird;
 
 import lombok.Data;
 
@@ -15,6 +15,8 @@ public class WindowRange {
     Float end;
     //precursor mz
     Float mz;
+
+    String features;
 
     public WindowRange() {}
 

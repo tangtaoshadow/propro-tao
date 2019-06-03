@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
 
-public class AnalyseDataUtil {
+public class AnalyseUtil {
 
-    public static final Logger logger = LoggerFactory.getLogger(AnalyseDataUtil.class);
+    public static final Logger logger = LoggerFactory.getLogger(AnalyseUtil.class);
 
     public static ResultDO<AnalyseDataDO> readConvDataFromFile(AnalyseDataDO data, RandomAccessFile raf) throws Exception {
         if (data.getPosDeltaList().size() != (data.getMzMap().size() + 1)) {

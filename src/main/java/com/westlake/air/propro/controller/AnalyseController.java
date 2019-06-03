@@ -3,6 +3,7 @@ package com.westlake.air.propro.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.westlake.air.propro.algorithm.extract.Extractor;
 import com.westlake.air.propro.algorithm.feature.ChromatographicScorer;
 import com.westlake.air.propro.algorithm.feature.LibraryScorer;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
@@ -83,6 +84,8 @@ public class AnalyseController extends BaseController {
     ChromatographicScorer chromatographicScorer;
     @Autowired
     LibraryScorer libraryScorer;
+    @Autowired
+    Extractor extractor;
 
     @RequestMapping(value = "/overview/list")
     String overviewList(Model model,
@@ -153,12 +156,12 @@ public class AnalyseController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED);
             return "redirect:/analyse/overview/list";
         }
-        ResultDO<ProjectDO> projectResult = projectService.getByName(experimentResult.getModel().getProjectName());
-        if (projectResult.isFailed()) {
+        ProjectDO project = projectService.getByName(experimentResult.getModel().getProjectName());
+        if (project == null) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED);
             return "redirect:/analyse/overview/list";
         }
-        String exportPath = projectResult.getModel().getExportPath();
+        String exportPath = project.getExportPath();
 
         int pageSize = 1000;
         AnalyseDataQuery query = new AnalyseDataQuery(id);
@@ -544,7 +547,7 @@ public class AnalyseController extends BaseController {
         AnalyseDataDO data = null;
         ResultDO<AnalyseOverviewDO> overviewResult = null;
         ResultDO<ExperimentDO> experimentResult = null;
-        ResultDO<LibraryDO> libraryResult = null;
+        LibraryDO library = null;
         HashSet<String> usedCutInfos = new HashSet<>();
 
         String targetExpId = null;
@@ -586,8 +589,8 @@ public class AnalyseController extends BaseController {
             model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
             return "analyse/data/consultation";
         }
-        if (experimentResult.getModel().getSlope() == null || experimentResult.getModel().getIntercept() == null) {
-            model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
+        if (experimentResult.getModel().getIrtResult() == null) {
+            model.addAttribute(ERROR_MSG, ResultCode.IRT_FIRST.getMessage());
             return "analyse/data/consultation";
         }
         if (experimentResult.getModel().getAirdPath() == null || experimentResult.getModel().getAirdPath().isEmpty()) {
@@ -597,8 +600,8 @@ public class AnalyseController extends BaseController {
         //校验权限
         PermissionUtil.check(experimentResult.getModel());
 
-        libraryResult = libraryService.getById(targetLibraryId);
-        if (libraryResult.isFailed()) {
+        library = libraryService.getById(targetLibraryId);
+        if (library == null) {
             model.addAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED.getMessage());
             return "analyse/data/consultation";
         }
@@ -607,7 +610,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("peptideRef", targetPeptideRef);
         model.addAttribute("expId", targetExpId);
         model.addAttribute("libraryId", targetLibraryId);
-        model.addAttribute("libraryName", libraryResult.getModel().getName());
+        model.addAttribute("libraryName", library.getName());
 
         model.addAttribute("exp", experimentResult.getModel());
         if (!allCutInfo) {
@@ -643,7 +646,7 @@ public class AnalyseController extends BaseController {
             }
         }
 
-        ResultDO<AnalyseDataDO> dataRealResult = experimentService.extractOne(experimentDO, peptide, rtExtractWindow, mzExtractWindow);
+        ResultDO<AnalyseDataDO> dataRealResult = extractor.extractOne(experimentDO, peptide, rtExtractWindow, mzExtractWindow);
         if (dataRealResult.isFailed()) {
             model.addAttribute(ERROR_MSG, ResultCode.CONVOLUTION_DATA_NOT_EXISTED.getMessage());
             return "analyse/data/consultation";

@@ -2,20 +2,17 @@ package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.westlake.air.propro.constants.PositionType;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.db.ExperimentDO;
-import com.westlake.air.propro.domain.db.ScanIndexDO;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.algorithm.parser.MzXMLParser;
+import com.westlake.air.propro.domain.db.SwathIndexDO;
 import com.westlake.air.propro.service.ExperimentService;
-import com.westlake.air.propro.service.ScanIndexService;
-import com.westlake.air.propro.utils.ByteUtil;
+import com.westlake.air.propro.service.SwathIndexService;
 import com.westlake.air.propro.utils.FileUtil;
 import com.westlake.air.propro.utils.PermissionUtil;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,9 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
-import java.nio.ByteOrder;
 
 /**
  * Created by James Lu MiaoShan
@@ -43,66 +38,13 @@ public class SpectrumController extends BaseController {
     @Autowired
     ExperimentService experimentService;
     @Autowired
-    ScanIndexService scanIndexService;
-
-    @RequestMapping(value = "/mzxmlextractor")
-    String mzxmlextractor(Model model,
-                          @RequestParam(value = "isZlibCompression", required = false) boolean isZlibCompression,
-                          @RequestParam(value = "values", required = false) String values,
-                          @RequestParam(value = "precision", required = false, defaultValue = "32") Integer precision) {
-        model.addAttribute("values", values);
-        model.addAttribute("precision", precision);
-        model.addAttribute("isZlibCompression", isZlibCompression);
-
-        if (values != null && !values.isEmpty()) {
-            MzIntensityPairs pairs = mzXMLParser.getPeakMap(new Base64().decode(values.trim()), precision, isZlibCompression);
-            model.addAttribute("mzArray", pairs.getMzArray());
-            model.addAttribute("intensityArray", pairs.getIntensityArray());
-        }
-
-        return "spectrum/mzxmlextractor";
-    }
-
-    @RequestMapping(value = "/mzmlextractor")
-    String mzmlextractor(Model model,
-                         @RequestParam(value = "isZlibCompression", required = false) boolean isZlibCompression,
-                         @RequestParam(value = "mz", required = false) String mz,
-                         @RequestParam(value = "intensity", required = false) String intensity,
-                         @RequestParam(value = "mzPrecision", required = false, defaultValue = "32") Integer mzPrecision,
-                         @RequestParam(value = "intensityPrecision", required = false, defaultValue = "32") Integer intensityPrecision) {
-        model.addAttribute("mz", mz);
-        model.addAttribute("intensity", intensity);
-        model.addAttribute("mzPrecision", mzPrecision);
-        model.addAttribute("intensityPrecision", intensityPrecision);
-        model.addAttribute("isZlibCompression", isZlibCompression);
-
-        if (mz != null && !mz.isEmpty() && intensity != null && !intensity.isEmpty()) {
-
-            Float[] mzArray = mzXMLParser.getValues(new Base64().decode(mz.trim()), mzPrecision, isZlibCompression, ByteOrder.LITTLE_ENDIAN);
-            Float[] intensityArray = mzXMLParser.getValues(new Base64().decode(intensity.trim()), intensityPrecision, isZlibCompression, ByteOrder.LITTLE_ENDIAN);
-
-            if (mzArray == null || intensityArray == null || mzArray.length != intensityArray.length) {
-                return null;
-            }
-
-            model.addAttribute("mzArray", mzArray);
-            model.addAttribute("intensityArray", intensityArray);
-        }
-
-        return "spectrum/mzmlextractor";
-    }
-
-    @RequestMapping(value = "/mzxmlcompressor")
-    String mzxmlCompressor(Model model) {
-
-        return "spectrum/mzmlextractor";
-    }
+    SwathIndexService swathIndexService;
 
     @RequestMapping(value = "/view")
     @ResponseBody
     ResultDO<JSONObject> view(Model model,
                               @RequestParam(value = "indexId", required = false) String indexId,
-                              @RequestParam(value = "type", required = false) String type,
+                              @RequestParam(value = "rt", required = false) float rt,
                               @RequestParam(value = "expId", required = false) String expId) {
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
         MzIntensityPairs pairs = null;
@@ -114,22 +56,20 @@ public class SpectrumController extends BaseController {
         }
         PermissionUtil.check(expResult.getModel());
 
-        ResultDO<ScanIndexDO> indexResult = scanIndexService.getById(indexId);
-        if (indexResult.isFailed()) {
-            resultDO.setErrorResult(ResultCode.SCAN_INDEX_NOT_EXISTED);
+        SwathIndexDO swathIndex = swathIndexService.getById(indexId);
+        if (swathIndex == null) {
+            resultDO.setErrorResult(ResultCode.SWATH_INDEX_NOT_EXISTED);
             return resultDO;
         }
 
         ExperimentDO experimentDO = expResult.getModel();
-        ScanIndexDO scanIndexDO = indexResult.getModel();
 
         RandomAccessFile raf = null;
         try {
             File file = new File(experimentDO.getAirdPath());
             raf = new RandomAccessFile(file, "r");
-            pairs = airdFileParser.parseValue(raf, scanIndexDO.getPositionMap().get(PositionType.AIRD_MZ), scanIndexDO.getPositionMap().get(PositionType.AIRD_INTENSITY), ByteUtil.getByteOrder(experimentDO.getByteOrder()));
-
-        } catch (FileNotFoundException e) {
+            pairs = airdFileParser.parseValue(raf, swathIndex, rt);
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             FileUtil.close(raf);
@@ -154,67 +94,5 @@ public class SpectrumController extends BaseController {
         resultDO.setModel(res);
         return resultDO;
     }
-
-    @RequestMapping(value = "/viewmzxml")
-    @ResponseBody
-    ResultDO<JSONObject> viewMzXML(Model model,
-                                   @RequestParam(value = "indexId", required = false) String indexId,
-                                   @RequestParam(value = "expId", required = false) String expId) {
-        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
-        MzIntensityPairs pairs = null;
-
-        ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
-        if (expResult.isFailed()) {
-            resultDO.setErrorResult(ResultCode.EXPERIMENT_NOT_EXISTED);
-            return resultDO;
-        }
-        PermissionUtil.check(expResult.getModel());
-
-
-        ResultDO<ScanIndexDO> indexResult = scanIndexService.getById(indexId);
-        if (indexResult.isFailed()) {
-            resultDO.setErrorResult(ResultCode.SCAN_INDEX_NOT_EXISTED);
-            return resultDO;
-        }
-
-        ExperimentDO experimentDO = expResult.getModel();
-        ScanIndexDO scanIndexDO = indexResult.getModel();
-
-        File file = new File(experimentDO.getFilePath());
-
-        RandomAccessFile raf = null;
-        try {
-            raf = new RandomAccessFile(file, "r");
-            pairs = mzXMLParser.parseValue(raf, scanIndexDO.getPosStart(PositionType.MZXML), scanIndexDO.getPosEnd(PositionType.MZXML), experimentDO.getCompressionType(), experimentDO.getPrecision());
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } finally {
-            FileUtil.close(raf);
-        }
-
-        JSONObject res = new JSONObject();
-        JSONArray mzArray = new JSONArray();
-        JSONArray intensityArray = new JSONArray();
-        if (pairs == null) {
-            return ResultDO.buildError(ResultCode.DATA_IS_EMPTY);
-        }
-
-        Float[] pairMzArray = pairs.getMzArray();
-        Float[] pairIntensityArray = pairs.getIntensityArray();
-        for (int n = 0; n < pairMzArray.length; n++) {
-//            if(pairIntensityArray[n] == 0f){
-//                continue;
-//            }
-            mzArray.add(pairMzArray[n]);
-            intensityArray.add(pairIntensityArray[n]);
-        }
-
-        res.put("mz", mzArray);
-        res.put("intensity", intensityArray);
-        resultDO.setModel(res);
-        return resultDO;
-    }
-
 
 }

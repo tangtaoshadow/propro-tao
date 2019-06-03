@@ -1,56 +1,81 @@
 package com.westlake.air.propro.domain.bean.aird;
 
-import com.westlake.air.propro.domain.bean.analyse.WindowRange;
-import com.westlake.air.propro.domain.bean.compressor.Strategy;
-import com.westlake.air.propro.domain.db.ScanIndexDO;
+import com.westlake.air.propro.domain.db.SwathIndexDO;
 import lombok.Data;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 @Data
 public class AirdInfo {
 
-    //mz数组采用了pfor+zlib的压缩,intensity数组采用了zlib压缩
-    String compressStrategy = "mz:pfor,zlib;intensity:zlib";
-    //枚举值,LITTLE_ENDIAN和BIG_ENDIAN两种
-    String byteOrder = "LITTLE_ENDIAN";
-
-    //使用的压缩策略,MZ数组和Intensity数组分别采用的压缩策略,Propro1.0采用的是mz:pfor,zlib:1000;intensity:zlib:1000
-    HashMap<String, Strategy> strategies = new HashMap<>();
-
-    //是否忽略Intensity为0的键值对
-    Boolean ignoreZeroIntensity = true;
-
-    //对应的raw文件中的id
-    String rawId;
-    //转换压缩后的aird的文件路径,默认读取的是同目录下同文件名的aird文件,如果不存在则读取本字段
-    String airdPath;
-    //实验的描述
-    String description;
-    //实验的创建者
-    String creator = "Propro-Client";
-
-    String createDate;
-    //Swaht的各个窗口间的重叠部分
-    Float overlap;
-
-    //DIA-Swath,PRM
-    String type;
     /**
+     * 仪器设备信息
+     */
+    Instrument instrument;
+
+    /**
+     * 处理的软件信息
+     */
+    List<Software> softwares;
+
+    /**
+     * 处理前的文件信息
+     */
+    List<ParentFile> parentFiles;
+
+    /**
+     * [核心字段]
+     * 数组压缩策略
+     */
+    List<Compressor> compressors;
+
+    /**
+     * [核心字段]
      * Store the window rangs which have been adjusted with experiment overlap
+     * 存储SWATH窗口信息,窗口已经根据overlap进行过调整
      */
     List<WindowRange> rangeList = new ArrayList<>();
 
     /**
-     * the whole new scan index for new format file
+     * [核心字段]
+     * 用于存储SWATH Block的索引
      */
-    List<ScanIndexDO> scanIndexList = new ArrayList<>();
+    List<SwathIndexDO> indexList;
 
     /**
-     * the swath window location(start and and) for new format file
+     * [核心字段]
+     * 实验类型,目前支持DIA_SWATH和PRM两种
      */
-    List<ScanIndexDO> swathIndexList = new ArrayList<>();
+    String type;
+
+    /**
+     * 原始文件的总大小
+     */
+    Long fileSize;
+
+    /**
+     * 转换压缩后的aird二进制文件路径,默认读取同目录下的同名文件,如果不存在才去去读本字段对应的路径
+     */
+    String airdPath;
+
+    /**
+     * 实验的描述
+     */
+    String description;
+
+    /**
+     * 实验的创建者,本字段在被导入Propro Server时会被操作人覆盖
+     */
+    String creator;
+
+    /**
+     * 实验的创建日期
+     */
+    String createDate;
+
+    /**
+     * 特征键值对,详情见Features.cs
+     */
+    String features;
 }

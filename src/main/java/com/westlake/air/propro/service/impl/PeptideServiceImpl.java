@@ -6,7 +6,7 @@ import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.dao.LibraryDAO;
 import com.westlake.air.propro.dao.PeptideDAO;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.analyse.WindowRange;
+import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
@@ -217,7 +217,6 @@ public class PeptideServiceImpl implements PeptideService {
     public List<TargetPeptide> buildMS1Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows) {
         long start = System.currentTimeMillis();
         PeptideQuery query = new PeptideQuery(libraryId);
-//        query.setIsDecoy(false);
         List<TargetPeptide> targetList = peptideDAO.getTPAll(query);
 
         for (TargetPeptide targetPeptide : targetList) {

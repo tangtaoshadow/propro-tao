@@ -1,5 +1,6 @@
 package com.westlake.air.propro.openapi;
 
+import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.controller.BaseController;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
@@ -31,7 +32,12 @@ public class LibraryApi extends BaseController {
     })
     public ResultDO<LibraryDO> getById(Model model,
                                               @RequestParam(value = "id", required = true) String id) {
-        ResultDO<LibraryDO> resultDO = libraryService.getById(id);
+        LibraryDO library = libraryService.getById(id);
+        if(library == null){
+            return ResultDO.buildError(ResultCode.LIBRARY_NOT_EXISTED);
+        }
+        ResultDO<LibraryDO> resultDO = new ResultDO<>(true);
+        resultDO.setModel(library);
         return resultDO;
     }
 

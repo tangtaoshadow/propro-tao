@@ -20,7 +20,7 @@
         <div class="clearfix">
             <form id="searchForm" method="post" role="form"
                   class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
-                  th:action="@{/scanindex/list}">
+                  th:action="@{/swathindex/list}">
                 <input id="currentPage" type="hidden" class="form-control" name="currentPage">
                 <input id="pageSize" type="hidden" th:value="${pageSize}" class="form-control" name="pageSize">
 
@@ -29,8 +29,8 @@
                         <div class="input-group-prepend">
                             <button class="btn btn-success" type="button" th:text="#{label_exp_id}"></button>
                         </div>
-                        <input type="text" class="form-control m-input" name="experimentId"
-                               th:value="${experimentId}">
+                        <input type="text" class="form-control m-input" name="expId"
+                               th:value="${expId}">
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
@@ -41,29 +41,11 @@
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
                             <button class="btn btn-success" type="button">
-                                RT:
-                            </button>
-                        </div>
-                        <input type="text" class="form-control m-input" name="rt"
-                               placeholder="1036.45" th:value="${rt}">
-                    </div>
-                    <div class="input-group col-lg-2">
-                        <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button">
-                                ParentNum:
-                            </button>
-                        </div>
-                        <input type="text" class="form-control m-input" name="parentNum"
-                               placeholder="" th:value="${parentNum}">
-                    </div>
-                    <div class="input-group col-lg-2">
-                        <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button" >
                                 Precursor Mz-Start:
                             </button>
                         </div>
-                        <input type="text" class="form-control m-input" name="precursorMzStart"
-                               placeholder="precursorMzStart" th:value="${precursorMzStart}">
+                        <input type="text" class="form-control m-input" name="mzStart"
+                               placeholder="mzStart" th:value="${mzStart}">
 
                     </div>
                     <div class="input-group col-lg-2">
@@ -80,49 +62,30 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="2%">No.</th>
-                    <th width="10%" th:text="#{label_exp_name}"></th>
-                    <th width="3%" th:text="#{label_parent_node}"></th>
-                    <th width="5%">Num</th>
+                    <th width="5%">No.</th>
+                    <th width="20%" th:text="#{label_exp_name}"></th>
                     <th width="5%" th:text="#{label_ms_level}"></th>
-                    <th width="5%">RT</th>
-                    <!--<th width="10%">mzXml Position(Start/Size)</th>-->
-                    <th width="10%">mz Position(Start/Size)</th>
-                    <th width="10%">Intensity Position(Start/Size)</th>
-                    <th width="10%" th:text="#{label_precursor_mz_range_before_adjust}"></th>
-                    <th width="10%" th:text="#{label_precursor_mz_range_after_adjust}"></th>
-                    <th width="10%" th:text="|#{label_swath_window_weight}(Before/After)|"></th>
+                    <th width="15%" th:text="#{label_spectrum_count}"></th>
+                    <th width="15%" th:text="#{label_swath_block_size}"></th>
+                    <th width="15%" th:text="#{label_rt_range}"></th>
+                    <th width="15%" th:text="#{label_swath_windows}"></th>
                     <th width="15%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="scanIndex,status:${scanIndexList}">
-                    <td th:text="${status.index+1}"></td>
+                <tr th:each="swathIndex,status:${swathIndexList}">
+                    <td th:text="${status.index}"></td>
                     <td>
-                        <a th:href="@{/experiment/detail/{id}(id=${scanIndex.experimentId})}"
+                        <a th:href="@{/experiment/detail/{id}(id=${swathIndex.expId})}"
                            th:text="${experiment.name}"></a>
                     </td>
-                    <td th:text="${scanIndex.parentNum}"></td>
-
-                    <td th:text="${scanIndex.num}"></td>
-                    <td th:text="${scanIndex.msLevel}"></td>
-                    <td th:text="${scanIndex.rt}"></td>
-                    <!--<td th:text="|${scanIndex.positionMap?.get('mzxml')?.start} : ${scanIndex.positionMap?.get('mzxml')?.delta}|"></td>-->
-                    <td th:text="|${scanIndex.positionMap?.get('mz')?.start} : ${scanIndex.positionMap?.get('mz')?.delta}|"></td>
-                    <td th:text="|${scanIndex.positionMap?.get('int')?.start} : ${scanIndex.positionMap?.get('int')?.delta}|"></td>
-                    <td th:text="|${scanIndex.originalPrecursorMzStart}/${scanIndex.originalPrecursorMzEnd}|"></td>
-                    <td th:text="|${scanIndex.precursorMzStart}/${scanIndex.precursorMzEnd}|">
-                    <td th:text="|${scanIndex.originalWindowWideness}/${scanIndex.windowWideness}|"></td>
+                    <td th:text="${swathIndex.level}"></td>
+                    <td th:text="${swathIndex.rts?.size()}"></td>
+                    <td th:text="|${(swathIndex.endPtr - swathIndex.startPtr)/1024/1024} MB|"></td>
+                    <td th:text="|${swathIndex.rts?.get(0)}-${swathIndex.rts?.get(swathIndex.rts?.size()-1)}|"></td>
+                    <td th:text="|${swathIndex?.range?.mz} [${swathIndex?.range?.start}-${swathIndex?.range?.end}]|">
                     <td>
-                        <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
-                                data-target="#m_modal_spectrum" th:data1="${scanIndex.id}" th:data2="${experiment.id}"
-                                th:onclick="query(this.getAttribute('data1'),this.getAttribute('data2'),'aird')" th:text="#{label_aird_spectrum}">
-                        </button>
-                        <a th:href="@{/scanindex/detail/{id}(id=${scanIndex.id})}" data-toggle="m-tooltip"
-                           th:title="#{btn_detail}"
-                           class="btn btn-warning m-btn m-btn--icon m-btn--icon-only">
-                            <i class="fa fa-wpforms"></i>
-                        </a>
+                        <a th:href="@{/swathindex/detail/{id}(id=${swathIndex.id})}" class="btn btn-sm btn-info" th:text="#{label_spectrum_list}"></a>
                     </td>
                 </tr>
                 </tbody>
@@ -130,25 +93,6 @@
         </div>
         <p id="pagination"></p>
         <!--end: Datatable -->
-
-        <div class="modal fade" id="m_modal_spectrum" tabindex="-1" role="dialog" aria-labelledby="SpectrumInfo"
-             aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Spectrum Info</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-                    </div>
-                    <div id="modal-body" class="modal-body" style="width: 1200px;height:600px;">
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{btn_close}"></button>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 <th:block layout:fragment="script">
@@ -175,38 +119,23 @@
                 document.getElementById("searchForm").submit();
             });
             chart = echarts.init(document.getElementById('modal-body'));
-
-            // chart = echarts.init(document.getElementById('modal-body'));
         });
 
-        function query(indexId, expId, type) {
+        function query(indexId, expId) {
 
             var datas = null;
-            if (type === 'mzxml') {
-                $.ajax({
-                    url: "/spectrum/viewmzxml?indexId=" + indexId + "&expId=" + expId,
-                    async: false,
-                    success: function (result) {
-                        if (result.success) {
-                            datas = result.model;
-                        } else {
-                            chart.clear();
-                        }
+            $.ajax({
+                url: "/spectrum/view?indexId=" + indexId + "&expId=" + expId,
+                async: false,
+                success: function (result) {
+                    if (result.success) {
+                        datas = result.model;
+                    } else {
+                        chart.clear();
                     }
-                })
-            } else if (type === 'aird') {
-                $.ajax({
-                    url: "/spectrum/view?indexId=" + indexId + "&expId=" + expId,
-                    async: false,
-                    success: function (result) {
-                        if (result.success) {
-                            datas = result.model;
-                        } else {
-                            chart.clear();
-                        }
-                    }
-                })
-            }
+                }
+            });
+
             if (datas == null) {
                 return;
             }

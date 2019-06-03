@@ -38,8 +38,8 @@ public class DecoyController extends BaseController {
     @RequestMapping(value = "/overview/{id}")
     String overview(Model model, @PathVariable("id") String id) {
 
-        ResultDO<LibraryDO> libraryResult = libraryService.getById(id);
-        PermissionUtil.check(libraryResult.getModel());
+        LibraryDO library = libraryService.getById(id);
+        PermissionUtil.check(library);
 
         FragmentResult result = fragmentFactory.decoyOverview(id);
 
@@ -53,12 +53,11 @@ public class DecoyController extends BaseController {
     @RequestMapping(value = "/delete")
     String delete(Model model, @RequestParam(value = "id", required = true) String id) {
 
-        ResultDO<LibraryDO> libraryResult = libraryService.getById(id);
-        PermissionUtil.check(libraryResult.getModel());
+        LibraryDO library = libraryService.getById(id);
+        PermissionUtil.check(library);
 
         peptideService.deleteAllDecoyByLibraryId(id);
-        ResultDO<LibraryDO> resultDO = libraryService.getById(id);
-        LibraryDO library = resultDO.getModel();
+
         libraryService.countAndUpdateForLibrary(library);
         return "redirect:/library/detail/" + id;
     }
@@ -67,8 +66,8 @@ public class DecoyController extends BaseController {
     String generate(Model model,
                     @RequestParam(value = "id", required = true) String id) {
 
-        ResultDO<LibraryDO> libraryResult = libraryService.getById(id);
-        PermissionUtil.check(libraryResult.getModel());
+        LibraryDO library = libraryService.getById(id);
+        PermissionUtil.check(library);
 
         logger.info("正在删除原有伪肽段");
         //删除原有的伪肽段
@@ -93,8 +92,6 @@ public class DecoyController extends BaseController {
             }
         }
 
-        ResultDO<LibraryDO> resultDO = libraryService.getById(id);
-        LibraryDO library = resultDO.getModel();
         libraryService.countAndUpdateForLibrary(library);
 
         return "redirect:/library/detail/" + id;

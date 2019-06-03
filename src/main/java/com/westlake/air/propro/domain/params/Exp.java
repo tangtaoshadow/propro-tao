@@ -9,16 +9,13 @@ public class Exp {
 
     String filePath;
 
-    Float overlap;
-
     String description;
 
     public Exp(){}
 
-    public Exp(String name, String filePath, Float overlap, String description){
+    public Exp(String name, String filePath, String description){
         this.name = name;
         this.filePath = filePath;
-        this.overlap = overlap;
         this.description = description;
     }
 

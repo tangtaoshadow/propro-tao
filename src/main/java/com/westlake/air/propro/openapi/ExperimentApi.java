@@ -1,13 +1,12 @@
 package com.westlake.air.propro.openapi;
 
+import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.controller.BaseController;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.ExperimentDO;
+import com.westlake.air.propro.domain.db.ProjectDO;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
-import com.westlake.air.propro.service.ExperimentService;
-import com.westlake.air.propro.service.LibraryService;
-import com.westlake.air.propro.service.PeptideService;
-import com.westlake.air.propro.service.ScanIndexService;
+import com.westlake.air.propro.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -25,6 +24,8 @@ public class ExperimentApi extends BaseController {
 
     @Autowired
     ExperimentService experimentService;
+    @Autowired
+    ProjectService projectService;
 
     @ApiOperation(value = "Get Experiment by Id", notes = "根据ID获取实验对象")
     @RequestMapping(value = "getById", method = RequestMethod.GET)
@@ -56,7 +57,11 @@ public class ExperimentApi extends BaseController {
             query.setName(expName);
         }
         if (projectName != null && !projectName.isEmpty()) {
-            query.setProjectName(projectName);
+            ProjectDO project = projectService.getByName(projectName);
+            if(project == null){
+                return ResultDO.buildError(ResultCode.PROJECT_NOT_EXISTED);
+            }
+            query.setProjectId(project.getId());
         }
         buildPageQuery(query, currentPage, pageSize);
         ResultDO<List<ExperimentDO>> resultDO = experimentService.getList(query);

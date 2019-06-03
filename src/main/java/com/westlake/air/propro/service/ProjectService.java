@@ -18,9 +18,9 @@ public interface ProjectService {
 
     ResultDO delete(String id);
 
-    ResultDO<ProjectDO> getById(String id);
+    ProjectDO getById(String id);
 
-    ResultDO<ProjectDO> getByName(String name);
+    ProjectDO getByName(String name);
 
     long count(ProjectQuery query);
 }

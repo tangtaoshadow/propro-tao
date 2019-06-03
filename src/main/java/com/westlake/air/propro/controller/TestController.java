@@ -49,8 +49,6 @@ public class TestController extends BaseController {
     @Autowired
     ProjectService projectService;
     @Autowired
-    ScanIndexService scanIndexService;
-    @Autowired
     TaskService taskService;
     @Autowired
     AnalyseDataService analyseDataService;
@@ -84,72 +82,6 @@ public class TestController extends BaseController {
     public static float SIGMA = 6.25f;
     public static float SPACING = 0.01f;
 
-    @RequestMapping("test")
-    @ResponseBody
-    String test(Model model, RedirectAttributes redirectAttributes) {
-
-        /**
-         * 5c9c2269dfdfdd356065d2ac
-         * mz unique:456789
-         * intensity unique:45366
-         *
-         * 5c9c226adfdfdd356065d2ae
-         * mz unique:456790
-         * intensity unique:46730
-         *
-         * 5c9c226adfdfdd356065d2b2
-         * mz unique:456790
-         * intensity unique:48352
-         *
-         * 5c9c226adfdfdd356065d2b0
-         * mz unique:456791
-         * intensity unique:46707
-         *
-         * 5c9c226adfdfdd356065d2b6
-         * mz unique:456790
-         * intensity unique:48202
-         */
-        HashSet<Float> uniqueMz = new HashSet<>();
-        HashSet<Float> uniqueIntensity = new HashSet<>();
-        test(uniqueMz, uniqueIntensity, "5ce7814620fa1d0908210385");
-
-        System.out.println("mz unique:" + uniqueMz.size());
-        System.out.println("intensity unique:" + uniqueIntensity.size());
-
-        return "success";
-    }
-
-    private void test(HashSet<Float> uniqueMz, HashSet<Float> uniqueIntensity, String expId){
-        System.out.println("exp Id: " + expId);
-        try {
-            ResultDO<ExperimentDO> result = experimentService.getById(expId);
-            ExperimentDO exp = result.getModel();
-            List<ScanIndexDO> scanIndexes = scanIndexService.getAllByExperimentId(expId);
-            RandomAccessFile raf = new RandomAccessFile(new File(exp.getAirdPath()), "r");
-            System.out.println("总计Scan数:" + scanIndexes.size());
-            long count = 0;
-            for (ScanIndexDO scanIndex : scanIndexes) {
-                if (count % 10000 == 0) {
-                    System.out.println("Processing:" + count);
-                }
-                count++;
-
-                if (scanIndex.getMsLevel() != 2) {
-                    continue;
-                }
-                MzIntensityPairs pairs = scanIndexService.getSpectrum(scanIndex, raf, ByteUtil.getByteOrder(exp.getByteOrder()));
-                uniqueMz.addAll(Lists.newArrayList(pairs.getMzArray()));
-                uniqueIntensity.addAll(Lists.newArrayList(pairs.getIntensityArray()));
-
-            }
-            System.out.println("mz unique:" + uniqueMz.size());
-            System.out.println("intensity unique:" + uniqueIntensity.size());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     //计算iRT
     @RequestMapping("test2")
     @ResponseBody
@@ -168,30 +100,6 @@ public class TestController extends BaseController {
         String jsonTest = "{\"start\": 482.14798,\"end\": 483.348,\"interval\": 1.20001221}";
         HashMap test = JSONObject.parseObject(jsonTest, HashMap.class);
         System.out.println(test.size());
-        return null;
-    }
-
-    @RequestMapping("test8")
-    @ResponseBody
-    String test8(Model model, RedirectAttributes redirectAttributes) throws Exception {
-        System.out.println("------ Aird Read Test ------");
-        String filePath = "\\\\ProproNas\\ProproNAS\\data\\SGS\\aird\\napedro_L120420_010_SW.aird";
-        String indexFilePath = "\\\\ProproNas\\ProproNAS\\data\\SGS\\aird\\napedro_L120420_010_SW.json";
-        String jsonIndex = FileUtil.readFile(indexFilePath);
-        AirdInfo airdInfo = JSONObject.parseObject(jsonIndex, AirdInfo.class);
-        File jsonFile = new File(filePath);
-        RandomAccessFile raf = new RandomAccessFile(jsonFile, "r");
-        long start = System.currentTimeMillis();
-        int i = 1;
-        System.out.println("napedro_L120224_010_SW.aird");
-        for (ScanIndexDO index : airdInfo.getSwathIndexList()) {
-            TreeMap<Float, MzIntensityPairs> result = airdFileParser.parseSwathBlockValues(raf, index, ByteOrder.LITTLE_ENDIAN);
-            System.out.println("第" + i + "批数据,读取耗时:" + (System.currentTimeMillis() - start));
-            start = System.currentTimeMillis();
-            i++;
-        }
-
-        FileUtil.close(raf);
         return null;
     }
 

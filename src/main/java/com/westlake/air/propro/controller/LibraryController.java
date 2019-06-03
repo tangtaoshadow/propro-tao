@@ -7,7 +7,7 @@ import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.SuccessMsg;
 import com.westlake.air.propro.constants.TaskTemplate;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.analyse.WindowRange;
+import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.query.LibraryQuery;
 import com.westlake.air.propro.domain.query.PeptideQuery;
@@ -206,14 +206,13 @@ public class LibraryController extends BaseController {
     @RequestMapping(value = "/aggregate/{id}")
     String aggregate(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
 
-        ResultDO<LibraryDO> resultDO = libraryService.getById(id);
-        PermissionUtil.check(resultDO.getModel());
-        if (resultDO.isFailed()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
+        LibraryDO library = libraryService.getById(id);
+        PermissionUtil.check(library);
+        if (library == null) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED.getMessage());
             return "redirect:/library/list";
         }
 
-        LibraryDO library = resultDO.getModel();
         libraryService.countAndUpdateForLibrary(library);
 
         return "redirect:/library/detail/" + library.getId();
@@ -221,41 +220,41 @@ public class LibraryController extends BaseController {
 
     @RequestMapping(value = "/edit/{id}")
     String edit(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
-        ResultDO<LibraryDO> resultDO = libraryService.getById(id);
-        if (resultDO.isFailed()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
+        LibraryDO library = libraryService.getById(id);
+        if (library == null) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED.getMessage());
             return "redirect:/library/list";
         } else {
-            PermissionUtil.check(resultDO.getModel());
+            PermissionUtil.check(library);
             List<LibraryDO> libraryDOList = getLibraryList(1, false);
             LibraryDO libraryDO = new LibraryDO();
             libraryDO.setName("");
             libraryDO.setId("");
             libraryDOList.add(0, libraryDO);
             model.addAttribute("libraries", libraryDOList);
-            model.addAttribute("library", resultDO.getModel());
+            model.addAttribute("library", library);
             return "library/edit";
         }
     }
 
     @RequestMapping(value = "/detail/{id}")
     String detail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
-        ResultDO<LibraryDO> resultDO = libraryService.getById(id);
+        LibraryDO library = libraryService.getById(id);
 
-        if (resultDO.isSuccess()) {
-            PermissionUtil.check(resultDO.getModel());
-            if (resultDO.getModel().getType().equals(LibraryDO.TYPE_IRT)) {
+        if (library == null) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED.getMessage());
+            return "redirect:/library/list";
+        } else {
+            PermissionUtil.check(library);
+            if (library.getType().equals(LibraryDO.TYPE_IRT)) {
                 Double[] range = peptideService.getRTRange(id);
                 if (range != null && range.length == 2) {
                     model.addAttribute("minRt", range[0]);
                     model.addAttribute("maxRt", range[1]);
                 }
             }
-            model.addAttribute("library", resultDO.getModel());
+            model.addAttribute("library", library);
             return "library/detail";
-        } else {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/library/list";
         }
     }
 
@@ -279,14 +278,13 @@ public class LibraryController extends BaseController {
             redirectListUrl = "redirect:/library/list";
         }
 
-        ResultDO<LibraryDO> resultDO = libraryService.getById(id);
-        if (resultDO.isFailed()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
+        LibraryDO library = libraryService.getById(id);
+        if (library == null) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED.getMessage());
             return redirectListUrl;
         }
 
-        PermissionUtil.check(resultDO.getModel());
-        LibraryDO library = resultDO.getModel();
+        PermissionUtil.check(library);
         library.setDescription(description);
         library.setType(type);
         ResultDO updateResult = libraryService.update(library);
@@ -325,12 +323,12 @@ public class LibraryController extends BaseController {
     @RequestMapping(value = "/delete/{id}")
     String delete(Model model, @PathVariable("id") String id,
                   RedirectAttributes redirectAttributes) {
-        ResultDO<LibraryDO> res = libraryService.getById(id);
+        LibraryDO library = libraryService.getById(id);
         int type = 0;
-        if (res.isFailed()) {
-            type = res.getModel().getType();
+        if (library != null) {
+            type = library.getType();
         }
-        PermissionUtil.check(res.getModel());
+        PermissionUtil.check(library);
         ResultDO resultDO = libraryService.delete(id);
 
         String redirectListUrl = null;
@@ -352,13 +350,12 @@ public class LibraryController extends BaseController {
     @RequestMapping(value = "/setPublic/{id}")
     String setPublic(@PathVariable("id") String id,
                      RedirectAttributes redirectAttributes) {
-        ResultDO<LibraryDO> resultDO = libraryService.getById(id);
-        if (resultDO.isFailed()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
+        LibraryDO library = libraryService.getById(id);
+        if (library == null) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED.getMessage());
             return "redirect:/library/list";
         }
 
-        LibraryDO library = resultDO.getModel();
         PermissionUtil.check(library);
 
         library.setDoPublic(true);
@@ -383,8 +380,8 @@ public class LibraryController extends BaseController {
             return ResultDO.buildError(ResultCode.SEARCH_FRAGMENT_LENGTH_MUST_BIGGER_THAN_3);
         }
 
-        ResultDO<LibraryDO> LibResult = libraryService.getById(libraryId);
-        PermissionUtil.check(LibResult.getModel());
+        LibraryDO library = libraryService.getById(libraryId);
+        PermissionUtil.check(library);
 
         ResultDO<ExperimentDO> expResult = experimentService.getById(experimentId);
         PermissionUtil.check(expResult.getModel());
@@ -425,8 +422,8 @@ public class LibraryController extends BaseController {
     @RequestMapping(value = "overview/{id}")
     @ResponseBody
     String overview(Model model, @PathVariable("id") String id) {
-        ResultDO<LibraryDO> LibResult = libraryService.getById(id);
-        PermissionUtil.check(LibResult.getModel());
+        LibraryDO library = libraryService.getById(id);
+        PermissionUtil.check(library);
 
         List<PeptideDO> peptides = peptideService.getAllByLibraryId(id);
         int count = 0;

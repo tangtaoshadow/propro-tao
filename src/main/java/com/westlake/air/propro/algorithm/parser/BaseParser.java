@@ -45,9 +45,9 @@ public class BaseParser {
         return floatValues;
     }
 
-    //默认为BIG_ENDIAN,精度为小数点后三位
+    //默认从Aird文件中读取,编码Order为LITTLE_ENDIAN,精度为小数点后三位
     public Float[] getMzValues(byte[] value) throws Exception {
-        return getMzValues(value, ByteOrder.BIG_ENDIAN);
+        return getMzValues(value, ByteOrder.LITTLE_ENDIAN);
     }
 
     /**
@@ -74,9 +74,9 @@ public class BaseParser {
         return floatValues;
     }
 
-    //默认为BIG_ENDIAN
+    //默认为LITTLE_ENDIAN
     public Float[] getIntValues(byte[] value) throws Exception {
-        return getIntValues(value, ByteOrder.BIG_ENDIAN);
+        return getIntValues(value, ByteOrder.LITTLE_ENDIAN);
     }
 
     /**

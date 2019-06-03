@@ -68,7 +68,7 @@
                                 <div class="m-form__group m-form__group--inline">
                                     <div class="m-form__label">
                                         <label>
-                                            File_List(mzXML,aird):
+                                            File_List(aird):
                                         </label>
                                     </div>
                                     <div class="m-form__control">
@@ -111,21 +111,6 @@
                                                 </div>
                                                 <div class="d-md-none m--margin-bottom-10"></div>
                                             </div>
-                                            <div class="col-md-2">
-                                                <div class="m-form__group m-form__group--inline">
-                                                    <div class="m-form__label">
-                                                        <label class="m-label m-label--single">
-                                                            SwathWindowOverlap:
-                                                        </label>
-                                                    </div>
-                                                    <div class="m-form__control">
-                                                        <input type="number" class="form-control m-input" value="1"
-                                                               origin-name="overlap"
-                                                               name="overlap">
-                                                    </div>
-                                                </div>
-                                                <div class="d-md-none m--margin-bottom-10"></div>
-                                            </div>
                                             <div class="col-md-3">
                                                 <div class="m-form__group m-form__group--inline">
                                                     <div class="m-form__label">
@@ -134,8 +119,7 @@
                                                         </label>
                                                     </div>
                                                     <div class="m-form__control">
-                                        <textarea type="text" class="form-control m-input" origin-name="description"
-                                                  name="description"></textarea>
+                                                        <textarea type="text" class="form-control m-input" origin-name="description" name="description"></textarea>
                                                     </div>
                                                 </div>
                                                 <div class="d-md-none m--margin-bottom-10"></div>
@@ -220,9 +204,8 @@
                 "'></div></div><div class='d-md-none m--margin-bottom-10'></div></div><div class='col-md-3'><div class='m-form__group m-form__group--inline'> <div class='m-form__label'> <label class='m-label m-label--single'>FilePath:</label></div>" +
                 "<div class='m-form__control'><input type='text' class='form-control m-input' origin-name='filePath' name='" + "exps[" + count + "].filePath' placeholder='Enter File Path' value='" +
                 path + "\\" + name +
-                "'></div></div><div class='d-md-none m--margin-bottom-10'></div></div><div class='col-md-2'><div class='m-form__group m-form__group--inline'><div class='m-form__label'><label class='m-label m-label--single'>SwathWindowOverlap:" +
-                "</label></div><div class='m-form__control'><input type='number' class='form-control m-input' value='" + overlap +"' origin-name='overlap' name='" + "exps[" + count + "].overlap'></div></div><div class='d-md-none m--margin-bottom-10'></div>" +
-                "</div><div class='col-md-3'><div class='m-form__group m-form__group--inline'><div class='m-form__label'><label class='m-label m-label--single'>Description:</label></div>" +
+                "'></div></div><div class='d-md-none m--margin-bottom-10'></div></div>" +
+                "<div class='col-md-3'><div class='m-form__group m-form__group--inline'><div class='m-form__label'><label class='m-label m-label--single'>Description:</label></div>" +
                 "<div class='m-form__control'><textarea type='text' class='form-control m-input' origin-name='description' name='" + "exps[" + count + "].description'></textarea></div></div>" +
                 "<div class='d-md-none m--margin-bottom-10'></div></div><div class='col-md-1'><div data-repeater-delete='' class='btn-sm btn btn-danger m-btn m-btn--icon m-btn--pill'><span><i class='la la-trash-o'></i><span>Delete</span>" +
                 "</span></div></div></div>"

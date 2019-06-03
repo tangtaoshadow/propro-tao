@@ -18,8 +18,6 @@ public class ExperimentQuery extends PageQuery {
 
     String name;
 
-    String projectName;
-
     String projectId;
 
     String type;

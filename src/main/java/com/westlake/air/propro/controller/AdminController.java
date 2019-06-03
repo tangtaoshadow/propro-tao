@@ -236,20 +236,4 @@ public class AdminController extends BaseController {
         }
         return "Success";
     }
-
-    @RequestMapping(value = "/fillInfo")
-    @ResponseBody
-    public String fillInfo() throws IOException {
-        ProjectDO project = projectService.getById("5c737f50dfdfdd7abcdb1e4d").getModel();
-        List<ExperimentDO> experiments = experimentService.getAllByProjectName(project.getName());
-        for(ExperimentDO exp : experiments){
-            if(exp.getWindowRanges().get(0).getMz() == null){
-                String jsonIndex = FileUtil.readFile(exp.getAirdIndexPath());
-                AirdInfo airdInfo = JSONObject.parseObject(jsonIndex, AirdInfo.class);
-                exp.setWindowRanges(airdInfo.getRangeList());
-                experimentService.update(exp);
-            }
-        }
-        return "Success";
-    }
 }

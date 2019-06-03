@@ -30,6 +30,7 @@ import java.util.*;
  * Time: 2018-07-19 16:50
  */
 @Component
+@Deprecated
 public class MzXMLParser extends BaseParser {
 
     public final Logger logger = LoggerFactory.getLogger(MzXMLParser.class);
@@ -99,67 +100,67 @@ public class MzXMLParser extends BaseParser {
      * @param taskDO
      * @return
      */
-    public List<ScanIndexDO> index(File file, ExperimentDO experimentDO, TaskDO taskDO) {
-        RandomAccessFile raf = null;
-        FileChannel fc = null;
-        List<ScanIndexDO> list = null;
-        try {
-            raf = new RandomAccessFile(file, "r");
-//            fc = raf.getChannel();
-            list = indexForSwath(file);
-            if (list != null && list.size() > 0) {
-                ScanIndexDO index = list.get(0);
-                String[] attributes = parsePeakAttribute(raf, index.getPosStart(PositionType.MZXML), index.getPosEnd(PositionType.MZXML));
-                if (attributes != null && attributes.length == 2) {
-                    experimentDO.setCompressionType(attributes[0]);
-                    experimentDO.setPrecision(attributes[1]);
-                    ResultDO resultDO = experimentService.update(experimentDO);
-                    if (resultDO.isFailed()) {
-                        logger.info("Experiment save error! CompressionType and precision are mandatory! Index Action is interrupted", resultDO.getMsgInfo());
-                        return null;
-                    }
-                } else {
-                    logger.info("No Peak Attribute Found! CompressionType and precision are mandatory! Index Action is interrupted");
-                    return null;
-                }
-            }
-            int count = 0;
-            ScanIndexDO currentMS1 = null;
-            for (ScanIndexDO scanIndex : list) {
-                parseAttribute(raf, experimentDO.getOverlap(), scanIndex);
-                scanIndex.setExpId(experimentDO.getId());
-
-                if (scanIndex.getMsLevel() == 1) {
-                    currentMS1 = scanIndex;
-                } else {
-                    if (currentMS1 == null) {
-                        continue;
-                    } else {
-                        scanIndex.setParentNum(currentMS1.getNum());
-                    }
-                }
-
-                count++;
-                if (count % 10000 == 0) {
-                    taskDO.addLog("已扫描索引:" + count + "/" + list.size() + "条");
-                    taskService.update(taskDO);
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (raf != null) {
-                    raf.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return list;
-    }
+//    public List<ScanIndexDO> index(File file, ExperimentDO experimentDO, TaskDO taskDO) {
+//        RandomAccessFile raf = null;
+//        FileChannel fc = null;
+//        List<ScanIndexDO> list = null;
+//        try {
+//            raf = new RandomAccessFile(file, "r");
+////            fc = raf.getChannel();
+//            list = indexForSwath(file);
+//            if (list != null && list.size() > 0) {
+//                ScanIndexDO index = list.get(0);
+//                String[] attributes = parsePeakAttribute(raf, index.getPosStart(PositionType.MZXML), index.getPosEnd(PositionType.MZXML));
+//                if (attributes != null && attributes.length == 2) {
+//                    experimentDO.setCompressionType(attributes[0]);
+//                    experimentDO.setPrecision(attributes[1]);
+//                    ResultDO resultDO = experimentService.update(experimentDO);
+//                    if (resultDO.isFailed()) {
+//                        logger.info("Experiment save error! CompressionType and precision are mandatory! Index Action is interrupted", resultDO.getMsgInfo());
+//                        return null;
+//                    }
+//                } else {
+//                    logger.info("No Peak Attribute Found! CompressionType and precision are mandatory! Index Action is interrupted");
+//                    return null;
+//                }
+//            }
+//            int count = 0;
+//            ScanIndexDO currentMS1 = null;
+//            for (ScanIndexDO scanIndex : list) {
+//                parseAttribute(raf, experimentDO.getOverlap(), scanIndex);
+//                scanIndex.setExpId(experimentDO.getId());
+//
+//                if (scanIndex.getMsLevel() == 1) {
+//                    currentMS1 = scanIndex;
+//                } else {
+//                    if (currentMS1 == null) {
+//                        continue;
+//                    } else {
+//                        scanIndex.setParentNum(currentMS1.getNum());
+//                    }
+//                }
+//
+//                count++;
+//                if (count % 10000 == 0) {
+//                    taskDO.addLog("已扫描索引:" + count + "/" + list.size() + "条");
+//                    taskService.update(taskDO);
+//                }
+//            }
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            try {
+//                if (raf != null) {
+//                    raf.close();
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        return list;
+//    }
 
     /**
      * 从MzXML中解析Mz和Intensity的值
