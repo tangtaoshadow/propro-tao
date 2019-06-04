@@ -1,15 +1,10 @@
 package com.westlake.air.propro.test.algorithm;
 
-import com.westlake.air.propro.algorithm.parser.MzXMLParser;
 import com.westlake.air.propro.test.BaseTest;
 import com.westlake.air.propro.utils.CompressUtil;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class AirdCompressorTest extends BaseTest {
-
-    @Autowired
-    MzXMLParser mzXMLParser;
 
     @Test
     public void testSortedIntegerCompress(){

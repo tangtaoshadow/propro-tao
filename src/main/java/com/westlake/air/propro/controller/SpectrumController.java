@@ -7,7 +7,6 @@ import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
-import com.westlake.air.propro.algorithm.parser.MzXMLParser;
 import com.westlake.air.propro.domain.db.SwathIndexDO;
 import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.SwathIndexService;
@@ -31,8 +30,6 @@ import java.io.RandomAccessFile;
 @RequestMapping("spectrum")
 public class SpectrumController extends BaseController {
 
-    @Autowired
-    MzXMLParser mzXMLParser;
     @Autowired
     AirdFileParser airdFileParser;
     @Autowired

@@ -1,17 +1,13 @@
 package com.westlake.air.propro.algorithm.parser;
 
 import com.westlake.air.propro.constants.Constants;
-import com.westlake.air.propro.constants.PositionType;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
-import com.westlake.air.propro.domain.bean.scanindex.Position;
-import com.westlake.air.propro.domain.db.ScanIndexDO;
 import com.westlake.air.propro.domain.db.SwathIndexDO;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.RandomAccessFile;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 

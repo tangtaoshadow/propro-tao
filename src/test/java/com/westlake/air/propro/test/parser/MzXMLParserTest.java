@@ -1,6 +1,5 @@
 package com.westlake.air.propro.test.parser;
 
-import com.westlake.air.propro.algorithm.parser.MzXMLParser;
 import com.westlake.air.propro.test.BaseTest;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,9 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 
 public class MzXMLParserTest extends BaseTest {
-
-    @Autowired
-    MzXMLParser mzXMLParser;
 
     ArrayList<String> filePaths = new ArrayList<>();
 

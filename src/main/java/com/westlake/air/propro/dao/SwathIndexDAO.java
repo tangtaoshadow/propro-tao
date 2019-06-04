@@ -1,6 +1,5 @@
 package com.westlake.air.propro.dao;
 
-import com.westlake.air.propro.domain.db.ScanIndexDO;
 import com.westlake.air.propro.domain.db.SwathIndexDO;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import org.springframework.data.mongodb.core.query.Query;

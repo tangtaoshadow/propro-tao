@@ -2,7 +2,6 @@ package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Lists;
 import com.westlake.air.propro.algorithm.feature.DIAScorer;
 import com.westlake.air.propro.algorithm.fitter.LinearFitter;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
@@ -10,21 +9,13 @@ import com.westlake.air.propro.algorithm.learner.Airus;
 import com.westlake.air.propro.algorithm.merger.Tric;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.algorithm.parser.MsmsParser;
-import com.westlake.air.propro.algorithm.parser.MzXMLParser;
-import com.westlake.air.propro.constants.PositionType;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.dao.AnalyseDataDAO;
-import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
-import com.westlake.air.propro.domain.bean.aird.AirdInfo;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.ExperimentDO;
-import com.westlake.air.propro.domain.db.ScanIndexDO;
 import com.westlake.air.propro.service.*;
-import com.westlake.air.propro.utils.ByteUtil;
 import com.westlake.air.propro.utils.FileUtil;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,7 +24,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.*;
-import java.nio.ByteOrder;
 import java.util.*;
 
 /**
@@ -67,8 +57,6 @@ public class TestController extends BaseController {
     @Autowired
     AirdFileParser airdFileParser;
     @Autowired
-    MzXMLParser mzXMLParser;
-    @Autowired
     Tric tric;
     @Autowired
     MsmsParser msmsParser;
@@ -100,50 +88,6 @@ public class TestController extends BaseController {
         String jsonTest = "{\"start\": 482.14798,\"end\": 483.348,\"interval\": 1.20001221}";
         HashMap test = JSONObject.parseObject(jsonTest, HashMap.class);
         System.out.println(test.size());
-        return null;
-    }
-
-    @RequestMapping("test9")
-    @ResponseBody
-    String test9(Model model, RedirectAttributes redirectAttributes) throws IOException {
-
-        File file = new File("\\\\ProproNas\\ProproNAS\\data\\SGS\\mzxml\\napedro_L120224_010_SW.mzxml");
-        List<ScanIndexDO> scanIndexes = mzXMLParser.index(file, 1);
-        HashMap<Float, List<ScanIndexDO>> swathMap = new HashMap<>();
-        for (ScanIndexDO index : scanIndexes) {
-            if (index.getMsLevel().equals(2)) {
-                List<ScanIndexDO> indexes = swathMap.computeIfAbsent(index.getPrecursorMzStart(), k -> new ArrayList<>());
-                indexes.add(index);
-            }
-        }
-        RandomAccessFile raf = null;
-        try {
-            raf = new RandomAccessFile(file, "r");
-
-            int i = 1;
-            for (List<ScanIndexDO> indexes : swathMap.values()) {
-                long start = System.currentTimeMillis();
-                for (ScanIndexDO scanIndex : indexes) {
-                    String value = mzXMLParser.parseValue(raf, scanIndex.getPosStart(PositionType.MZXML), scanIndex.getPosEnd(PositionType.MZXML));
-                    Float[] values = mzXMLParser.getValues(new Base64().decode(value), 32, true, ByteOrder.BIG_ENDIAN);
-                    List<Float> mzList = new ArrayList<>();
-                    List<Float> intensityList = new ArrayList<>();
-                    for (int peakIndex = 0; peakIndex < values.length - 1; peakIndex += 2) {
-                        Float mz = values[peakIndex];
-                        Float intensity = values[peakIndex + 1];
-                        mzList.add(mz);
-                        intensityList.add(intensity);
-                    }
-                }
-                logger.info("第" + i + "批,耗时:" + (System.currentTimeMillis() - start));
-                i++;
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        } finally {
-            FileUtil.close(raf);
-        }
-
         return null;
     }
 
