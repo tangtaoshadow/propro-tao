@@ -58,6 +58,8 @@ public class FeatureScores {
      */
     HashMap<String, Double> scoresMap;
 
+    Double[] scores;
+
     Double finalScore;
 
     Boolean thresholdPassed = true;

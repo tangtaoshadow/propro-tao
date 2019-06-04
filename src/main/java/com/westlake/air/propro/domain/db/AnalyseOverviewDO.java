@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -101,6 +102,9 @@ public class AnalyseOverviewDO extends BaseDO {
     Integer libraryPeptideCount;
 
     Long peakCount = 0L;
+
+    //用于打分的子分数模板,会和AnalyseDataDO中的每一个FeatureScore中的scores对象做一一映射
+    List<String> scoreTypes;
 
     //备忘录
     String note;

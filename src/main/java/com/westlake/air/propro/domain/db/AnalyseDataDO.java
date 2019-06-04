@@ -111,8 +111,8 @@ public class AnalyseDataDO extends BaseDO {
 
     @JSONField(serialize=false)
     Double intensitySum;
-    //最终的定量值
 
+    //最终的定量值
     @JSONField(serialize=false)
     String fragIntFeature;
 }
