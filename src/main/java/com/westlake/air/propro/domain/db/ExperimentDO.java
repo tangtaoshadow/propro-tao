@@ -88,4 +88,13 @@ public class ExperimentDO extends BaseDO {
     //转byte时的编码顺序,由于C#默认采用LITTLE_ENDIAN,Aird文件由Propro-Client(C#端)转换而来,因此也采用LITTLE_ENDIAN的编码
     String features;
 
+    public Compressor fetchCompressor(String target){
+        for(Compressor c : compressors){
+            if(c.getTarget().equals(target)){
+                return c;
+            }
+        }
+        return null;
+    }
+
 }

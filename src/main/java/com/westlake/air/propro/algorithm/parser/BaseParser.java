@@ -1,5 +1,6 @@
 package com.westlake.air.propro.algorithm.parser;
 
+import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.utils.CompressUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,45 +9,10 @@ import java.nio.*;
 
 public class BaseParser {
 
-    protected static int PRECISION_32 = 32;
-    protected static int PRECISION_64 = 64;
-
     public final Logger logger = LoggerFactory.getLogger(BaseParser.class);
 
-    public Float[] getValues(byte[] value, int precision, boolean isCompression, ByteOrder byteOrder) {
-        double[] doubleValues;
-        Float[] floatValues;
-        ByteBuffer byteBuffer = null;
-
-        if (isCompression) {
-            byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(value));
-        } else {
-            byteBuffer = ByteBuffer.wrap(value);
-        }
-
-        byteBuffer.order(byteOrder);
-        if (precision == PRECISION_64) {
-            DoubleBuffer doubleBuffer = byteBuffer.asDoubleBuffer();
-            doubleValues = new double[doubleBuffer.capacity()];
-            doubleBuffer.get(doubleValues);
-            floatValues = new Float[doubleValues.length];
-            for (int index = 0; index < doubleValues.length; index++) {
-                floatValues[index] = (float) doubleValues[index];
-            }
-        } else {
-            FloatBuffer floats = byteBuffer.asFloatBuffer();
-            floatValues = new Float[floats.capacity()];
-            for (int index = 0; index < floats.capacity(); index++) {
-                floatValues[index] = floats.get(index);
-            }
-        }
-
-        byteBuffer.clear();
-        return floatValues;
-    }
-
     //默认从Aird文件中读取,编码Order为LITTLE_ENDIAN,精度为小数点后三位
-    public Float[] getMzValues(byte[] value) throws Exception {
+    public Float[] getMzValues(byte[] value, Compressor intCompressor) {
         return getMzValues(value, ByteOrder.LITTLE_ENDIAN);
     }
 
@@ -56,7 +22,7 @@ public class BaseParser {
      * @param value
      * @return
      */
-    public Float[] getMzValues(byte[] value, ByteOrder order) throws Exception {
+    public Float[] getMzValues(byte[] value, ByteOrder order) {
         ByteBuffer byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(value));
         byteBuffer.order(order);
 
@@ -74,9 +40,12 @@ public class BaseParser {
         return floatValues;
     }
 
-    //默认为LITTLE_ENDIAN
-    public Float[] getIntValues(byte[] value) throws Exception {
-        return getIntValues(value, ByteOrder.LITTLE_ENDIAN);
+    public Float[] getIntValues(byte[] value, Compressor intCompressor) throws Exception {
+        if (intCompressor.getMethod().contains("log10")) {
+            return getLogedIntValues(value, ByteOrder.LITTLE_ENDIAN);
+        } else {
+            return getIntValues(value, ByteOrder.LITTLE_ENDIAN);
+        }
     }
 
     /**
@@ -94,6 +63,31 @@ public class BaseParser {
             Float[] intValues = new Float[intensities.capacity()];
             for (int i = 0; i < intensities.capacity(); i++) {
                 intValues[i] = intensities.get(i);
+            }
+
+            byteBuffer.clear();
+            return intValues;
+        } catch (Exception e) {
+            throw e;
+        }
+
+    }
+
+    /**
+     * get mz values only for aird file
+     *
+     * @param value
+     * @return
+     */
+    public Float[] getLogedIntValues(byte[] value, ByteOrder order) throws Exception {
+        try {
+            ByteBuffer byteBuffer = ByteBuffer.wrap(CompressUtil.zlibDecompress(value));
+            byteBuffer.order(order);
+
+            FloatBuffer intensities = byteBuffer.asFloatBuffer();
+            Float[] intValues = new Float[intensities.capacity()];
+            for (int i = 0; i < intensities.capacity(); i++) {
+                intValues[i] = (float) Math.pow(10, intensities.get(i));
             }
 
             byteBuffer.clear();

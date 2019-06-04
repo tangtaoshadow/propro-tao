@@ -95,7 +95,6 @@ public class Constants {
     public static final String COMMA = ",";
 
     public static final String AIRD_COMPRESSION_TYPE_ZLIB = "zlib";
-    public static final int AIRD_PRECISION_32 = 32;
 
     public static final String CUTINFO_PREFIX = "CUTINFO_";
 

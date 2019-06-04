@@ -56,8 +56,8 @@
                     <th width="10%" th:text="#{label_exp_name}"></th>
                     <th width="10%" th:text="#{label_exp_id}"></th>
                     <th width="5%" th:text="#{label_exp_type}"></th>
-                    <th width="8%">Aird Size(Bin/Index)</th>
-                    <th width="8%" th:text="#{label_vendor_file_size}"></th>
+                    <th width="5%">Aird Size</th>
+                    <th width="5%" th:text="#{label_vendor_file_size}"></th>
                     <th width="5%" th:text="#{label_swath_windows_count}"></th>
                     <th width="8%" th:text="#{label_slope_intercept}"></th>
                     <th width="10%" th:text="#{label_instrument_model}"></th>
@@ -74,7 +74,7 @@
                     <td th:text="${experiment.type}">
                     </td>
                     <td>
-                        <span class="m-badge m-badge--success m-badge--wide" th:text="|${(experiment.airdSize+experiment.airdIndexSize)/1024/1024}MB|"></span>
+                        <span th:if="${experiment.airdSize}" class="m-badge m-badge--success m-badge--wide" th:text="|${(experiment.airdSize+experiment.airdIndexSize)/1024/1024}MB|"></span>
                     </td>
                     <td>
                         <span th:if="${experiment.vendorFileSize}" class="m-badge m-badge--success m-badge--wide" th:text="|${experiment.vendorFileSize/1024/1024}MB|"></span>
@@ -83,8 +83,7 @@
                         <span class="m-badge m-badge--brand m-badge--wide" th:text="${experiment.windowRanges?.size()}"></span>
                     </td>
                     <td th:text="|${experiment.irtResult?.si?.slope} -> ${experiment.irtResult?.si?.intercept}|"></td>
-                    <td>
-                        <span class="m-badge m-badge--success m-badge--wide" th:text="|${experiment.instrument?.manufacturer} ${experiment.instrument?.model}|"></span>
+                    <td th:text="|${experiment.instrument?.manufacturer} ${experiment.instrument?.model}|">
                     </td>
                     <td th:text="${#dates.format(experiment.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="|${analyseOverviewDOMap.get(experiment.id)?.matchedPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.totalPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.libraryPeptideCount}|"></td>

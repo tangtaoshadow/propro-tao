@@ -6,6 +6,7 @@ import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.dao.ProjectDAO;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.bean.compressor.AircInfo;
@@ -175,7 +176,7 @@ public class Extractor {
             //Step2.获取该窗口内的谱图Map,key值代表了RT
             TreeMap<Float, MzIntensityPairs> rtMap;
             try {
-                rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndexDO);
+                rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndexDO, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
             } catch (Exception e) {
                 logger.error("PrecursorMZ:" + swathIndexDO.getRange().getMz());
                 throw e;
@@ -221,30 +222,13 @@ public class Extractor {
      * @param rtExtractWindow
      */
     public void extractForIrt(List<AnalyseDataDO> finalList, List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float mzExtractWindow, Float rtExtractWindow) {
-        for (TargetPeptide ms : coordinates) {
-            AnalyseDataDO dataDO = extractForOne(ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
+        for (TargetPeptide tp : coordinates) {
+            AnalyseDataDO dataDO = extractForOne(tp, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
             if (dataDO == null) {
                 continue;
             }
             finalList.add(dataDO);
         }
-    }
-
-    public AnalyseDataDO extractForOne(PeptideDO peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams lumsParams, String overviewId) {
-
-        TargetPeptide tp = peptide.toTargetPeptide();
-        SlopeIntercept slopeIntercept = lumsParams.getSlopeIntercept();
-
-        if (lumsParams.getRtExtractWindow() != -1) {
-            float iRt = (tp.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue();
-            tp.setRtStart(iRt - lumsParams.getRtExtractWindow() / 2.0f);
-            tp.setRtEnd(iRt + lumsParams.getRtExtractWindow() / 2.0f);
-        } else {
-            tp.setRtStart(-1);
-            tp.setRtEnd(99999);
-        }
-
-        return extractForOne(tp, rtMap, lumsParams.getMzExtractWindow(), lumsParams.getRtExtractWindow(), overviewId);
     }
 
     private AnalyseDataDO extractForOne(TargetPeptide tp, TreeMap<Float, MzIntensityPairs> rtMap, Float mzExtractWindow, Float rtExtractWindow, String overviewId) {
@@ -409,7 +393,8 @@ public class Extractor {
             float precursorMz = swathIndex.getRange().getMz();
             rtRange = lumsParams.getRtRangeMap().get(precursorMz);
         }
-        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibraryId(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), swathIndex.getRange(), rtRange, lumsParams.getExperimentDO().getType(), lumsParams.isUniqueOnly());
+        ExperimentDO exp = lumsParams.getExperimentDO();
+        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibraryId(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), swathIndex.getRange(), rtRange, exp.getType(), lumsParams.isUniqueOnly());
         if (coordinates.isEmpty()) {
             logger.warn("No Coordinates Found,Rang:" + swathIndex.getRange().getStart() + ":" + swathIndex.getRange().getEnd());
             return null;
@@ -420,7 +405,7 @@ public class Extractor {
         //Step3.提取指定原始谱图
         long start = System.currentTimeMillis();
 
-        rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex);
+        rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
 
         logger.info("IO及解码耗时:" + (System.currentTimeMillis() - start));
         if (lumsParams.isUseEpps()) {

@@ -6,6 +6,7 @@ import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.analyse.*;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
@@ -157,7 +158,7 @@ public class ScoreServiceImpl implements ScoreService {
 
             TreeMap<Float, MzIntensityPairs> rtMap = null;
             if (input.isUsedDIAScores()) {
-                rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex);
+                rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex,  exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
             }
 
             for (AnalyseDataDO dataDO : dataList) {

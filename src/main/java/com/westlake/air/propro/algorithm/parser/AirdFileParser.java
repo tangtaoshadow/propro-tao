@@ -1,13 +1,12 @@
 package com.westlake.air.propro.algorithm.parser;
 
-import com.westlake.air.propro.constants.Constants;
+import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.db.SwathIndexDO;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.RandomAccessFile;
-import java.nio.ByteOrder;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -21,7 +20,7 @@ public class AirdFileParser extends BaseParser {
      * @return
      * @throws Exception
      */
-    public TreeMap<Float, MzIntensityPairs> parseSwathBlockValues(RandomAccessFile raf, SwathIndexDO indexDO) throws Exception {
+    public TreeMap<Float, MzIntensityPairs> parseSwathBlockValues(RandomAccessFile raf, SwathIndexDO indexDO, Compressor mzCompressor, Compressor intCompressor) throws Exception {
         TreeMap<Float, MzIntensityPairs> map = new TreeMap<>();
         List<Float> rts = indexDO.getRts();
 
@@ -40,7 +39,7 @@ public class AirdFileParser extends BaseParser {
             byte[] intensity = ArrayUtils.subarray(result, start, start + intensitySizes.get(i).intValue());
             start = start + intensitySizes.get(i).intValue();
             try {
-                MzIntensityPairs pairs = new MzIntensityPairs(getMzValues(mz), getIntValues(intensity));
+                MzIntensityPairs pairs = new MzIntensityPairs(getMzValues(mz, mzCompressor), getIntValues(intensity, intCompressor));
                 map.put(rts.get(i), pairs);
             } catch (Exception e) {
                 logger.error("index size error:" + i);
@@ -59,7 +58,7 @@ public class AirdFileParser extends BaseParser {
      * @param rt
      * @return
      */
-    public MzIntensityPairs parseValue(RandomAccessFile raf, SwathIndexDO indexDO, float rt) {
+    public MzIntensityPairs parseValue(RandomAccessFile raf, SwathIndexDO indexDO, float rt, Compressor mzCompressor, Compressor intCompressor) {
 
         List<Float> rts = indexDO.getRts();
         int index = rts.indexOf(rt);
@@ -75,13 +74,13 @@ public class AirdFileParser extends BaseParser {
             raf.seek(start);
             byte[] reader = new byte[indexDO.getMzs().get(index).intValue()];
             raf.read(reader);
-            Float[] mzArray = getMzValues(reader);
+            Float[] mzArray = getMzValues(reader, mzCompressor);
             start += indexDO.getMzs().get(index).intValue();
             raf.seek(start);
             reader = new byte[indexDO.getInts().get(index).intValue()];
             raf.read(reader);
 
-            Float[] intensityArray = getValues(reader, Constants.AIRD_PRECISION_32, true, ByteOrder.LITTLE_ENDIAN);
+            Float[] intensityArray = getIntValues(reader, intCompressor);
             return new MzIntensityPairs(mzArray, intensityArray);
         } catch (Exception e) {
             e.printStackTrace();

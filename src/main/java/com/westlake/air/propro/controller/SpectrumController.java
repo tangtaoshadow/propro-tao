@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
@@ -65,7 +66,7 @@ public class SpectrumController extends BaseController {
         try {
             File file = new File(experimentDO.getAirdPath());
             raf = new RandomAccessFile(file, "r");
-            pairs = airdFileParser.parseValue(raf, swathIndex, rt);
+            pairs = airdFileParser.parseValue(raf, swathIndex, rt, experimentDO.fetchCompressor(Compressor.TARGET_MZ), experimentDO.fetchCompressor(Compressor.TARGET_INTENSITY));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

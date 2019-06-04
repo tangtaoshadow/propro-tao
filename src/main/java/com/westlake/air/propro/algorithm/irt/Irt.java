@@ -4,6 +4,7 @@ import com.westlake.air.propro.algorithm.extract.Extractor;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
@@ -82,7 +83,7 @@ public class Irt {
                 }
                 //Step3.提取指定原始谱图
                 try {
-                    rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndexDO);
+                    rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndexDO, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
                 } catch (Exception e) {
                     logger.error("PrecursorMZStart:" + swathIndexDO.getRange().getStart());
                     throw e;

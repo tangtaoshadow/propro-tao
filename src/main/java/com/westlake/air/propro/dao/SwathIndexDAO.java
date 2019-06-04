@@ -42,14 +42,14 @@ public class SwathIndexDAO extends BaseDAO<SwathIndexDO, SwathIndexQuery>{
             query.addCriteria(where("level").is(swathIndexQuery.getLevel()));
         }
         if (swathIndexQuery.getMzStart() != null) {
-            query.addCriteria(where("range.mzStart").is(swathIndexQuery.getMzStart()));
+            query.addCriteria(where("range.start").is(swathIndexQuery.getMzStart()));
         }
         if (swathIndexQuery.getMzEnd() != null) {
-            query.addCriteria(where("range.mzEnd").is(swathIndexQuery.getMzEnd()));
+            query.addCriteria(where("range.end").is(swathIndexQuery.getMzEnd()));
         }
-        if (swathIndexQuery.getMzEnd() != null) {
-            query.addCriteria(where("range.mzStart").lte(swathIndexQuery.getMz()));
-            query.addCriteria(where("range.mzEnd").gte(swathIndexQuery.getMz()));
+        if (swathIndexQuery.getMz() != null) {
+            query.addCriteria(where("range.start").lte(swathIndexQuery.getMz()));
+            query.addCriteria(where("range.end").gte(swathIndexQuery.getMz()));
         }
 
         return query;
