@@ -9,6 +9,7 @@ import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.analyse.*;
+import com.westlake.air.propro.domain.bean.irt.IrtResult;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.bean.score.*;
@@ -83,13 +84,13 @@ public class ScoreServiceImpl implements ScoreService {
     SwathIndexService swathIndexService;
 
     @Override
-    public ResultDO<SlopeIntercept> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing) {
+    public ResultDO<IrtResult> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing) {
 
         HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(new PeptideQuery(iRtLibraryId));
 
         List<List<ScoreRtPair>> scoreRtList = new ArrayList<>();
         List<Double> compoundRt = new ArrayList<>();
-        ResultDO<SlopeIntercept> resultDO = new ResultDO<>();
+        ResultDO<IrtResult> resultDO = new ResultDO<>();
         double minGroupRt = Double.MAX_VALUE, maxGroupRt = Double.MIN_VALUE;
         for (AnalyseDataDO dataDO : dataList) {
             PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(dataDO, ttMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()).buildIntensityMap(), sigmaSpacing);
@@ -129,9 +130,23 @@ public class ScoreServiceImpl implements ScoreService {
 
         }
         System.out.println("choose finish ------------------------");
+        IrtResult irtResult = new IrtResult();
+
+        List<Double[]> selectedList = new ArrayList<>();
+        List<Double[]> unselectedList = new ArrayList<>();
+        for (int i = 0; i < pairs.size(); i++) {
+            if(pairsCorrected.contains(pairs.get(i))){
+                selectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
+            }else{
+                unselectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
+            }
+        }
+        irtResult.setSelectedPairs(selectedList);
+        irtResult.setUnselectedPairs(unselectedList);
         SlopeIntercept slopeIntercept = linearFitter.proproFit(pairsCorrected, delta);
+        irtResult.setSi(slopeIntercept);
         resultDO.setSuccess(true);
-        resultDO.setModel(slopeIntercept);
+        resultDO.setModel(irtResult);
 
         return resultDO;
     }

@@ -89,14 +89,14 @@ public class ExperimentTask extends BaseTask {
         if (StringUtils.isNotEmpty(lumsParams.getIRtLibraryId())) {
             taskDO.addLog("开始卷积IRT校准库并且计算iRT值");
             taskService.update(taskDO);
-            ResultDO<SlopeIntercept> resultDO = irt.convAndIrt(lumsParams.getExperimentDO(), lumsParams.getIRtLibraryId(), lumsParams.getMzExtractWindow(), lumsParams.getSigmaSpacing());
+            ResultDO<IrtResult> resultDO = irt.convAndIrt(lumsParams.getExperimentDO(), lumsParams.getIRtLibraryId(), lumsParams.getMzExtractWindow(), lumsParams.getSigmaSpacing());
             if(resultDO.isFailed()){
                 taskDO.addLog("iRT计算失败:"+resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
                 taskDO.finish(TaskStatus.FAILED.getName());
                 taskService.update(taskDO);
                 return;
             }
-            SlopeIntercept si = resultDO.getModel();
+            SlopeIntercept si = resultDO.getModel().getSi();
             lumsParams.setSlopeIntercept(si);
             taskDO.addLog("iRT计算完毕");
             taskDO.addLog("斜率:" + si.getSlope() + "截距:" + si.getIntercept());
@@ -126,17 +126,14 @@ public class ExperimentTask extends BaseTask {
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
 
-        ResultDO<SlopeIntercept> resultDO = irt.convAndIrt(experimentDO, iRtLibraryId, mzExtractWindow, sigmaSpacing);
+        ResultDO<IrtResult> resultDO = irt.convAndIrt(experimentDO, iRtLibraryId, mzExtractWindow, sigmaSpacing);
         if (resultDO.isFailed()) {
             taskDO.addLog("iRT计算失败:"+resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
             taskDO.finish(TaskStatus.FAILED.getName());
             taskService.update(taskDO);
             return;
         }
-        SlopeIntercept slopeIntercept = resultDO.getModel();
-        IrtResult irtResult = new IrtResult();
-        irtResult.setSi(slopeIntercept);
-        experimentDO.setIrtResult(irtResult);
+        SlopeIntercept slopeIntercept = resultDO.getModel().getSi();
         experimentDO.setIRtLibraryId(iRtLibraryId);
         experimentService.update(experimentDO);
 

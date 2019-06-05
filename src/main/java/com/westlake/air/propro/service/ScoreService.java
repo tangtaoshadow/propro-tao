@@ -3,6 +3,7 @@ package com.westlake.air.propro.service;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
+import com.westlake.air.propro.domain.bean.irt.IrtResult;
 import com.westlake.air.propro.domain.bean.score.PeptideFeature;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
@@ -28,7 +29,7 @@ public interface ScoreService {
      * @param sigmaSpacing Sigma通常为30/8 = 6.25/Spacing通常为0.01
      * @return
      */
-    ResultDO<SlopeIntercept> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing);
+    ResultDO<IrtResult> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing);
 
     /**
      * 打分,调用本函数前最好确认是否已经删除了已有的打分数据,一份分析报告中只对应一份打分数据

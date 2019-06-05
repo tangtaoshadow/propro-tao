@@ -8,6 +8,7 @@ import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
+import com.westlake.air.propro.domain.bean.irt.IrtResult;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.ExperimentDO;
@@ -110,7 +111,7 @@ public class Irt {
      * @param sigmaSpacing
      * @return
      */
-    public ResultDO<SlopeIntercept> convAndIrt(ExperimentDO experimentDO, String iRtLibraryId, Float mzExtractWindow, SigmaSpacing sigmaSpacing) {
+    public ResultDO<IrtResult> convAndIrt(ExperimentDO experimentDO, String iRtLibraryId, Float mzExtractWindow, SigmaSpacing sigmaSpacing) {
         try {
             logger.info("开始卷积数据");
             long start = System.currentTimeMillis();
@@ -120,8 +121,13 @@ public class Irt {
             }
             logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
             start = System.currentTimeMillis();
-            ResultDO resultDO = scoreService.computeIRt(dataList, iRtLibraryId, sigmaSpacing);
+            ResultDO<IrtResult> resultDO = scoreService.computeIRt(dataList, iRtLibraryId, sigmaSpacing);
             logger.info("计算完毕,耗时:" + (System.currentTimeMillis() - start));
+
+            if(resultDO.isFailed()){
+                return resultDO;
+            }
+            experimentDO.setIrtResult(resultDO.getModel());
             return resultDO;
         } catch (Exception e) {
             e.printStackTrace();

@@ -6,6 +6,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.algorithm.extract.Extractor;
 import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.aird.Compressor;
+import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.irt.IrtResult;
@@ -18,6 +20,7 @@ import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.exception.UnauthorizedAccessException;
 import com.westlake.air.propro.service.*;
+import com.westlake.air.propro.utils.FileUtil;
 import com.westlake.air.propro.utils.PermissionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -27,6 +30,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.RandomAccessFile;
 import java.util.*;
 
 /**
@@ -490,6 +494,47 @@ public class ExperimentController extends BaseController {
         experimentTask.convAndIrt(resultDO.getModel(), iRtLibraryId, mzExtractWindow, sigmaSpacing, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
+    }
+
+    @RequestMapping(value = "/irtresult")
+    @ResponseBody
+    ResultDO<JSONObject> irtResult(Model model,
+                              @RequestParam(value = "expId", required = false) String expId) {
+        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
+        MzIntensityPairs pairs = null;
+
+        ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
+        if (expResult.isFailed()) {
+            resultDO.setErrorResult(ResultCode.EXPERIMENT_NOT_EXISTED);
+            return resultDO;
+        }
+        PermissionUtil.check(expResult.getModel());
+        ExperimentDO experimentDO = expResult.getModel();
+
+        IrtResult irtResult = experimentDO.getIrtResult();
+        if(irtResult == null){
+            return ResultDO.buildError(ResultCode.IRT_FIRST);
+        }
+
+        JSONObject res = new JSONObject();
+        JSONArray selectedArray = new JSONArray();
+        JSONArray unselectedArray = new JSONArray();
+        JSONArray lineArray = new JSONArray();
+        for(Double[] pair : irtResult.getSelectedPairs()){
+            selectedArray.add(JSONArray.toJSON(pair));
+            lineArray.add(JSONArray.toJSON(new Double[]{pair[0], (pair[0]- irtResult.getSi().getIntercept())/irtResult.getSi().getSlope()}));
+        }
+        for(Double[] pair : irtResult.getUnselectedPairs()){
+            unselectedArray.add(JSONArray.toJSON(pair));
+        }
+
+        res.put("slope", irtResult.getSi().getSlope());
+        res.put("intercept", irtResult.getSi().getIntercept());
+        res.put("lineArray", lineArray);
+        res.put("selectedArray", selectedArray);
+        res.put("unselectedArray", unselectedArray);
+        resultDO.setModel(res);
+        return resultDO;
     }
 
     @RequestMapping(value = "/getWindows")
