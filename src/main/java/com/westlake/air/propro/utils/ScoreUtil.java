@@ -1,10 +1,12 @@
 package com.westlake.air.propro.utils;
 
+import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.domain.bean.score.IntegrateWindowMzIntensity;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,5 +115,16 @@ public class ScoreUtil {
         mzIntensity.setIntensity(intensity);
 
         return mzIntensity;
+    }
+
+    public static List<String> getScoreTypes(HttpServletRequest request){
+        List<String> scoreTypes = new ArrayList<>();
+        for (ScoreType type : ScoreType.values()) {
+            String typeParam = request.getParameter(type.getTypeName());
+            if (typeParam != null && typeParam.equals("on")) {
+                scoreTypes.add(type.getTypeName());
+            }
+        }
+        return scoreTypes;
     }
 }

@@ -6,8 +6,10 @@ import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -40,7 +42,7 @@ public class LumsParams {
      */
     String ownerName;
 
-    HashSet<String> scoreTypes = new HashSet<>();
+    List<String> scoreTypes = new ArrayList<>();
 
     boolean usedDIAScores = true;
     /**

@@ -224,7 +224,7 @@ public class ScoreController extends BaseController {
         query.setOverviewId(overviewId);
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
-        ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getListWithConvolutionData(query);
+        ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
 
         for(AnalyseDataDO data : resultDO.getModel()){
             AnalyseUtil.decompress(data);

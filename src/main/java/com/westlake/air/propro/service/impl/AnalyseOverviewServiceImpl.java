@@ -92,21 +92,6 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
             return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
         }
         try {
-            AnalyseOverviewDO overview = analyseOverviewDAO.getById(id);
-            if (overview != null) {
-                if (overview.getAircPath() != null && !overview.getAircPath().isEmpty()) {
-                    File file = new File(overview.getAircPath());
-                    if (file.exists()) {
-                        file.delete();
-                    }
-                }
-                if (overview.getAircIndexPath() != null && !overview.getAircIndexPath().isEmpty()) {
-                    File file = new File(overview.getAircIndexPath());
-                    if (file.exists()) {
-                        file.delete();
-                    }
-                }
-            }
             analyseOverviewDAO.delete(id);
             analyseDataService.deleteAllByOverviewId(id);
 

@@ -56,7 +56,7 @@ public class DIAScorer {
      * @param normedLibIntMap  unNormalized library intensity(in peptidepeptide)
      * @param scores           scoreForAll for Airus
      */
-    public void calculateDiaMassDiffScore(HashMap<String, Float> productMzArray, Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<String, Double> normedLibIntMap, FeatureScores scores, HashSet<String> scoreTypes) {
+    public void calculateDiaMassDiffScore(HashMap<String, Float> productMzArray, Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<String, Double> normedLibIntMap, FeatureScores scores, List<String> scoreTypes) {
 
         double ppmScore = 0.0d;
         double ppmScoreWeighted = 0.0d;

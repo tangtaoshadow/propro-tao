@@ -29,7 +29,7 @@ public class ChromatographicScorer {
     /**
      * @param peakGroup list of features in selected mrmfeature
      */
-    public void calculateChromatographicScores(PeakGroup peakGroup, HashMap<String, Double> normedLibIntMap, FeatureScores scores, HashSet<String> scoreTypes) {
+    public void calculateChromatographicScores(PeakGroup peakGroup, HashMap<String, Double> normedLibIntMap, FeatureScores scores, List<String> scoreTypes) {
         Table<Integer, Integer, Double[]> xcorrMatrix = initializeXCorrMatrix(peakGroup);
 
         //xcorrCoelutionScore

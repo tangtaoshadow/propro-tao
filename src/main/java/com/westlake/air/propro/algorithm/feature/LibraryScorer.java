@@ -35,7 +35,7 @@ public class LibraryScorer {
      * @param normedLibIntMap   get libraryIntensity: from transitions
      * @param scores             library_corr, library_norm_manhattan
      */
-    public void calculateLibraryScores(PeakGroup peakGroup, HashMap<String, Double> normedLibIntMap, FeatureScores scores, HashSet<String> scoreTypes) {
+    public void calculateLibraryScores(PeakGroup peakGroup, HashMap<String, Double> normedLibIntMap, FeatureScores scores, List<String> scoreTypes) {
         List<Double> experimentIntensity = new ArrayList<>(peakGroup.getIonIntensity().values());
         assert experimentIntensity.size() == normedLibIntMap.size();
 

@@ -22,6 +22,7 @@ import com.westlake.air.propro.exception.UnauthorizedAccessException;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.FileUtil;
 import com.westlake.air.propro.utils.PermissionUtil;
+import com.westlake.air.propro.utils.ScoreUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -400,13 +401,7 @@ public class ExperimentController extends BaseController {
             return "redirect:/extractor?id=" + id;
         }
 
-        HashSet<String> scoreTypes = new HashSet<>();
-        for (ScoreType type : ScoreType.values()) {
-            String typeParam = request.getParameter(type.getTypeName());
-            if (typeParam != null && typeParam.equals("on")) {
-                scoreTypes.add(type.getTypeName());
-            }
-        }
+        List<String> scoreTypes = ScoreUtil.getScoreTypes(request);
 
         TaskDO taskDO = new TaskDO(useEpps ? TaskTemplate.EXTRACT_PEAKPICK_SCORE : TaskTemplate.EXTRACTOR, resultDO.getModel().getName() + ":" + library.getName() + "(" + libraryId + ")");
         taskService.insert(taskDO);

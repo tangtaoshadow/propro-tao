@@ -353,7 +353,7 @@ public class ProjectController extends BaseController {
             doIrt = true;
         }
 
-        HashSet<String> scoreTypes = new HashSet<>();
+        List<String> scoreTypes = new ArrayList<>();
         for (ScoreType type : ScoreType.values()) {
             String typeParam = request.getParameter(type.getTypeName());
             if (typeParam != null && typeParam.equals("on")) {
