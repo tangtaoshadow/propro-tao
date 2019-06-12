@@ -3,6 +3,7 @@ package com.westlake.air.propro.constants;
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public enum ScoreType {
@@ -77,6 +78,9 @@ public enum ScoreType {
             true, true),
     WeightedTotalScore("WeightedTotalScore", "",
             "根据权重算出的加权总分-加权总分的平均分",
+            null, false),
+    IntensityTotalScore("IntensityTotalScore", "",
+            "针对特殊需要的只做Intensity分类得到的总分-Intensity总分",
             null, false),
     ;
 

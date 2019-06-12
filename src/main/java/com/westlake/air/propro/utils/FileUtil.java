@@ -2,12 +2,15 @@ package com.westlake.air.propro.utils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.westlake.air.propro.domain.bean.analyse.RtIntensityPairsDouble;
+import com.westlake.air.propro.domain.bean.file.TableFile;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -17,6 +20,8 @@ import java.util.List;
 public class FileUtil {
 
     public final Logger logger = LoggerFactory.getLogger(getClass());
+    public static final String COMMA = ",";
+    public static final String TAB = "\t";
 
     public static String readFile(File file) throws IOException {
         FileInputStream fis = new FileInputStream(file);
@@ -33,6 +38,35 @@ public class FileUtil {
         byte[] bytes = new byte[fileLength];
         fis.read(bytes);
         return new String(bytes, 0, fileLength);
+    }
+
+    public static TableFile readTableFile(String filePath) throws IOException {
+        File file = new File(filePath);
+        InputStreamReader isr = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8);
+        BufferedReader reader = new BufferedReader(isr);
+        String line = reader.readLine();
+        if (line == null){
+            return null;
+        }
+        String splitter = TAB;
+        String[] columns = line.split(splitter);
+        if (columns.length == 1){
+            splitter = COMMA;
+            columns = line.split(splitter);
+        }
+        HashMap<String, Integer> columnMap = new HashMap<>();
+        List<String[]> fileData = new ArrayList<>();
+        for (int i=0; i<columns.length; i++){
+            columnMap.put(columns[i].toLowerCase(), i);
+        }
+        while ((line = reader.readLine()) != null){
+            String[] lineSplit = line.split(splitter);
+            if (lineSplit.length != columnMap.size()){
+                return null;
+            }
+            fileData.add(lineSplit);
+        }
+        return new TableFile(columnMap, fileData);
     }
 
     public static String readFileFromSource(String filePath) throws IOException {

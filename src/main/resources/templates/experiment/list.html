@@ -86,7 +86,7 @@
                               th:text="${experiment.windowRanges?.size()}"></span>
                     </td>
                     <td>
-                        <a th:data1="${experiment.id}" th:onclick="query(this.getAttribute('data1'))" data-toggle="modal" data-target="#m_modal_irt" href="#" th:text="#{label_irt_result}"></a>
+                        <a th:data1="${experiment.id}" th:onclick="query(this.getAttribute('data1'))" data-toggle="modal" data-target="#m_modal_irt" href="#" th:text="|${experiment.irtResult.si.slope} -> ${experiment.irtResult.si.intercept}|"></a>
                     </td>
                     <td th:text="|${experiment.instrument?.manufacturer} ${experiment.instrument?.model}|">
                     </td>
