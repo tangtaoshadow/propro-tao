@@ -186,140 +186,135 @@
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('MainScore')}"></td>
+                                                th:text="${featureScore.get('MainScore', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('MainScore')}"></td>
+                                                th:text="${featureScore.get('MainScore', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('BseriesScore')}"></td>
+                                                th:text="${featureScore.get('BseriesScore', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('BseriesScore')}"></td>
+                                                th:text="${featureScore.get('BseriesScore', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('ElutionModelFitScore')}"></td>
+                                                th:text="${featureScore.get('ElutionModelFitScore', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('ElutionModelFitScore')}"></td>
+                                                th:text="${featureScore.get('ElutionModelFitScore', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('IntensityScore')}"></td>
+                                                th:text="${featureScore.get('IntensityScore', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('IntensityScore')}"></td>
+                                                th:text="${featureScore.get('IntensityScore', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('IsotopeCorrelationScore')}"></td>
+                                                th:text="${featureScore.get('IsotopeCorrelationScore', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('IsotopeCorrelationScore')}"></td>
+                                                th:text="${featureScore.get('IsotopeCorrelationScore', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('IsotopeOverlapScore')}"></td>
+                                                th:text="${featureScore.get('IsotopeOverlapScore', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('IsotopeOverlapScore')}"></td>
+                                                th:text="${featureScore.get('IsotopeOverlapScore', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('LibraryCorr')}"></td>
+                                                th:text="${featureScore.get('LibraryCorr', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('LibraryCorr')}"></td>
+                                                th:text="${featureScore.get('LibraryCorr', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('LibraryRsmd')}"></td>
+                                                th:text="${featureScore.get('LibraryRsmd', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('LibraryRsmd')}"></td>
+                                                th:text="${featureScore.get('LibraryRsmd', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('LogSnScore')}"></td>
+                                                th:text="${featureScore.get('LogSnScore', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('LogSnScore')}"></td>
+                                                th:text="${featureScore.get('LogSnScore', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('MassdevScore')}"></td>
+                                                th:text="${featureScore.get('MassdevScore', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('MassdevScore')}"></td>
+                                                th:text="${featureScore.get('MassdevScore', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('MassdevScoreWeighted')}"></td>
+                                                th:text="${featureScore.get('MassdevScoreWeighted', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('MassdevScoreWeighted')}"></td>
+                                                th:text="${featureScore.get('MassdevScoreWeighted', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('NormRtScore')}"></td>
+                                                th:text="${featureScore.get('NormRtScore', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('NormRtScore')}"></td>
+                                                th:text="${featureScore.get('NormRtScore', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('XcorrCoelution')}"></td>
+                                                th:text="${featureScore.get('XcorrCoelution', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('XcorrCoelution')}"></td>
+                                                th:text="${featureScore.get('XcorrCoelution', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('XcorrCoelutionWeighted')}"></td>
+                                                th:text="${featureScore.get('XcorrCoelutionWeighted', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('XcorrCoelutionWeighted')}"></td>
+                                                th:text="${featureScore.get('XcorrCoelutionWeighted', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('XcorrShape')}"></td>
+                                                th:text="${featureScore.get('XcorrShape', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('XcorrShape')}"></td>
+                                                th:text="${featureScore.get('XcorrShape', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('XcorrShapeWeighted')}"></td>
+                                                th:text="${featureScore.get('XcorrShapeWeighted', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('XcorrShapeWeighted')}"></td>
+                                                th:text="${featureScore.get('XcorrShapeWeighted', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('YseriesScore')}"></td>
+                                                th:text="${featureScore.get('YseriesScore', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('YseriesScore')}"></td>
+                                                th:text="${featureScore.get('YseriesScore', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('LibraryDotprod')}"></td>
+                                                th:text="${featureScore.get('LibraryDotprod', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('LibraryDotprod')}"></td>
+                                                th:text="${featureScore.get('LibraryDotprod', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('LibraryManhattan')}"></td>
+                                                th:text="${featureScore.get('LibraryManhattan', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('LibraryManhattan')}"></td>
+                                                th:text="${featureScore.get('LibraryManhattan', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('LibrarySangle')}"></td>
+                                                th:text="${featureScore.get('LibrarySangle', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('LibrarySangle')}"></td>
+                                                th:text="${featureScore.get('LibrarySangle', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('LibraryRootmeansquare')}"></td>
+                                                th:text="${featureScore.get('LibraryRootmeansquare', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('LibraryRootmeansquare')}"></td>
+                                                th:text="${featureScore.get('LibraryRootmeansquare', scoreTypes)}"></td>
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('ManhattScore')}"></td>
+                                                th:text="${featureScore.get('ManhattScore', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('ManhattScore')}"></td>
-                                            <td th:if="${score.bestRt==featureScore.rt}"
-                                                th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('NewScore')}"></td>
-                                            <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('NewScore')}"></td>
+                                                th:text="${featureScore.get('ManhattScore', scoreTypes)}"></td>
                                         </tr>
                                         </tbody>
                                     </table>

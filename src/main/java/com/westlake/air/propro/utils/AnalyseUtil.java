@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class AnalyseUtil {
 
@@ -13,7 +14,9 @@ public class AnalyseUtil {
 
     public static void compress(AnalyseDataDO data) {
         if (data.getRtArray() != null) {
-            data.setConvRtArray(CompressUtil.zlibCompress(CompressUtil.transToByte(ArrayUtils.toPrimitive(data.getRtArray()))));
+            data.setRtStart(data.getRtArray()[0]);
+            data.setRtEnd(data.getRtArray()[data.getRtArray().length - 1]);
+//            data.setConvRtArray(CompressUtil.zlibCompress(CompressUtil.transToByte(ArrayUtils.toPrimitive(data.getRtArray()))));
             data.setRtArray(null);
         }
         data.setConvIntensityMap(new HashMap<>());
@@ -29,11 +32,15 @@ public class AnalyseUtil {
         data.setCompressed(true);
     }
 
-    public static void decompress(AnalyseDataDO data) {
-        if (data.getConvRtArray() != null) {
-            data.setRtArray(CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvRtArray())));
-            data.setConvRtArray(null);
-        }
+
+    public static void decompress(AnalyseDataDO data, List<Float> rtList) {
+        int indexStart = rtList.indexOf(data.getRtStart());
+        int indexEnd = rtList.indexOf(data.getRtEnd());
+
+        Float[] rtArray = new Float[rtList.size()];
+        rtList.toArray(rtArray);
+        data.setRtArray(ArrayUtils.subarray(rtArray, indexStart, indexEnd+1));
+
         for (String cutInfo : data.getConvIntensityMap().keySet()) {
             byte[] intensities = data.getConvIntensityMap().get(cutInfo);
             if (intensities != null) {
@@ -45,4 +52,6 @@ public class AnalyseUtil {
         data.setConvIntensityMap(null);
         data.setCompressed(false);
     }
+
+
 }

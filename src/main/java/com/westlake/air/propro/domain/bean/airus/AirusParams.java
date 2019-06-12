@@ -2,6 +2,7 @@ package com.westlake.air.propro.domain.bean.airus;
 
 import com.westlake.air.propro.constants.Classifier;
 import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.domain.params.LumsParams;
 import lombok.Data;
 
 import java.util.List;
@@ -71,4 +72,10 @@ public class AirusParams {
 
     //首批训练时默认作为主分数的分数类型
     String mainScore = ScoreType.MainScore.getTypeName();
+
+    public AirusParams(){
+        if (scoreTypes == null){
+            scoreTypes = new LumsParams().getScoreTypes();
+        }
+    }
 }

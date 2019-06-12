@@ -112,6 +112,7 @@ public class ScoreController extends BaseController {
 
         model.addAttribute("overview", overviewResult.getModel());
         model.addAttribute("scores", resultDO.getModel());
+        model.addAttribute("scoreTypes", overviewResult.getModel().getScoreTypes());
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalNum", resultDO.getTotalNum());
@@ -183,59 +184,6 @@ public class ScoreController extends BaseController {
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalNum", protList.size());
         return "scores/result/list";
-    }
-
-    @RequestMapping(value = "/report")
-    String report(Model model,
-                @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                @RequestParam(value = "pageSize", required = false, defaultValue = "100") Integer pageSize,
-                @RequestParam(value = "overviewId", required = false) String overviewId,
-                @RequestParam(value = "peptideRef", required = false) String peptideRef,
-                @RequestParam(value = "fdrStart", required = false) Double fdrStart,
-                @RequestParam(value = "fdrEnd", required = false) Double fdrEnd,
-                RedirectAttributes redirectAttributes) {
-        model.addAttribute("overviewId", overviewId);
-        model.addAttribute("peptideRef", peptideRef);
-        model.addAttribute("pageSize", pageSize);
-        model.addAttribute("fdrStart", fdrStart);
-        model.addAttribute("fdrEnd", fdrEnd);
-        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
-        if (overviewResult.isFailed()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-            return "redirect:/analyse/overview/list";
-        }
-        PermissionUtil.check(overviewResult.getModel());
-
-        AnalyseDataQuery query = new AnalyseDataQuery();
-        if (peptideRef != null && !peptideRef.isEmpty()) {
-            query.setPeptideRef(peptideRef);
-        }
-        if (fdrStart != null) {
-            query.setFdrStart(fdrStart);
-        }
-        if (fdrEnd != null) {
-            query.setFdrEnd(fdrEnd);
-        }
-        query.setIsDecoy(false);
-        if (overviewId == null) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_ID_CAN_NOT_BE_EMPTY.getMessage());
-            return "redirect:/analyse/overview/list";
-        }
-        query.setOverviewId(overviewId);
-        query.setPageSize(pageSize);
-        query.setPageNo(currentPage);
-        ResultDO<List<AnalyseDataDO>> resultDO = analyseDataService.getList(query);
-
-        for(AnalyseDataDO data : resultDO.getModel()){
-            AnalyseUtil.decompress(data);
-        }
-
-        model.addAttribute("overview", overviewResult.getModel());
-        model.addAttribute("dataList", resultDO.getModel());
-        model.addAttribute("totalPage", resultDO.getTotalPage());
-        model.addAttribute("currentPage", currentPage);
-        model.addAttribute("totalNum", resultDO.getTotalNum());
-        return "scores/list";
     }
 
     @RequestMapping(value = "/detail")

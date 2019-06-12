@@ -178,7 +178,7 @@ public class ScoreServiceImpl implements ScoreService {
             }
 
             for (AnalyseDataDO dataDO : dataList) {
-                AnalyseUtil.decompress(dataDO);
+                AnalyseUtil.decompress(dataDO, swathIndex.getRts());
                 scoreForOne(dataDO, ttMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()), rtMap, input);
                 analyseDataService.update(dataDO);
             }
@@ -195,7 +195,7 @@ public class ScoreServiceImpl implements ScoreService {
 
         if (dataDO.isCompressed()) {
             logger.warn("进入本函数前的AnalyseDataDO需要提前被解压缩!!!!!");
-            AnalyseUtil.decompress(dataDO);
+            AnalyseUtil.decompress(dataDO, new ArrayList<>(rtMap.keySet()));
         }
 
         if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() <= 2) {

@@ -64,6 +64,8 @@ public class AnalyseController extends BaseController {
     @Autowired
     ExperimentService experimentService;
     @Autowired
+    SwathIndexService swathIndexService;
+    @Autowired
     ProjectService projectService;
     @Autowired
     ScoreService scoreService;
@@ -409,7 +411,8 @@ public class AnalyseController extends BaseController {
         JSONArray rtArray = new JSONArray();
         JSONArray intensityArray = new JSONArray();
 
-        AnalyseUtil.decompress(dataDO);
+        SwathIndexDO swathIndexDO = swathIndexService.getSwathIndex(overviewResult.getModel().getExpId(), dataDO.getMz());
+        AnalyseUtil.decompress(dataDO, swathIndexDO.getRts());
         Float[] pairRtArray = dataDO.getRtArray();
         Float[] pairIntensityArray = dataDO.getIntensityMap().get(cutInfo);
 
@@ -454,7 +457,8 @@ public class AnalyseController extends BaseController {
         JSONArray cutInfoArray = new JSONArray();
 
         //同一组的rt坐标是相同的
-        AnalyseUtil.decompress(data);
+        SwathIndexDO swathIndexDO = swathIndexService.getSwathIndex(overviewResult.getModel().getExpId(), data.getMz());
+        AnalyseUtil.decompress(data, swathIndexDO.getRts());
         Float[] pairRtArray = data.getRtArray();
         for (String cutInfo : data.getIntensityMap().keySet()) {
             if (data.getIntensityMap().get(cutInfo) == null) {
