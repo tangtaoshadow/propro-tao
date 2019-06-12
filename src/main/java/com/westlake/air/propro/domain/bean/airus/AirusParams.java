@@ -66,7 +66,7 @@ public class AirusParams {
 
     boolean isDebug = false;
 
-    //用于训练的打分快照
+    //用于打分的子分数模板快照,会和AnalyseDataDO中的每一个FeatureScore中的scores对象做一一映射
     List<String> scoreTypes;
 
     //首批训练时默认作为主分数的分数类型

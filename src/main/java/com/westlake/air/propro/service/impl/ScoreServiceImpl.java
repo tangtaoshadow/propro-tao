@@ -472,11 +472,11 @@ public class ScoreServiceImpl implements ScoreService {
         return sortedPairs.subList(0,cutLine);
     }
 
-    private List<FeatureScores> getFilteredScore(List<FeatureScores> featureScoresList, int topN, String scoreName){
+    private List<FeatureScores> getFilteredScore(List<FeatureScores> featureScoresList, int topN, String scoreName, List<String> scoreTypes){
         if (featureScoresList.size() < topN){
             return featureScoresList;
         }
-        List<FeatureScores> filteredScoreList = SortUtil.sortBySelectedScore(featureScoresList, scoreName, true);
+        List<FeatureScores> filteredScoreList = SortUtil.sortBySelectedScore(featureScoresList, scoreName, true, scoreTypes);
         return filteredScoreList.subList(0, topN);
     }
 }

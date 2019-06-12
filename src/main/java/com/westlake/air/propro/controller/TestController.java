@@ -17,6 +17,7 @@ import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.ExperimentDO;
+import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.FileUtil;
@@ -313,8 +314,10 @@ public class TestController extends BaseController {
                 mzArray[i] = Float.parseFloat(mz[i]);
                 intArray[i] = Float.parseFloat(intensity[i]);
             }
-            FeatureScores featureScores = new FeatureScores();
-            diaScorer.calculateBYIonScore(mzArray, intArray, new HashMap<>(), "AAMTLVQSLLNGNK", 2, featureScores);
+            LumsParams lp = new LumsParams();
+            List<String> defaultScoreTypes = lp.getScoreTypes();
+            FeatureScores featureScores = new FeatureScores(defaultScoreTypes.size());
+            diaScorer.calculateBYIonScore(mzArray, intArray, new HashMap<>(), "AAMTLVQSLLNGNK", 2, featureScores, defaultScoreTypes);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -356,11 +359,10 @@ public class TestController extends BaseController {
             double bestRt = analyseDataDO.getBestRt();
             for (FeatureScores featureScores: featureScoresList){
                 if (featureScores.getRt() == bestRt){
-                    HashMap<String,Double> scoresMap = featureScores.getScoresMap();
                     double score = 0d;
                     for (Map.Entry<String,Double> entry: weightsMap.entrySet()){
                         //默认分数不为null
-                        score += entry.getValue() * scoresMap.get(entry.getKey());
+                        score += entry.getValue() * featureScores.get(entry.getKey(), overviewResult.getScoreTypes());
                     }
                     if (isHeavy){
                         heavyList.add(score);

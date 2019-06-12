@@ -43,12 +43,16 @@ public class LumsParams {
      */
     String ownerName;
 
+    /**
+     * 用于打分的子分数模板快照,会和AnalyseDataDO中的每一个FeatureScore中的scores对象做一一映射
+     */
     List<String> scoreTypes = new ArrayList<>();
 
     /**
      * 是否使用DIA打分,如果使用DIA打分的话,需要提前读取Aird文件中的谱图信息以提升系统运算速度
      */
     boolean usedDIAScores = true;
+
     /**
      * 是否在卷积的时候同时完成选峰和打分
      * epps: extract, peakpick, scoreForAll

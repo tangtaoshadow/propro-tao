@@ -31,9 +31,9 @@ public class SortUtil {
                 if (isDesc) {
                     return o2.getMainScore().compareTo(o1.getMainScore());
                 } else {
-                    try{
+                    try {
                         return o1.getMainScore().compareTo(o2.getMainScore());
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                         return 0;
                     }
@@ -44,16 +44,16 @@ public class SortUtil {
         return ordering.sortedCopy(scores);
     }
 
-    public static List<FeatureScores> sortBySelectedScore(List<FeatureScores> scores, String scoreName, boolean isDesc) {
+    public static List<FeatureScores> sortBySelectedScore(List<FeatureScores> scores, String scoreName, boolean isDesc, List<String> scoreTypes) {
         Ordering<FeatureScores> ordering = Ordering.from(new Comparator<FeatureScores>() {
             @Override
             public int compare(FeatureScores o1, FeatureScores o2) {
                 if (isDesc) {
-                    return o2.getScoresMap().get(scoreName).compareTo(o1.getScoresMap().get(scoreName));
+                    return o2.get(scoreName, scoreTypes).compareTo(o1.get(scoreName, scoreTypes));
                 } else {
-                    try{
-                        return o1.getScoresMap().get(scoreName).compareTo(o2.getScoresMap().get(scoreName));
-                    }catch (Exception e){
+                    try {
+                        return o1.get(scoreName, scoreTypes).compareTo(o2.get(scoreName, scoreTypes));
+                    } catch (Exception e) {
                         e.printStackTrace();
                         return 0;
                     }
@@ -86,7 +86,7 @@ public class SortUtil {
 
     /**
      * @param overviews
-     * @param isDesc 是否降序排序
+     * @param isDesc    是否降序排序
      * @return
      */
     public static List<AnalyseOverviewDO> sortByMatchedPeptideCount(List<AnalyseOverviewDO> overviews, boolean isDesc) {
@@ -106,7 +106,7 @@ public class SortUtil {
 
     /**
      * @param peptides
-     * @param isDesc 是否降序排序
+     * @param isDesc   是否降序排序
      * @return
      */
     public static List<PeptideDO> sortByMz(List<PeptideDO> peptides, boolean isDesc) {
