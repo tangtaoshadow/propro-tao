@@ -49,14 +49,6 @@ public class ProjectDO extends BaseDO {
     //最后修改日期
     Date lastModifiedDate;
 
-    public String getAirdPath(){
-        return repository + "/aird/";
-    }
-
-    public String getAircPath(){
-        return repository + "/airc/";
-    }
-
     public String getExportPath(){
         return repository + "/export/";
     }

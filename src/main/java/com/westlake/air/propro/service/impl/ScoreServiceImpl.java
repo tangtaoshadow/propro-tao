@@ -191,30 +191,6 @@ public class ScoreServiceImpl implements ScoreService {
 
 
     @Override
-    public PeptideFeature selectPeak(AnalyseDataDO dataDO, HashMap<String, Float> intensityMap, SigmaSpacing ss) {
-
-        if (dataDO.isCompressed()) {
-            logger.warn("进入本函数前的AnalyseDataDO需要提前被解压缩!!!!!");
-            AnalyseUtil.decompress(dataDO);
-        }
-
-        if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() < 3) {
-            if (!dataDO.getIsDecoy()){
-                logger.info("数据的离子片段少于3个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
-            }
-            return null;
-        }
-
-        //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
-        PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(dataDO, intensityMap, ss);
-        if (!peptideFeature.isFeatureFound()) {
-            return null;
-        } else {
-            return peptideFeature;
-        }
-    }
-
-    @Override
     public void scoreForOne(AnalyseDataDO dataDO, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input) {
 
         if (dataDO.isCompressed()) {

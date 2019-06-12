@@ -5,6 +5,7 @@ import com.westlake.air.propro.domain.BaseDO;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -56,30 +57,26 @@ public class AnalyseDataDO extends BaseDO {
     @JSONField(serialize=false)
     String peptideId;
 
-    //排序后的rt
-    @JSONField(serialize=false)
-    Float[] rtArray;
-
-    //key为cutInfo, value为对应的intensity值
-    @JSONField(serialize=false)
-    HashMap<String, Float[]> intensityMap = new HashMap<>();
-
     //key为cutInfo, value为对应的mz
     HashMap<String, Float> mzMap = new HashMap<>();
-
 
     /**
      * 压缩相关的字段
      */
+    //开始的时间,闭区间
+    Float rtStart;
+    //结束时间,闭区间
+    Float rtEnd;
+
     //是否处于压缩状态
     @JSONField(serialize=false)
     boolean compressed = false;
 
-    //内存计算时使用的字段,对应rtArray的压缩版本
+    //rtArray的压缩版本
     @JSONField(serialize=false)
     byte[] convRtArray;
 
-    //内存计算时使用的字段,对应intensityMap的压缩版本
+    //intensityMap的压缩版本
     @JSONField(serialize=false)
     HashMap<String, byte[]> convIntensityMap = new HashMap<>();
 
@@ -111,4 +108,15 @@ public class AnalyseDataDO extends BaseDO {
     //最终的定量值
     @JSONField(serialize=false)
     String fragIntFeature;
+
+    //*******************非数据库字段*******************************
+    //排序后的rt,仅在解压缩的时候使用,不存入数据库
+    @JSONField(serialize=false)
+    @Transient
+    Float[] rtArray;
+
+    //key为cutInfo, value为对应的intensity值,仅在解压缩的时候使用,不存入数据库
+    @JSONField(serialize=false)
+    @Transient
+    HashMap<String, Float[]> intensityMap = new HashMap<>();
 }

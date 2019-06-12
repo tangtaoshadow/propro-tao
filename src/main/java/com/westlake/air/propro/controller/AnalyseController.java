@@ -26,10 +26,7 @@ import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.domain.query.AnalyseOverviewQuery;
 import com.westlake.air.propro.service.*;
-import com.westlake.air.propro.utils.CompressUtil;
-import com.westlake.air.propro.utils.FeatureUtil;
-import com.westlake.air.propro.utils.PermissionUtil;
-import com.westlake.air.propro.utils.ScoreUtil;
+import com.westlake.air.propro.utils.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -412,8 +409,9 @@ public class AnalyseController extends BaseController {
         JSONArray rtArray = new JSONArray();
         JSONArray intensityArray = new JSONArray();
 
-        Float[] pairRtArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(dataDO.getConvRtArray()));
-        Float[] pairIntensityArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(dataDO.getConvIntensityMap().get(cutInfo)));
+        AnalyseUtil.decompress(dataDO);
+        Float[] pairRtArray = dataDO.getRtArray();
+        Float[] pairIntensityArray = dataDO.getIntensityMap().get(cutInfo);
 
         for (int n = 0; n < pairRtArray.length; n++) {
             rtArray.add(pairRtArray[n]);
@@ -456,13 +454,14 @@ public class AnalyseController extends BaseController {
         JSONArray cutInfoArray = new JSONArray();
 
         //同一组的rt坐标是相同的
-        Float[] pairRtArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvRtArray()));
-        for (String cutInfo : data.getConvIntensityMap().keySet()) {
-            if (data.getConvIntensityMap().get(cutInfo) == null) {
+        AnalyseUtil.decompress(data);
+        Float[] pairRtArray = data.getRtArray();
+        for (String cutInfo : data.getIntensityMap().keySet()) {
+            if (data.getIntensityMap().get(cutInfo) == null) {
                 continue;
             }
 
-            Float[] pairIntensityArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvIntensityMap().get(cutInfo)));
+            Float[] pairIntensityArray = data.getIntensityMap().get(cutInfo);
             if (isGaussFilter) {
                 AnalyseOverviewDO overview = overviewResult.getModel();
                 pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, cutInfo, pairIntensityArray,new SigmaSpacing(overview.getSigma(), overview.getSpacing()));
