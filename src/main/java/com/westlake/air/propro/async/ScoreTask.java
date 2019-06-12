@@ -4,10 +4,12 @@ import com.westlake.air.propro.constants.TaskStatus;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.ExperimentDO;
+import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.service.AnalyseDataService;
 import com.westlake.air.propro.service.AnalyseOverviewService;
+import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.ScoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -26,6 +28,8 @@ public class ScoreTask extends BaseTask {
     @Autowired
     ScoreService scoreService;
     @Autowired
+    LibraryService libraryService;
+    @Autowired
     AnalyseDataService analyseDataService;
     @Autowired
     AnalyseOverviewService analyseOverviewService;
@@ -38,7 +42,8 @@ public class ScoreTask extends BaseTask {
         taskService.update(taskDO);
 
         LumsParams input = new LumsParams();
-        input.setLibraryId(libraryId);
+        LibraryDO libraryDO = libraryService.getById(libraryId);
+        input.setLibrary(libraryDO);
         input.setSigmaSpacing(sigmaSpacing);
         input.setSlopeIntercept(slopeIntercept);
         input.setOverviewId(overviewId);

@@ -71,34 +71,16 @@ public class Extractor {
             return checkResult;
         }
 
-        //准备读取Aird文件
-        File file = (File) checkResult.getModel();
-        RandomAccessFile raf = null;
-
-        LibraryDO library = libraryService.getById(lumsParams.getLibraryId());
-        if (library == null) {
-            return ResultDO.buildError(ResultCode.LIBRARY_NOT_EXISTED);
-        }
         AnalyseOverviewDO overviewDO = createOverview(lumsParams);
-        overviewDO.setLibraryPeptideCount(library.getTotalCount().intValue());
-        analyseOverviewService.insert(overviewDO);
-        lumsParams.setOverviewId(overviewDO.getId());
+
+        RandomAccessFile raf = null;
         try {
-            raf = new RandomAccessFile(file, "r");
-
+            raf = new RandomAccessFile((File) checkResult.getModel(), "r");
             //核心函数在这里
-            List<AnalyseDataDO> totalDataList = extract(raf, overviewDO.getId(), lumsParams);
-            long count = 0L;
-            for (AnalyseDataDO dataDO : totalDataList) {
-                count += dataDO.getFeatureScoresList().size();
-            }
-            overviewDO.setTotalPeptideCount(totalDataList.size());
-
-            overviewDO.setPeakCount(count);
+            extract(raf, overviewDO, lumsParams);
 
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error(e.getMessage());
         } finally {
             FileUtil.close(raf);
         }
@@ -263,10 +245,10 @@ public class Extractor {
      * 卷积MS2图谱并且输出最终结果,不返回最终的卷积结果以减少内存的使用
      *
      * @param raf        用于读取Aird文件
-     * @param overviewId
+     * @param overviewDO
      * @param lumsParams
      */
-    private List<AnalyseDataDO> extract(RandomAccessFile raf, String overviewId, LumsParams lumsParams) {
+    private void extract(RandomAccessFile raf, AnalyseOverviewDO overviewDO, LumsParams lumsParams) {
 
         //Step1.获取窗口信息.
         logger.info("获取Swath窗口信息");
@@ -284,23 +266,31 @@ public class Extractor {
         //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
         logger.info("总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
         int count = 1;
-        List<AnalyseDataDO> totalDataList = new ArrayList<>();
         try {
+            long peakCount = 0L;
+            int dataCount = 0;
             for (SwathIndexDO index : swathIndexList) {
                 long start = System.currentTimeMillis();
-                List<AnalyseDataDO> dataList = doExtract(raf, index, overviewId, lumsParams);
+                List<AnalyseDataDO> dataList = doExtract(raf, index, overviewDO.getId(), lumsParams);
                 if (dataList != null) {
-                    totalDataList.addAll(dataList);
+                    for (AnalyseDataDO dataDO : dataList) {
+                        peakCount += dataDO.getFeatureScoresList().size();
+                    }
+                    dataCount += dataList.size();
                 }
                 analyseDataService.insertAll(dataList, false);
                 logger.info("第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
                 count++;
             }
+
+            overviewDO.setTotalPeptideCount(dataCount);
+            overviewDO.setPeakCount(peakCount);
+            analyseOverviewService.update(overviewDO);
+
         } catch (Exception e) {
             e.printStackTrace();
             logger.error(e.getMessage());
         }
-        return totalDataList;
     }
 
     /**
@@ -323,7 +313,7 @@ public class Extractor {
             rtRange = lumsParams.getRtRangeMap().get(precursorMz);
         }
         ExperimentDO exp = lumsParams.getExperimentDO();
-        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibraryId(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), swathIndex.getRange(), rtRange, exp.getType(), lumsParams.isUniqueOnly());
+        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibrary().getId(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), swathIndex.getRange(), rtRange, exp.getType(), lumsParams.isUniqueOnly());
         if (coordinates.isEmpty()) {
             logger.warn("No Coordinates Found,Rang:" + swathIndex.getRange().getStart() + ":" + swathIndex.getRange().getEnd());
             return null;
@@ -405,7 +395,7 @@ public class Extractor {
             //Step2. 常规选峰及打分
             scoreService.scoreForOne(dataDO, tp, rtMap, lumsParams);
             if (dataDO.getFeatureScoresList() == null) {
-            //logger.info("未满足基础条件,直接忽略:"+dataDO.getPeptideRef());
+                //logger.info("未满足基础条件,直接忽略:"+dataDO.getPeptideRef());
                 targetIgnorePeptides.add(dataDO.getPeptideRef());
                 continue;
             }
@@ -441,18 +431,15 @@ public class Extractor {
      * @return
      */
     public AnalyseOverviewDO createOverview(LumsParams input) {
-        //创建实验初始化概览数据
         AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
         overviewDO.setExpId(input.getExperimentDO().getId());
         overviewDO.setExpName(input.getExperimentDO().getName());
         overviewDO.setType(input.getExperimentDO().getType());
-        if (input.getLibraryId() != null) {
-            String name = libraryService.getNameById(input.getLibraryId());
-            overviewDO.setLibraryId(input.getLibraryId());
-            overviewDO.setLibraryName(name);
-            overviewDO.setName(input.getExperimentDO().getName() + "-" + name + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
-        }
-
+        overviewDO.setScoreTypes(input.getScoreTypes()); //存储打分分数类型的快照
+        overviewDO.setLibraryId(input.getLibrary().getId());
+        overviewDO.setLibraryName(input.getLibrary().getName());
+        overviewDO.setLibraryPeptideCount(input.getLibrary().getTotalCount().intValue());
+        overviewDO.setName(input.getExperimentDO().getName() + "-" + input.getLibrary().getName() + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
         overviewDO.setOwnerName(input.getOwnerName());
         overviewDO.setCreateDate(new Date());
         overviewDO.setNote(input.getNote());
@@ -467,6 +454,8 @@ public class Extractor {
             overviewDO.setIntercept(input.getSlopeIntercept().getIntercept());
         }
 
+        analyseOverviewService.insert(overviewDO);
+        input.setOverviewId(overviewDO.getId());
         return overviewDO;
     }
 }

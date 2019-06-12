@@ -81,15 +81,15 @@ public class ExperimentTask extends BaseTask {
 
         taskDO.addLog("mz卷积窗口:" + lumsParams.getMzExtractWindow() + ",RT卷积窗口:" + lumsParams.getRtExtractWindow());
         taskDO.addLog("Sigma:" + lumsParams.getSigmaSpacing().getSigma() + ",Spacing:" + lumsParams.getSigmaSpacing().getSpacing());
-        taskDO.addLog("使用标准库ID:" + lumsParams.getLibraryId());
+        taskDO.addLog("使用标准库ID:" + lumsParams.getLibrary().getId());
         taskDO.addLog("Note:" + lumsParams.getNote());
         taskDO.addLog("使用限制阈值Shape/ShapeWeight:" + lumsParams.getXcorrShapeThreshold() + "/" + lumsParams.getXcorrShapeWeightThreshold());
 
         long start = System.currentTimeMillis();
-        if (StringUtils.isNotEmpty(lumsParams.getIRtLibraryId())) {
+        if (lumsParams.getIRtLibrary() != null) {
             taskDO.addLog("开始卷积IRT校准库并且计算iRT值");
             taskService.update(taskDO);
-            ResultDO<IrtResult> resultDO = irt.convAndIrt(lumsParams.getExperimentDO(), lumsParams.getIRtLibraryId(), lumsParams.getMzExtractWindow(), lumsParams.getSigmaSpacing());
+            ResultDO<IrtResult> resultDO = irt.convAndIrt(lumsParams.getExperimentDO(), lumsParams.getIRtLibrary().getId(), lumsParams.getMzExtractWindow(), lumsParams.getSigmaSpacing());
             if(resultDO.isFailed()){
                 taskDO.addLog("iRT计算失败:"+resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
                 taskDO.finish(TaskStatus.FAILED.getName());
@@ -111,7 +111,9 @@ public class ExperimentTask extends BaseTask {
         taskDO.addLog("处理完毕,卷积(打分)总耗时:" + (System.currentTimeMillis() - start));
         taskDO.addLog("开始进行合并打分");
         taskService.update(taskDO);
-        FinalResult finalResult = airus.doAirus(lumsParams.getOverviewId(), new AirusParams());
+        AirusParams ap = new AirusParams();
+        ap.setScoreTypes(lumsParams.getScoreTypes());
+        FinalResult finalResult = airus.doAirus(lumsParams.getOverviewId(), ap);
         int matchedPeptideCount = finalResult.getMatchedPeptideCount();
 
         taskDO.addLog("流程执行完毕,总耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为" + matchedPeptideCount);

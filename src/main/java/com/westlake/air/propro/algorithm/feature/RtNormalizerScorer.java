@@ -2,6 +2,7 @@ package com.westlake.air.propro.algorithm.feature;
 
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.domain.bean.score.*;
+import com.westlake.air.propro.domain.params.LumsParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,20 +40,21 @@ public class RtNormalizerScorer {
      * scores.elution_model_fit_score          *  1.88443209;
      *
      * @param peakGroupFeatureList features extracted from chromatogramList in transitionGroup
-     * @param normedLibIntMap   intensity in transitionList in transitionGroup
+     * @param normedLibIntMap      intensity in transitionList in transitionGroup
      * @return List of overallQuality
      */
     public List<ScoreRtPair> score(List<PeakGroup> peakGroupFeatureList, HashMap<String, Double> normedLibIntMap, double groupRt) {
 
 
         List<ScoreRtPair> finalScores = new ArrayList<>();
+        List<String> defaultScoreTypes = new LumsParams().getScoreTypes();
         for (PeakGroup peakGroupFeature : peakGroupFeatureList) {
-            FeatureScores scores = new FeatureScores();
-            chromatographicScorer.calculateChromatographicScores(peakGroupFeature, normedLibIntMap, scores, null);
-            chromatographicScorer.calculateLogSnScore(peakGroupFeature, scores);
-            libraryScorer.calculateLibraryScores(peakGroupFeature, normedLibIntMap, scores, null);
+            FeatureScores scores = new FeatureScores(defaultScoreTypes.size());
+            chromatographicScorer.calculateChromatographicScores(peakGroupFeature, normedLibIntMap, scores, defaultScoreTypes);
+            chromatographicScorer.calculateLogSnScore(peakGroupFeature, scores, defaultScoreTypes);
+            libraryScorer.calculateLibraryScores(peakGroupFeature, normedLibIntMap, scores, defaultScoreTypes);
 
-            double ldaScore = -1d * calculateLdaPrescore(scores);
+            double ldaScore = -1d * calculateLdaPrescore(scores, defaultScoreTypes);
             ScoreRtPair scoreRtPair = new ScoreRtPair();
             scoreRtPair.setGroupRt(groupRt);
             scoreRtPair.setRt(peakGroupFeature.getApexRt());
@@ -70,13 +72,12 @@ public class RtNormalizerScorer {
      * @param scores pre-calculated
      * @return final scoreForAll
      */
-    private double calculateLdaPrescore(FeatureScores scores) {
-        return scores.get(ScoreType.LibraryCorr) * -0.34664267d +
-                scores.get(ScoreType.LibraryRsmd) * 2.98700722d +
-                scores.get(ScoreType.XcorrCoelution) * 0.09445371d +
-                scores.get(ScoreType.XcorrShape) * -5.71823862d +
-                scores.get(ScoreType.LogSnScore) * -0.72989582d;
+    private double calculateLdaPrescore(FeatureScores scores, List<String> scoreTypes) {
+        return scores.get(ScoreType.LibraryCorr.getTypeName(), scoreTypes) * -0.34664267d +
+                scores.get(ScoreType.LibraryRsmd.getTypeName(), scoreTypes) * 2.98700722d +
+                scores.get(ScoreType.XcorrCoelution.getTypeName(), scoreTypes) * 0.09445371d +
+                scores.get(ScoreType.XcorrShape.getTypeName(), scoreTypes) * -5.71823862d +
+                scores.get(ScoreType.LogSnScore.getTypeName(), scoreTypes) * -0.72989582d;
     }
-
 
 }

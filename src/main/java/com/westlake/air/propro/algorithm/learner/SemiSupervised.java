@@ -38,27 +38,23 @@ public class SemiSupervised {
         LDALearnData ldaLearnData = new LDALearnData();
         try {
             //Get part of scores as train input.
-            TrainData trainData = AirusUtil.split(scores, airusParams.getTrainTestRatio(), airusParams.isDebug());
+            TrainData trainData = AirusUtil.split(scores, airusParams.getTrainTestRatio(), airusParams.isDebug(), airusParams.getScoreTypes());
 
             //第一次训练数据集使用指定的主分数(默认为MainScore)进行训练
 //            TrainPeaks trainPeaks = selectTrainPeaks(trainData, airusParams.getMainScore(), airusParams, airusParams.getSsInitialFdr());
-            TrainPeaks trainPeaks = selectFirstTrainPeaks(trainData);
+            TrainPeaks trainPeaks = selectFirstTrainPeaks(trainData, airusParams);
 
-            HashMap<String, Double> weightsMap = ldaLearner.learn(trainPeaks, airusParams.getMainScore());
+            HashMap<String, Double> weightsMap = ldaLearner.learn(trainPeaks, airusParams.getMainScore(), airusParams.getScoreTypes());
             logger.info("Train Weight:" + JSONArray.toJSONString(weightsMap));
 
             //根据weightsMap计算子分数的加权总分
-            ldaLearner.score(trainData, weightsMap);
+            ldaLearner.score(trainData, weightsMap, airusParams.getScoreTypes());
             weightsMap = new HashMap<>();
             HashMap<String, Double> lastWeightsMap = new HashMap<>();
             for (int times = 0; times < airusParams.getXevalNumIter(); times++) {
                 TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, ScoreType.WeightedTotalScore.getTypeName(), airusParams, airusParams.getSsIterationFdr());
-//                if(trainPeaksTemp.getBestTargets().size() == 0){
-//                    System.out.println("emmm");
-//                }
                 lastWeightsMap = weightsMap;
-                weightsMap = ldaLearner.learn(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName());
-//                cleanWeightsMap(weightsMap);
+                weightsMap = ldaLearner.learn(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName(), airusParams.getScoreTypes());
                 logger.info("Train Weight:" + JSONArray.toJSONString(weightsMap));
                 for(Double value: weightsMap.values()){
                     if(value == null || Double.isNaN(value)){
@@ -71,7 +67,7 @@ public class SemiSupervised {
                         weightsMap.put(key, (weightsMap.get(key) + lastWeightsMap.get(key)) / 2);
                     }
                 }
-                ldaLearner.score(trainData, weightsMap);
+                ldaLearner.score(trainData, weightsMap, airusParams.getScoreTypes());
             }
 //            cleanWeightsMap(weightsMap);
 //            System.out.println(JSONArray.toJSONString(weightsMap));
@@ -90,22 +86,22 @@ public class SemiSupervised {
     public Booster learnRandomizedXGB(List<SimpleScores> scores, AirusParams airusParams){
         try{
             //Get part of scores as train input.
-            TrainData trainData = AirusUtil.split(scores, airusParams.getTrainTestRatio(), airusParams.isDebug());
+            TrainData trainData = AirusUtil.split(scores, airusParams.getTrainTestRatio(), airusParams.isDebug(), airusParams.getScoreTypes());
             //第一次训练数据集使用MainScore进行训练
             long startTime = System.currentTimeMillis();
             TrainPeaks trainPeaks = selectTrainPeaks(trainData, airusParams.getMainScore(), airusParams, airusParams.getSsInitialFdr());
             logger.info("高可信Target个数："+ trainPeaks.getBestTargets().size());
-            Booster booster = xgBoostLearner.train(trainPeaks, airusParams.getMainScore());
-            xgBoostLearner.predict(booster, trainData, airusParams.getMainScore());
+            Booster booster = xgBoostLearner.train(trainPeaks, airusParams.getMainScore(), airusParams.getScoreTypes());
+            xgBoostLearner.predict(booster, trainData, airusParams.getMainScore(), airusParams.getScoreTypes());
             for(int times = 0; times < airusParams.getXevalNumIter(); times++){
                 logger.info("开始第"+ times +"轮训练");
                 TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, ScoreType.WeightedTotalScore.getTypeName(), airusParams, airusParams.getXgbIterationFdr());
                 logger.info("高可信Target个数："+ trainPeaksTemp.getBestTargets().size());
-                booster = xgBoostLearner.train(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName());
-                xgBoostLearner.predict(booster, trainData, ScoreType.WeightedTotalScore.getTypeName());
+                booster = xgBoostLearner.train(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName(), airusParams.getScoreTypes());
+                xgBoostLearner.predict(booster, trainData, ScoreType.WeightedTotalScore.getTypeName(), airusParams.getScoreTypes());
             }
             logger.info("总时间：" +(System.currentTimeMillis()-startTime));
-            List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), false);
+            List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), airusParams.getScoreTypes(), false);
             ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
             int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
             logger.info("Train count:" + count);
@@ -119,8 +115,8 @@ public class SemiSupervised {
 
     private TrainPeaks selectTrainPeaks(TrainData trainData, String usedScoreType, AirusParams airusParams, Double cutoff) {
 
-        List<SimpleFeatureScores> topTargetPeaks = AirusUtil.findTopFeatureScores(trainData.getTargets(), usedScoreType, true);
-        List<SimpleFeatureScores> topDecoyPeaks = AirusUtil.findTopFeatureScores(trainData.getDecoys(), usedScoreType, false);
+        List<SimpleFeatureScores> topTargetPeaks = AirusUtil.findTopFeatureScores(trainData.getTargets(), usedScoreType, airusParams.getScoreTypes(), true);
+        List<SimpleFeatureScores> topDecoyPeaks = AirusUtil.findTopFeatureScores(trainData.getDecoys(), usedScoreType, airusParams.getScoreTypes(), false);
 
         Double cutoffNew;
         if (topTargetPeaks.size() < 100){
@@ -149,40 +145,41 @@ public class SemiSupervised {
         return trainPeaks;
     }
 
-    private TrainPeaks selectFirstTrainPeaks(TrainData trainData){
+    private TrainPeaks selectFirstTrainPeaks(TrainData trainData, AirusParams airusParams){
         List<SimpleFeatureScores> decoyPeaks = new ArrayList<>();
         for (SimpleScores simpleScores: trainData.getDecoys()){
             for (FeatureScores featureScores : simpleScores.getFeatureScoresList()){
                 SimpleFeatureScores simpleFeatureScores = new SimpleFeatureScores();
-                simpleFeatureScores.setScoresMap(featureScores.getScoresMap());
+                simpleFeatureScores.setScores(featureScores.getScores());
                 decoyPeaks.add(simpleFeatureScores);
             }
         }
         TrainPeaks trainPeaks = new TrainPeaks();
         trainPeaks.setTopDecoys(decoyPeaks);
-        HashMap<String, Double> bestScoreMap = new HashMap<>();
-        bestScoreMap.put(ScoreType.XcorrShape.getTypeName(), 1d);
-        bestScoreMap.put(ScoreType.XcorrShapeWeighted.getTypeName(), 1d);
-        bestScoreMap.put(ScoreType.XcorrCoelution.getTypeName(), 0d);
-        bestScoreMap.put(ScoreType.XcorrCoelutionWeighted.getTypeName(), 0d);
-        bestScoreMap.put(ScoreType.LibraryCorr.getTypeName(), 1d);
-        bestScoreMap.put(ScoreType.LibraryRsmd.getTypeName(), 0d);
-        bestScoreMap.put(ScoreType.LibraryManhattan.getTypeName(), 0d);
-        bestScoreMap.put(ScoreType.LibraryDotprod.getTypeName(), 1d);
-        bestScoreMap.put(ScoreType.LibrarySangle.getTypeName(), 0d);
-        bestScoreMap.put(ScoreType.LibraryRootmeansquare.getTypeName(), 0d);
-        bestScoreMap.put(ScoreType.LogSnScore.getTypeName(), 5d);
-        bestScoreMap.put(ScoreType.NormRtScore.getTypeName(), 0d);
-        bestScoreMap.put(ScoreType.IntensityScore.getTypeName(), 1d);
-        bestScoreMap.put(ScoreType.IsotopeCorrelationScore.getTypeName(), 1d);
-        bestScoreMap.put(ScoreType.IsotopeOverlapScore.getTypeName(), 0d);
-        bestScoreMap.put(ScoreType.MassdevScore.getTypeName(), 0d);
-        bestScoreMap.put(ScoreType.MassdevScoreWeighted.getTypeName(), 0d);
-        bestScoreMap.put(ScoreType.BseriesScore.getTypeName(), 4d);
-        bestScoreMap.put(ScoreType.YseriesScore.getTypeName(), 10d);
-        bestScoreMap.put(ScoreType.NewScore.getTypeName(), 0d);
-        SimpleFeatureScores bestTargetScore = new SimpleFeatureScores();
-        bestTargetScore.setScoresMap(bestScoreMap);
+        List<String> scoreTypes = airusParams.getScoreTypes();
+
+        SimpleFeatureScores bestTargetScore = new SimpleFeatureScores(airusParams.getScoreTypes().size());
+        bestTargetScore.put(ScoreType.XcorrShape.getTypeName(), 1d, scoreTypes);
+        bestTargetScore.put(ScoreType.XcorrShapeWeighted.getTypeName(), 1d, scoreTypes);
+        bestTargetScore.put(ScoreType.XcorrCoelution.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.XcorrCoelutionWeighted.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.LibraryCorr.getTypeName(), 1d, scoreTypes);
+        bestTargetScore.put(ScoreType.LibraryRsmd.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.LibraryManhattan.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.LibraryDotprod.getTypeName(), 1d, scoreTypes);
+        bestTargetScore.put(ScoreType.LibrarySangle.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.LibraryRootmeansquare.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.LogSnScore.getTypeName(), 5d, scoreTypes);
+        bestTargetScore.put(ScoreType.NormRtScore.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.IntensityScore.getTypeName(), 1d, scoreTypes);
+        bestTargetScore.put(ScoreType.IsotopeCorrelationScore.getTypeName(), 1d, scoreTypes);
+        bestTargetScore.put(ScoreType.IsotopeOverlapScore.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.MassdevScore.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.MassdevScoreWeighted.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.BseriesScore.getTypeName(), 4d, scoreTypes);
+        bestTargetScore.put(ScoreType.YseriesScore.getTypeName(), 10d, scoreTypes);
+
+
         List<SimpleFeatureScores> bestTargets = new ArrayList<>();
         bestTargets.add(bestTargetScore);
         trainPeaks.setBestTargets(bestTargets);

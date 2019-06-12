@@ -17,8 +17,7 @@ public class PeptideFeature {
 
     HashMap<String, Double> normedLibIntMap;
 
-    public PeptideFeature() {
-    }
+    public PeptideFeature() {}
 
     public PeptideFeature(boolean isFeatureFound) {
         this.featureFound = isFeatureFound;

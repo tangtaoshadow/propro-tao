@@ -2,14 +2,12 @@ package com.westlake.air.propro.domain.bean.score;
 
 import lombok.Data;
 
-import java.util.HashMap;
-
 /**
  * Created by Nico Wang Ruimin
  * Time: 2018-08-05 22:42
  */
 @Data
-public class SimpleFeatureScores {
+public class SimpleFeatureScores extends BaseScores{
 
     String peptideRef;
 
@@ -19,9 +17,6 @@ public class SimpleFeatureScores {
     Double rt;
 
     Double intensitySum;
-
-    //本峰对应的打分列表
-    HashMap<String, Double> scoresMap;
 
     //本峰对应的最终综合打分
     Double mainScore;
@@ -37,6 +32,10 @@ public class SimpleFeatureScores {
     Boolean thresholdPassed = true;
 
     public SimpleFeatureScores(){}
+
+    public SimpleFeatureScores(int scoreTypesSize){
+        this.scores = new Double[scoreTypesSize];
+    }
 
     public SimpleFeatureScores(String peptideRef, Boolean isDecoy){
         this.peptideRef = peptideRef;

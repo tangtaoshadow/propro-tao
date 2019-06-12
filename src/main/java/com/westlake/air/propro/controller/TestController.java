@@ -13,6 +13,7 @@ import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.dao.AnalyseDataDAO;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
+import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.FileUtil;
@@ -88,49 +89,6 @@ public class TestController extends BaseController {
         String jsonTest = "{\"start\": 482.14798,\"end\": 483.348,\"interval\": 1.20001221}";
         HashMap test = JSONObject.parseObject(jsonTest, HashMap.class);
         System.out.println(test.size());
-        return null;
-    }
-
-    @RequestMapping("scoreTest")
-    @ResponseBody
-    String scoreTest() {
-        List<String> experimentIdList = new ArrayList<>();
-        experimentIdList.add("5c7e6d13dfdfdd2e3430a110");
-        experimentIdList.add("5c7e6d13dfdfdd2e3430a112");
-        experimentIdList.add("5c7e6d13dfdfdd2e3430a114");
-        experimentIdList.add("5c7e6d13dfdfdd2e3430a116");
-        experimentIdList.add("5c7e6d13dfdfdd2e3430a118");
-        experimentIdList.add("5c7e6d13dfdfdd2e3430a11a");
-        experimentIdList.add("5c7e6d13dfdfdd2e3430a11c");
-        experimentIdList.add("5c7e6d13dfdfdd2e3430a11e");
-        List<Double> targetScoreList = new ArrayList<>();
-        for (String expId : experimentIdList) {
-            String overviewId = analyseOverviewService.getAllByExpId(expId).get(0).getId();
-            List<AnalyseDataDO> analyseDataDOList = analyseDataService.getAllByOverviewId(overviewId);
-            for (AnalyseDataDO analyseDataDO : analyseDataDOList) {
-                if (analyseDataDO.getIdentifiedStatus() != AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS) {
-                    continue;
-                }
-                List<FeatureScores> featureScoresList = analyseDataDO.getFeatureScoresList();
-                for (FeatureScores featureScores : featureScoresList) {
-                    if (featureScores.getRt().equals(analyseDataDO.getBestRt())) {
-                        double score = featureScores.getScoresMap().get(ScoreType.XcorrShapeWeighted.getTypeName());
-                        if (score < 0.7 && score > 0.6) {
-                            System.out.println(expId + " + " + analyseDataDO.getPeptideRef() + " + " + score);
-                        }
-                        targetScoreList.add(score);
-                    }
-                }
-            }
-        }
-//        List<String> badList = new ArrayList<>();
-//        for (String peptideRef: targetScoreMap.keySet()){
-//            if (targetScoreMap.get(peptideRef) < 0.6){
-//                badList.add(peptideRef);
-//            }
-//        }
-
-        System.out.println(targetScoreList);
         return null;
     }
 
@@ -317,50 +275,6 @@ public class TestController extends BaseController {
         return hitMap;
     }
 
-    private void printScoreDistribution(List<String> analyseOverviewIdList, HashMap<String, Integer> peptideRefMap, String scoreType, int cutOff) throws IOException {
-        List<Double> decoyScoreList = new ArrayList<>();
-        List<Double> matchTargetScoreList = new ArrayList<>();
-        for (String analyseOverviewId : analyseOverviewIdList) {
-            List<AnalyseDataDO> dataDOList = analyseDataService.getAllByOverviewId(analyseOverviewId);
-            for (AnalyseDataDO dataDO : dataDOList) {
-                if (dataDO.getIsDecoy()) {
-                    List<FeatureScores> featureScoresList = dataDO.getFeatureScoresList();
-                    double bestRt = dataDO.getBestRt();
-                    for (FeatureScores featureScores : featureScoresList) {
-                        if (featureScores.getRt() == bestRt) {
-                            decoyScoreList.add(featureScores.getScoresMap().get(scoreType));
-                        }
-                    }
-                } else {
-                    if (dataDO.getIdentifiedStatus() == AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS && peptideRefMap.containsKey(dataDO.getPeptideRef()) && peptideRefMap.get(dataDO.getPeptideRef()) > cutOff) {
-                        List<FeatureScores> featureScoresList = dataDO.getFeatureScoresList();
-                        double bestRt = dataDO.getBestRt();
-                        for (FeatureScores featureScores : featureScoresList) {
-                            if (featureScores.getRt() == bestRt) {
-                                matchTargetScoreList.add(featureScores.getScoresMap().get(scoreType));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        File file = new File("D:/test.tsv");
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
-        writer.append("decoy");
-        for (Double value : decoyScoreList) {
-            writer.append("\t").append(value.toString());
-        }
-        writer.append("\r").append("target");
-        for (Double value : matchTargetScoreList) {
-            writer.append("\t").append(value.toString());
-        }
-        writer.append("\r");
-        writer.close();
-
-//        System.out.println("decoy: " + decoyScoreList);
-//        System.out.println("matchT:" + matchTargetScoreList);
-    }
-
     @RequestMapping("unimodTest")
     @ResponseBody
     String unimodTest() {
@@ -379,28 +293,4 @@ public class TestController extends BaseController {
         System.out.println(isSuccess);
         return null;
     }
-
-    @RequestMapping("byScore")
-    @ResponseBody
-    String byScoreTest(){
-        try{
-            String file = FileUtil.readFile("C:\\workspace\\java\\test\\byscore.txt");
-            String[] mz = file.split("\n")[0].split(",");
-            String[] intensity = file.split("\n")[1].split(",");
-            assert mz.length == intensity.length;
-            Float[] mzArray = new Float[mz.length];
-            Float[] intArray = new Float[mz.length];
-            for (int i=0; i<mz.length; i++){
-                mzArray[i] = Float.parseFloat(mz[i]);
-                intArray[i] = Float.parseFloat(intensity[i]);
-            }
-            FeatureScores featureScores = new FeatureScores();
-            diaScorer.calculateBYIonScore(mzArray, intArray, new HashMap<>(), "AAMTLVQSLLNGNK", 2, featureScores);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
 }

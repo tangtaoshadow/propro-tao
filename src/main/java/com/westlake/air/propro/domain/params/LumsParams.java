@@ -4,6 +4,7 @@ import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.ExperimentDO;
+import com.westlake.air.propro.domain.db.LibraryDO;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -22,9 +23,9 @@ public class LumsParams {
 
     String overviewId;
 
-    String iRtLibraryId;
+    LibraryDO iRtLibrary;
 
-    String libraryId;
+    LibraryDO library;
 
     Float mzExtractWindow;
 
@@ -44,6 +45,9 @@ public class LumsParams {
 
     List<String> scoreTypes = new ArrayList<>();
 
+    /**
+     * 是否使用DIA打分,如果使用DIA打分的话,需要提前读取Aird文件中的谱图信息以提升系统运算速度
+     */
     boolean usedDIAScores = true;
     /**
      * 是否在卷积的时候同时完成选峰和打分
@@ -69,6 +73,8 @@ public class LumsParams {
     HashMap<Float, Float[]> rtRangeMap;
 
     public LumsParams(){
+        scoreTypes.add(ScoreType.MainScore.getTypeName()); //存储的第一个位置默认存放的是MainScore
+        scoreTypes.add(ScoreType.WeightedTotalScore.getTypeName()); //存储的第一个位置默认存放的是MainScore
         scoreTypes.add(ScoreType.IntensityScore.getTypeName());
         scoreTypes.add(ScoreType.LibraryCorr.getTypeName());
         scoreTypes.add(ScoreType.LibraryRsmd.getTypeName());

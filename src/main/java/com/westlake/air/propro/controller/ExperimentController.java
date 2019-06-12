@@ -414,7 +414,7 @@ public class ExperimentController extends BaseController {
 
         LumsParams input = new LumsParams();
         input.setExperimentDO(resultDO.getModel());
-        input.setLibraryId(libraryId);
+        input.setLibrary(library);
         input.setSlopeIntercept(si);
         input.setNote(note);
         input.setOwnerName(getCurrentUsername());

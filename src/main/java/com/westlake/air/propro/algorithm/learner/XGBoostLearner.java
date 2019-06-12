@@ -41,109 +41,101 @@ public class XGBoostLearner extends Learner {
             put("objective", "binary:logitraw");
             put("eval_metric", "error");
             put("seed", "23");
-            put("subsample",0.5);
+            put("subsample", 0.5);
         }
     };
     int nRounds = 100;
 
-    public Booster train(TrainPeaks trainPeaks, String skipScoreType) throws XGBoostError {
-
-        DMatrix trainMat = trainPeaksToDMatrix(trainPeaks, skipScoreType);
+    public Booster train(TrainPeaks trainPeaks, String skipScoreType, List<String> scoreTypes) throws XGBoostError {
+        DMatrix trainMat = trainPeaksToDMatrix(trainPeaks, skipScoreType, scoreTypes);
         Map<String, DMatrix> watches = new HashMap<>();
         watches.put("train", trainMat);
 
-        Booster booster = XGBoost.train(trainMat, this.params,500, watches, null, null);
+        Booster booster = XGBoost.train(trainMat, this.params, 500, watches, null, null);
         return booster;
     }
 
-    public void predict(Booster booster, TrainData trainData, String skipScoreType) throws XGBoostError {
+    public void predict(Booster booster, TrainData trainData, String skipScoreType, List<String> scoreTypes) throws XGBoostError {
         List<SimpleScores> totalGroupScore = new ArrayList<>(trainData.getDecoys());
         totalGroupScore.addAll(trainData.getTargets());
-        predictAll(booster, totalGroupScore, skipScoreType);
+        predictAll(booster, totalGroupScore, skipScoreType, scoreTypes);
     }
 
-    public void predictAll(Booster booster, List<SimpleScores> scores, String skipScoreType) throws XGBoostError{
-        Set<String> keySet = scores.get(0).getFeatureScoresList().get(0).getScoresMap().keySet();
-        int scoreTypes = keySet.size();
-        if(skipScoreType.equals(ScoreType.MainScore.getTypeName())){
-            scoreTypes -= 1;
-        }else{
-            scoreTypes -= 2;
+    public void predictAll(Booster booster, List<SimpleScores> scores, String skipScoreType, List<String> scoreTypes) throws XGBoostError {
+        int scoreTypesCount = scoreTypes.size();
+        if (skipScoreType.equals(ScoreType.MainScore.getTypeName())) {
+            scoreTypesCount -= 1;
+        } else {
+            scoreTypesCount -= 2;
         }
 //        List<Float> testData = new ArrayList<>();
-        for(SimpleScores simpleScores : scores){
-            for(FeatureScores featureScores: simpleScores.getFeatureScoresList()){
-                if(!simpleScores.getIsDecoy() && !checkRationality(featureScores)){
-                    featureScores.put(ScoreType.WeightedTotalScore.getTypeName(), 0d);
+        for (SimpleScores simpleScores : scores) {
+            for (FeatureScores featureScores : simpleScores.getFeatureScoresList()) {
+                if (!simpleScores.getIsDecoy() && !checkRationality(featureScores, scoreTypes)) {
+                    featureScores.put(ScoreType.WeightedTotalScore.getTypeName(), 0d, scoreTypes);
                     continue;
                 }
-                HashMap<String,Double> scoreMap = featureScores.getScoresMap();
-                float[] testData = new float[scoreTypes];
+                float[] testData = new float[scoreTypesCount];
                 int tempIndex = 0;
-                for (String scoreName : keySet) {
+                for (String scoreName : scoreTypes) {
                     if (scoreName.equals(ScoreType.WeightedTotalScore.getTypeName()) || scoreName.equals(ScoreType.MainScore.getTypeName())) {
                         continue;
                     }
-                    testData[tempIndex] = scoreMap.get(scoreName).floatValue();
-                    tempIndex ++;
+                    testData[tempIndex] = featureScores.get(scoreName, scoreTypes).floatValue();
+                    tempIndex++;
                 }
-                DMatrix dMatrix = new DMatrix(testData, 1,scoreTypes);
+                DMatrix dMatrix = new DMatrix(testData, 1, scoreTypesCount);
                 float[][] predicts = booster.predict(dMatrix);
                 double score = predicts[0][0];
-                featureScores.put(ScoreType.WeightedTotalScore.getTypeName(), score);
+                featureScores.put(ScoreType.WeightedTotalScore.getTypeName(), score, scoreTypes);
             }
         }
     }
 
-    public DMatrix trainPeaksToDMatrix(TrainPeaks trainPeaks, String skipScoreType) throws XGBoostError {
-
-
+    public DMatrix trainPeaksToDMatrix(TrainPeaks trainPeaks, String skipScoreType, List<String> scoreTypes) throws XGBoostError {
         int totalLength = trainPeaks.getBestTargets().size() + trainPeaks.getTopDecoys().size();
-        HashMap<String, Double> scoreMapSample = trainPeaks.getBestTargets().get(0).getScoresMap();
-        Set<String> keySet = scoreMapSample.keySet();
-        int scoreTypes = keySet.size();
-        if(skipScoreType.equals(ScoreType.MainScore.getTypeName())){
-            scoreTypes -= 1;
-        }else{
-            scoreTypes -= 2;
+        int scoreTypesCount = scoreTypes.size();
+        if (skipScoreType.equals(ScoreType.MainScore.getTypeName())) {
+            scoreTypesCount -= 1;
+        } else {
+            scoreTypesCount -= 2;
         }
 
-        float[] trainData = new float[totalLength * scoreTypes];
+        float[] trainData = new float[totalLength * scoreTypesCount];
         float[] trainLabel = new float[totalLength];
         int dataIndex = 0, labelIndex = 0;
-        for(SimpleFeatureScores sample: trainPeaks.getBestTargets()){
-            for (String scoreName : keySet) {
-                if(scoreName.equals(skipScoreType) || scoreName.equals(ScoreType.MainScore.getTypeName())){
+        for (SimpleFeatureScores sample : trainPeaks.getBestTargets()) {
+            for (String scoreName : scoreTypes) {
+                if (scoreName.equals(skipScoreType) || scoreName.equals(ScoreType.MainScore.getTypeName())) {
                     continue;
                 }
-                trainData[dataIndex] = sample.getScoresMap().get(scoreName).floatValue();
+                trainData[dataIndex] = sample.get(scoreName, scoreTypes).floatValue();
                 trainLabel[labelIndex] = 1;
-                dataIndex ++;
+                dataIndex++;
             }
-            labelIndex ++;
+            labelIndex++;
         }
-        for(SimpleFeatureScores sample: trainPeaks.getTopDecoys()){
-            for (String scoreName : keySet) {
-                if(scoreName.equals(skipScoreType) || scoreName.equals(ScoreType.MainScore.getTypeName())){
+        for (SimpleFeatureScores sample : trainPeaks.getTopDecoys()) {
+            for (String scoreName : scoreTypes) {
+                if (scoreName.equals(skipScoreType) || scoreName.equals(ScoreType.MainScore.getTypeName())) {
                     continue;
                 }
-                trainData[dataIndex] = sample.getScoresMap().get(scoreName).floatValue();
+                trainData[dataIndex] = sample.get(scoreName, scoreTypes).floatValue();
                 trainLabel[labelIndex] = 0;
-                dataIndex ++;
+                dataIndex++;
             }
-            labelIndex ++;
+            labelIndex++;
         }
 
-        DMatrix trainMat = new DMatrix(trainData, totalLength, scoreTypes);
+        DMatrix trainMat = new DMatrix(trainData, totalLength, scoreTypesCount);
         trainMat.setLabel(trainLabel);
         return trainMat;
     }
 
-    private boolean checkRationality(FeatureScores featureScores){
-        HashMap<String, Double> scoresMap = featureScores.getScoresMap();
-        if(scoresMap.get(ScoreType.XcorrShape.getTypeName()) < 0.5){
+    private boolean checkRationality(FeatureScores featureScores, List<String> scoreTypes) {
+        if (featureScores.get(ScoreType.XcorrShape.getTypeName(), scoreTypes) < 0.5) {
             return false;
-        }else {
+        } else {
             return true;
         }
     }

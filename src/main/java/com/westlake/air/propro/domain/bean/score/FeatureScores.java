@@ -1,16 +1,13 @@
 package com.westlake.air.propro.domain.bean.score;
 
-import com.westlake.air.propro.constants.ScoreType;
 import lombok.Data;
-
-import java.util.HashMap;
 
 /**
  * Time: 2018-08-05 22:42
  * @author Nico Wang Ruimin
  */
 @Data
-public class FeatureScores {
+public class FeatureScores extends BaseScores{
 
     /**
      * return scores.library_corr                     * -0.34664267 + 2
@@ -52,49 +49,14 @@ public class FeatureScores {
     //HashMap --> String
     String fragIntFeature;
 
-    /**
-     * key为子分数类型
-     * @see ScoreType
-     */
-    HashMap<String, Double> scoresMap;
-
-    Double[] scores;
-
     Double finalScore;
 
     Boolean thresholdPassed = true;
 
-    public void put(String typeName, Double score) {
-        if (scoresMap == null) {
-            scoresMap = new HashMap<>();
-        }
-        scoresMap.put(typeName, score);
-    }
+    public FeatureScores(){}
 
-    public void put(ScoreType type, Double score) {
-        if (scoresMap == null) {
-            scoresMap = new HashMap<>();
-        }
-        scoresMap.put(type.getTypeName(), score);
+    public FeatureScores(int scoreTypesSize){
+        this.scores = new Double[scoreTypesSize];
     }
-
-    public Double get(ScoreType type) {
-        if (scoresMap == null) {
-            return null;
-        } else {
-            Double d = scoresMap.get(type.getTypeName());
-            return d == null ? 0d : d;
-        }
-    }
-
-    public Double get(String typeName) {
-        if (scoresMap == null) {
-            return null;
-        } else {
-            Double d = scoresMap.get(typeName);
-            return d == null ? 0d : d;
-        }
-    }
-
 
 }

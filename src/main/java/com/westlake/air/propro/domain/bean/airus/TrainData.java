@@ -23,23 +23,4 @@ public class TrainData {
         this.targets = targets;
         this.decoys = decoys;
     }
-
-    public void removeWeightedTotalScore() {
-        if(targets!=null){
-            for (SimpleScores ss : targets) {
-                for (FeatureScores sft : ss.getFeatureScoresList()) {
-                    sft.getScoresMap().remove(ScoreType.WeightedTotalScore.getTypeName());
-                }
-            }
-        }
-
-        if(decoys != null){
-            for (SimpleScores ss : decoys) {
-                for (FeatureScores sft : ss.getFeatureScoresList()) {
-                    sft.getScoresMap().remove(ScoreType.WeightedTotalScore.getTypeName());
-                }
-            }
-        }
-
-    }
 }

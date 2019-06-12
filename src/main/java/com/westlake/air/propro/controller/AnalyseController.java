@@ -22,6 +22,7 @@ import com.westlake.air.propro.domain.bean.score.PeptideFeature;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
+import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.domain.query.AnalyseOverviewQuery;
 import com.westlake.air.propro.service.*;
@@ -660,13 +661,14 @@ public class AnalyseController extends BaseController {
 
         //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
         PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(newDataDO, intensityMap, new SigmaSpacing(sigma, spacing));
+        List<String> defaultScoreTypes = new LumsParams().getScoreTypes();
         if (peptideFeature.isFeatureFound()) {
             TreeMap<Double, Double> rtShapeScoreMap = new TreeMap<>();
             for (PeakGroup peakGroupFeature : peptideFeature.getPeakGroupList()) {
-                FeatureScores featureScores = new FeatureScores();
-                chromatographicScorer.calculateChromatographicScores(peakGroupFeature, peptideFeature.getNormedLibIntMap(), featureScores, null);
-                libraryScorer.calculateLibraryScores(peakGroupFeature, peptideFeature.getNormedLibIntMap(), featureScores, null);
-                rtShapeScoreMap.put(peakGroupFeature.getApexRt(), featureScores.get(ScoreType.XcorrShapeWeighted));
+                FeatureScores featureScores = new FeatureScores(defaultScoreTypes.size());
+                chromatographicScorer.calculateChromatographicScores(peakGroupFeature, peptideFeature.getNormedLibIntMap(), featureScores, defaultScoreTypes);
+                libraryScorer.calculateLibraryScores(peakGroupFeature, peptideFeature.getNormedLibIntMap(), featureScores, defaultScoreTypes);
+                rtShapeScoreMap.put(peakGroupFeature.getApexRt(), featureScores.get(ScoreType.XcorrShapeWeighted.getTypeName(), defaultScoreTypes));
             }
             model.addAttribute("rtShapeScoreMap", rtShapeScoreMap);
         } else {

@@ -116,6 +116,6 @@ public class LoginController extends BaseController {
             subject.logout();
         }
 
-        return "login/login";
+        return "login";
     }
 }

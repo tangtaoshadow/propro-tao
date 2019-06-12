@@ -344,8 +344,9 @@ public class ProjectController extends BaseController {
         }
 
         boolean doIrt = false;
+        LibraryDO irtLibrary = null;
         if (iRtLibraryId != null && !iRtLibraryId.isEmpty()) {
-            LibraryDO irtLibrary = libraryService.getById(iRtLibraryId);
+            irtLibrary = libraryService.getById(iRtLibraryId);
             if (irtLibrary == null) {
                 redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.IRT_LIBRARY_NOT_EXISTED.getMessage());
                 return "redirect:/project/extractor?id=" + id;
@@ -392,11 +393,11 @@ public class ProjectController extends BaseController {
             input.setSigmaSpacing(ss);
             input.setExperimentDO(exp);
             if (doIrt) {
-                input.setIRtLibraryId(iRtLibraryId);
+                input.setIRtLibrary(irtLibrary);
             } else {
                 input.setSlopeIntercept(exp.getIrtResult().getSi());
             }
-            input.setLibraryId(libraryId);
+            input.setLibrary(library);
 
             if (StringUtils.isEmpty(ownerName)) {
                 ownerName = project.getOwnerName();

@@ -172,10 +172,11 @@ public class AirusUtil {
      * 以scoreType为主分数挑选出所有主分数最高的峰
      *
      * @param scores
-     * @param scoreType
+     * @param scoreType 需要作为主分数的分数
+     * @param scoreTypes 打分开始的时候所有参与打分的子分数快照列表
      * @return
      */
-    public static List<SimpleFeatureScores> findTopFeatureScores(List<SimpleScores> scores, String scoreType, Boolean strict) {
+    public static List<SimpleFeatureScores> findTopFeatureScores(List<SimpleScores> scores, String scoreType, List<String> scoreTypes, Boolean strict) {
         List<SimpleFeatureScores> bestFeatureScoresList = new ArrayList<>();
         for (SimpleScores score : scores) {
             if(score.getFeatureScoresList() == null || score.getFeatureScoresList().size() == 0){
@@ -187,16 +188,16 @@ public class AirusUtil {
                     continue;
                 }
                 if (bestFeatureScores.getMainScore() == null) {
-                    bestFeatureScores.setMainScore(featureScores.get(scoreType));
-                    bestFeatureScores.setScoresMap(featureScores.getScoresMap());
+                    bestFeatureScores.setMainScore(featureScores.get(scoreType, scoreTypes));
+                    bestFeatureScores.setScores(featureScores.getScores());
                     bestFeatureScores.setRt(featureScores.getRt());
                     bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
                     bestFeatureScores.setFragIntFeature(featureScores.getFragIntFeature());
                 } else {
-                    Double featureMainScore = featureScores.get(scoreType);
+                    Double featureMainScore = featureScores.get(scoreType, scoreTypes);
                     if (featureMainScore > bestFeatureScores.getMainScore()) {
                         bestFeatureScores.setMainScore(featureMainScore);
-                        bestFeatureScores.setScoresMap(featureScores.getScoresMap());
+                        bestFeatureScores.setScores(featureScores.getScores());
                         bestFeatureScores.setRt(featureScores.getRt());
                         bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
                         bestFeatureScores.setFragIntFeature(featureScores.getFragIntFeature());
@@ -209,16 +210,16 @@ public class AirusUtil {
                 }else {
                     for (FeatureScores featureScores : score.getFeatureScoresList()) {
                         if (bestFeatureScores.getMainScore() == null) {
-                            bestFeatureScores.setMainScore(featureScores.get(scoreType));
-                            bestFeatureScores.setScoresMap(featureScores.getScoresMap());
+                            bestFeatureScores.setMainScore(featureScores.get(scoreType, scoreTypes));
+                            bestFeatureScores.setScores(featureScores.getScores());
                             bestFeatureScores.setRt(featureScores.getRt());
                             bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
                             bestFeatureScores.setFragIntFeature(featureScores.getFragIntFeature());
                         } else {
-                            Double featureMainScore = featureScores.get(scoreType);
+                            Double featureMainScore = featureScores.get(scoreType, scoreTypes);
                             if (featureMainScore > bestFeatureScores.getMainScore()) {
                                 bestFeatureScores.setMainScore(featureMainScore);
-                                bestFeatureScores.setScoresMap(featureScores.getScoresMap());
+                                bestFeatureScores.setScores(featureScores.getScores());
                                 bestFeatureScores.setRt(featureScores.getRt());
                                 bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
                                 bestFeatureScores.setFragIntFeature(featureScores.getFragIntFeature());
@@ -261,52 +262,6 @@ public class AirusUtil {
     }
 
     /**
-     * 按子分数类型计算数组中所有分数的平均值,返回值中key为子分数类型,value为该类型的子分数的平均值
-     * skipScoreType为需要略去不进去计算逻辑的子分数类型
-     * @param scores
-     * @return
-     */
-    public static HashMap<String, Double> getScoresMeans(List<SimpleFeatureScores> scores, String skipScoreType) {
-        if(scores == null || scores.size() == 0){
-            return null;
-        }
-        HashMap<String, Double> meanScoresMap = new HashMap<>();
-        for (SimpleFeatureScores score : scores) {
-            HashMap<String, Double> scoreMap = score.getScoresMap();
-            for (String key : scoreMap.keySet()) {
-                if (key.equals(skipScoreType)) {
-                    continue;
-                }
-                Double value = meanScoresMap.get(key);
-                if (value == null) {
-                    value = scoreMap.get(key);
-                    meanScoresMap.put(key, value);
-                } else {
-                    meanScoresMap.put(key, value + scoreMap.get(key));
-                }
-            }
-        }
-        int size = scores.size();
-        for (String key : meanScoresMap.keySet()) {
-            meanScoresMap.put(key, meanScoresMap.get(key) / size);
-        }
-
-        return meanScoresMap;
-    }
-
-    public static void computeDScore(List<SimpleScores> scores, HashMap<String, Double> weightsMap) {
-        for (SimpleScores score : scores) {
-            for (FeatureScores fs : score.getFeatureScoresList()) {
-                double finalScore = 0;
-                for (String key : weightsMap.keySet()) {
-                    finalScore += fs.getScoresMap().get(key) * weightsMap.get(key);
-                }
-                fs.setFinalScore(finalScore);
-            }
-        }
-    }
-
-    /**
      * Get feature Matrix of useMainScore or not.
      */
     public static Double[][] getFeatureMatrix(Double[][] array, Boolean useMainScore) {
@@ -329,15 +284,6 @@ public class AirusUtil {
                 peakScores.add(i);
             }
         }
-//        if (peakScores.size() == 0){
-//            SimpleFeatureScores scores = trainTargets.get(0);
-//            for (SimpleFeatureScores simpleFeatureScores: trainTargets){
-//                if (simpleFeatureScores.getMainScore() > scores.getMainScore()){
-//                    scores = simpleFeatureScores;
-//                }
-//            }
-//            peakScores.add(scores);
-//        }
 
         return peakScores;
     }
@@ -405,12 +351,12 @@ public class AirusUtil {
      * @param isDebug  是否取测试集
      * @return
      */
-    public static TrainData split(List<SimpleScores> scores, double fraction, boolean isDebug) {
+    public static TrainData split(List<SimpleScores> scores, double fraction, boolean isDebug, List<String> scoreTypes) {
 
         //每一轮开始前将上一轮的加权总分去掉
         for (SimpleScores ss : scores) {
             for (FeatureScores sft : ss.getFeatureScoresList()) {
-                sft.getScoresMap().remove(ScoreType.WeightedTotalScore.getTypeName());
+                sft.remove(ScoreType.WeightedTotalScore.getTypeName(), scoreTypes);
             }
         }
 

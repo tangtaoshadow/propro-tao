@@ -76,11 +76,11 @@ public class DIAScorer {
                 e.printStackTrace();
             }
         }
-        if (scoreTypes == null || scoreTypes.contains(ScoreType.MassdevScore.getTypeName())) {
-            scores.put(ScoreType.MassdevScore, ppmScore);
+        if (scoreTypes.contains(ScoreType.MassdevScore.getTypeName())) {
+            scores.put(ScoreType.MassdevScore.getTypeName(), ppmScore, scoreTypes);
         }
-        if (scoreTypes == null || scoreTypes.contains(ScoreType.MassdevScoreWeighted.getTypeName())) {
-            scores.put(ScoreType.MassdevScoreWeighted, ppmScoreWeighted);
+        if (scoreTypes.contains(ScoreType.MassdevScoreWeighted.getTypeName())) {
+            scores.put(ScoreType.MassdevScoreWeighted.getTypeName(), ppmScoreWeighted, scoreTypes);
         }
     }
 
@@ -96,7 +96,7 @@ public class DIAScorer {
      * @param productChargeMap charge in peptide
      * @param scores           scoreForAll for JProphet
      */
-    public void calculateDiaIsotopeScores(PeakGroup peakGroupFeature, HashMap<String, Float> productMzMap, Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<String, Integer> productChargeMap, FeatureScores scores) {
+    public void calculateDiaIsotopeScores(PeakGroup peakGroupFeature, HashMap<String, Float> productMzMap, Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<String, Integer> productChargeMap, FeatureScores scores,List<String> scoreTypes) {
         double isotopeCorr = 0d;
         double isotopeOverlap = 0d;
         int maxIsotope = Constants.DIA_NR_ISOTOPES + 1;
@@ -202,8 +202,8 @@ public class DIAScorer {
             }
             isotopeOverlap += largePeaksBeforeFirstIsotope * relIntensity;//带离子强度权重的largePeaksBeforeFirstIsotope数量统计
         }
-        scores.put(ScoreType.IsotopeCorrelationScore, isotopeCorr);
-        scores.put(ScoreType.IsotopeOverlapScore, isotopeOverlap);
+        scores.put(ScoreType.IsotopeCorrelationScore.getTypeName(), isotopeCorr, scoreTypes);
+        scores.put(ScoreType.IsotopeOverlapScore.getTypeName(), isotopeOverlap, scoreTypes);
     }
 
     /**
@@ -217,7 +217,7 @@ public class DIAScorer {
      * @param charge
      * @param scores
      */
-    public void calculateBYIonScore(Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<Integer, String> unimodHashMap, String sequence, int charge, FeatureScores scores) {
+    public void calculateBYIonScore(Float[] spectrumMzArray, Float[] spectrumIntArray, HashMap<Integer, String> unimodHashMap, String sequence, int charge, FeatureScores scores, List<String> scoreTypes) {
 
         //计算理论值
         BYSeries bySeries = fragmentFactory.getBYSeries(unimodHashMap, sequence, charge);
@@ -227,9 +227,8 @@ public class DIAScorer {
         List<Double> ySeriesList = bySeries.getYSeries();
         int ySeriesScore = getSeriesScore(ySeriesList, spectrumMzArray, spectrumIntArray);
 
-
-        scores.put(ScoreType.BseriesScore, (double) bSeriesScore);
-        scores.put(ScoreType.YseriesScore, (double) ySeriesScore);
+        scores.put(ScoreType.BseriesScore.getTypeName(), (double) bSeriesScore, scoreTypes);
+        scores.put(ScoreType.YseriesScore.getTypeName(), (double) ySeriesScore, scoreTypes);
     }
 
 

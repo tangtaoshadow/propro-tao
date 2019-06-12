@@ -160,7 +160,7 @@ public class ScoreServiceImpl implements ScoreService {
         input.setOverviewId(dataList.get(0).getOverviewId());//取一个AnalyseDataDO的OverviewId
         WindowRange range = swathIndex.getRange();
         //标准库按照PeptideRef分组
-        PeptideQuery query = new PeptideQuery(input.getLibraryId());
+        PeptideQuery query = new PeptideQuery(input.getLibrary().getId());
         query.setMzStart(Double.parseDouble(range.getStart().toString()));
         query.setMzEnd(Double.parseDouble(range.getEnd().toString()));
         HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(query);
@@ -203,7 +203,6 @@ public class ScoreServiceImpl implements ScoreService {
             }
             return null;
         }
-        List<FeatureScores> featureScoresList = new ArrayList<>();
 
         //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
         PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(dataDO, intensityMap, ss);
@@ -270,12 +269,11 @@ public class ScoreServiceImpl implements ScoreService {
         String sequence = peptide.getSequence();
 
         for (PeakGroup peakGroupFeature : peakGroupFeatureList) {
-
-            FeatureScores featureScores = new FeatureScores();
+            FeatureScores featureScores = new FeatureScores(input.getScoreTypes().size());
             chromatographicScorer.calculateChromatographicScores(peakGroupFeature, normedLibIntMap, featureScores, input.getScoreTypes());
-            if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.XcorrShapeWeighted) != null
-                    && featureScores.get(ScoreType.XcorrShapeWeighted) < input.getXcorrShapeWeightThreshold()
-                    && featureScores.get(ScoreType.XcorrShape) < input.getXcorrShapeThreshold()){
+            if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.XcorrShapeWeighted.getTypeName(), input.getScoreTypes()) != null
+                    && featureScores.get(ScoreType.XcorrShapeWeighted.getTypeName(), input.getScoreTypes()) < input.getXcorrShapeWeightThreshold()
+                    && featureScores.get(ScoreType.XcorrShape.getTypeName(), input.getScoreTypes()) < input.getXcorrShapeThreshold()){
                 continue;
             }
             //根据RT时间和前体MZ获取最近的一个原始谱图
@@ -285,24 +283,24 @@ public class ScoreServiceImpl implements ScoreService {
                     Float[] spectrumMzArray = mzIntensityPairs.getMzArray();
                     Float[] spectrumIntArray = mzIntensityPairs.getIntensityArray();
                     if (input.getScoreTypes().contains(ScoreType.IsotopeCorrelationScore.getTypeName()) || input.getScoreTypes().contains(ScoreType.IsotopeOverlapScore.getTypeName())) {
-                        diaScorer.calculateDiaIsotopeScores(peakGroupFeature, productMzMap, spectrumMzArray, spectrumIntArray, productChargeMap, featureScores);
+                        diaScorer.calculateDiaIsotopeScores(peakGroupFeature, productMzMap, spectrumMzArray, spectrumIntArray, productChargeMap, featureScores, input.getScoreTypes());
                     }
                     if (input.getScoreTypes().contains(ScoreType.BseriesScore.getTypeName()) || input.getScoreTypes().contains(ScoreType.YseriesScore.getTypeName())) {
-                        diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores);
+                        diaScorer.calculateBYIonScore(spectrumMzArray, spectrumIntArray, unimodHashMap, sequence, 1, featureScores, input.getScoreTypes());
                     }
                     diaScorer.calculateDiaMassDiffScore(productMzMap, spectrumMzArray, spectrumIntArray, normedLibIntMap, featureScores, input.getScoreTypes());
 
                 }
             }
             if (input.getScoreTypes().contains(ScoreType.LogSnScore.getTypeName())) {
-                chromatographicScorer.calculateLogSnScore(peakGroupFeature, featureScores);
+                chromatographicScorer.calculateLogSnScore(peakGroupFeature, featureScores, input.getScoreTypes());
             }
 
             if (input.getScoreTypes().contains(ScoreType.ElutionModelFitScore.getTypeName())) {
-                elutionScorer.calculateElutionModelScore(peakGroupFeature, featureScores);
+                elutionScorer.calculateElutionModelScore(peakGroupFeature, featureScores, input.getScoreTypes());
             }
             if (input.getScoreTypes().contains(ScoreType.IntensityScore.getTypeName())) {
-                libraryScorer.calculateIntensityScore(peakGroupFeature, featureScores);
+                libraryScorer.calculateIntensityScore(peakGroupFeature, featureScores, input.getScoreTypes());
             }
 
             libraryScorer.calculateLibraryScores(peakGroupFeature, normedLibIntMap, featureScores, input.getScoreTypes());
@@ -310,9 +308,9 @@ public class ScoreServiceImpl implements ScoreService {
 //                System.out.println(dataDO.getPeptideRef());
 //            }
             if (input.getScoreTypes().contains(ScoreType.NormRtScore.getTypeName())) {
-                libraryScorer.calculateNormRtScore(peakGroupFeature, input.getSlopeIntercept(), dataDO.getRt(), featureScores);
+                libraryScorer.calculateNormRtScore(peakGroupFeature, input.getSlopeIntercept(), dataDO.getRt(), featureScores, input.getScoreTypes());
             }
-            swathLDAScorer.calculateSwathLdaPrescore(featureScores);
+            swathLDAScorer.calculateSwathLdaPrescore(featureScores, input.getScoreTypes());
             featureScores.setRt(peakGroupFeature.getApexRt());
             featureScores.setRtRangeFeature(FeatureUtil.toString(peakGroupFeature.getBestLeftRt(), peakGroupFeature.getBestRightRt()));
             featureScores.setIntensitySum(peakGroupFeature.getPeakGroupInt());

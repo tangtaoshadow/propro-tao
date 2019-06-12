@@ -20,12 +20,12 @@ public abstract class Learner {
      * Get clfScore with given confidence(params).
      * 根据weightsMap计算子分数的(加权总分-平均加权总分)
      */
-    public void score(TrainData data, HashMap<String, Double> weightsMap) {
-        score(data.getTargets(), weightsMap);
-        score(data.getDecoys(), weightsMap);
+    public void score(TrainData data, HashMap<String, Double> weightsMap, List<String> scoreTypes) {
+        score(data.getTargets(), weightsMap, scoreTypes);
+        score(data.getDecoys(), weightsMap, scoreTypes);
     }
 
-    public void score(List<SimpleScores> scores, HashMap<String, Double> weightsMap) {
+    public void score(List<SimpleScores> scores, HashMap<String, Double> weightsMap, List<String> scoreTypes) {
         Set<Map.Entry<String, Double>> entries = weightsMap.entrySet();
         for (SimpleScores score : scores) {
             if(score.getFeatureScoresList() == null){
@@ -34,9 +34,9 @@ public abstract class Learner {
             for (FeatureScores featureScores : score.getFeatureScoresList()) {
                 double addedScore = 0;
                 for (Map.Entry<String, Double> entry : entries) {
-                    addedScore += featureScores.getScoresMap().get(entry.getKey()) * entry.getValue();
+                    addedScore += featureScores.get(entry.getKey(), scoreTypes) * entry.getValue();
                 }
-                featureScores.put(ScoreType.WeightedTotalScore.getTypeName(), addedScore);
+                featureScores.put(ScoreType.WeightedTotalScore.getTypeName(), addedScore, scoreTypes);
             }
         }
     }

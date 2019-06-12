@@ -3,7 +3,6 @@ package com.westlake.air.propro.domain.db;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.westlake.air.propro.domain.BaseDO;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
-import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -39,6 +38,10 @@ public class AnalyseDataDO extends BaseDO {
     @Indexed
     String peptideRef;
 
+    //是否是伪肽段
+    @Indexed
+    Boolean isDecoy = false;
+
     String proteinName;
 
     Boolean isUnique;
@@ -64,8 +67,6 @@ public class AnalyseDataDO extends BaseDO {
     //key为cutInfo, value为对应的mz
     HashMap<String, Float> mzMap = new HashMap<>();
 
-    //是否是伪肽段
-    Boolean isDecoy = false;
 
     /**
      * 压缩相关的字段

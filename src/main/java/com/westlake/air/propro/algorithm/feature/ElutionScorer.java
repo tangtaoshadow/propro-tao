@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 
 /**
  * scores.var_elution_model_fit_score
@@ -24,7 +26,7 @@ public class ElutionScorer {
 
     public final Logger logger = LoggerFactory.getLogger(ElutionScorer.class);
 
-    public void calculateElutionModelScore(PeakGroup peakGroupFeature, FeatureScores scores) {
+    public void calculateElutionModelScore(PeakGroup peakGroupFeature, FeatureScores scores, List<String> scoreTypes) {
         double avgScore = 0.0d;
         for (String cutInfo: peakGroupFeature.getIonHullInt().keySet()) {
             RtIntensityPairsDouble preparedHullPoints = prepareElutionFit(peakGroupFeature.getIonHullRt(), peakGroupFeature.getIonHullInt().get(cutInfo));
@@ -88,7 +90,7 @@ public class ElutionScorer {
         }
         avgScore /= peakGroupFeature.getIonHullInt().size();
 
-        scores.put(ScoreType.ElutionModelFitScore, avgScore);
+        scores.put(ScoreType.ElutionModelFitScore.getTypeName(), avgScore, scoreTypes);
     }
     /**
      * prepareFit_

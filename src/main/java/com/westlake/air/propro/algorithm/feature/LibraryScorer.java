@@ -31,9 +31,9 @@ public class LibraryScorer {
      * scores.library_norm_manhattan // 对experiment intensity 算平均占比差距
      * scores.norm_rt_score //normalizedExperimentalRt与groupRt之差
      *
-     * @param peakGroup get experimentIntensity: from features extracted
-     * @param normedLibIntMap   get libraryIntensity: from transitions
-     * @param scores             library_corr, library_norm_manhattan
+     * @param peakGroup       get experimentIntensity: from features extracted
+     * @param normedLibIntMap get libraryIntensity: from transitions
+     * @param scores          library_corr, library_norm_manhattan
      */
     public void calculateLibraryScores(PeakGroup peakGroup, HashMap<String, Double> normedLibIntMap, FeatureScores scores, List<String> scoreTypes) {
         List<Double> experimentIntensity = new ArrayList<>(peakGroup.getIonIntensity().values());
@@ -43,16 +43,12 @@ public class LibraryScorer {
         List<Double> normedExpInt = ScoreUtil.normalizeSumDouble(experimentIntensity, peakGroup.getPeakGroupInt());
         //library_norm_manhattan
         //占比差距平均
-        if(scoreTypes == null || scoreTypes.contains(ScoreType.LibraryRsmd.getTypeName())){
+        if (scoreTypes.contains(ScoreType.LibraryRsmd.getTypeName())) {
             double sum = 0.0d;
             for (int i = 0; i < normedLibInt.size(); i++) {
                 sum += Math.abs(normedLibInt.get(i) - normedExpInt.get(i));
             }
-            scores.put(ScoreType.LibraryRsmd,sum / normedLibInt.size());
-        }
-
-        if (scoreTypes == null || scoreTypes.contains(ScoreType.NewScore.getTypeName())){
-            scores.put(ScoreType.NewScore, new TestScore().getIntensityScore(normedLibInt, normedExpInt));
+            scores.put(ScoreType.LibraryRsmd.getTypeName(), sum / normedLibInt.size(), scoreTypes);
         }
 
         double experimentSum = 0.0d, librarySum = 0.0d, experiment2Sum = 0.0d, library2Sum = 0.0d, dotprod = 0.0d;
@@ -65,15 +61,15 @@ public class LibraryScorer {
         }
         //library_corr pearson 相关系数
         //需要的前置变量：dotprod, sum, 2sum
-        if(scoreTypes == null || scoreTypes.contains(ScoreType.LibraryCorr.getTypeName())) {
+        if (scoreTypes.contains(ScoreType.LibraryCorr.getTypeName())) {
             double expDeno = experiment2Sum - experimentSum * experimentSum / normedLibInt.size();
             double libDeno = library2Sum - librarySum * librarySum / normedLibInt.size();
-            if (expDeno <= Constants.MIN_DOUBLE || libDeno <= Constants.MIN_DOUBLE){
-                scores.put(ScoreType.LibraryCorr, 0d);
-            }else {
+            if (expDeno <= Constants.MIN_DOUBLE || libDeno <= Constants.MIN_DOUBLE) {
+                scores.put(ScoreType.LibraryCorr.getTypeName(), 0d, scoreTypes);
+            } else {
                 double pearsonR = dotprod - experimentSum * librarySum / normedLibInt.size();
                 pearsonR /= FastMath.sqrt(expDeno * libDeno);
-                scores.put(ScoreType.LibraryCorr, pearsonR);
+                scores.put(ScoreType.LibraryCorr.getTypeName(), pearsonR, scoreTypes);
             }
 
         }
@@ -87,7 +83,7 @@ public class LibraryScorer {
 
         //dotprodScoring
         //需要的前置变量：experimentSum, librarySum, expSqrt, libSqrt
-        if(scoreTypes == null || scoreTypes.contains(ScoreType.LibraryDotprod.getTypeName())){
+        if (scoreTypes.contains(ScoreType.LibraryDotprod.getTypeName())) {
             double expVecNorm = FastMath.sqrt(experimentSum);
             double libVecNorm = FastMath.sqrt(librarySum);
 
@@ -98,12 +94,12 @@ public class LibraryScorer {
             for (int i = 0; i < expSqrt.length; i++) {
                 sumOfMult += expSqrtVecNormed[i] * libSqrtVecNormed[i];
             }
-            scores.put(ScoreType.LibraryDotprod, sumOfMult);
+            scores.put(ScoreType.LibraryDotprod.getTypeName(), sumOfMult, scoreTypes);
         }
 
         //manhattan
         //需要的前置变量：expSqrt, libSqrt
-        if(scoreTypes == null ||scoreTypes.contains(ScoreType.LibraryManhattan.getTypeName())){
+        if (scoreTypes.contains(ScoreType.LibraryManhattan.getTypeName())) {
             double expIntTotal = MathUtil.sum(expSqrt);
             double libIntTotal = MathUtil.sum(libSqrt);
             double[] expSqrtNormed = normalize(expSqrt, expIntTotal);
@@ -112,34 +108,31 @@ public class LibraryScorer {
             for (int i = 0; i < expSqrt.length; i++) {
                 sumOfDivide += FastMath.abs(expSqrtNormed[i] - libSqrtNormed[i]);
             }
-            scores.put(ScoreType.LibraryManhattan, sumOfDivide);
+            scores.put(ScoreType.LibraryManhattan.getTypeName(), sumOfDivide, scoreTypes);
         }
 
         //spectral angle
-        if(scoreTypes == null ||scoreTypes.contains(ScoreType.LibrarySangle.getTypeName())){
+        if (scoreTypes.contains(ScoreType.LibrarySangle.getTypeName())) {
             double spectralAngle = FastMath.acos(dotprod / (FastMath.sqrt(experiment2Sum) * FastMath.sqrt(library2Sum)));
-            scores.put(ScoreType.LibrarySangle, spectralAngle);
+            scores.put(ScoreType.LibrarySangle.getTypeName(), spectralAngle, scoreTypes);
         }
 
         //root mean square
-
-        if(scoreTypes == null ||scoreTypes.contains(ScoreType.LibraryRootmeansquare.getTypeName())){
+        if (scoreTypes.contains(ScoreType.LibraryRootmeansquare.getTypeName())) {
             double rms = 0;
             for (int i = 0; i < normedLibInt.size(); i++) {
                 rms += (normedLibInt.get(i) - normedExpInt.get(i)) * (normedLibInt.get(i) - normedExpInt.get(i));
             }
             rms = Math.sqrt(rms / normedLibInt.size());
-            scores.put(ScoreType.LibraryRootmeansquare, rms);
+            scores.put(ScoreType.LibraryRootmeansquare.getTypeName(), rms, scoreTypes);
         }
-
-
     }
 
-    public void calculateNormRtScore(PeakGroup peakGroup, SlopeIntercept slopeIntercept, double groupRt, FeatureScores scores) {
+    public void calculateNormRtScore(PeakGroup peakGroup, SlopeIntercept slopeIntercept, double groupRt, FeatureScores scores, List<String> scoreTypes) {
         //varNormRtScore
         double experimentalRt = peakGroup.getApexRt();
         double normalizedExperimentalRt = ScoreUtil.trafoApplier(slopeIntercept, experimentalRt);
-        scores.put(ScoreType.NormRtScore, Math.abs(normalizedExperimentalRt - groupRt));
+        scores.put(ScoreType.NormRtScore.getTypeName(), Math.abs(normalizedExperimentalRt - groupRt), scoreTypes);
     }
 
     /**
@@ -147,10 +140,10 @@ public class LibraryScorer {
      * sum of intensitySum:
      * totalXic
      */
-    public void calculateIntensityScore(PeakGroup peakGroup, FeatureScores scores) {
+    public void calculateIntensityScore(PeakGroup peakGroup, FeatureScores scores, List<String> scoreTypes) {
         double intensitySum = peakGroup.getPeakGroupInt();
         double totalXic = peakGroup.getTotalXic();
-        scores.put(ScoreType.IntensityScore,(intensitySum / totalXic));
+        scores.put(ScoreType.IntensityScore.getTypeName(), intensitySum / totalXic, scoreTypes);
     }
 
     private double[] normalize(double[] array, double value) {

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 @Component("ldaLearner")
@@ -23,30 +24,29 @@ public class LDALearner extends Learner {
      * @param skipScoreType 需要在结果中剔除的主分数,如果为空则不删除
      * @return key为子分数的名称, value是该子分数的权重值
      */
-    public HashMap<String, Double> learn(TrainPeaks trainPeaks, String skipScoreType) {
+    public HashMap<String, Double> learn(TrainPeaks trainPeaks, String skipScoreType, List<String> scoreTypes) {
 
         int totalLength = trainPeaks.getBestTargets().size() + trainPeaks.getTopDecoys().size();
 
-        HashMap<String, Double> scoreMapSample = trainPeaks.getTopDecoys().get(0).getScoresMap();
-        int scoreTypes = 0;
-        Set<String> keySet = scoreMapSample.keySet();
-        if (keySet.contains(skipScoreType)) {
-            scoreTypes = keySet.size() - 1;
+//        List<Double> scoreSamples = trainPeaks.getTopDecoys().get(0).getScores();
+        int scoreTypesCount = 0;
+        if (scoreTypes.contains(skipScoreType)) {
+            scoreTypesCount = scoreTypes.size() - 1;
         } else {
-            scoreTypes = keySet.size();
+            scoreTypesCount = scoreTypes.size();
         }
 
         //先将需要进入学习的打分转化为二维矩阵
-        RealMatrix scoresMatrix = new Array2DRowRealMatrix(totalLength, scoreTypes);
+        RealMatrix scoresMatrix = new Array2DRowRealMatrix(totalLength, scoreTypesCount);
         RealVector labelVector = new ArrayRealVector(totalLength);
         int k = 0;
         for (SimpleFeatureScores sfs : trainPeaks.getBestTargets()) {
             int i = 0;
-            for (String scoreType : keySet) {
+            for (String scoreType : scoreTypes) {
                 if (scoreType.equals(skipScoreType)) {
                     continue;
                 }
-                scoresMatrix.setEntry(k, i, sfs.getScoresMap().get(scoreType));
+                scoresMatrix.setEntry(k, i, sfs.get(scoreType, scoreTypes));
                 i++;
             }
             labelVector.setEntry(k, 1);
@@ -54,11 +54,11 @@ public class LDALearner extends Learner {
         }
         for (SimpleFeatureScores sfs : trainPeaks.getTopDecoys()) {
             int i = 0;
-            for (String scoreType : keySet) {
+            for (String scoreType : scoreTypes) {
                 if (scoreType.equals(skipScoreType)) {
                     continue;
                 }
-                scoresMatrix.setEntry(k, i, sfs.getScoresMap().get(scoreType));
+                scoresMatrix.setEntry(k, i, sfs.get(scoreType, scoreTypes));
                 i++;
             }
             labelVector.setEntry(k, 0);
@@ -72,7 +72,7 @@ public class LDALearner extends Learner {
         //输出最终的权重值
         HashMap<String, Double> weightsMap = new HashMap<>();
         int tempJ = 0;
-        for (String key : scoreMapSample.keySet()) {
+        for (String key : scoreTypes) {
             if (key.equals(skipScoreType)) {
                 continue;
             }

@@ -64,12 +64,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
         query.setOverviewId(overviewId);
         query.setPeptideRef(peptideRef);
         query.setIsDecoy(isDecoy);
-        List<AnalyseDataDO> datas = analyseDataDAO.getAll(query);
-        if (datas.size() == 1) {
-            return datas.get(0);
-        } else {
-            return null;
-        }
+        return analyseDataDAO.getOne(query);
     }
 
     @Override

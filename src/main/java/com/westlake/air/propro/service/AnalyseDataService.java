@@ -20,7 +20,7 @@ public interface AnalyseDataService {
 
     List<MatchedPeptide> getAllSuccessMatchedPeptides(String overviewId);
 
-    AnalyseDataDO getByOverviewIdAndPeptideRefAndIsDecoy(String overviewId,String peptideRef,Boolean isDecoy);
+    AnalyseDataDO getByOverviewIdAndPeptideRefAndIsDecoy(String overviewId, String peptideRef, Boolean isDecoy);
 
     Long count(AnalyseDataQuery query);
 

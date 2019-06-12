@@ -4,6 +4,8 @@ import com.westlake.air.propro.constants.Classifier;
 import com.westlake.air.propro.constants.ScoreType;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * Created by Nico Wang Ruimin
  * Time: 2018-06-19 09:05
@@ -63,6 +65,9 @@ public class AirusParams {
     Double[] qvalues = {0.0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5};
 
     boolean isDebug = false;
+
+    //用于训练的打分快照
+    List<String> scoreTypes;
 
     //首批训练时默认作为主分数的分数类型
     String mainScore = ScoreType.MainScore.getTypeName();

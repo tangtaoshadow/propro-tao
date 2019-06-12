@@ -78,29 +78,29 @@ public class ChromatographicScorer {
         if (deltas.size() != 1) {
             stdDelta = Math.sqrt(sumDelta / (deltas.size() - 1));
         }
-        if (scoreTypes == null || scoreTypes.contains(ScoreType.XcorrCoelution.getTypeName())) {
-            scores.put(ScoreType.XcorrCoelution, meanDelta + stdDelta); //时间偏差
+        if (scoreTypes.contains(ScoreType.XcorrCoelution.getTypeName())) {
+            scores.put(ScoreType.XcorrCoelution.getTypeName(), meanDelta + stdDelta, scoreTypes); //时间偏差
         }
-        if (scoreTypes == null || scoreTypes.contains(ScoreType.XcorrCoelutionWeighted.getTypeName())) {
-            scores.put(ScoreType.XcorrCoelutionWeighted, sumDeltaWeighted);
+        if (scoreTypes.contains(ScoreType.XcorrCoelutionWeighted.getTypeName())) {
+            scores.put(ScoreType.XcorrCoelutionWeighted.getTypeName(), sumDeltaWeighted, scoreTypes);
         }
-        if (scoreTypes == null || scoreTypes.contains(ScoreType.XcorrShape.getTypeName())) {
-            scores.put(ScoreType.XcorrShape, meanIntensity); // 平均的吻合程度--> 新的吻合系数
+        if (scoreTypes.contains(ScoreType.XcorrShape.getTypeName())) {
+            scores.put(ScoreType.XcorrShape.getTypeName(), meanIntensity, scoreTypes); // 平均的吻合程度--> 新的吻合系数
         }
-        if (scoreTypes == null || scoreTypes.contains(ScoreType.XcorrShapeWeighted.getTypeName())) {
-            scores.put(ScoreType.XcorrShapeWeighted, sumIntensityWeighted);
+        if (scoreTypes.contains(ScoreType.XcorrShapeWeighted.getTypeName())) {
+            scores.put(ScoreType.XcorrShapeWeighted.getTypeName(), sumIntensityWeighted, scoreTypes);
         }
     }
 
-    public void calculateLogSnScore(PeakGroup peakGroup, FeatureScores scores) {
+    public void calculateLogSnScore(PeakGroup peakGroup, FeatureScores scores, List<String> scoreTypes) {
         //logSnScore
         // log(mean of Apex sn s)
         double snScore = peakGroup.getSignalToNoiseSum();
         snScore /= peakGroup.getIonCount();
         if (snScore < 1) {
-            scores.put(ScoreType.LogSnScore, 0d);
+            scores.put(ScoreType.LogSnScore.getTypeName(), 0d, scoreTypes);
         } else {
-            scores.put(ScoreType.LogSnScore, FastMath.log(snScore));
+            scores.put(ScoreType.LogSnScore.getTypeName(), FastMath.log(snScore), scoreTypes);
         }
     }
 
