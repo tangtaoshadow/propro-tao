@@ -62,12 +62,12 @@ public class PeptideDO extends BaseDO {
     /**
      * 针对PRM提出，开始采集肽段的真实时间，单位：秒
      */
-    Double PrmRtStart;
+    Double prmRtStart;
 
     /**
      * 针对PRM提出，peptidelist中预计肽段出现的时间，单位：秒
      */
-    Double PrmRt;
+    Double prmRt;
 
     /**
      * 是否是伪肽段

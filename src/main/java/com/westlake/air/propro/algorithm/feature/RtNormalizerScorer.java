@@ -47,6 +47,9 @@ public class RtNormalizerScorer {
 
         List<ScoreRtPair> finalScores = new ArrayList<>();
         for (PeakGroup peakGroupFeature : peakGroupFeatureList) {
+            if (peakGroupFeature.getBestRightRt()-peakGroupFeature.getBestLeftRt() < 15d){
+                continue;
+            }
             FeatureScores scores = new FeatureScores();
             chromatographicScorer.calculateChromatographicScores(peakGroupFeature, normedLibIntMap, scores, null);
             chromatographicScorer.calculateLogSnScore(peakGroupFeature, scores);

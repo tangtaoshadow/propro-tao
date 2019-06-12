@@ -2,6 +2,8 @@ package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
+import com.westlake.air.propro.algorithm.comparator.ResultComparator;
 import com.westlake.air.propro.algorithm.feature.DIAScorer;
 import com.westlake.air.propro.algorithm.fitter.LinearFitter;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
@@ -13,7 +15,9 @@ import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.dao.AnalyseDataDAO;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
+import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.ExperimentDO;
+import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +68,8 @@ public class TestController extends BaseController {
     DIAScorer diaScorer;
     @Autowired
     LinearFitter linearFitter;
+    @Autowired
+    ResultComparator resultComparator;
 
     public static float MZ_EXTRACT_WINDOW = 0.05f;
     public static float RT_EXTRACT_WINDOW = 1200f;
@@ -402,5 +408,56 @@ public class TestController extends BaseController {
         return null;
     }
 
+    @RequestMapping("compare")
+    @ResponseBody
+    String compareTest(){
+        String analyseOverviewId = "5cfe846de0073c3b041381b8";
+        String filePath = "P:\\data\\single_cell\\F20190530liangx_SILAC_K562_DIA_LHtitra1_0_allFrag_with_dscore_filtered.tsv";
+        resultComparator.proteinResults(analyseOverviewId, filePath);
+        resultComparator.peptideRefResults(analyseOverviewId, filePath);
+        resultComparator.peptideSeqResults(analyseOverviewId, filePath);
+        resultComparator.silacResults(analyseOverviewId, filePath);
+        return null;
+    }
+
+    @RequestMapping("distribution")
+    @ResponseBody
+    String distributionTest(){
+        String analyseOverviewId = "5cfe7adee0073c2fd07def50";
+//        String scoreType = ScoreType.WeightedTotalScore.getTypeName();
+        AnalyseOverviewDO overviewResult = analyseOverviewService.getById(analyseOverviewId).getModel();
+        HashMap<String,Double> weightsMap = overviewResult.getWeights();
+        AnalyseDataQuery query = new AnalyseDataQuery();
+        query.setOverviewId(analyseOverviewId);
+        query.setIsDecoy(false);
+        query.addIndentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS);
+        List<AnalyseDataDO> analyseDataDOList = analyseDataService.getAll(query);
+        List<Double> heavyList = new ArrayList<>();
+        List<Double> lightList = new ArrayList<>();
+        for (AnalyseDataDO analyseDataDO: analyseDataDOList){
+            if (analyseDataDO.getIsDecoy()){
+                continue;
+            }
+            List<FeatureScores> featureScoresList = analyseDataDO.getFeatureScoresList();
+            boolean isHeavy = analyseDataDO.getPeptideRef().split("_")[0].endsWith("(UniMod:188)");
+            double bestRt = analyseDataDO.getBestRt();
+            for (FeatureScores featureScores: featureScoresList){
+                if (featureScores.getRt() == bestRt){
+                    HashMap<String,Double> scoresMap = featureScores.getScoresMap();
+                    double score = 0d;
+                    for (Map.Entry<String,Double> entry: weightsMap.entrySet()){
+                        //默认分数不为null
+                        score += entry.getValue() * scoresMap.get(entry.getKey());
+                    }
+                    if (isHeavy){
+                        heavyList.add(score);
+                    }else {
+                        lightList.add(score);
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
 }

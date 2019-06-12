@@ -122,20 +122,21 @@ public class ScoreServiceImpl implements ScoreService {
 
 //        SlopeIntercept slopeIntercept = linearFitter.leastSquare(pairsCorrected);
         double delta = (maxGroupRt - minGroupRt)/30d;
+//        List<Pair<Double,Double>> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE, delta);
         List<Pair<Double,Double>> pairsCorrected = chooseReliablePairs(pairs, delta);
-        int choosedPointCount = pairsCorrected.size();
-        if (choosedPointCount <= 3){
-
-        }else if (choosedPointCount <= pairs.size()/2){
-
-        }
+//        int choosedPointCount = pairsCorrected.size();
+//        if (choosedPointCount <= 3){
+//
+//        }else if (choosedPointCount <= pairs.size()/2){
+//
+//        }
         System.out.println("choose finish ------------------------");
         IrtResult irtResult = new IrtResult();
 
         List<Double[]> selectedList = new ArrayList<>();
         List<Double[]> unselectedList = new ArrayList<>();
         for (int i = 0; i < pairs.size(); i++) {
-            if(pairsCorrected.contains(pairs.get(i))){
+            if(pairsCorrected != null && pairsCorrected.contains(pairs.get(i))){
                 selectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
             }else{
                 unselectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
@@ -319,6 +320,9 @@ public class ScoreServiceImpl implements ScoreService {
             featureScores.setFragIntFeature(FeatureUtil.toString(peakGroupFeature.getIonIntensity()));
             featureScoresList.add(featureScores);
         }
+//        if (dataDO.getIsDecoy()){//min 1
+//            featureScoresList = getFilteredScore(featureScoresList, 5, ScoreType.XcorrShapeWeighted.getTypeName());
+//        }
 
         if (featureScoresList.size() == 0) {
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
@@ -370,7 +374,7 @@ public class ScoreServiceImpl implements ScoreService {
      * @param minCoverage limit of picking
      * @return pairsCorrected
      */
-    private List<Pair<Double,Double>> removeOutlierIterative(List<Pair<Double,Double>> pairs, double minRsq, double minCoverage) {
+    private List<Pair<Double,Double>> removeOutlierIterative(List<Pair<Double,Double>> pairs, double minRsq, double minCoverage, double delta) {
 
         int pairsSize = pairs.size();
         if (pairsSize < 3) {
@@ -379,7 +383,7 @@ public class ScoreServiceImpl implements ScoreService {
 
         //获取斜率和截距
         double rsq = 0;
-        double[] coEff;
+        double[] coEff = new double[2];
 
         WeightedObservedPoints obs = new WeightedObservedPoints();
         while (pairs.size() >= pairsSize * minCoverage && rsq < minRsq) {
@@ -389,6 +393,9 @@ public class ScoreServiceImpl implements ScoreService {
             }
             PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
             coEff = fitter.fit(obs.toList());
+//            SlopeIntercept slopeIntercept = linearFitter.huberFit(pairs, delta);
+//            coEff[1] = slopeIntercept.getSlope();
+//            coEff[0] = slopeIntercept.getIntercept();
 
             rsq = MathUtil.getRsq(pairs);
             if (rsq < minRsq) {
@@ -465,5 +472,13 @@ public class ScoreServiceImpl implements ScoreService {
             }
         }
         return sortedPairs.subList(0,cutLine);
+    }
+
+    private List<FeatureScores> getFilteredScore(List<FeatureScores> featureScoresList, int topN, String scoreName){
+        if (featureScoresList.size() < topN){
+            return featureScoresList;
+        }
+        List<FeatureScores> filteredScoreList = SortUtil.sortBySelectedScore(featureScoresList, scoreName, true);
+        return filteredScoreList.subList(0, topN);
     }
 }

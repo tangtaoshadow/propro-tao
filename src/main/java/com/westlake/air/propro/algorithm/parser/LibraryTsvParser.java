@@ -167,13 +167,13 @@ public class LibraryTsvParser extends BaseLibraryParser {
         String annotations = row[columnMap.get(Annotation)].replaceAll("\"", "");
         fi.setAnnotations(annotations);
         String fullName = row[columnMap.get(FullUniModPeptideName)];//no target sequence
+        String[] transitionGroupId = row[columnMap.get(TransitionGroupId)].split("_");
         if (fullName == null) {
             logger.info("Full Peptide Name cannot be empty");
         } else {
             if (!isDecoy) {
-                peptideDO.setFullName(row[columnMap.get(FullUniModPeptideName)]);
+                peptideDO.setFullName(transitionGroupId[1]);
             } else {
-                String[] transitionGroupId = row[columnMap.get(TransitionGroupId)].split("_");
                 peptideDO.setFullName(transitionGroupId[2]);
             }
         }
@@ -241,7 +241,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
                     continue;
                 }
                 PeptideDO peptideDO = new PeptideDO();
-                peptideDO.setPrmRtStart(Double.parseDouble(columns[columnMap.get("start[min]")]));
+//                peptideDO.setPrmRtStart(Double.parseDouble(columns[columnMap.get("start[min]")]));
                 if (columnMap.containsKey("rt[min]")){
                     peptideDO.setPrmRt(Double.parseDouble(columns[columnMap.get("rt[min]")]));
                 }

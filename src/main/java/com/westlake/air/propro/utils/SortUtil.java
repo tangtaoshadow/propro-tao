@@ -2,6 +2,7 @@ package com.westlake.air.propro.utils;
 
 import com.google.common.collect.Ordering;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
+import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
@@ -32,6 +33,26 @@ public class SortUtil {
                 } else {
                     try{
                         return o1.getMainScore().compareTo(o2.getMainScore());
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        return 0;
+                    }
+                }
+            }
+        });
+
+        return ordering.sortedCopy(scores);
+    }
+
+    public static List<FeatureScores> sortBySelectedScore(List<FeatureScores> scores, String scoreName, boolean isDesc) {
+        Ordering<FeatureScores> ordering = Ordering.from(new Comparator<FeatureScores>() {
+            @Override
+            public int compare(FeatureScores o1, FeatureScores o2) {
+                if (isDesc) {
+                    return o2.getScoresMap().get(scoreName).compareTo(o1.getScoresMap().get(scoreName));
+                } else {
+                    try{
+                        return o1.getScoresMap().get(scoreName).compareTo(o2.getScoresMap().get(scoreName));
                     }catch (Exception e){
                         e.printStackTrace();
                         return 0;
