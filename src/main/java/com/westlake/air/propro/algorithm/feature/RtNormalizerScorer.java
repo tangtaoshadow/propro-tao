@@ -67,7 +67,6 @@ public class RtNormalizerScorer {
         return finalScores;
     }
 
-
     /**
      * The scoreForAll that is really matter to final pairs selection.
      *

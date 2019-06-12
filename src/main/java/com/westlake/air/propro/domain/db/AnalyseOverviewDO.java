@@ -30,20 +30,13 @@ public class AnalyseOverviewDO extends BaseDO {
 
     //卷积实验的创建者
     @Indexed
-    String ownerName = "Admin";
+    String ownerName;
 
     //对应实验的名称
     String expName;
 
-    //0:DIA 1:PRM
+    //0:SWATH_DIA 1:PRM
     String type;
-
-    //是否包含卷积结果文件
-    Boolean hasAircFile;
-    //卷积结果文件路径
-    String aircPath;
-    //卷积结果索引文件路径
-    String aircIndexPath;
 
     //卷积代号
     String name;
@@ -65,6 +58,7 @@ public class AnalyseOverviewDO extends BaseDO {
 
     //在打分时设定的shape分的阈值,如果低于这个阈值的峰组会被直接忽略掉,从而节省运算时间
     Float shapeScoreThreshold;
+
     //在打分时设定的shapeWeight分的阈值,如果低于这个阈值的峰组会被直接忽略掉,从而节省运算时间
     Float shapeScoreWeightThreshold;
 

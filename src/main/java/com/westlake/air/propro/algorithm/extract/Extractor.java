@@ -82,68 +82,25 @@ public class Extractor {
         AnalyseOverviewDO overviewDO = createOverview(lumsParams);
         overviewDO.setLibraryPeptideCount(library.getTotalCount().intValue());
         analyseOverviewService.insert(overviewDO);
-
-        //准备卷积结果输出文件及计算相关的路径
-        String configAircPath = projectDAO.getByName(lumsParams.getExperimentDO().getProjectName()).getAircPath();
-        String fileParent = "";
-        if (configAircPath != null && !configAircPath.isEmpty()) {
-            fileParent = configAircPath;
-        } else {
-            fileParent = file.getParent();
-        }
-        String fileNameWithoutSuffix = file.getName().replace(".aird", "");
-        String aircFilePath = fileParent + fileNameWithoutSuffix + "-" + overviewDO.getId() + Constants.SUFFIX_AIRUS_CONVOLUTION;
-        String aircIndexPath = fileParent + fileNameWithoutSuffix + "-" + overviewDO.getId() + Constants.SUFFIX_AIRUS_CONVOLUTION_INFO;
-        File aircFile = new File(aircFilePath);
-        File aircIndexFile = new File(aircIndexPath);
-        FileWriter fwInfo = null;
-        FileOutputStream fos = null;
-        BufferedOutputStream bos = null;
-
         lumsParams.setOverviewId(overviewDO.getId());
-
         try {
             raf = new RandomAccessFile(file, "r");
 
-            if (!aircIndexFile.exists()) {
-                aircIndexFile.getParentFile().mkdirs();
-                aircIndexFile.createNewFile();
-            }
-            if (!aircFile.exists()) {
-                aircFile.getParentFile().mkdirs();
-                aircFile.createNewFile();
-            }
-
-            //所有的索引数据均以JSON文件保存
-            fwInfo = new FileWriter(aircIndexFile.getAbsoluteFile());
-            fos = new FileOutputStream(aircFile.getAbsoluteFile());
-            bos = new BufferedOutputStream(fos);
-
             //核心函数在这里
-            List<AnalyseDataDO> totalDataList = extract(raf, bos, overviewDO.getId(), lumsParams);
+            List<AnalyseDataDO> totalDataList = extract(raf, overviewDO.getId(), lumsParams);
             long count = 0L;
             for (AnalyseDataDO dataDO : totalDataList) {
                 count += dataDO.getFeatureScoresList().size();
             }
             overviewDO.setTotalPeptideCount(totalDataList.size());
-            overviewDO.setAircIndexPath(aircIndexPath);
-            overviewDO.setAircPath(aircFilePath);
-            overviewDO.setHasAircFile(true);
+
             overviewDO.setPeakCount(count);
-            //将AircInfo写入到本地文件
-            AircInfo aircInfo = new AircInfo();
-            aircInfo.setOverview(overviewDO);
-            aircInfo.setDataList(totalDataList);
-            fwInfo.write(JSON.toJSONString(aircInfo));
 
         } catch (Exception e) {
             e.printStackTrace();
             logger.error(e.getMessage());
         } finally {
             FileUtil.close(raf);
-            FileUtil.close(fwInfo);
-            FileUtil.close(bos);
-            FileUtil.close(fos);
         }
 
         analyseOverviewService.update(overviewDO);
@@ -306,11 +263,10 @@ public class Extractor {
      * 卷积MS2图谱并且输出最终结果,不返回最终的卷积结果以减少内存的使用
      *
      * @param raf        用于读取Aird文件
-     * @param bos        用于存储卷积结果
      * @param overviewId
      * @param lumsParams
      */
-    private List<AnalyseDataDO> extract(RandomAccessFile raf, BufferedOutputStream bos, String overviewId, LumsParams lumsParams) {
+    private List<AnalyseDataDO> extract(RandomAccessFile raf, String overviewId, LumsParams lumsParams) {
 
         //Step1.获取窗口信息.
         logger.info("获取Swath窗口信息");
@@ -330,38 +286,11 @@ public class Extractor {
         int count = 1;
         List<AnalyseDataDO> totalDataList = new ArrayList<>();
         try {
-            long startPosition = 0;
             for (SwathIndexDO index : swathIndexList) {
                 long start = System.currentTimeMillis();
                 List<AnalyseDataDO> dataList = doExtract(raf, index, overviewId, lumsParams);
                 if (dataList != null) {
                     totalDataList.addAll(dataList);
-                    //将卷积的核心数据压缩以后存储到本地
-                    for (AnalyseDataDO data : dataList) {
-                        byte[] rtArray = data.getConvRtArray();
-                        byte[] intensityAll = new byte[0];
-                        //存储rt array的位置信息
-                        data.setStartPos(startPosition);
-                        List<Integer> deltaList = new ArrayList<>();
-                        deltaList.add(rtArray.length);
-                        startPosition = startPosition + rtArray.length;
-                        //逐个存储fragment对应的卷积位置的
-                        for (String key : data.getConvIntensityMap().keySet()) {
-                            deltaList.add(data.getConvIntensityMap().get(key).length);
-                            startPosition = startPosition + data.getConvIntensityMap().get(key).length;
-                            intensityAll = ArrayUtils.addAll(intensityAll, data.getConvIntensityMap().get(key));
-                        }
-
-                        byte[] result = ArrayUtils.addAll(rtArray, intensityAll);
-
-                        bos.write(result);
-                        //压缩数据已经存储到本地,清空内容中的压缩数据
-                        data.setPosDeltaList(deltaList);
-                        data.setConvRtArray(null);
-                        for (String key : data.getConvIntensityMap().keySet()) {
-                            data.getConvIntensityMap().put(key, null);
-                        }
-                    }
                 }
                 analyseDataService.insertAll(dataList, false);
                 logger.info("第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
@@ -476,7 +405,7 @@ public class Extractor {
             //Step2. 常规选峰及打分
             scoreService.scoreForOne(dataDO, tp, rtMap, lumsParams);
             if (dataDO.getFeatureScoresList() == null) {
-//                logger.info("未满足基础条件,直接忽略:"+dataDO.getPeptideRef());
+            //logger.info("未满足基础条件,直接忽略:"+dataDO.getPeptideRef());
                 targetIgnorePeptides.add(dataDO.getPeptideRef());
                 continue;
             }
@@ -488,7 +417,7 @@ public class Extractor {
             if (targetIgnorePeptides.contains(tp.getPeptideRef()) && !lumsParams.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM)) {
                 continue;
             }
-            //Step1. 常规卷积,卷积结果不进行压缩处理
+            //Step1. 常规卷积,卷积结果不进行压缩处理,因为后续会立即进行子分数打分,等到打分结束以后再进行压缩
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, lumsParams.getMzExtractWindow(), lumsParams.getRtExtractWindow(), overviewId);
             if (dataDO == null) {
                 continue;

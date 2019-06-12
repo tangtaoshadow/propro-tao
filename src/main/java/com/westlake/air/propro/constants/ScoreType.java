@@ -11,9 +11,11 @@ public enum ScoreType {
     MainScore("MainScore", "main_VarXxSwathPrelimScore",
             "Swath主打分",
             true, true),
+
     BseriesScore("BseriesScore", "var_BseriesScore",
             "peptideRt对应的spectrumArray中，检测到的b离子的数量",
             true, true),
+
     ElutionModelFitScore("ElutionModelFitScore", "var_ElutionModelFitScore",
             "",
             null, false),

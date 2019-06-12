@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -30,7 +31,7 @@ public class ScoreTask extends BaseTask {
     AnalyseOverviewService analyseOverviewService;
 
     @Async(value = "scoreExecutor")
-    public void score(String overviewId, ExperimentDO experimentDO, SlopeIntercept slopeIntercept, String libraryId, SigmaSpacing sigmaSpacing, HashSet<String> scoreTypes, TaskDO taskDO) {
+    public void score(String overviewId, ExperimentDO experimentDO, SlopeIntercept slopeIntercept, String libraryId, SigmaSpacing sigmaSpacing, List<String> scoreTypes, TaskDO taskDO) {
         long start = System.currentTimeMillis();
         taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());

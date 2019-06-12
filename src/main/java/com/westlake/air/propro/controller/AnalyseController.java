@@ -28,6 +28,7 @@ import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.CompressUtil;
 import com.westlake.air.propro.utils.FeatureUtil;
 import com.westlake.air.propro.utils.PermissionUtil;
+import com.westlake.air.propro.utils.ScoreUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -350,13 +351,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("slope", slope);
         model.addAttribute("intercept", intercept);
 
-        HashSet<String> scoreTypes = new HashSet<>();
-        for (ScoreType type : ScoreType.values()) {
-            String typeParam = request.getParameter(type.getTypeName());
-            if (typeParam != null && typeParam.equals("on")) {
-                scoreTypes.add(type.getTypeName());
-            }
-        }
+        List<String> scoreTypes = ScoreUtil.getScoreTypes(request);
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         if (overviewResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
@@ -396,7 +391,7 @@ public class AnalyseController extends BaseController {
         ResultDO<AnalyseDataDO> dataResult = null;
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
         if (dataId != null && !dataId.isEmpty() && !dataId.equals("null")) {
-            dataResult = analyseDataService.getByIdWithConvolutionData(dataId);
+            dataResult = analyseDataService.getById(dataId);
         } else {
             resultDO.setErrorResult(ResultCode.ANALYSE_DATA_ID_CANNOT_BE_EMPTY);
             return resultDO;
@@ -441,7 +436,7 @@ public class AnalyseController extends BaseController {
                                    @RequestParam(value = "useNoise1000", required = false, defaultValue = "false") Boolean useNoise1000) {
         ResultDO<AnalyseDataDO> dataResult = null;
         if (dataId != null && !dataId.isEmpty() && !dataId.equals("null")) {
-            dataResult = analyseDataService.getByIdWithConvolutionData(dataId);
+            dataResult = analyseDataService.getById(dataId);
         }
 
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
@@ -743,7 +738,7 @@ public class AnalyseController extends BaseController {
             if (dataForId == null) {
                 continue;
             }
-            ResultDO<AnalyseDataDO> dataResult = analyseDataService.getByIdWithConvolutionData(dataForId.getId());
+            ResultDO<AnalyseDataDO> dataResult = analyseDataService.getById(dataForId.getId());
             if (dataResult.isFailed() || dataResult.getModel() == null) {
                 continue;
             }

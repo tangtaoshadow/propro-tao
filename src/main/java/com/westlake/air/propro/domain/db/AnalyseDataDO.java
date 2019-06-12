@@ -82,11 +82,6 @@ public class AnalyseDataDO extends BaseDO {
     @JSONField(serialize=false)
     HashMap<String, byte[]> convIntensityMap = new HashMap<>();
 
-    //本肽段在存储文件中的开始位置
-    Long startPos;
-    //存储在本地的位置块信息,顺序依次为convRtArray,mzMap.keySet()为顺序的各个离子片段的位置,长度为mzMap.size()+1
-    List<Integer> posDeltaList;
-
     //打分相关的字段
     @Indexed
     @JSONField(serialize=false)
