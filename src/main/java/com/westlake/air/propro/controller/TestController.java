@@ -78,11 +78,20 @@ public class TestController extends BaseController {
     public static float SPACING = 0.01f;
 
     //计算iRT
+    @RequestMapping("testLMS")
+    @ResponseBody
+    String testLMS(Model model, RedirectAttributes redirectAttributes) {
+        String a = resultComparator.getProproProteins("5d035ed3fc6f9e2f6cab6391", true).size() + "";
+        String b = resultComparator.getProproProteins("5d037a57fc6f9e4100b55d81", true).size() + "";
+        return a + ":" + b;
+    }
+
+    //计算iRT
     @RequestMapping("test2")
     @ResponseBody
     String test2(Model model, RedirectAttributes redirectAttributes) {
         List<ExperimentDO> exps = experimentService.getAllByProjectName("SGS");
-        exps.forEach(exp->{
+        exps.forEach(exp -> {
             exp.setOwnerName("lms");
             experimentService.update(exp);
         });
@@ -302,15 +311,15 @@ public class TestController extends BaseController {
 
     @RequestMapping("byScore")
     @ResponseBody
-    String byScoreTest(){
-        try{
+    String byScoreTest() {
+        try {
             String file = FileUtil.readFile("C:\\workspace\\java\\test\\byscore.txt");
             String[] mz = file.split("\n")[0].split(",");
             String[] intensity = file.split("\n")[1].split(",");
             assert mz.length == intensity.length;
             Float[] mzArray = new Float[mz.length];
             Float[] intArray = new Float[mz.length];
-            for (int i=0; i<mz.length; i++){
+            for (int i = 0; i < mz.length; i++) {
                 mzArray[i] = Float.parseFloat(mz[i]);
                 intArray[i] = Float.parseFloat(intensity[i]);
             }
@@ -318,7 +327,7 @@ public class TestController extends BaseController {
             List<String> defaultScoreTypes = lp.getScoreTypes();
             FeatureScores featureScores = new FeatureScores(defaultScoreTypes.size());
             diaScorer.calculateBYIonScore(mzArray, intArray, new HashMap<>(), "AAMTLVQSLLNGNK", 2, featureScores, defaultScoreTypes);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -326,7 +335,7 @@ public class TestController extends BaseController {
 
     @RequestMapping("compare")
     @ResponseBody
-    String compareTest(){
+    String compareTest() {
         String analyseOverviewId = "5cfe846de0073c3b041381b8";
         String filePath = "P:\\data\\single_cell\\F20190530liangx_SILAC_K562_DIA_LHtitra1_0_allFrag_with_dscore_filtered.tsv";
         resultComparator.proteinResults(analyseOverviewId, filePath);
@@ -338,11 +347,11 @@ public class TestController extends BaseController {
 
     @RequestMapping("distribution")
     @ResponseBody
-    String distributionTest(){
+    String distributionTest() {
         String analyseOverviewId = "5cfe7adee0073c2fd07def50";
 //        String scoreType = ScoreType.WeightedTotalScore.getTypeName();
         AnalyseOverviewDO overviewResult = analyseOverviewService.getById(analyseOverviewId).getModel();
-        HashMap<String,Double> weightsMap = overviewResult.getWeights();
+        HashMap<String, Double> weightsMap = overviewResult.getWeights();
         AnalyseDataQuery query = new AnalyseDataQuery();
         query.setOverviewId(analyseOverviewId);
         query.setIsDecoy(false);
@@ -350,23 +359,23 @@ public class TestController extends BaseController {
         List<AnalyseDataDO> analyseDataDOList = analyseDataService.getAll(query);
         List<Double> heavyList = new ArrayList<>();
         List<Double> lightList = new ArrayList<>();
-        for (AnalyseDataDO analyseDataDO: analyseDataDOList){
-            if (analyseDataDO.getIsDecoy()){
+        for (AnalyseDataDO analyseDataDO : analyseDataDOList) {
+            if (analyseDataDO.getIsDecoy()) {
                 continue;
             }
             List<FeatureScores> featureScoresList = analyseDataDO.getFeatureScoresList();
             boolean isHeavy = analyseDataDO.getPeptideRef().split("_")[0].endsWith("(UniMod:188)");
             double bestRt = analyseDataDO.getBestRt();
-            for (FeatureScores featureScores: featureScoresList){
-                if (featureScores.getRt() == bestRt){
+            for (FeatureScores featureScores : featureScoresList) {
+                if (featureScores.getRt() == bestRt) {
                     double score = 0d;
-                    for (Map.Entry<String,Double> entry: weightsMap.entrySet()){
+                    for (Map.Entry<String, Double> entry : weightsMap.entrySet()) {
                         //默认分数不为null
                         score += entry.getValue() * featureScores.get(entry.getKey(), overviewResult.getScoreTypes());
                     }
-                    if (isHeavy){
+                    if (isHeavy) {
                         heavyList.add(score);
-                    }else {
+                    } else {
                         lightList.add(score);
                     }
                 }

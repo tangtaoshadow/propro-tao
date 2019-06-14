@@ -184,7 +184,7 @@ public class Airus {
 //        test(scores);
         List<HashMap<String, Double>> weightsMapList = new ArrayList<>();
         for (int i = 0; i < neval; i++) {
-            logger.info("开始第" + i + "轮尝试");
+            logger.info("开始第" + i + "轮尝试,总计"+neval+"轮");
             LDALearnData ldaLearnData = semiSupervised.learnRandomized(scores, airusParams);
             if (ldaLearnData == null) {
                 logger.info("跳过本轮训练");

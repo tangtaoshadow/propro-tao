@@ -202,7 +202,7 @@ public class ResultComparator {
         }
     }
 
-    private HashSet<String> getProproProteins(String overviewId, boolean isUnique){
+    public HashSet<String> getProproProteins(String overviewId, boolean isUnique){
         AnalyseDataQuery query = new AnalyseDataQuery();
         query.setOverviewId(overviewId);
         query.setIsDecoy(false);
