@@ -326,7 +326,6 @@ public class ProjectController extends BaseController {
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
                      @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.5") Float shapeScoreThreshold,
                      @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.6") Float shapeWeightScoreThreshold,
-                     @RequestParam(value = "useEpps", required = false, defaultValue = "false") Boolean useEpps,
                      HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
 
@@ -369,14 +368,10 @@ public class ProjectController extends BaseController {
         }
         String errorInfo = "";
         TaskTemplate template = null;
-        if (doIrt && useEpps) {
+        if (doIrt) {
             template = TaskTemplate.IRT_EXTRACT_PEAKPICK_SCORE;
-        } else if (!doIrt && useEpps) {
-            template = TaskTemplate.EXTRACT_PEAKPICK_SCORE;
-        } else if (doIrt) {
-            template = TaskTemplate.IRT_EXTRACTOR;
         } else {
-            template = TaskTemplate.EXTRACTOR;
+            template = TaskTemplate.EXTRACT_PEAKPICK_SCORE;
         }
 
         for (ExperimentDO exp : exps) {
@@ -405,7 +400,6 @@ public class ProjectController extends BaseController {
             input.setOwnerName(ownerName);
             input.setRtExtractWindow(rtExtractWindow);
             input.setMzExtractWindow(mzExtractWindow);
-            input.setUseEpps(useEpps);
             input.setScoreTypes(scoreTypes);
 
             input.setXcorrShapeThreshold(shapeScoreThreshold);
@@ -544,7 +538,6 @@ public class ProjectController extends BaseController {
         model.addAttribute("projectName", projectName);
         model.addAttribute("libraryId", libraryId);
         model.addAttribute("libName", libName);
-//        model.addAttribute("peptideRefs", peptideRefs);
         model.addAttribute("protNameList", protNameList);
         model.addAttribute("pepFragIntListMap", pepFragIntListMap);
         model.addAttribute("expNameList", expNameList);

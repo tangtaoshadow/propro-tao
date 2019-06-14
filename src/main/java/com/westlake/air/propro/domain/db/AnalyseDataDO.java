@@ -28,6 +28,7 @@ public class AnalyseDataDO extends BaseDO {
     public static Integer IDENTIFIED_STATUS_UNKNOWN = 2;
     //尚未鉴定
     public static Integer IDENTIFIED_STATUS_NOT_START = 3;
+
     @Id
     @JSONField(serialize=false)
     String id;
@@ -42,6 +43,21 @@ public class AnalyseDataDO extends BaseDO {
     //是否是伪肽段
     @Indexed
     Boolean isDecoy = false;
+
+    //打分相关的字段
+    @Indexed
+    @JSONField(serialize=false)
+    int identifiedStatus = IDENTIFIED_STATUS_NOT_START;
+
+    //最终给出的FDR打分
+    @Indexed
+    @JSONField(serialize=false)
+    Double fdr;
+
+    //最终给出的qValue
+    @Indexed
+    @JSONField(serialize=false)
+    Double qValue;
 
     String proteinName;
 
@@ -69,31 +85,16 @@ public class AnalyseDataDO extends BaseDO {
     Float rtEnd;
 
     //是否处于压缩状态
-    @JSONField(serialize=false)
-    boolean compressed = false;
+//    @JSONField(serialize=false)
+//    boolean compressed = false;
 
     //rtArray的压缩版本
-    @JSONField(serialize=false)
-    byte[] convRtArray;
+//    @JSONField(serialize=false)
+//    byte[] convRtArray;
 
     //intensityMap的压缩版本
-    @JSONField(serialize=false)
-    HashMap<String, byte[]> convIntensityMap = new HashMap<>();
-
-    //打分相关的字段
-    @Indexed
-    @JSONField(serialize=false)
-    int identifiedStatus = IDENTIFIED_STATUS_NOT_START;
-
-    //最终给出的FDR打分
-    @Indexed
-    @JSONField(serialize=false)
-    Double fdr;
-
-    //最终给出的qValue
-    @Indexed
-    @JSONField(serialize=false)
-    Double qValue;
+//    @JSONField(serialize=false)
+//    HashMap<String, byte[]> convIntensityMap = new HashMap<>();
 
     @JSONField(serialize=false)
     List<FeatureScores> featureScoresList;

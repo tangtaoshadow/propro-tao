@@ -6,10 +6,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.algorithm.extract.Extractor;
 import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.aird.Compressor;
+import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.irt.IrtResult;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
@@ -20,7 +19,6 @@ import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.exception.UnauthorizedAccessException;
 import com.westlake.air.propro.service.*;
-import com.westlake.air.propro.utils.FileUtil;
 import com.westlake.air.propro.utils.PermissionUtil;
 import com.westlake.air.propro.utils.ScoreUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +29,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.io.RandomAccessFile;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -383,7 +383,6 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
                      @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.5") Float shapeScoreThreshold,
                      @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.6") Float shapeWeightScoreThreshold,
-                     @RequestParam(value = "useEpps", required = false, defaultValue = "true") Boolean useEpps,
                      @RequestParam(value = "uniqueOnly", required = false, defaultValue = "false") Boolean uniqueOnly,
                      HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
@@ -403,7 +402,7 @@ public class ExperimentController extends BaseController {
 
         List<String> scoreTypes = ScoreUtil.getScoreTypes(request);
 
-        TaskDO taskDO = new TaskDO(useEpps ? TaskTemplate.EXTRACT_PEAKPICK_SCORE : TaskTemplate.EXTRACTOR, resultDO.getModel().getName() + ":" + library.getName() + "(" + libraryId + ")");
+        TaskDO taskDO = new TaskDO(TaskTemplate.EXTRACT_PEAKPICK_SCORE, resultDO.getModel().getName() + ":" + library.getName() + "(" + libraryId + ")");
         taskService.insert(taskDO);
         SlopeIntercept si = SlopeIntercept.create();
         if (slope != null && intercept != null) {
@@ -420,7 +419,6 @@ public class ExperimentController extends BaseController {
         input.setOwnerName(getCurrentUsername());
         input.setRtExtractWindow(rtExtractWindow);
         input.setMzExtractWindow(mzExtractWindow);
-        input.setUseEpps(useEpps);
         input.setUniqueOnly(uniqueOnly);
         input.setScoreTypes(scoreTypes);
         input.setSigmaSpacing(ss);

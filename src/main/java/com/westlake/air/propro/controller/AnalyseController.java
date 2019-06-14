@@ -1,7 +1,6 @@
 package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.westlake.air.propro.algorithm.extract.Extractor;
 import com.westlake.air.propro.algorithm.feature.ChromatographicScorer;
@@ -10,7 +9,6 @@ import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.algorithm.peak.FeatureExtractor;
 import com.westlake.air.propro.algorithm.peak.GaussFilter;
 import com.westlake.air.propro.algorithm.peak.SignalToNoiseEstimator;
-import com.westlake.air.propro.async.ScoreTask;
 import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.domain.ResultDO;
@@ -19,7 +17,6 @@ import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.PeakGroup;
 import com.westlake.air.propro.domain.bean.score.PeptideFeature;
-import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
 import com.westlake.air.propro.domain.params.LumsParams;
@@ -36,9 +33,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import scala.tools.nsc.backend.jvm.BTypes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -69,8 +64,6 @@ public class AnalyseController extends BaseController {
     ProjectService projectService;
     @Autowired
     ScoreService scoreService;
-    @Autowired
-    ScoreTask scoreTask;
     @Autowired
     GaussFilter gaussFilter;
     @Autowired
@@ -310,205 +303,6 @@ public class AnalyseController extends BaseController {
         return "analyse/data/list";
     }
 
-    @RequestMapping(value = "/overview/score")
-    String score(Model model,
-                 @RequestParam(value = "overviewId", required = true) String overviewId,
-                 @RequestParam(value = "sigma", required = false) Float sigma,
-                 @RequestParam(value = "spacing", required = false) Float spacing,
-                 RedirectAttributes redirectAttributes) {
-
-        model.addAttribute("sigma", sigma);
-        model.addAttribute("spacing", spacing);
-
-        ResultDO<AnalyseOverviewDO> resultDO = analyseOverviewService.getById(overviewId);
-        if (resultDO.isFailed()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-            return "redirect:/analyse/overview/list";
-        }
-
-        AnalyseOverviewDO overviewDO = resultDO.getModel();
-        PermissionUtil.check(overviewDO);
-        model.addAttribute("overview", overviewDO);
-        model.addAttribute("slope", overviewDO.getSlope());
-        model.addAttribute("intercept", overviewDO.getIntercept());
-        model.addAttribute("scoreTypes", ScoreType.getShownTypes());
-        return "analyse/overview/score";
-    }
-
-    @RequestMapping(value = "/overview/doscore")
-    String doscore(Model model,
-                   @RequestParam(value = "overviewId", required = true) String overviewId,
-                   @RequestParam(value = "slope", required = false) Double slope,
-                   @RequestParam(value = "intercept", required = false) Double intercept,
-                   @RequestParam(value = "sigma", required = false) Float sigma,
-                   @RequestParam(value = "spacing", required = false) Float spacing,
-                   HttpServletRequest request,
-                   RedirectAttributes redirectAttributes) {
-
-        model.addAttribute("overviewId", overviewId);
-        model.addAttribute("sigma", sigma);
-        model.addAttribute("spacing", spacing);
-        model.addAttribute("slope", slope);
-        model.addAttribute("intercept", intercept);
-
-        List<String> scoreTypes = ScoreUtil.getScoreTypes(request);
-        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
-        if (overviewResult.isFailed()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-            return "redirect:/analyse/overview/list";
-        }
-
-        AnalyseOverviewDO overviewDO = overviewResult.getModel();
-        PermissionUtil.check(overviewDO);
-        model.addAttribute("overview", overviewDO);
-
-        ResultDO<ExperimentDO> expResult = experimentService.getById(overviewDO.getExpId());
-        if (expResult.isFailed()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
-            return "redirect:/experiment/list";
-        }
-
-        TaskDO taskDO = new TaskDO(TaskTemplate.SCORE, overviewDO.getName());
-        taskService.insert(taskDO);
-
-        SlopeIntercept si = new SlopeIntercept();
-        if (slope == null || intercept == null) {
-            si = SlopeIntercept.create();
-        } else {
-            si.setSlope(slope);
-            si.setIntercept(intercept);
-        }
-
-        scoreTask.score(overviewId, expResult.getModel(), si, overviewDO.getLibraryId(), new SigmaSpacing(sigma, spacing), scoreTypes, taskDO);
-        return "redirect:/task/detail/" + taskDO.getId();
-    }
-
-    @RequestMapping(value = "/view")
-    @ResponseBody
-    ResultDO<JSONObject> view(Model model,
-                              @RequestParam(value = "dataId", required = false, defaultValue = "") String dataId,
-                              @RequestParam(value = "cutInfo", required = false) String cutInfo) {
-        ResultDO<AnalyseDataDO> dataResult = null;
-        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
-        if (dataId != null && !dataId.isEmpty() && !dataId.equals("null")) {
-            dataResult = analyseDataService.getById(dataId);
-        } else {
-            resultDO.setErrorResult(ResultCode.ANALYSE_DATA_ID_CANNOT_BE_EMPTY);
-            return resultDO;
-        }
-
-        if (dataResult.isFailed()) {
-            resultDO.setErrorResult(ResultCode.ANALYSE_DATA_NOT_EXISTED);
-            return resultDO;
-        }
-
-        AnalyseDataDO dataDO = dataResult.getModel();
-
-        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(dataDO.getOverviewId());
-        PermissionUtil.check(overviewResult.getModel());
-
-        JSONObject res = new JSONObject();
-        JSONArray rtArray = new JSONArray();
-        JSONArray intensityArray = new JSONArray();
-
-        SwathIndexDO swathIndexDO = swathIndexService.getSwathIndex(overviewResult.getModel().getExpId(), dataDO.getMz());
-        AnalyseUtil.decompress(dataDO, swathIndexDO.getRts());
-        Float[] pairRtArray = dataDO.getRtArray();
-        Float[] pairIntensityArray = dataDO.getIntensityMap().get(cutInfo);
-
-        for (int n = 0; n < pairRtArray.length; n++) {
-            rtArray.add(pairRtArray[n]);
-            if (pairIntensityArray != null) {
-                intensityArray.add(pairIntensityArray[n]);
-            }
-        }
-
-        res.put("rt", rtArray);
-        res.put("intensity", intensityArray);
-        res.put("peptideRef", dataDO.getPeptideRef());
-        resultDO.setModel(res);
-        return resultDO;
-    }
-
-    @RequestMapping(value = "/viewGroup")
-    @ResponseBody
-    ResultDO<JSONObject> viewGroup(Model model,
-                                   @RequestParam(value = "dataId", required = false) String dataId,
-                                   @RequestParam(value = "isGaussFilter", required = false, defaultValue = "false") Boolean isGaussFilter,
-                                   @RequestParam(value = "useNoise1000", required = false, defaultValue = "false") Boolean useNoise1000) {
-        ResultDO<AnalyseDataDO> dataResult = null;
-        if (dataId != null && !dataId.isEmpty() && !dataId.equals("null")) {
-            dataResult = analyseDataService.getById(dataId);
-        }
-
-        ResultDO<JSONObject> resultDO = new ResultDO<>(true);
-        if (dataResult == null || dataResult.isFailed()) {
-            resultDO.setErrorResult(ResultCode.ANALYSE_DATA_NOT_EXISTED);
-            return resultDO;
-        }
-
-        AnalyseDataDO data = dataResult.getModel();
-        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(data.getOverviewId());
-        PermissionUtil.check(overviewResult.getModel());
-
-        JSONObject res = new JSONObject();
-        JSONArray rtArray = new JSONArray();
-        JSONArray intensityArrays = new JSONArray();
-        JSONArray cutInfoArray = new JSONArray();
-
-        //同一组的rt坐标是相同的
-        SwathIndexDO swathIndexDO = swathIndexService.getSwathIndex(overviewResult.getModel().getExpId(), data.getMz());
-        AnalyseUtil.decompress(data, swathIndexDO.getRts());
-        Float[] pairRtArray = data.getRtArray();
-        for (String cutInfo : data.getIntensityMap().keySet()) {
-            if (data.getIntensityMap().get(cutInfo) == null) {
-                continue;
-            }
-
-            Float[] pairIntensityArray = data.getIntensityMap().get(cutInfo);
-            if (isGaussFilter) {
-                AnalyseOverviewDO overview = overviewResult.getModel();
-                pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, cutInfo, pairIntensityArray,new SigmaSpacing(overview.getSigma(), overview.getSpacing()));
-            }
-
-            cutInfoArray.add(cutInfo);
-            JSONArray intensityArray = new JSONArray();
-            if (useNoise1000) {
-                intensityArray = noise(pairRtArray, pairIntensityArray);
-                intensityArrays.add(intensityArray);
-            } else {
-                intensityArray.addAll(Arrays.asList(pairIntensityArray));
-                intensityArrays.add(intensityArray);
-            }
-        }
-
-        if (pairRtArray != null) {
-            rtArray.addAll(Arrays.asList(pairRtArray));
-        } else {
-            logger.error("No AnalyseData Has RtArray!!!");
-        }
-
-        JSONArray leftRtList = new JSONArray();
-        JSONArray rightRtList = new JSONArray();
-        for(FeatureScores scores :data.getFeatureScoresList()){
-            Pair<Double, Double> rtRange = FeatureUtil.toDoublePair(scores.getRtRangeFeature());
-            leftRtList.add(rtRange.getLeft());
-            rightRtList.add(rtRange.getRight());
-        }
-        res.put("leftRtList", leftRtList);
-        res.put("rightRtList", rightRtList);
-        res.put("rt", rtArray);
-        res.put("peptideRef", data.getPeptideRef());
-        res.put("cutInfoArray", cutInfoArray);
-        res.put("intensityArrays", intensityArrays);
-        if (data.getBestRt() != null) {
-            res.put("bestRt", (double) Math.round(data.getBestRt() * 100) / 100);
-        }
-
-        resultDO.setModel(res);
-        return resultDO;
-    }
-
     @RequestMapping(value = "/consultation")
     String consultation(Model model,
                         @RequestParam(value = "dataId", required = false) String dataId,
@@ -610,8 +404,8 @@ public class AnalyseController extends BaseController {
         model.addAttribute("expId", targetExpId);
         model.addAttribute("libraryId", targetLibraryId);
         model.addAttribute("libraryName", library.getName());
-
         model.addAttribute("exp", experimentResult.getModel());
+
         if (!allCutInfo) {
             for (String cutInfoOri : request.getParameterMap().keySet()) {
                 if (cutInfoOri.contains(Constants.CUTINFO_PREFIX) && request.getParameter(cutInfoOri).equals("on")) {
@@ -707,6 +501,23 @@ public class AnalyseController extends BaseController {
             usedCutInfos.addAll(cutInfoFromDic);
             usedCutInfos.addAll(cutInfoFromGuessAndHit);
         }
+
+        if(data != null){
+            List<Double> leftRtList = new ArrayList<>();
+            List<Double> rightRtList = new ArrayList<>();
+            for(FeatureScores scores :data.getFeatureScoresList()){
+                Pair<Double, Double> rtRange = FeatureUtil.toDoublePair(scores.getRtRangeFeature());
+                leftRtList.add(rtRange.getLeft());
+                rightRtList.add(rtRange.getRight());
+            }
+            model.addAttribute("leftRtList", leftRtList);
+            model.addAttribute("rightRtList", rightRtList);
+            if (data.getBestRt() != null) {
+                model.addAttribute("bestRt", (double) Math.round(data.getBestRt() * 100) / 100);
+            }
+        }
+
+
         model.addAttribute("rt", rtArray);
         model.addAttribute("cutInfoFromDic", cutInfoFromDic);
         model.addAttribute("cutInfoFromGuess", cutInfoFromGuess);
@@ -718,92 +529,92 @@ public class AnalyseController extends BaseController {
         return "analyse/data/consultation";
     }
 
-    @RequestMapping(value = "/viewMultiGroup")
-    @ResponseBody
-    ResultDO<JSONObject> viewMultiGroup(Model model,
-                                        @RequestParam(value = "overviewIds", required = true) String overviewIds,
-                                        @RequestParam(value = "peptideRef", required = true) String peptideRef,
-                                        @RequestParam(value = "isGaussFilter", required = false, defaultValue = "false") Boolean isGaussFilter,
-                                        @RequestParam(value = "useNoise1000", required = false, defaultValue = "false") Boolean useNoise1000) {
-
-        ResultDO resultDO = new ResultDO(true);
-        JSONArray groups = new JSONArray();
-
-        String[] analyseOverviewIdArray = overviewIds.split(",");
-        for (String overviewId : analyseOverviewIdArray) {
-            JSONObject group = new JSONObject();
-            if (overviewId == null || overviewId.isEmpty()) {
-                continue;
-            }
-            //校验权限
-            ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
-            PermissionUtil.check(overviewResult.getModel());
-
-            AnalyseDataDO dataForId = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, peptideRef, false);
-            if (dataForId == null) {
-                continue;
-            }
-            ResultDO<AnalyseDataDO> dataResult = analyseDataService.getById(dataForId.getId());
-            if (dataResult.isFailed() || dataResult.getModel() == null) {
-                continue;
-            }
-            AnalyseDataDO data = dataResult.getModel();
-            JSONArray rtArray = new JSONArray();
-            JSONArray intensityArrays = new JSONArray();
-            JSONArray cutInfoArray = new JSONArray();
-
-            //同一组的rt坐标是相同的
-            Float[] pairRtArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvRtArray()));
-
-            for (String cutInfo : data.getConvIntensityMap().keySet()) {
-                if (data.getConvIntensityMap().get(cutInfo) == null) {
-                    continue;
-                }
-                Float[] pairIntensityArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvIntensityMap().get(cutInfo)));
-                if (isGaussFilter) {
-                    AnalyseOverviewDO overview = overviewResult.getModel();
-                    pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, cutInfo, pairIntensityArray,new SigmaSpacing(overview.getSigma(), overview.getSpacing()));
-                }
-                cutInfoArray.add(cutInfo);
-                JSONArray intensityArray = new JSONArray();
-                if (useNoise1000) {
-                    intensityArray = noise(pairRtArray, pairIntensityArray);
-                    intensityArrays.add(intensityArray);
-                } else {
-
-                    intensityArray.addAll(Arrays.asList(pairIntensityArray));
-                    intensityArrays.add(intensityArray);
-                }
-            }
-
-            if (pairRtArray != null) {
-                rtArray.addAll(Arrays.asList(pairRtArray));
-            } else {
-                logger.error("No AnalyseData Has RtArray!!!");
-            }
-            JSONArray leftRtList = new JSONArray();
-            JSONArray rightRtList = new JSONArray();
-            for(FeatureScores scores :data.getFeatureScoresList()){
-                Pair<Double, Double> rtRange = FeatureUtil.toDoublePair(scores.getRtRangeFeature());
-                leftRtList.add(rtRange.getLeft());
-                rightRtList.add(rtRange.getRight());
-            }
-            group.put("leftRtList", leftRtList);
-            group.put("rightRtList", rightRtList);
-            group.put("overviewId", overviewId);
-            group.put("rt", rtArray);
-            group.put("peptideRef", data.getPeptideRef());
-            group.put("cutInfoArray", cutInfoArray);
-            group.put("intensityArrays", intensityArrays);
-            if (data.getBestRt() != null) {
-                group.put("bestRt", (double) Math.round(data.getBestRt() * 100) / 100);
-            }
-            groups.add(group);
-        }
-
-        resultDO.setModel(groups);
-        return resultDO;
-    }
+//    @RequestMapping(value = "/viewMultiGroup")
+//    @ResponseBody
+//    ResultDO<JSONObject> viewMultiGroup(Model model,
+//                                        @RequestParam(value = "overviewIds", required = true) String overviewIds,
+//                                        @RequestParam(value = "peptideRef", required = true) String peptideRef,
+//                                        @RequestParam(value = "isGaussFilter", required = false, defaultValue = "false") Boolean isGaussFilter,
+//                                        @RequestParam(value = "useNoise1000", required = false, defaultValue = "false") Boolean useNoise1000) {
+//
+//        ResultDO resultDO = new ResultDO(true);
+//        JSONArray groups = new JSONArray();
+//
+//        String[] analyseOverviewIdArray = overviewIds.split(",");
+//        for (String overviewId : analyseOverviewIdArray) {
+//            JSONObject group = new JSONObject();
+//            if (overviewId == null || overviewId.isEmpty()) {
+//                continue;
+//            }
+//            //校验权限
+//            ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
+//            PermissionUtil.check(overviewResult.getModel());
+//
+//            AnalyseDataDO dataForId = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, peptideRef, false);
+//            if (dataForId == null) {
+//                continue;
+//            }
+//            ResultDO<AnalyseDataDO> dataResult = analyseDataService.getById(dataForId.getId());
+//            if (dataResult.isFailed() || dataResult.getModel() == null) {
+//                continue;
+//            }
+//            AnalyseDataDO data = dataResult.getModel();
+//            JSONArray rtArray = new JSONArray();
+//            JSONArray intensityArrays = new JSONArray();
+//            JSONArray cutInfoArray = new JSONArray();
+//
+//            //同一组的rt坐标是相同的
+//            Float[] pairRtArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvRtArray()));
+//
+//            for (String cutInfo : data.getConvIntensityMap().keySet()) {
+//                if (data.getConvIntensityMap().get(cutInfo) == null) {
+//                    continue;
+//                }
+//                Float[] pairIntensityArray = CompressUtil.transToFloat(CompressUtil.zlibDecompress(data.getConvIntensityMap().get(cutInfo)));
+//                if (isGaussFilter) {
+//                    AnalyseOverviewDO overview = overviewResult.getModel();
+//                    pairIntensityArray = gaussFilter.filterForFloat(pairRtArray, cutInfo, pairIntensityArray,new SigmaSpacing(overview.getSigma(), overview.getSpacing()));
+//                }
+//                cutInfoArray.add(cutInfo);
+//                JSONArray intensityArray = new JSONArray();
+//                if (useNoise1000) {
+//                    intensityArray = noise(pairRtArray, pairIntensityArray);
+//                    intensityArrays.add(intensityArray);
+//                } else {
+//
+//                    intensityArray.addAll(Arrays.asList(pairIntensityArray));
+//                    intensityArrays.add(intensityArray);
+//                }
+//            }
+//
+//            if (pairRtArray != null) {
+//                rtArray.addAll(Arrays.asList(pairRtArray));
+//            } else {
+//                logger.error("No AnalyseData Has RtArray!!!");
+//            }
+//            JSONArray leftRtList = new JSONArray();
+//            JSONArray rightRtList = new JSONArray();
+//            for(FeatureScores scores :data.getFeatureScoresList()){
+//                Pair<Double, Double> rtRange = FeatureUtil.toDoublePair(scores.getRtRangeFeature());
+//                leftRtList.add(rtRange.getLeft());
+//                rightRtList.add(rtRange.getRight());
+//            }
+//            group.put("leftRtList", leftRtList);
+//            group.put("rightRtList", rightRtList);
+//            group.put("overviewId", overviewId);
+//            group.put("rt", rtArray);
+//            group.put("peptideRef", data.getPeptideRef());
+//            group.put("cutInfoArray", cutInfoArray);
+//            group.put("intensityArrays", intensityArrays);
+//            if (data.getBestRt() != null) {
+//                group.put("bestRt", (double) Math.round(data.getBestRt() * 100) / 100);
+//            }
+//            groups.add(group);
+//        }
+//
+//        resultDO.setModel(groups);
+//        return resultDO;
+//    }
 
     private JSONArray noise(Float[] pairRtArray, Float[] pairIntensityArray) {
 

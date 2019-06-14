@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.List;
 
@@ -74,7 +75,6 @@ public abstract class BaseDAO<T, Q extends PageQuery> {
                 query.with(new Sort(targetQuery.getOrderBy(), targetQuery.getSortColumn()));
             }
         }
-
         return query;
     }
 }

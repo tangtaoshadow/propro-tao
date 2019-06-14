@@ -79,11 +79,6 @@
                            class="btn btn-warning m-btn m-btn--icon m-btn--icon-only">
                             <i class="fa fa-wpforms"></i>
                         </a>
-<!--                        <a th:href="@{/score/report(overviewId=${overview.id})}" data-toggle="m-tooltip"-->
-<!--                           th:title="#{label_check_recognized_result}"-->
-<!--                           class="btn btn-brand m-btn m-btn&#45;&#45;icon m-btn&#45;&#45;icon-only">-->
-<!--                            <i class="fa fa-mixcloud"></i>-->
-<!--                        </a>-->
                         <a th:href="@{/analyse/data/list(overviewId=${overview.id})}" data-toggle="m-tooltip"
                            th:title="#{label_convolution_data}"
                            class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
@@ -105,16 +100,16 @@
                             <i class="fa fa-th-list"></i>
                         </a>
 
-                        <div class="btn-group dropright" role="group">
-                            <button id="scoresBtnGroup" type="button" class="btn btn-sm dropdown-toggle"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" th:text="#{label_do_identified_score}">
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="scoresBtn">
-                                <a class="dropdown-item" th:href="@{/score/airus(overviewId=${overview.id},classifier=lda)}" th:text="#{label_use_lda}"></a>
-                                <a class="dropdown-item" th:href="@{/score/airus(overviewId=${overview.id},classifier=xgboost)}"  th:text="#{label_use_xgboost}"></a>
-                                <!--<a class="dropdown-item" onclick="alert('Not Open!')" th:text="#{label_identified_score_with_xgboost}"></a>-->
-                            </div>
-                        </div>
+<!--                        <div class="btn-group dropright" role="group">-->
+<!--                            <button id="scoresBtnGroup" type="button" class="btn btn-sm dropdown-toggle"-->
+<!--                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" th:text="#{label_do_identified_score}">-->
+<!--                            </button>-->
+<!--                            <div class="dropdown-menu" aria-labelledby="scoresBtn">-->
+<!--                                <a class="dropdown-item" th:href="@{/score/airus(overviewId=${overview.id},classifier=lda)}" th:text="#{label_use_lda}"></a>-->
+<!--                                <a class="dropdown-item" th:href="@{/score/airus(overviewId=${overview.id},classifier=xgboost)}"  th:text="#{label_use_xgboost}"></a>-->
+<!--                                &lt;!&ndash;<a class="dropdown-item" onclick="alert('Not Open!')" th:text="#{label_identified_score_with_xgboost}"></a>&ndash;&gt;-->
+<!--                            </div>-->
+<!--                        </div>-->
                     </td>
                 </tr>
                 </tbody>

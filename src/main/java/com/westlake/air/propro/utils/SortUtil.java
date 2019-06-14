@@ -28,15 +28,15 @@ public class SortUtil {
         Ordering<SimpleFeatureScores> ordering = Ordering.from(new Comparator<SimpleFeatureScores>() {
             @Override
             public int compare(SimpleFeatureScores o1, SimpleFeatureScores o2) {
-                if (isDesc) {
-                    return o2.getMainScore().compareTo(o1.getMainScore());
-                } else {
-                    try {
+                try {
+                    if (isDesc) {
+                        return o2.getMainScore().compareTo(o1.getMainScore());
+                    } else {
                         return o1.getMainScore().compareTo(o2.getMainScore());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return 0;
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return 0;
                 }
             }
         });

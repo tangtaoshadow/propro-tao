@@ -104,10 +104,10 @@
                                 </td>
                                 <td style="text-align: left" th:text="${analyseDataDO.intensitySum.intValue()}"></td>
                                 <td style="text-align: left">
-                                    <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
-                                            data-target="#m_modal_group" th:data1 = "${analyseDataDO.id}"
-                                            th:onclick="queryGroup(this.getAttribute('data1'), false, false)" th:text="#{btn_group_chromatograms}">
-                                    </button>
+<!--                                    <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"-->
+<!--                                            data-target="#m_modal_group" th:data1 = "${analyseDataDO.id}"-->
+<!--                                            th:onclick="queryGroup(this.getAttribute('data1'), false, false)" th:text="#{btn_group_chromatograms}">-->
+<!--                                    </button>-->
                                     <a th:if="${!analyseDataDO.isDecoy}" target="_blank" th:href="@{/analyse/consultation(dataId=${analyseDataDO.id},allCutInfo=true)}"
                                        class="btn btn-danger btn-sm" th:text="#{btn_peptide_clinic}"></a>
                                 </td>
@@ -221,56 +221,56 @@
             </div>
             <!--end::Portlet-->
         </div>
-        <div class="modal fade" id="m_modal_target" tabindex="-1" role="dialog" aria-labelledby="TargetInfo"
-             aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Target Info</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-                    </div>
-                    <div id="modal-body" class="modal-body" style="width: 1200px;height:600px;"></div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{btn_close}">
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="m_modal_group" tabindex="-1" role="dialog" aria-labelledby="TargetInfo"
-             aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            <button type="button" class="btn btn-sm btn-warning"
-                                    th:onclick="queryGroup(null,true,false)" th:text="#{btn_gauss_filter}">
-                            </button>
-                            <button type="button" class="btn btn-sm btn-info"
-                                    th:onclick="queryGroup(null,true, true)" th:text="#{btn_denoising_gauss_filter}">
-                            </button>
-                            <button type="button" class="btn btn-sm btn-brand"
-                                    th:onclick="queryGroup(null,false, false)" th:text="#{btn_original_data}">
-                            </button>
-                            <button type="button" class="btn btn-sm btn-accent"
-                                    th:onclick="queryGroup(null,false, true)" th:text="#{btn_denoising_data}">
-                            </button>
-                            <span class="m-badge m-badge--success m-badge--wide" id="peptideLabel">
+<!--        <div class="modal fade" id="m_modal_target" tabindex="-1" role="dialog" aria-labelledby="TargetInfo"-->
+<!--             aria-hidden="true">-->
+<!--            <div class="modal-dialog modal-lg" role="document">-->
+<!--                <div class="modal-content">-->
+<!--                    <div class="modal-header">-->
+<!--                        <h5 class="modal-title" id="exampleModalLabel">Target Info</h5>-->
+<!--                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span-->
+<!--                                aria-hidden="true">&times;</span></button>-->
+<!--                    </div>-->
+<!--                    <div id="modal-body" class="modal-body" style="width: 1200px;height:600px;"></div>-->
+<!--                    <div class="modal-footer">-->
+<!--                        <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{btn_close}">-->
+<!--                        </button>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="modal fade" id="m_modal_group" tabindex="-1" role="dialog" aria-labelledby="TargetInfo"-->
+<!--             aria-hidden="true">-->
+<!--            <div class="modal-dialog modal-lg" role="document">-->
+<!--                <div class="modal-content">-->
+<!--                    <div class="modal-header">-->
+<!--                        <h5 class="modal-title">-->
+<!--                            <button type="button" class="btn btn-sm btn-warning"-->
+<!--                                    th:onclick="queryGroup(null,true,false)" th:text="#{btn_gauss_filter}">-->
+<!--                            </button>-->
+<!--                            <button type="button" class="btn btn-sm btn-info"-->
+<!--                                    th:onclick="queryGroup(null,true, true)" th:text="#{btn_denoising_gauss_filter}">-->
+<!--                            </button>-->
+<!--                            <button type="button" class="btn btn-sm btn-brand"-->
+<!--                                    th:onclick="queryGroup(null,false, false)" th:text="#{btn_original_data}">-->
+<!--                            </button>-->
+<!--                            <button type="button" class="btn btn-sm btn-accent"-->
+<!--                                    th:onclick="queryGroup(null,false, true)" th:text="#{btn_denoising_data}">-->
+<!--                            </button>-->
+<!--                            <span class="m-badge m-badge&#45;&#45;success m-badge&#45;&#45;wide" id="peptideLabel">-->
 
-                        </span>
-                        </h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-                    </div>
-                    <div id="modal-body-group" class="modal-body" style="width: 1200px;height:600px;"></div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{btn_close}">
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!--                        </span>-->
+<!--                        </h5>-->
+<!--                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span-->
+<!--                                aria-hidden="true">&times;</span></button>-->
+<!--                    </div>-->
+<!--                    <div id="modal-body-group" class="modal-body" style="width: 1200px;height:600px;"></div>-->
+<!--                    <div class="modal-footer">-->
+<!--                        <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{btn_close}">-->
+<!--                        </button>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
     </div>
 
 </div>
@@ -289,8 +289,8 @@
         var totalPage = [[${totalPage}]];
         var currentPage = [[${currentPage}]];
         /*]]>*/
-        var chart;
-        var chartGroup;
+        // var chart;
+        // var chartGroup;
 
         $(document).ready(function () {
             $('#pagination').bootpag({
@@ -304,8 +304,8 @@
                 document.getElementById("currentPage").value = num;
                 document.getElementById("searchForm").submit();
             });
-            chart = echarts.init(document.getElementById('modal-body'));
-            chartGroup = echarts.init(document.getElementById('modal-body-group'));
+            // chart = echarts.init(document.getElementById('modal-body'));
+            // chartGroup = echarts.init(document.getElementById('modal-body-group'));
         });
 
 

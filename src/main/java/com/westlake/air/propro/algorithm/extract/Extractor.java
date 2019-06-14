@@ -327,38 +327,8 @@ public class Extractor {
         rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
 
         logger.info("IO及解码耗时:" + (System.currentTimeMillis() - start));
-        if (lumsParams.isUseEpps()) {
-            return epps(coordinates, rtMap, overviewId, lumsParams);
-        } else {
-            return extract(coordinates, rtMap, overviewId, lumsParams.getRtExtractWindow(), lumsParams.getMzExtractWindow());
-        }
-    }
+        return epps(coordinates, rtMap, overviewId, lumsParams);
 
-    /**
-     * 最终的卷积结果需要落盘数据库,一般用于正式卷积的计算
-     *
-     * @param coordinates
-     * @param rtMap
-     * @param overviewId
-     * @param rtExtractWindow
-     * @param mzExtractWindow
-     * @return
-     */
-    private List<AnalyseDataDO> extract(List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float rtExtractWindow, Float mzExtractWindow) {
-        List<AnalyseDataDO> dataList = new ArrayList<>();
-        long start = System.currentTimeMillis();
-        //PRM use adaptiveWindow
-        for (TargetPeptide ms : coordinates) {
-            AnalyseDataDO dataDO = extractForOne(ms, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
-            if (dataDO == null) {
-                continue;
-            }
-            //存储数据库前先进行压缩处理
-            AnalyseUtil.compress(dataDO);
-            dataList.add(dataDO);
-        }
-        logger.info("纯卷积耗时:" + (System.currentTimeMillis() - start));
-        return dataList;
     }
 
     /**

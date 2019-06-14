@@ -339,20 +339,47 @@
         var data_rt = [[${rt}]];
         var cutinfo = [[${totalCutInfos}]];
         var intensity_arrays = [[${intensitiesList}]];
+        var bestRt = [[${bestRt}]];
+        var leftRtList = [[${leftRtList}]];
+        var rightRtList = [[${rightRtList}]];
+
         /*]]>*/
         var chart;
-
+        var boundaryData = [];
         $(document).ready(function () {
             chart = echarts.init(document.getElementById('chart'));
             var intensity_series = [];
+
+            if(leftRtList != null && rightRtList != null && bestRt != null){
+                for (var i =0; i<leftRtList.length; i++){
+                    if(bestRt < rightRtList[i] && bestRt > leftRtList[i]){
+                        boundaryData.push([
+                            {xAxis: leftRtList[i]+"",itemStyle:{color:'rgba(102,204,255,0.5)'}},
+                            {xAxis: rightRtList[i]+""}
+                        ]);
+                    }else {
+                        boundaryData.push([
+                            {xAxis: leftRtList[i]+""},
+                            {xAxis: rightRtList[i]+""}
+                        ]);
+                    }
+                }
+            }
+
+
             for (var i = 0; i < intensity_arrays.length; i++) {
                 intensity_series.push({
                     name: cutinfo[i],
                     type: 'line',
                     smooth: false,
-                    data: intensity_arrays[i]
+                    data: intensity_arrays[i],
+                    markArea: {
+                        silent: true,
+                        data: boundaryData
+                    }
                 });
             }
+
             option = {
                 legend: {
                     data: cutinfo.sort(),

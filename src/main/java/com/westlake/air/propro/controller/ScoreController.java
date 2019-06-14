@@ -3,7 +3,6 @@ package com.westlake.air.propro.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.westlake.air.propro.async.AirusTask;
-import com.westlake.air.propro.async.ScoreTask;
 import com.westlake.air.propro.constants.Classifier;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.ScoreType;
@@ -18,7 +17,6 @@ import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.service.AnalyseDataService;
 import com.westlake.air.propro.service.AnalyseOverviewService;
 import com.westlake.air.propro.service.ScoreService;
-import com.westlake.air.propro.utils.AnalyseUtil;
 import com.westlake.air.propro.utils.PermissionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -47,8 +45,6 @@ public class ScoreController extends BaseController {
     AnalyseOverviewService analyseOverviewService;
     @Autowired
     AnalyseDataService analyseDataService;
-    @Autowired
-    ScoreTask scoreTask;
     @Autowired
     AirusTask airusTask;
 

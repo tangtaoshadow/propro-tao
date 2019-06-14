@@ -136,7 +136,7 @@ public class ScoreServiceImpl implements ScoreService {
         List<Double[]> selectedList = new ArrayList<>();
         List<Double[]> unselectedList = new ArrayList<>();
         for (int i = 0; i < pairs.size(); i++) {
-            if(pairsCorrected != null && pairsCorrected.contains(pairs.get(i))){
+            if(pairsCorrected.contains(pairs.get(i))){
                 selectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
             }else{
                 unselectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
@@ -152,51 +152,9 @@ public class ScoreServiceImpl implements ScoreService {
         return resultDO;
     }
 
-    @Override
-    public void scoreForAll(List<AnalyseDataDO> dataList, SwathIndexDO swathIndex, LumsParams input) {
-
-        if (dataList == null || dataList.size() == 0) {
-            return;
-        }
-        input.setOverviewId(dataList.get(0).getOverviewId());//取一个AnalyseDataDO的OverviewId
-        WindowRange range = swathIndex.getRange();
-        //标准库按照PeptideRef分组
-        PeptideQuery query = new PeptideQuery(input.getLibrary().getId());
-        query.setMzStart(Double.parseDouble(range.getStart().toString()));
-        query.setMzEnd(Double.parseDouble(range.getEnd().toString()));
-        HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(query);
-
-        //为每一组PeptideRef卷积结果打分
-        ExperimentDO exp = input.getExperimentDO();
-        RandomAccessFile raf = null;
-        try {
-            raf = new RandomAccessFile(exp.getAirdPath(), "r");
-
-            TreeMap<Float, MzIntensityPairs> rtMap = null;
-            if (input.isUsedDIAScores()) {
-                rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex,  exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
-            }
-
-            for (AnalyseDataDO dataDO : dataList) {
-                AnalyseUtil.decompress(dataDO, swathIndex.getRts());
-                scoreForOne(dataDO, ttMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()), rtMap, input);
-                analyseDataService.update(dataDO);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            FileUtil.close(raf);
-        }
-    }
-
 
     @Override
     public void scoreForOne(AnalyseDataDO dataDO, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input) {
-
-        if (dataDO.isCompressed()) {
-            logger.warn("进入本函数前的AnalyseDataDO需要提前被解压缩!!!!!");
-            AnalyseUtil.decompress(dataDO, new ArrayList<>(rtMap.keySet()));
-        }
 
         if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() <= 2) {
             logger.info((dataDO.getIsDecoy()?"[Decoy]":"[Target]")+"数据的离子片段少于2个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());

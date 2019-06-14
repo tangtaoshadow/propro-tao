@@ -95,29 +95,18 @@
                             <tr>
                                 <th width="30%" th:text="#{label_cutinfo}"></th>
                                 <th width="30%" th:text="#{label_fragment_mz}"></th>
-                                <th width="40%" th:text="#{label_operation}"></th>
+<!--                                <th width="40%" th:text="#{label_operation}"></th>-->
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:each="cutInfo:${data.mzMap.keySet()}">
                                 <td th:text="${cutInfo}"></td>
                                 <td th:text="${data.mzMap.get(cutInfo)}"></td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
-                                            data-target="#m_modal_target" th:data1="${data.id}" th:data2="${cutInfo}"
-                                            th:onclick="query(this.getAttribute('data1'),this.getAttribute('data2'))" th:text="#{btn_chromatogram}">
-                                    </button>
-                                </td>
                             </tr>
                             </tbody>
                         </table>
                     </td>
-
                     <td>
-                        <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"
-                                data-target="#m_modal_group" th:data1="${data.id}"
-                                th:onclick="queryGroup(this.getAttribute('data1'), false, false)" th:text="#{btn_group_chromatograms}">
-                        </button>
                         <a th:if="${!data.isDecoy}" target="_blank" th:href="@{/analyse/consultation(dataId=${data.id},allCutInfo=true)}"
                            class="btn btn-danger btn-sm" th:text="#{btn_peptide_clinic}"></a>
                     </td>
