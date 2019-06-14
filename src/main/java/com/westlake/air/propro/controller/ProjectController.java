@@ -13,6 +13,7 @@ import com.westlake.air.propro.domain.query.ProjectQuery;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.FeatureUtil;
 import com.westlake.air.propro.utils.PermissionUtil;
+import com.westlake.air.propro.utils.ScoreUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -303,7 +304,6 @@ public class ProjectController extends BaseController {
         List<ExperimentDO> expList = experimentService.getAllByProjectName(project.getName());
 
         model.addAttribute("exps", expList);
-        model.addAttribute("useEpps", true);
         model.addAttribute("libraries", getLibraryList(0, true));
         model.addAttribute("iRtLibraries", getLibraryList(1, true));
         model.addAttribute("project", project);
@@ -353,13 +353,7 @@ public class ProjectController extends BaseController {
             doIrt = true;
         }
 
-        List<String> scoreTypes = new ArrayList<>();
-        for (ScoreType type : ScoreType.values()) {
-            String typeParam = request.getParameter(type.getTypeName());
-            if (typeParam != null && typeParam.equals("on")) {
-                scoreTypes.add(type.getTypeName());
-            }
-        }
+        List<String> scoreTypes = ScoreUtil.getScoreTypes(request);
 
         List<ExperimentDO> exps = getAllExperimentsByProjectId(id);
         if (exps == null) {

@@ -116,7 +116,7 @@ public class Airus {
         }
         //对于最终的打分结果和选峰结果保存到数据库中
         logger.info("将合并打分及定量结果反馈更新到数据库中,总计:" + featureScoresList.size() + "条数据");
-//        giveDecoyFdr(featureScoresList);
+        giveDecoyFdr(featureScoresList);
         for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
             AnalyseDataDO dataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
             dataDO.setBestRt(simpleFeatureScores.getRt());

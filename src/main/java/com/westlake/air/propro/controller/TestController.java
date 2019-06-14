@@ -83,7 +83,8 @@ public class TestController extends BaseController {
     String testLMS(Model model, RedirectAttributes redirectAttributes) {
         String a = resultComparator.getProproProteins("5d035ed3fc6f9e2f6cab6391", true).size() + "";
         String b = resultComparator.getProproProteins("5d037a57fc6f9e4100b55d81", true).size() + "";
-        return a + ":" + b;
+        String c = resultComparator.getProproProteins("5d038111fc6f9e4100b74990", true).size() + "";
+        return a + ":" + b + ":" + c;
     }
 
     //计算iRT
