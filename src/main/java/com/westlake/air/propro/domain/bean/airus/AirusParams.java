@@ -72,10 +72,4 @@ public class AirusParams {
 
     //首批训练时默认作为主分数的分数类型
     String mainScore = ScoreType.MainScore.getTypeName();
-
-    public AirusParams(){
-        if (scoreTypes == null){
-            scoreTypes = new LumsParams().getScoreTypes();
-        }
-    }
 }

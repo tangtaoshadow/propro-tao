@@ -131,7 +131,24 @@ public class TestController extends BaseController {
         analyseOverviewIdList.add("5ca07b2cdfdfdd6c580b0fdc");//003
         analyseOverviewIdList.add("5ca08169dfdfdd6c580dc75a");//001
 
-        HashMap<String, Integer> proproPepRef = tric.parameterEstimation(analyseOverviewIdList, 0.01d);
+        List<String> analyseOverviewIdList64VarA = new ArrayList<>();
+        analyseOverviewIdList64VarA.add("5d063f62e0073c3f28b023ed");//1
+        analyseOverviewIdList64VarA.add("5d06494be0073c3f28b2f2bc");//3
+        analyseOverviewIdList64VarA.add("5d065335e0073c3f28b5c19e");//5
+        List<String> analyseOverviewIdList64VarB = new ArrayList<>();
+        analyseOverviewIdList64VarB.add("5d06445ae0073c3f28b18b4c");//2
+        analyseOverviewIdList64VarB.add("5d064e3ae0073c3f28b45a28");//4
+        analyseOverviewIdList64VarB.add("5d06582be0073c3f28b7290a");//6
+        List<String> analyseOverviewIdList64FixA = new ArrayList<>();
+        analyseOverviewIdList64FixA.add("5d0700cce0073c3f28b8921d");//1
+        analyseOverviewIdList64FixA.add("5d070b34e0073c3f28bb5f5e");//3
+        analyseOverviewIdList64FixA.add("5d0714e5e0073c3f28be2ca0");//5
+        List<String> analyseOverviewIdList64FixB = new ArrayList<>();
+        analyseOverviewIdList64FixB.add("5d070639e0073c3f28b9f8c3");//2
+        analyseOverviewIdList64FixB.add("5d071007e0073c3f28bcc5ff");//4
+        analyseOverviewIdList64FixB.add("5d0719cbe0073c3f28bf9323");//6
+
+        HashMap<String, Integer> proproPepRef = tric.parameterEstimation(analyseOverviewIdList64VarA, 0.01d);
 
 
         // HYE110_TTOF6600_64var    C:/E1603141345_feature_alignment.tsv
@@ -187,15 +204,17 @@ public class TestController extends BaseController {
         HashMap<String, Integer> fileDecoyMap = new HashMap<>();
         //32var 0_02 0_11 0_24 0_35 0_46 0_53
         //64var 0_05 0_14 0_22 0_31 0_43 0_56
-        List<String> aList = new ArrayList<>();
-//        evenList.add("0_1");
-//        evenList.add("0_2");
-//        evenList.add("0_5");
-        aList.add("0_0");
-        aList.add("0_2");
-        aList.add("0_4");
+        //64fix 0_03 0_15 0_26 0_31 0_44 0_52
+        List<String> aList64Var = new ArrayList<>();
+        aList64Var.add("0_3");
+        aList64Var.add("0_0");
+        aList64Var.add("0_4");
+        List<String> aList64Fix = new ArrayList<>();
+        aList64Fix.add("0_3");
+        aList64Fix.add("0_0");
+        aList64Fix.add("0_1");
         while ((line = reader.readLine()) != null) {
-            if (aList.contains(line.split("\t")[2])) {
+            if (!aList64Var.contains(line.split("\t")[2])) {
                 continue;
             }
             String item[] = line.split("\t")[0].split("_");
@@ -336,23 +355,23 @@ public class TestController extends BaseController {
 
     @RequestMapping("compare")
     @ResponseBody
-    String compareTest() {
-        String analyseOverviewId = "5cfe846de0073c3b041381b8";
-        String filePath = "P:\\data\\single_cell\\F20190530liangx_SILAC_K562_DIA_LHtitra1_0_allFrag_with_dscore_filtered.tsv";
+    String compareTest(){
+        String analyseOverviewId = "5cf0eacfe0073c6fc496ab03";
+        String filePath = "P:\\data\\Spectronaut_vs\\openswath_new_result.tsv";
         resultComparator.proteinResults(analyseOverviewId, filePath);
         resultComparator.peptideRefResults(analyseOverviewId, filePath);
-        resultComparator.peptideSeqResults(analyseOverviewId, filePath);
-        resultComparator.silacResults(analyseOverviewId, filePath);
+//        resultComparator.peptideSeqResults(analyseOverviewId, filePath);
+//        resultComparator.silacResults(analyseOverviewId, filePath);
         return null;
     }
 
     @RequestMapping("distribution")
     @ResponseBody
-    String distributionTest() {
+    String distributionTest(){
         String analyseOverviewId = "5cfe7adee0073c2fd07def50";
 //        String scoreType = ScoreType.WeightedTotalScore.getTypeName();
         AnalyseOverviewDO overviewResult = analyseOverviewService.getById(analyseOverviewId).getModel();
-        HashMap<String, Double> weightsMap = overviewResult.getWeights();
+        HashMap<String,Double> weightsMap = overviewResult.getWeights();
         AnalyseDataQuery query = new AnalyseDataQuery();
         query.setOverviewId(analyseOverviewId);
         query.setIsDecoy(false);
@@ -360,23 +379,33 @@ public class TestController extends BaseController {
         List<AnalyseDataDO> analyseDataDOList = analyseDataService.getAll(query);
         List<Double> heavyList = new ArrayList<>();
         List<Double> lightList = new ArrayList<>();
-        for (AnalyseDataDO analyseDataDO : analyseDataDOList) {
-            if (analyseDataDO.getIsDecoy()) {
+        HashSet<String> intensitySet = new HashSet<>();
+        intensitySet.add(ScoreType.LibraryManhattan.getTypeName());
+        intensitySet.add(ScoreType.LibrarySangle.getTypeName());
+        intensitySet.add(ScoreType.LibraryRsmd.getTypeName());
+        intensitySet.add(ScoreType.LibraryDotprod.getTypeName());
+        intensitySet.add(ScoreType.LibraryRootmeansquare.getTypeName());
+        intensitySet.add(ScoreType.LibraryCorr.getTypeName());
+        for (AnalyseDataDO analyseDataDO: analyseDataDOList){
+            if (analyseDataDO.getIsDecoy()){
                 continue;
             }
             List<FeatureScores> featureScoresList = analyseDataDO.getFeatureScoresList();
             boolean isHeavy = analyseDataDO.getPeptideRef().split("_")[0].endsWith("(UniMod:188)");
             double bestRt = analyseDataDO.getBestRt();
-            for (FeatureScores featureScores : featureScoresList) {
-                if (featureScores.getRt() == bestRt) {
+            for (FeatureScores featureScores: featureScoresList){
+                if (featureScores.getRt() == bestRt){
                     double score = 0d;
-                    for (Map.Entry<String, Double> entry : weightsMap.entrySet()) {
+                    for (Map.Entry<String,Double> entry: weightsMap.entrySet()){
+                        if (!intensitySet.contains(entry.getKey())){
+                            continue;
+                        }
                         //默认分数不为null
                         score += entry.getValue() * featureScores.get(entry.getKey(), overviewResult.getScoreTypes());
                     }
-                    if (isHeavy) {
+                    if (isHeavy){
                         heavyList.add(score);
-                    } else {
+                    }else {
                         lightList.add(score);
                     }
                 }
