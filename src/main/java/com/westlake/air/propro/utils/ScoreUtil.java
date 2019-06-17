@@ -8,7 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Nico Wang Ruimin
@@ -128,5 +130,15 @@ public class ScoreUtil {
             }
         }
         return scoreTypes;
+    }
+
+    //test failed
+    public static void weightsMapFilter(HashMap<String,Double> weightsMap){
+        for (String scoreTypeName: weightsMap.keySet()){
+            Boolean biggerIsBetter = ScoreType.getBiggerIsBetter(scoreTypeName);
+            if (biggerIsBetter == null || (biggerIsBetter != weightsMap.get(scoreTypeName) > 0)){
+                weightsMap.put(scoreTypeName, 0d);
+            }
+        }
     }
 }

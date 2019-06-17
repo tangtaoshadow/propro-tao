@@ -42,7 +42,7 @@ public class ResultComparator {
         HashSet<String> proproPepSet = getProproPeptideRefs(analyseOverviewId);
         int proproHeavy = 0, proproLight = 0;
         for (String pepRef: proproPepSet){
-            if (pepRef.split("_")[0].endsWith("(UniMod:188)")){
+            if (pepRef.split("_")[0].endsWith("(Unimod:188)")){
                 proproHeavy ++;
             }else {
                 proproLight ++;
@@ -140,10 +140,10 @@ public class ResultComparator {
             HashMap<String,Integer> columnMap = ppFile.getColumnMap();
             List<String[]> fileData = ppFile.getFileData();
             for (String[] lineSplit : fileData){
-                if (lineSplit[columnMap.get("decoy")].equals("1")){
+                if (columnMap.containsKey("decoy") && lineSplit[columnMap.get("decoy")].equals("1")){
                     continue;
                 }
-                if (Double.parseDouble(lineSplit[columnMap.get("m_score")]) > 0.01d){
+                if (columnMap.containsKey("m_score") && Double.parseDouble(lineSplit[columnMap.get("m_score")]) > 0.01d){
                     continue;
                 }
                 String proteinName = lineSplit[columnMap.get("proteinname")];
@@ -165,10 +165,10 @@ public class ResultComparator {
             HashMap<String,Integer> columnMap = ppFile.getColumnMap();
             List<String[]> fileData = ppFile.getFileData();
             for (String[] lineSplit : fileData){
-                if (lineSplit[columnMap.get("decoy")].equals("1")){
+                if (columnMap.containsKey("decoy") && lineSplit[columnMap.get("decoy")].equals("1")){
                     continue;
                 }
-                if (Double.parseDouble(lineSplit[columnMap.get("m_score")]) > 0.01d){
+                if (columnMap.containsKey("m_score") && Double.parseDouble(lineSplit[columnMap.get("m_score")]) > 0.01d){
                     continue;
                 }
                 String[] peptideGroupInfo = lineSplit[columnMap.get("transition_group_id")].split("_");
@@ -187,10 +187,10 @@ public class ResultComparator {
             HashMap<String,Integer> columnMap = ppFile.getColumnMap();
             List<String[]> fileData = ppFile.getFileData();
             for (String[] lineSplit : fileData){
-                if (lineSplit[columnMap.get("decoy")].equals("1")){
+                if (columnMap.containsKey("decoy") && lineSplit[columnMap.get("decoy")].equals("1")){
                     continue;
                 }
-                if (Double.parseDouble(lineSplit[columnMap.get("m_score")]) > 0.01d){
+                if (columnMap.containsKey("m_score") && Double.parseDouble(lineSplit[columnMap.get("m_score")]) > 0.01d){
                     continue;
                 }
                 uniqueSeq.add(lineSplit[columnMap.get("sequence")]);

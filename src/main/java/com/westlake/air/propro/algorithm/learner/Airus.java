@@ -14,10 +14,7 @@ import com.westlake.air.propro.domain.db.simple.SimpleScores;
 import com.westlake.air.propro.service.AnalyseDataService;
 import com.westlake.air.propro.service.AnalyseOverviewService;
 import com.westlake.air.propro.service.ScoreService;
-import com.westlake.air.propro.utils.AirusUtil;
-import com.westlake.air.propro.utils.ArrayUtil;
-import com.westlake.air.propro.utils.MathUtil;
-import com.westlake.air.propro.utils.SortUtil;
+import com.westlake.air.propro.utils.*;
 import ml.dmlc.xgboost4j.java.Booster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +68,9 @@ public class Airus {
         type = overviewDO.getType();
         logger.info("开始获取打分数据");
 
+        if (airusParams.getScoreTypes()==null){
+            airusParams.setScoreTypes(overviewDO.getScoreTypes());
+        }
         List<SimpleScores> scores = analyseDataService.getSimpleScoresByOverviewId(overviewId);
         ResultDO resultDO = checkData(scores);
         if (resultDO.isFailed()) {

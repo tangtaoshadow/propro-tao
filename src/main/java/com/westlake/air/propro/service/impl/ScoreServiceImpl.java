@@ -136,7 +136,7 @@ public class ScoreServiceImpl implements ScoreService {
         List<Double[]> selectedList = new ArrayList<>();
         List<Double[]> unselectedList = new ArrayList<>();
         for (int i = 0; i < pairs.size(); i++) {
-            if(pairsCorrected.contains(pairs.get(i))){
+            if(pairsCorrected != null && pairsCorrected.contains(pairs.get(i))){
                 selectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
             }else{
                 unselectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
