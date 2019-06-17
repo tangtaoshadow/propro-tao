@@ -139,8 +139,16 @@ public class TestController extends BaseController {
         analyseOverviewIdList64VarB.add("5d06445ae0073c3f28b18b4c");//2
         analyseOverviewIdList64VarB.add("5d064e3ae0073c3f28b45a28");//4
         analyseOverviewIdList64VarB.add("5d06582be0073c3f28b7290a");//6
+        List<String> analyseOverviewIdList64FixA = new ArrayList<>();
+        analyseOverviewIdList64FixA.add("5d0700cce0073c3f28b8921d");//1
+        analyseOverviewIdList64FixA.add("5d070b34e0073c3f28bb5f5e");//3
+        analyseOverviewIdList64FixA.add("5d0714e5e0073c3f28be2ca0");//5
+        List<String> analyseOverviewIdList64FixB = new ArrayList<>();
+        analyseOverviewIdList64FixB.add("5d070639e0073c3f28b9f8c3");//2
+        analyseOverviewIdList64FixB.add("5d071007e0073c3f28bcc5ff");//4
+        analyseOverviewIdList64FixB.add("5d0719cbe0073c3f28bf9323");//6
 
-        HashMap<String, Integer> proproPepRef = tric.parameterEstimation(analyseOverviewIdList64VarB, 0.01d);
+        HashMap<String, Integer> proproPepRef = tric.parameterEstimation(analyseOverviewIdList64VarA, 0.01d);
 
 
         // HYE110_TTOF6600_64var    C:/E1603141345_feature_alignment.tsv
@@ -196,15 +204,17 @@ public class TestController extends BaseController {
         HashMap<String, Integer> fileDecoyMap = new HashMap<>();
         //32var 0_02 0_11 0_24 0_35 0_46 0_53
         //64var 0_05 0_14 0_22 0_31 0_43 0_56
-        List<String> aList64var = new ArrayList<>();
-//        evenList.add("0_1");
-//        evenList.add("0_2");
-//        evenList.add("0_5");
-        aList64var.add("0_3");
-        aList64var.add("0_0");
-        aList64var.add("0_4");
+        //64fix 0_03 0_15 0_26 0_31 0_44 0_52
+        List<String> aList64Var = new ArrayList<>();
+        aList64Var.add("0_3");
+        aList64Var.add("0_0");
+        aList64Var.add("0_4");
+        List<String> aList64Fix = new ArrayList<>();
+        aList64Fix.add("0_3");
+        aList64Fix.add("0_0");
+        aList64Fix.add("0_1");
         while ((line = reader.readLine()) != null) {
-            if (aList64var.contains(line.split("\t")[2])) {
+            if (!aList64Var.contains(line.split("\t")[2])) {
                 continue;
             }
             String item[] = line.split("\t")[0].split("_");

@@ -173,9 +173,12 @@ public class Extractor {
     private AnalyseDataDO extractForOne(TargetPeptide tp, TreeMap<Float, MzIntensityPairs> rtMap, Float mzExtractWindow, Float rtExtractWindow, String overviewId) {
         float mzStart = 0;
         float mzEnd = -1;
-        boolean useAdaptiveWindow = false;
+        boolean useAdaptiveWindow = false, isPpm = false;
         if (mzExtractWindow == -1) {
             useAdaptiveWindow = true;
+        }
+        if (mzExtractWindow > 1) {
+            isPpm = true;
         }
         //所有的碎片共享同一个RT数组
         ArrayList<Float> rtList = new ArrayList<>();
@@ -202,9 +205,17 @@ public class Extractor {
         dataDO.setMz(tp.getMz());
 
         boolean isHit = false;
+        //take half for each side
+        mzExtractWindow = mzExtractWindow / 2f;
         for (FragmentInfo fi : tp.getFragmentMap().values()) {
-            mzStart = fi.getMz().floatValue() - mzExtractWindow / 2;
-            mzEnd = fi.getMz().floatValue() + mzExtractWindow / 2;
+            float mz = fi.getMz().floatValue();
+            if (isPpm) {
+                mzStart = mz - mz * mzExtractWindow * 1E-6f;
+                mzEnd = mz + mz * mzExtractWindow * 1E-6f;
+            } else {
+                mzStart = fi.getMz().floatValue() - mzExtractWindow;
+                mzEnd = fi.getMz().floatValue() + mzExtractWindow;
+            }
 
             //由于本函数极其注重性能,因此为了避免下面的拆箱装箱操作,在本处会预备两种类型的数组
             Float[] intArray = new Float[rtArray.length];
@@ -318,7 +329,7 @@ public class Extractor {
             logger.warn("No Coordinates Found,Rang:" + swathIndex.getRange().getStart() + ":" + swathIndex.getRange().getEnd());
             return null;
         }
-        if (coordinates.size() != 2) {
+        if (lumsParams.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM) && coordinates.size() != 2) {
             logger.warn("coordinate size != 2,Rang:" + swathIndex.getRange().getStart() + ":" + swathIndex.getRange().getEnd());
         }
         //Step3.提取指定原始谱图
