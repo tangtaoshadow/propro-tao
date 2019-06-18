@@ -254,10 +254,6 @@ public class ProjectController extends BaseController {
             String expId = experimentDO.getId();
             experimentService.delete(expId);
             swathIndexService.deleteAllByExpId(expId);
-            List<AnalyseOverviewDO> overviewDOList = analyseOverviewService.getAllByExpId(expId);
-            for (AnalyseOverviewDO overviewDO : overviewDOList) {
-                analyseDataService.deleteAllByOverviewId(overviewDO.getId());
-            }
             analyseOverviewService.deleteAllByExpId(experimentDO.getId());
         }
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
@@ -274,12 +270,7 @@ public class ProjectController extends BaseController {
         String name = project.getName();
         List<ExperimentDO> expList = experimentService.getAllByProjectName(name);
         for (ExperimentDO experimentDO : expList) {
-            String expId = experimentDO.getId();
-            List<AnalyseOverviewDO> overviewDOList = analyseOverviewService.getAllByExpId(expId);
-            for (AnalyseOverviewDO overviewDO : overviewDOList) {
-                analyseDataService.deleteAllByOverviewId(overviewDO.getId());
-            }
-            analyseOverviewService.deleteAllByExpId(expId);
+            analyseOverviewService.deleteAllByExpId(experimentDO.getId());
         }
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
         return "redirect:/project/list";

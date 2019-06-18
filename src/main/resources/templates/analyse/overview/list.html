@@ -100,16 +100,16 @@
                             <i class="fa fa-th-list"></i>
                         </a>
 
-<!--                        <div class="btn-group dropright" role="group">-->
-<!--                            <button id="scoresBtnGroup" type="button" class="btn btn-sm dropdown-toggle"-->
-<!--                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" th:text="#{label_do_identified_score}">-->
-<!--                            </button>-->
-<!--                            <div class="dropdown-menu" aria-labelledby="scoresBtn">-->
-<!--                                <a class="dropdown-item" th:href="@{/score/airus(overviewId=${overview.id},classifier=lda)}" th:text="#{label_use_lda}"></a>-->
+                        <div class="btn-group dropright" role="group">
+                            <button id="scoresBtnGroup" type="button" class="btn btn-sm dropdown-toggle"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" th:text="#{btn_delete}">
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="scoresBtn">
+                                <a class="dropdown-item" th:href="@{/analyse/overview/delete/{id}(id=${overview?.id})}" th:text="#{btn_delete}"></a>
 <!--                                <a class="dropdown-item" th:href="@{/score/airus(overviewId=${overview.id},classifier=xgboost)}"  th:text="#{label_use_xgboost}"></a>-->
-<!--                                &lt;!&ndash;<a class="dropdown-item" onclick="alert('Not Open!')" th:text="#{label_identified_score_with_xgboost}"></a>&ndash;&gt;-->
-<!--                            </div>-->
-<!--                        </div>-->
+                                <!--<a class="dropdown-item" onclick="alert('Not Open!')" th:text="#{label_identified_score_with_xgboost}"></a>-->
+                            </div>
+                        </div>
                     </td>
                 </tr>
                 </tbody>

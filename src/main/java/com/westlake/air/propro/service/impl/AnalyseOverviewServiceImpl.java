@@ -7,7 +7,6 @@ import com.westlake.air.propro.domain.bean.analyse.ComparisonResult;
 import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
 import com.westlake.air.propro.domain.query.AnalyseOverviewQuery;
-import com.westlake.air.propro.exception.UnauthorizedAccessException;
 import com.westlake.air.propro.service.AnalyseDataService;
 import com.westlake.air.propro.service.AnalyseOverviewService;
 import com.westlake.air.propro.service.ScoreService;
@@ -16,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.util.*;
 
 /**
@@ -108,6 +106,11 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
             return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
         }
         try {
+            List<AnalyseOverviewDO> overviewDOList = analyseOverviewDAO.getAllByExperimentId(expId);
+            for (AnalyseOverviewDO overviewDO : overviewDOList) {
+                analyseDataService.deleteAllByOverviewId(overviewDO.getId());
+            }
+
             analyseOverviewDAO.deleteAllByExperimentId(expId);
             return new ResultDO(true);
         } catch (Exception e) {

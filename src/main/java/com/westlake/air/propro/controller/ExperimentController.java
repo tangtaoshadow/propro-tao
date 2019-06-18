@@ -320,11 +320,6 @@ public class ExperimentController extends BaseController {
         PermissionUtil.check(exp.getModel());
         experimentService.delete(id);
         swathIndexService.deleteAllByExpId(id);
-        List<AnalyseOverviewDO> overviewDOList = analyseOverviewService.getAllByExpId(id);
-        for (AnalyseOverviewDO overviewDO : overviewDOList) {
-            analyseDataService.deleteAllByOverviewId(overviewDO.getId());
-        }
-
         analyseOverviewService.deleteAllByExpId(id);
 
         redirectAttributes.addFlashAttribute("projectName", exp.getModel().getProjectName());
@@ -338,14 +333,9 @@ public class ExperimentController extends BaseController {
                      RedirectAttributes redirectAttributes) {
         ResultDO<ExperimentDO> exp = experimentService.getById(id);
         PermissionUtil.check(exp.getModel());
-        List<AnalyseOverviewDO> overviewDOList = analyseOverviewService.getAllByExpId(id);
-        for (AnalyseOverviewDO overviewDO : overviewDOList) {
-            analyseDataService.deleteAllByOverviewId(overviewDO.getId());
-        }
         analyseOverviewService.deleteAllByExpId(id);
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
         return "redirect:/experiment/list";
-
     }
 
     @RequestMapping(value = "/extractor")
