@@ -49,7 +49,7 @@ public class LinearFitter {
         SlopeIntercept lastSlopeIntercept = getInitSlopeIntercept(rtPairs);
         SlopeIntercept slopeIntercept = updateProproSlopeIntercept(rtPairs, lastSlopeIntercept, delta);
         int count = 1;
-        while (Math.abs(getProproSlopeGradient(rtPairs, slopeIntercept, delta)) > tolerance
+        while (count < 10000 && Math.abs(getProproSlopeGradient(rtPairs, slopeIntercept, delta)) > tolerance
                 || Math.abs(getProproInterceptGradient(rtPairs, slopeIntercept, delta)) > tolerance){
             slopeIntercept = updateProproSlopeIntercept(rtPairs, slopeIntercept, delta);
             count ++;
