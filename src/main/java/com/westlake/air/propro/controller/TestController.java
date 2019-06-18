@@ -356,8 +356,8 @@ public class TestController extends BaseController {
     @RequestMapping("compare")
     @ResponseBody
     String compareTest(){
-        String analyseOverviewId = "5cf0eacfe0073c6fc496ab03";
-        String filePath = "P:\\data\\Spectronaut_vs\\openswath_new_result.tsv";
+        String analyseOverviewId = "5d07c06ce0073c6ffc67fcb0";
+        String filePath = "P:\\data\\Spectronaut_vs\\openswath_result.tsv";
         resultComparator.proteinResults(analyseOverviewId, filePath);
         resultComparator.peptideRefResults(analyseOverviewId, filePath);
 //        resultComparator.peptideSeqResults(analyseOverviewId, filePath);

@@ -251,6 +251,8 @@ public class ResultComparator {
         for (String word: set1){
             if (set2.contains(word)){
                 count ++;
+//            }else {
+//                System.out.println(word);
             }
         }
         return count;
