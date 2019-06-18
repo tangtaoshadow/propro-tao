@@ -325,7 +325,6 @@ public class ExperimentController extends BaseController {
         redirectAttributes.addFlashAttribute("projectName", exp.getModel().getProjectName());
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
         return "redirect:/experiment/list";
-
     }
 
     @RequestMapping(value = "/deleteAll/{id}")
