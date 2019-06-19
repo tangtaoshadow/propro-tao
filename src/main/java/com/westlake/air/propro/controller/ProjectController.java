@@ -306,7 +306,6 @@ public class ProjectController extends BaseController {
     @RequestMapping(value = "/doextract")
     String doExtract(Model model,
                      @RequestParam(value = "id", required = true) String id,
-                     @RequestParam(value = "ownerName", required = false) String ownerName,
                      @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
                      @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
@@ -378,11 +377,7 @@ public class ProjectController extends BaseController {
                 input.setSlopeIntercept(exp.getIrtResult().getSi());
             }
             input.setLibrary(library);
-
-            if (StringUtils.isEmpty(ownerName)) {
-                ownerName = project.getOwnerName();
-            }
-            input.setOwnerName(ownerName);
+            input.setOwnerName(getCurrentUsername());
             input.setRtExtractWindow(rtExtractWindow);
             input.setMzExtractWindow(mzExtractWindow);
             input.setScoreTypes(scoreTypes);

@@ -100,7 +100,7 @@ public class ExperimentTask extends BaseTask {
             lumsParams.setSlopeIntercept(si);
             taskDO.addLog("iRT计算完毕");
             taskDO.addLog("斜率:" + si.getSlope() + "截距:" + si.getIntercept());
-
+            experimentService.update(lumsParams.getExperimentDO());
         }else{
             taskDO.addLog("斜率:" + lumsParams.getSlopeIntercept().getSlope() + "截距:" + lumsParams.getSlopeIntercept().getIntercept());
         }
