@@ -180,6 +180,10 @@ public class Airus {
      * @return
      */
     public HashMap<String, Double> LDALearn(List<SimpleScores> scores, HashMap<String, Integer> peptideHitMap, AirusParams airusParams, List<String> scoreTypes, String type) {
+        // adjust AirusParams iter times, too much iterations result to deviation
+        if(scores.size() < 500){
+            airusParams.setXevalNumIter(10);
+        }
         int neval = airusParams.getTrainTimes();
 //        test(scores);
         List<HashMap<String, Double>> weightsMapList = new ArrayList<>();
