@@ -61,9 +61,9 @@ public class FileUtil {
         }
         while ((line = reader.readLine()) != null){
             String[] lineSplit = line.split(splitter);
-            if (lineSplit.length != columnMap.size()){
-                return null;
-            }
+//            if (lineSplit.length != columnMap.size()){
+//                return null;
+//            }
             fileData.add(lineSplit);
         }
         return new TableFile(columnMap, fileData);
