@@ -2,6 +2,7 @@ package com.westlake.air.propro.domain.db;
 
 import com.westlake.air.propro.domain.BaseDO;
 import lombok.Data;
+import org.checkerframework.common.aliasing.qual.Unique;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,7 +19,7 @@ public class ProjectDO extends BaseDO {
     String id;
 
     //项目名称,唯一值
-    @Indexed
+    @Indexed(unique = true)
     String name;
 
     //是否设置为公共项目
