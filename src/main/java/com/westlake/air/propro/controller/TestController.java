@@ -365,6 +365,26 @@ public class TestController extends BaseController {
         return null;
     }
 
+    @RequestMapping("compareRep")
+    @ResponseBody
+    String compareRepTest(){
+        String projectId = "5d08705fe0073c9b70faff6a";
+        String filePath = "P:\\data\\HCC_QE3\\HCC_20190106_dia_os_peptides_matrix.tsv";
+        resultComparator.compareReplicate(projectId, filePath, "C20181210yix_HCC_DIA_T_17A", "C20181218yix_HCC_DIA_T_17B");
+        resultComparator.compareReplicate(projectId, filePath, "C20181210yix_HCC_DIA_T_18A", "C20181218yix_HCC_DIA_T_18B");
+        resultComparator.compareReplicate(projectId, filePath, "C20181210yix_HCC_DIA_T_24A", "C20181218yix_HCC_DIA_T_24B");
+        resultComparator.compareReplicate(projectId, filePath, "C20181208yix_HCC_DIA_T_46A", "C20181218yix_HCC_DIA_T_46B");
+        resultComparator.compareReplicate(projectId, filePath, "C20181208yix_HCC_DIA_T_48A", "C20181218yix_HCC_DIA_T_48B");
+        projectId = "5d087107e0073c9b70fb0091";
+        filePath = "P:\\data\\HCC_sciex\\HCC_20190114_swath_os_peptides_matrix.tsv";
+        resultComparator.compareReplicate(projectId, filePath, "D20181213yix_HCC_SW_T_17A", "D20181217yix_HCC_SW_T_17B");
+        resultComparator.compareReplicate(projectId, filePath, "D20181213yix_HCC_SW_T_18A", "D20181217yix_HCC_SW_T_18B");
+        resultComparator.compareReplicate(projectId, filePath, "D20181213yix_HCC_SW_T_24A", "D20181217yix_HCC_SW_T_24B");
+        resultComparator.compareReplicate(projectId, filePath, "D20181207yix_HCC_SW_T_46A", "D20181217yix_HCC_SW_T_46B");
+        resultComparator.compareReplicate(projectId, filePath, "D20181207yix_HCC_SW_T_48A", "D20181217yix_HCC_SW_T_48B");
+        return null;
+    }
+
     @RequestMapping("distribution")
     @ResponseBody
     String distributionTest(){
