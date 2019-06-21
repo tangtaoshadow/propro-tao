@@ -62,6 +62,10 @@ public class ExperimentDO extends BaseDO {
     //Aird文件大小,单位byte
     Long airdSize;
 
+    String path;
+
+    String airdFileName;
+
     //转换压缩后aird的文件路径
     String airdIndexPath;
 
