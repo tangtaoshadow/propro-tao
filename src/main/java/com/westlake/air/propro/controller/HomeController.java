@@ -102,17 +102,6 @@ public class HomeController extends BaseController {
     }
 
     /**
-     * 错误页面
-     *
-     * @param model
-     * @return
-     */
-    @RequestMapping("/errorReport")
-    String error(Model model){
-        return "error";
-    }
-
-    /**
      * 需要有Admin权限才可以执行注册功能
      *
      * @param model
