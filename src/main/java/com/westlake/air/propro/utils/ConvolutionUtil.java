@@ -26,7 +26,8 @@ public class ConvolutionUtil {
         float result = 0f;
         try {
             int start = findLeftIndex(mzArray, mzStart);
-            if (start == -1) {
+
+            if (start == -1 || Math.abs(mzStart - mzArray[start]) > (mzEnd-mzStart)) {
                 return 0f;
             }
             while (mzArray[start] <= mzEnd) {
@@ -140,6 +141,7 @@ public class ConvolutionUtil {
                 return tmp;
             }
         }
+
         return leftIndex;
     }
 

@@ -1,4 +1,4 @@
-package com.westlake.air.propro.service.impl;
+package com.westlake.air.propro.config;
 
 import com.westlake.air.propro.domain.db.UserDO;
 import com.westlake.air.propro.service.UserService;

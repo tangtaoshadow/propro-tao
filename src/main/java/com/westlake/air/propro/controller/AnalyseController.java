@@ -511,7 +511,6 @@ public class AnalyseController extends BaseController {
             }
         }
 
-
         model.addAttribute("rt", rtArray);
         model.addAttribute("cutInfoFromDic", cutInfoFromDic);
         model.addAttribute("cutInfoFromGuess", cutInfoFromGuess);

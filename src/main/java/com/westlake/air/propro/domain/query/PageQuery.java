@@ -89,12 +89,11 @@ public class PageQuery implements Serializable {
     }
 
     public long  getTotalPage() {
-        if(this.pageSize> 0 && this.totalNum >0)
-        {
+        if(this.pageSize> 0 && this.totalNum >0) {
             return ( this.totalNum % this.pageSize == 0 ? (this.totalNum / this.pageSize) : ( this.totalNum / this.pageSize +1 )) ;
-
-        }else
+        }else {
             return 0 ;
+        }
     }
 
     public Sort.Direction getOrderBy() {
