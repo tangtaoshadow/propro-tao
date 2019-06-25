@@ -53,6 +53,7 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
         LevenbergMarquardt optimizer = new LevenbergMarquardt() {
             private static final long serialVersionUID = -282626938650139518L;
 
+            @Override
             public void setValues(double[] parameters, double[] values) {
                 values[0] = parameters[0] * 0.0D + parameters[1];
                 values[1] = parameters[0] * 2.0D + parameters[1];
@@ -291,10 +292,12 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
         }
     }
 
+    @Override
     public double[] getBestFitParameters() {
         return this.parameterCurrent;
     }
 
+    @Override
     public double getRootMeanSquaredError() {
         return Math.sqrt(this.errorMeanSquaredCurrent);
     }
@@ -303,6 +306,7 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
         this.errorMeanSquaredCurrent = errorMeanSquaredCurrent;
     }
 
+    @Override
     public int getIterations() {
         return this.iteration;
     }
@@ -318,6 +322,7 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
             final double[] derivative = derivatives[parameterIndex];
             final int parameterIndexx = parameterIndex;
             Callable<double[]> worker = new Callable<double[]>() {
+                @Override
                 public double[] call() {
                     double parameterFiniteDifference;
                     if (LevenbergMarquardt.this.parameterSteps != null) {
@@ -371,6 +376,7 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
         return this.iteration > this.maxIteration || this.errorRootMeanSquaredChange <= this.errorRootMeanSquaredTolerance || Double.isInfinite(this.lambda);
     }
 
+    @Override
     public void run() throws SolverException {
         if (this.numberOfThreads > 1 && this.executor == null) {
             this.executor = Executors.newFixedThreadPool(this.numberOfThreads);
@@ -502,6 +508,7 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
 
     }
 
+    @Override
     public LevenbergMarquardt clone() throws CloneNotSupportedException {
         LevenbergMarquardt clonedOptimizer = (LevenbergMarquardt) super.clone();
         clonedOptimizer.isParameterCurrentDerivativeValid = false;

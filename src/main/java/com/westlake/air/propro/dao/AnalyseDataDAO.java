@@ -47,9 +47,6 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
         if (analyseDataQuery.getPeptideId() != null) {
             query.addCriteria(where("peptideId").is(analyseDataQuery.getPeptideId()));
         }
-        if (analyseDataQuery.getMsLevel() != null) {
-            query.addCriteria(where("msLevel").is(analyseDataQuery.getMsLevel()));
-        }
         if (analyseDataQuery.getPeptideRef() != null) {
             query.addCriteria(where("peptideRef").is(analyseDataQuery.getPeptideRef()));
         }
@@ -74,8 +71,6 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
         return query;
     }
 
-
-
     public List<AnalyseDataDO> getAllByOverviewId(String overviewId) {
         Query query = new Query(where("overviewId").is(overviewId));
         return mongoTemplate.find(query, AnalyseDataDO.class, CollectionName);
@@ -84,19 +79,6 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
     public List<SimpleScores> getSimpleScoresByOverviewId(String overviewId){
         AnalyseDataQuery query = new AnalyseDataQuery(overviewId);
         return mongoTemplate.find(buildQueryWithoutPage(query), SimpleScores.class, CollectionName);
-    }
-
-    public AnalyseDataDO getMS1Data(String overviewId, String peptideRef) {
-        Query query = new Query(where("overviewId").is(overviewId));
-        query.addCriteria(where("peptideRef").is(peptideRef));
-        return mongoTemplate.findOne(query, AnalyseDataDO.class, CollectionName);
-    }
-
-    public AnalyseDataDO getMS2Data(String overviewId, String peptideRef, String cutInfo) {
-        Query query = new Query(where("overviewId").is(overviewId));
-        query.addCriteria(where("peptideRef").is(peptideRef));
-        query.addCriteria(where("cutInfo").is(cutInfo));
-        return mongoTemplate.findOne(query, AnalyseDataDO.class, CollectionName);
     }
 
     public List<MatchedPeptide> getAllMatchedPeptide(AnalyseDataQuery query) {

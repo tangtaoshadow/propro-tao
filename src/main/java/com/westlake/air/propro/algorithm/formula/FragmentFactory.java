@@ -180,14 +180,15 @@ public class FragmentFactory {
      * @param limitLength 生成的B,Y离子的最小长度
      * @return
      */
-    public HashMap<String, Double> getBYSeriesMap(PeptideDO peptideDO, int limitLength) {
+    public HashMap<String, Double> getBYSeriesMap(PeptideDO peptideDO, int limitLength, boolean onlyOneCharge) {
         HashMap<String, Double> bySeriesMap = new HashMap<>();
         String sequence = peptideDO.getSequence();
         int length = sequence.length();
         if (length < limitLength) {
             return null;
         }
-        for (int c = 1; c <= peptideDO.getCharge(); c++) {
+        int charge = onlyOneCharge ? 1 : peptideDO.getCharge();
+        for (int c = 1; c <= charge; c++) {
             for (int i = limitLength; i < length; i++) {
                 String bSubstring = sequence.substring(0, i);
                 String ySubstring = sequence.substring(length - i, length);
@@ -204,14 +205,14 @@ public class FragmentFactory {
         return bySeriesMap;
     }
 
-    public double getTheoryMass(HashMap<Integer, String> unimodHashMap, String sequence){
+    public double getTheoryMass(HashMap<Integer, String> unimodHashMap, String sequence) {
         double totalMass = Constants.B_SIDE_MASS + Y_SIDE_MASS;
         char[] acidCodeArray = sequence.toCharArray();
-        for (char acidCode: acidCodeArray) {
+        for (char acidCode : acidCodeArray) {
             AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCode));
             totalMass += aa.getMonoIsotopicMass();
         }
-        for (String unimodCode: unimodHashMap.values()){
+        for (String unimodCode : unimodHashMap.values()) {
             Unimod unimod = unimodDAO.getUnimod(unimodCode);
             if (unimod != null) {
                 totalMass += unimod.getMonoMass();

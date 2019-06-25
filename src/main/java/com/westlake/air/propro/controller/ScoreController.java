@@ -92,9 +92,8 @@ public class ScoreController extends BaseController {
             return "redirect:/analyse/overview/list";
         }
         query.setOverviewId(overviewId);
-        query.setPageSize(30);
+        query.setPageSize(50);
         query.setPageNo(currentPage);
-//        query.setSortColumn("fdr");
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
         if (overviewResult.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());

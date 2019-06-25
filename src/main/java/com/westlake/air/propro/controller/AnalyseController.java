@@ -264,14 +264,12 @@ public class AnalyseController extends BaseController {
     String dataList(Model model,
                     @RequestParam(value = "overviewId", required = true) String overviewId,
                     @RequestParam(value = "peptideRef", required = false) String peptideRef,
-                    @RequestParam(value = "msLevel", required = false) String msLevel,
                     @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                     @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
                     RedirectAttributes redirectAttributes) {
 
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("overviewId", overviewId);
-        model.addAttribute("msLevel", msLevel);
         model.addAttribute("peptideRef", peptideRef);
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
@@ -282,13 +280,7 @@ public class AnalyseController extends BaseController {
         AnalyseDataQuery query = new AnalyseDataQuery();
         query.setPageSize(pageSize);
         query.setPageNo(currentPage);
-        if (msLevel != null && !msLevel.equals("All")) {
-            try {
-                query.setMsLevel(Integer.parseInt(msLevel));
-            } catch (Exception e) {
-                logger.error("msLevel必须为1或者2");
-            }
-        }
+
         if (StringUtils.isNotEmpty(peptideRef)) {
             query.setPeptideRef(peptideRef);
         }
@@ -320,6 +312,7 @@ public class AnalyseController extends BaseController {
                         @RequestParam(value = "noUseForFill", required = false, defaultValue = "false") Boolean noUseForFill,
                         @RequestParam(value = "noUseForLib", required = false, defaultValue = "false") Boolean noUseForLib,
                         @RequestParam(value = "limitLength", required = false, defaultValue = "3") Integer limitLength,
+                        @RequestParam(value = "onlyOneCharge", required = false, defaultValue = "false") Boolean onlyOneCharge,
                         HttpServletRequest request) {
 
         model.addAttribute("dataId", dataId);
@@ -337,6 +330,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("noUseForFill", noUseForFill);
         model.addAttribute("noUseForLib", noUseForLib);
         model.addAttribute("limitLength", limitLength);
+        model.addAttribute("onlyOneCharge", onlyOneCharge);
         AnalyseDataDO data = null;
         ResultDO<AnalyseOverviewDO> overviewResult = null;
         ResultDO<ExperimentDO> experimentResult = null;
@@ -423,7 +417,7 @@ public class AnalyseController extends BaseController {
         List<String> cutInfoFromDic = new ArrayList<>(peptide.getFragmentMap().keySet());
         //准备该肽段的其他互补离子
         if (!noUseForFill) {
-            HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, limitLength);
+            HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, limitLength, onlyOneCharge);
             if (bySeriesMap == null) {
                 model.addAttribute(ERROR_MSG, ResultCode.FRAGMENT_LENGTH_IS_TOO_LONG.getMessage());
                 return "analyse/data/consultation";

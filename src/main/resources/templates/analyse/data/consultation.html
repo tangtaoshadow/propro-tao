@@ -34,16 +34,16 @@
                     <form id="searchForm" method="post" role="form"
                           class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed"
                           th:action="@{/analyse/consultation}">
-                        <input id="dataId" type="hidden" th:value="${dataId}" class="form-control" name="dataId">
+<!--                        <input id="dataId" type="hidden" th:value="${dataId}" class="form-control" name="dataId">-->
                         <div class="form-group m-form__group row">
-                            <div class="input-group col-lg-4">
+                            <div class="input-group col-lg-2">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-success" type="button" th:text="#{label_exp_id}"></button>
                                 </div>
                                 <input type="text" class="form-control m-input" name="expId"
                                        th:value="${expId}">
                             </div>
-                            <div class="input-group col-lg-4">
+                            <div class="input-group col-lg-2">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-success" type="button" th:text="#{label_associated_library}">
                                     </button>
@@ -59,6 +59,24 @@
                                 </div>
                                 <input type="text" class="form-control m-input" name="peptideRef"
                                        th:value="${peptideRef}">
+                            </div>
+                            <div class="input-group col-lg-2">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        Sigma:
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control m-input" name="sigma"
+                                       th:value="${sigma}">
+                            </div>
+                            <div class="input-group col-lg-2">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-success" type="button">
+                                        Spacing:
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control m-input" name="spacing"
+                                       th:value="${spacing}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -91,29 +109,29 @@
                             <div class="input-group col-lg-2">
                                 <div class="input-group-prepend">
                                     <button class="btn btn-success" type="button">
-                                        Sigma:
-                                    </button>
-                                </div>
-                                <input type="text" class="form-control m-input" name="sigma"
-                                       th:value="${sigma}">
-                            </div>
-                            <div class="input-group col-lg-2">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-success" type="button">
-                                        Spacing:
-                                    </button>
-                                </div>
-                                <input type="text" class="form-control m-input" name="spacing"
-                                       th:value="${spacing}">
-                            </div>
-                            <div class="input-group col-lg-2">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-success" type="button">
                                         Noise:
                                     </button>
                                 </div>
                                 <input type="text" class="form-control m-input" name="noise"
                                        th:value="${noise}">
+                            </div>
+                            <div class="input-group col-lg-2">
+                                <div class="m-checkbox-list">
+                                    <label class="m-checkbox">
+                                        <input type="checkbox" class="form-control m-input" name="allCutInfo"
+                                               th:checked="${allCutInfo}" th:text="#{label_recalculate_per_time}">
+                                        <span></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="input-group col-lg-2">
+                                <div class="m-checkbox-list">
+                                    <label class="m-checkbox">
+                                        <input type="checkbox" class="form-control m-input" name="noUseForLib"
+                                               th:checked="${noUseForLib}" th:text="#{label_no_use_for_library_fill}">
+                                        <span></span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -145,28 +163,20 @@
                                     </label>
                                 </div>
                             </div>
+
                             <div class="input-group col-lg-2">
                                 <div class="m-checkbox-list">
                                     <label class="m-checkbox">
-                                        <input type="checkbox" class="form-control m-input" name="noUseForLib"
-                                               th:checked="${noUseForLib}" th:text="#{label_no_use_for_library_fill}">
+                                        <input type="checkbox" class="form-control m-input" name="onlyOneCharge"
+                                               th:checked="${onlyOneCharge}" th:text="#{label_only_one_charge}">
                                         <span></span>
                                     </label>
                                 </div>
                             </div>
 
-                            <div class="input-group col-lg-2">
-                                <div class="m-checkbox-list">
-                                    <label class="m-checkbox">
-                                        <input type="checkbox" class="form-control m-input" name="allCutInfo"
-                                               th:checked="${allCutInfo}" th:text="#{label_recalculate_per_time}">
-                                        <span></span>
-                                    </label>
-                                </div>
-                            </div>
+
                             <div class="input-group-append">
-                                <button class="btn btn-primary" type="submit" th:text="#{btn_analyse}">
-                                </button>
+                                <button class="btn btn-primary" type="submit" th:text="#{btn_analyse}"></button>
                             </div>
                         </div>
                         <div class="row">

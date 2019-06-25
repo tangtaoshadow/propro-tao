@@ -39,22 +39,4 @@ public interface AnalyseDataService {
     ResultDO deleteAllByOverviewId(String overviewId);
 
     ResultDO<AnalyseDataDO> getById(String id);
-
-    /**
-     * 获取MS1的卷积卷积信息
-     *
-     * @param overviewId
-     * @param peptideRef
-     * @return
-     */
-    ResultDO<AnalyseDataDO> getMS1Data(String overviewId, String peptideRef);
-
-    /**
-     * 获取MS2的卷积组数据,唯一值
-     *
-     * @param overviewId
-     * @param peptideRef
-     * @return
-     */
-    ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String peptideRef, Boolean isDecoy);
 }

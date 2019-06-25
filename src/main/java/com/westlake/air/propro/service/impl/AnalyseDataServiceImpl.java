@@ -75,10 +75,11 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     @Override
     public ResultDO<List<AnalyseDataDO>> getList(AnalyseDataQuery query) {
         List<AnalyseDataDO> dataList = analyseDataDAO.getList(query);
-        long totalCount = analyseDataDAO.count(query);
+        //暂时去除count功能,以免造成性能损耗
+//        long totalCount = analyseDataDAO.count(query);
+//        resultDO.setTotalNum(100000);
         ResultDO<List<AnalyseDataDO>> resultDO = new ResultDO<>(true);
         resultDO.setModel(dataList);
-        resultDO.setTotalNum(totalCount);
         resultDO.setPageSize(query.getPageSize());
         return resultDO;
     }
@@ -172,38 +173,5 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
         } catch (Exception e) {
             return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
-    }
-
-    @Override
-    public ResultDO<AnalyseDataDO> getMS1Data(String overviewId, String peptideRef) {
-        try {
-            AnalyseDataDO analyseDataDO = analyseDataDAO.getMS1Data(overviewId, peptideRef);
-            if (analyseDataDO == null) {
-                return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
-            } else {
-                ResultDO<AnalyseDataDO> resultDO = new ResultDO<>(true);
-                resultDO.setModel(analyseDataDO);
-                return resultDO;
-            }
-        } catch (Exception e) {
-            return ResultDO.buildError(ResultCode.QUERY_ERROR);
-        }
-    }
-
-    @Override
-    public ResultDO<AnalyseDataDO> getMS2Data(String overviewId, String peptideRef, Boolean isDecoy) {
-        AnalyseDataQuery query = new AnalyseDataQuery();
-        query.setIsDecoy(isDecoy);
-        query.setOverviewId(overviewId);
-        query.setPeptideRef(peptideRef);
-        List<AnalyseDataDO> dataList = analyseDataDAO.getAll(query);
-        ResultDO<AnalyseDataDO> resultDO = new ResultDO<>();
-        if (dataList == null || dataList.size() == 0) {
-            return ResultDO.buildError(ResultCode.ANALYSE_DATA_NOT_EXISTED);
-        }
-
-        resultDO.setSuccess(true);
-        resultDO.setModel(dataList.get(0));
-        return resultDO;
     }
 }

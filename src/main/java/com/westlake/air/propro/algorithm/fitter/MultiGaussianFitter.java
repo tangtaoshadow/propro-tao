@@ -25,6 +25,7 @@ public class MultiGaussianFitter extends AbstractCurveFitter {
     private final int count;
 
     private static final Parametric FUNCTION = new Parametric() {
+        @Override
         public double value(double x, double... p) {
             double v = 1.0D / 0.0;
 
@@ -37,6 +38,7 @@ public class MultiGaussianFitter extends AbstractCurveFitter {
             return v;
         }
 
+        @Override
         public double[] gradient(double x, double... p) {
             double[] v = new double[p.length];
             for(int index = 0; index < v.length; index ++){
@@ -99,6 +101,7 @@ public class MultiGaussianFitter extends AbstractCurveFitter {
     //modified
     private static class Parametric implements ParametricUnivariateFunction {
 
+        @Override
         public double value(double x, double... param) throws NullArgumentException, DimensionMismatchException, NotStrictlyPositiveException {
             double result = 0;
             int count = param.length/3;
@@ -117,6 +120,7 @@ public class MultiGaussianFitter extends AbstractCurveFitter {
             return gaussValue(diff, param[0], i2s2);
         }
 
+        @Override
         public double[] gradient(double x, double... param) throws NullArgumentException, DimensionMismatchException, NotStrictlyPositiveException {
             int count = param.length/3;
             double[] tmpParam = new double[3];
@@ -356,6 +360,7 @@ public class MultiGaussianFitter extends AbstractCurveFitter {
         private List<WeightedObservedPoint> sortObservations(Collection<WeightedObservedPoint> unsorted) {
             List<WeightedObservedPoint> observations = new ArrayList(unsorted);
             Comparator<WeightedObservedPoint> cmp = new Comparator<WeightedObservedPoint>() {
+                @Override
                 public int compare(WeightedObservedPoint p1, WeightedObservedPoint p2) {
                     if (p1 == null && p2 == null) {
                         return 0;

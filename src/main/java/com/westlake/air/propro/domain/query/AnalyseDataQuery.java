@@ -22,8 +22,6 @@ public class AnalyseDataQuery extends PageQuery{
 
     String libraryId;
 
-    Integer msLevel;
-
     String peptideRef;
 
     String proteinName;

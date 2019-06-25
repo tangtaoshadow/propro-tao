@@ -45,7 +45,6 @@ public class AnalyseDataApi extends BaseController{
             @ApiImplicitParam(name = "currentPage", value = "current page", dataType = "int", required = false, defaultValue = "1"),
             @ApiImplicitParam(name = "overviewId", value = "overview id", dataType = "string", required = false),
             @ApiImplicitParam(name = "libraryId", value = "library id", dataType = "string", required = false),
-            @ApiImplicitParam(name = "msLevel", value = "ms level", dataType = "int", required = false),
             @ApiImplicitParam(name = "peptideRef", value = "peptide ref", dataType = "string", required = false),
             @ApiImplicitParam(name = "proteinName", value = "protein name", dataType = "string", required = false),
             @ApiImplicitParam(name = "isDecoy", value = "is decoy or target", dataType = "boolean", required = false),
@@ -60,7 +59,6 @@ public class AnalyseDataApi extends BaseController{
                                                    @RequestParam(value = "pageSize", required = false, defaultValue = "50") Integer pageSize,
                                                    @RequestParam(value = "overviewId", required = false) String overviewId,
                                                    @RequestParam(value = "libraryId", required = false) String libraryId,
-                                                   @RequestParam(value = "msLevel", required = false) Integer msLevel,
                                                    @RequestParam(value = "peptideRef", required = false) String peptideRef,
                                                    @RequestParam(value = "proteinName", required = false) String proteinName,
                                                    @RequestParam(value = "isDecoy", required = false) Boolean isDecoy,
@@ -75,9 +73,6 @@ public class AnalyseDataApi extends BaseController{
         }
         if (libraryId != null && !libraryId.isEmpty()) {
             query.setLibraryId(libraryId);
-        }
-        if (msLevel != null) {
-            query.setMsLevel(msLevel);
         }
         if (peptideRef != null && !peptideRef.isEmpty()) {
             query.setPeptideRef(peptideRef);
