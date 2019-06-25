@@ -148,7 +148,7 @@ public class Airus {
         overviewDO.setMatchedPeptideCount(count);
         analyseOverviewService.update(overviewDO);
         
-        logger.info("合并打分完成,共找到新肽段" + count + "个");
+        logger.info("合并打分完成,共找到新肽段" + count + "个");/////////
         return finalResult;
     }
 
