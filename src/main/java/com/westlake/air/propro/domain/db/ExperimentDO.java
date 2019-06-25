@@ -2,15 +2,14 @@ package com.westlake.air.propro.domain.db;
 
 import com.westlake.air.propro.domain.BaseDO;
 import com.westlake.air.propro.domain.bean.aird.*;
-import com.westlake.air.propro.domain.bean.compressor.Strategy;
 import com.westlake.air.propro.domain.bean.irt.IrtResult;
 import lombok.Data;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -56,16 +55,11 @@ public class ExperimentDO extends BaseDO {
     //DIA_SWATH, PRM, @see Constants
     String type;
 
-    //转换压缩后的aird的文件名称
-    String airdPath;
-
     //Aird文件大小,单位byte
     Long airdSize;
 
+    //Aird文件的名称,不包含后缀名
     String airdFileName;
-
-    //转换压缩后aird的文件路径
-    String airdIndexPath;
 
     //Aird索引文件的大小,单位byte
     Long airdIndexSize;
@@ -99,4 +93,11 @@ public class ExperimentDO extends BaseDO {
         return null;
     }
 
+    public String getAirdPath(){
+        return FilenameUtils.normalize("/nas/data/"+projectName+"/"+airdFileName+".aird");
+    }
+
+    public String getAirdIndexPath(){
+        return FilenameUtils.normalize("/nas/data/"+projectName+"/"+airdFileName+".json");
+    }
 }

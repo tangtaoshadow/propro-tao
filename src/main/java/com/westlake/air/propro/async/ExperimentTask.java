@@ -49,7 +49,7 @@ public class ExperimentTask extends BaseTask {
     Extractor extractor;
 
     @Async(value = "uploadFileExecutor")
-    public void saveAirdTask(ExperimentDO experimentDO, String airdFilePath, TaskDO taskDO) {
+    public void uploadAird(ExperimentDO experimentDO, String airdFilePath, TaskDO taskDO) {
         taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);

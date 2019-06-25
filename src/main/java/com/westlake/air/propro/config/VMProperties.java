@@ -16,6 +16,9 @@ public class VMProperties {
     @Value("${dingtalk.robot}")
     private String dingtalkRobot;
 
+    @Value("${file_repository}")
+    private String fileRepository;
+
     public String getDingtalkRobot() {
         if(StringUtils.isEmpty(dingtalkRobot)){
             dingtalkRobot = "https://oapi.dingtalk.com/robot/send?access_token=f2fb029431f174e678106b30c2db5fb0e40e921999386a61031bf864f18beb77";
@@ -47,6 +50,13 @@ public class VMProperties {
 
     public void setAdminPassword(String adminPassword) {
         this.adminPassword = adminPassword;
+    }
+
+    public String getFileRepository(){
+        if(StringUtils.isEmpty(fileRepository)){
+            return "/nas/data";
+        }
+        return fileRepository;
     }
 
 }

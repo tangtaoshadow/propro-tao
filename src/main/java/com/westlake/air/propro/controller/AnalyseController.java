@@ -380,10 +380,6 @@ public class AnalyseController extends BaseController {
             model.addAttribute(ERROR_MSG, ResultCode.IRT_FIRST.getMessage());
             return "analyse/data/consultation";
         }
-        if (experimentResult.getModel().getAirdPath() == null || experimentResult.getModel().getAirdPath().isEmpty()) {
-            model.addAttribute(ERROR_MSG, ResultCode.AIRD_COMPRESSION_FIRST.getMessage());
-            return "analyse/data/consultation";
-        }
         //校验权限
         PermissionUtil.check(experimentResult.getModel());
 

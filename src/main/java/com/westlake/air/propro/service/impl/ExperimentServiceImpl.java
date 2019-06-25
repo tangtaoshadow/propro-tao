@@ -195,10 +195,8 @@ public class ExperimentServiceImpl implements ExperimentService {
             return;
         }
 
-        experimentDO.setAirdPath(airdFilePath);
         //根据Aird文件获取同名同目录下的Aird索引文件的文件路径
         String airdIndexPath = FileUtil.getAirdIndexFilePath(airdFilePath);
-        experimentDO.setAirdIndexPath(airdIndexPath);
         try {
             File indexFile = new File(airdIndexPath);
             File airdFile = new File(airdFilePath);

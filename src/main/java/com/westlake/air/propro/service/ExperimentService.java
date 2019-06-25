@@ -40,7 +40,7 @@ public interface ExperimentService {
 
     HashMap<Float, Float[]> getPrmRtWindowMap(String expId);
 
-    public HashMap<Float, Float[]> getPrmRtWindowMap(List<SwathIndexDO> ms2SwathIndexes);
+    HashMap<Float, Float[]> getPrmRtWindowMap(List<SwathIndexDO> ms2SwathIndexes);
 
     void uploadAirdFile(ExperimentDO experimentDO, String airdFilePath, TaskDO taskDO);
 

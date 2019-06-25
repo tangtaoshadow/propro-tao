@@ -137,6 +137,7 @@ public class ExperimentController extends BaseController {
                @RequestParam(value = "description", required = false) String description,
                RedirectAttributes redirectAttributes) {
 
+
         model.addAttribute("name", name);
         model.addAttribute("description", description);
 
@@ -167,7 +168,6 @@ public class ExperimentController extends BaseController {
         experimentDO.setDescription(description);
         experimentDO.setProjectName(projectName);
         experimentDO.setType(project.getType());
-        experimentDO.setAirdPath(filePath);
         ResultDO result = experimentService.insert(experimentDO);
         if (result.isFailed()) {
             model.addAttribute(ERROR_MSG, result.getMsgInfo());
@@ -177,7 +177,7 @@ public class ExperimentController extends BaseController {
         TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_EXPERIMENT_FILE, experimentDO.getName());
         taskService.insert(taskDO);
 
-        experimentTask.saveAirdTask(experimentDO, file.getPath(), taskDO);
+        experimentTask.uploadAird(experimentDO, file.getPath(), taskDO);
         return "redirect:/task/detail/" + taskDO.getId();
     }
 
@@ -209,7 +209,6 @@ public class ExperimentController extends BaseController {
             experimentDO.setProjectId(project.getId());
             experimentDO.setOwnerName(project.getOwnerName());
             experimentDO.setDescription(exp.getDescription());
-            experimentDO.setAirdPath(exp.getFilePath());
             experimentDO.setType(project.getType());
 
             ResultDO result = experimentService.insert(experimentDO);
@@ -223,7 +222,7 @@ public class ExperimentController extends BaseController {
                 taskDO.finish(TaskStatus.FAILED.getName());
             } else {
                 taskService.insert(taskDO);
-                experimentTask.saveAirdTask(experimentDO, file.getPath(), taskDO);
+                experimentTask.uploadAird(experimentDO, file.getPath(), taskDO);
             }
         }
 
@@ -298,8 +297,6 @@ public class ExperimentController extends BaseController {
         experimentDO.setType(type);
         experimentDO.setProjectName(projectName);
         experimentDO.setProjectId(project.getId());
-        experimentDO.setAirdPath(airdPath);
-        experimentDO.setAirdIndexPath(airdIndexPath);
         experimentDO.setDescription(description);
         experimentDO.setIRtLibraryId(iRtLibraryId);
         IrtResult irtResult = experimentDO.getIrtResult();

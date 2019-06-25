@@ -100,9 +100,6 @@ public class ConvolutionUtil {
         if (experimentDO == null) {
             return ResultDO.buildError(ResultCode.EXPERIMENT_NOT_EXISTED);
         }
-        if (experimentDO.getAirdPath() == null || experimentDO.getAirdPath().isEmpty()) {
-            return ResultDO.buildError(ResultCode.FILE_NOT_EXISTED);
-        }
         File file = new File(experimentDO.getAirdPath());
         if (!file.exists()) {
             return ResultDO.buildError(ResultCode.FILE_NOT_EXISTED);
