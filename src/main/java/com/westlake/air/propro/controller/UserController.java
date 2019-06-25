@@ -121,7 +121,7 @@ public class UserController extends BaseController {
         user.setPassword(result);
         userService.update(user);
 
-        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
+        redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.UPDATE_SUCCESS);
         redirectAttributes.addFlashAttribute("tab", "changepwd");
         return "redirect:/user/profile";
     }
