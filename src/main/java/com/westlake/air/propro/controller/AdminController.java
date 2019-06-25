@@ -1,9 +1,7 @@
 package com.westlake.air.propro.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.aird.AirdInfo;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.query.LibraryQuery;
 import com.westlake.air.propro.domain.query.ProjectQuery;
@@ -12,7 +10,6 @@ import com.westlake.air.propro.service.AnalyseOverviewService;
 import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.ProjectService;
 import com.westlake.air.propro.service.UserService;
-import com.westlake.air.propro.utils.FileUtil;
 import com.westlake.air.propro.utils.PasswordUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -22,13 +19,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Controller
-@RequiresRoles({"admin"})
 @RequestMapping("admin")
 public class AdminController extends BaseController {
 
@@ -41,6 +36,7 @@ public class AdminController extends BaseController {
     @Autowired
     AnalyseOverviewService analyseOverviewService;
 
+    @RequiresRoles("admin")
     @RequestMapping(value = "/user/list")
     String list(Model model,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
@@ -80,11 +76,13 @@ public class AdminController extends BaseController {
         return "user/list";
     }
 
+    @RequiresRoles("admin")
     @RequestMapping(value = "/user/create")
     String create(Model model) {
         return "user/create";
     }
 
+    @RequiresRoles("admin")
     @RequestMapping(value = "/user/add")
     String add(Model model, @RequestParam(value = "nick", required = false) String nick,
                @RequestParam(value = "username", required = true) String username,
@@ -131,6 +129,7 @@ public class AdminController extends BaseController {
 
     }
 
+    @RequiresRoles("admin")
     @RequestMapping(value = "/user/edit/{id}")
     String edit(Model model,
                 @PathVariable("id") String id,
@@ -141,6 +140,7 @@ public class AdminController extends BaseController {
         return "user/edit";
     }
 
+    @RequiresRoles("admin")
     @RequestMapping(value = "/user/update",method = RequestMethod.POST)
     String update(Model model,
                   @RequestParam(value = "id", required = true) String id,
@@ -167,6 +167,7 @@ public class AdminController extends BaseController {
         return "redirect:/admin/user/list";
     }
 
+    @RequiresRoles("admin")
     @RequestMapping(value = "/user/delete/{id}")
     String delete(Model model,
                   @PathVariable("id") String id,
@@ -177,6 +178,7 @@ public class AdminController extends BaseController {
         return "redirect:admin/user/list";
     }
 
+    @RequiresRoles("admin")
     @RequestMapping(value = "/user/setasadmin/{id}")
     String setAsAdmin(Model model,
                   @PathVariable("id") String id,
@@ -193,6 +195,7 @@ public class AdminController extends BaseController {
         return "redirect:/admin/user/list";
     }
 
+    @RequiresRoles("admin")
     @RequestMapping(value = "/user/resetpwd/{id}")
     String resetPwd(Model model,
                       @PathVariable("id") String id,
@@ -208,6 +211,7 @@ public class AdminController extends BaseController {
         return "redirect:/admin/user/list";
     }
 
+    @RequiresRoles("admin")
     @RequestMapping(value = "/repair")
     @ResponseBody
     public String repair(){

@@ -5,6 +5,7 @@ import com.westlake.air.propro.service.impl.ShiroRealm;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.cache.MemoryConstrainedCacheManager;
+import org.apache.shiro.codec.Base64;
 import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -15,6 +16,7 @@ import org.apache.shiro.web.mgt.CookieRememberMeManager;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.servlet.Cookie;
 import org.apache.shiro.web.servlet.SimpleCookie;
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -60,9 +62,10 @@ public class ShiroConfig {
     public RememberMeManager rememberMeManager() {
         Cookie cookie = new SimpleCookie("rememberMe");
         cookie.setHttpOnly(true);//通过js脚本将无法读取到cookie信息
-        cookie.setMaxAge(60 * 60 * 24);//cookie保存一天
+        cookie.setMaxAge(60 * 60 * 24 * 3);//cookie保存一天
         CookieRememberMeManager manager = new CookieRememberMeManager();
         manager.setCookie(cookie);
+        manager.setCipherKey(Base64.decode("2AvVhdsgUs0FSA3SDFAdag=="));
         return manager;
     }
 
@@ -96,6 +99,13 @@ public class ShiroConfig {
         AuthorizationAttributeSourceAdvisor advisor = new AuthorizationAttributeSourceAdvisor();
         advisor.setSecurityManager(securityManager);
         return advisor;
+    }
+
+    @Bean
+    public DefaultAdvisorAutoProxyCreator advisorAutoProxyCreator() {
+        DefaultAdvisorAutoProxyCreator advisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+        advisorAutoProxyCreator.setProxyTargetClass(true);
+        return advisorAutoProxyCreator;
     }
 
     public Map<String, String> shiroFilterMap() {

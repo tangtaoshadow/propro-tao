@@ -1,12 +1,17 @@
 package com.westlake.air.propro.exception;
 
 import com.westlake.air.propro.constants.ResultCode;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    public final Logger logger = LoggerFactory.getLogger(getClass());
 
     @ExceptionHandler(UserNotLoginException.class)
     public String userNotLoginException(UserNotLoginException e, RedirectAttributes redirectAttributes) {
@@ -18,5 +23,12 @@ public class GlobalExceptionHandler {
     public String unauthorizedAccessException(UnauthorizedAccessException e, RedirectAttributes redirectAttributes) {
         redirectAttributes.addFlashAttribute("error_msg", ResultCode.UNAUTHORIZED_ACCESS.getMessage());
         return e.getRedirectPage();
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public String unauthorizedException(UnauthorizedException e, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("error_msg", ResultCode.UNAUTHORIZED_ACCESS.getMessage());
+        logger.warn("非法访问尝试,非管理员权限账号正在企图访问管理员专有页面");
+        return "/error";
     }
 }

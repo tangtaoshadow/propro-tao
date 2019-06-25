@@ -16,7 +16,7 @@ public class ShiroRealm extends AuthorizingRealm {
     private UserService userService;
 
     /**
-     * 授权方法，如果不设置缓存管理的话，需要访问需要一定的权限或角色的请求时会进入这个方法
+     * 授权方法，如果不设置缓存管理的话，访问需要一定的权限或角色的请求时会进入这个方法
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
