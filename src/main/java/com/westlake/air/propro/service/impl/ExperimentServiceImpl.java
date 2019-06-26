@@ -187,21 +187,13 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     @Override
-    public void uploadAirdFile(ExperimentDO experimentDO, String airdFilePath, TaskDO taskDO) {
-        if (!FileUtil.isAirdFile(airdFilePath)) {
-            taskDO.addLog("Aird File Format Error!");
-            taskDO.finish(TaskStatus.FAILED.getName());
-            taskService.update(taskDO);
-            return;
-        }
+    public void uploadAirdFile(ExperimentDO experimentDO, TaskDO taskDO) {
 
-        experimentDO.setAirdPath(airdFilePath);
-        //根据Aird文件获取同名同目录下的Aird索引文件的文件路径
-        String airdIndexPath = FileUtil.getAirdIndexFilePath(airdFilePath);
-        experimentDO.setAirdIndexPath(airdIndexPath);
+        taskDO.addLog("Start Parsing Aird File:" + experimentDO.getName());
+        taskService.update(taskDO);
         try {
-            File indexFile = new File(airdIndexPath);
-            File airdFile = new File(airdFilePath);
+            File indexFile = new File(experimentDO.getAirdIndexPath());
+            File airdFile = new File(experimentDO.getAirdPath());
             String airdInfoJson = FileUtil.readFile(indexFile);
             AirdInfo airdInfo = null;
             try {
@@ -226,9 +218,7 @@ public class ExperimentServiceImpl implements ExperimentService {
             }
 
             swathIndexDAO.insert(airdInfo.getIndexList());
-
             taskDO.addLog("Swath Index Store Success.索引存储成功");
-            taskDO.finish(TaskStatus.SUCCESS.getName());
             taskService.update(taskDO);
 
         } catch (IOException e) {

@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-08-17 10:40
@@ -49,12 +51,16 @@ public class ExperimentTask extends BaseTask {
     Extractor extractor;
 
     @Async(value = "uploadFileExecutor")
-    public void saveAirdTask(ExperimentDO experimentDO, String airdFilePath, TaskDO taskDO) {
+    public void uploadAird(List<ExperimentDO> exps, TaskDO taskDO) {
         taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
-        experimentService.uploadAirdFile(experimentDO, airdFilePath, taskDO);
-        experimentService.update(experimentDO);
+        for (ExperimentDO exp : exps) {
+            experimentService.uploadAirdFile(exp, taskDO);
+            experimentService.update(exp);
+        }
+        taskDO.finish(TaskStatus.SUCCESS.getName());
+        taskService.update(taskDO);
     }
 
     /**
@@ -90,8 +96,8 @@ public class ExperimentTask extends BaseTask {
             taskDO.addLog("开始卷积IRT校准库并且计算iRT值");
             taskService.update(taskDO);
             ResultDO<IrtResult> resultDO = irt.convAndIrt(lumsParams.getExperimentDO(), lumsParams.getIRtLibrary().getId(), lumsParams.getMzExtractWindow(), lumsParams.getSigmaSpacing());
-            if(resultDO.isFailed()){
-                taskDO.addLog("iRT计算失败:"+resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
+            if (resultDO.isFailed()) {
+                taskDO.addLog("iRT计算失败:" + resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
                 taskDO.finish(TaskStatus.FAILED.getName());
                 taskService.update(taskDO);
                 return;
@@ -101,7 +107,7 @@ public class ExperimentTask extends BaseTask {
             taskDO.addLog("iRT计算完毕");
             taskDO.addLog("斜率:" + si.getSlope() + "截距:" + si.getIntercept());
             experimentService.update(lumsParams.getExperimentDO());
-        }else{
+        } else {
             taskDO.addLog("斜率:" + lumsParams.getSlopeIntercept().getSlope() + "截距:" + lumsParams.getSlopeIntercept().getIntercept());
         }
 
@@ -122,24 +128,27 @@ public class ExperimentTask extends BaseTask {
     }
 
     @Async(value = "extractorExecutor")
-    public void convAndIrt(ExperimentDO experimentDO, String iRtLibraryId, Float mzExtractWindow, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
+    public void convAndIrt(List<ExperimentDO> exps, String iRtLibraryId, Float mzExtractWindow, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
         taskDO.start();
         taskDO.addLog("开始卷积IRT校准库并且计算iRT值,iRT Library ID:" + iRtLibraryId);
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
 
-        ResultDO<IrtResult> resultDO = irt.convAndIrt(experimentDO, iRtLibraryId, mzExtractWindow, sigmaSpacing);
-        if (resultDO.isFailed()) {
-            taskDO.addLog("iRT计算失败:"+resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
-            taskDO.finish(TaskStatus.FAILED.getName());
+        for (ExperimentDO exp : exps) {
+            taskDO.addLog("Processing " + exp.getName() + "-" + exp.getId());
             taskService.update(taskDO);
-            return;
+            ResultDO<IrtResult> resultDO = irt.convAndIrt(exp, iRtLibraryId, mzExtractWindow, sigmaSpacing);
+            if (resultDO.isFailed()) {
+                taskDO.addLog("iRT计算失败:" + resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
+                taskService.update(taskDO);
+                continue;
+            }
+            SlopeIntercept slopeIntercept = resultDO.getModel().getSi();
+            exp.setIRtLibraryId(iRtLibraryId);
+            experimentService.update(exp);
+            taskDO.addLog("iRT计算完毕,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept());
         }
-        SlopeIntercept slopeIntercept = resultDO.getModel().getSi();
-        experimentDO.setIRtLibraryId(iRtLibraryId);
-        experimentService.update(experimentDO);
 
-        taskDO.addLog("iRT计算完毕,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept());
         taskDO.finish(TaskStatus.SUCCESS.getName());
         taskService.update(taskDO);
     }

@@ -69,17 +69,6 @@ public class TaskController extends BaseController {
         return "task/list";
     }
 
-    @RequestMapping(value = "/create")
-    String create(Model model,
-                  @RequestParam(value = "templateName", required = true) String templateName) {
-        TaskTemplate template = TaskTemplate.getByName(templateName);
-        if (template != null) {
-            return "redirect:/" + template.getPagePath();
-        } else {
-            return "home";
-        }
-    }
-
     @RequestMapping(value = "/detail/{id}")
     String detail(Model model, @PathVariable("id") String id) {
         ResultDO<TaskDO> resultDO = taskService.getById(id);

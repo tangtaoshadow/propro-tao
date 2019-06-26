@@ -48,10 +48,6 @@ public class TaskDO extends BaseDO {
     public TaskDO() {
     }
 
-    public static TaskDO create(TaskTemplate taskTemplate, String taskSuffixName){
-        return new TaskDO(taskTemplate, taskSuffixName);
-    }
-
     public TaskDO(TaskTemplate taskTemplate, String taskSuffixName) {
         this.creator = ((UserDO)SecurityUtils.getSubject().getPrincipal()).getUsername();
         this.taskTemplate = taskTemplate.getName();
