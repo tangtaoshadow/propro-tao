@@ -42,6 +42,6 @@ public interface ExperimentService {
 
     HashMap<Float, Float[]> getPrmRtWindowMap(List<SwathIndexDO> ms2SwathIndexes);
 
-    void uploadAirdFile(ExperimentDO experimentDO, String airdFilePath, TaskDO taskDO);
+    void uploadAirdFile(ExperimentDO experimentDO, TaskDO taskDO);
 
 }

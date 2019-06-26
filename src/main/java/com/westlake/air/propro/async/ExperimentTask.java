@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-08-17 10:40
@@ -49,12 +51,16 @@ public class ExperimentTask extends BaseTask {
     Extractor extractor;
 
     @Async(value = "uploadFileExecutor")
-    public void uploadAird(ExperimentDO experimentDO, String airdFilePath, TaskDO taskDO) {
+    public void uploadAird(List<ExperimentDO> exps, TaskDO taskDO) {
         taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());
         taskService.update(taskDO);
-        experimentService.uploadAirdFile(experimentDO, airdFilePath, taskDO);
-        experimentService.update(experimentDO);
+        for(ExperimentDO exp : exps){
+            experimentService.uploadAirdFile(exp, taskDO);
+            experimentService.update(exp);
+        }
+        taskDO.finish(TaskStatus.SUCCESS.getName());
+        taskService.update(taskDO);
     }
 
     /**

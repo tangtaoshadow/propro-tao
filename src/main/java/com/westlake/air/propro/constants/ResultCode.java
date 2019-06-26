@@ -70,6 +70,7 @@ public enum ResultCode implements Serializable {
     FASTA_FILE_FORMAT_NOT_SUPPORTED("FASTA_FILE_FORMAT_NOT_SUPPORTED","FASTA文件格式不支持"),
     NO_AIRD_COMPRESSION_FOR_DIA_SWATH("NO_AIRD_COMPRESSION_FOR_DIA_SWATH","DIA-Swath实验不需要进行Aird文件压缩,请使用Propro客户端进行压缩"),
     EXPERIMENT_TYPE_MUST_DEFINE("EXPERIMENT_TYPE_MUST_DEFINE","实验类型必须被定义"),
+    NO_NEW_EXPERIMENTS("NO_NEW_EXPERIMENTS","没有扫描到新实验"),
 
     /**
      * ******

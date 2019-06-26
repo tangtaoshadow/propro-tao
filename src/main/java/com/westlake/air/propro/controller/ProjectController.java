@@ -66,7 +66,7 @@ public class ProjectController extends BaseController {
             query.setName(name);
         }
 
-        if(!isAdmin()){
+        if (!isAdmin()) {
             query.setOwnerName(getCurrentUsername());
         }
         query.setPageSize(pageSize);
@@ -151,7 +151,6 @@ public class ProjectController extends BaseController {
 //    }
 
     @RequestMapping(value = "/scan")
-    @ResponseBody
     String scan(Model model,
                 @RequestParam(value = "projectId", required = true) String projectId,
                 RedirectAttributes redirectAttributes) {
@@ -160,16 +159,57 @@ public class ProjectController extends BaseController {
 
         String directoryPath = RepositoryUtil.getProjectRepo(project.getName());
         File directory = new File(directoryPath);
-        if (directory.isDirectory()) {
-            File[] fileList = directory.listFiles();
-            if (fileList == null) {
-                return "Error";
-            }
-            for (int i = 0; i < fileList.length; i++) {
-                System.out.println(fileList[i]);
+
+        List<File> newFileList = new ArrayList<>();
+        if (!directory.isDirectory()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.FILE_NOT_SET);
+            return "redirect:/project/list";
+        }
+
+        File[] fileList = directory.listFiles();
+        if (fileList == null) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED);
+            return "redirect:/project/list";
+        }
+
+        List<ExperimentDO> exps = experimentService.getAllByProjectId(projectId);
+        List<String> existedExpNames = new ArrayList<>();
+        for (ExperimentDO exp : exps) {
+            existedExpNames.add(exp.getName());
+        }
+        //过滤文件
+        for (File file : fileList) {
+            if (file.isFile() && file.getName().toLowerCase().endsWith(".json") && !existedExpNames.contains(FilenameUtils.getBaseName(file.getName()))) {
+                newFileList.add(file);
             }
         }
-        return "";
+        if (newFileList.isEmpty()) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.NO_NEW_EXPERIMENTS.getMessage());
+            return "redirect:/project/list";
+        }
+
+        TaskDO taskDO = new TaskDO(TaskTemplate.SCAN_AND_UPDATE_EXPERIMENTS, project.getName());
+        taskDO.addLog(newFileList.size() + " total");
+        taskService.insert(taskDO);
+        List<ExperimentDO> expsToUpdate = new ArrayList<>();
+        for (File file : newFileList) {
+            ExperimentDO exp = new ExperimentDO();
+            exp.setName(FilenameUtils.getBaseName(file.getName()));
+            exp.setOwnerName(project.getOwnerName());
+            exp.setProjectId(project.getId());
+            exp.setProjectName(project.getName());
+            exp.setType(project.getType());
+            ResultDO result = experimentService.insert(exp);
+            if (result.isFailed()) {
+                taskDO.addLog("ERROR-"+exp.getId()+"-"+exp.getName());
+                taskDO.addLog(result.getMsgInfo());
+                taskService.update(taskDO);
+            }
+            expsToUpdate.add(exp);
+        }
+
+        experimentTask.uploadAird(expsToUpdate, taskDO);
+        return "redirect:/task/detail/" + taskDO.getId();
     }
 
     @RequestMapping(value = "/irt")
@@ -181,10 +221,7 @@ public class ProjectController extends BaseController {
         ProjectDO project = projectService.getById(id);
         PermissionUtil.check(project);
         List<ExperimentDO> expList = experimentService.getAllByProjectName(project.getName());
-        if (project == null) {
-            redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.PROJECT_NOT_EXISTED);
-            return "redirect:/project/list";
-        }
+
         model.addAttribute("exps", expList);
         model.addAttribute("project", project);
         model.addAttribute("iRtLibraryId", iRtLibraryId);
@@ -213,11 +250,11 @@ public class ProjectController extends BaseController {
         int count = 0;
         for (ExperimentDO exp : expList) {
 //            if (exp.getSlope() == null || exp.getIntercept() == null) {
-                TaskDO taskDO = new TaskDO(TaskTemplate.IRT, exp.getName() + ":" + iRtLibraryId);
-                taskService.insert(taskDO);
-                SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);
-                experimentTask.convAndIrt(exp, iRtLibraryId, mzExtractWindow, sigmaSpacing, taskDO);
-                count++;
+            TaskDO taskDO = new TaskDO(TaskTemplate.IRT, exp.getName() + ":" + iRtLibraryId);
+            taskService.insert(taskDO);
+            SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);
+            experimentTask.convAndIrt(exp, iRtLibraryId, mzExtractWindow, sigmaSpacing, taskDO);
+            count++;
 //            }
         }
         if (count == 0) {
@@ -485,7 +522,7 @@ public class ProjectController extends BaseController {
             String[] peptideRefs = peptideRefInfo.split(";");
             for (String peptideRef : peptideRefs) {
                 PeptideDO peptideDO = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, false);
-                if (peptideDO == null){
+                if (peptideDO == null) {
                     continue;
                 }
                 peptideDOMap.put(peptideRef, peptideDO);
@@ -559,7 +596,7 @@ public class ProjectController extends BaseController {
         ProjectDO projectDO = projectService.getById(id);
         PermissionUtil.check(projectDO);
         List<ExperimentDO> experimentDOList = getAllExperimentsByProjectId(id);
-        String defaultOutputPath = RepositoryUtil.buildOutputPath(projectDO.getName(), projectDO.getName()+".tsv");
+        String defaultOutputPath = RepositoryUtil.buildOutputPath(projectDO.getName(), projectDO.getName() + ".tsv");
         model.addAttribute("expList", experimentDOList);
         model.addAttribute("project", projectDO);
         model.addAttribute("defaultPathName", defaultOutputPath);
