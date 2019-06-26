@@ -29,9 +29,6 @@ public class ProjectDO extends BaseDO {
     //DIA_SWATH, PRM
     String type;
 
-    //项目仓库路径(存储项目所有元数据的地方)
-    String repository;
-
     //项目负责人名称
     String ownerName;
 
@@ -49,8 +46,4 @@ public class ProjectDO extends BaseDO {
 
     //最后修改日期
     Date lastModifiedDate;
-
-    public String getExportPath(){
-        return repository + "/export/";
-    }
 }

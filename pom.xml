@@ -163,19 +163,8 @@
         <!--mongodb-->
         <dependency>
             <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver</artifactId>
-            <version>3.8.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>bson</artifactId>
-            <version>3.8.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver-core</artifactId>
-            <version>3.8.0</version>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>3.10.1</version>
         </dependency>
         <!--XML操作库-->
         <dependency>
@@ -241,6 +230,12 @@
             <artifactId>JavaFastPFOR</artifactId>
             <version>0.1.12</version>
         </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>ai.catboost</groupId>-->
+<!--            <artifactId>catboost-prediction</artifactId>-->
+<!--            <version>0.2.5</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <repositories>

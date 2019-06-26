@@ -3,6 +3,7 @@ package com.westlake.air.propro.domain.db;
 import com.westlake.air.propro.domain.BaseDO;
 import com.westlake.air.propro.domain.bean.aird.*;
 import com.westlake.air.propro.domain.bean.irt.IrtResult;
+import com.westlake.air.propro.utils.RepositoryUtil;
 import lombok.Data;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.data.annotation.Id;
@@ -49,17 +50,17 @@ public class ExperimentDO extends BaseDO {
     //关联的项目名称
     String projectName;
 
-    //必填,实验名称
+    //必填,实验名称,与Aird文件同名
     String name;
+
+    //别名,默认为空
+    String alias;
 
     //DIA_SWATH, PRM, @see Constants
     String type;
 
     //Aird文件大小,单位byte
     Long airdSize;
-
-    //Aird文件的名称,不包含后缀名
-    String airdFileName;
 
     //Aird索引文件的大小,单位byte
     Long airdIndexSize;
@@ -84,20 +85,21 @@ public class ExperimentDO extends BaseDO {
     //转byte时的编码顺序,由于C#默认采用LITTLE_ENDIAN,Aird文件由Propro-Client(C#端)转换而来,因此也采用LITTLE_ENDIAN的编码
     String features;
 
-    public Compressor fetchCompressor(String target){
-        for(Compressor c : compressors){
-            if(c.getTarget().equals(target)){
+    public Compressor fetchCompressor(String target) {
+        for (Compressor c : compressors) {
+            if (c.getTarget().equals(target)) {
                 return c;
             }
         }
         return null;
     }
 
-    public String getAirdPath(){
-        return FilenameUtils.normalize("/nas/data/"+projectName+"/"+airdFileName+".aird");
+    public String getAirdPath() {
+        return FilenameUtils.concat(FilenameUtils.concat(RepositoryUtil.getRepo(), projectName), name) + ".aird";
     }
 
-    public String getAirdIndexPath(){
-        return FilenameUtils.normalize("/nas/data/"+projectName+"/"+airdFileName+".json");
+    public String getAirdIndexPath() {
+        return FilenameUtils.concat(FilenameUtils.concat(RepositoryUtil.getRepo(), projectName), name) + ".json";
+
     }
 }

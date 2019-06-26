@@ -155,7 +155,6 @@ public class AnalyseController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED);
             return "redirect:/analyse/overview/list";
         }
-        String exportPath = project.getExportPath();
 
         int pageSize = 1000;
         AnalyseDataQuery query = new AnalyseDataQuery(id);
@@ -166,7 +165,8 @@ public class AnalyseController extends BaseController {
         int count = analyseDataService.count(query).intValue();
         int totalPage = count % pageSize == 0 ? count / pageSize : (count / pageSize + 1);
 
-        File file = new File(exportPath + overviewResult.getModel().getName() + "[" + overviewResult.getModel().getId() + "].txt");
+        String exportPath = RepositoryUtil.buildOutputPath(project.getName(), overviewResult.getModel().getName() + "[" + overviewResult.getModel().getId() + "].txt");
+        File file = new File(exportPath);
         if (!file.exists()) {
             file.getParentFile().mkdirs();
             file.createNewFile();

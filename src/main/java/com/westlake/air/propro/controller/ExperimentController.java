@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.algorithm.extract.Extractor;
+import com.westlake.air.propro.config.VMProperties;
 import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
@@ -20,7 +21,9 @@ import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.exception.UnauthorizedAccessException;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.PermissionUtil;
+import com.westlake.air.propro.utils.RepositoryUtil;
 import com.westlake.air.propro.utils.ScoreUtil;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -58,6 +61,8 @@ public class ExperimentController extends BaseController {
     ProjectService projectService;
     @Autowired
     Extractor extractor;
+    @Autowired
+    VMProperties vmProperties;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -136,7 +141,6 @@ public class ExperimentController extends BaseController {
                @RequestParam(value = "filePath", required = true) String filePath,
                @RequestParam(value = "description", required = false) String description,
                RedirectAttributes redirectAttributes) {
-
 
         model.addAttribute("name", name);
         model.addAttribute("description", description);
@@ -250,8 +254,9 @@ public class ExperimentController extends BaseController {
     String detail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isSuccess()) {
-            PermissionUtil.check(resultDO.getModel());
-            model.addAttribute("experiment", resultDO.getModel());
+            ExperimentDO exp = resultDO.getModel();
+            PermissionUtil.check(exp);
+            model.addAttribute("experiment", exp);
             return "experiment/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
@@ -478,7 +483,7 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/irtresult")
     @ResponseBody
     ResultDO<JSONObject> irtResult(Model model,
-                              @RequestParam(value = "expId", required = false) String expId) {
+                                   @RequestParam(value = "expId", required = false) String expId) {
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
         MzIntensityPairs pairs = null;
 
@@ -491,7 +496,7 @@ public class ExperimentController extends BaseController {
         ExperimentDO experimentDO = expResult.getModel();
 
         IrtResult irtResult = experimentDO.getIrtResult();
-        if(irtResult == null){
+        if (irtResult == null) {
             return ResultDO.buildError(ResultCode.IRT_FIRST);
         }
 
@@ -499,11 +504,11 @@ public class ExperimentController extends BaseController {
         JSONArray selectedArray = new JSONArray();
         JSONArray unselectedArray = new JSONArray();
         JSONArray lineArray = new JSONArray();
-        for(Double[] pair : irtResult.getSelectedPairs()){
+        for (Double[] pair : irtResult.getSelectedPairs()) {
             selectedArray.add(JSONArray.toJSON(pair));
-            lineArray.add(JSONArray.toJSON(new Double[]{pair[0], (pair[0]- irtResult.getSi().getIntercept())/irtResult.getSi().getSlope()}));
+            lineArray.add(JSONArray.toJSON(new Double[]{pair[0], (pair[0] - irtResult.getSi().getIntercept()) / irtResult.getSi().getSlope()}));
         }
-        for(Double[] pair : irtResult.getUnselectedPairs()){
+        for (Double[] pair : irtResult.getUnselectedPairs()) {
             unselectedArray.add(JSONArray.toJSON(pair));
         }
 

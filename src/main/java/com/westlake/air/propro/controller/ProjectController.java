@@ -1,5 +1,6 @@
 package com.westlake.air.propro.controller;
 
+import com.westlake.air.propro.config.VMProperties;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.constants.SuccessMsg;
@@ -13,15 +14,14 @@ import com.westlake.air.propro.domain.query.ProjectQuery;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.FeatureUtil;
 import com.westlake.air.propro.utils.PermissionUtil;
+import com.westlake.air.propro.utils.RepositoryUtil;
 import com.westlake.air.propro.utils.ScoreUtil;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,6 +51,8 @@ public class ProjectController extends BaseController {
     ExperimentService experimentService;
     @Autowired
     SwathIndexService swathIndexService;
+    @Autowired
+    VMProperties vmProperties;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -71,6 +73,7 @@ public class ProjectController extends BaseController {
         query.setPageNo(currentPage);
         ResultDO<List<ProjectDO>> resultDO = projectService.getList(query);
 
+        model.addAttribute("repository", RepositoryUtil.getRepo());
         model.addAttribute("projectList", resultDO.getModel());
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
@@ -85,28 +88,20 @@ public class ProjectController extends BaseController {
     @RequestMapping(value = "/add")
     String add(Model model,
                @RequestParam(value = "name", required = true) String name,
-               @RequestParam(value = "repository", required = true) String repository,
                @RequestParam(value = "description", required = false) String description,
                @RequestParam(value = "type", required = true) String type,
                RedirectAttributes redirectAttributes) {
 
         String ownerName = getCurrentUsername();
 
-        model.addAttribute("repository", repository);
         model.addAttribute("ownerName", ownerName);
         model.addAttribute("name", name);
         model.addAttribute("description", description);
         model.addAttribute("type", type);
 
-        File file = new File(repository);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-
         ProjectDO projectDO = new ProjectDO();
         projectDO.setName(name);
         projectDO.setDescription(description);
-        projectDO.setRepository(repository);
         projectDO.setOwnerName(ownerName);
         projectDO.setType(type);
 
@@ -114,6 +109,13 @@ public class ProjectController extends BaseController {
         if (result.isFailed()) {
             model.addAttribute(ERROR_MSG, result.getMsgInfo());
             return "project/create";
+        }
+
+        //Project创建成功再去创建文件夹
+        String repository = vmProperties.getRepository();
+        File file = new File(FilenameUtils.concat(repository, name));
+        if (!file.exists()) {
+            file.mkdirs();
         }
 
         return "redirect:/project/list";
@@ -133,19 +135,41 @@ public class ProjectController extends BaseController {
         }
     }
 
-    @RequestMapping(value = "/delete/{id}")
-    String delete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+//    @RequestMapping(value = "/delete/{id}")
+//    String delete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+//
+//        ProjectDO project = projectService.getById(id);
+//        if (project == null) {
+//            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED.getMessage());
+//            return "redirect:/project/list";
+//        } else {
+//            PermissionUtil.check(project);
+//            projectService.delete(id);
+//            redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
+//            return "redirect:/project/list";
+//        }
+//    }
 
-        ProjectDO project = projectService.getById(id);
-        if (project == null) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED.getMessage());
-            return "redirect:/project/list";
-        } else {
-            PermissionUtil.check(project);
-            projectService.delete(id);
-            redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
-            return "redirect:/project/list";
+    @RequestMapping(value = "/scan")
+    @ResponseBody
+    String scan(Model model,
+                @RequestParam(value = "projectId", required = true) String projectId,
+                RedirectAttributes redirectAttributes) {
+        ProjectDO project = projectService.getById(projectId);
+        PermissionUtil.check(project);
+
+        String directoryPath = RepositoryUtil.getProjectRepo(project.getName());
+        File directory = new File(directoryPath);
+        if (directory.isDirectory()) {
+            File[] fileList = directory.listFiles();
+            if (fileList == null) {
+                return "Error";
+            }
+            for (int i = 0; i < fileList.length; i++) {
+                System.out.println(fileList[i]);
+            }
         }
+        return "";
     }
 
     @RequestMapping(value = "/irt")
@@ -249,7 +273,7 @@ public class ProjectController extends BaseController {
         PermissionUtil.check(project);
 
         String name = project.getName();
-        List<ExperimentDO> expList = experimentService.getAllByProjectName(name);
+        List<ExperimentDO> expList = experimentService.getAllByProjectId(id);
         for (ExperimentDO experimentDO : expList) {
             String expId = experimentDO.getId();
             experimentService.delete(expId);
@@ -535,7 +559,7 @@ public class ProjectController extends BaseController {
         ProjectDO projectDO = projectService.getById(id);
         PermissionUtil.check(projectDO);
         List<ExperimentDO> experimentDOList = getAllExperimentsByProjectId(id);
-        String defaultOutputPath = projectDO.getRepository() + "/Propro_" + projectDO.getName() + ".tsv";
+        String defaultOutputPath = RepositoryUtil.buildOutputPath(projectDO.getName(), projectDO.getName()+".tsv");
         model.addAttribute("expList", experimentDOList);
         model.addAttribute("project", projectDO);
         model.addAttribute("defaultPathName", defaultOutputPath);
