@@ -22,6 +22,9 @@ public class VMProperties {
     @Value("${repository}")
     private String repository;
 
+    @Value("${multiple}")
+    private int multiple;
+
     @PostConstruct
     public void init() {
         RepositoryUtil.repository = repository;
@@ -69,6 +72,17 @@ public class VMProperties {
             return "/nas/data";
         }
         return repository;
+    }
+
+    public void setMultiple(int multiple) {
+        this.multiple = multiple;
+    }
+
+    public int getMultiple() {
+        if (multiple <= 1) {
+            return 1;
+        }
+        return multiple;
     }
 
 }

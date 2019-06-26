@@ -135,21 +135,6 @@ public class ProjectController extends BaseController {
         }
     }
 
-//    @RequestMapping(value = "/delete/{id}")
-//    String delete(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
-//
-//        ProjectDO project = projectService.getById(id);
-//        if (project == null) {
-//            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED.getMessage());
-//            return "redirect:/project/list";
-//        } else {
-//            PermissionUtil.check(project);
-//            projectService.delete(id);
-//            redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
-//            return "redirect:/project/list";
-//        }
-//    }
-
     @RequestMapping(value = "/scan")
     String scan(Model model,
                 @RequestParam(value = "projectId", required = true) String projectId,
@@ -201,7 +186,7 @@ public class ProjectController extends BaseController {
             exp.setType(project.getType());
             ResultDO result = experimentService.insert(exp);
             if (result.isFailed()) {
-                taskDO.addLog("ERROR-"+exp.getId()+"-"+exp.getName());
+                taskDO.addLog("ERROR-" + exp.getId() + "-" + exp.getName());
                 taskDO.addLog(result.getMsgInfo());
                 taskService.update(taskDO);
             }
@@ -247,22 +232,14 @@ public class ProjectController extends BaseController {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.NO_EXPERIMENT_UNDER_PROJECT);
             return "redirect:/project/list";
         }
-        int count = 0;
-        for (ExperimentDO exp : expList) {
-//            if (exp.getSlope() == null || exp.getIntercept() == null) {
-            TaskDO taskDO = new TaskDO(TaskTemplate.IRT, exp.getName() + ":" + iRtLibraryId);
-            taskService.insert(taskDO);
-            SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);
-            experimentTask.convAndIrt(exp, iRtLibraryId, mzExtractWindow, sigmaSpacing, taskDO);
-            count++;
-//            }
-        }
-        if (count == 0) {
-            redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.ALL_EXPERIMENTS_UNDER_THIS_PROJECT_ARE_ALREADY_COMPUTE_IRT);
-            return "redirect:/project/list";
-        } else {
-            return "redirect:/task/list";
-        }
+
+        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, project.getName() + ":" + iRtLibraryId + "-Num:" + expList.size());
+        taskService.insert(taskDO);
+        SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);
+        experimentTask.convAndIrt(expList, iRtLibraryId, mzExtractWindow, sigmaSpacing, taskDO);
+
+        return "redirect:/task/list";
+
     }
 
     @RequestMapping(value = "/setPublic/{id}")

@@ -369,11 +369,13 @@ public class ExperimentController extends BaseController {
             return "redirect:/irt/" + id;
         }
         PermissionUtil.check(resultDO.getModel());
-        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName() + ":" + iRtLibraryId);
+        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName() + ":" + iRtLibraryId+"-Num:1");
         taskService.insert(taskDO);
 
         SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);
-        experimentTask.convAndIrt(resultDO.getModel(), iRtLibraryId, mzExtractWindow, sigmaSpacing, taskDO);
+        List<ExperimentDO> exps = new ArrayList<>();
+        exps.add(resultDO.getModel());
+        experimentTask.convAndIrt(exps, iRtLibraryId, mzExtractWindow, sigmaSpacing, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }
