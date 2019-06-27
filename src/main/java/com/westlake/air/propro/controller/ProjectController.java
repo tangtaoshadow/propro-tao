@@ -444,6 +444,12 @@ public class ProjectController extends BaseController {
         PermissionUtil.check(project);
 
         List<ExperimentDO> expList = experimentService.getAllByProjectName(project.getName());
+        expList.sort(new Comparator<ExperimentDO>() {
+            @Override
+            public int compare(ExperimentDO o1, ExperimentDO o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         model.addAttribute("project", project);
         model.addAttribute("expList", expList);
         return "project/portionSelector";
@@ -468,6 +474,12 @@ public class ProjectController extends BaseController {
         String projectName = project.getName() + "(" + project.getId() + ")";
         //get corresponding experiments
         List<ExperimentDO> expList = experimentService.getAllByProjectName(project.getName());
+        expList.sort(new Comparator<ExperimentDO>() {
+            @Override
+            public int compare(ExperimentDO o1, ExperimentDO o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         String libraryId = "";
         String libName = "";
         List<String> analyseOverviewIdList = new ArrayList<>();

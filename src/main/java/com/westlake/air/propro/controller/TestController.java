@@ -2,8 +2,6 @@ package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Lists;
-import com.westlake.air.propro.algorithm.comparator.ResultComparator;
 import com.westlake.air.propro.algorithm.feature.DIAScorer;
 import com.westlake.air.propro.algorithm.fitter.LinearFitter;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
@@ -13,10 +11,9 @@ import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.algorithm.parser.MsmsParser;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.dao.AnalyseDataDAO;
+import com.westlake.air.propro.domain.bean.file.TableFile;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
-import com.westlake.air.propro.domain.db.AnalyseDataDO;
-import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
-import com.westlake.air.propro.domain.db.ExperimentDO;
+import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.service.*;
@@ -70,7 +67,7 @@ public class TestController extends BaseController {
     @Autowired
     LinearFitter linearFitter;
     @Autowired
-    ResultComparator resultComparator;
+    ResultCompareService resultCompareService;
 
     public static float MZ_EXTRACT_WINDOW = 0.05f;
     public static float RT_EXTRACT_WINDOW = 1200f;
@@ -81,9 +78,9 @@ public class TestController extends BaseController {
     @RequestMapping("testLMS")
     @ResponseBody
     String testLMS(Model model, RedirectAttributes redirectAttributes) {
-        String a = resultComparator.getProproProteins("5d035ed3fc6f9e2f6cab6391", true).size() + "";
-        String b = resultComparator.getProproProteins("5d037a57fc6f9e4100b55d81", true).size() + "";
-        String c = resultComparator.getProproProteins("5d038111fc6f9e4100b74990", true).size() + "";
+        String a = resultCompareService.getProproProteins("5d035ed3fc6f9e2f6cab6391", true).size() + "";
+        String b = resultCompareService.getProproProteins("5d037a57fc6f9e4100b55d81", true).size() + "";
+        String c = resultCompareService.getProproProteins("5d038111fc6f9e4100b74990", true).size() + "";
         return a + ":" + b + ":" + c;
     }
 
@@ -356,32 +353,84 @@ public class TestController extends BaseController {
     @RequestMapping("compare")
     @ResponseBody
     String compareTest(){
-        String analyseOverviewId = "5d07c06ce0073c6ffc67fcb0";
-        String filePath = "P:\\data\\Spectronaut_vs\\openswath_result.tsv";
-        resultComparator.proteinResults(analyseOverviewId, filePath);
-        resultComparator.peptideRefResults(analyseOverviewId, filePath);
+//        String analyseOverviewId = "5d087c33e24d2e62a82055a3";
+//        String filePath = "P:\\data\\HCC_sciex\\pyprophet\\D20181207yix_HCC_SW_T_46A_with_dscore_filtered.tsv";
+//        HashSet<String> result = resultComparator.getFileOnlyPepRef(analyseOverviewId, filePath);
+//        resultComparator.proteinResults(analyseOverviewId, filePath);
+//        resultComparator.peptideRefResults(analyseOverviewId, filePath);
 //        resultComparator.peptideSeqResults(analyseOverviewId, filePath);
 //        resultComparator.silacResults(analyseOverviewId, filePath);
+        String projectIdOld = "5d08705fe0073c9b70faff6a";
+        String projectId = "5d11dd3f33251e8512a2f402";
+        String libraryId = "5d0870dce0073c9b70fb008f";
+        String matrixFilePath = "P:\\data\\HCC_QE3\\HCC_20190106_dia_os_peptides_matrix.tsv";
+        String matrixFilePathNew = "P:\\data\\HCC_QE3\\QEpeptides_2019626.txt";
+//        String projectId = "5d087107e0073c9b70fb0091";
+//        String matrixFilePath = "P:\\data\\HCC_sciex\\HCC_20190114_swath_os_peptides_matrix.tsv";
+//        resultCompareService.compareMatrix(projectId, matrixFilePathNew, 0, true);
+        resultCompareService.printProteinCoverage(projectId, libraryId, matrixFilePathNew);
         return null;
     }
 
     @RequestMapping("compareRep")
     @ResponseBody
     String compareRepTest(){
-        String projectId = "5d08705fe0073c9b70faff6a";
-        String filePath = "P:\\data\\HCC_QE3\\HCC_20190106_dia_os_peptides_matrix.tsv";
-        resultComparator.compareReplicate(projectId, filePath, "C20181210yix_HCC_DIA_T_17A", "C20181218yix_HCC_DIA_T_17B");
-        resultComparator.compareReplicate(projectId, filePath, "C20181210yix_HCC_DIA_T_18A", "C20181218yix_HCC_DIA_T_18B");
-        resultComparator.compareReplicate(projectId, filePath, "C20181210yix_HCC_DIA_T_24A", "C20181218yix_HCC_DIA_T_24B");
-        resultComparator.compareReplicate(projectId, filePath, "C20181208yix_HCC_DIA_T_46A", "C20181218yix_HCC_DIA_T_46B");
-        resultComparator.compareReplicate(projectId, filePath, "C20181208yix_HCC_DIA_T_48A", "C20181218yix_HCC_DIA_T_48B");
-        projectId = "5d087107e0073c9b70fb0091";
-        filePath = "P:\\data\\HCC_sciex\\HCC_20190114_swath_os_peptides_matrix.tsv";
-        resultComparator.compareReplicate(projectId, filePath, "D20181213yix_HCC_SW_T_17A", "D20181217yix_HCC_SW_T_17B");
-        resultComparator.compareReplicate(projectId, filePath, "D20181213yix_HCC_SW_T_18A", "D20181217yix_HCC_SW_T_18B");
-        resultComparator.compareReplicate(projectId, filePath, "D20181213yix_HCC_SW_T_24A", "D20181217yix_HCC_SW_T_24B");
-        resultComparator.compareReplicate(projectId, filePath, "D20181207yix_HCC_SW_T_46A", "D20181217yix_HCC_SW_T_46B");
-        resultComparator.compareReplicate(projectId, filePath, "D20181207yix_HCC_SW_T_48A", "D20181217yix_HCC_SW_T_48B");
+//        String projectId1 = "5d08705fe0073c9b70faff6a";
+//        String filePath1 = "P:\\data\\HCC_QE3\\HCC_20190106_dia_os_peptides_matrix.tsv";
+//        resultComparator.compareReplicate(projectId1, filePath1, "C20181210yix_HCC_DIA_T_17A", "C20181218yix_HCC_DIA_T_17B");
+//        resultComparator.compareReplicate(projectId1, filePath1, "C20181210yix_HCC_DIA_T_18A", "C20181218yix_HCC_DIA_T_18B");
+//        resultComparator.compareReplicate(projectId1, filePath1, "C20181210yix_HCC_DIA_T_24A", "C20181218yix_HCC_DIA_T_24B");
+//        resultComparator.compareReplicate(projectId1, filePath1, "C20181208yix_HCC_DIA_T_46A", "C20181218yix_HCC_DIA_T_46B");
+//        resultComparator.compareReplicate(projectId1, filePath1, "C20181208yix_HCC_DIA_T_48A", "C20181218yix_HCC_DIA_T_48B");
+        String projectId2 = "5d08705fe0073c9b70faff6a";
+        String filePath2 = "P:\\data\\HCC_sciex\\HCC_20190114_swath_os_peptides_matrix.tsv";
+        resultCompareService.compareMatrixReplicate(projectId2, filePath2, "D20181213yix_HCC_SW_T_17A", "D20181217yix_HCC_SW_T_17B", 0, false);
+//        resultComparator.compareReplicate(projectId2, filePath2, "D20181213yix_HCC_SW_T_18A", "D20181217yix_HCC_SW_T_18B");
+//        resultComparator.compareReplicate(projectId2, filePath2, "D20181213yix_HCC_SW_T_24A", "D20181217yix_HCC_SW_T_24B");
+//        resultComparator.compareReplicate(projectId2, filePath2, "D20181207yix_HCC_SW_T_46A", "D20181217yix_HCC_SW_T_46B");
+//        resultComparator.compareReplicate(projectId2, filePath2, "D20181207yix_HCC_SW_T_48A", "D20181217yix_HCC_SW_T_48B");
+        return null;
+    }
+
+    @RequestMapping("sequence")
+    @ResponseBody
+    String getSequenceNum(){
+        String libraryId = "5d08739ee0073c9b70042eb5";
+        List<PeptideDO> peptideDOList = peptideService.getAllByLibraryIdAndIsDecoy(libraryId, false);
+        HashSet<String> sequenceSet = new HashSet<>();
+        for (PeptideDO peptideDO: peptideDOList){
+            sequenceSet.add(peptideDO.getSequence());
+        }
+        System.out.println(sequenceSet.size());
+        return null;
+    }
+
+    @RequestMapping("libconfirm")
+    @ResponseBody
+    String libConfirmTest(){
+        String filePath = "P:\\data\\HCC_sciex\\HCC_20190114_swath_os_peptides_matrix.tsv";
+        String libraryId = "5d08739ee0073c9b70042eb5";
+        List<PeptideDO> peptideDOList = peptideService.getAllByLibraryIdAndIsDecoy(libraryId, false);
+        HashSet<String> libPepRefSet = new HashSet<>();
+        for (PeptideDO peptideDO: peptideDOList){
+            libPepRefSet.add(peptideDO.getPeptideRef());
+        }
+        HashSet<String> filePepRefSet = new HashSet<>();
+        try{
+            TableFile ppFile = FileUtil.readTableFile(filePath);
+            List<String[]> fileData = ppFile.getFileData();
+            for (String[] line: fileData){
+                String[] pepInfo = line[0].split("_");
+                filePepRefSet.add(pepInfo[1]+"_"+pepInfo[2]);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        for (String pepRef: filePepRefSet){
+            if (!libPepRefSet.contains(pepRef)){
+                System.out.println(pepRef);
+            }
+        }
         return null;
     }
 

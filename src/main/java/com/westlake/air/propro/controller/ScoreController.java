@@ -201,7 +201,7 @@ public class ScoreController extends BaseController {
     @RequestMapping(value = "/airus")
     String airus(Model model,
                  @RequestParam(value = "overviewId", required = true) String overviewId,
-                 @RequestParam(value = "classifier", required = true) String classifier,
+                 @RequestParam(value = "classifier", required = false, defaultValue = "lda") String classifier,
                  RedirectAttributes redirectAttributes) {
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
