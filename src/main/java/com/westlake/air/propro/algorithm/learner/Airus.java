@@ -135,8 +135,6 @@ public class Airus {
                         .build());
         MongoDatabase database = mongoClient.getDatabase("propro");
         MongoCollection<Document> collection = database.getCollection("analyseData");
-        //collection.createIndex(Indexes.ascending("peptideRef","isDecoy","overviewId"));
-        //List<AnalyseDataDO> dataDO_list = new ArrayList<AnalyseDataDO>();
         List<UpdateOneModel<Document>> documentList = new ArrayList<>();
         Long getTime = 0L, updateTime = 0L, insertTime = 0L,startTime = 0L;
         for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
