@@ -286,7 +286,6 @@ public class ProjectController extends BaseController {
         ProjectDO project = projectService.getById(id);
         PermissionUtil.check(project);
 
-        String name = project.getName();
         List<ExperimentDO> expList = experimentService.getAllByProjectId(id);
         for (ExperimentDO experimentDO : expList) {
             String expId = experimentDO.getId();
@@ -294,6 +293,8 @@ public class ProjectController extends BaseController {
             swathIndexService.deleteAllByExpId(expId);
             analyseOverviewService.deleteAllByExpId(experimentDO.getId());
         }
+
+        projectService.delete(id);
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
         return "redirect:/project/list";
     }

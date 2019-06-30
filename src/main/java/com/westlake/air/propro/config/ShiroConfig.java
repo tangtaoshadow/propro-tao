@@ -42,7 +42,7 @@ public class ShiroConfig {
     public DefaultWebSecurityManager securityManager(Realm shiroRealm, CacheManager cacheManager, RememberMeManager manager) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         securityManager.setCacheManager(cacheManager);
-//        securityManager.setRememberMeManager(manager);//记住Cookie
+        securityManager.setRememberMeManager(manager);//记住Cookie
         securityManager.setRealm(shiroRealm);
         return securityManager;
     }
