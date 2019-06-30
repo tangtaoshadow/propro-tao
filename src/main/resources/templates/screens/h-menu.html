@@ -39,21 +39,9 @@
                         </a>
                     </li>
                     <li class="m-menu__item " aria-haspopup="true">
-                        <a th:href="@{/task/create(templateName=UPLOAD_LIBRARY_FILE)}" class="m-menu__link ">
+                        <a th:href="@{/library/create}" class="m-menu__link ">
                             <i class="m-menu__link-icon flaticon-file"></i>
                             <span class="m-menu__link-text" th:text="#{import_library}"></span>
-                        </a>
-                    </li>
-                    <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
-                        <a th:href="@{/task/create(templateName=UPLOAD_EXPERIMENT_FILE)}" class="m-menu__link ">
-                            <i class="m-menu__link-icon flaticon-diagram"></i>
-                            <span class="m-menu__link-text" th:text="#{import_experiment}"></span>
-                        </a>
-                    </li>
-                    <li class="m-menu__item " data-redirect="true" aria-haspopup="true">
-                        <a th:href="@{/experiment/batchcreate}" class="m-menu__link ">
-                            <i class="m-menu__link-icon flaticon-diagram"></i>
-                            <span class="m-menu__link-text" th:text="#{batch_import_experiment}"></span>
                         </a>
                     </li>
                 </ul>

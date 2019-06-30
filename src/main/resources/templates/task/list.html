@@ -60,6 +60,7 @@
                     <th width="10%" th:text="#{label_task_template}"></th>
                     <th width="5%" th:text="#{label_task_status}"></th>
                     <th width="5%" th:text="#{label_task_cost_time}"></th>
+                    <th width="5%" th:text="#{label_creator}"></th>
                     <th width="10%" th:text="#{label_create_date}"></th>
                     <th width="10%" th:text="#{label_last_modified_date}"></th>
                     <th width="20%" th:text="#{label_operation}"></th>
@@ -71,6 +72,7 @@
                     <td th:text="${task.taskTemplate}"></td>
                     <td th:text="${task.status}"></td>
                     <td th:text="|${task.totalCost} ms|"></td>
+                    <td th:text="${task.creator}"></td>
                     <td th:text="${#dates.format(task.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${#dates.format(task.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>

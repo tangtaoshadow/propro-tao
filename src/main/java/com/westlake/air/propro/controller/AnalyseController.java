@@ -155,7 +155,6 @@ public class AnalyseController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED);
             return "redirect:/analyse/overview/list";
         }
-        String exportPath = project.getExportPath();
 
         int pageSize = 1000;
         AnalyseDataQuery query = new AnalyseDataQuery(id);
@@ -166,7 +165,8 @@ public class AnalyseController extends BaseController {
         int count = analyseDataService.count(query).intValue();
         int totalPage = count % pageSize == 0 ? count / pageSize : (count / pageSize + 1);
 
-        File file = new File(exportPath + overviewResult.getModel().getName() + "[" + overviewResult.getModel().getId() + "].txt");
+        String exportPath = RepositoryUtil.buildOutputPath(project.getName(), overviewResult.getModel().getName() + "[" + overviewResult.getModel().getId() + "].txt");
+        File file = new File(exportPath);
         if (!file.exists()) {
             file.getParentFile().mkdirs();
             file.createNewFile();
@@ -380,10 +380,6 @@ public class AnalyseController extends BaseController {
             model.addAttribute(ERROR_MSG, ResultCode.IRT_FIRST.getMessage());
             return "analyse/data/consultation";
         }
-        if (experimentResult.getModel().getAirdPath() == null || experimentResult.getModel().getAirdPath().isEmpty()) {
-            model.addAttribute(ERROR_MSG, ResultCode.AIRD_COMPRESSION_FIRST.getMessage());
-            return "analyse/data/consultation";
-        }
         //校验权限
         PermissionUtil.check(experimentResult.getModel());
 
@@ -510,7 +506,6 @@ public class AnalyseController extends BaseController {
                 model.addAttribute("bestRt", (double) Math.round(data.getBestRt() * 100) / 100);
             }
         }
-
 
         model.addAttribute("rt", rtArray);
         model.addAttribute("cutInfoFromDic", cutInfoFromDic);

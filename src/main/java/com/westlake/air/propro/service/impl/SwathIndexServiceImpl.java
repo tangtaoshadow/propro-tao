@@ -54,16 +54,16 @@ public class SwathIndexServiceImpl implements SwathIndexService {
     public MzIntensityPairs getNearestSpectrumByRt(TreeMap<Float, MzIntensityPairs> rtMap, Double rt) {
         Float[] fArray = new Float[rtMap.keySet().size()];
         rtMap.keySet().toArray(fArray);
-        int leftIndex = ConvolutionUtil.findLeftIndex(fArray, rt.floatValue());
-        int finalIndex = leftIndex;
-        try{
-            if((fArray[leftIndex] - rt) > (fArray[leftIndex+1] - rt)){
-                finalIndex = leftIndex + 1;
-            }
-        }catch (Exception e){
-            //leftIndex == fArray.length-1的时候数组溢出,直接返回finalIndex
-            return rtMap.get(fArray[finalIndex]);
+        int rightIndex = ConvolutionUtil.findRightIndex(fArray, rt.floatValue());
+        int finalIndex = rightIndex;
+        if (rightIndex == -1){
+            //Max value in fArray is less than rt. The max index of fArray is the nearest index.
+            finalIndex = fArray.length - 1;
+        }else if(rightIndex != 0 && (fArray[rightIndex] - rt) > (fArray[rightIndex-1] - rt)){
+            //if rightIndex == 0, finalIndex == 0
+            finalIndex = rightIndex - 1;
         }
+
         return rtMap.get(fArray[finalIndex]);
     }
 

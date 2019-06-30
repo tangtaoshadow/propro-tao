@@ -71,24 +71,7 @@ public class LumsParams {
     HashMap<Float, Float[]> rtRangeMap;
 
     public LumsParams(){
-        scoreTypes.add(ScoreType.MainScore.getTypeName()); //存储的第一个位置默认存放的是MainScore
-        scoreTypes.add(ScoreType.WeightedTotalScore.getTypeName()); //存储的第一个位置默认存放的是MainScore
-        scoreTypes.add(ScoreType.IntensityScore.getTypeName());
-        scoreTypes.add(ScoreType.LibraryCorr.getTypeName());
-        scoreTypes.add(ScoreType.LibraryRsmd.getTypeName());
-        scoreTypes.add(ScoreType.LogSnScore.getTypeName());
-        scoreTypes.add(ScoreType.MassdevScore.getTypeName());
-        scoreTypes.add(ScoreType.MassdevScoreWeighted.getTypeName());
-        scoreTypes.add(ScoreType.XcorrShape.getTypeName());
-        scoreTypes.add(ScoreType.XcorrShapeWeighted.getTypeName());
-        scoreTypes.add(ScoreType.LibraryDotprod.getTypeName());
-        scoreTypes.add(ScoreType.LibraryManhattan.getTypeName());
-        scoreTypes.add(ScoreType.LibrarySangle.getTypeName());
-        scoreTypes.add(ScoreType.LibraryRootmeansquare.getTypeName());
-        scoreTypes.add(ScoreType.ManhattScore.getTypeName());
-        scoreTypes.add(ScoreType.NormRtScore.getTypeName());
-        scoreTypes.add(ScoreType.XcorrCoelution.getTypeName());
-        scoreTypes.add(ScoreType.XcorrCoelutionWeighted.getTypeName());
+        scoreTypes = ScoreType.getAllTypesName();
     }
 
 }

@@ -98,7 +98,7 @@ public class AnalyseOverviewDO extends BaseDO {
     //本次分析最终的选峰数目
     Long peakCount = 0L;
 
-    //用于打分的子分数模板快照,会和AnalyseDataDO中的每一个FeatureScore中的scores对象做一一映射
+    //用于打分的子分数类型快照,会和AnalyseDataDO中的每一个FeatureScore中的scores对象做一一映射
     List<String> scoreTypes;
 
     //备忘录

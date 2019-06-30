@@ -57,7 +57,7 @@
 <!--                        <span class="m-badge m-badge&#45;&#45;danger m-badge&#45;&#45;wide">Private</span>-->
 <!--                    </td>-->
                     <td th:text="${project.type}"></td>
-                    <td th:text="${project.repository}"></td>
+                    <td th:text="|${repository}${project.name}|"></td>
                     <td th:text="${project.ownerName}"></td>
                     <td>
                         <span th:each="label:${project.labels}" class="m-badge m-badge--brand m-badge--wide" th:text="${label}"></span>
@@ -65,10 +65,15 @@
                     <td th:text="${#dates.format(project.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <!--                    <td th:text="${#dates.format(project.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>-->
                     <td>
-                        <a th:href="@{/experiment/batchcreate(projectName=${project?.name})}" data-toggle="m-tooltip"
-                           th:title="#{label_add_exp}"
+<!--                        <a th:href="@{/experiment/batchcreate(projectName=${project?.name})}" data-toggle="m-tooltip"-->
+<!--                           th:title="#{label_add_exp}"-->
+<!--                           class="btn btn-brand m-btn m-btn&#45;&#45;icon m-btn&#45;&#45;icon-only">-->
+<!--                            <i class="fa fa-plus"></i>-->
+<!--                        </a>-->
+                        <a th:href="@{/project/scan(projectId=${project?.id})}" data-toggle="m-tooltip"
+                           th:title="#{label_scan_and_update}"
                            class="btn btn-brand m-btn m-btn--icon m-btn--icon-only">
-                            <i class="fa fa-plus"></i>
+                            <i class="fa fa-search"></i>
                         </a>
                         <a th:href="@{/experiment/list(projectName=${project.name})}" data-toggle="m-tooltip"
                            th:title="#{label_project_exps}"
@@ -100,7 +105,7 @@
 <!--                           class="btn btn-danger m-btn m-btn&#45;&#45;icon m-btn&#45;&#45;icon-only">-->
 <!--                            <i class="fa fa-opencart"></i>-->
 <!--                        </a>-->
-                        <a th:href="@{/project/delete/{id}(id=${project.id})}" data-toggle="m-tooltip"
+                        <a th:href="@{/project/deleteAll/{id}(id=${project.id})}" data-toggle="m-tooltip"
                            th:title="#{btn_delete}"
                            class="btn btn-danger m-btn m-btn--icon m-btn--icon-only">
                             <i class="fa fa-remove"></i>

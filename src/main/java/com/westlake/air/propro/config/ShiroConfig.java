@@ -1,7 +1,6 @@
 package com.westlake.air.propro.config;
 
 import at.pollux.thymeleaf.shiro.dialect.ShiroDialect;
-import com.westlake.air.propro.service.impl.ShiroRealm;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.cache.MemoryConstrainedCacheManager;
@@ -43,7 +42,7 @@ public class ShiroConfig {
     public DefaultWebSecurityManager securityManager(Realm shiroRealm, CacheManager cacheManager, RememberMeManager manager) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         securityManager.setCacheManager(cacheManager);
-//        securityManager.setRememberMeManager(manager);//记住Cookie
+        securityManager.setRememberMeManager(manager);//记住Cookie
         securityManager.setRealm(shiroRealm);
         return securityManager;
     }
@@ -114,11 +113,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/assets/**", "anon");
         filterChainDefinitionMap.put("/instances", "anon");
         filterChainDefinitionMap.put("/actuator/**", "anon");
-//        filterChainDefinitionMap.put("/welcome", "anon");
         filterChainDefinitionMap.put("/login/**", "anon");
-//        filterChainDefinitionMap.put("/login/logout", "logout");
-//        filterChainDefinitionMap.put("/user", "roles[user]");
-        filterChainDefinitionMap.put("/register", "roles[admin]");
 
         filterChainDefinitionMap.put("/**", "user");//user允许 记住我和授权用户 访问，但在进行下单和支付时建议使用authc
 

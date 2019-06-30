@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.algorithm.extract.Extractor;
+import com.westlake.air.propro.config.VMProperties;
 import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
@@ -20,7 +21,9 @@ import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.exception.UnauthorizedAccessException;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.PermissionUtil;
+import com.westlake.air.propro.utils.RepositoryUtil;
 import com.westlake.air.propro.utils.ScoreUtil;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -58,6 +61,8 @@ public class ExperimentController extends BaseController {
     ProjectService projectService;
     @Autowired
     Extractor extractor;
+    @Autowired
+    VMProperties vmProperties;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -129,110 +134,6 @@ public class ExperimentController extends BaseController {
         return "experiment/batchcreate";
     }
 
-    @RequestMapping(value = "/add")
-    String add(Model model,
-               @RequestParam(value = "name", required = true) String name,
-               @RequestParam(value = "projectName", required = true) String projectName,
-               @RequestParam(value = "filePath", required = true) String filePath,
-               @RequestParam(value = "description", required = false) String description,
-               RedirectAttributes redirectAttributes) {
-
-        model.addAttribute("name", name);
-        model.addAttribute("description", description);
-
-        ProjectDO project = projectService.getByName(projectName);
-        model.addAttribute("projectName", projectName);
-        if (project == null) {
-            model.addAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED.getMessage());
-            return "experiment/create";
-        }
-        PermissionUtil.check(project);
-        //Check Params Start
-        if (filePath == null || filePath.isEmpty()) {
-            model.addAttribute(ERROR_MSG, ResultCode.FILE_LOCATION_CANNOT_BE_EMPTY.getMessage());
-            return "experiment/create";
-        }
-        model.addAttribute("filePath", filePath);
-        File file = new File(filePath);
-
-        if (!file.exists()) {
-            model.addAttribute(ERROR_MSG, ResultCode.FILE_NOT_EXISTED.getMessage());
-            return "experiment/create";
-        }
-
-        ExperimentDO experimentDO = new ExperimentDO();
-        experimentDO.setName(name);
-        experimentDO.setOwnerName(project.getOwnerName());
-        experimentDO.setProjectId(project.getId());
-        experimentDO.setDescription(description);
-        experimentDO.setProjectName(projectName);
-        experimentDO.setType(project.getType());
-        experimentDO.setAirdPath(filePath);
-        ResultDO result = experimentService.insert(experimentDO);
-        if (result.isFailed()) {
-            model.addAttribute(ERROR_MSG, result.getMsgInfo());
-            return "experiment/create";
-        }
-
-        TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_EXPERIMENT_FILE, experimentDO.getName());
-        taskService.insert(taskDO);
-
-        experimentTask.saveAirdTask(experimentDO, file.getPath(), taskDO);
-        return "redirect:/task/detail/" + taskDO.getId();
-    }
-
-    @RequestMapping(value = "/batchadd", method = {RequestMethod.POST})
-    String batchAdd(Model model,
-                    @RequestParam(value = "projectName", required = false) String projectName,
-                    ExpVO exps,
-                    RedirectAttributes redirectAttributes) {
-
-        String errorInfo = "";
-        List<Exp> expList = exps.getExps();
-        ProjectDO project = projectService.getByName(projectName);
-        PermissionUtil.check(project);
-
-        for (Exp exp : expList) {
-            if (exp.getFilePath() == null || exp.getFilePath().isEmpty()) {
-                errorInfo += ResultCode.FILE_LOCATION_CANNOT_BE_EMPTY.getMessage() + ":" + exp.getName() + "\r\n";
-            }
-            File file = new File(exp.getFilePath());
-
-            if (!file.exists()) {
-                errorInfo += ResultCode.FILE_NOT_EXISTED.getMessage() + ":" + exp.getFilePath() + "\r\n";
-                continue;
-            }
-
-            ExperimentDO experimentDO = new ExperimentDO();
-            experimentDO.setProjectName(projectName);
-            experimentDO.setName(exp.getName());
-            experimentDO.setProjectId(project.getId());
-            experimentDO.setOwnerName(project.getOwnerName());
-            experimentDO.setDescription(exp.getDescription());
-            experimentDO.setAirdPath(exp.getFilePath());
-            experimentDO.setType(project.getType());
-
-            ResultDO result = experimentService.insert(experimentDO);
-            if (result.isFailed()) {
-                errorInfo += result.getMsgInfo() + ":" + exp.getName() + "\r\n";
-            }
-
-            TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_EXPERIMENT_FILE, experimentDO.getName());
-            if (!errorInfo.isEmpty()) {
-                taskDO.addLog(errorInfo);
-                taskDO.finish(TaskStatus.FAILED.getName());
-            } else {
-                taskService.insert(taskDO);
-                experimentTask.saveAirdTask(experimentDO, file.getPath(), taskDO);
-            }
-        }
-
-        if (!errorInfo.isEmpty()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, errorInfo);
-        }
-        return "redirect:/task/list?taskTemplate=" + TaskTemplate.UPLOAD_EXPERIMENT_FILE.getName();
-    }
-
     @RequestMapping(value = "/edit/{id}")
     String edit(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
 
@@ -251,8 +152,9 @@ public class ExperimentController extends BaseController {
     String detail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isSuccess()) {
-            PermissionUtil.check(resultDO.getModel());
-            model.addAttribute("experiment", resultDO.getModel());
+            ExperimentDO exp = resultDO.getModel();
+            PermissionUtil.check(exp);
+            model.addAttribute("experiment", exp);
             return "experiment/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
@@ -298,8 +200,6 @@ public class ExperimentController extends BaseController {
         experimentDO.setType(type);
         experimentDO.setProjectName(projectName);
         experimentDO.setProjectId(project.getId());
-        experimentDO.setAirdPath(airdPath);
-        experimentDO.setAirdIndexPath(airdIndexPath);
         experimentDO.setDescription(description);
         experimentDO.setIRtLibraryId(iRtLibraryId);
         IrtResult irtResult = experimentDO.getIrtResult();
@@ -469,11 +369,13 @@ public class ExperimentController extends BaseController {
             return "redirect:/irt/" + id;
         }
         PermissionUtil.check(resultDO.getModel());
-        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName() + ":" + iRtLibraryId);
+        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName() + ":" + iRtLibraryId+"-Num:1");
         taskService.insert(taskDO);
 
         SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);
-        experimentTask.convAndIrt(resultDO.getModel(), iRtLibraryId, mzExtractWindow, sigmaSpacing, taskDO);
+        List<ExperimentDO> exps = new ArrayList<>();
+        exps.add(resultDO.getModel());
+        experimentTask.convAndIrt(exps, iRtLibraryId, mzExtractWindow, sigmaSpacing, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }
@@ -481,7 +383,7 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/irtresult")
     @ResponseBody
     ResultDO<JSONObject> irtResult(Model model,
-                              @RequestParam(value = "expId", required = false) String expId) {
+                                   @RequestParam(value = "expId", required = false) String expId) {
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
         MzIntensityPairs pairs = null;
 
@@ -494,7 +396,7 @@ public class ExperimentController extends BaseController {
         ExperimentDO experimentDO = expResult.getModel();
 
         IrtResult irtResult = experimentDO.getIrtResult();
-        if(irtResult == null){
+        if (irtResult == null) {
             return ResultDO.buildError(ResultCode.IRT_FIRST);
         }
 
@@ -502,11 +404,11 @@ public class ExperimentController extends BaseController {
         JSONArray selectedArray = new JSONArray();
         JSONArray unselectedArray = new JSONArray();
         JSONArray lineArray = new JSONArray();
-        for(Double[] pair : irtResult.getSelectedPairs()){
+        for (Double[] pair : irtResult.getSelectedPairs()) {
             selectedArray.add(JSONArray.toJSON(pair));
-            lineArray.add(JSONArray.toJSON(new Double[]{pair[0], (pair[0]- irtResult.getSi().getIntercept())/irtResult.getSi().getSlope()}));
+            lineArray.add(JSONArray.toJSON(new Double[]{pair[0], (pair[0] - irtResult.getSi().getIntercept()) / irtResult.getSi().getSlope()}));
         }
-        for(Double[] pair : irtResult.getUnselectedPairs()){
+        for (Double[] pair : irtResult.getUnselectedPairs()) {
             unselectedArray.add(JSONArray.toJSON(pair));
         }
 

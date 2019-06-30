@@ -163,6 +163,14 @@ public enum ScoreType {
         return types;
     }
 
+    public static List<String> getAllTypesName(){
+        List<String> scoreNameList = new ArrayList<>();
+        for (ScoreType type: values()){
+            scoreNameList.add(type.getTypeName());
+        }
+        return scoreNameList;
+    }
+
     public static String getPyProphetScoresColumns(String spliter) {
         StringBuilder columns = new StringBuilder();
         List<ScoreType> scoreTypes = ScoreType.getUsedTypes();

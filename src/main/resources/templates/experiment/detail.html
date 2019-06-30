@@ -46,34 +46,61 @@
                         <div class="form-group m-form__group row">
                             <label for="id" class="col-2 col-form-label" th:text="#{label_exp_id}">
                             </label>
-                            <div class="col-10">
+                            <div class="col-4">
                                 <input type="text" class="form-control m-input" id="id" name="id" readonly
                                        th:value="${experiment?.id}">
                             </div>
-                        </div>
-                        <div class="form-group m-form__group row">
                             <label for="name" class="col-2 col-form-label" th:text="#{label_exp_name}">
                             </label>
-                            <div class="col-10">
+                            <div class="col-4">
                                 <input type="text" class="form-control m-input" id="name" name="name" readonly
                                        th:value="${experiment?.name}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="type" class="col-2 col-form-label" th:text="#{label_exp_type}">
+                            <label for="id" class="col-2 col-form-label" th:text="#{label_alias}">
                             </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="type" name="type" readonly
-                                       th:value="${experiment?.type}">
-                                <span>DIA_SWATH,PRM</span>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="alias" name="alias" readonly
+                                       th:value="${experiment?.alias}">
                             </div>
                         </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="type" class="col-2 col-form-label" th:text="#{label_exp_type}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="type" name="type" readonly
+                                       th:value="${experiment?.type}">
+                            </div>
+                            <label for="ownerName" class="col-2 col-form-label" th:text="#{label_owner}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="ownerName" name="ownerName"
+                                       readonly th:value="${experiment?.ownerName}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="projectId" class="col-2 col-form-label" th:text="#{label_project_id}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="projectId" readonly
+                                       th:value="${experiment?.projectId}">
+                            </div>
+                            <label for="projectName" class="col-2 col-form-label" th:text="#{label_project_name}">
+                            </label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="projectName" readonly
+                                       th:value="${experiment?.projectName}">
+                            </div>
+                        </div>
+
                         <div class="form-group m-form__group row">
                             <label for="airdPath" class="col-2 col-form-label" th:text="#{label_aird_file_path}">
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="airdPath" readonly
-                                       th:value="${experiment?.airdPath}">
+                                       th:value="${experiment?.getAirdPath()}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -81,7 +108,7 @@
                             </label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="airdIndexPath" readonly
-                                       th:value="${experiment?.airdIndexPath}">
+                                       th:value="${experiment?.getAirdIndexPath()}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -116,14 +143,7 @@
                                           th:text="${experiment?.windowRanges}"></textarea>
                             </div>
                         </div>
-                        <div class="form-group m-form__group row">
-                            <label for="ownerName" class="col-2 col-form-label" th:text="#{label_owner}">
-                            </label>
-                            <div class="col-10">
-                                <input type="text" class="form-control m-input" id="ownerName" name="ownerName"
-                                       readonly th:value="${experiment?.ownerName}">
-                            </div>
-                        </div>
+
                         <div class="form-group m-form__group row">
                             <label for="manufacturer" class="col-2 col-form-label">Manufacturer</label>
                             <div class="col-4">
@@ -205,21 +225,20 @@
                         <div class="form-group m-form__group row">
                             <label for="createDate" class="col-2 col-form-label" th:text="#{label_create_date}">
                             </label>
-                            <div class="col-10">
+                            <div class="col-4">
                                 <input type="text" class="form-control m-input" id="createDate" name="createDate"
                                        readonly
                                        th:value="${#dates.format(experiment?.createDate, 'yyyy-MM-dd HH:mm:ss')}">
                             </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="model" class="col-2 col-form-label" th:text="#{label_instrument_model}">
+                            <label for="model" class="col-2 col-form-label" th:text="#{label_last_modified_date}">
                             </label>
-                            <div class="col-10">
+                            <div class="col-4">
                                 <input type="text" class="form-control m-input" id="lastModifiedDate"
                                        name="lastModifiedDate" readonly
                                        th:value="${#dates.format(experiment?.lastModifiedDate, 'yyyy-MM-dd HH:mm:ss')}">
                             </div>
                         </div>
+
                         <div class="form-group m-form__group row">
                             <label for="description" class="col-2 col-form-label" th:text="#{label_detail_description}">
                             </label>
@@ -231,8 +250,8 @@
                         <div class="form-group m-form__group row">
                             <label for="features" class="col-2 col-form-label" th:text="#{label_features}"></label>
                             <div class="col-10">
-                                <input type="text" class="form-control m-input" id="features" name="features"
-                                       readonly th:value="${experiment?.features}">
+                                <textarea class="form-control m-input" id="features" name="features" rows="4"
+                                          th:text="${experiment?.features}"></textarea>
                             </div>
                         </div>
                     </div>

@@ -32,7 +32,7 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
 
     @Override
     protected boolean allowSort() {
-        return false;
+        return true;
     }
 
     @Override

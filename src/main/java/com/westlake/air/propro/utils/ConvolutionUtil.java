@@ -25,18 +25,24 @@ public class ConvolutionUtil {
     public static float accumulation(Float[] mzArray, Float[] intensityArray, Float mzStart, Float mzEnd) {
         float result = 0f;
         try {
-            int start = findLeftIndex(mzArray, mzStart);
-            if (start == -1) {
+            //Index of first mz bigger than mzStart
+            int rightIndex = findRightIndex(mzArray, mzStart);
+
+            //No element is bigger than mzStart in mzArray
+            if (rightIndex == -1) {
                 return 0f;
             }
-            while (mzArray[start] <= mzEnd) {
+            int iterIndex = rightIndex;
+
+            //Accumulate when iterIndex in (mzStart, mzEnd). Return 0 if rightIndex's mz is bigger than mzEnd.
+            while (mzArray[iterIndex] <= mzEnd) {
                 //信号小于35的均认为是噪音直接删除
-                if (intensityArray[start] <= 17) {
-                    start++;
+                if (intensityArray[iterIndex] <= 17) {
+                    iterIndex++;
                     continue;
                 }
-                result += intensityArray[start];
-                start++;
+                result += intensityArray[iterIndex];
+                iterIndex++;
             }
         } catch (Exception e) {
             return result;
@@ -99,9 +105,6 @@ public class ConvolutionUtil {
         if (experimentDO == null) {
             return ResultDO.buildError(ResultCode.EXPERIMENT_NOT_EXISTED);
         }
-        if (experimentDO.getAirdPath() == null || experimentDO.getAirdPath().isEmpty()) {
-            return ResultDO.buildError(ResultCode.FILE_NOT_EXISTED);
-        }
         File file = new File(experimentDO.getAirdPath());
         if (!file.exists()) {
             return ResultDO.buildError(ResultCode.FILE_NOT_EXISTED);
@@ -120,7 +123,7 @@ public class ConvolutionUtil {
      * @param target
      * @return
      */
-    public static int findLeftIndex(Float[] array, Float target) {
+    public static int findRightIndex(Float[] array, Float target) {
         int rightIndex = array.length - 1;
         if (target <= array[0]) {
             return 0;
@@ -140,7 +143,8 @@ public class ConvolutionUtil {
                 return tmp;
             }
         }
-        return leftIndex;
+
+        return rightIndex;
     }
 
     /**
