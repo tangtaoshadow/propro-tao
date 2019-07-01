@@ -107,7 +107,7 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
             query.addCriteria(Criteria.where("peptideRef").is(simpleFeatureScores.getPeptideRef()));
             query.addCriteria(Criteria.where("isDecoy").is(simpleFeatureScores.getIsDecoy()));
             Update update = new Update();
-            update.set("bestRT", simpleFeatureScores.getRt());
+            update.set("bestRt", simpleFeatureScores.getRt());
             update.set("intensitySum", simpleFeatureScores.getIntensitySum());
             update.set("fragIntFeature", simpleFeatureScores.getFragIntFeature());
             update.set("fdr", simpleFeatureScores.getFdr());
