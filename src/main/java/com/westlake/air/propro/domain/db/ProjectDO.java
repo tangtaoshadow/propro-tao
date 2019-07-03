@@ -32,6 +32,18 @@ public class ProjectDO extends BaseDO {
     //项目负责人名称
     String ownerName;
 
+    //默认的标准库
+    String libraryId;
+
+    //默认的标准库名称
+    String libraryName;
+
+    //默认的irt库Id
+    String iRtLibraryId;
+
+    //默认的irt库名称
+    String iRtLibraryName;
+
     //被授权的合作者
     List<String> collaborators;
 

@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by James Lu MiaoShan
@@ -82,6 +83,10 @@ public class ProjectController extends BaseController {
 
     @RequestMapping(value = "/create")
     String create(Model model) {
+
+        model.addAttribute("libraries", getLibraryList(0, true));
+        model.addAttribute("iRtLibraries", getLibraryList(1, true));
+
         return "project/create";
     }
 
@@ -90,6 +95,8 @@ public class ProjectController extends BaseController {
                @RequestParam(value = "name", required = true) String name,
                @RequestParam(value = "description", required = false) String description,
                @RequestParam(value = "type", required = true) String type,
+               @RequestParam(value = "libraryId", required = false) String libraryId,
+               @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
                RedirectAttributes redirectAttributes) {
 
         String ownerName = getCurrentUsername();
@@ -98,12 +105,16 @@ public class ProjectController extends BaseController {
         model.addAttribute("name", name);
         model.addAttribute("description", description);
         model.addAttribute("type", type);
+        model.addAttribute("libraryId", libraryId);
+        model.addAttribute("iRtLibraryId", iRtLibraryId);
 
         ProjectDO projectDO = new ProjectDO();
         projectDO.setName(name);
         projectDO.setDescription(description);
         projectDO.setOwnerName(ownerName);
         projectDO.setType(type);
+        projectDO.setLibraryId(libraryId);
+        projectDO.setIRtLibraryId(iRtLibraryId);
 
         ResultDO result = projectService.insert(projectDO);
         if (result.isFailed()) {
@@ -122,7 +133,8 @@ public class ProjectController extends BaseController {
     }
 
     @RequestMapping(value = "/edit/{id}")
-    String edit(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+    String edit(Model model, @PathVariable("id") String id,
+                RedirectAttributes redirectAttributes) {
 
         ProjectDO project = projectService.getById(id);
         if (project == null) {
@@ -130,9 +142,47 @@ public class ProjectController extends BaseController {
             return "redirect:/project/list";
         } else {
             PermissionUtil.check(project);
+            model.addAttribute("libraryId", project.getLibraryId());
+            model.addAttribute("iRtLibraryId", project.getIRtLibraryId());
+            model.addAttribute("libraries", getLibraryList(0, true));
+            model.addAttribute("iRtLibraries", getLibraryList(1, true));
             model.addAttribute("project", project);
             return "project/edit";
         }
+    }
+
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    String update(Model model, @RequestParam("id") String id,
+                  @RequestParam(value = "description", required = false) String description,
+                  @RequestParam(value = "type", required = true) String type,
+                  @RequestParam(value = "libraryId", required = false) String libraryId,
+                  @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
+                  RedirectAttributes redirectAttributes) {
+
+
+        ProjectDO project = projectService.getById(id);
+        PermissionUtil.check(project);
+
+        project.setDescription(description);
+        project.setType(type);
+        LibraryDO lib = libraryService.getById(libraryId);
+        if (lib != null) {
+            project.setLibraryId(lib.getId());
+            project.setLibraryName(lib.getName());
+        }
+
+        LibraryDO iRtLib = libraryService.getById(iRtLibraryId);
+        if (iRtLib != null) {
+            project.setIRtLibraryId(iRtLib.getId());
+            project.setIRtLibraryName(iRtLib.getName());
+        }
+
+        ResultDO result = projectService.update(project);
+        if (result.isFailed()) {
+            model.addAttribute(ERROR_MSG, result.getMsgInfo());
+            return "project/create";
+        }
+        return "redirect:/project/list";
     }
 
     @RequestMapping(value = "/scan")
@@ -200,7 +250,6 @@ public class ProjectController extends BaseController {
     @RequestMapping(value = "/irt")
     String irt(Model model,
                @RequestParam(value = "id", required = true) String id,
-               @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
                RedirectAttributes redirectAttributes) {
 
         ProjectDO project = projectService.getById(id);
@@ -209,7 +258,7 @@ public class ProjectController extends BaseController {
 
         model.addAttribute("exps", expList);
         model.addAttribute("project", project);
-        model.addAttribute("iRtLibraryId", iRtLibraryId);
+        model.addAttribute("iRtLibraryId", project.getIRtLibraryId());
         model.addAttribute("libraries", getLibraryList(1, true));
 
         return "project/irt";
@@ -239,7 +288,6 @@ public class ProjectController extends BaseController {
         experimentTask.convAndIrt(expList, iRtLibraryId, mzExtractWindow, sigmaSpacing, taskDO);
 
         return "redirect:/task/list";
-
     }
 
     @RequestMapping(value = "/setPublic/{id}")
@@ -318,11 +366,8 @@ public class ProjectController extends BaseController {
     @RequestMapping(value = "/extractor")
     String extractor(Model model,
                      @RequestParam(value = "id", required = true) String id,
-                     @RequestParam(value = "libraryId", required = false) String libraryId,
-                     @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
                      RedirectAttributes redirectAttributes) {
-        model.addAttribute("libraryId", libraryId);
-        model.addAttribute("iRtLibraryId", iRtLibraryId);
+
 
         ProjectDO project = projectService.getById(id);
         PermissionUtil.check(project);
@@ -332,7 +377,8 @@ public class ProjectController extends BaseController {
         }
 
         List<ExperimentDO> expList = experimentService.getAllByProjectName(project.getName());
-
+        model.addAttribute("libraryId", project.getLibraryId());
+        model.addAttribute("iRtLibraryId", project.getIRtLibraryId());
         model.addAttribute("exps", expList);
         model.addAttribute("libraries", getLibraryList(0, true));
         model.addAttribute("iRtLibraries", getLibraryList(1, true));
@@ -445,14 +491,9 @@ public class ProjectController extends BaseController {
         PermissionUtil.check(project);
 
         List<ExperimentDO> expList = experimentService.getAllByProjectName(project.getName());
-        expList.sort(new Comparator<ExperimentDO>() {
-            @Override
-            public int compare(ExperimentDO o1, ExperimentDO o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
+        List<ExperimentDO> collect = expList.stream().sorted(Comparator.comparing(ExperimentDO::getName)).collect(Collectors.toList());
         model.addAttribute("project", project);
-        model.addAttribute("expList", expList);
+        model.addAttribute("expList", collect);
         return "project/portionSelector";
     }
 

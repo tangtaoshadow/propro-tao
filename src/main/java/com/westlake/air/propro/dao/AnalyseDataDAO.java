@@ -1,20 +1,18 @@
 package com.westlake.air.propro.dao;
 
-import com.mongodb.client.model.UpdateOneModel;
+import com.westlake.air.propro.domain.bean.analyse.AnalyseDataRT;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
 import com.westlake.air.propro.domain.db.simple.SimpleScores;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
+import com.westlake.air.propro.utils.AnalyseUtil;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.Document;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
@@ -48,6 +46,9 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
         Query query = new Query();
         if (analyseDataQuery.getId() != null) {
             query.addCriteria(where("id").is(analyseDataQuery.getId()));
+        }
+        if (analyseDataQuery.getDataRef() != null){
+            query.addCriteria(where("dataRef").is(analyseDataQuery.getDataRef()));
         }
         if (analyseDataQuery.getOverviewId() != null) {
             query.addCriteria(where("overviewId").is(analyseDataQuery.getOverviewId()));
@@ -98,14 +99,16 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
         mongoTemplate.remove(query, AnalyseDataDO.class, CollectionName);
     }
 
+    public List<AnalyseDataRT> getRtList(AnalyseDataQuery query) {
+        return mongoTemplate.find(buildQuery(query), AnalyseDataRT.class, CollectionName);
+    }
+
     public void updateMulti(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList){
         BulkOperations ops = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, AnalyseDataDO.class);
         for (SimpleFeatureScores simpleFeatureScores : simpleFeatureScoresList) {
 
             Query query = new Query();
-            query.addCriteria(Criteria.where("overviewId").is(overviewId));
-            query.addCriteria(Criteria.where("peptideRef").is(simpleFeatureScores.getPeptideRef()));
-            query.addCriteria(Criteria.where("isDecoy").is(simpleFeatureScores.getIsDecoy()));
+            query.addCriteria(Criteria.where("dataRef").is(AnalyseUtil.getDataRef(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy())));
             Update update = new Update();
             update.set("bestRt", simpleFeatureScores.getRt());
             update.set("intensitySum", simpleFeatureScores.getIntensitySum());

@@ -44,6 +44,9 @@ public class AnalyseDataDO extends BaseDO {
     @Indexed
     Boolean isDecoy = false;
 
+    @Indexed
+    String dataRef;
+
     //打分相关的字段
     @Indexed
     @JSONField(serialize=false)

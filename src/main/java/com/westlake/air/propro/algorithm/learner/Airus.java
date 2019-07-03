@@ -1,33 +1,23 @@
 package com.westlake.air.propro.algorithm.learner;
 
-import com.mongodb.MongoClientSettings;
-import com.mongodb.ServerAddress;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.BulkWriteOptions;
-import com.mongodb.client.model.Indexes;
-import com.mongodb.client.model.UpdateOneModel;
-import com.mongodb.client.model.WriteModel;
 import com.westlake.air.propro.constants.Classifier;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.ScoreType;
-import com.westlake.air.propro.dao.AnalyseDataDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.airus.*;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
-import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.simple.SimpleScores;
 import com.westlake.air.propro.service.AnalyseDataService;
 import com.westlake.air.propro.service.AnalyseOverviewService;
 import com.westlake.air.propro.service.ScoreService;
-import com.westlake.air.propro.utils.*;
+import com.westlake.air.propro.utils.AirusUtil;
+import com.westlake.air.propro.utils.ArrayUtil;
+import com.westlake.air.propro.utils.MathUtil;
+import com.westlake.air.propro.utils.SortUtil;
 import ml.dmlc.xgboost4j.java.Booster;
-import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,8 +47,6 @@ public class Airus {
     ScoreService scoreService;
     @Autowired
     AnalyseDataService analyseDataService;
-    @Autowired
-    AnalyseDataDAO analyseDataDAO;
     @Autowired
     AnalyseOverviewService analyseOverviewService;
     @Autowired
@@ -131,62 +119,22 @@ public class Airus {
         //对于最终的打分结果和选峰结果保存到数据库中
         logger.info("将合并打分及定量结果反馈更新到数据库中,总计:" + featureScoresList.size() + "条数据");
         giveDecoyFdr(featureScoresList);
-//        MongoClient mongoClient = MongoClients.create(
-//                MongoClientSettings.builder()
-//                        .applyToClusterSettings(builder ->
-//                                builder.hosts(Arrays.asList(new ServerAddress("localhost", 27017))))
-//                        .build());
-//        MongoDatabase database = mongoClient.getDatabase("propro");
-//        MongoCollection<Document> collection = database.getCollection("analyseData");
-//        List<UpdateOneModel<Document>> documentList = new ArrayList<>();
-        Long getTime = 0L, updateTime = 0L, insertTime = 0L,startTime = 0L;
-//        for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
-//            //Long startTime = System.currentTimeMillis();
-//            Document updateCon = new Document();
-//            Document searchQuery = new Document();
-//            Document updateQuery = new Document("$set",updateCon);
-//            //AnalyseDataDO dataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
-//            getTime += System.currentTimeMillis() - startTime;
-////            dataDO.setBestRt(simpleFeatureScores.getRt());
-////            dataDO.setIntensitySum(simpleFeatureScores.getIntensitySum());
-////            dataDO.setFragIntFeature(simpleFeatureScores.getFragIntFeature());
-////            dataDO.setFdr(simpleFeatureScores.getFdr());
-////            dataDO.setQValue(simpleFeatureScores.getQValue());
-//            searchQuery.append("overviewId", overviewId);
-//            searchQuery.append("peptideRef",simpleFeatureScores.getPeptideRef());
-//            searchQuery.append("isDeoy",simpleFeatureScores.getIsDecoy());
-//            updateCon.append("bestRT",simpleFeatureScores.getRt());
-//            updateCon.append("intensitySum",simpleFeatureScores.getIntensitySum());
-//            updateCon.append("fragIntFeature",simpleFeatureScores.getFragIntFeature());
-//            updateCon.append("fdr",simpleFeatureScores.getFdr());
-//            updateCon.append("qValue",simpleFeatureScores.getQValue());
-//            if (!simpleFeatureScores.getIsDecoy()) {
-//                //投票策略
-//                if (simpleFeatureScores.getFdr() <= 0.01) {
-//                    Integer hitCount = peptideHitMap.get(simpleFeatureScores.getPeptideRef());
-//                    if (hitCount != null && hitCount >= airusParams.getTrainTimes() / 2) {
-//                        hit++;
-//                    }
-//                    //dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS);
-//                    updateCon.append("identifiedStatus",AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS);
-//                } else {
-//                    //dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
-//                    updateCon.append("identifiedStatus",AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
-//                }
-//            }
-//            documentList.add(new UpdateOneModel<>(searchQuery,updateQuery));
-//            //startTime = System.currentTimeMillis();
-//            //ResultDO r = analyseDataService.update(dataDO);
-//            //dataDO_list.add(dataDO);
-//            //updateTime += System.currentTimeMillis() - startTime;
-////            if (r.isFailed()) {
-////                logger.error(r.getMsgInfo());
-////            }
-//        }
-        startTime = System.currentTimeMillis();
-        analyseDataDAO.updateMulti(overviewId,featureScoresList);
-        insertTime += System.currentTimeMillis() - startTime;
-        logger.info("插入数据库一共用时："+insertTime);
+        long start = System.currentTimeMillis();
+        analyseDataService.updateMulti(overviewDO.getId(), featureScoresList);
+        logger.info("插入数据库一共用时："+(System.currentTimeMillis() - start));
+
+        for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
+            if (!simpleFeatureScores.getIsDecoy()) {
+                //投票策略
+                if (simpleFeatureScores.getFdr() <= 0.01) {
+                    Integer hitCount = peptideHitMap.get(simpleFeatureScores.getPeptideRef());
+                    if (hitCount != null && hitCount >= airusParams.getTrainTimes() / 2) {
+                        hit++;
+                    }
+                }
+            }
+        }
+
         logger.info("采用加权法获得的肽段数目为:" + hit);
         logger.info("打分反馈更新完毕");
         finalResult.setMatchedPeptideCount(count);

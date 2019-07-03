@@ -16,10 +16,11 @@ public class TableFile {
 
     List<String[]> fileData;
 
+    public TableFile(){ }
+
     public TableFile(HashMap<String, Integer> indexMap, List<String[]> fileData){
         this.columnMap = indexMap;
         this.fileData = fileData;
     }
-    public TableFile(){
-    }
+
 }

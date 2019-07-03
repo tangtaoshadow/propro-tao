@@ -157,7 +157,7 @@ public class ScoreServiceImpl implements ScoreService {
     public void scoreForOne(AnalyseDataDO dataDO, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input) {
 
         if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() <= 2) {
-            logger.info((dataDO.getIsDecoy()?"[Decoy]":"[Target]")+"数据的离子片段少于2个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
+//            logger.info((dataDO.getIsDecoy()?"[Decoy]":"[Target]")+"数据的离子片段少于2个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
             return;
         }
@@ -258,9 +258,9 @@ public class ScoreServiceImpl implements ScoreService {
 
         if (featureScoresList.size() == 0) {
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
-            if (!dataDO.getIsDecoy()){
-                logger.info("肽段没有被选中的Peak, PeptideRef:" + dataDO.getPeptideRef());
-            }
+//            if (!dataDO.getIsDecoy()){
+//                logger.info("肽段没有被选中的Peak, PeptideRef:" + dataDO.getPeptideRef());
+//            }
             return;
         }
 

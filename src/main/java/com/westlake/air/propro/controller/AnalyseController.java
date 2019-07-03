@@ -12,6 +12,7 @@ import com.westlake.air.propro.algorithm.peak.SignalToNoiseEstimator;
 import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.analyse.AnalyseDataRT;
 import com.westlake.air.propro.domain.bean.analyse.ComparisonResult;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
@@ -123,11 +124,19 @@ public class AnalyseController extends BaseController {
     String overviewDetail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
 
         ResultDO<AnalyseOverviewDO> resultDO = analyseOverviewService.getById(id);
-
         if (resultDO.isSuccess()) {
+            AnalyseOverviewDO overview = resultDO.getModel();
             PermissionUtil.check(resultDO.getModel());
+
+            AnalyseDataQuery query = new AnalyseDataQuery(id);
+            query.setIsDecoy(false);
+            query.setFdrEnd(0.01);
+            query.setPageSize(10000);
+            List<AnalyseDataRT> rts = analyseDataService.getRtList(query);
+            model.addAttribute("rts", rts);
             model.addAttribute("overview", resultDO.getModel());
-            model.addAttribute("slopeIntercept", resultDO.getModel().getSlope() + "/" + resultDO.getModel().getIntercept());
+            model.addAttribute("slope", resultDO.getModel().getSlope());
+            model.addAttribute("intercept", resultDO.getModel().getIntercept());
             return "analyse/overview/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
@@ -430,6 +439,7 @@ public class AnalyseController extends BaseController {
         }
 
         ResultDO<AnalyseDataDO> dataRealResult = extractor.extractOne(experimentDO, peptide, rtExtractWindow, mzExtractWindow);
+
         if (dataRealResult.isFailed()) {
             model.addAttribute(ERROR_MSG, ResultCode.CONVOLUTION_DATA_NOT_EXISTED.getMessage());
             return "analyse/data/consultation";

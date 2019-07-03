@@ -47,39 +47,51 @@ public class HomeController extends BaseController {
     @Autowired
     UserService userService;
 
-    public static int SHOW_NUM = 5;
-
     @RequestMapping("/")
     String home(Model model) {
         ResultDO<List<LibraryDO>> libRes = libraryService.getList(new LibraryQuery());
         String username = getCurrentUsername();
 
         ExperimentQuery experimentQuery = new ExperimentQuery();
-        experimentQuery.setOwnerName(username);
+        if (!isAdmin()) {
+            experimentQuery.setOwnerName(username);
+        }
         experimentQuery.setType(Constants.EXP_TYPE_DIA_SWATH);
         long expSWATHCount = experimentService.count(experimentQuery);
         experimentQuery.setType(Constants.EXP_TYPE_PRM);
         long expPRMCount = experimentService.count(experimentQuery);
 
         AnalyseOverviewQuery analyseOverviewQuery = new AnalyseOverviewQuery();
-
+        if (!isAdmin()) {
+            analyseOverviewQuery.setOwnerName(username);
+        }
         long overviewCount = analyseOverviewService.count(analyseOverviewQuery);
 
         ProjectQuery projectQuery = new ProjectQuery();
+        if (!isAdmin()) {
+            projectQuery.setOwnerName(username);
+        }
         long projectCount = projectService.count(projectQuery);
 
         TaskQuery query = new TaskQuery();
+        if (!isAdmin()) {
+            query.setCreator(username);
+        }
         query.setStatus(TaskStatus.RUNNING.getName());
         long taskRunningCount = taskService.count(query);
 
         LibraryQuery libraryQuery = new LibraryQuery(0);
-        libraryQuery.setCreator(username);
+        if (!isAdmin()) {
+            libraryQuery.setCreator(username);
+        }
+
         long libCount = libraryService.count(libraryQuery);
         libraryQuery.setType(1);
         long iRtLibCount = libraryService.count(libraryQuery);
 
         libraryQuery = new LibraryQuery(0);
         libraryQuery.setDoPublic(true);
+        libraryQuery.setCreator(null);
         long publicLibCount = libraryService.count(libraryQuery);
         libraryQuery.setType(1);
         long publicIrtCount = libraryService.count(libraryQuery);

@@ -16,6 +16,10 @@ public class AnalyseUtil {
         data.setRtArray(null);
         data.setIntensityMap(null);
     }
+
+    public static String getDataRef(String overviewId, String peptideRef, Boolean isDecoy) {
+        return overviewId + "-" + peptideRef + "-" + isDecoy;
+    }
 //    public static void compress(AnalyseDataDO data) {
 //        if (data.getRtArray() != null) {
 //            data.setRtStart(data.getRtArray()[0]);
