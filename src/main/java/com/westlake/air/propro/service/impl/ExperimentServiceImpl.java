@@ -9,6 +9,7 @@ import com.westlake.air.propro.dao.ProjectDAO;
 import com.westlake.air.propro.dao.SwathIndexDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.aird.AirdInfo;
+import com.westlake.air.propro.domain.bean.experiment.ExpFileSize;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.ProjectDO;
 import com.westlake.air.propro.domain.db.SwathIndexDO;
@@ -225,6 +226,22 @@ public class ExperimentServiceImpl implements ExperimentService {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public List<ExpFileSize> getAllFileSizeList(String ownerName) {
+        return experimentDAO.getAllFileSizeList(ownerName);
+    }
+
+    @Override
+    public Float getSumUsedFileSpace(String ownerName) {
+        List<ExpFileSize> fileSizeList = experimentDAO.getAllFileSizeList(ownerName);
+        float fileSizeCount = 0;
+        for (ExpFileSize fs : fileSizeList) {
+            fileSizeCount += (fs.getAirdSize()+fs.getAirdIndexSize());
+        }
+        return fileSizeCount/1024/1024;
+    }
+
 
     @Override
     public HashMap<Float, Float[]> getPrmRtWindowMap(String expId) {

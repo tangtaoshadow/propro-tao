@@ -20,8 +20,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Locale;
 
 @Controller
 @RequestMapping("login")
@@ -74,7 +78,19 @@ public class LoginController extends BaseController {
     }
 
     @RequestMapping(value = "/login")
-    public String login(HttpServletRequest request) {
+    public String login(HttpServletRequest request,
+                        HttpServletResponse response,
+            @RequestParam(value = "lang", required = false) String lang) {
+
+        LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
+        if(localeResolver != null){
+            if ("zh".equals(lang)) {
+                localeResolver.setLocale(request, response, new Locale("zh", "CN"));
+            } else if ("en".equals(lang)) {
+                localeResolver.setLocale(request, response, new Locale("en", "US"));
+            }
+        }
+
         try {
             if ((null != SecurityUtils.getSubject() && SecurityUtils.getSubject().isAuthenticated()) || (SecurityUtils.getSubject() != null && SecurityUtils.getSubject().isRemembered())) {
                 return "redirect:/";

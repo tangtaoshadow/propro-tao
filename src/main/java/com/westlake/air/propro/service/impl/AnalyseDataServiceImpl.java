@@ -6,6 +6,8 @@ import com.westlake.air.propro.dao.AnalyseOverviewDAO;
 import com.westlake.air.propro.dao.LibraryDAO;
 import com.westlake.air.propro.dao.PeptideDAO;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.analyse.AnalyseDataRT;
+import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
@@ -92,6 +94,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     @Override
     public ResultDO insert(AnalyseDataDO dataDO) {
         try {
+            dataDO.setDataRef(AnalyseUtil.getDataRef(dataDO.getOverviewId(), dataDO.getPeptideRef(), dataDO.getIsDecoy()));
             analyseDataDAO.insert(dataDO);
             return ResultDO.build(dataDO);
         } catch (Exception e) {
@@ -108,6 +111,9 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
         try {
             if (isDeleteOld) {
                 analyseDataDAO.deleteAllByOverviewId(dataList.get(0).getOverviewId());
+            }
+            for(AnalyseDataDO dataDO : dataList){
+                dataDO.setDataRef(AnalyseUtil.getDataRef(dataDO.getOverviewId(), dataDO.getPeptideRef(), dataDO.getIsDecoy()));
             }
             analyseDataDAO.insert(dataList);
             return new ResultDO(true);
@@ -173,5 +179,15 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
         } catch (Exception e) {
             return ResultDO.buildError(ResultCode.QUERY_ERROR);
         }
+    }
+
+    @Override
+    public List<AnalyseDataRT> getRtList(AnalyseDataQuery query) {
+        return analyseDataDAO.getRtList(query);
+    }
+
+    @Override
+    public void updateMulti(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList) {
+        analyseDataDAO.updateMulti(overviewId, simpleFeatureScoresList);
     }
 }

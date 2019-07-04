@@ -52,6 +52,7 @@ public class PeptideDO extends BaseDO {
     /**
      * 肽段的荷质比MZ
      */
+    @Indexed
     Double mz;
 
     /**

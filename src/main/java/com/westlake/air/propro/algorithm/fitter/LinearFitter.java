@@ -31,7 +31,7 @@ public class LinearFitter {
         return slopeIntercept;
     }
 
-    public SlopeIntercept huberFit(List<Pair<Double, Double>> rtPairs, double delta){
+    public SlopeIntercept huberFit(List<Pair<Double, Double>> rtPairs, double delta) throws Exception {
         double tolerance = 0.001d;
         SlopeIntercept lastSlopeIntercept = getInitSlopeIntercept(rtPairs);
         SlopeIntercept slopeIntercept = updateHuberSlopeIntercept(rtPairs, lastSlopeIntercept, delta);
@@ -44,7 +44,7 @@ public class LinearFitter {
         System.out.println("----------------------- Huber " + count + " epochs -----------------------");
         return slopeIntercept;
     }
-    public SlopeIntercept proproFit(List<Pair<Double, Double>> rtPairs, double delta){
+    public SlopeIntercept proproFit(List<Pair<Double, Double>> rtPairs, double delta) throws Exception {
         double tolerance = 0.001d;
         SlopeIntercept lastSlopeIntercept = getInitSlopeIntercept(rtPairs);
         SlopeIntercept slopeIntercept = updateProproSlopeIntercept(rtPairs, lastSlopeIntercept, delta);
@@ -146,7 +146,7 @@ public class LinearFitter {
         return new SlopeIntercept(slope, intercept);
     }
 
-    private SlopeIntercept getInitSlopeIntercept(List<Pair<Double,Double>> rtPairs){
+    private SlopeIntercept getInitSlopeIntercept(List<Pair<Double,Double>> rtPairs) throws Exception {
         double minLibRT = Double.MAX_VALUE;
         for (Pair<Double,Double> pair:rtPairs){
             if (pair.getLeft() < minLibRT){
@@ -165,6 +165,9 @@ public class LinearFitter {
                 min = product;
                 minIndex = i;
             }
+        }
+        if(rtPairs.size() == 0){
+            throw new Exception("RtPair Size is 0");
         }
         double slope = (rtPairs.get(maxIndex).getLeft() - rtPairs.get(minIndex).getLeft())
                 /(rtPairs.get(maxIndex).getRight() - rtPairs.get(minIndex).getRight());

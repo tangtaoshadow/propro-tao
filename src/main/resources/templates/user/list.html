@@ -54,6 +54,7 @@
                     <th width="10%" th:text="#{label_username}"></th>
                     <th width="10%" th:text="#{label_role}"></th>
                     <th width="10%" th:text="#{label_email}"></th>
+                    <th width="10%" th:text="#{label_space}"></th>
                     <th width="10%" th:text="#{label_nick}"></th>
                     <th width="10%" th:text="#{label_telephone}"></th>
                     <th width="10%" th:text="#{label_organization}"></th>
@@ -63,14 +64,14 @@
                 </thead>
                 <tbody>
                 <tr th:each="user:${users}">
-                    <td th:text="${user.username}">
-                    </td>
+                    <td th:text="${user.username}"></td>
                     <td>
                         <span th:if="${#lists.contains(user.roles,'admin')}" class="m-badge m-badge--success m-badge--wide" th:text="#{label_admin}"></span>
                         <span th:if="${#lists.contains(user.roles,'member')}" class="m-badge m-badge--brand m-badge--wide" th:text="#{label_member}"></span>
                         <span th:if="${#lists.contains(user.roles,'guest')}" class="m-badge m-badge--danger m-badge--wide" th:text="#{label_guest}"></span>
                     </td>
                     <td th:text="${user.email}"></td>
+                    <td th:text="|${user.usedSpace}/${user.allocatedSpace}|"></td>
                     <td th:text="${user.nick}"></td>
                     <td th:text="${user.telephone}"></td>
                     <td th:text="${user.organization}"></td>

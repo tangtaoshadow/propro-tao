@@ -1,6 +1,5 @@
 package com.westlake.air.propro.algorithm.extract;
 
-import com.alibaba.fastjson.JSON;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
@@ -9,24 +8,21 @@ import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
-import com.westlake.air.propro.domain.bean.compressor.AircInfo;
-import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.AnalyseUtil;
-import com.westlake.air.propro.utils.ByteUtil;
 import com.westlake.air.propro.utils.ConvolutionUtil;
 import com.westlake.air.propro.utils.FileUtil;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.File;
+import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -114,6 +110,7 @@ public class Extractor {
             SwathIndexDO swathIndexDO = swathIndexService.getSwathIndex(exp.getId(), peptide.getMz().floatValue());
             //Step2.获取该窗口内的谱图Map,key值代表了RT
             TreeMap<Float, MzIntensityPairs> rtMap;
+            long start = System.currentTimeMillis();
             try {
                 rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndexDO, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
             } catch (Exception e) {
@@ -121,6 +118,7 @@ public class Extractor {
                 throw e;
             }
 
+            logger.warn("Cost:"+(System.currentTimeMillis() - start));
             TargetPeptide tp = new TargetPeptide(peptide);
             Double rt = peptide.getRt();
             if (rtExtractorWindow == -1) {
@@ -131,11 +129,11 @@ public class Extractor {
                 tp.setRtStart(targetRt.floatValue() - rtExtractorWindow / 2);
                 tp.setRtEnd(targetRt.floatValue() + rtExtractorWindow / 2);
             }
-
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, mzExtractorWindow, rtExtractorWindow, null);
             if (dataDO == null) {
                 return ResultDO.buildError(ResultCode.ANALYSE_DATA_ARE_ALL_ZERO);
             }
+
             ResultDO<AnalyseDataDO> resultDO = new ResultDO<AnalyseDataDO>(true);
             resultDO.setModel(dataDO);
             return resultDO;
@@ -290,7 +288,7 @@ public class Extractor {
                     dataCount += dataList.size();
                 }
                 analyseDataService.insertAll(dataList, false);
-                logger.info("第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
+                logger.info("第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start)/1000 + "秒");
                 count++;
             }
 
@@ -366,7 +364,7 @@ public class Extractor {
             //Step1. 常规卷积,卷积结果不进行压缩处理
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, lumsParams.getMzExtractWindow(), lumsParams.getRtExtractWindow(), overviewId);
             if (dataDO == null) {
-                logger.info("未卷积到任何片段,PeptideRef:" + tp.getPeptideRef());
+//                logger.info("未卷积到任何片段,PeptideRef:" + tp.getPeptideRef());
                 continue;
             }
 //            if (dataDO.getRtArray().length < 20){

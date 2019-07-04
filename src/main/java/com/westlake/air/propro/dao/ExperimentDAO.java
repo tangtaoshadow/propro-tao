@@ -1,12 +1,17 @@
 package com.westlake.air.propro.dao;
 
+import com.westlake.air.propro.domain.bean.experiment.ExpFileSize;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import org.bson.Document;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.query.BasicQuery;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
@@ -71,6 +76,12 @@ public class ExperimentDAO extends BaseDAO<ExperimentDO, ExperimentQuery>{
         ExperimentQuery query = new ExperimentQuery();
         query.setName(name);
         return mongoTemplate.findOne(buildQuery(query), ExperimentDO.class, CollectionName);
+    }
+
+    public List<ExpFileSize> getAllFileSizeList(String ownerName){
+        ExperimentQuery query = new ExperimentQuery();
+        query.setOwnerName(ownerName);
+        return mongoTemplate.find(buildQueryWithoutPage(query), ExpFileSize.class, CollectionName);
     }
 
 }

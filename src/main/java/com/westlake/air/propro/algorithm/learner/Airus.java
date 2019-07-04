@@ -8,13 +8,15 @@ import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.airus.*;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
-import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.simple.SimpleScores;
 import com.westlake.air.propro.service.AnalyseDataService;
 import com.westlake.air.propro.service.AnalyseOverviewService;
 import com.westlake.air.propro.service.ScoreService;
-import com.westlake.air.propro.utils.*;
+import com.westlake.air.propro.utils.AirusUtil;
+import com.westlake.air.propro.utils.ArrayUtil;
+import com.westlake.air.propro.utils.MathUtil;
+import com.westlake.air.propro.utils.SortUtil;
 import ml.dmlc.xgboost4j.java.Booster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,13 +119,11 @@ public class Airus {
         //对于最终的打分结果和选峰结果保存到数据库中
         logger.info("将合并打分及定量结果反馈更新到数据库中,总计:" + featureScoresList.size() + "条数据");
         giveDecoyFdr(featureScoresList);
+        long start = System.currentTimeMillis();
+        analyseDataService.updateMulti(overviewDO.getId(), featureScoresList);
+        logger.info("插入数据库一共用时："+(System.currentTimeMillis() - start));
+
         for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
-            AnalyseDataDO dataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy());
-            dataDO.setBestRt(simpleFeatureScores.getRt());
-            dataDO.setIntensitySum(simpleFeatureScores.getIntensitySum());
-            dataDO.setFragIntFeature(simpleFeatureScores.getFragIntFeature());
-            dataDO.setFdr(simpleFeatureScores.getFdr());
-            dataDO.setQValue(simpleFeatureScores.getQValue());
             if (!simpleFeatureScores.getIsDecoy()) {
                 //投票策略
                 if (simpleFeatureScores.getFdr() <= 0.01) {
@@ -131,16 +131,10 @@ public class Airus {
                     if (hitCount != null && hitCount >= airusParams.getTrainTimes() / 2) {
                         hit++;
                     }
-                    dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS);
-                } else {
-                    dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
                 }
             }
-            ResultDO r = analyseDataService.update(dataDO);
-            if (r.isFailed()) {
-                logger.error(r.getMsgInfo());
-            }
         }
+
         logger.info("采用加权法获得的肽段数目为:" + hit);
         logger.info("打分反馈更新完毕");
         finalResult.setMatchedPeptideCount(count);

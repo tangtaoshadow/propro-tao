@@ -1,6 +1,7 @@
 package com.westlake.air.propro.service;
 
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.experiment.ExpFileSize;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
@@ -43,5 +44,9 @@ public interface ExperimentService {
     HashMap<Float, Float[]> getPrmRtWindowMap(List<SwathIndexDO> ms2SwathIndexes);
 
     void uploadAirdFile(ExperimentDO experimentDO, TaskDO taskDO);
+
+    List<ExpFileSize> getAllFileSizeList(String ownerName);
+
+    Float getSumUsedFileSpace(String ownerName);
 
 }

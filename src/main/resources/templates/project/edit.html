@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
-      layout:decorator="~{layouts/layout}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" layout:decorator="~{layouts/layout}">
 <!-- begin::Head -->
 <head>
     <title th:text="#{title_welcome_to_propro}"></title>
@@ -20,12 +19,13 @@
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
                             <span class="m-portlet__head-icon m--hide"><i class="la la-gear"></i></span>
-                            <h3 class="m-portlet__head-text" th:text="#{label_create_project}"></h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_update_project}"></h3>
                         </div>
                     </div>
                 </div>
                 <!--begin::Form-->
-                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/project/add}" th:method="post">
+                <form class="m-form m-form--fit m-form--label-align-right" th:action="@{/project/update}" th:method="post">
+                    <input type="text" class="form-control m-input" hidden="" name="id" readonly th:value="${project?.id}">
                     <div class="m-portlet__body">
                         <div class="form-group m-form__group m--margin-top-10">
                             <div class="alert m-alert m-alert--default" role="alert" th:text="#{label_fill_information}">
@@ -34,8 +34,7 @@
                         <div class="form-group m-form__group row">
                             <label for="name" class="col-4 col-form-label" th:text="#{label_project_name}"></label>
                             <div class="col-8">
-                                <input type="text" class="form-control m-input" id="name"
-                                       placeholder="Enter Project Name" name="name" th:value="${project?.name}">
+                                <input type="text" class="form-control m-input" id="name" name="name" readonly th:value="${project?.name}">
                                 <span class="m-form__help" th:text="#{label_project_name_must_be_unique}"></span>
                             </div>
                         </div>

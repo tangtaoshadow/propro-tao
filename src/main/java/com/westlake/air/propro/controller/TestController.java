@@ -78,10 +78,10 @@ public class TestController extends BaseController {
     @RequestMapping("testLMS")
     @ResponseBody
     String testLMS(Model model, RedirectAttributes redirectAttributes) {
-        String a = resultCompareService.getProproProteins("5d035ed3fc6f9e2f6cab6391", true).size() + "";
-        String b = resultCompareService.getProproProteins("5d037a57fc6f9e4100b55d81", true).size() + "";
-        String c = resultCompareService.getProproProteins("5d038111fc6f9e4100b74990", true).size() + "";
-        return a + ":" + b + ":" + c;
+        String a = resultCompareService.getProproProteins("5d1d57b05bb5e9463e9dcc16", false).size() + "";
+//        String b = resultCompareService.getProproProteins("5d037a57fc6f9e4100b55d81", true).size() + "";
+//        String c = resultCompareService.getProproProteins("5d038111fc6f9e4100b74990", true).size() + "";
+        return a;
     }
 
     //计算iRT

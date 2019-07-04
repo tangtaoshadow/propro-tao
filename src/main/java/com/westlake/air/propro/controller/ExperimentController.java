@@ -5,25 +5,23 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.algorithm.extract.Extractor;
 import com.westlake.air.propro.config.VMProperties;
-import com.westlake.air.propro.constants.*;
+import com.westlake.air.propro.constants.ResultCode;
+import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.constants.SuccessMsg;
+import com.westlake.air.propro.constants.TaskTemplate;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
-import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.irt.IrtResult;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
-import com.westlake.air.propro.domain.params.Exp;
-import com.westlake.air.propro.domain.params.ExpVO;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.exception.UnauthorizedAccessException;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.PermissionUtil;
-import com.westlake.air.propro.utils.RepositoryUtil;
 import com.westlake.air.propro.utils.ScoreUtil;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,7 +29,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -170,8 +167,6 @@ public class ExperimentController extends BaseController {
                   @RequestParam(value = "iRtLibraryId") String iRtLibraryId,
                   @RequestParam(value = "slope") Double slope,
                   @RequestParam(value = "intercept") Double intercept,
-                  @RequestParam(value = "airdPath") String airdPath,
-                  @RequestParam(value = "airdIndexPath") String airdIndexPath,
                   @RequestParam(value = "description") String description,
                   @RequestParam(value = "projectName") String projectName,
                   RedirectAttributes redirectAttributes) {
@@ -240,9 +235,8 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/extractor")
     String extractor(Model model,
                      @RequestParam(value = "id", required = true) String id,
-                     @RequestParam(value = "libraryId", required = false) String libraryId,
                      RedirectAttributes redirectAttributes) {
-        model.addAttribute("libraryId", libraryId);
+
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
@@ -250,7 +244,12 @@ public class ExperimentController extends BaseController {
             return "redirect:/experiment/list";
         }
         PermissionUtil.check(resultDO.getModel());
-        model.addAttribute("useEpps", true);
+
+        ProjectDO project = projectService.getById(resultDO.getModel().getProjectId());
+        if(project != null){
+            model.addAttribute("libraryId", project.getLibraryId());
+        }
+
         model.addAttribute("libraries", getLibraryList(0, true));
         model.addAttribute("experiment", resultDO.getModel());
         model.addAttribute("scoreTypes", ScoreType.getShownTypes());
@@ -340,9 +339,8 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/irt")
     String irt(Model model,
                @RequestParam(value = "id", required = true) String id,
-               @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
                RedirectAttributes redirectAttributes) {
-        model.addAttribute("iRtLibraryId", iRtLibraryId);
+
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
@@ -350,6 +348,12 @@ public class ExperimentController extends BaseController {
             return "redirect:/experiment/list";
         }
         PermissionUtil.check(resultDO.getModel());
+
+        ProjectDO project = projectService.getById(resultDO.getModel().getProjectId());
+        if(project != null){
+            model.addAttribute("iRtLibraryId", project.getIRtLibraryId());
+        }
+
         model.addAttribute("libraries", getLibraryList(1, true));
         model.addAttribute("experiment", resultDO.getModel());
         return "experiment/irt";
@@ -385,7 +389,6 @@ public class ExperimentController extends BaseController {
     ResultDO<JSONObject> irtResult(Model model,
                                    @RequestParam(value = "expId", required = false) String expId) {
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
-        MzIntensityPairs pairs = null;
 
         ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
         if (expResult.isFailed()) {

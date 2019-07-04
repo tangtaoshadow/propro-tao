@@ -1,6 +1,8 @@
 package com.westlake.air.propro.service;
 
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.analyse.AnalyseDataRT;
+import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
 import com.westlake.air.propro.domain.db.simple.SimpleScores;
@@ -39,4 +41,8 @@ public interface AnalyseDataService {
     ResultDO deleteAllByOverviewId(String overviewId);
 
     ResultDO<AnalyseDataDO> getById(String id);
+
+    List<AnalyseDataRT> getRtList(AnalyseDataQuery query);
+
+    void updateMulti(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList);
 }

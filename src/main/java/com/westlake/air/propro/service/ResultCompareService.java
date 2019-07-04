@@ -56,5 +56,11 @@ public interface ResultCompareService {
 
     void printSilacResults(String analyseOverviewId, String filePath);
 
+    /**
+     * 某一个分析结果中被鉴定到的蛋白
+     * @param overviewId
+     * @param isUnique
+     * @return
+     */
     HashSet<String> getProproProteins(String overviewId, boolean isUnique);
 }
