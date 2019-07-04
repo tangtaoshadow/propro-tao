@@ -121,10 +121,16 @@ public class Irt {
             }
             logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
             start = System.currentTimeMillis();
-            ResultDO<IrtResult> resultDO = scoreService.computeIRt(dataList, iRtLibraryId, sigmaSpacing);
+            ResultDO<IrtResult> resultDO = new ResultDO<>(false);
+            try {
+                resultDO = scoreService.computeIRt(dataList, iRtLibraryId, sigmaSpacing);
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                resultDO.setMsgInfo(e.getMessage());
+            }
             logger.info("计算完毕,耗时:" + (System.currentTimeMillis() - start));
 
-            if(resultDO.isFailed()){
+            if (resultDO.isFailed()) {
                 return resultDO;
             }
             experimentDO.setIrtResult(resultDO.getModel());

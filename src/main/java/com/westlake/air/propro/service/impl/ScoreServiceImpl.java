@@ -84,7 +84,7 @@ public class ScoreServiceImpl implements ScoreService {
     SwathIndexService swathIndexService;
 
     @Override
-    public ResultDO<IrtResult> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing) {
+    public ResultDO<IrtResult> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing) throws Exception {
 
         HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(new PeptideQuery(iRtLibraryId));
 
@@ -136,7 +136,7 @@ public class ScoreServiceImpl implements ScoreService {
         List<Double[]> selectedList = new ArrayList<>();
         List<Double[]> unselectedList = new ArrayList<>();
         for (int i = 0; i < pairs.size(); i++) {
-            if(pairsCorrected != null && pairsCorrected.contains(pairs.get(i))){
+            if(pairsCorrected.contains(pairs.get(i))){
                 selectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
             }else{
                 unselectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
@@ -389,7 +389,7 @@ public class ScoreServiceImpl implements ScoreService {
 
 
 
-    private List<Pair<Double,Double>> chooseReliablePairs(List<Pair<Double,Double>> rtPairs, double delta){
+    private List<Pair<Double,Double>> chooseReliablePairs(List<Pair<Double,Double>> rtPairs, double delta) throws Exception {
         SlopeIntercept slopeIntercept = linearFitter.huberFit(rtPairs, delta);
         TreeMap<Double, Pair<Double,Double>> errorMap = new TreeMap<>();
         for (Pair<Double, Double> pair: rtPairs){
