@@ -177,6 +177,8 @@ public class Airus {
         // adjust AirusParams iter times, too much iterations result to deviation
         if(scores.size() < 500){
             airusParams.setXevalNumIter(10);
+            airusParams.setSsIterationFdr(0.02);
+            airusParams.setProgressiveRate(1);
         }
         int neval = airusParams.getTrainTimes();
 //        test(scores);

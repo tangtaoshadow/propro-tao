@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.westlake.air.propro.algorithm.extract.Extractor;
 import com.westlake.air.propro.algorithm.feature.ChromatographicScorer;
 import com.westlake.air.propro.algorithm.feature.LibraryScorer;
+import com.westlake.air.propro.algorithm.formula.FormulaCalculator;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.algorithm.peak.FeatureExtractor;
 import com.westlake.air.propro.algorithm.peak.GaussFilter;
@@ -81,6 +82,8 @@ public class AnalyseController extends BaseController {
     LibraryScorer libraryScorer;
     @Autowired
     Extractor extractor;
+    @Autowired
+    FormulaCalculator formulaCalculator;
 
     @RequestMapping(value = "/overview/list")
     String overviewList(Model model,
@@ -324,7 +327,6 @@ public class AnalyseController extends BaseController {
                         @RequestParam(value = "onlyOneCharge", required = false, defaultValue = "false") Boolean onlyOneCharge,
                         HttpServletRequest request) {
 
-        model.addAttribute("dataId", dataId);
         model.addAttribute("peptideRef", peptideRef);
         model.addAttribute("expId", expId);
         model.addAttribute("libraryId", libraryId);
@@ -340,69 +342,48 @@ public class AnalyseController extends BaseController {
         model.addAttribute("noUseForLib", noUseForLib);
         model.addAttribute("limitLength", limitLength);
         model.addAttribute("onlyOneCharge", onlyOneCharge);
-        AnalyseDataDO data = null;
-        ResultDO<AnalyseOverviewDO> overviewResult = null;
-        ResultDO<ExperimentDO> experimentResult = null;
-        LibraryDO library = null;
+
+        AnalyseDataDO dataDO = null;
+        if (StringUtils.isNotEmpty(dataId)){
+            dataDO = analyseDataService.getById(dataId).getModel();
+            AnalyseOverviewDO analyseOverviewDO = analyseOverviewService.getById(dataDO.getOverviewId()).getModel();
+            model.addAttribute("libraryId", analyseOverviewDO.getLibraryId());
+            model.addAttribute("expId", analyseOverviewDO.getExpId());
+            model.addAttribute("peptideRef", dataDO.getPeptideRef());
+            libraryId = analyseOverviewDO.getLibraryId();
+            expId = analyseOverviewDO.getExpId();
+            peptideRef = dataDO.getPeptideRef();
+        }else if (StringUtils.isNotEmpty(expId)) {
+            String overviewId = analyseOverviewService.getFirstByExpId(expId).getModel().getId();
+            dataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, peptideRef, false);
+        }
         HashSet<String> usedCutInfos = new HashSet<>();
 
-        String targetExpId = null;
-        String targetLibraryId = null;
-        String targetPeptideRef = null;
-        //如果dataId不为空,则优先使用dataId作为查询参数
-        if (dataId != null && !dataId.isEmpty()) {
-            ResultDO<AnalyseDataDO> dataResult = analyseDataService.getById(dataId);
-            if (dataResult.isFailed()) {
-                model.addAttribute(ERROR_MSG, ResultCode.ANALYSE_DATA_NOT_EXISTED.getMessage());
-                return "analyse/data/consultation";
-            }
-            data = dataResult.getModel();
-            overviewResult = analyseOverviewService.getById(data.getOverviewId());
-            if (overviewResult.isFailed()) {
-                model.addAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-                return "analyse/data/consultation";
-            }
-            //校验权限
-            PermissionUtil.check(overviewResult.getModel());
-            targetExpId = overviewResult.getModel().getExpId();
-            targetLibraryId = overviewResult.getModel().getLibraryId();
-            targetPeptideRef = data.getPeptideRef();
-            model.addAttribute("libraryId", overviewResult.getModel().getLibraryId());
-            model.addAttribute("expId", overviewResult.getModel().getExpId());
-        } else if (StringUtils.isNotEmpty(peptideRef) && StringUtils.isNotEmpty(expId) && StringUtils.isNotEmpty(libraryId)) {
-            //如果dataId为空,则使用peptideRef,expId,libraryId作为查询条件
-            targetExpId = expId;
-            targetLibraryId = libraryId;
-            targetPeptideRef = peptideRef;
-        } else {
+        if (!model.containsAttribute("peptideRef") || !model.containsAttribute("expId") || !model.containsAttribute("libraryId")){
             model.addAttribute(ERROR_MSG, ResultCode.PARAMS_NOT_ENOUGH.getMessage());
             return "analyse/data/consultation";
         }
 
         //检测原始实验是否已经被转化为Aird压缩文件,是否执行了IRT计算
-        experimentResult = experimentService.getById(targetExpId);
+        ResultDO<ExperimentDO> experimentResult = experimentService.getById(expId);
         if (experimentResult.isFailed()) {
             model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
             return "analyse/data/consultation";
         }
         if (experimentResult.getModel().getIrtResult() == null) {
-            model.addAttribute(ERROR_MSG, ResultCode.IRT_FIRST.getMessage());
-            return "analyse/data/consultation";
+//            model.addAttribute(ERROR_MSG, ResultCode.IRT_FIRST.getMessage());
+//            return "analyse/data/consultation";
+            model.addAttribute("rtExtractWindow", -1f);
+            rtExtractWindow = -1f;
         }
         //校验权限
         PermissionUtil.check(experimentResult.getModel());
 
-        library = libraryService.getById(targetLibraryId);
+        LibraryDO library = libraryService.getById(libraryId);
         if (library == null) {
             model.addAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED.getMessage());
             return "analyse/data/consultation";
         }
-
-        //覆盖之前的参数
-        model.addAttribute("peptideRef", targetPeptideRef);
-        model.addAttribute("expId", targetExpId);
-        model.addAttribute("libraryId", targetLibraryId);
-        model.addAttribute("libraryName", library.getName());
         model.addAttribute("exp", experimentResult.getModel());
 
         if (!allCutInfo) {
@@ -414,12 +395,27 @@ public class AnalyseController extends BaseController {
         }
 
         ExperimentDO experimentDO = experimentResult.getModel();
-        PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(targetLibraryId, targetPeptideRef, false);
+        PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, false);
         model.addAttribute("peptide", peptide);
         List<String> cutInfoFromGuess = new ArrayList<>();
         List<String> cutInfoFromGuessAndHit = new ArrayList<>();
         List<Float[]> intensitiesList = new ArrayList<Float[]>();
-        List<String> cutInfoFromDic = new ArrayList<>(peptide.getFragmentMap().keySet());
+        List<String> cutInfoFromDic;
+        if (peptide != null){
+            cutInfoFromDic = new ArrayList<>(peptide.getFragmentMap().keySet());
+        }else {
+            cutInfoFromDic = new ArrayList<>();
+            noUseForFill = false;
+            String[] pepInfo = peptideRef.split("_");
+            peptide = new PeptideDO();
+            peptide.setCharge(Integer.parseInt(pepInfo[1]));
+            peptide.setSequence(PeptideUtil.removeUnimod(pepInfo[0]));
+            peptide.setFullName(pepInfo[0]);
+            peptide.setMz(formulaCalculator.getMonoMz(peptide));
+            peptide.setRt(-1d);
+            peptide.setIsDecoy(false);
+            PeptideUtil.parseModification(peptide);
+        }
         //准备该肽段的其他互补离子
         if (!noUseForFill) {
             HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, limitLength, onlyOneCharge);
@@ -502,18 +498,18 @@ public class AnalyseController extends BaseController {
             usedCutInfos.addAll(cutInfoFromGuessAndHit);
         }
 
-        if(data != null){
+        if(dataDO != null){
             List<Double> leftRtList = new ArrayList<>();
             List<Double> rightRtList = new ArrayList<>();
-            for(FeatureScores scores :data.getFeatureScoresList()){
+            for(FeatureScores scores :dataDO.getFeatureScoresList()){
                 Pair<Double, Double> rtRange = FeatureUtil.toDoublePair(scores.getRtRangeFeature());
                 leftRtList.add(rtRange.getLeft());
                 rightRtList.add(rtRange.getRight());
             }
             model.addAttribute("leftRtList", leftRtList);
             model.addAttribute("rightRtList", rightRtList);
-            if (data.getBestRt() != null) {
-                model.addAttribute("bestRt", (double) Math.round(data.getBestRt() * 100) / 100);
+            if (dataDO.getBestRt() != null) {
+                model.addAttribute("bestRt", (double) Math.round(dataDO.getBestRt() * 100) / 100);
             }
         }
 

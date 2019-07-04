@@ -23,6 +23,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import static com.westlake.air.propro.utils.PeptideUtil.parseModification;
+import static com.westlake.air.propro.utils.PeptideUtil.removeUnimod;
+
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-06-07 11:07

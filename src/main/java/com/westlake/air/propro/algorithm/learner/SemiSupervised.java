@@ -64,7 +64,7 @@ public class SemiSupervised {
                 }
                 if (lastWeightsMap.size() !=0) {
                     for (String key : weightsMap.keySet()) {
-                        weightsMap.put(key, (weightsMap.get(key) + lastWeightsMap.get(key)) / 2);
+                        weightsMap.put(key, weightsMap.get(key) * airusParams.getProgressiveRate() + lastWeightsMap.get(key) * (1d - airusParams.getProgressiveRate()));
                     }
                 }
                 ldaLearner.score(trainData, weightsMap, airusParams.getScoreTypes());
