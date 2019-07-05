@@ -185,6 +185,7 @@
     <script th:inline="javascript">
         var chart;
         var rts = [[${rts}]];
+        var badRts = [[${badRts}]];
         var slope = [[${slope}]];
         var intercept = [[${intercept}]];
         window.onload = init();
@@ -198,6 +199,7 @@
             var rtList = [];
             var rtListIn100 = [];
             var rtListIn200 = [];
+            var rtListBad = [];
             var lineRtList = [];
             var minRt = rts[0].rt;
             var maxRt = rts[0].rt;
@@ -219,6 +221,9 @@
                     maxRt = rts[i].rt;
                 }
             }
+            for (i = 0; i < badRts.length; i++) {
+                rtListBad.push([badRts[i].bestRt, badRts[i].rt]);
+            }
             lineRtList.push([(minRt - intercept) / slope, minRt]);
             lineRtList.push([(maxRt - intercept) / slope, maxRt]);
             option = {
@@ -228,7 +233,10 @@
                 },
                 legend: {
                     orient: 'vertical',
-                    left: 'right'
+                    left: 'right',
+                    selected: {
+                        'Not identified Points': false
+                    }
                 },
                 tooltip: {
                     trigger: 'axis',
@@ -276,6 +284,12 @@
                         type: 'scatter',
                         symbolSize: 3,
                         data: rtList
+                    },
+                    {
+                        name: 'Not identified Points',
+                        type: 'scatter',
+                        symbolSize: 3,
+                        data: rtListBad
                     },
                     {
                         name: 'IRT Line ',

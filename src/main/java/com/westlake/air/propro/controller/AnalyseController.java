@@ -136,7 +136,11 @@ public class AnalyseController extends BaseController {
             query.setFdrEnd(0.01);
             query.setPageSize(10000);
             List<AnalyseDataRT> rts = analyseDataService.getRtList(query);
+            query.setFdrStart(0.01);
+            query.setFdrEnd(1.0);
+            List<AnalyseDataRT> badRts = analyseDataService.getRtList(query);
             model.addAttribute("rts", rts);
+            model.addAttribute("badRts", badRts);
             model.addAttribute("overview", resultDO.getModel());
             model.addAttribute("slope", resultDO.getModel().getSlope());
             model.addAttribute("intercept", resultDO.getModel().getIntercept());
