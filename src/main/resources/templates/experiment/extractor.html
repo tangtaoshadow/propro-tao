@@ -19,12 +19,12 @@
 
 <div class="m-content" layout:fragment="content">
 
-    <div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>
-    <div th:if="${errorList}" th:each="arrayS:${errorList}">
-        <div class="alert alert-danger" role="alert" th:text="${arrayS}"></div>
-    </div>
+    <!--<div class="alert alert-danger" role="alert" th:if="${error_msg}" th:text="${error_msg}"></div>-->
+    <!--<div th:if="${errorList}" th:each="arrayS:${errorList}">-->
+    <!--<div class="alert alert-danger" role="alert" th:text="${arrayS}"></div>-->
+    <!--</div>-->
 
-    <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
+    <!--<div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>-->
     <div class="row">
         <div class="col-md-12">
             <div class="m-portlet m-portlet--tab">
@@ -34,7 +34,10 @@
                             <span class="m-portlet__head-icon m--hide">
                                 <i class="la la-gear"></i>
                             </span>
-                            <h3 class="m-portlet__head-text" th:text="#{label_convolution_panel}"></h3>
+                            <h3 class="m-portlet__head-text" th:text="#{label_operation_panel}"></h3>
+                        </div>
+                        <div class="m-form__actions" id="first-button">
+                            <button type="submit" class="btn btn-primary">开始卷积</button>
                         </div>
                     </div>
                 </div>
@@ -68,8 +71,10 @@
                             </div>
                         </div>
                         <div class="m-accordion__item">
-                            <div class="btn btn-primary collapsed" role="button" id="m_accordion_1_item_1_head" data-toggle="collapse" href="#m_accordion_1_item_1_body" aria-expanded="false">
-
+                            <div class="collapsed" role="button" id="m_accordion_1_item_1_head" data-toggle="collapse" href="#m_accordion_1_item_1_body" aria-expanded="false">
+                                <div class="m-demo-icon__preview">
+                                    <i class="fa fa-chevron-down" id="icon"></i>
+                                </div>
                                 <span class="m-accordion__item-title"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">高级选项</font></font></span>
                                 <span class="m-accordion__item-mode"></span>
                             </div>
