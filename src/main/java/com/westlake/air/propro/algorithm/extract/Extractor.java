@@ -49,6 +49,8 @@ public class Extractor {
     PeptideService peptideService;
     @Autowired
     ScoreService scoreService;
+    @Autowired
+    TaskService taskService;
 
     /**
      * 卷积的核心函数,最终返回卷积到的Peptide数目
@@ -60,15 +62,14 @@ public class Extractor {
      */
     public ResultDO<AnalyseOverviewDO> extract(LumsParams lumsParams) {
         ResultDO<AnalyseOverviewDO> resultDO = new ResultDO(true);
-        logger.info("基本条件检查开始");
+        TaskDO task = lumsParams.getTaskDO();
+        task.addLog("基本条件检查开始");
         ResultDO checkResult = ConvolutionUtil.checkExperiment(lumsParams.getExperimentDO());
         if (checkResult.isFailed()) {
-            logger.error("条件检查失败:" + checkResult.getMsgInfo());
             return checkResult;
         }
 
         AnalyseOverviewDO overviewDO = createOverview(lumsParams);
-
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile((File) checkResult.getModel(), "r");
@@ -87,13 +88,13 @@ public class Extractor {
     }
 
     /**
-     * 实时卷积某一个PeptideRef的图谱,卷积的rtWindows默认为-1,即全时间段卷积
+     * 实时卷积某一个PeptideRef的图谱,即全时间段卷积
      *
      * @param exp
      * @param peptide
      * @return
      */
-    public ResultDO<AnalyseDataDO> extractOne(ExperimentDO exp, PeptideDO peptide, Float rtExtractorWindow, Float mzExtractorWindow) {
+    public ResultDO<AnalyseDataDO> extractOneOnRealTime(ExperimentDO exp, PeptideDO peptide, Float rtExtractorWindow, Float mzExtractorWindow) {
         ResultDO checkResult = ConvolutionUtil.checkExperiment(exp);
         if (checkResult.isFailed()) {
             logger.error("条件检查失败:" + checkResult.getMsgInfo());
@@ -254,6 +255,7 @@ public class Extractor {
      */
     private void extract(RandomAccessFile raf, AnalyseOverviewDO overviewDO, LumsParams lumsParams) {
 
+        TaskDO task = lumsParams.getTaskDO();
         //Step1.获取窗口信息.
         logger.info("获取Swath窗口信息");
         List<WindowRange> rangs = lumsParams.getExperimentDO().getWindowRanges();
@@ -267,8 +269,8 @@ public class Extractor {
             lumsParams.setRtRangeMap(rtRangeMap);
         }
 
+        task.addLog("总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
         //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
-        logger.info("总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
         int count = 1;
         try {
             long peakCount = 0L;
@@ -283,7 +285,9 @@ public class Extractor {
                     dataCount += dataList.size();
                 }
                 analyseDataService.insertAll(dataList, false);
+                task.addLog("第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start)/1000 + "秒");
                 logger.info("第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start)/1000 + "秒");
+                taskService.update(task);
                 count++;
             }
 
@@ -317,7 +321,7 @@ public class Extractor {
             rtRange = lumsParams.getRtRangeMap().get(precursorMz);
         }
         ExperimentDO exp = lumsParams.getExperimentDO();
-        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibrary().getId(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), swathIndex.getRange(), rtRange, exp.getType(), lumsParams.isUniqueOnly());
+        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibrary(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), swathIndex.getRange(), rtRange, exp.getType(), lumsParams.isUniqueOnly());
         if (coordinates.isEmpty()) {
             logger.warn("No Coordinates Found,Rang:" + swathIndex.getRange().getStart() + ":" + swathIndex.getRange().getEnd());
             return null;
@@ -350,7 +354,8 @@ public class Extractor {
 
         HashSet<String> targetIgnorePeptides = new HashSet<>();
         List<TargetPeptide> decoyList = new ArrayList<>();
-        //传入的coordinates是没有经过排序的,需要排序先处理真实肽段,再处理伪肽段
+        //传入的coordinates是没有经过排序的,需要排序先处理真实肽段,再处理伪肽段.如果先处理的真肽段没有被卷积到任何信息,或者卷积后的峰太差被忽略掉,都会同时删掉对应的伪肽段的卷积
+        //
         for (TargetPeptide tp : coordinates) {
             if (tp.getIsDecoy()) {
                 decoyList.add(tp);
@@ -358,19 +363,19 @@ public class Extractor {
             }
             //Step1. 常规卷积,卷积结果不进行压缩处理
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, lumsParams.getMzExtractWindow(), lumsParams.getRtExtractWindow(), overviewId);
+
+            //如果没有卷积到任何结果,那么加入忽略列表
             if (dataDO == null) {
-//                logger.info("未卷积到任何片段,PeptideRef:" + tp.getPeptideRef());
+                targetIgnorePeptides.add(tp.getPeptideRef());
                 continue;
             }
-//            if (dataDO.getRtArray().length < 20){
-//                logger.info("卷积谱图时间太短,PeptideRef:" + tp.getPeptideRef());
-//                continue;
-//            }
+
             //Step2. 常规选峰及打分
             scoreService.scoreForOne(dataDO, tp, rtMap, lumsParams);
+
+            //未满足条件的直接忽略
             if (dataDO.getFeatureScoresList() == null) {
-                //logger.info("未满足基础条件,直接忽略:"+dataDO.getPeptideRef());
-                targetIgnorePeptides.add(dataDO.getPeptideRef());
+                targetIgnorePeptides.add(tp.getPeptideRef());
                 continue;
             }
             AnalyseUtil.compress(dataDO);

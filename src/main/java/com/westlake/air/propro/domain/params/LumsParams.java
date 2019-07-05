@@ -5,6 +5,7 @@ import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
+import com.westlake.air.propro.domain.db.TaskDO;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -66,6 +67,8 @@ public class LumsParams {
 
     //上下文备忘录
     String note;
+
+    TaskDO taskDO;
 
     //用于PRM, <precursor mz, [rt start, rt end]>
     HashMap<Float, Float[]> rtRangeMap;

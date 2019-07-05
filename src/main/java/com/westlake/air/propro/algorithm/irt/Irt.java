@@ -12,6 +12,7 @@ import com.westlake.air.propro.domain.bean.irt.IrtResult;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.ExperimentDO;
+import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.SwathIndexDO;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
@@ -51,11 +52,11 @@ public class Irt {
      * 卷积iRT校准库的数据
      *
      * @param exp
-     * @param iRtLibraryId
+     * @param library
      * @param mzExtractWindow
      * @return
      */
-    public List<AnalyseDataDO> extractIrt(ExperimentDO exp, String iRtLibraryId, float mzExtractWindow) {
+    public List<AnalyseDataDO> extractIrt(ExperimentDO exp, LibraryDO library, float mzExtractWindow) {
 
         ResultDO checkResult = ConvolutionUtil.checkExperiment(exp);
         if (checkResult.isFailed()) {
@@ -77,7 +78,7 @@ public class Irt {
                 //Step2.获取标准库的目标肽段片段的坐标
                 //key为rt
                 TreeMap<Float, MzIntensityPairs> rtMap;
-                List<TargetPeptide> coordinates = peptideService.buildMS2Coordinates(iRtLibraryId, SlopeIntercept.create(), -1, swathIndexDO.getRange(), null, exp.getType(), false);
+                List<TargetPeptide> coordinates = peptideService.buildMS2Coordinates(library, SlopeIntercept.create(), -1, swathIndexDO.getRange(), null, exp.getType(), false);
                 if (coordinates.size() == 0) {
                     logger.warn("No iRT Coordinates Found,Rang:" + swathIndexDO.getRange().getStart() + ":" + swathIndexDO.getRange().getEnd());
                     continue;
@@ -106,16 +107,16 @@ public class Irt {
      * 卷积并且求出iRT
      *
      * @param experimentDO
-     * @param iRtLibraryId
+     * @param library
      * @param mzExtractWindow
      * @param sigmaSpacing
      * @return
      */
-    public ResultDO<IrtResult> convAndIrt(ExperimentDO experimentDO, String iRtLibraryId, Float mzExtractWindow, SigmaSpacing sigmaSpacing) {
+    public ResultDO<IrtResult> convAndIrt(ExperimentDO experimentDO, LibraryDO library, Float mzExtractWindow, SigmaSpacing sigmaSpacing) {
         try {
             logger.info("开始卷积数据");
             long start = System.currentTimeMillis();
-            List<AnalyseDataDO> dataList = extractIrt(experimentDO, iRtLibraryId, mzExtractWindow);
+            List<AnalyseDataDO> dataList = extractIrt(experimentDO, library, mzExtractWindow);
             if (dataList == null) {
                 return ResultDO.buildError(ResultCode.IRT_EXCEPTION);
             }
@@ -123,7 +124,7 @@ public class Irt {
             start = System.currentTimeMillis();
             ResultDO<IrtResult> resultDO = new ResultDO<>(false);
             try {
-                resultDO = scoreService.computeIRt(dataList, iRtLibraryId, sigmaSpacing);
+                resultDO = scoreService.computeIRt(dataList, library, sigmaSpacing);
             } catch (Exception e) {
                 logger.error(e.getMessage());
                 resultDO.setMsgInfo(e.getMessage());

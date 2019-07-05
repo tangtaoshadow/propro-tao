@@ -73,6 +73,7 @@ public class PeptideDO extends BaseDO {
     /**
      * 是否是伪肽段
      */
+    @Indexed
     Boolean isDecoy;
 
     /**

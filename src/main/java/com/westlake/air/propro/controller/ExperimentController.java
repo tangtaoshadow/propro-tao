@@ -331,7 +331,7 @@ public class ExperimentController extends BaseController {
         PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, false);
 
 
-        ResultDO<AnalyseDataDO> analyseData = extractor.extractOne(resultDO.getModel(), peptide, -1f, 0.05f);
+        ResultDO<AnalyseDataDO> analyseData = extractor.extractOneOnRealTime(resultDO.getModel(), peptide, -1f, 0.05f);
 
         return JSON.toJSONString(analyseData);
     }
@@ -340,7 +340,6 @@ public class ExperimentController extends BaseController {
     String irt(Model model,
                @RequestParam(value = "id", required = true) String id,
                RedirectAttributes redirectAttributes) {
-
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
@@ -379,7 +378,10 @@ public class ExperimentController extends BaseController {
         SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);
         List<ExperimentDO> exps = new ArrayList<>();
         exps.add(resultDO.getModel());
-        experimentTask.convAndIrt(exps, iRtLibraryId, mzExtractWindow, sigmaSpacing, taskDO);
+
+        LibraryDO lib = libraryService.getById(iRtLibraryId);
+//        LibraryDO lib = libraryService.getById("5d0848fee0073c6ffc69752d");
+        experimentTask.convAndIrt(exps, lib, mzExtractWindow, sigmaSpacing, taskDO);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }

@@ -438,7 +438,7 @@ public class AnalyseController extends BaseController {
             }
         }
 
-        ResultDO<AnalyseDataDO> dataRealResult = extractor.extractOne(experimentDO, peptide, rtExtractWindow, mzExtractWindow);
+        ResultDO<AnalyseDataDO> dataRealResult = extractor.extractOneOnRealTime(experimentDO, peptide, rtExtractWindow, mzExtractWindow);
 
         if (dataRealResult.isFailed()) {
             model.addAttribute(ERROR_MSG, ResultCode.CONVOLUTION_DATA_NOT_EXISTED.getMessage());

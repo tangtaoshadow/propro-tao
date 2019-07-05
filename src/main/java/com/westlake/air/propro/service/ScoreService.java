@@ -25,11 +25,11 @@ public interface ScoreService {
      * 从一个卷积结果列表中求出iRT
      *
      * @param dataList
-     * @param iRtLibraryId
+     * @param library
      * @param sigmaSpacing Sigma通常为30/8 = 6.25/Spacing通常为0.01
      * @return
      */
-    ResultDO<IrtResult> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing) throws Exception;
+    ResultDO<IrtResult> computeIRt(List<AnalyseDataDO> dataList, LibraryDO library, SigmaSpacing sigmaSpacing) throws Exception;
 
     /**
      * 请确保调用本函数时传入的AnalyseDataDO已经解压缩

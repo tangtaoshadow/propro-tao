@@ -113,8 +113,17 @@ public class ProjectController extends BaseController {
         projectDO.setDescription(description);
         projectDO.setOwnerName(ownerName);
         projectDO.setType(type);
-        projectDO.setLibraryId(libraryId);
-        projectDO.setIRtLibraryId(iRtLibraryId);
+        LibraryDO lib = libraryService.getById(libraryId);
+        if (lib != null) {
+            projectDO.setLibraryId(lib.getId());
+            projectDO.setLibraryName(lib.getName());
+        }
+
+        LibraryDO iRtLib = libraryService.getById(iRtLibraryId);
+        if (iRtLib != null) {
+            projectDO.setIRtLibraryId(iRtLib.getId());
+            projectDO.setIRtLibraryName(iRtLib.getName());
+        }
 
         ResultDO result = projectService.insert(projectDO);
         if (result.isFailed()) {
@@ -285,7 +294,10 @@ public class ProjectController extends BaseController {
         TaskDO taskDO = new TaskDO(TaskTemplate.IRT, project.getName() + ":" + iRtLibraryId + "-Num:" + expList.size());
         taskService.insert(taskDO);
         SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);
-        experimentTask.convAndIrt(expList, iRtLibraryId, mzExtractWindow, sigmaSpacing, taskDO);
+
+        //支持直接使用标准库进行irt预测,在这里进行库的类型的检测,已进入不同的流程渠道
+        LibraryDO lib = libraryService.getById(iRtLibraryId);
+        experimentTask.convAndIrt(expList, lib, mzExtractWindow, sigmaSpacing, taskDO);
 
         return "redirect:/task/list";
     }

@@ -3,6 +3,7 @@ package com.westlake.air.propro.service;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
+import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.simple.Protein;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
@@ -82,12 +83,12 @@ public interface PeptideService {
     /**
      * 创建MS2的坐标系
      *
-     * @param libraryId
+     * @param library
      * @param rtExtractionWindows
      * @param range
      * @return
      */
-    List<TargetPeptide> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange range, Float[] rtRange, String type, boolean uniqueCheck);
+    List<TargetPeptide> buildMS2Coordinates(LibraryDO library, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange range, Float[] rtRange, String type, boolean uniqueCheck);
 
     /**
      * 根据限制条件获取按照PeptideRef+IsDecoy进行分组的Intensity Map

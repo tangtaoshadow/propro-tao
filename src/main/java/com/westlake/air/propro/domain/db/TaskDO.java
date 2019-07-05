@@ -68,7 +68,6 @@ public class TaskDO extends BaseDO {
         TaskLog taskLog = new TaskLog(content);
 
         logs.add(taskLog);
-
     }
 
     public void addLog(List<String> contents) {

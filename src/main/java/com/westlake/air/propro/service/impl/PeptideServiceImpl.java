@@ -215,7 +215,6 @@ public class PeptideServiceImpl implements PeptideService {
 
     @Override
     public List<TargetPeptide> buildMS1Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows) {
-        long start = System.currentTimeMillis();
         PeptideQuery query = new PeptideQuery(libraryId);
         List<TargetPeptide> targetList = peptideDAO.getTPAll(query);
 
@@ -228,10 +227,10 @@ public class PeptideServiceImpl implements PeptideService {
     }
 
     @Override
-    public List<TargetPeptide> buildMS2Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange mzRange, Float[] rtRange, String type, boolean uniqueCheck) {
+    public List<TargetPeptide> buildMS2Coordinates(LibraryDO library, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange mzRange, Float[] rtRange, String type, boolean uniqueCheck) {
 
         long start = System.currentTimeMillis();
-        PeptideQuery query = new PeptideQuery(libraryId);
+        PeptideQuery query = new PeptideQuery(library.getId());
         float precursorMz = mzRange.getMz();
         if(type.equals(Constants.EXP_TYPE_PRM)){
             //TODO: PRM
@@ -244,6 +243,9 @@ public class PeptideServiceImpl implements PeptideService {
         if(uniqueCheck){
             query.setIsUnique(true);
         }
+        if(library.getType().equals(LibraryDO.TYPE_IRT)){
+            query.setIsDecoy(false);
+        }
 
         List<TargetPeptide> targetList = peptideDAO.getTPAll(query);
         if (!targetList.isEmpty() && targetList.size() != 2 && type.equals(Constants.EXP_TYPE_PRM)){
@@ -251,9 +253,6 @@ public class PeptideServiceImpl implements PeptideService {
             TargetPeptide bestTarget = null, bestDecoy = null;
             float mzDistance = Float.MAX_VALUE;
             for (TargetPeptide peptide: targetList){
-
-//                check time
-
                 if (rtExtractionWindows != -1){
                     float iRt = (peptide.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue();
                     if (iRt < rtRange[0] - 30 || iRt > rtRange[1] + 30){

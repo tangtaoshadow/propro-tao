@@ -84,9 +84,13 @@ public class ScoreServiceImpl implements ScoreService {
     SwathIndexService swathIndexService;
 
     @Override
-    public ResultDO<IrtResult> computeIRt(List<AnalyseDataDO> dataList, String iRtLibraryId, SigmaSpacing sigmaSpacing) throws Exception {
+    public ResultDO<IrtResult> computeIRt(List<AnalyseDataDO> dataList, LibraryDO library, SigmaSpacing sigmaSpacing) throws Exception {
 
-        HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(new PeptideQuery(iRtLibraryId));
+        PeptideQuery query = new PeptideQuery(library.getId());
+        if(library.getType().equals(LibraryDO.TYPE_IRT)){
+            query.setIsDecoy(false);
+        }
+        HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(query);
 
         List<List<ScoreRtPair>> scoreRtList = new ArrayList<>();
         List<Double> compoundRt = new ArrayList<>();
@@ -157,7 +161,6 @@ public class ScoreServiceImpl implements ScoreService {
     public void scoreForOne(AnalyseDataDO dataDO, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input) {
 
         if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() <= 2) {
-//            logger.info((dataDO.getIsDecoy()?"[Decoy]":"[Target]")+"数据的离子片段少于2个,属于无效数据:PeptideRef:" + dataDO.getPeptideRef());
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
             return;
         }
@@ -239,9 +242,6 @@ public class ScoreServiceImpl implements ScoreService {
             }
 
             libraryScorer.calculateLibraryScores(peakGroupFeature, normedLibIntMap, featureScores, input.getScoreTypes());
-//            if (dataDO.getIsDecoy() && featureScores.get(ScoreType.NewScore)>0.9){
-//                System.out.println(dataDO.getPeptideRef());
-//            }
             if (input.getScoreTypes().contains(ScoreType.NormRtScore.getTypeName())) {
                 libraryScorer.calculateNormRtScore(peakGroupFeature, input.getSlopeIntercept(), dataDO.getRt(), featureScores, input.getScoreTypes());
             }
