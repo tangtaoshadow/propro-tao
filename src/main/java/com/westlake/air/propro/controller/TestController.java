@@ -392,6 +392,15 @@ public class TestController extends BaseController {
         return null;
     }
 
+    @RequestMapping("silac")
+    @ResponseBody
+    String silacTest(){
+        String overviewId = "5d18e4341fb7212da56b31f1";
+        String filePath = "P:\\data\\SILAC_QE\\F20190530liangx_SILAC_K562_DIA_LHtitra1_1_allFrag_with_dscore_filtered.csv";
+        resultCompareService.printSilacResults(overviewId, filePath);
+        return null;
+    }
+
     @RequestMapping("sequence")
     @ResponseBody
     String getSequenceNum(){

@@ -35,7 +35,6 @@ public abstract class BaseLibraryParser {
     PeptideService peptideService;
 
     boolean drop = true;
-    public static final Pattern unimodPattern = Pattern.compile("([a-z])[\\(]unimod[\\:](\\d*)[\\)]");
 
     public abstract ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashMap<String, PeptideDO> prmPepMap, String libraryId, TaskDO taskDO);
 
@@ -104,29 +103,6 @@ public abstract class BaseLibraryParser {
     }
 
     /**
-     * 解析出Modification的位置
-     *
-     * @param peptideDO
-     */
-    protected void parseModification(PeptideDO peptideDO) {
-        //不论是真肽段还是伪肽段,fullUniModPeptideName字段都是真肽段的完整版
-        String peptide = peptideDO.getFullName();
-        peptide = peptide.toLowerCase();
-        HashMap<Integer, String> unimodMap = new HashMap<>();
-
-        while (peptide.contains("(unimod:") && peptide.indexOf("(unimod:") != 0) {
-            Matcher matcher = unimodPattern.matcher(peptide);
-            if (matcher.find()) {
-                unimodMap.put(matcher.start(), matcher.group(2));
-                peptide = StringUtils.replaceOnce(peptide, matcher.group(0), matcher.group(1));
-            }
-        }
-        if (unimodMap.size() > 0) {
-            peptideDO.setUnimodMap(unimodMap);
-        }
-    }
-
-    /**
      * 从去除的Peptide推断的Protein中删除含有未去除Peptide的Protein
      * @param dropSet 非Unique的Peptide推断得到的ProtSet
      * @param uniqueSet Unique的Peptide推断得到的ProtSet
@@ -156,22 +132,6 @@ public abstract class BaseLibraryParser {
             peptide.setIsUnique(false);
             libraryDropProt.add(peptide.getProteinName());
             libraryDropPep.add(peptide.getPeptideRef());
-        }
-    }
-
-    protected String removeUnimod(String fullName){
-        if (fullName.contains("(")){
-            String[] parts = fullName.replaceAll("\\(","|(").replaceAll("\\)","|").split("\\|");
-            String sequence = "";
-            for(String part: parts){
-                if (part.startsWith("(")){
-                    continue;
-                }
-                sequence += part;
-            }
-            return sequence;
-        }else {
-            return fullName;
         }
     }
 

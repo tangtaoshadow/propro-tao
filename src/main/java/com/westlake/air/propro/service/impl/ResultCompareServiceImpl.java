@@ -8,6 +8,7 @@ import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.FileUtil;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,29 +117,44 @@ public class ResultCompareServiceImpl implements ResultCompareService {
 
     @Override
     public void printSilacResults(String analyseOverviewId, String filePath) {
-        HashSet<String> filePepSet = getFilePeptideRefs(filePath);
+        String SILAC_UNIMOD = "(Unimod:188)";
+        HashMap<String, Pair<Double,Double>> filePepFdrRtMap = getFilePepFdrRtMap(filePath);
         int fileHeavy = 0, fileLight = 0;
-        for (String pepRef : filePepSet) {
-            if (pepRef.split("_")[0].endsWith("(UniMod:188)")) {
+        HashMap<String,Double> fileLightMap = new HashMap<>();
+        HashMap<String,Double> fileHeavyMap = new HashMap<>();
+        for (String pepRef : filePepFdrRtMap.keySet()) {
+            String[] pepInfo = pepRef.split("_");
+            if (pepInfo[0].endsWith(SILAC_UNIMOD)) {
                 fileHeavy++;
+                fileHeavyMap.put(pepRef.replace(SILAC_UNIMOD, ""), filePepFdrRtMap.get(pepRef).getRight());
             } else {
                 fileLight++;
+                fileLightMap.put(pepRef, filePepFdrRtMap.get(pepRef).getRight());
             }
         }
         System.out.println("File light peptide count: " + fileLight);
         System.out.println("File heavy peptide count: " + fileHeavy);
+        System.out.println("Intersection File: " + getIntersectionCount(new HashSet<>(fileLightMap.keySet()), new HashSet<>(fileHeavyMap.keySet())));
 
-        HashSet<String> proproPepSet = getProproPeptideRefs(analyseOverviewId);
+        HashMap<String, Pair<Double,Double>> proproPepFdrRtMap = getProproPepFdrRtMap(analyseOverviewId);
+
+        HashMap<String,Double> proproLightMap = new HashMap<>();
+        HashMap<String,Double> proproHeavyMap = new HashMap<>();
         int proproHeavy = 0, proproLight = 0;
-        for (String pepRef : proproPepSet) {
-            if (pepRef.split("_")[0].endsWith("(Unimod:188)")) {
+        for (String pepRef : proproPepFdrRtMap.keySet()) {
+            if (pepRef.split("_")[0].endsWith(SILAC_UNIMOD)) {
                 proproHeavy++;
+                proproHeavyMap.put(pepRef.replace(SILAC_UNIMOD, ""), proproPepFdrRtMap.get(pepRef).getRight());
             } else {
                 proproLight++;
+                proproLightMap.put(pepRef, proproPepFdrRtMap.get(pepRef).getRight());
             }
         }
         System.out.println("Propro light peptide count: " + proproLight);
         System.out.println("Propro heavy peptide count: " + proproHeavy);
+        System.out.println("Intersection Propro: " + getIntersectionCount(new HashSet<>(proproLightMap.keySet()), new HashSet<>(proproHeavyMap.keySet())));
+        System.out.println("Intersection Light: " + getIntersectionCount(new HashSet<>(proproLightMap.keySet()), new HashSet<>(fileLightMap.keySet())));
+        System.out.println("Intersection Heavy: " + getIntersectionCount(new HashSet<>(proproHeavyMap.keySet()), new HashSet<>(fileHeavyMap.keySet())));
     }
 
     @Override
@@ -256,6 +272,46 @@ public class ResultCompareServiceImpl implements ResultCompareService {
             e.printStackTrace();
             return new HashSet<>();
         }
+    }
+    private HashMap<String, Pair<Double,Double>> getFilePepFdrRtMap(String filePath) {
+        HashMap<String, Pair<Double,Double>> bestPepRtMap = new HashMap<>();
+        try {
+            TableFile ppFile = FileUtil.readTableFile(filePath);
+            HashMap<String, Integer> columnMap = ppFile.getColumnMap();
+            List<String[]> fileData = ppFile.getFileData();
+            for (String[] lineSplit : fileData) {
+                if (columnMap.containsKey("decoy") && lineSplit[columnMap.get("decoy")].equals("1")) {
+                    continue;
+                }
+                if (columnMap.containsKey("m_score") && Double.parseDouble(lineSplit[columnMap.get("m_score")]) > 0.01d) {
+                    continue;
+                }
+                String[] peptideGroupInfo = lineSplit[columnMap.get("transition_group_id")].split("_");
+                String pepRef = peptideGroupInfo[1] + "_" + peptideGroupInfo[2];
+                Double newMScore = Double.parseDouble(lineSplit[columnMap.get("m_score")]);
+                if (bestPepRtMap.containsKey(pepRef)){
+                    Double mScore = bestPepRtMap.get(pepRef).getLeft();
+                    if (newMScore < mScore){
+                        bestPepRtMap.put(pepRef, Pair.of(newMScore, Double.parseDouble(lineSplit[columnMap.get("rt")])));
+                    }
+                }else {
+                    bestPepRtMap.put(pepRef, Pair.of(newMScore, Double.parseDouble(lineSplit[columnMap.get("rt")])));
+                }
+            }
+            return bestPepRtMap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new HashMap<>();
+        }
+    }
+
+    private HashMap<String, Pair<Double,Double>> getProproPepFdrRtMap(String overviewId){
+        List<AnalyseDataDO> analyseDataDOList = getProproDataDO(overviewId);
+        HashMap<String, Pair<Double,Double>> pepFdrRtMap = new HashMap<>();
+        for (AnalyseDataDO dataDO: analyseDataDOList){
+            pepFdrRtMap.put(dataDO.getPeptideRef(), Pair.of(dataDO.getFdr(),dataDO.getBestRt()));
+        }
+        return pepFdrRtMap;
     }
 
     private HashSet<String> getFilePeptideSeqs(String filePath) {

@@ -125,6 +125,10 @@ public class FeatureExtractor {
         }
 
         List<PeakGroup> peakGroupFeatureList = featureFinder.findFeaturesNew(peptideSpectrum, ionPeaks, ionPeakParams,noise1000Map);
+        //give simple data decoy
+//        if (dataDO.getIsDecoy() && peakGroupFeatureList.isEmpty()){
+//            peakGroupFeatureList = featureFinder.findFeatures(peptideSpectrum, ionPeaks, ionPeakParams,noise1000Map);
+//        }
 
         PeptideFeature featureResult = new PeptideFeature(true);
         featureResult.setPeakGroupList(peakGroupFeatureList);

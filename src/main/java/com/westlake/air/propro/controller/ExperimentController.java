@@ -493,6 +493,7 @@ public class ExperimentController extends BaseController {
             return ResultDO.buildError(ResultCode.DATA_IS_EMPTY);
         }
         List<Float> ms1RtList = ms1Indexs.get(0).getRts();
+        Collections.sort(ms1RtList);
 
         query.setLevel(2);
         List<SwathIndexDO> ms2Indexs = swathIndexService.getAll(query);
@@ -501,7 +502,7 @@ public class ExperimentController extends BaseController {
             ms2RtList.addAll(ms2.getRts());
         }
         Collections.sort(ms2RtList);
-        int ms2Index = ms2Indexs.size() - 1;
+        int ms2Index = ms2RtList.size() - 1;
         int max = Integer.MIN_VALUE;
         for (int ms1Index = ms1RtList.size() - 1; ms1Index >= 0; ms1Index--) {
             int count = 0;
@@ -520,7 +521,7 @@ public class ExperimentController extends BaseController {
 
         JSONObject res = new JSONObject();
         res.put("ms2Density", ms2Density);
-        res.put("max", (int) Math.ceil(max / 10d) * 10d);
+        res.put("upMax", (int) Math.ceil(max / 10d) * 10d);
         resultDO.setModel(res);
         return resultDO;
     }

@@ -110,14 +110,9 @@ public class Extractor {
             SwathIndexDO swathIndexDO = swathIndexService.getSwathIndex(exp.getId(), peptide.getMz().floatValue());
             //Step2.获取该窗口内的谱图Map,key值代表了RT
             TreeMap<Float, MzIntensityPairs> rtMap;
-            long start = System.currentTimeMillis();
-            try {
-                rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndexDO, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
-            } catch (Exception e) {
-                logger.error("PrecursorMZ:" + swathIndexDO.getRange().getMz());
-                throw e;
-            }
 
+            long start = System.currentTimeMillis();
+            rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndexDO, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
             logger.warn("Cost:"+(System.currentTimeMillis() - start));
             TargetPeptide tp = new TargetPeptide(peptide);
             Double rt = peptide.getRt();
@@ -140,10 +135,10 @@ public class Extractor {
         } catch (Exception e) {
             e.printStackTrace();
             logger.error(e.getMessage());
+            return ResultDO.buildError(ResultCode.SWATH_INDEX_NOT_EXISTED);
         } finally {
             FileUtil.close(raf);
         }
-        return null;
     }
 
     /**

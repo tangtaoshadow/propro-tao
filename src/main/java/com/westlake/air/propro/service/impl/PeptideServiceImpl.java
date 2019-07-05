@@ -246,13 +246,14 @@ public class PeptideServiceImpl implements PeptideService {
         }
 
         List<TargetPeptide> targetList = peptideDAO.getTPAll(query);
-        if (!targetList.isEmpty() && type.equals(Constants.EXP_TYPE_PRM)){
+        if (!targetList.isEmpty() && targetList.size() != 2 && type.equals(Constants.EXP_TYPE_PRM)){
             //PRM模式下, rtRange不为空;
             TargetPeptide bestTarget = null, bestDecoy = null;
             float mzDistance = Float.MAX_VALUE;
             for (TargetPeptide peptide: targetList){
 
 //                check time
+
                 if (rtExtractionWindows != -1){
                     float iRt = (peptide.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue();
                     if (iRt < rtRange[0] - 30 || iRt > rtRange[1] + 30){

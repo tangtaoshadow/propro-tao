@@ -29,6 +29,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static com.westlake.air.propro.utils.PeptideUtil.parseModification;
+
 /**
  * Created by Nico Wang
  * Time: 2019-04-23 14:52

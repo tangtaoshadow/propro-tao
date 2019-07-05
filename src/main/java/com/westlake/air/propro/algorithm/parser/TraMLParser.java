@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import static com.westlake.air.propro.utils.PeptideUtil.parseModification;
+import static com.westlake.air.propro.utils.PeptideUtil.removeUnimod;
+
 @Component("traMLParser")
 public class TraMLParser extends BaseLibraryParser {
 
