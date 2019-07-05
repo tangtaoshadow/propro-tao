@@ -169,6 +169,28 @@ public class Extractor {
         }
     }
 
+    public void touchForIrt(List<AnalyseDataDO> finalList, List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float mzExtractWindow, Float rtExtractWindow) {
+        long start = System.currentTimeMillis();
+        int count = 0;
+        for (TargetPeptide tp : coordinates) {
+            AnalyseDataDO dataDO = extractForOne(tp, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
+            if (dataDO == null) {
+                continue;
+            }
+            scoreService.strictScoreForOne(dataDO, tp, rtMap);
+
+            if(dataDO.getFeatureScoresList() != null){
+                finalList.add(dataDO);
+                logger.info("找到了:"+dataDO.getPeptideRef()+",BestRT:"+dataDO.getFeatureScoresList().get(0).getRt()+"耗时:"+(System.currentTimeMillis() - start));
+                if(count < 10){
+                    count++;
+                }else{
+                    break;
+                }
+            }
+        }
+    }
+
     private AnalyseDataDO extractForOne(TargetPeptide tp, TreeMap<Float, MzIntensityPairs> rtMap, Float mzExtractWindow, Float rtExtractWindow, String overviewId) {
         float mzStart = 0;
         float mzEnd = -1;
@@ -275,6 +297,7 @@ public class Extractor {
         }
 
         task.addLog("总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
+        taskService.update(task);
         //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
         int count = 1;
         try {
@@ -326,7 +349,7 @@ public class Extractor {
             rtRange = lumsParams.getRtRangeMap().get(precursorMz);
         }
         ExperimentDO exp = lumsParams.getExperimentDO();
-        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibrary(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), swathIndex.getRange(), rtRange, exp.getType(), lumsParams.isUniqueOnly());
+        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibrary(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), swathIndex.getRange(), rtRange, exp.getType(), lumsParams.isUniqueOnly(), false);
         if (coordinates.isEmpty()) {
             logger.warn("No Coordinates Found,Rang:" + swathIndex.getRange().getStart() + ":" + swathIndex.getRange().getEnd());
             return null;

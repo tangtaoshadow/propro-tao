@@ -78,7 +78,7 @@ public class Irt {
                 //Step2.获取标准库的目标肽段片段的坐标
                 //key为rt
                 TreeMap<Float, MzIntensityPairs> rtMap;
-                List<TargetPeptide> coordinates = peptideService.buildMS2Coordinates(library, SlopeIntercept.create(), -1, swathIndexDO.getRange(), null, exp.getType(), false);
+                List<TargetPeptide> coordinates = peptideService.buildMS2Coordinates(library, SlopeIntercept.create(), -1, swathIndexDO.getRange(), null, exp.getType(), false, true);
                 if (coordinates.size() == 0) {
                     logger.warn("No iRT Coordinates Found,Rang:" + swathIndexDO.getRange().getStart() + ":" + swathIndexDO.getRange().getEnd());
                     continue;
@@ -92,7 +92,11 @@ public class Irt {
                 }
 
                 //Step4.卷积并且存储数据
-                extractor.extractForIrt(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
+                if(library.getType().equals(LibraryDO.TYPE_IRT)){
+                    extractor.extractForIrt(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
+                }else{
+                    extractor.touchForIrt(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

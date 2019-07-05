@@ -56,6 +56,11 @@ public class PeptideServiceImpl implements PeptideService {
     }
 
     @Override
+    public TargetPeptide getTargetPeptideByDataRef(String libraryId, String peptideRef, boolean isDecoy) {
+        return peptideDAO.getTargetPeptideByDataRef(libraryId, peptideRef, isDecoy);
+    }
+
+    @Override
     public List<PeptideDO> getAllByLibraryIdAndIsDecoy(String libraryId, boolean isDecoy) {
         return peptideDAO.getAllByLibraryIdAndIsDecoy(libraryId, isDecoy);
     }
@@ -227,7 +232,7 @@ public class PeptideServiceImpl implements PeptideService {
     }
 
     @Override
-    public List<TargetPeptide> buildMS2Coordinates(LibraryDO library, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange mzRange, Float[] rtRange, String type, boolean uniqueCheck) {
+    public List<TargetPeptide> buildMS2Coordinates(LibraryDO library, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange mzRange, Float[] rtRange, String type, boolean uniqueCheck, Boolean noDecoy) {
 
         long start = System.currentTimeMillis();
         PeptideQuery query = new PeptideQuery(library.getId());
@@ -243,7 +248,7 @@ public class PeptideServiceImpl implements PeptideService {
         if(uniqueCheck){
             query.setIsUnique(true);
         }
-        if(library.getType().equals(LibraryDO.TYPE_IRT)){
+        if(noDecoy){
             query.setIsDecoy(false);
         }
 

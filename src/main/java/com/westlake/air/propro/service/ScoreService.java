@@ -2,16 +2,13 @@ package com.westlake.air.propro.service;
 
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
-import com.westlake.air.propro.domain.bean.aird.WindowRange;
+import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.irt.IrtResult;
-import com.westlake.air.propro.domain.bean.score.PeptideFeature;
-import com.westlake.air.propro.domain.db.*;
+import com.westlake.air.propro.domain.db.AnalyseDataDO;
+import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
 import com.westlake.air.propro.domain.params.LumsParams;
-import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -40,4 +37,12 @@ public interface ScoreService {
      * @return
      */
     void scoreForOne(AnalyseDataDO data, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input);
+
+    /**
+     * 仅Shape和Shape Weighted Score均高于99分的可以过
+     * @param data
+     * @param peptide
+     * @param rtMap
+     */
+    void strictScoreForOne(AnalyseDataDO data, TargetPeptide peptide , TreeMap<Float, MzIntensityPairs> rtMap);
 }

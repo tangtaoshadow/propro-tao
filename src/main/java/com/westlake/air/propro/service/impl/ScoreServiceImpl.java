@@ -86,18 +86,19 @@ public class ScoreServiceImpl implements ScoreService {
     @Override
     public ResultDO<IrtResult> computeIRt(List<AnalyseDataDO> dataList, LibraryDO library, SigmaSpacing sigmaSpacing) throws Exception {
 
-        PeptideQuery query = new PeptideQuery(library.getId());
-        if(library.getType().equals(LibraryDO.TYPE_IRT)){
-            query.setIsDecoy(false);
-        }
-        HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(query);
+//        PeptideQuery query = new PeptideQuery(library.getId());
+//        if(library.getType().equals(LibraryDO.TYPE_IRT)){
+//            query.setIsDecoy(false);
+//        }
+//        HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(query);
 
         List<List<ScoreRtPair>> scoreRtList = new ArrayList<>();
         List<Double> compoundRt = new ArrayList<>();
         ResultDO<IrtResult> resultDO = new ResultDO<>();
         double minGroupRt = Double.MAX_VALUE, maxGroupRt = Double.MIN_VALUE;
         for (AnalyseDataDO dataDO : dataList) {
-            PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(dataDO, ttMap.get(dataDO.getPeptideRef() + "_" + dataDO.getIsDecoy()).buildIntensityMap(), sigmaSpacing);
+            TargetPeptide tp = peptideService.getTargetPeptideByDataRef(library.getId(), dataDO.getPeptideRef(), dataDO.getIsDecoy());
+            PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(dataDO, tp.buildIntensityMap(), sigmaSpacing);
             if (!peptideFeature.isFeatureFound()) {
                 continue;
             }
@@ -234,9 +235,6 @@ public class ScoreServiceImpl implements ScoreService {
                 chromatographicScorer.calculateLogSnScore(peakGroupFeature, featureScores, input.getScoreTypes());
             }
 
-//            if (input.getScoreTypes().contains(ScoreType.ElutionModelFitScore.getTypeName())) {
-//                elutionScorer.calculateElutionModelScore(peakGroupFeature, featureScores, input.getScoreTypes());
-//            }
             if (input.getScoreTypes().contains(ScoreType.IntensityScore.getTypeName())) {
                 libraryScorer.calculateIntensityScore(peakGroupFeature, featureScores, input.getScoreTypes());
                 if (input.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM) && featureScores.get(ScoreType.IntensityScore.getTypeName(), input.getScoreTypes()) < 0.1d){
@@ -255,15 +253,45 @@ public class ScoreServiceImpl implements ScoreService {
             featureScores.setFragIntFeature(FeatureUtil.toString(peakGroupFeature.getIonIntensity()));
             featureScoresList.add(featureScores);
         }
-//        if (dataDO.getIsDecoy()){//min 1
-//            featureScoresList = getFilteredScore(featureScoresList, 5, ScoreType.XcorrShapeWeighted.getTypeName());
-//        }
 
         if (featureScoresList.size() == 0) {
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
-//            if (!dataDO.getIsDecoy()){
-//                logger.info("肽段没有被选中的Peak, PeptideRef:" + dataDO.getPeptideRef());
-//            }
+            return;
+        }
+
+        dataDO.setFeatureScoresList(featureScoresList);
+    }
+
+    @Override
+    public void strictScoreForOne(AnalyseDataDO dataDO, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap) {
+        if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() < peptide.getFragmentMap().size()) {
+            dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
+            return;
+        }
+
+        SigmaSpacing ss = SigmaSpacing.create();
+        PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(dataDO, peptide.buildIntensityMap(), ss);
+        if (!peptideFeature.isFeatureFound()) {
+            return;
+        }
+        List<FeatureScores> featureScoresList = new ArrayList<>();
+        List<PeakGroup> peakGroupFeatureList = peptideFeature.getPeakGroupList();
+        HashMap<String, Double> normedLibIntMap = peptideFeature.getNormedLibIntMap();
+        for (PeakGroup peakGroupFeature : peakGroupFeatureList) {
+            FeatureScores featureScores = new FeatureScores(2);
+            List<String> scoreTypes = new ArrayList<>();
+            scoreTypes.add(ScoreType.XcorrShape.getTypeName());
+            scoreTypes.add(ScoreType.XcorrShapeWeighted.getTypeName());
+            chromatographicScorer.calculateChromatographicScores(peakGroupFeature, normedLibIntMap, featureScores, scoreTypes);
+            if(featureScores.get(ScoreType.XcorrShapeWeighted.getTypeName(), scoreTypes) < 0.95
+                    || featureScores.get(ScoreType.XcorrShape.getTypeName(), scoreTypes) < 0.95){
+                continue;
+            }
+            featureScores.setRt(peakGroupFeature.getApexRt());
+            featureScoresList.add(featureScores);
+        }
+
+        if (featureScoresList.size() == 0) {
             return;
         }
 

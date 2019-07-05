@@ -22,6 +22,8 @@ public interface PeptideService {
 
     PeptideDO getByLibraryIdAndPeptideRefAndIsDecoy(String libraryId, String peptideRef, boolean isDecoy);
 
+    TargetPeptide getTargetPeptideByDataRef(String libraryId, String peptideRef, boolean isDecoy);
+
     List<PeptideDO> getAllByLibraryIdAndIsDecoy(String libraryId, boolean isDecoy);
 
     List<PeptideDO> getAllByLibraryIdAndProteinNameAndIsDecoy(String libraryId, String proteinName, boolean isDecoy);
@@ -88,7 +90,7 @@ public interface PeptideService {
      * @param range
      * @return
      */
-    List<TargetPeptide> buildMS2Coordinates(LibraryDO library, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange range, Float[] rtRange, String type, boolean uniqueCheck);
+    List<TargetPeptide> buildMS2Coordinates(LibraryDO library, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange range, Float[] rtRange, String type, boolean uniqueCheck, Boolean noDecoy);
 
     /**
      * 根据限制条件获取按照PeptideRef+IsDecoy进行分组的Intensity Map

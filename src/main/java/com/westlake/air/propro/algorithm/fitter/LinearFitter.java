@@ -36,7 +36,7 @@ public class LinearFitter {
         SlopeIntercept lastSlopeIntercept = getInitSlopeIntercept(rtPairs);
         SlopeIntercept slopeIntercept = updateHuberSlopeIntercept(rtPairs, lastSlopeIntercept, delta);
         int count = 1;
-        while (Math.abs(getHuberSlopeGradient(rtPairs, slopeIntercept, delta)) > tolerance
+        while (count < 10000 && Math.abs(getHuberSlopeGradient(rtPairs, slopeIntercept, delta)) > tolerance
                 || Math.abs(getHuberInterceptGradient(rtPairs, slopeIntercept, delta)) > tolerance){
             slopeIntercept = updateHuberSlopeIntercept(rtPairs, slopeIntercept, delta);
             count ++;

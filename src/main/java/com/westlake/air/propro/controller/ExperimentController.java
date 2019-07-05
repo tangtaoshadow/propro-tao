@@ -386,6 +386,35 @@ public class ExperimentController extends BaseController {
         return "redirect:/task/detail/" + taskDO.getId();
     }
 
+    @RequestMapping(value = "/irtwithlib")
+    String irtWithLib(Model model,
+                 @RequestParam(value = "id", required = true) String id,
+                 @RequestParam(value = "sigma", required = true, defaultValue = "3.75") Float sigma,
+                 @RequestParam(value = "spacing", required = true, defaultValue = "0.01") Float spacing,
+                 @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
+                 RedirectAttributes redirectAttributes) {
+
+        ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
+        if (resultDO.isFailed()) {
+            return "redirect:/irt/" + id;
+        }
+        PermissionUtil.check(resultDO.getModel());
+
+        ProjectDO project = projectService.getById(resultDO.getModel().getProjectId());
+        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName() + ":" + project.getLibraryId()+"-Num:1");
+        taskService.insert(taskDO);
+
+        SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);
+        List<ExperimentDO> exps = new ArrayList<>();
+        exps.add(resultDO.getModel());
+
+        LibraryDO lib = libraryService.getById(project.getLibraryId());
+//        LibraryDO lib = libraryService.getById("5d0848fee0073c6ffc69752d");
+        experimentTask.convAndIrt(exps, lib, mzExtractWindow, sigmaSpacing, taskDO);
+
+        return "redirect:/task/detail/" + taskDO.getId();
+    }
+
     @RequestMapping(value = "/irtresult")
     @ResponseBody
     ResultDO<JSONObject> irtResult(Model model,

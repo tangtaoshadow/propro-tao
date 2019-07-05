@@ -108,6 +108,11 @@
                            class="btn btn-info m-btn m-btn--icon m-btn--icon-only">
                             <i class="fa fa-calculator"></i>
                         </a>
+                        <a th:href="@{/experiment/irtwithlib(id=${experiment.id})}" data-toggle="m-tooltip"
+                           th:title="使用标准库计算irt"
+                           class="btn btn-brand m-btn m-btn--icon m-btn--icon-only">
+                            <i class="fa fa-calculator"></i>
+                        </a>
                         <a th:href="@{/experiment/extractor(id=${experiment.id})}" data-toggle="m-tooltip"
                            th:title="#{btn_start_convolution}"
                            class="btn btn-brand m-btn m-btn--icon m-btn--icon-only">

@@ -99,6 +99,13 @@ public class PeptideDAO extends BaseDAO<PeptideDO, PeptideQuery>{
         return mongoTemplate.findOne(query, PeptideDO.class, CollectionName);
     }
 
+    public TargetPeptide getTargetPeptideByDataRef(String libraryId, String peptideRef, boolean isDecoy) {
+        Query query = new Query(where("libraryId").is(libraryId));
+        query.addCriteria(where("isDecoy").is(isDecoy));
+        query.addCriteria(where("peptideRef").is(peptideRef));
+        return mongoTemplate.findOne(query, TargetPeptide.class, CollectionName);
+    }
+
     public List<TargetPeptide> getTPAll(PeptideQuery query) {
         Query q = buildQueryWithoutPage(query);
         return mongoTemplate.find(q, TargetPeptide.class, CollectionName);
