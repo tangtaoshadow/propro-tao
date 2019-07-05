@@ -108,7 +108,12 @@ public class Extractor {
             //Step1.获取窗口信息.
             SwathIndexQuery query = new SwathIndexQuery(exp.getId(), 2);
             query.setMz(peptide.getMz().floatValue());
-            SwathIndexDO swathIndexDO = swathIndexService.getSwathIndex(exp.getId(), peptide.getMz().floatValue());
+            SwathIndexDO swathIndexDO;
+            if (exp.getType().equals(Constants.EXP_TYPE_PRM)){
+                swathIndexDO = swathIndexService.getPrmIndex(exp.getId(), peptide.getMz().floatValue());
+            }else {
+                swathIndexDO = swathIndexService.getSwathIndex(exp.getId(), peptide.getMz().floatValue());
+            }
             //Step2.获取该窗口内的谱图Map,key值代表了RT
             TreeMap<Float, MzIntensityPairs> rtMap;
 

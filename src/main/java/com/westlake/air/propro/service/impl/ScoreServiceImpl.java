@@ -210,8 +210,8 @@ public class ScoreServiceImpl implements ScoreService {
             FeatureScores featureScores = new FeatureScores(input.getScoreTypes().size());
             chromatographicScorer.calculateChromatographicScores(peakGroupFeature, normedLibIntMap, featureScores, input.getScoreTypes());
             if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.XcorrShapeWeighted.getTypeName(), input.getScoreTypes()) != null
-                    && featureScores.get(ScoreType.XcorrShapeWeighted.getTypeName(), input.getScoreTypes()) < input.getXcorrShapeWeightThreshold()
-                    && featureScores.get(ScoreType.XcorrShape.getTypeName(), input.getScoreTypes()) < input.getXcorrShapeThreshold()){
+                    && (featureScores.get(ScoreType.XcorrShapeWeighted.getTypeName(), input.getScoreTypes()) < input.getXcorrShapeWeightThreshold()
+                    || featureScores.get(ScoreType.XcorrShape.getTypeName(), input.getScoreTypes()) < input.getXcorrShapeThreshold())){
                 continue;
             }
             //根据RT时间和前体MZ获取最近的一个原始谱图
@@ -239,6 +239,9 @@ public class ScoreServiceImpl implements ScoreService {
 //            }
             if (input.getScoreTypes().contains(ScoreType.IntensityScore.getTypeName())) {
                 libraryScorer.calculateIntensityScore(peakGroupFeature, featureScores, input.getScoreTypes());
+                if (input.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM) && featureScores.get(ScoreType.IntensityScore.getTypeName(), input.getScoreTypes()) < 0.1d){
+                    continue;
+                }
             }
 
             libraryScorer.calculateLibraryScores(peakGroupFeature, normedLibIntMap, featureScores, input.getScoreTypes());

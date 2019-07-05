@@ -24,6 +24,8 @@ public interface SwathIndexService {
 
     SwathIndexDO getSwathIndex(String expId, Float mz);
 
+    SwathIndexDO getPrmIndex(String expId, Float mz);
+
     ResultDO insert(SwathIndexDO swathIndexDO);
 
     ResultDO update(SwathIndexDO swathIndexDO);

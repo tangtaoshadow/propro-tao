@@ -492,4 +492,43 @@ public class TestController extends BaseController {
         return null;
     }
 
+    @RequestMapping("projectMainScore")
+    @ResponseBody
+    String projectMainScoreTest(){
+        String projectId = "5d1eb9b5e0073c4720e3bfa3";
+        List<ExperimentDO> experimentDOList = experimentService.getAllByProjectId(projectId);
+        List<Double> scoreList = new ArrayList<>();
+        for (ExperimentDO experimentDO: experimentDOList){
+            AnalyseOverviewDO analyseOverviewDO = analyseOverviewService.getFirstByExpId(experimentDO.getId()).getModel();
+            AnalyseDataQuery query = new AnalyseDataQuery();
+            query.addIndentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS);
+            query.setIsDecoy(false);
+            query.setOverviewId(analyseOverviewDO.getId());
+            List<AnalyseDataDO> dataDOList = analyseDataService.getAll(query);
+            int index = 0;
+            for (int i=0; i<analyseOverviewDO.getScoreTypes().size(); i++){
+                if (analyseOverviewDO.getScoreTypes().get(i).equals(ScoreType.XcorrShape.getTypeName())){
+                    index = i;
+                    break;
+                }
+            }
+
+            for (AnalyseDataDO dataDO: dataDOList){
+                List<FeatureScores> featureScoresList = dataDO.getFeatureScoresList();
+                Double bestRt = dataDO.getBestRt();
+                for (FeatureScores featureScores: featureScoresList){
+                    if (!featureScores.getRt().equals(bestRt)){
+                        continue;
+                    }else {
+                        scoreList.add(featureScores.getScores()[index]);
+                    }
+                }
+            }
+        }
+        Collections.sort(scoreList);
+        double minScore = scoreList.get(0);
+        double maxScore = scoreList.get(scoreList.size() - 1);
+        return null;
+    }
+
 }

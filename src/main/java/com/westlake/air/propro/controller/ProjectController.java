@@ -672,10 +672,13 @@ public class ProjectController extends BaseController {
                 if (checkState != null && checkState.equals("on")) {
                     List<AnalyseDataDO> analyseDataDOList = analyseDataService.getAllByOverviewId(analyseOverviewService.getAllByExpId(experimentDO.getId()).get(0).getId());
                     for (AnalyseDataDO analyseDataDO : analyseDataDOList) {
+                        if (analyseDataDO.getIsDecoy()){
+                            continue;
+                        }
                         if (analyseDataDO.getIdentifiedStatus() == AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS) {
                             intensityMap.get(analyseDataDO.getPeptideRef()).put(experimentDO.getName(), analyseDataDO.getIntensitySum().toString());
                         } else {
-                            intensityMap.get(analyseDataDO.getPeptideRef()).put(experimentDO.getName(), "Unidentified");
+                            intensityMap.get(analyseDataDO.getPeptideRef()).put(experimentDO.getName(), "x_"+ analyseDataDO.getIntensitySum().intValue());
                         }
                     }
                 }

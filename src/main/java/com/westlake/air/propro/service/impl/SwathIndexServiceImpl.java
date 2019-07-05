@@ -78,6 +78,22 @@ public class SwathIndexServiceImpl implements SwathIndexService {
         query.setMz(mz);
         return swathIndexDAO.getOne(query);
     }
+    @Override
+    public SwathIndexDO getPrmIndex(String expId, Float mz) {
+        SwathIndexQuery query = new SwathIndexQuery(expId, 2);
+        query.setMz(mz);
+        List<SwathIndexDO> swathIndexDOList = swathIndexDAO.getAll(query);
+        double minDeltaMz = Double.MAX_VALUE;
+        int minIndex = 0;
+        for (int i=0; i<swathIndexDOList.size(); i++){
+            double deltaMz = Math.abs(swathIndexDOList.get(i).getRange().getMz() - mz);
+            if (deltaMz < minDeltaMz){
+                minDeltaMz = deltaMz;
+                minIndex = i;
+            }
+        }
+        return swathIndexDOList.get(minIndex);
+    }
 
     @Override
     public ResultDO insert(SwathIndexDO swathIndexDO) {
