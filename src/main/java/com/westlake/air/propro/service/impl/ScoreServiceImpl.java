@@ -231,9 +231,9 @@ public class ScoreServiceImpl implements ScoreService {
                 chromatographicScorer.calculateLogSnScore(peakGroupFeature, featureScores, input.getScoreTypes());
             }
 
-            if (input.getScoreTypes().contains(ScoreType.ElutionModelFitScore.getTypeName())) {
-                elutionScorer.calculateElutionModelScore(peakGroupFeature, featureScores, input.getScoreTypes());
-            }
+//            if (input.getScoreTypes().contains(ScoreType.ElutionModelFitScore.getTypeName())) {
+//                elutionScorer.calculateElutionModelScore(peakGroupFeature, featureScores, input.getScoreTypes());
+//            }
             if (input.getScoreTypes().contains(ScoreType.IntensityScore.getTypeName())) {
                 libraryScorer.calculateIntensityScore(peakGroupFeature, featureScores, input.getScoreTypes());
             }

@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
@@ -129,4 +130,13 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
         ops.execute();
     }
 
+    public void deleteMulti(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList){
+        BulkOperations ops = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, AnalyseDataDO.class);
+        for (SimpleFeatureScores simpleFeatureScores : simpleFeatureScoresList) {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("dataRef").is(AnalyseUtil.getDataRef(overviewId, simpleFeatureScores.getPeptideRef(), simpleFeatureScores.getIsDecoy())));
+            ops.remove(query);
+        }
+        ops.execute();
+    }
 }

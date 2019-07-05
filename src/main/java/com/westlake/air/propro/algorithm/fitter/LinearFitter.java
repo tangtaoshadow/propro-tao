@@ -123,7 +123,7 @@ public class LinearFitter {
             intercept = slopeIntercept.getIntercept() - sigma * Math.random() * interceptStep * interceptGradient;
             updatedLoss = getHuberLoss(rtPairs, slope, intercept, delta);
         }
-        System.out.println("Huber: " + updatedLoss + ", " + slope + ", " + intercept);
+//        System.out.println("Huber: " + updatedLoss + ", " + slope + ", " + intercept);
         return new SlopeIntercept(slope, intercept);
     }
 
@@ -142,7 +142,7 @@ public class LinearFitter {
             intercept = slopeIntercept.getIntercept() - sigma * Math.random() * interceptStep * interceptGradient;
             updatedLoss = getProproLoss(rtPairs, slope, intercept, delta);
         }
-        System.out.println("Propro: " + updatedLoss + ", " + slope + ", " + intercept);
+//        System.out.println("Propro: " + updatedLoss + ", " + slope + ", " + intercept);
         return new SlopeIntercept(slope, intercept);
     }
 

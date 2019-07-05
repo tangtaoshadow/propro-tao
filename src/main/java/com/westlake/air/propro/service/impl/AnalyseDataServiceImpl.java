@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -112,7 +113,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
             if (isDeleteOld) {
                 analyseDataDAO.deleteAllByOverviewId(dataList.get(0).getOverviewId());
             }
-            for(AnalyseDataDO dataDO : dataList){
+            for (AnalyseDataDO dataDO : dataList) {
                 dataDO.setDataRef(AnalyseUtil.getDataRef(dataDO.getOverviewId(), dataDO.getPeptideRef(), dataDO.getIsDecoy()));
             }
             analyseDataDAO.insert(dataList);
@@ -189,5 +190,23 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     @Override
     public void updateMulti(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList) {
         analyseDataDAO.updateMulti(overviewId, simpleFeatureScoresList);
+    }
+
+    @Override
+    public void removeMultiDecoy(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList, Double fdr) {
+        List<SimpleFeatureScores> decoyNeedToRemove = new ArrayList<>();
+        for (int i = simpleFeatureScoresList.size() - 1; i >= 0; i--) {
+            //如果是伪肽段,并且fdr为空或者fdr小于指定的值,那么删除它
+            if(simpleFeatureScoresList.get(i).getIsDecoy() &&
+                    (simpleFeatureScoresList.get(i).getFdr() == null || simpleFeatureScoresList.get(i).getFdr() > fdr)){
+                decoyNeedToRemove.add(simpleFeatureScoresList.get(i));
+                simpleFeatureScoresList.remove(i);
+            }
+        }
+
+        logger.info("删除数据:"+decoyNeedToRemove.size()+"条");
+        if(decoyNeedToRemove.size() != 0){
+            analyseDataDAO.deleteMulti(overviewId, decoyNeedToRemove);
+        }
     }
 }

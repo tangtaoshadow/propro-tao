@@ -24,6 +24,7 @@ public interface AnalyseOverviewService {
 
     ResultDO update(AnalyseOverviewDO overviewDO);
 
+    //会删除overviewId关联的所有AnanlyseDataDO
     ResultDO delete(String id);
 
     ResultDO deleteAllByExpId(String expId);

@@ -140,12 +140,7 @@
                                 <div class="m-accordion__item-content">
                                     <a th:href="@{/score/list(overviewId=${overviewId},peptideRef=${score?.peptideRef})}"
                                        class="btn btn-primary btn-sm" th:text="#{btn_view_peptide_score}"></a>
-<!--                                    <button type="button" class="btn btn-sm btn-warning" data-toggle="modal"-->
-<!--                                            data-target="#m_modal_group" th:data1="${score.id}"-->
-<!--                                            th:onclick="queryGroup(this.getAttribute('data1'), false, false)"-->
-<!--                                            th:text="#{btn_group_chromatograms}">-->
-<!--                                    </button>-->
-                                    <a th:if="${!score.isDecoy}" target="_blank"
+                                    <a target="_blank"
                                        th:href="@{/analyse/consultation(dataId=${score.id},allCutInfo=true)}"
                                        class="btn btn-danger btn-sm" th:text="#{btn_peptide_clinic}"></a>
                                     <table class="table table-bordered table-hover" style="table-layout:fixed;">

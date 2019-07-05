@@ -45,4 +45,7 @@ public interface AnalyseDataService {
     List<AnalyseDataRT> getRtList(AnalyseDataQuery query);
 
     void updateMulti(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList);
+
+    //将数组中的FDR小于指定值的伪肽段删除,同时将数据库中对应的伪肽段也删除
+    void removeMultiDecoy(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList, Double fdr);
 }

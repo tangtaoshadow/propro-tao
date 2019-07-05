@@ -120,8 +120,11 @@ public class Airus {
         logger.info("将合并打分及定量结果反馈更新到数据库中,总计:" + featureScoresList.size() + "条数据");
         giveDecoyFdr(featureScoresList);
         long start = System.currentTimeMillis();
+        analyseDataService.removeMultiDecoy(overviewId, featureScoresList, 0.01d);
+        logger.info("删除无用数据一共用时："+(System.currentTimeMillis() - start));
+        start = System.currentTimeMillis();
         analyseDataService.updateMulti(overviewDO.getId(), featureScoresList);
-        logger.info("插入数据库一共用时："+(System.currentTimeMillis() - start));
+        logger.info("更新数据"+featureScoresList.size()+"条一共用时："+(System.currentTimeMillis() - start));
 
         for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
             if (!simpleFeatureScores.getIsDecoy()) {
@@ -338,6 +341,7 @@ public class Airus {
 
     //TODO 王瑞敏 MainScore有时候会是空的
     private void giveDecoyFdr(List<SimpleFeatureScores> featureScoresList) {
+
         List<SimpleFeatureScores> sortedAll = SortUtil.sortByMainScore(featureScoresList, false);
         SimpleFeatureScores leftFeatureScore = null;
         SimpleFeatureScores rightFeatureScore;

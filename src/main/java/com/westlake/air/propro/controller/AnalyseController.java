@@ -349,6 +349,7 @@ public class AnalyseController extends BaseController {
         String targetExpId = null;
         String targetLibraryId = null;
         String targetPeptideRef = null;
+        Boolean isDecoy = false;
         //如果dataId不为空,则优先使用dataId作为查询参数
         if (dataId != null && !dataId.isEmpty()) {
             ResultDO<AnalyseDataDO> dataResult = analyseDataService.getById(dataId);
@@ -367,6 +368,7 @@ public class AnalyseController extends BaseController {
             targetExpId = overviewResult.getModel().getExpId();
             targetLibraryId = overviewResult.getModel().getLibraryId();
             targetPeptideRef = data.getPeptideRef();
+            isDecoy = data.getIsDecoy();
             model.addAttribute("libraryId", overviewResult.getModel().getLibraryId());
             model.addAttribute("expId", overviewResult.getModel().getExpId());
         } else if (StringUtils.isNotEmpty(peptideRef) && StringUtils.isNotEmpty(expId) && StringUtils.isNotEmpty(libraryId)) {
@@ -414,7 +416,7 @@ public class AnalyseController extends BaseController {
         }
 
         ExperimentDO experimentDO = experimentResult.getModel();
-        PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(targetLibraryId, targetPeptideRef, false);
+        PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(targetLibraryId, targetPeptideRef, isDecoy);
         model.addAttribute("peptide", peptide);
         List<String> cutInfoFromGuess = new ArrayList<>();
         List<String> cutInfoFromGuessAndHit = new ArrayList<>();

@@ -352,7 +352,6 @@ function queryMultiGroup(peptideRef, isGaussFilter, useNoise1000) {
         element.setOption(option, true);
     }
 }
-
 function allFragmentConv(dataId, isGaussFilter, useNoise1000){
 
     if (dataId == null) {
