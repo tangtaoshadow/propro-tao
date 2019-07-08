@@ -85,6 +85,7 @@ public class PeptideDAO extends BaseDAO<PeptideDO, PeptideQuery>{
         query.addCriteria(where("isDecoy").is(isDecoy));
         return mongoTemplate.find(query, PeptideDO.class, CollectionName);
     }
+
     public List<PeptideDO> getAllByLibraryIdAndProteinNameAndIsDecoy(String libraryId, String proteinName, boolean isDecoy) {
         Query query = new Query(where("libraryId").is(libraryId));
         query.addCriteria(where("proteinName").is(proteinName));
