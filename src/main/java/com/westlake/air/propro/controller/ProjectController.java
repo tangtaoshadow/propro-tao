@@ -1,10 +1,7 @@
 package com.westlake.air.propro.controller;
 
 import com.westlake.air.propro.config.VMProperties;
-import com.westlake.air.propro.constants.ResultCode;
-import com.westlake.air.propro.constants.ScoreType;
-import com.westlake.air.propro.constants.SuccessMsg;
-import com.westlake.air.propro.constants.TaskTemplate;
+import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.db.*;
@@ -252,7 +249,9 @@ public class ProjectController extends BaseController {
             expsToUpdate.add(exp);
         }
 
+
         experimentTask.uploadAird(expsToUpdate, taskDO);
+
         return "redirect:/task/detail/" + taskDO.getId();
     }
 
@@ -672,13 +671,13 @@ public class ProjectController extends BaseController {
                 if (checkState != null && checkState.equals("on")) {
                     List<AnalyseDataDO> analyseDataDOList = analyseDataService.getAllByOverviewId(analyseOverviewService.getAllByExpId(experimentDO.getId()).get(0).getId());
                     for (AnalyseDataDO analyseDataDO : analyseDataDOList) {
-                        if (analyseDataDO.getIsDecoy()){
+                        if (analyseDataDO.getIsDecoy()) {
                             continue;
                         }
                         if (analyseDataDO.getIdentifiedStatus() == AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS) {
                             intensityMap.get(analyseDataDO.getPeptideRef()).put(experimentDO.getName(), analyseDataDO.getIntensitySum().toString());
                         } else {
-                            intensityMap.get(analyseDataDO.getPeptideRef()).put(experimentDO.getName(), "x_"+ analyseDataDO.getIntensitySum().intValue());
+                            intensityMap.get(analyseDataDO.getPeptideRef()).put(experimentDO.getName(), "x_" + analyseDataDO.getIntensitySum().intValue());
                         }
                     }
                 }
