@@ -79,10 +79,9 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     public ResultDO<List<AnalyseDataDO>> getList(AnalyseDataQuery query) {
         List<AnalyseDataDO> dataList = analyseDataDAO.getList(query);
         //暂时去除count功能,以免造成性能损耗
-//        long totalCount = analyseDataDAO.count(query);
-//        resultDO.setTotalNum(100000);
         ResultDO<List<AnalyseDataDO>> resultDO = new ResultDO<>(true);
         resultDO.setModel(dataList);
+        resultDO.setTotalNum(100000);
         resultDO.setPageSize(query.getPageSize());
         return resultDO;
     }

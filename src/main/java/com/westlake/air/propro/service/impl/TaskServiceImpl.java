@@ -33,6 +33,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public List<TaskDO> getAll(TaskQuery targetQuery) {
+        return taskDAO.getAll(targetQuery);
+    }
+
+    @Override
     public ResultDO<List<TaskDO>> getList(TaskQuery targetQuery) {
         List<TaskDO> taskList = taskDAO.getList(targetQuery);
         long totalCount = taskDAO.count(targetQuery);

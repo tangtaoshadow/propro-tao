@@ -214,24 +214,6 @@ public class PeptideServiceImpl implements PeptideService {
     }
 
     @Override
-    public Long countByPeptideRef(String libraryId) {
-        return peptideDAO.countByPeptideRef(libraryId);
-    }
-
-    @Override
-    public List<TargetPeptide> buildMS1Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows) {
-        PeptideQuery query = new PeptideQuery(libraryId);
-        List<TargetPeptide> targetList = peptideDAO.getTPAll(query);
-
-        for (TargetPeptide targetPeptide : targetList) {
-            targetPeptide.setRtStart((targetPeptide.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue() - rtExtractionWindows / 2.0f);
-            targetPeptide.setRtEnd((targetPeptide.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue() + rtExtractionWindows / 2.0f);
-        }
-        List<TargetPeptide> list = sortMS1Coordinates(targetList);
-        return list;
-    }
-
-    @Override
     public List<TargetPeptide> buildMS2Coordinates(LibraryDO library, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange mzRange, Float[] rtRange, String type, boolean uniqueCheck, Boolean noDecoy) {
 
         long start = System.currentTimeMillis();
@@ -299,38 +281,8 @@ public class PeptideServiceImpl implements PeptideService {
             }
         }
 
-        logger.info("构建卷积MS2坐标,读取标准库耗时:" + readDB);
+        logger.info("构建卷积MS2坐标,总计"+targetList.size()+"条记录,读取标准库耗时:" + readDB + "毫秒");
         return targetList;
-    }
-
-    @Override
-    public HashMap<String, TargetPeptide> getTPMap(PeptideQuery query) {
-        List<TargetPeptide> tps = peptideDAO.getTPAll(query);
-        HashMap<String, TargetPeptide> hashMap = new HashMap<>();
-        for (TargetPeptide peptide : tps) {
-            hashMap.put(peptide.getPeptideRef() + "_" + peptide.getIsDecoy(), peptide);
-        }
-
-        return hashMap;
-    }
-
-    private List<TargetPeptide> sortMS1Coordinates(List<TargetPeptide> targetList) {
-        //存储set中从而过滤出MS1
-        HashSet<TargetPeptide> targetSet = new HashSet<>(targetList);
-        Ordering<TargetPeptide> ordering = Ordering.from(new Comparator<TargetPeptide>() {
-            @Override
-            public int compare(TargetPeptide o1, TargetPeptide o2) {
-                if (o1.getMz() > o2.getMz()) {
-                    return 1;
-                } else if (o1.getMz() == o2.getMz()) {
-                    return 0;
-                } else {
-                    return -1;
-                }
-            }
-        });
-
-        return ordering.sortedCopy(targetSet);
     }
 
 }

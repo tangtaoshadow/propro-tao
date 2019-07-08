@@ -1,11 +1,10 @@
-package com.westlake.air.propro.async;
+package com.westlake.air.propro.async.task;
 
 import com.westlake.air.propro.algorithm.extract.Extractor;
 import com.westlake.air.propro.algorithm.irt.Irt;
 import com.westlake.air.propro.algorithm.learner.Airus;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.constants.TaskStatus;
-import com.westlake.air.propro.constants.TaskTemplate;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.airus.AirusParams;
 import com.westlake.air.propro.domain.bean.airus.FinalResult;
@@ -17,7 +16,6 @@ import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.service.*;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;

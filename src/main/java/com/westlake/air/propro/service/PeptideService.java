@@ -66,23 +66,6 @@ public interface PeptideService {
     Long countByUniqueProteinName(String libraryId);
 
     /**
-     * 计算不同肽段的数目
-     *
-     * @param libraryId
-     * @return
-     */
-    Long countByPeptideRef(String libraryId);
-
-    /**
-     * 创建MS1的坐标系
-     *
-     * @param libraryId
-     * @param rtExtractionWindows
-     * @return
-     */
-    List<TargetPeptide> buildMS1Coordinates(String libraryId, SlopeIntercept slopeIntercept, float rtExtractionWindows);
-
-    /**
      * 创建MS2的坐标系
      *
      * @param library
@@ -91,12 +74,5 @@ public interface PeptideService {
      * @return
      */
     List<TargetPeptide> buildMS2Coordinates(LibraryDO library, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange range, Float[] rtRange, String type, boolean uniqueCheck, Boolean noDecoy);
-
-    /**
-     * 根据限制条件获取按照PeptideRef+IsDecoy进行分组的Intensity Map
-     * @param query
-     * @return
-     */
-    HashMap<String, TargetPeptide> getTPMap(PeptideQuery query);
 }
 

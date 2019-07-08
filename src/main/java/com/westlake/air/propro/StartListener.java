@@ -12,7 +12,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import java.util.HashSet;
 import java.util.Set;
 
-public class StartUpListener implements ApplicationListener<ContextRefreshedEvent> {
+public class StartListener implements ApplicationListener<ContextRefreshedEvent> {
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {

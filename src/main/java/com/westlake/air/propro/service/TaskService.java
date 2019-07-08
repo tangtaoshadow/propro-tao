@@ -15,6 +15,8 @@ public interface TaskService {
 
     Long count(TaskQuery query);
 
+    List<TaskDO> getAll(TaskQuery targetQuery);
+
     ResultDO<List<TaskDO>> getList(TaskQuery targetQuery);
 
     ResultDO insert(TaskDO taskDO);

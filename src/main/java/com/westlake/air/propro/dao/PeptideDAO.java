@@ -108,6 +108,7 @@ public class PeptideDAO extends BaseDAO<PeptideDO, PeptideQuery>{
 
     public List<TargetPeptide> getTPAll(PeptideQuery query) {
         Query q = buildQueryWithoutPage(query);
+        q.withHint("{'libraryId':1}");//使用libraryId作为第一优先索引
         return mongoTemplate.find(q, TargetPeptide.class, CollectionName);
     }
 

@@ -5,7 +5,6 @@ import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.aird.Compressor;
-import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.irt.IrtResult;
@@ -91,11 +90,11 @@ public class Irt {
                     throw e;
                 }
 
-                //Step4.卷积并且存储数据
+                //Step4.卷积并且存储数据,如果传入的库是标准库,那么使用采样的方式进行卷积
                 if(library.getType().equals(LibraryDO.TYPE_IRT)){
                     extractor.extractForIrt(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
                 }else{
-                    extractor.touchForIrt(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
+                    extractor.randomFetchForIrt(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
                 }
             }
         } catch (Exception e) {

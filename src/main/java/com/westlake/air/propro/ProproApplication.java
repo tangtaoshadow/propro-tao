@@ -22,7 +22,7 @@ public class ProproApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
         SpringApplication springApplication = new SpringApplication(ProproApplication.class);
-        springApplication.addListeners(new StartUpListener());
+        springApplication.addListeners(new StartListener());
         springApplication.run(args);
 //        SpringApplication.run(ProproApplication.class, args);
     }
@@ -36,5 +36,4 @@ public class ProproApplication extends SpringBootServletInitializer {
         localeResolver.setCookieMaxAge(604800);//设置cookie有效期.
         return localeResolver;
     }
-
 }

@@ -1,4 +1,4 @@
-package com.westlake.air.propro.async;
+package com.westlake.air.propro.async.task;
 
 import com.westlake.air.propro.algorithm.learner.Airus;
 import com.westlake.air.propro.constants.TaskStatus;

@@ -149,7 +149,7 @@
                                             <th>RT</th>
                                             <th>MainXxSwathPrelimScore+</th>
                                             <th>VarBseriesScore+</th>
-                                            <th>VarElutionModelFitScore+</th>
+<!--                                            <th>VarElutionModelFitScore+</th>-->
                                             <th>VarIntensityScore+</th>
                                             <th>VarIsotopeCorrelationScore+</th>
                                             <th>VarIsotopeOverlapScore-</th>
@@ -168,7 +168,7 @@
                                             <th>VarLibraryManhattan-</th>
                                             <th>VarLibrarySangle-</th>
                                             <th>VarLibraryRootmeansquare-</th>
-                                            <th>VarManhattScore+</th>
+<!--                                            <th>VarManhattScore+</th>-->
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -192,12 +192,6 @@
 
                                             <td th:if="${score.bestRt==featureScore.rt}"
                                                 th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('ElutionModelFitScore', scoreTypes)}"></td>
-                                            <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('ElutionModelFitScore', scoreTypes)}"></td>
-
-                                            <td th:if="${score.bestRt==featureScore.rt}"
-                                                th:style="'background-color:#bbc1f1'"
                                                 th:text="${featureScore.get('IntensityScore', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
                                                 th:text="${featureScore.get('IntensityScore', scoreTypes)}"></td>
@@ -303,12 +297,6 @@
                                                 th:text="${featureScore.get('LibraryRootmeansquare', scoreTypes)}"></td>
                                             <td th:unless="${score.bestRt==featureScore.rt}"
                                                 th:text="${featureScore.get('LibraryRootmeansquare', scoreTypes)}"></td>
-
-                                            <td th:if="${score.bestRt==featureScore.rt}"
-                                                th:style="'background-color:#bbc1f1'"
-                                                th:text="${featureScore.get('ManhattScore', scoreTypes)}"></td>
-                                            <td th:unless="${score.bestRt==featureScore.rt}"
-                                                th:text="${featureScore.get('ManhattScore', scoreTypes)}"></td>
                                         </tr>
                                         </tbody>
                                     </table>
@@ -322,35 +310,6 @@
             </div>
         </div>
     </div>
-<!--    <div class="modal fade" id="m_modal_group" tabindex="-1" role="dialog" aria-labelledby="TargetInfo"-->
-<!--         aria-hidden="true">-->
-<!--        <div class="modal-dialog modal-lg" role="document">-->
-<!--            <div class="modal-content">-->
-<!--                <div class="modal-header">-->
-<!--                    <h5 class="modal-title">-->
-<!--                        <button type="button" class="btn btn-sm btn-warning"-->
-<!--                                th:onclick="queryGroup(null,true,false)" th:text="#{btn_gauss_filter}"></button>-->
-<!--                        <button type="button" class="btn btn-sm btn-info"-->
-<!--                                th:onclick="queryGroup(null,true, true)"-->
-<!--                                th:text="#{btn_denoising_gauss_filter}"></button>-->
-<!--                        <button type="button" class="btn btn-sm btn-brand"-->
-<!--                                th:onclick="queryGroup(null,false, false)" th:text="#{btn_original_data}"></button>-->
-<!--                        <button type="button" class="btn btn-sm btn-accent"-->
-<!--                                th:onclick="queryGroup(null,false, true)" th:text="#{btn_denoising_data}"></button>-->
-<!--                        <span class="m-badge m-badge&#45;&#45;success m-badge&#45;&#45;wide" id="peptideLabel">-->
-<!--                        </span>-->
-<!--                    </h5>-->
-<!--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span-->
-<!--                            aria-hidden="true">&times;</span></button>-->
-<!--                </div>-->
-<!--                <div id="modal-body-group" class="modal-body" style="width: 1200px;height:600px;"></div>-->
-<!--                <div class="modal-footer">-->
-<!--                    <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{btn_close}">-->
-<!--                    </button>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
 </div>
 
 </body>

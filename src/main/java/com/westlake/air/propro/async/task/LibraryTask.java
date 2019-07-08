@@ -1,4 +1,4 @@
-package com.westlake.air.propro.async;
+package com.westlake.air.propro.async.task;
 
 import com.westlake.air.propro.constants.TaskStatus;
 import com.westlake.air.propro.domain.db.LibraryDO;
@@ -9,8 +9,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.List;
 
 /**
  * Created by James Lu MiaoShan

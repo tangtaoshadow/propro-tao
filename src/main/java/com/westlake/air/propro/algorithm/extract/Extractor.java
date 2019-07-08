@@ -3,7 +3,6 @@ package com.westlake.air.propro.algorithm.extract;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
-import com.westlake.air.propro.dao.ProjectDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
@@ -38,8 +37,6 @@ public class Extractor {
     @Autowired
     AnalyseOverviewService analyseOverviewService;
     @Autowired
-    ProjectDAO projectDAO;
-    @Autowired
     SwathIndexService swathIndexService;
     @Autowired
     ExperimentService experimentService;
@@ -56,8 +53,9 @@ public class Extractor {
      * 卷积的核心函数,最终返回卷积到的Peptide数目
      * 目前只支持MS2的卷积
      *
-     * @param lumsParams useEpps: true: 将卷积,选峰及打分合并在一个步骤中执行,可以完整的省去一次IO读取及解析,大大提升分析速度
-     *                   需要experimentDO,libraryId,rtExtractionWindow,mzExtractionWindow,SlopeIntercept
+     * @param lumsParams
+     * 将卷积,选峰及打分合并在一个步骤中执行,可以完整的省去一次IO读取及解析,大大提升分析速度,
+     * 需要experimentDO,libraryId,rtExtractionWindow,mzExtractionWindow,SlopeIntercept
      * @return
      */
     public ResultDO<AnalyseOverviewDO> extract(LumsParams lumsParams) {
@@ -73,7 +71,7 @@ public class Extractor {
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile((File) checkResult.getModel(), "r");
-            //核心函数在这里
+
             extract(raf, overviewDO, lumsParams);
 
         } catch (Exception e) {
@@ -169,10 +167,13 @@ public class Extractor {
         }
     }
 
-    public void touchForIrt(List<AnalyseDataDO> finalList, List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float mzExtractWindow, Float rtExtractWindow) {
+    public void randomFetchForIrt(List<AnalyseDataDO> finalList, List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float mzExtractWindow, Float rtExtractWindow) {
         long start = System.currentTimeMillis();
         int count = 0;
         for (TargetPeptide tp : coordinates) {
+            if(count >= 2){
+                break;
+            }
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
             if (dataDO == null) {
                 continue;
@@ -182,11 +183,7 @@ public class Extractor {
             if(dataDO.getFeatureScoresList() != null){
                 finalList.add(dataDO);
                 logger.info("找到了:"+dataDO.getPeptideRef()+",BestRT:"+dataDO.getFeatureScoresList().get(0).getRt()+"耗时:"+(System.currentTimeMillis() - start));
-                if(count < 10){
-                    count++;
-                }else{
-                    break;
-                }
+                count++;
             }
         }
     }
@@ -362,7 +359,7 @@ public class Extractor {
 
         rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
 
-        logger.info("IO及解码耗时:" + (System.currentTimeMillis() - start));
+        logger.info("IO及解码耗时:" + (System.currentTimeMillis() - start) + "毫秒");
         return epps(coordinates, rtMap, overviewId, lumsParams);
 
     }
@@ -427,7 +424,7 @@ public class Extractor {
             AnalyseUtil.compress(dataDO);
             dataList.add(dataDO);
         }
-        logger.info("卷积+选峰+打分耗时:" + (System.currentTimeMillis() - start));
+        logger.info("卷积+选峰+打分耗时:" + (System.currentTimeMillis() - start)/1000 +"秒");
         return dataList;
     }
 
