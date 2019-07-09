@@ -120,9 +120,8 @@ public class LibraryTsvParser extends BaseLibraryParser {
                         map.get(peptideDO.getPeptideRef() + "_" + peptideDO.getIsDecoy()).setProteinName("IRT");
                         continue;
                     }
-                    if (prmPeptideRefSet.contains(peptideDO.getPeptideRef())) {
-                        prmPeptideRefSet.remove(peptideDO.getPeptideRef());
-                    }
+
+                    prmPeptideRefSet.remove(peptideDO.getPeptideRef());
                     peptideDO.setProteinName("IRT");
                     peptideDO.setId(null);
                     peptideDO.setLibraryId(library.getId());

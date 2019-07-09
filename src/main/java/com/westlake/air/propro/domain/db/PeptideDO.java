@@ -30,30 +30,37 @@ public class PeptideDO extends BaseDO {
     String libraryId;
 
     /**
-     * 标准库名称
-     */
-    String libraryName;
-
-    /**
-     * 对应蛋白质名称（包含Decoy信息）
-     */
-    String proteinName;
-
-//    String uniProtName;
-
-    /**
      * 肽段的唯一识别符,格式为 : fullName_precursorCharge,如果是伪肽段,则本字段为对应的真肽段的PeptideRef
      */
     @Indexed
     String peptideRef;
-
-    Boolean isUnique = true;
 
     /**
      * 肽段的荷质比MZ
      */
     @Indexed
     Double mz;
+
+    /**
+     * 是否是伪肽段
+     */
+    @Indexed
+    Boolean isDecoy;
+
+    /**
+     * 标准库名称
+     */
+    String libraryName;
+
+    /**
+     * 对应蛋白质名称
+     */
+    String proteinName;
+
+    /**
+     * 该肽段是否是该蛋白的不重复肽段
+     */
+    Boolean isUnique = true;
 
     /**
      * 肽段的归一化RT
@@ -69,12 +76,6 @@ public class PeptideDO extends BaseDO {
      * 针对PRM提出，peptidelist中预计肽段出现的时间，单位：秒
      */
     Double prmRt;
-
-    /**
-     * 是否是伪肽段
-     */
-    @Indexed
-    Boolean isDecoy;
 
     /**
      * 对应肽段序列,如果是伪肽段,则本字段为伪肽段对应的原始真肽段的序列(不包含UniModId)
@@ -101,16 +102,6 @@ public class PeptideDO extends BaseDO {
      * key为unimod在肽段中的位置,位置从0开始计数,value为unimod的Id(参见unimod.obo文件)
      */
     HashMap<Integer, String> unimodMap;
-
-    /**
-     * 新字段,原始肽段的序列列表,包含修饰符
-     */
-    List<AminoAcid> acidList = new ArrayList<>();
-
-    /**
-     * 新字段,如果是伪肽段则为伪肽段的序列列表,包含修饰符
-     */
-    List<AminoAcid> decoyAcidList = new ArrayList<>();
 
     /**
      * 对应的肽段碎片的信息

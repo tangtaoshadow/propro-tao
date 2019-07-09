@@ -105,7 +105,6 @@ public class ShuffleGenerator extends BaseGenerator {
         PeptideDO decoy = TransitionUtil.cloneForDecoy(peptideDO);
         decoy.setSequence(TransitionUtil.toSequence(bestDecoy, false));
         decoy.setUnimodMap(newUnimodMap);
-        decoy.setDecoyAcidList(bestDecoy);
 
         for (String cutInfo : peptideDO.getFragmentMap().keySet()) {
             FragmentInfo targetFi = peptideDO.getFragmentMap().get(cutInfo);
@@ -117,9 +116,6 @@ public class ShuffleGenerator extends BaseGenerator {
             decoyFi.setAnnotations(targetFi.getAnnotation().toAnnoInfo());
             Annotation oneAnno = targetFi.getAnnotation();
             List<String> unimodIds = new ArrayList<>();
-            if (oneAnno.getType() == null){
-                System.out.println("debug");
-            }
             List<AminoAcid> acids = fragmentFactory.getFragmentSequence(bestDecoy, oneAnno.getType(), oneAnno.getLocation());
             for (AminoAcid aminoAcid : acids) {
                 if (aminoAcid.getModId() != null) {
