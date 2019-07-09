@@ -195,10 +195,12 @@ public class FragmentFactory {
                 List<String> bUnimodIds = formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i);
                 List<String> yUnimodIds = formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), length - i, length);
 
-                Double bMz = formulaCalculator.getMonoMz(bSubstring, ResidueType.BIon, c, 0, 0, false, bUnimodIds);
-                bySeriesMap.put("b" + i + (c == 1 ? "" : ("^" + c)), bMz);
-                Double yMz = formulaCalculator.getMonoMz(ySubstring, ResidueType.YIon, c, 0, 0, false, yUnimodIds);
-                bySeriesMap.put("y" + i + (c == 1 ? "" : ("^" + c)), yMz);
+                bySeriesMap.put("a" + i + (c == 1 ? "" : ("^" + c)), formulaCalculator.getMonoMz(bSubstring, ResidueType.AIon, c, 0, 0, false, bUnimodIds));
+                bySeriesMap.put("b" + i + (c == 1 ? "" : ("^" + c)), formulaCalculator.getMonoMz(bSubstring, ResidueType.BIon, c, 0, 0, false, bUnimodIds));
+                bySeriesMap.put("c" + i + (c == 1 ? "" : ("^" + c)), formulaCalculator.getMonoMz(bSubstring, ResidueType.CIon, c, 0, 0, false, bUnimodIds));
+                bySeriesMap.put("x" + i + (c == 1 ? "" : ("^" + c)), formulaCalculator.getMonoMz(ySubstring, ResidueType.XIon, c, 0, 0, false, yUnimodIds));
+                bySeriesMap.put("y" + i + (c == 1 ? "" : ("^" + c)), formulaCalculator.getMonoMz(ySubstring, ResidueType.YIon, c, 0, 0, false, yUnimodIds));
+                bySeriesMap.put("z" + i + (c == 1 ? "" : ("^" + c)), formulaCalculator.getMonoMz(ySubstring, ResidueType.ZIon, c, 0, 0, false, yUnimodIds));
             }
         }
 

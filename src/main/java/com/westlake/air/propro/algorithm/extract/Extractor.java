@@ -53,10 +53,8 @@ public class Extractor {
      * 卷积的核心函数,最终返回卷积到的Peptide数目
      * 目前只支持MS2的卷积
      *
-     * @param lumsParams
-     * 将卷积,选峰及打分合并在一个步骤中执行,可以完整的省去一次IO读取及解析,大大提升分析速度,
-     * 需要experimentDO,libraryId,rtExtractionWindow,mzExtractionWindow,SlopeIntercept
-     * @return
+     * @param lumsParams 将卷积,选峰及打分合并在一个步骤中执行,可以完整的省去一次IO读取及解析,大大提升分析速度,
+     *                   需要experimentDO,libraryId,rtExtractionWindow,mzExtractionWindow,SlopeIntercept
      */
     public ResultDO<AnalyseOverviewDO> extract(LumsParams lumsParams) {
         ResultDO<AnalyseOverviewDO> resultDO = new ResultDO(true);
@@ -71,9 +69,7 @@ public class Extractor {
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile((File) checkResult.getModel(), "r");
-
             extract(raf, overviewDO, lumsParams);
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -107,9 +103,9 @@ public class Extractor {
             SwathIndexQuery query = new SwathIndexQuery(exp.getId(), 2);
             query.setMz(peptide.getMz().floatValue());
             SwathIndexDO swathIndexDO;
-            if (exp.getType().equals(Constants.EXP_TYPE_PRM)){
+            if (exp.getType().equals(Constants.EXP_TYPE_PRM)) {
                 swathIndexDO = swathIndexService.getPrmIndex(exp.getId(), peptide.getMz().floatValue());
-            }else {
+            } else {
                 swathIndexDO = swathIndexService.getSwathIndex(exp.getId(), peptide.getMz().floatValue());
             }
             //Step2.获取该窗口内的谱图Map,key值代表了RT
@@ -117,7 +113,7 @@ public class Extractor {
 
             long start = System.currentTimeMillis();
             rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndexDO, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
-            logger.warn("Cost:"+(System.currentTimeMillis() - start));
+            logger.warn("Cost:" + (System.currentTimeMillis() - start));
             TargetPeptide tp = new TargetPeptide(peptide);
             Double rt = peptide.getRt();
             if (rtExtractorWindow == -1) {
@@ -128,7 +124,9 @@ public class Extractor {
                 tp.setRtStart(targetRt.floatValue() - rtExtractorWindow / 2);
                 tp.setRtEnd(targetRt.floatValue() + rtExtractorWindow / 2);
             }
+            long startA = System.currentTimeMillis();
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, mzExtractorWindow, rtExtractorWindow, null);
+            System.out.println("耗时:"+(System.currentTimeMillis() - startA));
             if (dataDO == null) {
                 return ResultDO.buildError(ResultCode.ANALYSE_DATA_ARE_ALL_ZERO);
             }
@@ -171,7 +169,7 @@ public class Extractor {
         long start = System.currentTimeMillis();
         int count = 0;
         for (TargetPeptide tp : coordinates) {
-            if(count >= 2){
+            if (count >= 2) {
                 break;
             }
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
@@ -180,9 +178,9 @@ public class Extractor {
             }
             scoreService.strictScoreForOne(dataDO, tp, rtMap);
 
-            if(dataDO.getFeatureScoresList() != null){
+            if (dataDO.getFeatureScoresList() != null) {
                 finalList.add(dataDO);
-                logger.info("找到了:"+dataDO.getPeptideRef()+",BestRT:"+dataDO.getFeatureScoresList().get(0).getRt()+"耗时:"+(System.currentTimeMillis() - start));
+                logger.info("找到了:" + dataDO.getPeptideRef() + ",BestRT:" + dataDO.getFeatureScoresList().get(0).getRt() + "耗时:" + (System.currentTimeMillis() - start));
                 count++;
             }
         }
@@ -224,18 +222,22 @@ public class Extractor {
 
         boolean isHit = false;
         //take half for each side
-        mzExtractWindow = mzExtractWindow / 2f;
+        if (isPpm) {
+            mzExtractWindow = (mzExtractWindow / 2f) * 1E-6f;
+        } else {
+            mzExtractWindow = mzExtractWindow / 2f;
+        }
+
         for (FragmentInfo fi : tp.getFragmentMap().values()) {
             float mz = fi.getMz().floatValue();
             if (isPpm) {
-                mzStart = mz - mz * mzExtractWindow * 1E-6f;
-                mzEnd = mz + mz * mzExtractWindow * 1E-6f;
+                mzStart = mz - mz * mzExtractWindow;
+                mzEnd = mz + mz * mzExtractWindow;
             } else {
-                mzStart = fi.getMz().floatValue() - mzExtractWindow;
-                mzEnd = fi.getMz().floatValue() + mzExtractWindow;
+                mzStart = mz - mzExtractWindow;
+                mzEnd = mz + mzExtractWindow;
             }
 
-            //由于本函数极其注重性能,因此为了避免下面的拆箱装箱操作,在本处会预备两种类型的数组
             Float[] intArray = new Float[rtArray.length];
             boolean isAllZero = true;
             for (int i = 0; i < rtArray.length; i++) {
@@ -243,14 +245,16 @@ public class Extractor {
                 Float[] pairMzArray = pairs.getMzArray();
                 Float[] pairIntensityArray = pairs.getIntensityArray();
                 float acc;
+                //由于本函数极其注重性能,为整个流程最关键的耗时步骤,每提升10毫秒都可以带来巨大的性能提升  --陆妙善
                 if (useAdaptiveWindow) {
-                    acc = ConvolutionUtil.adaptiveAccumulation(pairMzArray, pairIntensityArray, fi.getMz().floatValue());
+                    acc = ConvolutionUtil.adaptiveAccumulation(pairMzArray, pairIntensityArray, mz);
                 } else {
                     acc = ConvolutionUtil.accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd);
                 }
                 if (acc != 0) {
                     isAllZero = false;
                 }
+
                 intArray[i] = acc;
             }
             if (isAllZero) {
@@ -310,8 +314,8 @@ public class Extractor {
                     dataCount += dataList.size();
                 }
                 analyseDataService.insertAll(dataList, false);
-                task.addLog("第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start)/1000 + "秒");
-                logger.info("第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start)/1000 + "秒");
+                task.addLog("第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start) / 1000 + "秒");
+                logger.info("第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start) / 1000 + "秒");
                 taskService.update(task);
                 count++;
             }
@@ -356,10 +360,9 @@ public class Extractor {
         }
         //Step3.提取指定原始谱图
         long start = System.currentTimeMillis();
-
         rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
-
         logger.info("IO及解码耗时:" + (System.currentTimeMillis() - start) + "毫秒");
+
         return epps(coordinates, rtMap, overviewId, lumsParams);
 
     }
@@ -380,7 +383,6 @@ public class Extractor {
         HashSet<String> targetIgnorePeptides = new HashSet<>();
         List<TargetPeptide> decoyList = new ArrayList<>();
         //传入的coordinates是没有经过排序的,需要排序先处理真实肽段,再处理伪肽段.如果先处理的真肽段没有被卷积到任何信息,或者卷积后的峰太差被忽略掉,都会同时删掉对应的伪肽段的卷积
-        //
         for (TargetPeptide tp : coordinates) {
             if (tp.getIsDecoy()) {
                 decoyList.add(tp);
@@ -424,7 +426,7 @@ public class Extractor {
             AnalyseUtil.compress(dataDO);
             dataList.add(dataDO);
         }
-        logger.info("卷积+选峰+打分耗时:" + (System.currentTimeMillis() - start)/1000 +"秒");
+        logger.info("卷积+选峰+打分耗时:" + (System.currentTimeMillis() - start) / 1000 + "秒");
         return dataList;
     }
 

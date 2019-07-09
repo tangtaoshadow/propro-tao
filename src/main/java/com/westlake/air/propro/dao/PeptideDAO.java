@@ -150,6 +150,7 @@ public class PeptideDAO extends BaseDAO<PeptideDO, PeptideQuery>{
                 BasicDBObject.class);
         return (long) a.getMappedResults().size();
     }
+
     public long countByUniqueProteinName(String libraryId) {
         AggregationResults<BasicDBObject> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(

@@ -224,6 +224,9 @@ public class ExperimentServiceImpl implements ExperimentService {
 
         } catch (IOException e) {
             e.printStackTrace();
+            taskDO.addLog("Aird Parse Exception");
+            taskDO.finish(TaskStatus.FAILED.getName());
+            taskService.update(taskDO);
         }
     }
 

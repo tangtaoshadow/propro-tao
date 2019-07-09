@@ -25,7 +25,9 @@ public class TargetPeptide {
      */
     String sequence;
 
-    //对应的MS1荷质比
+    /**
+     * 对应的前体荷质比
+     */
     float mz;
 
     HashMap<String, FragmentInfo> fragmentMap;

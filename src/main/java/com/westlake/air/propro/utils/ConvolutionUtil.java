@@ -3,7 +3,6 @@ package com.westlake.air.propro.utils;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.ExperimentDO;
-import org.junit.Test;
 
 import java.io.File;
 
@@ -36,11 +35,6 @@ public class ConvolutionUtil {
 
             //Accumulate when iterIndex in (mzStart, mzEnd). Return 0 if rightIndex's mz is bigger than mzEnd.
             while (mzArray[iterIndex] <= mzEnd) {
-                //信号小于35的均认为是噪音直接删除
-                if (intensityArray[iterIndex] <= 17) {
-                    iterIndex++;
-                    continue;
-                }
                 result += intensityArray[iterIndex];
                 iterIndex++;
             }
@@ -61,24 +55,14 @@ public class ConvolutionUtil {
     public static float adaptiveAccumulation(Float[] mzArray, Float[] intensityArray, Float mz) {
         float result = 0f;
         int nearestIndex = PeakUtil.findNearestIndex(mzArray, mz);
-        int leftIndex = nearestIndex==0 ? 0 : nearestIndex - 1;
-        int rightIndex = nearestIndex==mzArray.length-1 ? nearestIndex : nearestIndex + 1;
+        int leftIndex = nearestIndex == 0 ? 0 : nearestIndex - 1;
+        int rightIndex = nearestIndex == mzArray.length - 1 ? nearestIndex : nearestIndex + 1;
         float leftPace = mzArray[nearestIndex] - mzArray[leftIndex];
         float rightPace = mzArray[rightIndex] - mzArray[nearestIndex];
         float pace = Math.min(leftPace, rightPace);
         if (Math.abs(mzArray[nearestIndex] - mz) > 0.01) {
             return 0f;
         }
-//        if (mzArray[nearestIndex] - mz > 0){
-//            if (mzArray[rightIndex] > mzArray[leftIndex]){
-//                return 0f;
-//            }
-//        }
-//        if (mzArray[nearestIndex] - mz < 0){
-//            if (mzArray[rightIndex] < mzArray[leftIndex]){
-//                return 0f;
-//            }
-//        }
         //to the left
         while (leftIndex > 0 && mzArray[leftIndex] - mzArray[leftIndex - 1] < 2 * pace) {
             if (intensityArray[leftIndex] > intensityArray[leftIndex - 1]) {
@@ -88,7 +72,7 @@ public class ConvolutionUtil {
             }
         }
         //to the right
-        while (rightIndex < mzArray.length-1 && mzArray[rightIndex + 1] - mzArray[rightIndex] < 2 * pace) {
+        while (rightIndex < mzArray.length - 1 && mzArray[rightIndex + 1] - mzArray[rightIndex] < 2 * pace) {
             if (intensityArray[rightIndex] > intensityArray[rightIndex + 1]) {
                 rightIndex++;
             } else {
@@ -117,7 +101,8 @@ public class ConvolutionUtil {
 
     /**
      * 找到从小到大排序的第一个大于等于目标值的索引
-     * 当目标值大于范围中的最大值时,返回-1
+     * 当目标值大于等于范围中的最大值时,返回-1
+     * 左闭右开区间
      *
      * @param array
      * @param target
@@ -125,6 +110,7 @@ public class ConvolutionUtil {
      */
     public static int findRightIndex(Float[] array, Float target) {
         int rightIndex = array.length - 1;
+
         if (target <= array[0]) {
             return 0;
         }
@@ -146,6 +132,7 @@ public class ConvolutionUtil {
 
         return rightIndex;
     }
+
 
     /**
      * 找到从小到大排序的第一个大于目标值的索引
@@ -277,6 +264,5 @@ public class ConvolutionUtil {
             return leftIndex;
         }
     }
-
 
 }

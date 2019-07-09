@@ -63,7 +63,7 @@ public class ExperimentTask extends BaseTask {
             taskDO.finish(TaskStatus.SUCCESS.getName());
             taskService.update(taskDO);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            e.printStackTrace();
             taskDO.addLog("Error:" + e.getMessage());
             taskDO.finish(TaskStatus.FAILED.getName());
             taskService.update(taskDO);

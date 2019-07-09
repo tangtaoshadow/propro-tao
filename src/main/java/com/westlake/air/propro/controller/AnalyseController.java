@@ -110,7 +110,7 @@ public class AnalyseController extends BaseController {
         if (StringUtils.isNotEmpty(expId)) {
             query.setExpId(expId);
         }
-        if(!isAdmin()){
+        if (!isAdmin()) {
             query.setOwnerName(getCurrentUsername());
         }
         query.setOrderBy(Sort.Direction.DESC);
@@ -216,10 +216,10 @@ public class AnalyseController extends BaseController {
 
         ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(id);
         PermissionUtil.check(overviewResult.getModel());
-
+        String expId = overviewResult.getModel().getExpId();
         analyseOverviewService.delete(id);
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
-        return "redirect:/analyse/overview/list";
+        return "redirect:/analyse/overview/list?expId="+expId;
     }
 
     @RequestMapping(value = "/overview/select")
@@ -348,7 +348,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("onlyOneCharge", onlyOneCharge);
 
         AnalyseDataDO dataDO = null;
-        if (StringUtils.isNotEmpty(dataId)){
+        if (StringUtils.isNotEmpty(dataId)) {
             dataDO = analyseDataService.getById(dataId).getModel();
             AnalyseOverviewDO analyseOverviewDO = analyseOverviewService.getById(dataDO.getOverviewId()).getModel();
             model.addAttribute("libraryId", analyseOverviewDO.getLibraryId());
@@ -357,13 +357,13 @@ public class AnalyseController extends BaseController {
             libraryId = analyseOverviewDO.getLibraryId();
             expId = analyseOverviewDO.getExpId();
             peptideRef = dataDO.getPeptideRef();
-        }else if (StringUtils.isNotEmpty(expId)) {
+        } else if (StringUtils.isNotEmpty(expId)) {
             String overviewId = analyseOverviewService.getFirstByExpId(expId).getModel().getId();
             dataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, peptideRef, false);
         }
         HashSet<String> usedCutInfos = new HashSet<>();
 
-        if (!model.containsAttribute("peptideRef") || !model.containsAttribute("expId") || !model.containsAttribute("libraryId")){
+        if (!model.containsAttribute("peptideRef") || !model.containsAttribute("expId") || !model.containsAttribute("libraryId")) {
             model.addAttribute(ERROR_MSG, ResultCode.PARAMS_NOT_ENOUGH.getMessage());
             return "analyse/data/consultation";
         }
@@ -375,8 +375,6 @@ public class AnalyseController extends BaseController {
             return "analyse/data/consultation";
         }
         if (experimentResult.getModel().getIrtResult() == null) {
-//            model.addAttribute(ERROR_MSG, ResultCode.IRT_FIRST.getMessage());
-//            return "analyse/data/consultation";
             model.addAttribute("rtExtractWindow", -1f);
             rtExtractWindow = -1f;
         }
@@ -405,9 +403,9 @@ public class AnalyseController extends BaseController {
         List<String> cutInfoFromGuessAndHit = new ArrayList<>();
         List<Float[]> intensitiesList = new ArrayList<Float[]>();
         List<String> cutInfoFromDic;
-        if (peptide != null){
+        if (peptide != null) {
             cutInfoFromDic = new ArrayList<>(peptide.getFragmentMap().keySet());
-        }else {
+        } else {
             cutInfoFromDic = new ArrayList<>();
             noUseForFill = false;
             String[] pepInfo = peptideRef.split("_");
@@ -463,6 +461,7 @@ public class AnalyseController extends BaseController {
             TreeMap<Double, Double> rtShapeScoreMap = new TreeMap<>();
             for (PeakGroup peakGroupFeature : peptideFeature.getPeakGroupList()) {
                 FeatureScores featureScores = new FeatureScores(defaultScoreTypes.size());
+
                 chromatographicScorer.calculateChromatographicScores(peakGroupFeature, peptideFeature.getNormedLibIntMap(), featureScores, defaultScoreTypes);
                 libraryScorer.calculateLibraryScores(peakGroupFeature, peptideFeature.getNormedLibIntMap(), featureScores, defaultScoreTypes);
                 rtShapeScoreMap.put(peakGroupFeature.getApexRt(), featureScores.get(ScoreType.XcorrShapeWeighted.getTypeName(), defaultScoreTypes));
@@ -502,10 +501,10 @@ public class AnalyseController extends BaseController {
             usedCutInfos.addAll(cutInfoFromGuessAndHit);
         }
 
-        if(dataDO != null){
+        if (dataDO != null) {
             List<Double> leftRtList = new ArrayList<>();
             List<Double> rightRtList = new ArrayList<>();
-            for(FeatureScores scores :dataDO.getFeatureScoresList()){
+            for (FeatureScores scores : dataDO.getFeatureScoresList()) {
                 Pair<Double, Double> rtRange = FeatureUtil.toDoublePair(scores.getRtRangeFeature());
                 leftRtList.add(rtRange.getLeft());
                 rightRtList.add(rtRange.getRight());
@@ -524,7 +523,8 @@ public class AnalyseController extends BaseController {
         model.addAttribute("usedCutInfos", usedCutInfos);
         model.addAttribute("intensitiesList", intensitiesList);
         model.addAttribute("totalCutInfos", totalCutInfoList);
-
+        model.addAttribute("library", library);
+        model.addAttribute("mzMap",mzMap);
         return "analyse/data/consultation";
     }
 

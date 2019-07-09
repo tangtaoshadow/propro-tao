@@ -161,7 +161,7 @@ public class ScoreServiceImpl implements ScoreService {
     @Override
     public void scoreForOne(AnalyseDataDO dataDO, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input) {
 
-        if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() <= 2) {
+        if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() <= peptide.getFragmentMap().size()/2) {
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
             return;
         }

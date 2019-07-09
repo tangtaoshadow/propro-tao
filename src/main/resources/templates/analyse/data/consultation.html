@@ -251,6 +251,13 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
+                            <label for="libraryName" class="col-3 col-form-label" th:text="#{label_library_name}"></label>
+                            <div class="col-9">
+                                <input type="text" class="form-control m-input" id="libraryName" readonly
+                                       th:value="${library?.name}">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
                             <label for="slopeIntercept" class="col-12 col-form-label" style="text-align: center;" th:text="#{label_algo_fill_but_not_hit}">
                             </label>
                             <div class="m-checkbox-list" th:each="genCutInfo:${cutInfoFromGuess}">
@@ -359,6 +366,7 @@
         var bestRt = [[${bestRt}]];
         var leftRtList = [[${leftRtList}]];
         var rightRtList = [[${rightRtList}]];
+        var mzMap = [[${mzMap}]];
         /*]]>*/
         var chart;
         var boundaryData = [];
@@ -433,10 +441,10 @@
                         var rt = "";
                         for (var i = 0; i < params.length; i++) {
                             if (params[i].data !== 0) {
-                                if (params[i].seriesName.slice(0, 1) === "b") {
-                                    showBion += params[i].marker + params[i].seriesName + ':' + params[i].data + '<br>'
+                                if (params[i].seriesName.slice(0, 1) === "a" || params[i].seriesName.slice(0, 1) === "b" || params[i].seriesName.slice(0, 1) === "c") {
+                                    showBion += params[i].marker + params[i].seriesName + '('+mzMap[params[i].seriesName]+'):' + params[i].data + '<br>'
                                 } else {
-                                    showYion += params[i].marker + params[i].seriesName + ':' + params[i].data + '<br>'
+                                    showYion += params[i].marker + params[i].seriesName + '('+mzMap[params[i].seriesName]+'):' + params[i].data + '<br>'
                                 }
                             }
                             rt = params[i].axisValue;
