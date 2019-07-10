@@ -95,7 +95,6 @@
                             <tr>
                                 <th width="30%" th:text="#{label_cutinfo}"></th>
                                 <th width="30%" th:text="#{label_fragment_mz}"></th>
-<!--                                <th width="40%" th:text="#{label_operation}"></th>-->
                             </tr>
                             </thead>
                             <tbody>
@@ -107,7 +106,7 @@
                         </table>
                     </td>
                     <td>
-                        <a th:if="${!data.isDecoy}" target="_blank" th:href="@{/analyse/clinic(dataId=${data.id},allCutInfo=true)}"
+                        <a th:if="${!data.isDecoy}" target="_blank" th:href="@{/analyse/clinic(dataId=${data.id},onlyLib=true)}"
                            class="btn btn-danger btn-sm" th:text="#{btn_peptide_clinic}"></a>
                     </td>
                 </tr>

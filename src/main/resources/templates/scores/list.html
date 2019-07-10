@@ -138,10 +138,10 @@
                                  th:id="|${score?.peptideRef}_${score.isDecoy?'decoy':''}|" role="tabpanel"
                                  aria-labelledby="m_accordion_7_item_1_head" data-parent="#m_accordion_7">
                                 <div class="m-accordion__item-content">
-                                    <a th:href="@{/score/list(overviewId=${overviewId},peptideRef=${score?.peptideRef})}"
-                                       class="btn btn-primary btn-sm" th:text="#{btn_view_peptide_score}"></a>
+<!--                                    <a th:href="@{/score/list(overviewId=${overviewId},peptideRef=${score?.peptideRef})}"-->
+<!--                                       class="btn btn-primary btn-sm" th:text="#{btn_view_peptide_score}"></a>-->
                                     <a target="_blank"
-                                       th:href="@{/analyse/clinic(dataId=${score.id},allCutInfo=true)}"
+                                       th:href="@{/analyse/clinic(dataId=${score.id},onlyLib=true)}"
                                        class="btn btn-danger btn-sm" th:text="#{btn_peptide_clinic}"></a>
                                     <table class="table table-bordered table-hover" style="table-layout:fixed;">
                                         <thead>

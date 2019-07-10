@@ -296,39 +296,46 @@ public class PeptideServiceImpl implements PeptideService {
 
     @Override
     public PeptideDO buildWithPeptideRef(String peptideRef) {
+        List<Integer> chargeTypes = new ArrayList<>();
+        //默认采集所有离子碎片,默认采集[1,precusor charge]区间内的整数
+        if (peptideRef.contains("_")) {
+            int charge = Integer.parseInt(peptideRef.split("_")[1]);
+            for (int i = 1; i <= charge; i++) {
+                chargeTypes.add(i);
+            }
+        } else {
+            chargeTypes.add(1);
+            chargeTypes.add(2);
+        }
+        return buildWithPeptideRef(peptideRef, 3, ResidueType.abcxyz, chargeTypes);
+    }
 
+    @Override
+    public PeptideDO buildWithPeptideRef(String peptideRef, int minLength, List<String> ionTypes, List<Integer> chargeTypes) {
         int charge;
         String fullName;
-        try {
-            if(peptideRef.contains("_")){
-                String[] peptideInfos = peptideRef.split("_");
-                charge = Integer.parseInt(peptideInfos[1]);
-                fullName = peptideInfos[0];
-            }else{
-                charge = 1;
-                fullName = peptideRef;
-            }
 
-        } catch (Exception e) {
-            return null;
+        if (peptideRef.contains("_")) {
+            String[] peptideInfos = peptideRef.split("_");
+            charge = Integer.parseInt(peptideInfos[1]);
+            fullName = peptideInfos[0];
+        } else {
+            charge = 1;
+            fullName = peptideRef;
         }
 
         PeptideDO peptide = new PeptideDO();
         peptide.setFullName(fullName);
         peptide.setCharge(charge);
-        peptide.setSequence(fullName.replaceAll("\\([^)]+\\)",""));
+        peptide.setSequence(fullName.replaceAll("\\([^)]+\\)", ""));
         peptide.setIsDecoy(false);
         HashMap<Integer, String> unimodMap = PeptideUtil.parseModification(fullName);
         peptide.setUnimodMap(unimodMap);
         peptide.setMz(formulaCalculator.getMonoMz(peptide.getSequence(), ResidueType.Full, charge, 0, 0, false, new ArrayList<>(unimodMap.values())));
         peptide.setPeptideRef(peptideRef);
         peptide.setRt(-1d);
-        Integer[] chargeArray = new Integer[charge];
-        for(int i=0;i<charge;i++){
-            chargeArray[i] = i+1;
-        }
 
-        peptide.setFragmentMap(fragmentFactory.buildFragmentMap(peptide, 3, chargeArray));
+        peptide.setFragmentMap(fragmentFactory.buildFragmentMap(peptide, minLength, ionTypes, chargeTypes));
         return peptide;
     }
 }

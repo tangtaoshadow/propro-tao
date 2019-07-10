@@ -83,5 +83,15 @@ public interface PeptideService {
      * @return
      */
     PeptideDO buildWithPeptideRef(String peptideRef);
+
+    /**
+     * 根据PeptideRef生成一个全新的PeptideDO
+     * 可以指定生成的a,b,c,x,y,z碎片类型 ionTypes
+     * 可以指定生成的碎片的带电量种类 chargeTypes
+     * 注意:生成的靶向肽段是没有预测rt和预测intensity的
+     * @param peptideRef
+     * @return
+     */
+    PeptideDO buildWithPeptideRef(String peptideRef, int minLength, List<String> ionTypes, List<Integer> chargeTypes);
 }
 

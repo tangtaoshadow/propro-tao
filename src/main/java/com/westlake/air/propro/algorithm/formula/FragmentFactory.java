@@ -106,33 +106,44 @@ public class FragmentFactory {
      * @param limitLength 生成的B,Y离子的最小长度
      * @return
      */
-    public HashMap<String, FragmentInfo> buildFragmentMap(PeptideDO peptideDO, int limitLength, Integer... chargeArray) {
+    public HashMap<String, FragmentInfo> buildFragmentMap(PeptideDO peptideDO, int limitLength, List<String> ionTypes, List<Integer> chargeTypes) {
         HashMap<String, FragmentInfo> fragmentMap = new HashMap<>();
         String sequence = peptideDO.getSequence();
         int length = sequence.length();
         if (length < limitLength) {
             return null;
         }
-        for (Integer charge : chargeArray) {
+        for (Integer charge : chargeTypes) {
             for (int i = limitLength; i < length; i++) {
                 String leftSubstring = sequence.substring(0, i);
                 String rightSubstring = sequence.substring(length - i, length);
                 List<String> leftUnimodIds = formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i);
                 List<String> rightUnimodIds = formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), length - i, length);
 
-                String cutInfoA = "a" + i + (charge == 1 ? "" : ("^" + charge));
-                String cutInfoB = "b" + i + (charge == 1 ? "" : ("^" + charge));
-                String cutInfoC = "c" + i + (charge == 1 ? "" : ("^" + charge));
-                String cutInfoX = "x" + i + (charge == 1 ? "" : ("^" + charge));
-                String cutInfoY = "y" + i + (charge == 1 ? "" : ("^" + charge));
-                String cutInfoZ = "z" + i + (charge == 1 ? "" : ("^" + charge));
-
-                fragmentMap.put(cutInfoA, new FragmentInfo(cutInfoA, formulaCalculator.getMonoMz(leftSubstring, ResidueType.AIon, charge, 0, 0, false, leftUnimodIds), charge));
-                fragmentMap.put(cutInfoB, new FragmentInfo(cutInfoB, formulaCalculator.getMonoMz(leftSubstring, ResidueType.BIon, charge, 0, 0, false, leftUnimodIds), charge));
-                fragmentMap.put(cutInfoC, new FragmentInfo(cutInfoC, formulaCalculator.getMonoMz(leftSubstring, ResidueType.CIon, charge, 0, 0, false, leftUnimodIds), charge));
-                fragmentMap.put(cutInfoX, new FragmentInfo(cutInfoX, formulaCalculator.getMonoMz(rightSubstring, ResidueType.XIon, charge, 0, 0, false, rightUnimodIds), charge));
-                fragmentMap.put(cutInfoY, new FragmentInfo(cutInfoY, formulaCalculator.getMonoMz(rightSubstring, ResidueType.YIon, charge, 0, 0, false, rightUnimodIds), charge));
-                fragmentMap.put(cutInfoZ, new FragmentInfo(cutInfoZ, formulaCalculator.getMonoMz(rightSubstring, ResidueType.ZIon, charge, 0, 0, false, rightUnimodIds), charge));
+                if(ionTypes.contains(ResidueType.AIon)){
+                    String cutInfoA = "a" + i + (charge == 1 ? "" : ("^" + charge));
+                    fragmentMap.put(cutInfoA, new FragmentInfo(cutInfoA, formulaCalculator.getMonoMz(leftSubstring, ResidueType.AIon, charge, 0, 0, false, leftUnimodIds), charge));
+                }
+                if(ionTypes.contains(ResidueType.BIon)){
+                    String cutInfoB = "b" + i + (charge == 1 ? "" : ("^" + charge));
+                    fragmentMap.put(cutInfoB, new FragmentInfo(cutInfoB, formulaCalculator.getMonoMz(leftSubstring, ResidueType.BIon, charge, 0, 0, false, leftUnimodIds), charge));
+                }
+                if(ionTypes.contains(ResidueType.CIon)){
+                    String cutInfoC = "c" + i + (charge == 1 ? "" : ("^" + charge));
+                    fragmentMap.put(cutInfoC, new FragmentInfo(cutInfoC, formulaCalculator.getMonoMz(leftSubstring, ResidueType.CIon, charge, 0, 0, false, leftUnimodIds), charge));
+                }
+                if(ionTypes.contains(ResidueType.XIon)){
+                    String cutInfoX = "x" + i + (charge == 1 ? "" : ("^" + charge));
+                    fragmentMap.put(cutInfoX, new FragmentInfo(cutInfoX, formulaCalculator.getMonoMz(rightSubstring, ResidueType.XIon, charge, 0, 0, false, rightUnimodIds), charge));
+                }
+                if(ionTypes.contains(ResidueType.YIon)){
+                    String cutInfoY = "y" + i + (charge == 1 ? "" : ("^" + charge));
+                    fragmentMap.put(cutInfoY, new FragmentInfo(cutInfoY, formulaCalculator.getMonoMz(rightSubstring, ResidueType.YIon, charge, 0, 0, false, rightUnimodIds), charge));
+                }
+                if(ionTypes.contains(ResidueType.ZIon)){
+                    String cutInfoZ = "z" + i + (charge == 1 ? "" : ("^" + charge));
+                    fragmentMap.put(cutInfoZ, new FragmentInfo(cutInfoZ, formulaCalculator.getMonoMz(rightSubstring, ResidueType.ZIon, charge, 0, 0, false, rightUnimodIds), charge));
+                }
             }
         }
 

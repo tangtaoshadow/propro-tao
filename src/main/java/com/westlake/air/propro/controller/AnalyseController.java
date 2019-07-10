@@ -319,11 +319,15 @@ public class AnalyseController extends BaseController {
                   @RequestParam(value = "libraryId", required = false) String libraryId,
                   @RequestParam(value = "mzExtractWindow", required = false, defaultValue = "0.03") Float mzExtractWindow,
                   @RequestParam(value = "rtExtractWindow", required = false, defaultValue = "800") Float rtExtractWindow,
-                  @RequestParam(value = "limitLength", required = false, defaultValue = "3") Integer limitLength,
+                  @RequestParam(value = "minLength", required = false, defaultValue = "3") Integer minLength,
+                  @RequestParam(value = "maxCharge", required = false, defaultValue = "3") Integer maxCharge,
+                  @RequestParam(value = "onlyLib", required = false, defaultValue = "false") Boolean onlyLib,
                   HttpServletRequest request) {
         model.addAttribute("mzExtractWindow", mzExtractWindow);
         model.addAttribute("rtExtractWindow", rtExtractWindow);
-        model.addAttribute("limitLength", limitLength);
+        model.addAttribute("minLength", minLength);
+        model.addAttribute("maxCharge", maxCharge);
+        model.addAttribute("onlyLib", onlyLib);
 
         /**
          * Step1. Prepare for dataId query.
@@ -377,7 +381,15 @@ public class AnalyseController extends BaseController {
         /**
          * Step3. Generate RealTime Peptide by peptideRef. For fragmentInfo length is big or equal than 3.
          */
-        PeptideDO buildPeptide = peptideService.buildWithPeptideRef(peptideRef);
+        PeptideDO buildPeptide = null;
+        if (!onlyLib) {//如果仅查询标准库,那么不构建全新的肽段
+            List<Integer> charges = new ArrayList<>();
+            for (int i = 1; i <= maxCharge; i++) {
+                charges.add(i);
+            }
+            model.addAttribute("charges",charges);
+            buildPeptide = peptideService.buildWithPeptideRef(peptideRef, minLength, ResidueType.abcxyz, charges);
+        }
 
         /**
          * Step4. Merge with library Peptide if existed
@@ -386,12 +398,16 @@ public class AnalyseController extends BaseController {
         if (libraryId != null) {
             PeptideDO libraryPeptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, false);
             if (libraryPeptide != null) {
-                buildPeptide.setLibraryId(libraryPeptide.getLibraryId());
-                buildPeptide.setLibraryName(libraryPeptide.getLibraryName());
-                for (FragmentInfo fi : libraryPeptide.getFragmentMap().values()) {
-                    FragmentInfo buildFi = buildPeptide.getFragmentMap().get(fi.getCutInfo());
-                    buildFi.setIntensity(fi.getIntensity());
-                    libraryCutInfos.add(fi.getCutInfo());
+                if (onlyLib) {
+                    buildPeptide = libraryPeptide;
+                } else {
+                    buildPeptide.setLibraryId(libraryPeptide.getLibraryId());
+                    buildPeptide.setLibraryName(libraryPeptide.getLibraryName());
+                    for (FragmentInfo fi : libraryPeptide.getFragmentMap().values()) {
+                        FragmentInfo buildFi = buildPeptide.getFragmentMap().get(fi.getCutInfo());
+                        buildFi.setIntensity(fi.getIntensity());
+                        libraryCutInfos.add(fi.getCutInfo());
+                    }
                 }
             }
         }
@@ -410,41 +426,12 @@ public class AnalyseController extends BaseController {
         HashMap<String, Float> mzMap = targetAnalyseData.getMzMap();
         model.addAttribute("hitCutInfos", mzMap.keySet());
 
-//        //获取标准库中对应的PeptideRef组
-//        HashMap<String, Float> intensityMap = TargetPeptide.buildIntensityMap(peptide);
-//
-//        //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
-//        PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(newDataDO, intensityMap, new SigmaSpacing(sigma, spacing));
-//        List<String> defaultScoreTypes = new LumsParams().getScoreTypes();
-//        if (peptideFeature.isFeatureFound()) {
-//            TreeMap<Double, Double> rtShapeScoreMap = new TreeMap<>();
-//            for (PeakGroup peakGroupFeature : peptideFeature.getPeakGroupList()) {
-//                FeatureScores featureScores = new FeatureScores(defaultScoreTypes.size());
-//
-//                chromatographicScorer.calculateChromatographicScores(peakGroupFeature, peptideFeature.getNormedLibIntMap(), featureScores, defaultScoreTypes);
-//                libraryScorer.calculateLibraryScores(peakGroupFeature, peptideFeature.getNormedLibIntMap(), featureScores, defaultScoreTypes);
-//                rtShapeScoreMap.put(peakGroupFeature.getApexRt(), featureScores.get(ScoreType.XcorrShapeWeighted.getTypeName(), defaultScoreTypes));
-//            }
-//            model.addAttribute("rtShapeScoreMap", rtShapeScoreMap);
-//        } else {
-//            logger.info("未发现好信号");
-//        }
-
         /**
          * Step6. 准备输出结果
          */
-        List<Float[]> intensitiesList = new ArrayList<>();
         Float[] rtArray = targetAnalyseData.getRtArray();
-        for (String cutInfo : targetAnalyseData.getIntensityMap().keySet()) {
-            if (targetAnalyseData.getIntensityMap().get(cutInfo) == null) {
-                continue;
-            }
-            Float[] intensityArray = targetAnalyseData.getIntensityMap().get(cutInfo);
-            intensitiesList.add(intensityArray);
-        }
-
         model.addAttribute("rt", rtArray);
-        model.addAttribute("intensitiesList", intensitiesList);
+        model.addAttribute("intensityMap", targetAnalyseData.getIntensityMap());
         model.addAttribute("mzMap", mzMap);
         return "analyse/data/clinic";
     }
