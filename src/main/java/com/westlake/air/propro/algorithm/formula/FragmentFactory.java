@@ -61,12 +61,6 @@ public class FragmentFactory {
         //bSeries 若要提高精度，提高json的精度
         List<Double> bSeries = new ArrayList<>();
         double monoWeight = Constants.PROTON_MASS_U * charge;
-//        if (unimodHashMap != null && unimodHashMap.containsKey(0)) {
-//            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(0));
-//            if (unimod != null) {
-//                monoWeight += unimod.getMonoMass();
-//            }
-//        }
 
         char[] acidCodeArray = sequence.toCharArray();
         for (int i = 0; i < acidCodeArray.length - 1; i++) {
@@ -90,12 +84,6 @@ public class FragmentFactory {
         //ySeries
         List<Double> ySeries = new ArrayList<>();
         monoWeight = Constants.PROTON_MASS_U * charge;
-//        if (unimodHashMap != null && unimodHashMap.containsKey(acidCodeArray.length - 1)) {
-//            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(acidCodeArray.length - 1));
-//            if (unimod != null) {
-//                monoWeight += unimod.getMonoMass();
-//            }
-//        }
 
         double h2oWeight = elementsDAO.getMonoWeight(ElementsDAO.H2O);
         for (int i = acidCodeArray.length - 1; i > 0; i--) {
@@ -208,7 +196,7 @@ public class FragmentFactory {
     }
 
     public double getTheoryMass(HashMap<Integer, String> unimodHashMap, String sequence) {
-        double totalMass = Constants.B_SIDE_MASS + Y_SIDE_MASS;
+        double totalMass = Constants.B_SIDE_MASS + Constants.Y_SIDE_MASS - 2 * Constants.PROTON_MASS_U;
         char[] acidCodeArray = sequence.toCharArray();
         for (char acidCode : acidCodeArray) {
             AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCode));

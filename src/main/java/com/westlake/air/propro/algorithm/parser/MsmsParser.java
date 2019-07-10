@@ -355,6 +355,7 @@ public class MsmsParser extends BaseLibraryParser {
                 int roundModMz = Integer.parseInt(bModInfoArray[i].split(";")[1]);
                 boolean success = certainIntepreter(i, roundModMz, unimodMap);
                 if (!success){
+                    logger.info(sequence);
                     isSuccess = false;
                 }
                 continue;
@@ -362,6 +363,7 @@ public class MsmsParser extends BaseLibraryParser {
             if (bModInfoArray[i].startsWith("1") && yModInfoArray[i].startsWith("2")){
                 boolean success = semicertainIntepreter(bModInfoArray, yModInfoArray, unimodMap, i);
                 if (!success){
+                    logger.info(sequence);
                     isSuccess = false;
                 }
                 continue;
@@ -369,6 +371,7 @@ public class MsmsParser extends BaseLibraryParser {
             if (bModInfoArray[i].startsWith("2") && yModInfoArray[i].startsWith("1")){
                 boolean success = semicertainIntepreter(yModInfoArray, bModInfoArray, unimodMap, i);
                 if (!success){
+                    logger.info(sequence);
                     isSuccess = false;
                 }
                 continue;
@@ -452,7 +455,7 @@ public class MsmsParser extends BaseLibraryParser {
             }
             return true;
         }else {
-            logger.info("Multi Modification is not UniMod:4");
+            logger.info("Multi Modification is not UniMod:4 " + sequence);
             return false;
         }
     }
@@ -491,6 +494,7 @@ public class MsmsParser extends BaseLibraryParser {
             int endPosition = Integer.parseInt(startEnd[1]);
             boolean success = analysePosMzDiff(startPosition, endPosition, positionMzDiffMap.get(key), sequence, unimodMap);
             if (!success){
+                logger.info(sequence);
                 isSuccess = false;
             }
         }

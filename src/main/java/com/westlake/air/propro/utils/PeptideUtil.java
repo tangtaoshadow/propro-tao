@@ -51,9 +51,9 @@ public class PeptideUtil {
                 peptide = StringUtils.replaceOnce(peptide, matcher.group(0), matcher.group(1));
             }
         }
-        if (unimodMap.size() > 0) {
+//        if (unimodMap.size() > 0) {
             peptideDO.setUnimodMap(unimodMap);
-        }
+//        }
     }
 
 }
