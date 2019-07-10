@@ -30,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.westlake.air.propro.utils.PeptideUtil.parseModification;
+import static com.westlake.air.propro.utils.PeptideUtil.removeUnimod;
 
 /**
  * Created by Nico Wang
@@ -46,11 +47,20 @@ public class MsmsParser extends BaseLibraryParser {
     FragmentFactory fragmentFactory;
 
     public final Logger logger = LoggerFactory.getLogger(MsmsParser.class);
-    @Override
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashMap<String, PeptideDO> prmPepMap, String libraryId, TaskDO taskDO) {
 
-        ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
+    @Override
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, TaskDO taskDO) {
+
         try {
+            //开始插入前先清空原有的数据库数据
+            ResultDO resultDOTmp = peptideService.deleteAllByLibraryId(library.getId());
+            if (resultDOTmp.isFailed()) {
+                logger.error(resultDOTmp.getMsgInfo());
+                return ResultDO.buildError(ResultCode.DELETE_ERROR);
+            }
+            taskDO.addLog("删除旧数据完毕,开始文件解析");
+            taskService.update(taskDO);
+
             InputStreamReader isr = new InputStreamReader(in, StandardCharsets.UTF_8);
             BufferedReader reader = new BufferedReader(isr);
             String line = reader.readLine();
@@ -59,117 +69,115 @@ public class MsmsParser extends BaseLibraryParser {
             }
             HashMap<String, Integer> columnMap = parseColumns(line);
 
+            //以sequence为单位进行批处理
+            String lastSequence = "";
+            List<String[]> sequenceInExps = new ArrayList<>();
+            HashMap<String, PeptideDO> libPepMap = new HashMap<>();
+            while ((line = reader.readLine()) != null) {
+                String[] row = line.split("\t");
+                String sequence = row[columnMap.get("sequence")];
+                if (sequence.equals(lastSequence)) {
+                    sequenceInExps.add(row);
+                } else {
+                    HashMap<String, PeptideDO> peptideDOMap = parseSequence(sequenceInExps, columnMap, library);
+                    libPepMap.putAll(peptideDOMap);
+                    //deal with same sequence
+                    sequenceInExps.clear();
+                    sequenceInExps.add(row);
+                    lastSequence = sequence;
+                }
+            }
+
+            peptideService.insertAll(new ArrayList<>(libPepMap.values()), false);
+            taskDO.addLog(libPepMap.size() + "条肽段数据插入成功");
+            taskService.update(taskDO);
+            logger.info(libPepMap.size() + "条肽段数据插入成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ResultDO(true);
+    }
+
+    @Override
+    public ResultDO selectiveParseAndInsert(InputStream in, LibraryDO library, HashSet<String> selectedPepSet, boolean selectBySequence, TaskDO taskDO) {
+
+        ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
+        try {
             //开始插入前先清空原有的数据库数据
             ResultDO resultDOTmp = peptideService.deleteAllByLibraryId(library.getId());
-            taskDO.addLog("删除旧数据完毕,开始文件解析");
-            taskService.update(taskDO);
-
             if (resultDOTmp.isFailed()) {
                 logger.error(resultDOTmp.getMsgInfo());
                 return ResultDO.buildError(ResultCode.DELETE_ERROR);
             }
+            taskDO.addLog("删除旧数据完毕,开始文件解析");
+            taskService.update(taskDO);
 
-//            HashSet<String> fastaDropPep = new HashSet<>();
-//            HashSet<String> libraryDropPep = new HashSet<>();
-//            HashSet<String> fastaDropProt = new HashSet<>();
-//            HashSet<String> libraryDropProt = new HashSet<>();
-//            HashSet<String> uniqueProt = new HashSet<>();
+            InputStreamReader isr = new InputStreamReader(in, StandardCharsets.UTF_8);
+            BufferedReader reader = new BufferedReader(isr);
+            String line = reader.readLine();
+            if (line == null) {
+                return ResultDO.buildError(ResultCode.LINE_IS_EMPTY);
+            }
+            HashMap<String, Integer> columnMap = parseColumns(line);
 
-
-            HashSet<String> prmSequenceSet = new HashSet<>();
-            for (PeptideDO peptideDO : prmPepMap.values()) {
-                prmSequenceSet.add(peptideDO.getSequence());
+            boolean withCharge = new ArrayList<>(selectedPepSet).get(0).contains("_");
+            HashSet<String> selectedSeqSet = new HashSet<>();
+            for (String pep: selectedPepSet) {
+                if (withCharge){
+                    selectedSeqSet.add(removeUnimod(pep.split("_")[0]));
+                }else {
+                    selectedSeqSet.add(removeUnimod(pep));
+                }
             }
             String lastSequence = "";
-            List<String[]> sequenceInExps = new ArrayList<>();
-            HashMap<String, PeptideDO> libPepMap = new HashMap<>();
-            List<PeptideDO> irtPepList = new ArrayList<>();
-            PeptideDO currentPeptideDO;
+            List<String[]> selectedRowList = new ArrayList<>();
+            List<PeptideDO> selectedPepList = new ArrayList<>();
             while ((line = reader.readLine()) != null) {
                 String[] row = line.split("\t");
                 String sequence = row[columnMap.get("sequence")];
                 if (sequence.equals(lastSequence)) {
                     //not empty means choosed
-                    if (!sequenceInExps.isEmpty()) {
-                        sequenceInExps.add(row);
-                    } else {
-                        continue;
+                    if (!selectedRowList.isEmpty()) {
+                        selectedRowList.add(row);
                     }
                 } else {
-                    HashMap<String, PeptideDO> peptideDOMap = parseSequence(sequenceInExps, columnMap, prmPepMap, library);
-                    List<PeptideDO> peptideList = new ArrayList<>(peptideDOMap.values());
-                    if (!peptideList.isEmpty() && peptideList.get(0).getProteinName().equals("iRT")){
-                        irtPepList.addAll(peptideList);
+                    HashMap<String, PeptideDO> peptideDOMap = parseSequence(selectedRowList, columnMap, library);
+                    if (selectBySequence){
+                        selectedPepList = new ArrayList<>(peptideDOMap.values());
+                    }else {
+                        for (String pepRef: peptideDOMap.keySet()){
+                            if (withCharge && selectedPepSet.contains(pepRef)){
+                                selectedPepList.add(peptideDOMap.get(pepRef));
+                                selectedPepSet.remove(pepRef);
+                            }
+                            if (!withCharge && selectedPepSet.contains(peptideDOMap.get(pepRef).getFullName())){
+                                selectedPepList.add(peptideDOMap.get(pepRef));
+                                selectedPepSet.remove(peptideDOMap.get(pepRef).getFullName());
+                            }
+                        }
                     }
-                    libPepMap.putAll(peptideDOMap);
                     //deal with same sequence
-                    sequenceInExps.clear();
-                    if (prmSequenceSet.isEmpty() || prmSequenceSet.contains(sequence)) {
-                        sequenceInExps.add(row);
+                    selectedRowList.clear();
+                    if (selectedSeqSet.contains(sequence)) {
+                        selectedRowList.add(row);
                     }
                     lastSequence = sequence;
                 }
             }
-            LibraryDO irtLibrary = new LibraryDO();
-            irtLibrary.setName(library.getName()+"_iRT");
-            irtLibrary.setType(LibraryDO.TYPE_IRT);
-            libraryService.insert(irtLibrary);
 
-
-
-//                ResultDO<PeptideDO> resultDO = parseMsmsLine(line, columnMap, library);
-
-//                PeptideDO peptide = resultDO.getModel();
-//                setUnique(peptide, fastaUniqueSet, fastaDropPep, libraryDropPep, fastaDropProt, libraryDropProt, uniqueProt);
-//                addFragment(peptide, map);
-
-//            if (!fastaUniqueSet.isEmpty()) {
-//                logger.info("fasta额外检出：" + fastaDropPep.size() + "个PeptideSequence");
-//            }
-
-//            for (PeptideDO peptideDO: map.values()){
-//                prmPeptideRefSet.remove(peptideDO.getPeptideRef());
-//            }
-//            library.setFastaDeWeightPepCount(fastaDropPep.size());
-//            library.setFastaDeWeightProtCount(getDropCount(fastaDropProt, uniqueProt));
-//            library.setLibraryDeWeightPepCount(libraryDropPep.size());
-//            library.setLibraryDeWeightProtCount(getDropCount(libraryDropProt, uniqueProt));
-
-            if (libraryId != null && !libraryId.isEmpty()) {
-                List<PeptideDO> irtPeps = peptideService.getAllByLibraryId(libraryId);
-                for (PeptideDO peptideDO: irtPeps){
-                    if (libPepMap.containsKey(peptideDO.getPeptideRef())){
-                        libPepMap.get(peptideDO.getPeptideRef()).setProteinName("iRT");
-                        continue;
-                    }
-//                    if (prmPeptideRefSet.contains(peptideDO.getPeptideRef())){
-//                        prmPeptideRefSet.remove(peptideDO.getPeptideRef());
-//                    }
-                    peptideDO.setProteinName("iRT");
-                    peptideDO.setId(null);
-                    peptideDO.setLibraryId(library.getId());
-                    peptideDO.setLibraryName(library.getName());
-                    libPepMap.put(peptideDO.getPeptideRef(), peptideDO);
-                }
-            }
-
-            peptideService.insertAll(new ArrayList<>(libPepMap.values()), false);
-            for (PeptideDO peptideDO: irtPepList){
-                peptideDO.setLibraryId(irtLibrary.getId());
-                peptideDO.setLibraryName(irtLibrary.getName());
-                peptideDO.setId(null);
-            }
-            peptideService.insertAll(irtPepList, false);
-            libraryService.countAndUpdateForLibrary(irtLibrary);
-//            taskDO.addLog(libPepMap.size() + "条肽段数据插入成功,其中蛋白质种类有" + uniqueProt.size() + "个");
+            peptideService.insertAll(selectedPepList, false);
+            taskDO.addLog(selectedPepList.size() + "条肽段数据插入成功");
             taskService.update(taskDO);
+            logger.info(selectedPepList.size() + "条肽段数据插入成功");
+            logger.info("在选中的" + selectedSeqSet.size() + "条肽段中, 有" + selectedPepSet.size() + "条没有在库中找到");
+            logger.info(selectedPepSet.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
         return tranResult;
     }
 
-    private HashMap<String, PeptideDO> parseSequence(List<String[]> sequenceInExps, HashMap<String, Integer> columnMap, HashMap<String, PeptideDO> prmPepMap, LibraryDO library){
+    private HashMap<String, PeptideDO> parseSequence(List<String[]> sequenceInExps, HashMap<String, Integer> columnMap, LibraryDO library){
         HashMap<String, Float> scoreMap = new HashMap<>();
         HashMap<String,String[]> peptideRefMap = new HashMap<>();
         for (String[] row: sequenceInExps){
@@ -203,10 +211,11 @@ public class MsmsParser extends BaseLibraryParser {
             peptideDO.setIsDecoy(false);
             peptideDO.setCharge(Integer.parseInt(row[columnMap.get("charge")]));
             peptideDO.setRt(Double.parseDouble(row[columnMap.get("retentiontime")]));
+            peptideDO.setFullName(peptideRef.split("_")[0]);
             parseModification(peptideDO);
             verifyUnimod(ionArray, massArray, peptideDO.getUnimodMap(), peptideDO.getSequence(), Double.parseDouble(row[columnMap.get("mass")]));
-            peptideDO.setPeptideRef(getPeptideRef(peptideDO.getSequence(), peptideDO.getUnimodMap()));
-            peptideDO.setFullName(peptideDO.getPeptideRef().split("_")[0]);
+            peptideDO.setFullName(getPeptideFullName(peptideDO.getSequence(), peptideDO.getUnimodMap()));
+            peptideDO.setPeptideRef(peptideDO.getFullName() + "_" + peptideDO.getCharge());
             peptideDOMap.put(peptideDO.getPeptideRef(), peptideDO);
         }
         return peptideDOMap;
@@ -243,9 +252,12 @@ public class MsmsParser extends BaseLibraryParser {
         }
     }
 
-    private String getPeptideRef(String sequence, HashMap<Integer, String> unimodMap){
+    private String getPeptideFullName(String sequence, HashMap<Integer, String> unimodMap){
         int length = sequence.length();
         int offset = 0;
+        if (unimodMap == null){
+            return sequence;
+        }
         for (int i=0; i<length; i++){
             if (unimodMap.get(i) != null){
                 sequence = sequence.substring(0, i + offset + 1) + "(UniMod:" + unimodMap.get(i) + ")" + sequence.substring(i + offset + 1);
@@ -492,86 +504,5 @@ public class MsmsParser extends BaseLibraryParser {
             return uncertainIntepreter(start, end, roundMzDiff, sequence, unimodMap);
         }
     }
-
-//    private Integer[] getCutIndex(String[] ionArray, int seqLen){
-//
-//        HashSet<Integer> cutIndexSet = new HashSet<>();
-//        for (int i = 0; i < ionArray.length; i++) {
-//            String cutInfo = ionArray[i];
-//            if (cutInfo.contains("-") || cutInfo.contains("+")) {
-//                continue;
-//            }
-//            if (cutInfo.startsWith("b")){
-//                cutIndexSet.add(Integer.parseInt(ionArray[i].substring(1)) - 1);
-//            }
-//            if (cutInfo.startsWith("y")){
-//                cutIndexSet.add(seqLen - Integer.parseInt(ionArray[i].substring(1)) - 1);
-//            }
-//        }
-//        cutIndexSet.add(seqLen - 1);
-//        Integer[] cutIndexArray = cutIndexSet.toArray(new Integer[0]);
-//        Arrays.sort(cutIndexArray);
-//        return cutIndexArray;
-//    }
-//
-//    private double[] getTheoCutMz(Integer[] cutIndexArray, String sequence, HashMap<Integer, String> unimodMap){
-//        double[] theoMzArray = new double[cutIndexArray.length];
-//        double[] aaMzArray = fragmentFactory.getAaMzArray(unimodMap, sequence);
-//        int startIndex = 0;
-//        for (int i = 0; i < cutIndexArray.length; i++){
-//            double fragMz = 0d;
-//            for (int j = startIndex; j <= cutIndexArray[i]; j++){
-//                fragMz += aaMzArray[j];
-//            }
-//            theoMzArray[i] = fragMz;
-//            startIndex = cutIndexArray[i] + 1;
-//        }
-//        return theoMzArray;
-//    }
-
-//    private void locateUnimod(Integer[] cutIndexArray, double[] theoMzArray, String[] ionArray, String[] massArray){
-//
-//        List<Integer> bIndexArray = new ArrayList<>();
-//        List<Integer> yIndexArray = new ArrayList<>();
-//        for (int i = 0; i < ionArray.length; i++){
-//            String cutInfo = ionArray[i];
-//            if (cutInfo.contains("-") || cutInfo.contains("+")) {
-//                continue;
-//            }
-//            if (ionArray[i].startsWith("b")){
-//                bIndexArray.add(i);
-//            }
-//            if (ionArray[i].startsWith("y")){
-//                yIndexArray.add(i);
-//            }
-//        }
-//        int lastBNum = 0, startCutIndex = 0, endCutIndex = 0;
-//        double lastBMass = 0d;
-//        for (int index: bIndexArray){
-//            int bNum = Integer.parseInt(ionArray[index].substring(1));
-//            double mass = Double.parseDouble(massArray[index]) - Constants.B_SIDE_MASS - lastBMass;
-//            double massAcc = 0d;
-//            for (int cutIndex = startCutIndex; cutIndexArray[cutIndex] < bNum; cutIndex ++){
-//                massAcc += theoMzArray[cutIndex];
-//                endCutIndex = cutIndex;
-//            }
-//            lastBMass = mass;
-//            int massRoundDiff = (int) Math.round(mass - massAcc);
-//            for (int i = startCutIndex; i<= endCutIndex; i++){
-//                cutMzDiff[i] = massRoundDiff
-//            }
-//            for (int num = lastBNum; num <= bNum; )
-//        }
-//        for (int index: yIndexArray){
-//
-//        }
-//
-//        for (int i = 0; i < expCutIndex.length; i++){
-//
-//        }
-//    }
-
-
-
 
 }

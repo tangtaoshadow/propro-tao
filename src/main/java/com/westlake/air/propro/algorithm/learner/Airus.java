@@ -181,7 +181,7 @@ public class Airus {
         if(scores.size() < 500){
             airusParams.setXevalNumIter(10);
             airusParams.setSsIterationFdr(0.02);
-            airusParams.setProgressiveRate(1);
+            airusParams.setProgressiveRate(0.8);
         }
         int neval = airusParams.getTrainTimes();
 //        test(scores);
@@ -341,7 +341,6 @@ public class Airus {
         }
     }
 
-    //TODO 王瑞敏 MainScore有时候会是空的
     private void giveDecoyFdr(List<SimpleFeatureScores> featureScoresList) {
 
         List<SimpleFeatureScores> sortedAll = SortUtil.sortByMainScore(featureScoresList, false);
@@ -383,31 +382,31 @@ public class Airus {
             }
             for (FeatureScores featureScores : simpleScores.getFeatureScoresList()) {
                 int count = 0;
-                if (featureScores.get(ScoreType.NormRtScore.getTypeName(), scoreTypes) > 8) {
+                if (featureScores.get(ScoreType.NormRtScore.getTypeName(), scoreTypes) != null && featureScores.get(ScoreType.NormRtScore.getTypeName(), scoreTypes) > 8) {
                     count++;
                 }
-                if (featureScores.get(ScoreType.LogSnScore.getTypeName(), scoreTypes) < 3) {
+                if (featureScores.get(ScoreType.LogSnScore.getTypeName(), scoreTypes) != null && featureScores.get(ScoreType.LogSnScore.getTypeName(), scoreTypes) < 3) {
                     count++;
                 }
-                if (featureScores.get(ScoreType.IsotopeCorrelationScore.getTypeName(), scoreTypes) < 0.8) {
+                if (featureScores.get(ScoreType.IsotopeCorrelationScore.getTypeName(), scoreTypes) != null && featureScores.get(ScoreType.IsotopeCorrelationScore.getTypeName(), scoreTypes) < 0.8) {
                     count++;
                 }
-                if (featureScores.get(ScoreType.IsotopeOverlapScore.getTypeName(), scoreTypes) > 0.2) {
+                if (featureScores.get(ScoreType.IsotopeOverlapScore.getTypeName(), scoreTypes) != null && featureScores.get(ScoreType.IsotopeOverlapScore.getTypeName(), scoreTypes) > 0.2) {
                     count++;
                 }
-                if (featureScores.get(ScoreType.MassdevScoreWeighted.getTypeName(), scoreTypes) > 15) {
+                if (featureScores.get(ScoreType.MassdevScoreWeighted.getTypeName(), scoreTypes) != null && featureScores.get(ScoreType.MassdevScoreWeighted.getTypeName(), scoreTypes) > 15) {
                     count++;
                 }
-                if (featureScores.get(ScoreType.BseriesScore.getTypeName(), scoreTypes) < 1) {
+                if (featureScores.get(ScoreType.BseriesScore.getTypeName(), scoreTypes) != null && featureScores.get(ScoreType.BseriesScore.getTypeName(), scoreTypes) < 1) {
                     count++;
                 }
-                if (featureScores.get(ScoreType.YseriesScore.getTypeName(), scoreTypes) < 5) {
+                if (featureScores.get(ScoreType.YseriesScore.getTypeName(), scoreTypes) != null && featureScores.get(ScoreType.YseriesScore.getTypeName(), scoreTypes) < 5) {
                     count++;
                 }
-                if (featureScores.get(ScoreType.XcorrShapeWeighted.getTypeName(), scoreTypes) < 0.6) {
+                if (featureScores.get(ScoreType.XcorrShapeWeighted.getTypeName(), scoreTypes) != null && featureScores.get(ScoreType.XcorrShapeWeighted.getTypeName(), scoreTypes) < 0.6) {
                     count++;
                 }
-                if (featureScores.get(ScoreType.XcorrShape.getTypeName(), scoreTypes) < 0.5) {
+                if (featureScores.get(ScoreType.XcorrShape.getTypeName(), scoreTypes) != null && featureScores.get(ScoreType.XcorrShape.getTypeName(), scoreTypes) < 0.5) {
                     count++;
                 }
 

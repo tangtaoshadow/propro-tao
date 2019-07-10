@@ -173,17 +173,6 @@ public class LibraryServiceImpl implements LibraryService {
 
         ResultDO resultDO;
 
-        //parse fasta
-        //若有fasta文件，fasta与Library一起判断unique；若无则用Library判断unique
-        HashSet<String> fastaUniqueSet = new HashSet<>();
-        if(fastaFileStream != null) {
-            ResultDO<HashSet<String>> fastaResultDO = fastaParser.getUniquePeptide(fastaFileStream);
-            if (fastaResultDO.isFailed()){
-                logger.warn(fastaResultDO.getMsgInfo());
-            }
-            fastaUniqueSet = fastaResultDO.getModel();
-        }
-
         //parse prm
         HashMap<String, PeptideDO> prmPeptideRefMap = new HashMap<>();
         if(prmFileStream != null) {
@@ -200,20 +189,26 @@ public class LibraryServiceImpl implements LibraryService {
 
 
         if (fileName.toLowerCase().endsWith("tsv") || fileName.toLowerCase().endsWith("csv")) {
-            resultDO = tsvParser.parseAndInsert(libFileStream, library, fastaUniqueSet, prmPeptideRefMap, libraryId, taskDO);
+            if (prmPeptideRefMap.isEmpty()){
+                resultDO = tsvParser.parseAndInsert(libFileStream, library, taskDO);
+            }else {
+                resultDO = tsvParser.selectiveParseAndInsert(libFileStream, library, new HashSet<>(prmPeptideRefMap.keySet()), false, taskDO);
+            }
         } else if (fileName.toLowerCase().endsWith("traml")) {
-            resultDO = traMLParser.parseAndInsert(libFileStream, library, fastaUniqueSet, prmPeptideRefMap, libraryId, taskDO);
+            if (prmPeptideRefMap.isEmpty()){
+                resultDO = traMLParser.parseAndInsert(libFileStream, library, taskDO);
+            }else {
+                resultDO = traMLParser.selectiveParseAndInsert(libFileStream, library, new HashSet<>(prmPeptideRefMap.keySet()), false, taskDO);
+            }
         } else if (fileName.toLowerCase().endsWith("txt")){
-            resultDO = msmsParser.parseAndInsert(libFileStream, library, fastaUniqueSet, prmPeptideRefMap, libraryId, taskDO);
+            if (prmPeptideRefMap.isEmpty()){
+                resultDO = msmsParser.parseAndInsert(libFileStream, library, taskDO);
+            }else {
+                resultDO = msmsParser.selectiveParseAndInsert(libFileStream, library, new HashSet<>(prmPeptideRefMap.keySet()), false, taskDO);
+            }
         } else {
             return ResultDO.buildError(ResultCode.INPUT_FILE_TYPE_MUST_BE_TSV_OR_TRAML);
         }
-//        if (prmPeptideRefMap.size() > 0){
-//            for (String peptideRef: prmPeptideRefSet){
-//                logger.warn("Library中不包含所选Peptide: " + peptideRef);
-//            }
-//        }
-
         return resultDO;
     }
 

@@ -36,7 +36,9 @@ public abstract class BaseLibraryParser {
 
     boolean drop = true;
 
-    public abstract ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashMap<String, PeptideDO> prmPepMap, String libraryId, TaskDO taskDO);
+    public abstract ResultDO parseAndInsert(InputStream in, LibraryDO library, TaskDO taskDO);
+
+    public abstract ResultDO selectiveParseAndInsert(InputStream in, LibraryDO library, HashSet<String> selectedPepSet, boolean selectBySequence, TaskDO taskDO);
 
     protected ResultDO<Annotation> parseAnnotation(String annotations) {
         ResultDO<Annotation> resultDO = new ResultDO<>(true);

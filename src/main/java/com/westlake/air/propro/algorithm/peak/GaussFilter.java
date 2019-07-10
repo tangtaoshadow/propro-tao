@@ -88,7 +88,7 @@ public class GaussFilter {
             }
 
             //endPostion
-            if ((rtArray[i] + middle * spacing) < maxRt) {
+            if ((rtArray[i] + middleSpacing) < maxRt) {
                 endPosition = MathUtil.keepLength(rtArray[i] + middleSpacing, Constants.PRECISION);
             } else {
                 endPosition = maxRt;

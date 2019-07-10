@@ -54,12 +54,20 @@ public class LibraryTsvParser extends BaseLibraryParser {
     private static String Detecting = "detecting_transition";
     private static String Identifying = "identifying_transition";
     private static String Quantifying = "quantifying_transition";
-
     @Override
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashMap<String, PeptideDO> prmPepMap, String libraryId, TaskDO taskDO) {
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, TaskDO taskDO){
 
         ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
         try {
+            //开始插入前先清空原有的数据库数据
+            ResultDO resultDOTmp = peptideService.deleteAllByLibraryId(library.getId());
+            if (resultDOTmp.isFailed()) {
+                logger.error(resultDOTmp.getMsgInfo());
+                return ResultDO.buildError(ResultCode.DELETE_ERROR);
+            }
+            taskDO.addLog("删除旧数据完毕,开始文件解析");
+            taskService.update(taskDO);
+
             InputStreamReader isr = new InputStreamReader(in, StandardCharsets.UTF_8);
             BufferedReader reader = new BufferedReader(isr);
             String line = reader.readLine();
@@ -68,78 +76,103 @@ public class LibraryTsvParser extends BaseLibraryParser {
             }
             HashMap<String, Integer> columnMap = parseColumns(line);
 
-            //开始插入前先清空原有的数据库数据
-            ResultDO resultDOTmp = peptideService.deleteAllByLibraryId(library.getId());
-            taskDO.addLog("删除旧数据完毕,开始文件解析");
-            taskService.update(taskDO);
-
-            if (resultDOTmp.isFailed()) {
-                logger.error(resultDOTmp.getMsgInfo());
-                return ResultDO.buildError(ResultCode.DELETE_ERROR);
-            }
 
             HashMap<String, PeptideDO> map = new HashMap<>();
-            HashSet<String> fastaDropPep = new HashSet<>();
-            HashSet<String> libraryDropPep = new HashSet<>();
-            HashSet<String> fastaDropProt = new HashSet<>();
-            HashSet<String> libraryDropProt = new HashSet<>();
-            HashSet<String> uniqueProt = new HashSet<>();
-            HashSet<String> prmPeptideRefSet = new HashSet<>(prmPepMap.keySet());
-            while ((line = reader.readLine()) != null) {
-                if (!prmPeptideRefSet.isEmpty() && !isPrmPeptideRef(line, columnMap, prmPeptideRefSet)) {
-                    continue;
-                }
-                ResultDO<PeptideDO> resultDO = parseTransition(line, columnMap, library);
 
+            while ((line = reader.readLine()) != null) {
+                ResultDO<PeptideDO> resultDO = parseTransition(line, columnMap, library);
                 if (resultDO.isFailed()) {
                     tranResult.addErrorMsg(resultDO.getMsgInfo());
                     continue;
                 }
-
                 PeptideDO peptide = resultDO.getModel();
-                setUnique(peptide, fastaUniqueSet, fastaDropPep, libraryDropPep, fastaDropProt, libraryDropProt, uniqueProt);
                 addFragment(peptide, map);
             }
-            if (!fastaUniqueSet.isEmpty()) {
-                logger.info("fasta额外检出：" + fastaDropPep.size() + "个PeptideSequence");
-            }
 
-            for (PeptideDO peptideDO : map.values()) {
-                prmPeptideRefSet.remove(peptideDO.getPeptideRef());
-            }
-            library.setFastaDeWeightPepCount(fastaDropPep.size());
-            library.setFastaDeWeightProtCount(getDropCount(fastaDropProt, uniqueProt));
-            library.setLibraryDeWeightPepCount(libraryDropPep.size());
-            library.setLibraryDeWeightProtCount(getDropCount(libraryDropProt, uniqueProt));
-
-            List<PeptideDO> peptides = new ArrayList<>(map.values());
-            if (libraryId != null && !libraryId.isEmpty()) {
-                List<PeptideDO> irtPeps = peptideService.getAllByLibraryId(libraryId);
-                for (PeptideDO peptideDO : irtPeps) {
-                    if (map.containsKey(peptideDO.getPeptideRef() + "_" + peptideDO.getIsDecoy())) {
-                        map.get(peptideDO.getPeptideRef() + "_" + peptideDO.getIsDecoy()).setProteinName("IRT");
-                        continue;
-                    }
-
-                    prmPeptideRefSet.remove(peptideDO.getPeptideRef());
-                    peptideDO.setProteinName("IRT");
-                    peptideDO.setId(null);
-                    peptideDO.setLibraryId(library.getId());
-                    peptideDO.setLibraryName(library.getName());
-                    peptides.add(peptideDO);
-                }
-            }
-
-            peptideService.insertAll(peptides, false);
-            tranResult.setModel(peptides);
-            taskDO.addLog(peptides.size() + "条肽段数据插入成功,其中蛋白质种类有" + uniqueProt.size() + "个");
+            peptideService.insertAll(new ArrayList<>(map.values()), false);
+            taskDO.addLog(map.size() + "条肽段数据插入成功");
             taskService.update(taskDO);
+            logger.info(map.size() + "条肽段数据插入成功");
         } catch (Exception e) {
             e.printStackTrace();
         }
         return tranResult;
     }
 
+    @Override
+    public ResultDO selectiveParseAndInsert(InputStream in, LibraryDO library, HashSet<String> selectedPepSet, boolean selectBySequence, TaskDO taskDO){
+
+        ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
+        try {
+            //开始插入前先清空原有的数据库数据
+            ResultDO resultDOTmp = peptideService.deleteAllByLibraryId(library.getId());
+            if (resultDOTmp.isFailed()) {
+                logger.error(resultDOTmp.getMsgInfo());
+                return ResultDO.buildError(ResultCode.DELETE_ERROR);
+            }
+            taskDO.addLog("删除旧数据完毕,开始文件解析");
+            taskService.update(taskDO);
+
+            InputStreamReader isr = new InputStreamReader(in, StandardCharsets.UTF_8);
+            BufferedReader reader = new BufferedReader(isr);
+            String line = reader.readLine();
+            if (line == null) {
+                return ResultDO.buildError(ResultCode.LINE_IS_EMPTY);
+            }
+            HashMap<String, Integer> columnMap = parseColumns(line);
+
+
+            HashMap<String, PeptideDO> map = new HashMap<>();
+
+            boolean withCharge = new ArrayList<>(selectedPepSet).get(0).contains("_");
+            if (selectBySequence){
+                HashSet<String> selectedSeqSet = new HashSet<>();
+                for (String pep: selectedPepSet){
+                    if (withCharge){
+                        selectedSeqSet.add(removeUnimod(pep.split("_")[0]));
+                    }else {
+                        selectedSeqSet.add(removeUnimod(pep));
+                    }
+                }
+                selectedPepSet = selectedSeqSet;
+            }
+            while ((line = reader.readLine()) != null) {
+                if (!selectedPepSet.isEmpty() && !isSelectedLine(line, columnMap, selectedPepSet, withCharge, selectBySequence)) {
+                    continue;
+                }
+                ResultDO<PeptideDO> resultDO = parseTransition(line, columnMap, library);
+                if (resultDO.isFailed()) {
+                    tranResult.addErrorMsg(resultDO.getMsgInfo());
+                    continue;
+                }
+
+                PeptideDO peptide = resultDO.getModel();
+                addFragment(peptide, map);
+            }
+
+            //删除命中的部分, 得到未命中的Set
+            int selectedCount = selectedPepSet.size();
+            if (withCharge){
+                for (PeptideDO peptideDO : map.values()) {
+                    selectedPepSet.remove(peptideDO.getPeptideRef());
+                }
+            }else {
+                for (PeptideDO peptideDO : map.values()) {
+                    selectedPepSet.remove(peptideDO.getFullName());
+                }
+            }
+
+            peptideService.insertAll(new ArrayList<>(map.values()), false);
+            taskDO.addLog(map.size() + "条肽段数据插入成功");
+            taskService.update(taskDO);
+            logger.info(map.size() + "条肽段数据插入成功");
+            logger.info("在选中的" + selectedCount + "条肽段中, 有" + selectedPepSet.size() + "条没有在库中找到");
+            logger.info(selectedPepSet.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return tranResult;
+    }
     /**
      * 从TSV文件中解析出每一行数据
      *
@@ -226,7 +259,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
              * format check
              * peptide  charge  start[min]
              */
-            if (!columnMap.containsKey("peptide") || !columnMap.containsKey("charge") || !columnMap.containsKey("start[min]")) {
+            if (!columnMap.containsKey("peptide")) {
                 return ResultDO.buildError(ResultCode.PRM_FILE_FORMAT_NOT_SUPPORTED);
             }
 
@@ -238,7 +271,8 @@ public class LibraryTsvParser extends BaseLibraryParser {
                         .replace(" (light)", "")
                         .replace("[+57.021464]", "(UniMod:4)")
                         .replace("[+57]", "(UniMod:4)")
-                        .replace("[+15.994915]", "(UniMod:35)");
+                        .replace("[+15.994915]", "(UniMod:35)")
+                        .replace(" ","");
                 if (prmPepMap.containsKey(modSequence)) {
                     continue;
                 }
@@ -251,9 +285,13 @@ public class LibraryTsvParser extends BaseLibraryParser {
                 peptideDO.setFullName(modSequence);
                 peptideDO.setSequence(removeUnimod(modSequence));
                 peptideDO.setTargetSequence(peptideDO.getSequence());
-                peptideDO.setCharge(Integer.parseInt(columns[columnMap.get("charge")]));
-                peptideDO.setPeptideRef(modSequence + "_" + peptideDO.getCharge());
-                prmPepMap.put(peptideDO.getPeptideRef() , peptideDO);
+                if (columnMap.containsKey("charge")){
+                    peptideDO.setCharge(Integer.parseInt(columns[columnMap.get("charge")]));
+                    peptideDO.setPeptideRef(modSequence + "_" + peptideDO.getCharge());
+                    prmPepMap.put(peptideDO.getPeptideRef() , peptideDO);
+                }else {
+                    prmPepMap.put(peptideDO.getFullName(), peptideDO);
+                }
             }
             return new ResultDO<HashMap<String, PeptideDO>>(true).setModel(prmPepMap);
         } catch (Exception e) {
@@ -262,11 +300,19 @@ public class LibraryTsvParser extends BaseLibraryParser {
         }
     }
 
-    private boolean isPrmPeptideRef(String line, HashMap<String, Integer> columnMap, HashSet<String> peptideRefList) {
+    private boolean isSelectedLine(String line, HashMap<String, Integer> columnMap, HashSet<String> peptideSet, boolean withCharge, boolean selectBySequence) {
         String[] row = line.split("\t");
         String fullName = row[columnMap.get(FullUniModPeptideName)];
         String charge = row[columnMap.get(PrecursorCharge)];
-        return peptideRefList.contains(fullName + "_" + charge);
+        if (selectBySequence){
+            String sequence = row[columnMap.get(PeptideSequence)];
+            return peptideSet.contains(sequence);
+        }
+        if (withCharge){
+            return peptideSet.contains(fullName + "_" + charge);
+        }else {
+            return peptideSet.contains(fullName);
+        }
     }
 
 }

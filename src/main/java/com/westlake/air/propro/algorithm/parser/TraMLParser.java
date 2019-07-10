@@ -168,7 +168,7 @@ public class TraMLParser extends BaseLibraryParser {
     }
 
     @Override
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library, HashSet<String> fastaUniqueSet, HashMap<String, PeptideDO> prmPepMap, String libraryId, TaskDO taskDO) {
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, TaskDO taskDO) {
         TraML traML = parse(in);
 
         HashMap<String, Peptide> peptideMap = makePeptideMap(traML.getCompoundList().getPeptideList());
@@ -185,14 +185,58 @@ public class TraMLParser extends BaseLibraryParser {
             }
 
             HashMap<String, PeptideDO> map = new HashMap<>();
-            HashSet<String> fastaDropPep = new HashSet<>();
-            HashSet<String> libraryDropPep = new HashSet<>();
-            HashSet<String> fastaDropProt = new HashSet<>();
-            HashSet<String> libraryDropProt = new HashSet<>();
-            HashSet<String> uniqueProt = new HashSet<>();
-            HashSet<String> prmPeptideRefSet = new HashSet<>(prmPepMap.keySet());
             for (Transition transition : traML.getTransitionList()) {
-                if(!prmPeptideRefSet.isEmpty() && !isPrmPeptideRef(transition, peptideMap, prmPeptideRefSet)){
+                ResultDO<PeptideDO> resultDO = parseTransition(transition, peptideMap, library);
+                if (resultDO.isFailed()) {
+                    tranResult.addErrorMsg(resultDO.getMsgInfo());
+                    continue;
+                }
+                PeptideDO peptide = resultDO.getModel();
+                addFragment(peptide, map);
+            }
+
+            peptideService.insertAll(new ArrayList<>(map.values()), false);
+            taskDO.addLog(map.size() + "条肽段数据插入成功");
+            taskService.update(taskDO);
+            logger.info(map.size() + "条肽段数据插入成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return tranResult;
+    }
+
+    @Override
+    public ResultDO selectiveParseAndInsert(InputStream in, LibraryDO library, HashSet<String> selectedPepSet, boolean selectBySequence, TaskDO taskDO) {
+        TraML traML = parse(in);
+        //TODO withCharge, isSelected;
+        HashMap<String, Peptide> peptideMap = makePeptideMap(traML.getCompoundList().getPeptideList());
+        ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
+        int selectedCount = selectedPepSet.size();
+        try {
+            //开始插入前先清空原有的数据库数据
+            ResultDO resultDOTmp = peptideService.deleteAllByLibraryId(library.getId());
+            logger.info("删除旧数据完毕");
+
+            if (resultDOTmp.isFailed()) {
+                logger.error(resultDOTmp.getMsgInfo());
+                return ResultDO.buildError(ResultCode.DELETE_ERROR);
+            }
+
+            boolean withCharge = new ArrayList<>(selectedPepSet).get(0).contains("_");
+            if (selectBySequence){
+                HashSet<String> selectedSeqSet = new HashSet<>();
+                for (String pep: selectedPepSet){
+                    if (withCharge){
+                        selectedSeqSet.add(removeUnimod(pep.split("_")[0]));
+                    }else {
+                        selectedSeqSet.add(removeUnimod(pep));
+                    }
+                }
+                selectedPepSet = selectedSeqSet;
+            }
+            HashMap<String, PeptideDO> map = new HashMap<>();
+            for (Transition transition : traML.getTransitionList()) {
+                if(!selectedPepSet.isEmpty() && !isSelectedPep(transition, peptideMap, selectedPepSet, withCharge, selectBySequence)){
                     continue;
                 }
                 ResultDO<PeptideDO> resultDO = parseTransition(transition, peptideMap, library);
@@ -202,58 +246,45 @@ public class TraMLParser extends BaseLibraryParser {
                     continue;
                 }
                 PeptideDO peptide = resultDO.getModel();
-                setUnique(peptide, fastaUniqueSet, fastaDropPep, libraryDropPep, fastaDropProt, libraryDropProt, uniqueProt);
                 addFragment(peptide, map);
             }
             for (PeptideDO peptideDO: map.values()){
-                prmPeptideRefSet.remove(peptideDO.getPeptideRef());
-            }
-            library.setFastaDeWeightPepCount(fastaDropPep.size());
-            library.setFastaDeWeightProtCount(getDropCount(fastaDropProt, uniqueProt));
-            library.setLibraryDeWeightPepCount(libraryDropPep.size());
-            library.setLibraryDeWeightProtCount(getDropCount(libraryDropProt, uniqueProt));
-            if(!fastaUniqueSet.isEmpty()) {
-                System.out.println("fasta额外检出：" + fastaDropPep.size() + "个Peptide");
+                selectedPepSet.remove(peptideDO.getPeptideRef());
             }
             ArrayList<PeptideDO> peptides = new ArrayList<PeptideDO>(map.values());
-            if (libraryId != null && !libraryId.isEmpty()) {
-                List<PeptideDO> irtPeps = peptideService.getAllByLibraryId(libraryId);
-                for (PeptideDO peptideDO: irtPeps){
-                    if (map.containsKey(peptideDO.getPeptideRef()+"_"+peptideDO.getIsDecoy())){
-                        map.get(peptideDO.getPeptideRef()+"_"+peptideDO.getIsDecoy()).setProteinName("IRT");
-                        continue;
-                    }
-                    if (prmPeptideRefSet.contains(peptideDO.getPeptideRef())){
-                        prmPeptideRefSet.remove(peptideDO.getPeptideRef());
-                    }
-                    peptideDO.setProteinName("IRT");
-                    peptideDO.setId(null);
-                    peptideDO.setLibraryId(library.getId());
-                    peptideDO.setLibraryName(library.getName());
-                    peptides.add(peptideDO);
-                }
-            }
+
             peptideService.insertAll(peptides, false);
             tranResult.setModel(peptides);
             taskDO.addLog(peptides.size() + "条数据插入成功");
             taskService.update(taskDO);
-            logger.info(peptides.size() + "条肽段数据插入成功,其中Unique蛋白质种类有" + uniqueProt.size() + "个");
+            logger.info(map.size() + "条肽段数据插入成功");
+            logger.info("在选中的" + selectedCount + "条肽段中, 有" + selectedPepSet.size() + "条没有在库中找到");
+            logger.info(selectedPepSet.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
         return tranResult;
     }
 
-    private boolean isPrmPeptideRef(Transition transition, HashMap<String, Peptide> peptideMap, HashSet<String> peptideRefList){
+
+    private boolean isSelectedPep(Transition transition, HashMap<String, Peptide> peptideMap, HashSet<String> selectedPepSet, boolean withCharge, boolean selectBySequence){
         Peptide peptide = peptideMap.get(transition.getPeptideRef());
-        String charge = "";
-        for(CvParam cvParam : peptide.getCvParams()){
-            if(cvParam.getName().equals("charge state")){
-                charge = cvParam.getValue();
-            }
-        }
         String fullName = peptide.getUserParams().get(0).getValue();
-        return peptideRefList.contains(fullName+"_"+charge);
+        if (selectBySequence){
+            String sequence = removeUnimod(fullName);
+            return selectedPepSet.contains(sequence);
+        }
+        if (withCharge){
+            String charge = "";
+            for(CvParam cvParam : peptide.getCvParams()){
+                if(cvParam.getName().equals("charge state")){
+                    charge = cvParam.getValue();
+                }
+            }
+            return selectedPepSet.contains(fullName+"_"+charge);
+        }else {
+            return selectedPepSet.contains(fullName);
+        }
     }
 
 
