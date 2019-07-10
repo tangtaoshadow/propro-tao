@@ -1,7 +1,9 @@
 package com.westlake.air.propro.service.impl;
 
-import com.google.common.collect.Ordering;
+import com.westlake.air.propro.algorithm.formula.FormulaCalculator;
+import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.constants.Constants;
+import com.westlake.air.propro.constants.ResidueType;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.dao.LibraryDAO;
 import com.westlake.air.propro.dao.PeptideDAO;
@@ -14,18 +16,19 @@ import com.westlake.air.propro.domain.db.simple.Protein;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
 import com.westlake.air.propro.domain.query.PeptideQuery;
 import com.westlake.air.propro.service.ExperimentService;
-import com.westlake.air.propro.service.TaskService;
 import com.westlake.air.propro.service.PeptideService;
+import com.westlake.air.propro.service.TaskService;
+import com.westlake.air.propro.utils.PeptideUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Created by James Lu MiaoShan
@@ -36,6 +39,7 @@ public class PeptideServiceImpl implements PeptideService {
 
     public final Logger logger = LoggerFactory.getLogger(PeptideServiceImpl.class);
 
+    public static Pattern pattern = Pattern.compile("/\\(.*\\)/");
     @Autowired
     PeptideDAO peptideDAO;
     @Autowired
@@ -44,6 +48,10 @@ public class PeptideServiceImpl implements PeptideService {
     ExperimentService experimentService;
     @Autowired
     TaskService taskService;
+    @Autowired
+    FragmentFactory fragmentFactory;
+    @Autowired
+    FormulaCalculator formulaCalculator;
 
     @Override
     public List<PeptideDO> getAllByLibraryId(String libraryId) {
@@ -64,6 +72,7 @@ public class PeptideServiceImpl implements PeptideService {
     public List<PeptideDO> getAllByLibraryIdAndIsDecoy(String libraryId, boolean isDecoy) {
         return peptideDAO.getAllByLibraryIdAndIsDecoy(libraryId, isDecoy);
     }
+
     @Override
     public List<PeptideDO> getAllByLibraryIdAndProteinNameAndIsDecoy(String libraryId, String proteinName, boolean isDecoy) {
         return peptideDAO.getAllByLibraryIdAndProteinNameAndIsDecoy(libraryId, proteinName, isDecoy);
@@ -219,51 +228,51 @@ public class PeptideServiceImpl implements PeptideService {
         long start = System.currentTimeMillis();
         PeptideQuery query = new PeptideQuery(library.getId());
         float precursorMz = mzRange.getMz();
-        if(type.equals(Constants.EXP_TYPE_PRM)){
+        if (type.equals(Constants.EXP_TYPE_PRM)) {
             //TODO: PRM
             query.setMzStart(precursorMz - 0.0006d);
             query.setMzEnd(precursorMz + 0.0006d);
-        }else {
+        } else {
             query.setMzStart((double) mzRange.getStart());
             query.setMzEnd((double) mzRange.getEnd());
         }
-        if(uniqueCheck){
+        if (uniqueCheck) {
             query.setIsUnique(true);
         }
-        if(noDecoy){
+        if (noDecoy) {
             query.setIsDecoy(false);
         }
 
         List<TargetPeptide> targetList = peptideDAO.getTPAll(query);
-        if (!targetList.isEmpty() && targetList.size() != 2 && type.equals(Constants.EXP_TYPE_PRM)){
+        if (!targetList.isEmpty() && targetList.size() != 2 && type.equals(Constants.EXP_TYPE_PRM)) {
             //PRM模式下, rtRange不为空;
             TargetPeptide bestTarget = null, bestDecoy = null;
             float mzDistance = Float.MAX_VALUE;
-            for (TargetPeptide peptide: targetList){
-                if (rtExtractionWindows != -1){
+            for (TargetPeptide peptide : targetList) {
+                if (rtExtractionWindows != -1) {
                     float iRt = (peptide.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue();
-                    if (iRt < rtRange[0] - 30 || iRt > rtRange[1] + 30){
+                    if (iRt < rtRange[0] - 30 || iRt > rtRange[1] + 30) {
                         continue;
                     }
                 }
                 float tempMzDistance = Math.abs(peptide.getMz() - precursorMz);
-                if (tempMzDistance <= mzDistance){
-                    if (peptide.getIsDecoy()){
+                if (tempMzDistance <= mzDistance) {
+                    if (peptide.getIsDecoy()) {
                         bestDecoy = peptide;
-                    }else {
+                    } else {
                         bestTarget = peptide;
                     }
                     mzDistance = tempMzDistance;
                 }
             }
             targetList.clear();
-            if (bestTarget != null){
+            if (bestTarget != null) {
                 targetList.add(bestTarget);
             }
-            if (bestDecoy != null){
+            if (bestDecoy != null) {
                 targetList.add(bestDecoy);
             }
-            if (mzDistance >= 0.0002f && bestTarget!=null){
+            if (mzDistance >= 0.0002f && bestTarget != null) {
                 System.out.println("Coordinate: " + bestTarget.getPeptideRef() + " " + mzDistance);
             }
         }
@@ -281,8 +290,45 @@ public class PeptideServiceImpl implements PeptideService {
             }
         }
 
-        logger.info("构建卷积MS2坐标,总计"+targetList.size()+"条记录,读取标准库耗时:" + readDB + "毫秒");
+        logger.info("构建卷积MS2坐标,总计" + targetList.size() + "条记录,读取标准库耗时:" + readDB + "毫秒");
         return targetList;
     }
 
+    @Override
+    public PeptideDO buildWithPeptideRef(String peptideRef) {
+
+        int charge;
+        String fullName;
+        try {
+            if(peptideRef.contains("_")){
+                String[] peptideInfos = peptideRef.split("_");
+                charge = Integer.parseInt(peptideInfos[1]);
+                fullName = peptideInfos[0];
+            }else{
+                charge = 1;
+                fullName = peptideRef;
+            }
+
+        } catch (Exception e) {
+            return null;
+        }
+
+        PeptideDO peptide = new PeptideDO();
+        peptide.setFullName(fullName);
+        peptide.setCharge(charge);
+        peptide.setSequence(fullName.replaceAll("\\([^)]+\\)",""));
+        peptide.setIsDecoy(false);
+        HashMap<Integer, String> unimodMap = PeptideUtil.parseModification(fullName);
+        peptide.setUnimodMap(unimodMap);
+        peptide.setMz(formulaCalculator.getMonoMz(peptide.getSequence(), ResidueType.Full, charge, 0, 0, false, new ArrayList<>(unimodMap.values())));
+        peptide.setPeptideRef(peptideRef);
+        peptide.setRt(-1d);
+        Integer[] chargeArray = new Integer[charge];
+        for(int i=0;i<charge;i++){
+            chargeArray[i] = i+1;
+        }
+
+        peptide.setFragmentMap(fragmentFactory.buildFragmentMap(peptide, 3, chargeArray));
+        return peptide;
+    }
 }

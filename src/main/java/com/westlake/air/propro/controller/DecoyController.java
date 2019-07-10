@@ -1,9 +1,7 @@
 package com.westlake.air.propro.controller;
 
-import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.algorithm.decoy.generator.ShuffleGenerator;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.peptide.FragmentResult;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.query.PeptideQuery;
@@ -12,7 +10,6 @@ import com.westlake.air.propro.utils.PermissionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -29,26 +26,9 @@ import static com.westlake.air.propro.constants.Constants.MAX_INSERT_RECORD_FOR_
 public class DecoyController extends BaseController {
 
     @Autowired
-    FragmentFactory fragmentFactory;
-    @Autowired
     ShuffleGenerator shuffleGenerator;
     @Autowired
     PeptideService peptideService;
-
-    @RequestMapping(value = "/overview/{id}")
-    String overview(Model model, @PathVariable("id") String id) {
-
-        LibraryDO library = libraryService.getById(id);
-        PermissionUtil.check(library);
-
-        FragmentResult result = fragmentFactory.decoyOverview(id);
-
-        model.addAttribute(SUCCESS_MSG, result.getMsgInfo());
-        model.addAttribute("overlapList", result.getOverlapList());
-        model.addAttribute("decoyList", result.getDecoyList());
-        model.addAttribute("targetList", result.getTargetList());
-        return "decoy/overview";
-    }
 
     @RequestMapping(value = "/delete")
     String delete(Model model, @RequestParam(value = "id", required = true) String id) {

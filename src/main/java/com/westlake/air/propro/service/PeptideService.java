@@ -74,5 +74,14 @@ public interface PeptideService {
      * @return
      */
     List<TargetPeptide> buildMS2Coordinates(LibraryDO library, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange range, Float[] rtRange, String type, boolean uniqueCheck, Boolean noDecoy);
+
+    /**
+     * 根据PeptideRef生成一个全新的PeptideDO
+     * 全新的PeptideDO包含所有的a,b,c,x,y,z碎片以及对应的mz.
+     * 注意:生成的靶向肽段是没有预测rt和预测intensity的
+     * @param peptideRef
+     * @return
+     */
+    PeptideDO buildWithPeptideRef(String peptideRef);
 }
 

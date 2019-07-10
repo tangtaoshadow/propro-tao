@@ -50,8 +50,7 @@ public class FeatureExtractor {
     TaskService taskService;
 
     /**
-     *
-     * @param dataDO 卷积后的数据对象
+     * @param dataDO       卷积后的数据对象
      * @param intensityMap 得到标准库中peptideRef对应的碎片和强度的键值对
      * @param sigmaSpacing
      * @return
@@ -102,15 +101,12 @@ public class FeatureExtractor {
         for (String cutInfo : intensitiesMap.keySet()) {
             //计算两个信噪比
             double[] noises200 = signalToNoiseEstimator.computeSTN(rtDoubleArray, smoothIntensitiesMap.get(cutInfo), 200, 30);
-//            double[] noises200 = signalToNoiseEstimator.computeSTN(rtDoubleArray, intensitiesMap.get(cutInfo), 200, 30);
             double[] noisesOri1000 = signalToNoiseEstimator.computeSTN(rtDoubleArray, intensitiesMap.get(cutInfo), 1000, 30);
             //根据信噪比和峰值形状选择最高峰,用降噪200及平滑过后的图去挑选Peak峰
             RtIntensityPairsDouble maxPeakPairs = peakPicker.pickMaxPeak(rtDoubleArray, smoothIntensitiesMap.get(cutInfo), noises200);
-//            RtIntensityPairsDouble maxPeakPairs = peakPicker.pickMaxPeak(rtDoubleArray, intensitiesMap.get(cutInfo), noises200);
-
             //根据信噪比和最高峰选择谱图
             if (maxPeakPairs == null) {
-                logger.info("Error: MaxPeakPairs were null!"+rtDoubleArray.length);
+                logger.info("Error: MaxPeakPairs were null!" + rtDoubleArray.length);
                 continue;
             }
             List<IonPeak> ionPeakList = chromatogramPicker.pickChromatogram(rtDoubleArray, intensitiesMap.get(cutInfo), smoothIntensitiesMap.get(cutInfo), noisesOri1000, maxPeakPairs);
@@ -118,17 +114,13 @@ public class FeatureExtractor {
             ionPeaks.put(cutInfo, maxPeakPairs);
             ionPeakParams.put(cutInfo, ionPeakList);
             noise1000Map.put(cutInfo, noisesOri1000);
-            normedLibIntMap.put(cutInfo, intensityMap.get(cutInfo)/libIntSum);
+            normedLibIntMap.put(cutInfo, intensityMap.get(cutInfo) / libIntSum);
         }
-        if (ionPeakParams.size() == 0){
+        if (ionPeakParams.size() == 0) {
             return new PeptideFeature(false);
         }
 
-        List<PeakGroup> peakGroupFeatureList = featureFinder.findFeaturesNew(peptideSpectrum, ionPeaks, ionPeakParams,noise1000Map);
-        //give simple data decoy
-//        if (dataDO.getIsDecoy() && peakGroupFeatureList.isEmpty()){
-//            peakGroupFeatureList = featureFinder.findFeatures(peptideSpectrum, ionPeaks, ionPeakParams,noise1000Map);
-//        }
+        List<PeakGroup> peakGroupFeatureList = featureFinder.findFeaturesNew(peptideSpectrum, ionPeaks, ionPeakParams, noise1000Map);
 
         PeptideFeature featureResult = new PeptideFeature(true);
         featureResult.setPeakGroupList(peakGroupFeatureList);
@@ -136,21 +128,4 @@ public class FeatureExtractor {
 
         return featureResult;
     }
-
-//    /**
-//     * get intensityGroup corresponding to peptideRef
-//     *
-//     * @param intensityGroupList intensity group of all peptides
-//     * @param peptideRef         chosen peptide
-//     * @return intensity group of peptideRef
-//     */
-//    private IntensityGroup getIntensityGroupByPep(List<IntensityGroup> intensityGroupList, String peptideRef) {
-//        for (IntensityGroup intensityGroup : intensityGroupList) {
-//            if (intensityGroup.getPeptideRef().equals(peptideRef)) {
-//                return intensityGroup;
-//            }
-//        }
-//        System.out.println("GetIntensityGroupByPep Error.");
-//        return null;
-//    }
 }

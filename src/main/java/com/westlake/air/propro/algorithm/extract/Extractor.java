@@ -111,9 +111,10 @@ public class Extractor {
             //Step2.获取该窗口内的谱图Map,key值代表了RT
             TreeMap<Float, MzIntensityPairs> rtMap;
 
-            long start = System.currentTimeMillis();
+            if(swathIndexDO == null){
+                return ResultDO.buildError(ResultCode.SWATH_INDEX_NOT_EXISTED);
+            }
             rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndexDO, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
-            logger.warn("Cost:" + (System.currentTimeMillis() - start));
             TargetPeptide tp = new TargetPeptide(peptide);
             Double rt = peptide.getRt();
             if (rtExtractorWindow == -1) {
@@ -124,9 +125,8 @@ public class Extractor {
                 tp.setRtStart(targetRt.floatValue() - rtExtractorWindow / 2);
                 tp.setRtEnd(targetRt.floatValue() + rtExtractorWindow / 2);
             }
-            long startA = System.currentTimeMillis();
+
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, mzExtractorWindow, rtExtractorWindow, null);
-            System.out.println("耗时:"+(System.currentTimeMillis() - startA));
             if (dataDO == null) {
                 return ResultDO.buildError(ResultCode.ANALYSE_DATA_ARE_ALL_ZERO);
             }

@@ -31,6 +31,13 @@ public class FragmentInfo {
     String annotations;
 
     public FragmentInfo(){}
+
+    public FragmentInfo(String cutInfo, Double mz, Integer charge){
+        this.cutInfo = cutInfo;
+        this.mz = mz;
+        this.charge = charge;
+    }
+
     public FragmentInfo(String cutInfo, Double mz, Double intensity, Integer charge){
         this.cutInfo = cutInfo;
         this.mz = mz;

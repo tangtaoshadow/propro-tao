@@ -219,7 +219,7 @@ public class AnalyseController extends BaseController {
         String expId = overviewResult.getModel().getExpId();
         analyseOverviewService.delete(id);
         redirectAttributes.addFlashAttribute(SUCCESS_MSG, SuccessMsg.DELETE_SUCCESS);
-        return "redirect:/analyse/overview/list?expId="+expId;
+        return "redirect:/analyse/overview/list?expId=" + expId;
     }
 
     @RequestMapping(value = "/overview/select")
@@ -311,222 +311,144 @@ public class AnalyseController extends BaseController {
         return "analyse/data/list";
     }
 
-    @RequestMapping(value = "/consultation")
-    String consultation(Model model,
-                        @RequestParam(value = "dataId", required = false) String dataId,
-                        @RequestParam(value = "peptideRef", required = false) String peptideRef,
-                        @RequestParam(value = "expId", required = false) String expId,
-                        @RequestParam(value = "libraryId", required = false) String libraryId,
-                        @RequestParam(value = "useGaussFilter", required = false, defaultValue = "false") Boolean useGaussFilter,
-                        @RequestParam(value = "sigma", required = false, defaultValue = "3.75") Float sigma,
-                        @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
-                        @RequestParam(value = "useNoise", required = false, defaultValue = "false") Boolean useNoise,
-                        @RequestParam(value = "noise", required = false, defaultValue = "1000") Integer noise,
-                        @RequestParam(value = "mzExtractWindow", required = false, defaultValue = "0.05") Float mzExtractWindow,
-                        @RequestParam(value = "rtExtractWindow", required = false, defaultValue = "800") Float rtExtractWindow,
-                        @RequestParam(value = "allCutInfo", required = false, defaultValue = "false") Boolean allCutInfo,
-                        @RequestParam(value = "noUseForFill", required = false, defaultValue = "false") Boolean noUseForFill,
-                        @RequestParam(value = "noUseForLib", required = false, defaultValue = "false") Boolean noUseForLib,
-                        @RequestParam(value = "limitLength", required = false, defaultValue = "3") Integer limitLength,
-                        @RequestParam(value = "onlyOneCharge", required = false, defaultValue = "false") Boolean onlyOneCharge,
-                        HttpServletRequest request) {
-
-        model.addAttribute("peptideRef", peptideRef);
-        model.addAttribute("expId", expId);
-        model.addAttribute("libraryId", libraryId);
-        model.addAttribute("useGaussFilter", useGaussFilter);
-        model.addAttribute("sigma", sigma);
-        model.addAttribute("spacing", spacing);
-        model.addAttribute("useNoise", useNoise);
-        model.addAttribute("noise", noise);
+    @RequestMapping(value = "/clinic")
+    String clinic(Model model,
+                  @RequestParam(value = "dataId", required = false) String dataId,
+                  @RequestParam(value = "peptideRef", required = false) String peptideRef,
+                  @RequestParam(value = "expId", required = false) String expId,
+                  @RequestParam(value = "libraryId", required = false) String libraryId,
+                  @RequestParam(value = "mzExtractWindow", required = false, defaultValue = "0.03") Float mzExtractWindow,
+                  @RequestParam(value = "rtExtractWindow", required = false, defaultValue = "800") Float rtExtractWindow,
+                  @RequestParam(value = "limitLength", required = false, defaultValue = "3") Integer limitLength,
+                  HttpServletRequest request) {
         model.addAttribute("mzExtractWindow", mzExtractWindow);
         model.addAttribute("rtExtractWindow", rtExtractWindow);
-        model.addAttribute("allCutInfo", allCutInfo);
-        model.addAttribute("noUseForFill", noUseForFill);
-        model.addAttribute("noUseForLib", noUseForLib);
         model.addAttribute("limitLength", limitLength);
-        model.addAttribute("onlyOneCharge", onlyOneCharge);
 
-        AnalyseDataDO dataDO = null;
+        /**
+         * Step1. Prepare for dataId query.
+         * 如果dataId不为空,那么可以根据dataId获取所有的相关信息.并且将这些信息全部填充入map中,用于在前端显示,
+         * 如果dataId为空并且expId也为空,那么返回错误信息
+         */
+        AnalyseDataDO data = null;
         if (StringUtils.isNotEmpty(dataId)) {
-            dataDO = analyseDataService.getById(dataId).getModel();
-            AnalyseOverviewDO analyseOverviewDO = analyseOverviewService.getById(dataDO.getOverviewId()).getModel();
-            model.addAttribute("libraryId", analyseOverviewDO.getLibraryId());
-            model.addAttribute("expId", analyseOverviewDO.getExpId());
-            model.addAttribute("peptideRef", dataDO.getPeptideRef());
-            libraryId = analyseOverviewDO.getLibraryId();
-            expId = analyseOverviewDO.getExpId();
-            peptideRef = dataDO.getPeptideRef();
-        } else if (StringUtils.isNotEmpty(expId)) {
-            String overviewId = analyseOverviewService.getFirstByExpId(expId).getModel().getId();
-            dataDO = analyseDataService.getByOverviewIdAndPeptideRefAndIsDecoy(overviewId, peptideRef, false);
-        }
-        HashSet<String> usedCutInfos = new HashSet<>();
-
-        if (!model.containsAttribute("peptideRef") || !model.containsAttribute("expId") || !model.containsAttribute("libraryId")) {
-            model.addAttribute(ERROR_MSG, ResultCode.PARAMS_NOT_ENOUGH.getMessage());
-            return "analyse/data/consultation";
-        }
-
-        //检测原始实验是否已经被转化为Aird压缩文件,是否执行了IRT计算
-        ResultDO<ExperimentDO> experimentResult = experimentService.getById(expId);
-        if (experimentResult.isFailed()) {
-            model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
-            return "analyse/data/consultation";
-        }
-        if (experimentResult.getModel().getIrtResult() == null) {
-            model.addAttribute("rtExtractWindow", -1f);
-            rtExtractWindow = -1f;
-        }
-        //校验权限
-        PermissionUtil.check(experimentResult.getModel());
-
-        LibraryDO library = libraryService.getById(libraryId);
-        if (library == null) {
-            model.addAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED.getMessage());
-            return "analyse/data/consultation";
-        }
-        model.addAttribute("exp", experimentResult.getModel());
-
-        if (!allCutInfo) {
-            for (String cutInfoOri : request.getParameterMap().keySet()) {
-                if (cutInfoOri.contains(Constants.CUTINFO_PREFIX) && request.getParameter(cutInfoOri).equals("on")) {
-                    usedCutInfos.add(cutInfoOri.replace(Constants.CUTINFO_PREFIX, ""));
-                }
-            }
-        }
-
-        ExperimentDO experimentDO = experimentResult.getModel();
-        PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, false);
-        model.addAttribute("peptide", peptide);
-        List<String> cutInfoFromGuess = new ArrayList<>();
-        List<String> cutInfoFromGuessAndHit = new ArrayList<>();
-        List<Float[]> intensitiesList = new ArrayList<Float[]>();
-        List<String> cutInfoFromDic;
-        if (peptide != null) {
-            cutInfoFromDic = new ArrayList<>(peptide.getFragmentMap().keySet());
-        } else {
-            cutInfoFromDic = new ArrayList<>();
-            noUseForFill = false;
-            String[] pepInfo = peptideRef.split("_");
-            peptide = new PeptideDO();
-            peptide.setCharge(Integer.parseInt(pepInfo[1]));
-            peptide.setSequence(PeptideUtil.removeUnimod(pepInfo[0]));
-            peptide.setFullName(pepInfo[0]);
-            peptide.setMz(formulaCalculator.getMonoMz(peptide));
-            peptide.setRt(-1d);
-            peptide.setIsDecoy(false);
-            PeptideUtil.parseModification(peptide);
-        }
-        //准备该肽段的其他互补离子
-        if (!noUseForFill) {
-            HashMap<String, Double> bySeriesMap = fragmentFactory.getBYSeriesMap(peptide, limitLength, onlyOneCharge);
-            if (bySeriesMap == null) {
-                model.addAttribute(ERROR_MSG, ResultCode.FRAGMENT_LENGTH_IS_TOO_LONG.getMessage());
-                return "analyse/data/consultation";
-            }
-            if (noUseForLib) {
-                peptide.getFragmentMap().clear();
-            }
-            for (String cutInfo : bySeriesMap.keySet()) {
-                if (peptide.getFragmentMap().get(cutInfo) == null) {
-                    peptide.getFragmentMap().put(cutInfo, new FragmentInfo(cutInfo, bySeriesMap.get(cutInfo), 0d, cutInfo.contains("^") ? Integer.parseInt(cutInfo.split("\\^")[1]) : 1));
-                }
-                cutInfoFromGuess.add(cutInfo);
-            }
-        }
-
-        ResultDO<AnalyseDataDO> dataRealResult = extractor.extractOneOnRealTime(experimentDO, peptide, rtExtractWindow, mzExtractWindow);
-
-        if (dataRealResult.isFailed()) {
-            model.addAttribute(ERROR_MSG, ResultCode.CONVOLUTION_DATA_NOT_EXISTED.getMessage());
-            return "analyse/data/consultation";
-        }
-        AnalyseDataDO newDataDO = dataRealResult.getModel();
-        HashMap<String, Float> mzMap = newDataDO.getMzMap();
-
-        List<String> existedCutInfoList = Lists.newArrayList(peptide.getFragmentMap().keySet());
-        for (String key : existedCutInfoList) {
-            if (!mzMap.containsKey(key)) {
-                peptide.removeFragment(key);
-            }
-        }
-        //获取标准库中对应的PeptideRef组
-        HashMap<String, Float> intensityMap = TargetPeptide.buildIntensityMap(peptide);
-
-        //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
-        PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(newDataDO, intensityMap, new SigmaSpacing(sigma, spacing));
-        List<String> defaultScoreTypes = new LumsParams().getScoreTypes();
-        if (peptideFeature.isFeatureFound()) {
-            TreeMap<Double, Double> rtShapeScoreMap = new TreeMap<>();
-            for (PeakGroup peakGroupFeature : peptideFeature.getPeakGroupList()) {
-                FeatureScores featureScores = new FeatureScores(defaultScoreTypes.size());
-
-                chromatographicScorer.calculateChromatographicScores(peakGroupFeature, peptideFeature.getNormedLibIntMap(), featureScores, defaultScoreTypes);
-                libraryScorer.calculateLibraryScores(peakGroupFeature, peptideFeature.getNormedLibIntMap(), featureScores, defaultScoreTypes);
-                rtShapeScoreMap.put(peakGroupFeature.getApexRt(), featureScores.get(ScoreType.XcorrShapeWeighted.getTypeName(), defaultScoreTypes));
-            }
-            model.addAttribute("rtShapeScoreMap", rtShapeScoreMap);
-        } else {
-            logger.info("未发现好信号");
-        }
-
-
-        //同一组的rt坐标是相同的
-        Float[] rtArray = newDataDO.getRtArray();
-        List<String> totalCutInfoList = new ArrayList<>();
-        for (String cutInfo : newDataDO.getIntensityMap().keySet()) {
-            if (newDataDO.getIntensityMap().get(cutInfo) == null || (usedCutInfos.size() != 0 && !usedCutInfos.contains(cutInfo))) {
-                continue;
-            }
-
-            Float[] intensityArray = newDataDO.getIntensityMap().get(cutInfo);
-            //先降噪后高斯平滑
-            if (useNoise) {
-                intensityArray = noise(rtArray, intensityArray, noise);
-            }
-            if (useGaussFilter) {
-                intensityArray = gaussFilter.filterForFloat(rtArray, cutInfo, intensityArray, new SigmaSpacing(sigma, spacing));
-            }
-            intensitiesList.add(intensityArray);
-            if (!cutInfoFromDic.contains(cutInfo)) {
-                cutInfoFromGuess.remove(cutInfo);
-                cutInfoFromGuessAndHit.add(cutInfo);
-            }
-            totalCutInfoList.add(cutInfo);
-        }
-
-        if (allCutInfo) {
-            usedCutInfos.addAll(cutInfoFromDic);
-            usedCutInfos.addAll(cutInfoFromGuessAndHit);
-        }
-
-        if (dataDO != null) {
+            data = analyseDataService.getById(dataId).getModel();
+            AnalyseOverviewDO analyseOverview = analyseOverviewService.getById(data.getOverviewId()).getModel();
+            libraryId = analyseOverview.getLibraryId();
+            peptideRef = data.getPeptideRef();
+            expId = analyseOverview.getExpId();
             List<Double> leftRtList = new ArrayList<>();
             List<Double> rightRtList = new ArrayList<>();
-            for (FeatureScores scores : dataDO.getFeatureScoresList()) {
+            for (FeatureScores scores : data.getFeatureScoresList()) {
                 Pair<Double, Double> rtRange = FeatureUtil.toDoublePair(scores.getRtRangeFeature());
                 leftRtList.add(rtRange.getLeft());
                 rightRtList.add(rtRange.getRight());
             }
             model.addAttribute("leftRtList", leftRtList);
             model.addAttribute("rightRtList", rightRtList);
-            if (dataDO.getBestRt() != null) {
-                model.addAttribute("bestRt", (double) Math.round(dataDO.getBestRt() * 100) / 100);
+            if (data.getBestRt() != null) {
+                model.addAttribute("bestRt", (double) Math.round(data.getBestRt() * 100) / 100);
             }
+        }
+        model.addAttribute("expId", expId);
+        model.addAttribute("libraryId", libraryId);
+        model.addAttribute("peptideRef", peptideRef);
+
+        /**
+         * Step2. Check for required info and visit permission
+         * 如果Experiment对象没有做过irt校准,那么rtExtractorWindow强制切换为-1
+         */
+        if (StringUtils.isEmpty(expId)) {
+            model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED.getMessage());
+            return "analyse/data/clinic";
+        }
+        if (StringUtils.isEmpty(peptideRef)) {
+            model.addAttribute(ERROR_MSG, ResultCode.PEPTIDE_REF_CANNOT_BE_EMPTY.getMessage());
+            return "analyse/data/clinic";
+        }
+        ExperimentDO experiment = experimentService.getById(expId).getModel();
+        PermissionUtil.check(experiment);
+        if (experiment.getIrtResult() == null) {
+            model.addAttribute("rtExtractWindow", -1f);
+            rtExtractWindow = -1f;
+        }
+        model.addAttribute("exp", experiment);
+
+        /**
+         * Step3. Generate RealTime Peptide by peptideRef. For fragmentInfo length is big or equal than 3.
+         */
+        PeptideDO buildPeptide = peptideService.buildWithPeptideRef(peptideRef);
+
+        /**
+         * Step4. Merge with library Peptide if existed
+         */
+        List<String> libraryCutInfos = new ArrayList<>();
+        if (libraryId != null) {
+            PeptideDO libraryPeptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, false);
+            if (libraryPeptide != null) {
+                buildPeptide.setLibraryId(libraryPeptide.getLibraryId());
+                buildPeptide.setLibraryName(libraryPeptide.getLibraryName());
+                for (FragmentInfo fi : libraryPeptide.getFragmentMap().values()) {
+                    FragmentInfo buildFi = buildPeptide.getFragmentMap().get(fi.getCutInfo());
+                    buildFi.setIntensity(fi.getIntensity());
+                    libraryCutInfos.add(fi.getCutInfo());
+                }
+            }
+        }
+        model.addAttribute("libCutInfos", libraryCutInfos);
+        model.addAttribute("peptide", buildPeptide);
+
+        /**
+         * Step5. Extract with Generated Peptide
+         */
+        ResultDO<AnalyseDataDO> realTimeAnalyseDataResult = extractor.extractOneOnRealTime(experiment, buildPeptide, rtExtractWindow, mzExtractWindow);
+        if (realTimeAnalyseDataResult.isFailed()) {
+            model.addAttribute(ERROR_MSG, realTimeAnalyseDataResult.getMsgInfo());
+            return "analyse/data/clinic";
+        }
+        AnalyseDataDO targetAnalyseData = realTimeAnalyseDataResult.getModel();
+        HashMap<String, Float> mzMap = targetAnalyseData.getMzMap();
+        model.addAttribute("hitCutInfos", mzMap.keySet());
+
+//        //获取标准库中对应的PeptideRef组
+//        HashMap<String, Float> intensityMap = TargetPeptide.buildIntensityMap(peptide);
+//
+//        //重要步骤,"或许是目前整个工程最重要的核心算法--选峰算法."--陆妙善
+//        PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(newDataDO, intensityMap, new SigmaSpacing(sigma, spacing));
+//        List<String> defaultScoreTypes = new LumsParams().getScoreTypes();
+//        if (peptideFeature.isFeatureFound()) {
+//            TreeMap<Double, Double> rtShapeScoreMap = new TreeMap<>();
+//            for (PeakGroup peakGroupFeature : peptideFeature.getPeakGroupList()) {
+//                FeatureScores featureScores = new FeatureScores(defaultScoreTypes.size());
+//
+//                chromatographicScorer.calculateChromatographicScores(peakGroupFeature, peptideFeature.getNormedLibIntMap(), featureScores, defaultScoreTypes);
+//                libraryScorer.calculateLibraryScores(peakGroupFeature, peptideFeature.getNormedLibIntMap(), featureScores, defaultScoreTypes);
+//                rtShapeScoreMap.put(peakGroupFeature.getApexRt(), featureScores.get(ScoreType.XcorrShapeWeighted.getTypeName(), defaultScoreTypes));
+//            }
+//            model.addAttribute("rtShapeScoreMap", rtShapeScoreMap);
+//        } else {
+//            logger.info("未发现好信号");
+//        }
+
+        /**
+         * Step6. 准备输出结果
+         */
+        List<Float[]> intensitiesList = new ArrayList<>();
+        Float[] rtArray = targetAnalyseData.getRtArray();
+        for (String cutInfo : targetAnalyseData.getIntensityMap().keySet()) {
+            if (targetAnalyseData.getIntensityMap().get(cutInfo) == null) {
+                continue;
+            }
+            Float[] intensityArray = targetAnalyseData.getIntensityMap().get(cutInfo);
+            intensitiesList.add(intensityArray);
         }
 
         model.addAttribute("rt", rtArray);
-        model.addAttribute("cutInfoFromDic", cutInfoFromDic);
-        model.addAttribute("cutInfoFromGuess", cutInfoFromGuess);
-        model.addAttribute("cutInfoFromGuessAndHit", cutInfoFromGuessAndHit);
-        model.addAttribute("usedCutInfos", usedCutInfos);
         model.addAttribute("intensitiesList", intensitiesList);
-        model.addAttribute("totalCutInfos", totalCutInfoList);
-        model.addAttribute("library", library);
-        model.addAttribute("mzMap",mzMap);
-        return "analyse/data/consultation";
+        model.addAttribute("mzMap", mzMap);
+        return "analyse/data/clinic";
     }
+
 
     private JSONArray noise(Float[] pairRtArray, Float[] pairIntensityArray) {
 

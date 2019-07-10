@@ -1,12 +1,9 @@
 package com.westlake.air.propro.algorithm.parser;
 
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
-import com.westlake.air.propro.algorithm.parser.model.chemistry.AminoAcid;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.Unimod;
-import com.westlake.air.propro.dao.AminoAcidDAO;
-import com.westlake.air.propro.dao.UnimodDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.peptide.Annotation;
 import com.westlake.air.propro.domain.bean.score.BYSeries;
@@ -16,18 +13,19 @@ import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.TaskService;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import scala.Int;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 import static com.westlake.air.propro.utils.PeptideUtil.parseModification;
 import static com.westlake.air.propro.utils.PeptideUtil.removeUnimod;

@@ -56,4 +56,25 @@ public class PeptideUtil {
 //        }
     }
 
+    /**
+     * 解析出Modification的位置
+     *
+     * @param fullName
+     */
+    public static HashMap<Integer, String> parseModification(String fullName) {
+        //不论是真肽段还是伪肽段,fullUniModPeptideName字段都是真肽段的完整版
+
+        fullName = fullName.toLowerCase();
+        HashMap<Integer, String> unimodMap = new HashMap<>();
+
+        while (fullName.contains("(unimod:") && fullName.indexOf("(unimod:") != 0) {
+            Matcher matcher = unimodPattern.matcher(fullName);
+            if (matcher.find()) {
+                unimodMap.put(matcher.start(), matcher.group(2));
+                fullName = StringUtils.replaceOnce(fullName, matcher.group(0), matcher.group(1));
+            }
+        }
+        return unimodMap;
+    }
+
 }

@@ -1,8 +1,7 @@
 package com.westlake.air.propro.algorithm.formula;
 
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Multiset;
-import com.google.common.collect.Ordering;
+import com.westlake.air.propro.algorithm.parser.model.chemistry.AminoAcid;
+import com.westlake.air.propro.algorithm.parser.model.chemistry.Unimod;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResidueType;
 import com.westlake.air.propro.dao.AminoAcidDAO;
@@ -10,15 +9,12 @@ import com.westlake.air.propro.dao.ElementsDAO;
 import com.westlake.air.propro.dao.UnimodDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.MzResult;
-import com.westlake.air.propro.domain.bean.score.BYSeries;
 import com.westlake.air.propro.domain.bean.peptide.Annotation;
 import com.westlake.air.propro.domain.bean.peptide.Fragment;
-import com.westlake.air.propro.domain.bean.peptide.FragmentResult;
+import com.westlake.air.propro.domain.bean.score.BYSeries;
 import com.westlake.air.propro.domain.db.FragmentInfo;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.query.PeptideQuery;
-import com.westlake.air.propro.algorithm.parser.model.chemistry.AminoAcid;
-import com.westlake.air.propro.algorithm.parser.model.chemistry.Unimod;
 import com.westlake.air.propro.service.PeptideService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import static com.westlake.air.propro.constants.Constants.MAX_PAGE_SIZE_FOR_FRAGMENT;
-import static com.westlake.air.propro.constants.Constants.Y_SIDE_MASS;
 
 /**
  * Created by James Lu MiaoShan
@@ -75,9 +70,6 @@ public class FragmentFactory {
                 }
             }
             monoWeight += aa.getMonoIsotopicMass();
-//            if (i == 0) {
-//                continue;
-//            }
             bSeries.add(monoWeight);
         }
 
@@ -107,60 +99,6 @@ public class FragmentFactory {
         return bySeries;
     }
 
-    public BYSeries getBYSeriesOld(HashMap<Integer, String> unimodHashMap, String sequence, int charge) {
-
-        BYSeries bySeries = new BYSeries();
-
-        //bSeries 若要提高精度，提高json的精度
-        List<Double> bSeries = new ArrayList<>();
-        double monoWeight = Constants.PROTON_MASS_U * charge;
-        if (unimodHashMap != null && unimodHashMap.containsKey(0)) {
-            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(0));
-            if (unimod != null) {
-                monoWeight += unimod.getMonoMass();
-            }
-        }
-
-        char[] acidCodeArray = sequence.toCharArray();
-        for (int i = 0; i < acidCodeArray.length - 1; i++) {
-            AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCodeArray[i]));
-            if (aa == null) {
-                continue;
-            }
-            if (i == 0) {
-                monoWeight += aa.getMonoIsotopicMass();
-                continue;
-            }
-            monoWeight += aa.getMonoIsotopicMass();
-            bSeries.add(monoWeight);
-        }
-
-        //ySeries
-        List<Double> ySeries = new ArrayList<>();
-        monoWeight = Constants.PROTON_MASS_U * charge;
-        if (unimodHashMap != null && unimodHashMap.containsKey(acidCodeArray.length - 1)) {
-            Unimod unimod = unimodDAO.getUnimod(unimodHashMap.get(acidCodeArray.length - 1));
-            if (unimod != null) {
-                monoWeight += unimod.getMonoMass();
-            }
-        }
-
-        double h2oWeight = elementsDAO.getMonoWeight(ElementsDAO.H2O);
-        for (int i = acidCodeArray.length - 1; i > 0; i--) {
-            AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCodeArray[i]));
-            if (aa == null) {
-                continue;
-            }
-            monoWeight += aa.getMonoIsotopicMass();
-            ySeries.add(monoWeight + h2oWeight);
-        }
-
-        bySeries.setBSeries(bSeries);
-        bySeries.setYSeries(ySeries);
-
-        return bySeries;
-    }
-
     /**
      * 标准库中的PeptideDO对象生成该肽段所有B,Y类型的排列组合的离子MZ的Map,key为cutInfo
      *
@@ -168,31 +106,37 @@ public class FragmentFactory {
      * @param limitLength 生成的B,Y离子的最小长度
      * @return
      */
-    public HashMap<String, Double> getBYSeriesMap(PeptideDO peptideDO, int limitLength, boolean onlyOneCharge) {
-        HashMap<String, Double> bySeriesMap = new HashMap<>();
+    public HashMap<String, FragmentInfo> buildFragmentMap(PeptideDO peptideDO, int limitLength, Integer... chargeArray) {
+        HashMap<String, FragmentInfo> fragmentMap = new HashMap<>();
         String sequence = peptideDO.getSequence();
         int length = sequence.length();
         if (length < limitLength) {
             return null;
         }
-        int charge = onlyOneCharge ? 1 : peptideDO.getCharge();
-        for (int c = 1; c <= charge; c++) {
+        for (Integer charge : chargeArray) {
             for (int i = limitLength; i < length; i++) {
-                String bSubstring = sequence.substring(0, i);
-                String ySubstring = sequence.substring(length - i, length);
-                List<String> bUnimodIds = formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i);
-                List<String> yUnimodIds = formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), length - i, length);
+                String leftSubstring = sequence.substring(0, i);
+                String rightSubstring = sequence.substring(length - i, length);
+                List<String> leftUnimodIds = formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i);
+                List<String> rightUnimodIds = formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), length - i, length);
 
-                bySeriesMap.put("a" + i + (c == 1 ? "" : ("^" + c)), formulaCalculator.getMonoMz(bSubstring, ResidueType.AIon, c, 0, 0, false, bUnimodIds));
-                bySeriesMap.put("b" + i + (c == 1 ? "" : ("^" + c)), formulaCalculator.getMonoMz(bSubstring, ResidueType.BIon, c, 0, 0, false, bUnimodIds));
-                bySeriesMap.put("c" + i + (c == 1 ? "" : ("^" + c)), formulaCalculator.getMonoMz(bSubstring, ResidueType.CIon, c, 0, 0, false, bUnimodIds));
-                bySeriesMap.put("x" + i + (c == 1 ? "" : ("^" + c)), formulaCalculator.getMonoMz(ySubstring, ResidueType.XIon, c, 0, 0, false, yUnimodIds));
-                bySeriesMap.put("y" + i + (c == 1 ? "" : ("^" + c)), formulaCalculator.getMonoMz(ySubstring, ResidueType.YIon, c, 0, 0, false, yUnimodIds));
-                bySeriesMap.put("z" + i + (c == 1 ? "" : ("^" + c)), formulaCalculator.getMonoMz(ySubstring, ResidueType.ZIon, c, 0, 0, false, yUnimodIds));
+                String cutInfoA = "a" + i + (charge == 1 ? "" : ("^" + charge));
+                String cutInfoB = "b" + i + (charge == 1 ? "" : ("^" + charge));
+                String cutInfoC = "c" + i + (charge == 1 ? "" : ("^" + charge));
+                String cutInfoX = "x" + i + (charge == 1 ? "" : ("^" + charge));
+                String cutInfoY = "y" + i + (charge == 1 ? "" : ("^" + charge));
+                String cutInfoZ = "z" + i + (charge == 1 ? "" : ("^" + charge));
+
+                fragmentMap.put(cutInfoA, new FragmentInfo(cutInfoA, formulaCalculator.getMonoMz(leftSubstring, ResidueType.AIon, charge, 0, 0, false, leftUnimodIds), charge));
+                fragmentMap.put(cutInfoB, new FragmentInfo(cutInfoB, formulaCalculator.getMonoMz(leftSubstring, ResidueType.BIon, charge, 0, 0, false, leftUnimodIds), charge));
+                fragmentMap.put(cutInfoC, new FragmentInfo(cutInfoC, formulaCalculator.getMonoMz(leftSubstring, ResidueType.CIon, charge, 0, 0, false, leftUnimodIds), charge));
+                fragmentMap.put(cutInfoX, new FragmentInfo(cutInfoX, formulaCalculator.getMonoMz(rightSubstring, ResidueType.XIon, charge, 0, 0, false, rightUnimodIds), charge));
+                fragmentMap.put(cutInfoY, new FragmentInfo(cutInfoY, formulaCalculator.getMonoMz(rightSubstring, ResidueType.YIon, charge, 0, 0, false, rightUnimodIds), charge));
+                fragmentMap.put(cutInfoZ, new FragmentInfo(cutInfoZ, formulaCalculator.getMonoMz(rightSubstring, ResidueType.ZIon, charge, 0, 0, false, rightUnimodIds), charge));
             }
         }
 
-        return bySeriesMap;
+        return fragmentMap;
     }
 
     public double getTheoryMass(HashMap<Integer, String> unimodHashMap, String sequence) {
@@ -273,7 +217,7 @@ public class FragmentFactory {
         if (type.equals(ResidueType.AIon) || type.equals(ResidueType.BIon) || type.equals(ResidueType.CIon)) {
             return originSequence.substring(0, location);
         } else if (type.equals(ResidueType.XIon) || type.equals(ResidueType.YIon) || type.equals(ResidueType.ZIon)) {
-            return originSequence.substring(originSequence.length() - location, originSequence.length());
+            return originSequence.substring(originSequence.length() - location);
         } else if (type.equals(ResidueType.Full)) {
             return originSequence;
         } else {
@@ -293,110 +237,6 @@ public class FragmentFactory {
             logger.error("解析出未识别离子类型:" + type);
             return null;
         }
-    }
-
-    public FragmentResult decoyOverview(String libraryId) {
-        FragmentResult result = new FragmentResult();
-        logger.info("数据库读取数据");
-
-        PeptideQuery query = new PeptideQuery();
-        query.setLibraryId(libraryId);
-        query.setPageSize(MAX_PAGE_SIZE_FOR_FRAGMENT);
-        long totalCount = peptideService.count(query);
-        int totalPage = 1;
-        if (totalCount > MAX_PAGE_SIZE_FOR_FRAGMENT) {
-            totalPage = (int) (totalCount / MAX_PAGE_SIZE_FOR_FRAGMENT) + 1;
-        }
-
-        HashSet<Fragment> targetFragments = new HashSet<>();
-        HashSet<Fragment> decoyFragments = new HashSet<>();
-        int countDecoy = 0;
-        int countTarget = 0;
-
-        for (int i = 1; i <= totalPage; i++) {
-            query.setPageNo(i);
-            ResultDO<List<PeptideDO>> resultTmp = peptideService.getList(query);
-            logger.info("读取第" + i + "批数据,总计" + totalPage + "批");
-            List<PeptideDO> list = resultTmp.getModel();
-
-            for (PeptideDO peptide : list) {
-                for (FragmentInfo fragmentInfo : peptide.getFragmentMap().values()) {
-                    Fragment fragment = getBaseFragment(peptide, fragmentInfo);
-                    if (fragment != null) {
-                        if (peptide.getIsDecoy()) {
-                            countDecoy++;
-                            if (decoyFragments.contains(fragment)) {
-                                fragment.count();
-                            } else {
-                                decoyFragments.add(fragment);
-                            }
-                        } else {
-                            countTarget++;
-                            if (targetFragments.contains(fragment)) {
-                                fragment.count();
-                            } else {
-                                targetFragments.add(fragment);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        logger.info("总计有原始肽段片段:" + targetFragments.size() + "/" + countTarget + "条,占比:" + (double) targetFragments.size() / countTarget);
-        logger.info("总计有伪肽段片段:" + decoyFragments.size() + "/" + countDecoy + "条,占比:" + (double) decoyFragments.size() / countDecoy);
-        logger.info("开始比对");
-
-        HashSet<Fragment> overlapFragments = new HashSet<>();
-        ArrayList<Fragment> targetListTemp = new ArrayList<>(targetFragments);
-        int count = 0;
-        int countForTarget = 0;
-
-        for (Fragment decoy : decoyFragments) {
-            if (targetFragments.contains(decoy)) {
-                countForTarget += targetListTemp.get(targetListTemp.indexOf(decoy)).getCount();
-                overlapFragments.add(decoy);
-                count += decoy.getCount();
-            }
-        }
-
-        Multiset<Integer> countForTargetSet = HashMultiset.create();
-        Multiset<Integer> countForDecoySet = HashMultiset.create();
-        for (Fragment fragment : targetFragments) {
-            countForTargetSet.add(fragment.getCount());
-        }
-
-        for (Fragment fragment : decoyFragments) {
-            countForDecoySet.add(fragment.getCount());
-        }
-
-        for (int i : countForTargetSet.elementSet()) {
-            System.out.println("Target:重复" + i + "次的有" + countForTargetSet.count(i) + "个");
-        }
-        for (int j : countForDecoySet.elementSet()) {
-            System.out.println("Decoy:重复" + j + "次的有" + countForDecoySet.count(j) + "个");
-        }
-
-        Ordering<Fragment> ordering = Ordering.natural();
-
-        ArrayList<Fragment> decoyList = new ArrayList<>(decoyFragments);
-        ArrayList<Fragment> targetList = new ArrayList<>(targetFragments);
-        ArrayList<Fragment> overlapList = new ArrayList<>(overlapFragments);
-
-        logger.info("总计有" + overlapFragments.size() + "个伪肽段片段是重复的,重复了" + count + "次");
-        logger.info("重复的伪肽段片段在Target片段列表中总计出现了" + countForTarget + "次");
-        result.setMsgInfo("总计有原始肽段片段:" + targetFragments.size() + "/" + countTarget + "条,占比:" + (double) targetFragments.size() / countTarget + ";有伪肽段片段:" + decoyFragments.size() + "/" + countDecoy + "条,占比:" + (double) decoyFragments.size() / countDecoy + ";有" + overlapFragments.size() + "个伪肽段片段是重复的,重复了" + count + "次");
-        result.setDecoyList(ordering.sortedCopy(decoyList).subList(0, decoyList.size() > 50 ? 50 : decoyList.size()));
-        result.setTargetList(ordering.sortedCopy(targetList).subList(0, targetList.size() > 50 ? 50 : targetList.size()));
-        result.setOverlapList(ordering.sortedCopy(overlapList).subList(0, overlapList.size() > 50 ? 50 : overlapList.size()));
-        result.setDecoyTotalCount(countDecoy);
-        result.setDecoyUniCount(decoyList.size());
-        result.setTargetTotalCount(countTarget);
-        result.setTargetUniCount(targetList.size());
-
-        logger.info("排序完毕");
-        return result;
-
     }
 
     public List<AminoAcid> parseAminoAcid(String sequence, HashMap<Integer, String> unimodMap) {

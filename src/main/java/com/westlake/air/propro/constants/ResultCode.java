@@ -50,6 +50,7 @@ public enum ResultCode implements Serializable {
     LIBRARY_NOT_EXISTED("LIBRARY_NOT_EXISTED", "指定的库不存在"),
     IRT_LIBRARY_NOT_EXISTED("IRT_LIBRARY_NOT_EXISTED", "指定的iRT库不存在"),
     SEARCH_FRAGMENT_LENGTH_MUST_BIGGER_THAN_3("SEARCH_FRAGMENT_LENGTH_MUST_BIGGER_THAN_3", "搜索的片段长度至少为4"),
+    PEPTIDE_REF_CANNOT_BE_EMPTY("PEPTIDE_REF_CANNOT_BE_EMPTY", "PeptideRef不能为空"),
 
     /**
      * ******

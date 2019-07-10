@@ -227,14 +227,6 @@ public class FragmentFactoryTest extends BaseTest {
     }
 
     @Test
-    public void decoyOverviewTest() {
-        PeptideDO transition = getJsonFromFileTest();
-        FragmentResult result = fragmentFactory.decoyOverview("5b6712012ada5f2dc8de57d7");
-        FragmentResult fragmentResult = new FragmentResult();
-
-    }
-
-    @Test
     public void parseAminoAcidTest() {
         PeptideDO peptideDO = getJsonFromFileTest();
         List<AminoAcid> result = fragmentFactory.parseAminoAcid(peptideDO.getSequence(), peptideDO.getUnimodMap());
@@ -289,13 +281,6 @@ public class FragmentFactoryTest extends BaseTest {
             expect.add(aa);
         }
         assert (result.equals(expect));
-    }
-
-    @Test
-    public void checkTest() {
-        PeptideDO peptideDO = getJsonFromFileTest();
-        List<MzResult> results = fragmentFactory.check(peptideDO.getLibraryId(), null, false);
-
     }
 
 }
