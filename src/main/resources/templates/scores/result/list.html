@@ -108,7 +108,7 @@
 <!--                                            data-target="#m_modal_group" th:data1 = "${analyseDataDO.id}"-->
 <!--                                            th:onclick="queryGroup(this.getAttribute('data1'), false, false)" th:text="#{btn_group_chromatograms}">-->
 <!--                                    </button>-->
-                                    <a th:if="${!analyseDataDO.isDecoy}" target="_blank" th:href="@{/analyse/consultation(dataId=${analyseDataDO.id},allCutInfo=true)}"
+                                    <a th:if="${!analyseDataDO.isDecoy}" target="_blank" th:href="@{/analyse/clinic(dataId=${analyseDataDO.id},onlyLib=true)}"
                                        class="btn btn-danger btn-sm" th:text="#{btn_peptide_clinic}"></a>
                                 </td>
                             </tr>
