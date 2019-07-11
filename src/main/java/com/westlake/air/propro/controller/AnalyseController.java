@@ -403,10 +403,14 @@ public class AnalyseController extends BaseController {
                 } else {
                     buildPeptide.setLibraryId(libraryPeptide.getLibraryId());
                     buildPeptide.setLibraryName(libraryPeptide.getLibraryName());
+                    buildPeptide.setRt(libraryPeptide.getRt());
                     for (FragmentInfo fi : libraryPeptide.getFragmentMap().values()) {
                         FragmentInfo buildFi = buildPeptide.getFragmentMap().get(fi.getCutInfo());
-                        buildFi.setIntensity(fi.getIntensity());
-                        libraryCutInfos.add(fi.getCutInfo());
+                        if(buildFi != null){
+                            buildFi.setIntensity(fi.getIntensity());
+                            libraryCutInfos.add(fi.getCutInfo());
+                        }
+
                     }
                 }
             }
