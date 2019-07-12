@@ -73,6 +73,8 @@ public class LumsParams {
     //用于PRM, <precursor mz, [rt start, rt end]>
     HashMap<Float, Float[]> rtRangeMap;
 
+    HashMap<String, Object> resultMap = new HashMap<>();
+
     public LumsParams(){
         scoreTypes = ScoreType.getAllTypesName();
     }

@@ -48,6 +48,36 @@ public class Irt {
     SwathIndexService swathIndexService;
 
     /**
+     * 卷积并且求出iRT
+     *
+     * @param experimentDO
+     * @param library
+     * @param mzExtractWindow
+     * @param sigmaSpacing
+     * @return
+     */
+    public ResultDO<IrtResult> convAndIrt(ExperimentDO experimentDO, LibraryDO library, Float mzExtractWindow, SigmaSpacing sigmaSpacing) {
+        try {
+            List<AnalyseDataDO> dataList = extractIrt(experimentDO, library, mzExtractWindow);
+            if (dataList == null) {
+                return ResultDO.buildError(ResultCode.IRT_EXCEPTION);
+            }
+            ResultDO<IrtResult> resultDO = new ResultDO<>(false);
+            try {
+                resultDO = scoreService.computeIRt(dataList, library, sigmaSpacing);
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                resultDO.setMsgInfo(e.getMessage());
+            }
+            experimentDO.setIrtResult(resultDO.getModel());
+            return resultDO;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
      * 卷积iRT校准库的数据
      *
      * @param exp
@@ -91,9 +121,9 @@ public class Irt {
                 }
 
                 //Step4.卷积并且存储数据,如果传入的库是标准库,那么使用采样的方式进行卷积
-                if(library.getType().equals(LibraryDO.TYPE_IRT)){
+                if (library.getType().equals(LibraryDO.TYPE_IRT)) {
                     extractor.extractForIrt(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
-                }else{
+                } else {
                     extractor.randomFetchForIrt(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
                 }
             }
@@ -106,42 +136,5 @@ public class Irt {
         return finalList;
     }
 
-    /**
-     * 卷积并且求出iRT
-     *
-     * @param experimentDO
-     * @param library
-     * @param mzExtractWindow
-     * @param sigmaSpacing
-     * @return
-     */
-    public ResultDO<IrtResult> convAndIrt(ExperimentDO experimentDO, LibraryDO library, Float mzExtractWindow, SigmaSpacing sigmaSpacing) {
-        try {
-            logger.info("开始卷积数据");
-            long start = System.currentTimeMillis();
-            List<AnalyseDataDO> dataList = extractIrt(experimentDO, library, mzExtractWindow);
-            if (dataList == null) {
-                return ResultDO.buildError(ResultCode.IRT_EXCEPTION);
-            }
-            logger.info("卷积完毕,耗时:" + (System.currentTimeMillis() - start));
-            start = System.currentTimeMillis();
-            ResultDO<IrtResult> resultDO = new ResultDO<>(false);
-            try {
-                resultDO = scoreService.computeIRt(dataList, library, sigmaSpacing);
-            } catch (Exception e) {
-                logger.error(e.getMessage());
-                resultDO.setMsgInfo(e.getMessage());
-            }
-            logger.info("计算完毕,耗时:" + (System.currentTimeMillis() - start));
 
-            if (resultDO.isFailed()) {
-                return resultDO;
-            }
-            experimentDO.setIrtResult(resultDO.getModel());
-            return resultDO;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 }

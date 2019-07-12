@@ -28,4 +28,5 @@ public interface TaskService {
     ResultDO<TaskDO> getById(String id);
 
     ResultDO doTask(TaskTemplate taskTemplate);
+
 }

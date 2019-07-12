@@ -114,6 +114,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/instances", "anon");
         filterChainDefinitionMap.put("/actuator/**", "anon");
         filterChainDefinitionMap.put("/login/**", "anon");
+        filterChainDefinitionMap.put("/test/**", "anon");
 
         filterChainDefinitionMap.put("/**", "user");//user允许 记住我和授权用户 访问，但在进行下单和支付时建议使用authc
 
