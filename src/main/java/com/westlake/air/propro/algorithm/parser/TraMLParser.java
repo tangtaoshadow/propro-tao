@@ -208,7 +208,6 @@ public class TraMLParser extends BaseLibraryParser {
     @Override
     public ResultDO selectiveParseAndInsert(InputStream in, LibraryDO library, HashSet<String> selectedPepSet, boolean selectBySequence, TaskDO taskDO) {
         TraML traML = parse(in);
-        //TODO withCharge, isSelected;
         HashMap<String, Peptide> peptideMap = makePeptideMap(traML.getCompoundList().getPeptideList());
         ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
         int selectedCount = selectedPepSet.size();
@@ -228,7 +227,7 @@ public class TraMLParser extends BaseLibraryParser {
                 for (String pep: selectedPepSet){
                     if (withCharge){
                         selectedSeqSet.add(removeUnimod(pep.split("_")[0]));
-                    }else {
+                    } else {
                         selectedSeqSet.add(removeUnimod(pep));
                     }
                 }

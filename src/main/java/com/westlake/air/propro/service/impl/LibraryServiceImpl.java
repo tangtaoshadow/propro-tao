@@ -169,7 +169,7 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public ResultDO parseAndInsert(LibraryDO library, InputStream libFileStream, String fileName, InputStream fastaFileStream, InputStream prmFileStream, String libraryId, TaskDO taskDO) {
+    public ResultDO parseAndInsert(LibraryDO library, InputStream libFileStream, String fileName, InputStream prmFileStream, TaskDO taskDO) {
 
         ResultDO resultDO;
 
@@ -239,9 +239,9 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public void uploadFile(LibraryDO library, InputStream libFileStream, String fileName, InputStream fastaFileStream, InputStream prmFileStream, String libraryId, TaskDO taskDO) {
+    public void uploadFile(LibraryDO library, InputStream libFileStream, String fileName, InputStream prmFileStream, TaskDO taskDO) {
         //先Parse文件,再作数据库的操作
-        ResultDO result = parseAndInsert(library, libFileStream, fileName, fastaFileStream, prmFileStream, libraryId, taskDO);
+        ResultDO result = parseAndInsert(library, libFileStream, fileName, prmFileStream, taskDO);
         if (result.getErrorList() != null) {
             if (result.getErrorList().size() > errorListNumberLimit) {
                 taskDO.addLog("解析错误,错误的条数过多,这边只显示" + errorListNumberLimit + "条错误信息");

@@ -147,12 +147,6 @@ public class LibraryController extends BaseController {
 
     @RequestMapping(value = "/create")
     String create(Model model) {
-        List<LibraryDO> libraryDOList = getLibraryList(1, true);
-        LibraryDO libraryDO = new LibraryDO();
-        libraryDO.setName("");
-        libraryDO.setId("");
-        libraryDOList.add(0, libraryDO);
-        model.addAttribute("libraries", libraryDOList);
         return "library/create";
     }
 
@@ -163,8 +157,6 @@ public class LibraryController extends BaseController {
                @RequestParam(value = "description", required = false) String description,
                @RequestParam(value = "libFile", required = true) MultipartFile libFile,
                @RequestParam(value = "prmFile", required = false) MultipartFile prmFile,
-               @RequestParam(value = "fastaFile", required = false) MultipartFile fastaFile,
-               @RequestParam(value = "libraryId", required = false) String libraryId,
                RedirectAttributes redirectAttributes) {
 
         if (libFile == null || libFile.getOriginalFilename() == null || libFile.getOriginalFilename().isEmpty()) {
@@ -191,12 +183,8 @@ public class LibraryController extends BaseController {
             if (!prmFile.isEmpty()) {
                 prmFileStream = prmFile.getInputStream();
             }
-            InputStream fastaFileStream = null;
-            if (!fastaFile.isEmpty()) {
-                fastaFileStream = fastaFile.getInputStream();
-            }
 
-            libraryTask.saveLibraryTask(library, libFileStream, libFile.getOriginalFilename(), fastaFileStream, prmFileStream, libraryId, taskDO);
+            libraryTask.saveLibraryTask(library, libFileStream, libFile.getOriginalFilename(), prmFileStream, taskDO);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -219,19 +207,15 @@ public class LibraryController extends BaseController {
     }
 
     @RequestMapping(value = "/edit/{id}")
-    String edit(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+    String edit(Model model, @PathVariable("id") String id,
+                RedirectAttributes redirectAttributes) {
+
         LibraryDO library = libraryService.getById(id);
         if (library == null) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.LIBRARY_NOT_EXISTED.getMessage());
             return "redirect:/library/list";
         } else {
             PermissionUtil.check(library);
-            List<LibraryDO> libraryDOList = getLibraryList(1, false);
-            LibraryDO libraryDO = new LibraryDO();
-            libraryDO.setName("");
-            libraryDO.setId("");
-            libraryDOList.add(0, libraryDO);
-            model.addAttribute("libraries", libraryDOList);
             model.addAttribute("library", library);
             return "library/edit";
         }
@@ -264,11 +248,8 @@ public class LibraryController extends BaseController {
                   @RequestParam(value = "name") String name,
                   @RequestParam(value = "type") Integer type,
                   @RequestParam(value = "description") String description,
-                  @RequestParam(value = "justReal", required = false) boolean justReal,
                   @RequestParam(value = "libFile") MultipartFile libFile,
                   @RequestParam(value = "prmFile", required = false) MultipartFile prmFile,
-                  @RequestParam(value = "fastaFile", required = false) MultipartFile fastaFile,
-                  @RequestParam(value = "libraryId", required = false) String libraryId,
                   RedirectAttributes redirectAttributes) {
 
         String redirectListUrl = null;
@@ -307,12 +288,8 @@ public class LibraryController extends BaseController {
             if (!prmFile.isEmpty()) {
                 prmFileStream = prmFile.getInputStream();
             }
-            InputStream fastaFileStream = null;
-            if (!prmFile.isEmpty()) {
-                fastaFileStream = fastaFile.getInputStream();
-            }
 
-            libraryTask.saveLibraryTask(library, libFileStream, libFile.getOriginalFilename(), fastaFileStream, prmFileStream, libraryId, taskDO);
+            libraryTask.saveLibraryTask(library, libFileStream, libFile.getOriginalFilename(), prmFileStream, taskDO);
         } catch (IOException e) {
             e.printStackTrace();
         }

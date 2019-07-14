@@ -69,6 +69,7 @@ public class Extractor {
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile((File) checkResult.getModel(), "r");
+            //核心函数在这里
             extract(raf, overviewDO, lumsParams);
         } catch (Exception e) {
             e.printStackTrace();
@@ -293,6 +294,7 @@ public class Extractor {
         //获取所有MS2的窗口
         List<SwathIndexDO> swathIndexList = swathIndexService.getAll(query);
         HashMap<Float, Float[]> rtRangeMap = null;
+
         if (lumsParams.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM)) {
             rtRangeMap = experimentService.getPrmRtWindowMap(swathIndexList);
             lumsParams.setRtRangeMap(rtRangeMap);

@@ -66,7 +66,12 @@ public class ChromatogramPicker {
                     signalToNoise[rightIndex + 1] >= Constants.SIGNAL_TO_NOISE_LIMIT) {
                 rightIndex++;
             }
-            ionPeakList.add(new IonPeak(integratePeaks(intensityArray, leftIndex, rightIndex), leftIndex, rightIndex, closestPeakIndex, i));
+
+            double intensity = integratePeaks(intensityArray, leftIndex, rightIndex);
+            if (intensity == 0){
+                continue;
+            }
+            ionPeakList.add(new IonPeak(intensity, leftIndex, rightIndex, closestPeakIndex, i));
         }
 
         return ionPeakList;

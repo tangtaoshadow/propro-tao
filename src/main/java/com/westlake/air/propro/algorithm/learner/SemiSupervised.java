@@ -147,16 +147,23 @@ public class SemiSupervised {
 
     private TrainPeaks selectFirstTrainPeaks(TrainData trainData, AirusParams airusParams){
         List<SimpleFeatureScores> decoyPeaks = new ArrayList<>();
+        List<String> scoreTypes = airusParams.getScoreTypes();
         for (SimpleScores simpleScores: trainData.getDecoys()){
+            FeatureScores topDecoy = null;
+            double maxMainScore = -Double.MAX_VALUE;
             for (FeatureScores featureScores : simpleScores.getFeatureScoresList()){
-                SimpleFeatureScores simpleFeatureScores = new SimpleFeatureScores();
-                simpleFeatureScores.setScores(featureScores.getScores());
-                decoyPeaks.add(simpleFeatureScores);
+                double mainScore = featureScores.get(ScoreType.MainScore.getTypeName(), scoreTypes);
+                if (mainScore > maxMainScore){
+                    maxMainScore = mainScore;
+                    topDecoy = featureScores;
+                }
             }
+            SimpleFeatureScores simpleFeatureScores = new SimpleFeatureScores();
+            simpleFeatureScores.setScores(topDecoy.getScores());
+            decoyPeaks.add(simpleFeatureScores);
         }
         TrainPeaks trainPeaks = new TrainPeaks();
         trainPeaks.setTopDecoys(decoyPeaks);
-        List<String> scoreTypes = airusParams.getScoreTypes();
 
         SimpleFeatureScores bestTargetScore = new SimpleFeatureScores(airusParams.getScoreTypes().size());
         bestTargetScore.put(ScoreType.XcorrShape.getTypeName(), 1d, scoreTypes);
