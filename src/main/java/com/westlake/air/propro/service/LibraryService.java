@@ -38,9 +38,9 @@ public interface LibraryService {
 
     String getNameById(String id);
 
-    ResultDO parseAndInsert(LibraryDO library, InputStream in, String fileName, InputStream fastaFileStream, InputStream prmFileStream, String libraryId, TaskDO taskDO);
+    ResultDO parseAndInsert(LibraryDO library, InputStream in, String fileName, InputStream prmFileStream, TaskDO taskDO);
 
     void countAndUpdateForLibrary(LibraryDO library);
 
-    void uploadFile(LibraryDO library, InputStream libFileStream, String fileName, InputStream fastaFileStream, InputStream prmFileStream, String libraryId, TaskDO taskDO);
+    void uploadFile(LibraryDO library, InputStream libFileStream, String fileName, InputStream prmFileStream, TaskDO taskDO);
 }

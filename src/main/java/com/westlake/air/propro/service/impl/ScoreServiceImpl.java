@@ -237,9 +237,6 @@ public class ScoreServiceImpl implements ScoreService {
 
             if (input.getScoreTypes().contains(ScoreType.IntensityScore.getTypeName())) {
                 libraryScorer.calculateIntensityScore(peakGroupFeature, featureScores, input.getScoreTypes());
-                if (input.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM) && featureScores.get(ScoreType.IntensityScore.getTypeName(), input.getScoreTypes()) < 0.1d){
-                    continue;
-                }
             }
 
             libraryScorer.calculateLibraryScores(peakGroupFeature, normedLibIntMap, featureScores, input.getScoreTypes());

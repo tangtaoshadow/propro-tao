@@ -157,6 +157,9 @@ public class FragmentFactory {
             AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCode));
             totalMass += aa.getMonoIsotopicMass();
         }
+        if (unimodHashMap == null){
+            return totalMass;
+        }
         for (String unimodCode : unimodHashMap.values()) {
             Unimod unimod = unimodDAO.getUnimod(unimodCode);
             if (unimod != null) {

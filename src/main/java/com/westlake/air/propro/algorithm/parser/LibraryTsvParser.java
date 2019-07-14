@@ -54,8 +54,9 @@ public class LibraryTsvParser extends BaseLibraryParser {
     private static String Detecting = "detecting_transition";
     private static String Identifying = "identifying_transition";
     private static String Quantifying = "quantifying_transition";
+
     @Override
-    public ResultDO parseAndInsert(InputStream in, LibraryDO library, TaskDO taskDO){
+    public ResultDO parseAndInsert(InputStream in, LibraryDO library, TaskDO taskDO) {
 
         ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
         try {
@@ -100,7 +101,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
     }
 
     @Override
-    public ResultDO selectiveParseAndInsert(InputStream in, LibraryDO library, HashSet<String> selectedPepSet, boolean selectBySequence, TaskDO taskDO){
+    public ResultDO selectiveParseAndInsert(InputStream in, LibraryDO library, HashSet<String> selectedPepSet, boolean selectBySequence, TaskDO taskDO) {
 
         ResultDO<List<PeptideDO>> tranResult = new ResultDO<>(true);
         try {
@@ -125,12 +126,12 @@ public class LibraryTsvParser extends BaseLibraryParser {
             HashMap<String, PeptideDO> map = new HashMap<>();
 
             boolean withCharge = new ArrayList<>(selectedPepSet).get(0).contains("_");
-            if (selectBySequence){
+            if (selectBySequence) {
                 HashSet<String> selectedSeqSet = new HashSet<>();
-                for (String pep: selectedPepSet){
-                    if (withCharge){
+                for (String pep : selectedPepSet) {
+                    if (withCharge) {
                         selectedSeqSet.add(removeUnimod(pep.split("_")[0]));
-                    }else {
+                    } else {
                         selectedSeqSet.add(removeUnimod(pep));
                     }
                 }
@@ -152,11 +153,11 @@ public class LibraryTsvParser extends BaseLibraryParser {
 
             //删除命中的部分, 得到未命中的Set
             int selectedCount = selectedPepSet.size();
-            if (withCharge){
+            if (withCharge) {
                 for (PeptideDO peptideDO : map.values()) {
                     selectedPepSet.remove(peptideDO.getPeptideRef());
                 }
-            }else {
+            } else {
                 for (PeptideDO peptideDO : map.values()) {
                     selectedPepSet.remove(peptideDO.getFullName());
                 }
@@ -173,6 +174,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
         }
         return tranResult;
     }
+
     /**
      * 从TSV文件中解析出每一行数据
      *
@@ -198,6 +200,9 @@ public class LibraryTsvParser extends BaseLibraryParser {
         fi.setIntensity(Double.parseDouble(row[columnMap.get(ProductIonIntensity)]));
         peptideDO.setSequence(row[columnMap.get(PeptideSequence)]);
         peptideDO.setProteinName(row[columnMap.get(ProteinName)].replace("DECOY_", ""));
+        if (peptideDO.getProteinName().toLowerCase().contains("irt")) {
+            peptideDO.setProteinName("iRT");
+        }
 
         String annotations = row[columnMap.get(Annotation)].replaceAll("\"", "");
         fi.setAnnotations(annotations);
@@ -262,7 +267,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
             if (!columnMap.containsKey("peptide")) {
                 return ResultDO.buildError(ResultCode.PRM_FILE_FORMAT_NOT_SUPPORTED);
             }
-
+            boolean withCharge = columnMap.containsKey("charge");
             HashMap<String, PeptideDO> prmPepMap = new HashMap<>();
             while ((line = reader.readLine()) != null) {
                 columns = line.split(",");
@@ -272,24 +277,23 @@ public class LibraryTsvParser extends BaseLibraryParser {
                         .replace("[+57.021464]", "(UniMod:4)")
                         .replace("[+57]", "(UniMod:4)")
                         .replace("[+15.994915]", "(UniMod:35)")
-                        .replace(" ","");
-                if (prmPepMap.containsKey(modSequence)) {
-                    continue;
-                }
+                        .replace(" ", "");
+
                 PeptideDO peptideDO = new PeptideDO();
 //                peptideDO.setPrmRtStart(Double.parseDouble(columns[columnMap.get("start[min]")]));
-                if (columnMap.containsKey("rt[min]")){
+                if (columnMap.containsKey("rt[min]")) {
                     peptideDO.setPrmRt(Double.parseDouble(columns[columnMap.get("rt[min]")]));
                 }
                 peptideDO.setIsDecoy(false);
                 peptideDO.setFullName(modSequence);
                 peptideDO.setSequence(removeUnimod(modSequence));
                 peptideDO.setTargetSequence(peptideDO.getSequence());
-                if (columnMap.containsKey("charge")){
+                peptideDO.setUnimodMap(parseModification(modSequence));
+                if (withCharge) {
                     peptideDO.setCharge(Integer.parseInt(columns[columnMap.get("charge")]));
                     peptideDO.setPeptideRef(modSequence + "_" + peptideDO.getCharge());
-                    prmPepMap.put(peptideDO.getPeptideRef() , peptideDO);
-                }else {
+                    prmPepMap.put(peptideDO.getPeptideRef(), peptideDO);
+                } else {
                     prmPepMap.put(peptideDO.getFullName(), peptideDO);
                 }
             }
@@ -304,13 +308,13 @@ public class LibraryTsvParser extends BaseLibraryParser {
         String[] row = line.split("\t");
         String fullName = row[columnMap.get(FullUniModPeptideName)];
         String charge = row[columnMap.get(PrecursorCharge)];
-        if (selectBySequence){
+        if (selectBySequence) {
             String sequence = row[columnMap.get(PeptideSequence)];
             return peptideSet.contains(sequence);
         }
-        if (withCharge){
+        if (withCharge) {
             return peptideSet.contains(fullName + "_" + charge);
-        }else {
+        } else {
             return peptideSet.contains(fullName);
         }
     }
