@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html th:with="url='https://wias.oss-cn-shanghai.aliyuncs.com'" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.w3.org/1999/xhtml" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout">
-<!--<html th:with="url='http://localhost'" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.w3.org/1999/xhtml" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout">-->
+<!--<html th:with="url='https://wias.oss-cn-shanghai.aliyuncs.com'" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.w3.org/1999/xhtml" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout">-->
+<html th:with="url='http://localhost'" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.w3.org/1999/xhtml" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout">
 <html xmlns:th="http://www.thymeleaf.org">
 	<!-- begin::Head -->
 	<head>
@@ -77,35 +77,32 @@
                                         <span></span>
                                     </label>
                                 </div>
-<!--                                <div class="col m&#45;&#45;align-right">-->
-<!--                                    <a href="javascript:;" id="m_login_forget_password" class="m-link">-->
-<!--                                        Forget Password ?-->
-<!--                                    </a>-->
-<!--                                </div>-->
-                            </div>
-                            <div class="m-dropdown m-dropdown--inline m-dropdown--small m-dropdown--arrow m-dropdown--align-right" data-dropdown-toggle="hover" aria-expanded="true">
-                                <span href="#" class="m-dropdown__toggle btn btn-success dropdown-toggle change" th:text="#{btn_change_lang}"></span>
-                                <div class="m-dropdown__wrapper">
-                                    <span class="m-dropdown__arrow m-dropdown__arrow--right"></span>
-                                    <div class="m-dropdown__inner">
-                                        <div class="m-dropdown__body">
-                                            <div class="m-dropdown__content">
-                                                <ul class="m-nav">
-                                                    <li class="m-nav__item">
-                                                        <a href="#" class="m-nav__link Chinese" >
+                                <div class="m--align-right col">
+                                    <div class="m-dropdown m-dropdown--inline m-dropdown--small m-dropdown--arrow m-dropdown--align-right" data-dropdown-toggle="hover" aria-expanded="true">
+                                        <span href="#" class="m-dropdown__toggle btn btn-success dropdown-toggle change" th:text="#{btn_change_lang}"></span>
+                                        <div class="m-dropdown__wrapper">
+                                            <span class="m-dropdown__arrow m-dropdown__arrow--right"></span>
+                                            <div class="m-dropdown__inner">
+                                                <div class="m-dropdown__body">
+                                                    <div class="m-dropdown__content">
+                                                        <ul class="m-nav">
+                                                            <li class="m-nav__item">
+                                                                <a href="#" class="m-nav__link Chinese" >
                                                             <span class="m-nav__link-text">
 											Simple Chinese-简体中文
 										                </span>
-                                                        </a>
-                                                    </li>
-                                                    <li class="m-nav__item">
-                                                        <a href="#" class="m-nav__link English">
+                                                                </a>
+                                                            </li>
+                                                            <li class="m-nav__item">
+                                                                <a href="#" class="m-nav__link English">
                                                             <span class="m-nav__link-text">
 											English-英文
 										</span>
-                                                        </a>
-                                                    </li>
-                                                </ul>
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

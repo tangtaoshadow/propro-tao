@@ -8,13 +8,6 @@ var change=function () {
     console.log("已经执行change");
     langCh.attr("href",url+"?"+"lang=ch");
     langEn.attr("href",url+"?"+"lang=en");
-    // var changeB=function () {
-    //     var text=$(this).text();
-    //     $(this).text(text);
-    //     return false
-    // };
-    // langCh.on("click",changeB);
-    // langEn.on("click", changeB);
 };
 changeBtn.hover(change);
 
@@ -26,15 +19,14 @@ var highPower=$("#m_accordion_1_item_1_head");
 var icon=$("#icon");
 var newAdd=function () {
     var changeIcon=function () {
-        if(icon.attr("class").indexOf("fa-chevron-down")<0){
-            icon.removeClass("fa-chevron-up");
-            icon.addClass("fa-chevron-down");
-        }else{
-            icon.removeClass("fa-chevron-down");
-            icon.addClass("fa-chevron-up");
-        }
+            if(icon.attr("class").indexOf("fa-chevron-down")<0){
+                icon.removeClass("fa-chevron-up");
+                icon.addClass("fa-chevron-down");
+            }else{
+                icon.removeClass("fa-chevron-down");
+                icon.addClass("fa-chevron-up");
+            }
     };
-    //high level choose end
     return {
         init:function () {
             changeIcon();
@@ -44,4 +36,12 @@ var newAdd=function () {
 }();
 highPower.click(function() {
     newAdd.init();
+});
+////high level choose end
+
+//another button  begin
+var form=$(".m-form").eq(0);
+var first_button=$("#first-button");
+first_button.on("click",function () {
+    form.submit();
 });

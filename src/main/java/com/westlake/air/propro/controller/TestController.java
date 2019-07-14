@@ -87,22 +87,42 @@ public class TestController extends BaseController {
     //计算iRT
     @RequestMapping("test2")
     @ResponseBody
-    String test2(Model model, RedirectAttributes redirectAttributes) {
-        List<ExperimentDO> exps = experimentService.getAllByProjectName("SGS");
-        exps.forEach(exp -> {
-            exp.setOwnerName("lms");
-            experimentService.update(exp);
-        });
-        return "success";
+    int test2(Model model, RedirectAttributes redirectAttributes) {
+        List<PeptideDO> peptides = peptideService.getAllByLibraryId("5c754e9ddfdfdd68309f0fce");
+        List<String> realList = new ArrayList<>();
+
+        HashMap<String, PeptideDO> targetMap = new HashMap<>();
+        HashMap<String, PeptideDO> decoyMap = new HashMap<>();
+        for (PeptideDO pep : peptides) {
+            if (!pep.getIsDecoy()) {
+                targetMap.put(pep.getPeptideRef(), pep);
+            } else {
+                decoyMap.put(pep.getPeptideRef(), pep);
+            }
+        }
+
+        int count = 0;
+        for (Map.Entry<String, PeptideDO> entry : targetMap.entrySet()) {
+            char[] target = entry.getValue().getSequence().toCharArray();
+            char[] decoy = decoyMap.get(entry.getKey()).getSequence().toCharArray();
+            for (int i = 0; i < target.length; i++) {
+                if(target[i] == decoy[i]){
+                    count++;
+                }
+            }
+        }
+        return count-targetMap.size();
     }
 
     @RequestMapping("test6")
     @ResponseBody
-    String test6(Model model, RedirectAttributes redirectAttributes) throws IOException {
-        String jsonTest = "{\"start\": 482.14798,\"end\": 483.348,\"interval\": 1.20001221}";
-        HashMap test = JSONObject.parseObject(jsonTest, HashMap.class);
-        System.out.println(test.size());
-        return null;
+    List<String> test6(Model model, RedirectAttributes redirectAttributes) throws IOException {
+        List<PeptideDO> peptides = peptideService.getAllByLibraryIdAndIsDecoy("5c754e9ddfdfdd68309f0fce", false);
+        List<String> realList = new ArrayList<>();
+        for(PeptideDO peptide : peptides){
+            realList.add(peptide.getSequence());
+        }
+        return realList;
     }
 
     @RequestMapping("hyeTest")
@@ -352,7 +372,7 @@ public class TestController extends BaseController {
 
     @RequestMapping("compare")
     @ResponseBody
-    String compareTest(){
+    String compareTest() {
 //        String analyseOverviewId = "5d087c33e24d2e62a82055a3";
 //        String filePath = "P:\\data\\HCC_sciex\\pyprophet\\D20181207yix_HCC_SW_T_46A_with_dscore_filtered.tsv";
 //        HashSet<String> result = resultComparator.getFileOnlyPepRef(analyseOverviewId, filePath);
@@ -374,7 +394,7 @@ public class TestController extends BaseController {
 
     @RequestMapping("compareRep")
     @ResponseBody
-    String compareRepTest(){
+    String compareRepTest() {
 //        String projectId1 = "5d08705fe0073c9b70faff6a";
 //        String filePath1 = "P:\\data\\HCC_QE3\\HCC_20190106_dia_os_peptides_matrix.tsv";
 //        resultComparator.compareReplicate(projectId1, filePath1, "C20181210yix_HCC_DIA_T_17A", "C20181218yix_HCC_DIA_T_17B");
@@ -394,7 +414,7 @@ public class TestController extends BaseController {
 
     @RequestMapping("silac")
     @ResponseBody
-    String silacTest(){
+    String silacTest() {
         String overviewId = "5d18e4341fb7212da56b31f1";
         String filePath = "P:\\data\\SILAC_QE\\F20190530liangx_SILAC_K562_DIA_LHtitra1_1_allFrag_with_dscore_filtered.csv";
         resultCompareService.printSilacResults(overviewId, filePath);
@@ -403,11 +423,11 @@ public class TestController extends BaseController {
 
     @RequestMapping("sequence")
     @ResponseBody
-    String getSequenceNum(){
+    String getSequenceNum() {
         String libraryId = "5d08739ee0073c9b70042eb5";
         List<PeptideDO> peptideDOList = peptideService.getAllByLibraryIdAndIsDecoy(libraryId, false);
         HashSet<String> sequenceSet = new HashSet<>();
-        for (PeptideDO peptideDO: peptideDOList){
+        for (PeptideDO peptideDO : peptideDOList) {
             sequenceSet.add(peptideDO.getSequence());
         }
         System.out.println(sequenceSet.size());
@@ -416,27 +436,27 @@ public class TestController extends BaseController {
 
     @RequestMapping("libconfirm")
     @ResponseBody
-    String libConfirmTest(){
+    String libConfirmTest() {
         String filePath = "P:\\data\\HCC_sciex\\HCC_20190114_swath_os_peptides_matrix.tsv";
         String libraryId = "5d08739ee0073c9b70042eb5";
         List<PeptideDO> peptideDOList = peptideService.getAllByLibraryIdAndIsDecoy(libraryId, false);
         HashSet<String> libPepRefSet = new HashSet<>();
-        for (PeptideDO peptideDO: peptideDOList){
+        for (PeptideDO peptideDO : peptideDOList) {
             libPepRefSet.add(peptideDO.getPeptideRef());
         }
         HashSet<String> filePepRefSet = new HashSet<>();
-        try{
+        try {
             TableFile ppFile = FileUtil.readTableFile(filePath);
             List<String[]> fileData = ppFile.getFileData();
-            for (String[] line: fileData){
+            for (String[] line : fileData) {
                 String[] pepInfo = line[0].split("_");
-                filePepRefSet.add(pepInfo[1]+"_"+pepInfo[2]);
+                filePepRefSet.add(pepInfo[1] + "_" + pepInfo[2]);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        for (String pepRef: filePepRefSet){
-            if (!libPepRefSet.contains(pepRef)){
+        for (String pepRef : filePepRefSet) {
+            if (!libPepRefSet.contains(pepRef)) {
                 System.out.println(pepRef);
             }
         }
@@ -445,11 +465,11 @@ public class TestController extends BaseController {
 
     @RequestMapping("distribution")
     @ResponseBody
-    String distributionTest(){
+    String distributionTest() {
         String analyseOverviewId = "5cfe7adee0073c2fd07def50";
 //        String scoreType = ScoreType.WeightedTotalScore.getTypeName();
         AnalyseOverviewDO overviewResult = analyseOverviewService.getById(analyseOverviewId).getModel();
-        HashMap<String,Double> weightsMap = overviewResult.getWeights();
+        HashMap<String, Double> weightsMap = overviewResult.getWeights();
         AnalyseDataQuery query = new AnalyseDataQuery();
         query.setOverviewId(analyseOverviewId);
         query.setIsDecoy(false);
@@ -464,26 +484,26 @@ public class TestController extends BaseController {
         intensitySet.add(ScoreType.LibraryDotprod.getTypeName());
         intensitySet.add(ScoreType.LibraryRootmeansquare.getTypeName());
         intensitySet.add(ScoreType.LibraryCorr.getTypeName());
-        for (AnalyseDataDO analyseDataDO: analyseDataDOList){
-            if (analyseDataDO.getIsDecoy()){
+        for (AnalyseDataDO analyseDataDO : analyseDataDOList) {
+            if (analyseDataDO.getIsDecoy()) {
                 continue;
             }
             List<FeatureScores> featureScoresList = analyseDataDO.getFeatureScoresList();
             boolean isHeavy = analyseDataDO.getPeptideRef().split("_")[0].endsWith("(UniMod:188)");
             double bestRt = analyseDataDO.getBestRt();
-            for (FeatureScores featureScores: featureScoresList){
-                if (featureScores.getRt() == bestRt){
+            for (FeatureScores featureScores : featureScoresList) {
+                if (featureScores.getRt() == bestRt) {
                     double score = 0d;
-                    for (Map.Entry<String,Double> entry: weightsMap.entrySet()){
-                        if (!intensitySet.contains(entry.getKey())){
+                    for (Map.Entry<String, Double> entry : weightsMap.entrySet()) {
+                        if (!intensitySet.contains(entry.getKey())) {
                             continue;
                         }
                         //默认分数不为null
                         score += entry.getValue() * featureScores.get(entry.getKey(), overviewResult.getScoreTypes());
                     }
-                    if (isHeavy){
+                    if (isHeavy) {
                         heavyList.add(score);
-                    }else {
+                    } else {
                         lightList.add(score);
                     }
                 }
@@ -494,11 +514,11 @@ public class TestController extends BaseController {
 
     @RequestMapping("projectMainScore")
     @ResponseBody
-    String projectMainScoreTest(){
+    String projectMainScoreTest() {
         String projectId = "5d1eb9b5e0073c4720e3bfa3";
         List<ExperimentDO> experimentDOList = experimentService.getAllByProjectId(projectId);
         List<Double> scoreList = new ArrayList<>();
-        for (ExperimentDO experimentDO: experimentDOList){
+        for (ExperimentDO experimentDO : experimentDOList) {
             AnalyseOverviewDO analyseOverviewDO = analyseOverviewService.getFirstByExpId(experimentDO.getId()).getModel();
             AnalyseDataQuery query = new AnalyseDataQuery();
             query.addIndentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS);
@@ -506,20 +526,20 @@ public class TestController extends BaseController {
             query.setOverviewId(analyseOverviewDO.getId());
             List<AnalyseDataDO> dataDOList = analyseDataService.getAll(query);
             int index = 0;
-            for (int i=0; i<analyseOverviewDO.getScoreTypes().size(); i++){
-                if (analyseOverviewDO.getScoreTypes().get(i).equals(ScoreType.XcorrShape.getTypeName())){
+            for (int i = 0; i < analyseOverviewDO.getScoreTypes().size(); i++) {
+                if (analyseOverviewDO.getScoreTypes().get(i).equals(ScoreType.XcorrShape.getTypeName())) {
                     index = i;
                     break;
                 }
             }
 
-            for (AnalyseDataDO dataDO: dataDOList){
+            for (AnalyseDataDO dataDO : dataDOList) {
                 List<FeatureScores> featureScoresList = dataDO.getFeatureScoresList();
                 Double bestRt = dataDO.getBestRt();
-                for (FeatureScores featureScores: featureScoresList){
-                    if (!featureScores.getRt().equals(bestRt)){
+                for (FeatureScores featureScores : featureScoresList) {
+                    if (!featureScores.getRt().equals(bestRt)) {
                         continue;
-                    }else {
+                    } else {
                         scoreList.add(featureScores.getScores()[index]);
                     }
                 }
