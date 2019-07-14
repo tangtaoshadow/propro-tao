@@ -84,81 +84,6 @@ public class ScoreServiceImpl implements ScoreService {
     SwathIndexService swathIndexService;
 
     @Override
-    public ResultDO<IrtResult> computeIRt(List<AnalyseDataDO> dataList, LibraryDO library, SigmaSpacing sigmaSpacing) throws Exception {
-
-//        PeptideQuery query = new PeptideQuery(library.getId());
-//        if(library.getType().equals(LibraryDO.TYPE_IRT)){
-//            query.setIsDecoy(false);
-//        }
-//        HashMap<String, TargetPeptide> ttMap = peptideService.getTPMap(query);
-
-        List<List<ScoreRtPair>> scoreRtList = new ArrayList<>();
-        List<Double> compoundRt = new ArrayList<>();
-        ResultDO<IrtResult> resultDO = new ResultDO<>();
-        double minGroupRt = Double.MAX_VALUE, maxGroupRt = Double.MIN_VALUE;
-        for (AnalyseDataDO dataDO : dataList) {
-            TargetPeptide tp = peptideService.getTargetPeptideByDataRef(library.getId(), dataDO.getPeptideRef(), dataDO.getIsDecoy());
-            PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(dataDO, tp.buildIntensityMap(), sigmaSpacing);
-            if (!peptideFeature.isFeatureFound()) {
-                continue;
-            }
-            double groupRt = dataDO.getRt();
-            if (groupRt > maxGroupRt){
-                maxGroupRt = groupRt;
-            }
-            if (groupRt < minGroupRt){
-                minGroupRt = groupRt;
-            }
-            List<ScoreRtPair> scoreRtPairs = rtNormalizerScorer.score(peptideFeature.getPeakGroupList(), peptideFeature.getNormedLibIntMap(), groupRt);
-            if (scoreRtPairs.size() == 0){
-                continue;
-            }
-            scoreRtList.add(scoreRtPairs);
-            compoundRt.add(groupRt);
-        }
-
-        List<Pair<Double,Double>> pairs = simpleFindBestFeature(scoreRtList, compoundRt);
-//        List<Pair<Double,Double>> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE);
-//        if (pairsCorrected == null || pairsCorrected.size() < 2) {
-//            logger.error(ResultCode.NOT_ENOUGH_IRT_PEPTIDES.getMessage());
-//            resultDO.setErrorResult(ResultCode.NOT_ENOUGH_IRT_PEPTIDES);
-//            return resultDO;
-//        }
-
-//        SlopeIntercept slopeIntercept = linearFitter.leastSquare(pairsCorrected);
-        double delta = (maxGroupRt - minGroupRt)/30d;
-//        List<Pair<Double,Double>> pairsCorrected = removeOutlierIterative(pairs, Constants.MIN_RSQ, Constants.MIN_COVERAGE, delta);
-        List<Pair<Double,Double>> pairsCorrected = chooseReliablePairs(pairs, delta);
-//        int choosedPointCount = pairsCorrected.size();
-//        if (choosedPointCount <= 3){
-//
-//        }else if (choosedPointCount <= pairs.size()/2){
-//
-//        }
-        System.out.println("choose finish ------------------------");
-        IrtResult irtResult = new IrtResult();
-
-        List<Double[]> selectedList = new ArrayList<>();
-        List<Double[]> unselectedList = new ArrayList<>();
-        for (int i = 0; i < pairs.size(); i++) {
-            if(pairsCorrected.contains(pairs.get(i))){
-                selectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
-            }else{
-                unselectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
-            }
-        }
-        irtResult.setSelectedPairs(selectedList);
-        irtResult.setUnselectedPairs(unselectedList);
-        SlopeIntercept slopeIntercept = linearFitter.proproFit(pairsCorrected, delta);
-        irtResult.setSi(slopeIntercept);
-        resultDO.setSuccess(true);
-        resultDO.setModel(irtResult);
-
-        return resultDO;
-    }
-
-
-    @Override
     public void scoreForOne(AnalyseDataDO dataDO, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input) {
 
         if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() <= peptide.getFragmentMap().size()/2) {
@@ -299,37 +224,6 @@ public class ScoreServiceImpl implements ScoreService {
     }
 
     /**
-     * get rt pairs for every peptideRef
-     *
-     * @param scoresList peptideRef list of List<ScoreRtPair>
-     * @param rt         get from groupsResult.getModel()
-     * @return rt pairs
-     */
-    private List<Pair<Double,Double>> simpleFindBestFeature(List<List<ScoreRtPair>> scoresList, List<Double> rt) {
-
-        List<Pair<Double,Double>> pairs = new ArrayList<>();
-
-        for (int i = 0; i < scoresList.size(); i++) {
-            List<ScoreRtPair> scores = scoresList.get(i);
-            double max = Double.MIN_VALUE;
-            //find max scoreForAll's rt
-            double expRt = 0d;
-            for (int j = 0; j < scores.size(); j++) {
-                if (scores.get(j).getScore() > max) {
-                    max = scores.get(j).getScore();
-                    expRt = scores.get(j).getRt();
-                }
-            }
-            if (Constants.ESTIMATE_BEST_PEPTIDES && max < Constants.OVERALL_QUALITY_CUTOFF) {
-                continue;
-            }
-            Pair<Double,Double> rtPair = Pair.of(rt.get(i), expRt);
-            pairs.add(rtPair);
-        }
-        return pairs;
-    }
-
-    /**
      * 先进行线性拟合，每次从pairs中选取一个residual最大的点丢弃，获得pairsCorrected
      *
      * @param pairs       RTPairs left:TheoryRt right:ExpRt
@@ -356,9 +250,6 @@ public class ScoreServiceImpl implements ScoreService {
             }
             PolynomialCurveFitter fitter = PolynomialCurveFitter.create(1);
             coEff = fitter.fit(obs.toList());
-//            SlopeIntercept slopeIntercept = linearFitter.huberFit(pairs, delta);
-//            coEff[1] = slopeIntercept.getSlope();
-//            coEff[0] = slopeIntercept.getIntercept();
 
             rsq = MathUtil.getRsq(pairs);
             if (rsq < minRsq) {
@@ -416,25 +307,6 @@ public class ScoreServiceImpl implements ScoreService {
             }
         }
         return binFilled >= minBinsFilled;
-    }
-
-
-
-    private List<Pair<Double,Double>> chooseReliablePairs(List<Pair<Double,Double>> rtPairs, double delta) throws Exception {
-        SlopeIntercept slopeIntercept = linearFitter.huberFit(rtPairs, delta);
-        TreeMap<Double, Pair<Double,Double>> errorMap = new TreeMap<>();
-        for (Pair<Double, Double> pair: rtPairs){
-            errorMap.put(Math.abs(pair.getRight() * slopeIntercept.getSlope() + slopeIntercept.getIntercept() - pair.getLeft()), pair);
-        }
-        List<Pair<Double,Double>> sortedPairs = new ArrayList<>(errorMap.values());
-        int cutLine = 2;
-        for (int i = sortedPairs.size(); i > 2; i--){
-            if (MathUtil.getRsq(sortedPairs.subList(0,i)) >= 0.95){
-                cutLine = i;
-                break;
-            }
-        }
-        return sortedPairs.subList(0,cutLine);
     }
 
     private List<FeatureScores> getFilteredScore(List<FeatureScores> featureScoresList, int topN, String scoreName, List<String> scoreTypes){

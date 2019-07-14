@@ -313,7 +313,7 @@ public class ExperimentController extends BaseController {
         input.setXcorrShapeThreshold(shapeScoreThreshold);
         input.setXcorrShapeWeightThreshold(shapeWeightScoreThreshold);
 
-        experimentTask.extract(input, taskDO);
+        experimentTask.extract(taskDO, input);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }
@@ -381,7 +381,7 @@ public class ExperimentController extends BaseController {
 
         LibraryDO lib = libraryService.getById(iRtLibraryId);
 //        LibraryDO lib = libraryService.getById("5d0848fee0073c6ffc69752d");
-        experimentTask.convAndIrt(exps, lib, mzExtractWindow, sigmaSpacing, taskDO);
+        experimentTask.irt(taskDO, lib, exps, mzExtractWindow, sigmaSpacing);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }
@@ -410,7 +410,7 @@ public class ExperimentController extends BaseController {
 
         LibraryDO lib = libraryService.getById(project.getLibraryId());
 //        LibraryDO lib = libraryService.getById("5d0848fee0073c6ffc69752d");
-        experimentTask.convAndIrt(exps, lib, mzExtractWindow, sigmaSpacing, taskDO);
+        experimentTask.irt(taskDO, lib, exps, mzExtractWindow, sigmaSpacing);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }

@@ -287,7 +287,6 @@ public class Extractor {
 
         TaskDO task = lumsParams.getTaskDO();
         //Step1.获取窗口信息.
-        logger.info("获取Swath窗口信息");
         List<WindowRange> rangs = lumsParams.getExperimentDO().getWindowRanges();
         SwathIndexQuery query = new SwathIndexQuery(lumsParams.getExperimentDO().getId(), 2);
 
@@ -299,8 +298,7 @@ public class Extractor {
             lumsParams.setRtRangeMap(rtRangeMap);
         }
 
-        task.addLog("总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
-        taskService.update(task);
+        taskService.update(task, "总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
         //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
         int count = 1;
         try {
@@ -316,9 +314,7 @@ public class Extractor {
                     dataCount += dataList.size();
                 }
                 analyseDataService.insertAll(dataList, false);
-                task.addLog("第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start) / 1000 + "秒");
-                logger.info("第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start) / 1000 + "秒");
-                taskService.update(task);
+                taskService.update(task,"第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start) / 1000 + "秒");
                 count++;
             }
 
