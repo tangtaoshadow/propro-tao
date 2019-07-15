@@ -90,7 +90,7 @@ public class FeatureFinder {
             HashMap<String, Double> ionIntensity = new HashMap<>();
             Double peakGroupInt = 0D;
             double signalToNoiseSum = 0d;
-            for (String cutInfo : peptideSpectrum.getIntensitiesMap().keySet()) {
+            for (String cutInfo : ionPeakParams.keySet()) {
                 Double[] intArray = peptideSpectrum.getIntensitiesMap().get(cutInfo);
                 //离子峰
                 Double[] rasteredInt = new Double[rightIndex - leftIndex + 1];
@@ -191,7 +191,7 @@ public class FeatureFinder {
             HashMap<String, Double> ionIntensity = new HashMap<>();
             Double peakGroupInt = 0D;
             double signalToNoiseSum = 0d;
-            for (String cutInfo : peptideSpectrum.getIntensitiesMap().keySet()) {
+            for (String cutInfo : ionPeakParams.keySet()) {
                 //离子峰
                 Double[] intArray = peptideSpectrum.getIntensitiesMap().get(cutInfo);
                 //设定局部最大值（峰型控制备用）
