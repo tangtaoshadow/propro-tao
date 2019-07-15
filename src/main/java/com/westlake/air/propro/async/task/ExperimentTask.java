@@ -125,6 +125,8 @@ public class ExperimentTask extends BaseTask {
     @Async(value = "extractorExecutor")
     public void irt(TaskDO taskDO, LibraryDO library, List<ExperimentDO> exps, Float mzExtractWindow, SigmaSpacing sigmaSpacing) {
 
+        ConvolutionUtil.totalCount = 0;
+        ConvolutionUtil.batchCount = 0;
         for (ExperimentDO exp : exps) {
             taskService.update(taskDO, "Processing " + exp.getName() + "-" + exp.getId());
 
