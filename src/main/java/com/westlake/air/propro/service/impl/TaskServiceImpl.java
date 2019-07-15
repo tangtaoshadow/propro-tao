@@ -1,12 +1,14 @@
 package com.westlake.air.propro.service.impl;
 
 import com.westlake.air.propro.constants.ResultCode;
+import com.westlake.air.propro.constants.TaskStatus;
 import com.westlake.air.propro.constants.TaskTemplate;
 import com.westlake.air.propro.dao.TaskDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.query.TaskQuery;
 import com.westlake.air.propro.service.TaskService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +78,36 @@ public class TaskServiceImpl implements TaskService {
             logger.warn(e.getMessage());
             return ResultDO.buildError(ResultCode.INSERT_ERROR);
         }
+    }
+
+    @Override
+    public ResultDO update(TaskDO taskDO, String newLog) {
+        logger.info(newLog);
+        taskDO.addLog(newLog);
+        return update(taskDO);
+    }
+
+    @Override
+    public ResultDO update(TaskDO taskDO, String status, String newLog) {
+        if (StringUtils.isNotEmpty(newLog)) {
+            logger.info(newLog);
+            taskDO.addLog(newLog);
+        }
+
+        taskDO.setStatus(status);
+        taskDO.addLog("Task Status:" + status);
+        return update(taskDO);
+    }
+
+    @Override
+    public ResultDO finish(TaskDO taskDO, String status, String newLog) {
+        if (StringUtils.isNotEmpty(newLog)) {
+            taskDO.addLog(newLog);
+        }
+
+        taskDO.finish(status);
+        logger.info("Task完整耗时测试：" + (taskDO.getTotalCost() > 1000 ? (taskDO.getTotalCost() / 1000 + "秒") : (taskDO.getTotalCost() + "毫秒")));
+        return update(taskDO);
     }
 
     @Override

@@ -296,7 +296,7 @@ public class ProjectController extends BaseController {
 
         //支持直接使用标准库进行irt预测,在这里进行库的类型的检测,已进入不同的流程渠道
         LibraryDO lib = libraryService.getById(iRtLibraryId);
-        experimentTask.convAndIrt(expList, lib, mzExtractWindow, sigmaSpacing, taskDO);
+        experimentTask.irt(taskDO, lib, expList, mzExtractWindow, sigmaSpacing);
 
         return "redirect:/task/list";
     }
@@ -480,7 +480,7 @@ public class ProjectController extends BaseController {
 
             input.setXcorrShapeThreshold(shapeScoreThreshold);
             input.setXcorrShapeWeightThreshold(shapeWeightScoreThreshold);
-            experimentTask.extract(input, taskDO);
+            experimentTask.extract(taskDO, input);
         }
 
         if (StringUtils.isNotEmpty(errorInfo)) {

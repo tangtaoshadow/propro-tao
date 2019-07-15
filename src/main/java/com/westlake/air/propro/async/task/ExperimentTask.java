@@ -64,9 +64,8 @@ public class ExperimentTask extends BaseTask {
             taskService.update(taskDO);
         } catch (Exception e) {
             e.printStackTrace();
-            taskDO.addLog("Error:" + e.getMessage());
             taskDO.finish(TaskStatus.FAILED.getName());
-            taskService.update(taskDO);
+            taskService.update(taskDO, "Error:" + e.getMessage());
         }
 
     }
@@ -88,101 +87,56 @@ public class ExperimentTask extends BaseTask {
      * @return
      */
     @Async(value = "extractorExecutor")
-    public void extract(LumsParams lumsParams, TaskDO taskDO) {
-        try {
-            taskDO.start();
-            taskDO.setStatus(TaskStatus.RUNNING.getName());
-            taskService.update(taskDO);
-
-            taskDO.addLog("mz卷积窗口:" + lumsParams.getMzExtractWindow() + ",RT卷积窗口:" + lumsParams.getRtExtractWindow());
-            taskDO.addLog("Sigma:" + lumsParams.getSigmaSpacing().getSigma() + ",Spacing:" + lumsParams.getSigmaSpacing().getSpacing());
-            taskDO.addLog("使用标准库ID:" + lumsParams.getLibrary().getId());
-            taskDO.addLog("Note:" + lumsParams.getNote());
-            taskDO.addLog("使用限制阈值Shape/ShapeWeight:" + lumsParams.getXcorrShapeThreshold() + "/" + lumsParams.getXcorrShapeWeightThreshold());
+    public void extract(TaskDO taskDO, LumsParams lumsParams) {
 
             long start = System.currentTimeMillis();
+            //如果还没有计算irt,先执行计算irt的步骤
             if (lumsParams.getIRtLibrary() != null) {
-                taskDO.addLog("开始卷积IRT校准库并且计算iRT值");
-                taskService.update(taskDO);
-                ResultDO<IrtResult> resultDO = irt.convAndIrt(lumsParams.getExperimentDO(), lumsParams.getIRtLibrary(), lumsParams.getMzExtractWindow(), lumsParams.getSigmaSpacing());
+                taskService.update(taskDO, "开始卷积IRT校准库并且计算iRT值");
+                ResultDO<IrtResult> resultDO = irt.extractAndAlign(lumsParams.getExperimentDO(), lumsParams.getIRtLibrary(), lumsParams.getMzExtractWindow(), lumsParams.getSigmaSpacing());
                 if (resultDO.isFailed()) {
-                    taskDO.addLog("iRT计算失败:" + resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
-                    taskDO.finish(TaskStatus.FAILED.getName());
-                    taskService.update(taskDO);
+                    taskService.finish(taskDO, TaskStatus.FAILED.getName(), "iRT计算失败:" + resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
                     return;
                 }
                 SlopeIntercept si = resultDO.getModel().getSi();
                 lumsParams.setSlopeIntercept(si);
-                taskDO.addLog("iRT计算完毕");
-                taskDO.addLog("斜率:" + si.getSlope() + "截距:" + si.getIntercept());
+                taskDO.addLog("iRT计算完毕,斜率:" + si.getSlope() + "截距:" + si.getIntercept());
                 experimentService.update(lumsParams.getExperimentDO());
             } else {
                 taskDO.addLog("斜率:" + lumsParams.getSlopeIntercept().getSlope() + "截距:" + lumsParams.getSlopeIntercept().getIntercept());
             }
 
-            taskDO.addLog("入参准备完毕,开始卷积(打分),时间可能较长");
-            taskService.update(taskDO);
+            taskService.update(taskDO, "入参准备完毕,开始卷积(打分)");
             lumsParams.setTaskDO(taskDO);
             ResultDO result = extractor.extract(lumsParams);
             if (result.isFailed()) {
-                taskDO.addLog("任务执行失败:" + result.getMsgInfo());
-                taskDO.finish(TaskStatus.FAILED.getName());
-                taskService.update(taskDO);
+                taskService.finish(taskDO, TaskStatus.FAILED.getName(), "任务执行失败:" + result.getMsgInfo());
                 return;
             }
-            taskDO.addLog("处理完毕,卷积(打分)总耗时:" + (System.currentTimeMillis() - start));
-            taskDO.addLog("开始进行合并打分");
-            taskService.update(taskDO);
+            taskService.update(taskDO, "处理完毕,卷积(打分)总耗时:" + (System.currentTimeMillis() - start) + "开始进行合并打分.....");
             AirusParams ap = new AirusParams();
             ap.setScoreTypes(lumsParams.getScoreTypes());
             FinalResult finalResult = airus.doAirus(lumsParams.getOverviewId(), ap);
-            int matchedPeptideCount = finalResult.getMatchedPeptideCount();
-
-            taskDO.addLog("流程执行完毕,总耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为" + matchedPeptideCount);
-            taskDO.finish(TaskStatus.SUCCESS.getName());
-            taskService.update(taskDO);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            taskDO.addLog("Error:" + e.getMessage());
-            taskDO.finish(TaskStatus.FAILED.getName());
-            taskService.update(taskDO);
-        }
-
+            taskDO.addLog("流程执行完毕,总耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为" + finalResult.getMatchedPeptideCount());
     }
 
     @Async(value = "extractorExecutor")
-    public void convAndIrt(List<ExperimentDO> exps, LibraryDO library, Float mzExtractWindow, SigmaSpacing sigmaSpacing, TaskDO taskDO) {
+    public void irt(TaskDO taskDO, LibraryDO library, List<ExperimentDO> exps, Float mzExtractWindow, SigmaSpacing sigmaSpacing) {
 
-        try{
-            taskDO.start();
-            taskDO.addLog("开始卷积IRT校准库并且计算iRT值,Library ID:" + library.getId() + ";Type:" + library.getType());
-            taskDO.setStatus(TaskStatus.RUNNING.getName());
-            taskService.update(taskDO);
+        for (ExperimentDO exp : exps) {
+            taskService.update(taskDO, "Processing " + exp.getName() + "-" + exp.getId());
 
-            for (ExperimentDO exp : exps) {
-                taskDO.addLog("Processing " + exp.getName() + "-" + exp.getId());
-                taskService.update(taskDO);
-                ResultDO<IrtResult> resultDO;
-                resultDO = irt.convAndIrt(exp, library, mzExtractWindow, sigmaSpacing);
+            ResultDO<IrtResult> resultDO = irt.extractAndAlign(exp, library, mzExtractWindow, sigmaSpacing);
 
-                if (resultDO.isFailed()) {
-                    taskDO.addLog("iRT计算失败:" + resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
-                    taskService.update(taskDO);
-                    continue;
-                }
-                SlopeIntercept slopeIntercept = resultDO.getModel().getSi();
-                exp.setIRtLibraryId(library.getId());
-                experimentService.update(exp);
-                taskDO.addLog("iRT计算完毕,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept());
+            if (resultDO.isFailed()) {
+                taskService.update(taskDO, "iRT计算失败:" + resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
+                continue;
             }
+            SlopeIntercept slopeIntercept = resultDO.getModel().getSi();
+            exp.setIRtLibraryId(library.getId());
+            experimentService.update(exp);
 
-            taskDO.finish(TaskStatus.SUCCESS.getName());
-            taskService.update(taskDO);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            taskDO.addLog("Error:" + e.getMessage());
-            taskDO.finish(TaskStatus.FAILED.getName());
-            taskService.update(taskDO);
+            taskDO.addLog("iRT计算完毕,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept());
         }
     }
 }

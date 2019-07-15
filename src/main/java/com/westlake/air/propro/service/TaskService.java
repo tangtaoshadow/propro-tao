@@ -23,9 +23,16 @@ public interface TaskService {
 
     ResultDO update(TaskDO taskDO);
 
+    ResultDO update(TaskDO taskDO, String newLog);
+
+    ResultDO update(TaskDO taskDO,String status, String newLog);
+
+    ResultDO finish(TaskDO taskDO, String status, String newLog);
+
     ResultDO delete(String id);
 
     ResultDO<TaskDO> getById(String id);
 
     ResultDO doTask(TaskTemplate taskTemplate);
+
 }

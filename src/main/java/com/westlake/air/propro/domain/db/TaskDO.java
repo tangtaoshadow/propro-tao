@@ -55,7 +55,7 @@ public class TaskDO extends BaseDO {
         this.name = taskTemplate.getName() + "-" + taskSuffixName;
     }
 
-    public void addLog(String content) {
+    public TaskDO addLog(String content) {
         if (logs == null) {
             if (status == null || taskTemplate == null) {
                 this.taskTemplate = TaskTemplate.DEFAULT.getName();
@@ -68,9 +68,11 @@ public class TaskDO extends BaseDO {
         TaskLog taskLog = new TaskLog(content);
 
         logs.add(taskLog);
+
+        return this;
     }
 
-    public void addLog(List<String> contents) {
+    public TaskDO addLog(List<String> contents) {
         if (logs == null) {
             logs = new ArrayList<>();
             logs.add(new TaskLog("Task Started"));
@@ -79,13 +81,17 @@ public class TaskDO extends BaseDO {
             TaskLog taskLog = new TaskLog(content);
             logs.add(taskLog);
         }
+
+        return this;
     }
 
-    public void start() {
+    public TaskDO start() {
         if (logs == null || logs.size() == 0) {
             logs = new ArrayList<>();
             logs.add(new TaskLog("Task Started"));
         }
+
+        return this;
     }
 
     public Long getStartTime() {
@@ -96,9 +102,20 @@ public class TaskDO extends BaseDO {
         return taskLog.getTime().getTime();
     }
 
-    public void finish(String status) {
+    public TaskDO finish(String status) {
         addLog("Task Ended");
         this.status = status;
         totalCost = System.currentTimeMillis() - getStartTime();
+
+        return this;
+    }
+
+    public TaskDO finish(String status, String finishLog) {
+        addLog(finishLog);
+        addLog("Task Ended");
+        this.status = status;
+        totalCost = System.currentTimeMillis() - getStartTime();
+
+        return this;
     }
 }

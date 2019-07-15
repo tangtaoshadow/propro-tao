@@ -53,7 +53,7 @@ public class Extractor {
      * 卷积的核心函数,最终返回卷积到的Peptide数目
      * 目前只支持MS2的卷积
      *
-     * @param lumsParams 将卷积,选峰及打分合并在一个步骤中执行,可以完整的省去一次IO读取及解析,大大提升分析速度,
+     * @param lumsParams 将卷积,选峰及打分合并在一个步骤中执行,可以完整的省去一次IO读取及解析,提升分析速度,
      *                   需要experimentDO,libraryId,rtExtractionWindow,mzExtractionWindow,SlopeIntercept
      */
     public ResultDO<AnalyseOverviewDO> extract(LumsParams lumsParams) {
@@ -112,7 +112,7 @@ public class Extractor {
             //Step2.获取该窗口内的谱图Map,key值代表了RT
             TreeMap<Float, MzIntensityPairs> rtMap;
 
-            if(swathIndexDO == null){
+            if (swathIndexDO == null) {
                 return ResultDO.buildError(ResultCode.SWATH_INDEX_NOT_EXISTED);
             }
             rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndexDO, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
@@ -241,22 +241,24 @@ public class Extractor {
 
             Float[] intArray = new Float[rtArray.length];
             boolean isAllZero = true;
-            for (int i = 0; i < rtArray.length; i++) {
-                MzIntensityPairs pairs = rtMap.get(rtArray[i]);
-                Float[] pairMzArray = pairs.getMzArray();
-                Float[] pairIntensityArray = pairs.getIntensityArray();
-                float acc;
-                //由于本函数极其注重性能,为整个流程最关键的耗时步骤,每提升10毫秒都可以带来巨大的性能提升  --陆妙善
-                if (useAdaptiveWindow) {
-                    acc = ConvolutionUtil.adaptiveAccumulation(pairMzArray, pairIntensityArray, mz);
-                } else {
-                    acc = ConvolutionUtil.accumulation(pairMzArray, pairIntensityArray, mzStart, mzEnd);
-                }
-                if (acc != 0) {
-                    isAllZero = false;
-                }
 
-                intArray[i] = acc;
+            //由于本函数极其注重性能,为整个流程最关键的耗时步骤,每提升10毫秒都可以带来巨大的性能提升  --陆妙善
+            if (useAdaptiveWindow) {
+                for (int i = 0; i < rtArray.length; i++) {
+                    float acc = ConvolutionUtil.adaptiveAccumulation(rtMap.get(rtArray[i]).getMzArray(), rtMap.get(rtArray[i]).getIntensityArray(), mz);
+                    if (acc != 0) {
+                        isAllZero = false;
+                    }
+                    intArray[i] = acc;
+                }
+            } else {
+                for (int i = 0; i < rtArray.length; i++) {
+                    float acc = ConvolutionUtil.accumulation(rtMap.get(rtArray[i]).getMzArray(), rtMap.get(rtArray[i]).getIntensityArray(), mzStart, mzEnd);
+                    if (acc != 0) {
+                        isAllZero = false;
+                    }
+                    intArray[i] = acc;
+                }
             }
             if (isAllZero) {
                 continue;
@@ -286,7 +288,6 @@ public class Extractor {
 
         TaskDO task = lumsParams.getTaskDO();
         //Step1.获取窗口信息.
-        logger.info("获取Swath窗口信息");
         List<WindowRange> rangs = lumsParams.getExperimentDO().getWindowRanges();
         SwathIndexQuery query = new SwathIndexQuery(lumsParams.getExperimentDO().getId(), 2);
 
@@ -299,8 +300,7 @@ public class Extractor {
             lumsParams.setRtRangeMap(rtRangeMap);
         }
 
-        task.addLog("总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
-        taskService.update(task);
+        taskService.update(task, "总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
         //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
         int count = 1;
         try {
@@ -316,9 +316,7 @@ public class Extractor {
                     dataCount += dataList.size();
                 }
                 analyseDataService.insertAll(dataList, false);
-                task.addLog("第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start) / 1000 + "秒");
-                logger.info("第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start) / 1000 + "秒");
-                taskService.update(task);
+                taskService.update(task,"第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start) / 1000 + "秒");
                 count++;
             }
 
@@ -361,9 +359,7 @@ public class Extractor {
             logger.warn("coordinate size != 2,Rang:" + swathIndex.getRange().getStart() + ":" + swathIndex.getRange().getEnd());
         }
         //Step3.提取指定原始谱图
-        long start = System.currentTimeMillis();
         rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
-        logger.info("IO及解码耗时:" + (System.currentTimeMillis() - start) + "毫秒");
 
         return epps(coordinates, rtMap, overviewId, lumsParams);
 
@@ -385,6 +381,9 @@ public class Extractor {
         HashSet<String> targetIgnorePeptides = new HashSet<>();
         List<TargetPeptide> decoyList = new ArrayList<>();
         //传入的coordinates是没有经过排序的,需要排序先处理真实肽段,再处理伪肽段.如果先处理的真肽段没有被卷积到任何信息,或者卷积后的峰太差被忽略掉,都会同时删掉对应的伪肽段的卷积
+        coordinates.parallelStream().forEach(tp -> {
+
+        });
         for (TargetPeptide tp : coordinates) {
             if (tp.getIsDecoy()) {
                 decoyList.add(tp);
