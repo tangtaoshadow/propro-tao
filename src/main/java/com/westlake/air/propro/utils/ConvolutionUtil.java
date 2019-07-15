@@ -2,6 +2,7 @@ package com.westlake.air.propro.utils;
 
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 
 import java.io.File;
@@ -12,20 +13,36 @@ import java.io.File;
  */
 public class ConvolutionUtil {
 
+
+    public static long totalCount = 0;
+    public static long batchCount = 0;
+
     /**
      * 计算 mz在[start, end]范围对应的intensity和
      *
-     * @param mzArray        从小到到已经排好序
-     * @param intensityArray
+     * @param pairs   其中mzArray已经从小到到已经排好序
      * @param mzStart
      * @param mzEnd
      * @return
      */
-    public static float accumulation(Float[] mzArray, Float[] intensityArray, Float mzStart, Float mzEnd) {
+    public static float accumulation(MzIntensityPairs pairs, Float mzStart, Float mzEnd) {
+
+        Float[] mzArray = pairs.getMzArray();
+        Float[] intensityArray = pairs.getIntensityArray();
+        Integer[] anchors = pairs.getAnchors();
+
         float result = 0f;
         try {
             //Index of first mz bigger than mzStart
-            int rightIndex = findRightIndex(mzArray, mzStart);
+            int rightIndex;
+            if (anchors != null) {
+                int index = (int) (mzStart / 100);
+                int start = anchors[index] == -1 ? 0 : anchors[index];
+                int end = anchors[index + 1] == -1 ? (mzArray.length - 1) : anchors[index + 1];
+                rightIndex = findRightIndex(mzArray, mzStart, start, end);
+            } else {
+                rightIndex = findRightIndex(mzArray, mzStart);
+            }
 
             //No element is bigger than mzStart in mzArray
             if (rightIndex == -1) {
@@ -47,12 +64,13 @@ public class ConvolutionUtil {
     /**
      * 计算 mz在[start, end]范围对应的intensity和
      *
-     * @param mzArray        从小到到已经排好序
-     * @param intensityArray
+     * @param pairs 其中mzArray已经从小到到已经排好序
      * @param mz
      * @return
      */
-    public static float adaptiveAccumulation(Float[] mzArray, Float[] intensityArray, Float mz) {
+    public static float adaptiveAccumulation(MzIntensityPairs pairs, Float mz) {
+        Float[] mzArray = pairs.getMzArray();
+        Float[] intensityArray = pairs.getIntensityArray();
         float result = 0f;
         int nearestIndex = PeakUtil.findNearestIndex(mzArray, mz);
         int leftIndex = nearestIndex == 0 ? 0 : nearestIndex - 1;
@@ -120,6 +138,40 @@ public class ConvolutionUtil {
 
         int leftIndex = 0;
         while (leftIndex + 1 < rightIndex) {
+            totalCount++;
+            int tmp = (leftIndex + rightIndex) / 2;
+            if (target < array[tmp]) {
+                rightIndex = tmp;
+            } else if (target > array[tmp]) {
+                leftIndex = tmp;
+            } else {
+                return tmp;
+            }
+        }
+
+        return rightIndex;
+    }
+
+    /**
+     * 找到从小到大排序的第一个大于等于目标值的索引
+     * 当目标值大于等于范围中的最大值时,返回-1
+     * 左闭右开区间
+     *
+     * @param array
+     * @param target
+     * @return
+     */
+    public static int findRightIndex(Float[] array, Float target, int leftIndex, int rightIndex) {
+
+        if (target <= array[leftIndex]) {
+            return 0;
+        }
+        if (target >= array[rightIndex]) {
+            return -1;
+        }
+
+        while (leftIndex + 1 < rightIndex) {
+            totalCount++;
             int tmp = (leftIndex + rightIndex) / 2;
             if (target < array[tmp]) {
                 rightIndex = tmp;

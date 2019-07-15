@@ -35,6 +35,8 @@ public class SwathIndexDO {
     List<Long> mzs;
     //一个Swath块中所有子谱图的intenisty的压缩后的大小列表
     List<Long> ints;
+    //用于加速核心Extractor搜索函数的锚点
+    List<Integer[]> anchors;
     //用于存储KV键值对
     String features;
 }

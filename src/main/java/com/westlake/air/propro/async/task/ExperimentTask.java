@@ -16,6 +16,7 @@ import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.service.*;
+import com.westlake.air.propro.utils.ConvolutionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -113,11 +114,12 @@ public class ExperimentTask extends BaseTask {
                 taskService.finish(taskDO, TaskStatus.FAILED.getName(), "任务执行失败:" + result.getMsgInfo());
                 return;
             }
-            taskService.update(taskDO, "处理完毕,卷积(打分)总耗时:" + (System.currentTimeMillis() - start) + "开始进行合并打分.....");
+            taskService.update(taskDO, "处理完毕,卷积(打分)总耗时:" + (System.currentTimeMillis() - start) + "毫秒,开始进行合并打分.....");
             AirusParams ap = new AirusParams();
             ap.setScoreTypes(lumsParams.getScoreTypes());
             FinalResult finalResult = airus.doAirus(lumsParams.getOverviewId(), ap);
             taskDO.addLog("流程执行完毕,总耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为" + finalResult.getMatchedPeptideCount());
+
     }
 
     @Async(value = "extractorExecutor")
@@ -137,6 +139,7 @@ public class ExperimentTask extends BaseTask {
             experimentService.update(exp);
 
             taskDO.addLog("iRT计算完毕,斜率:" + slopeIntercept.getSlope() + ",截距:" + slopeIntercept.getIntercept());
+            logger.info(ConvolutionUtil.batchCount+":"+ConvolutionUtil.totalCount);
         }
     }
 }

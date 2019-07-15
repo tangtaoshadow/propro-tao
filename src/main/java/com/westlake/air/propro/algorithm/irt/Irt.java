@@ -138,7 +138,7 @@ public class Irt {
                 if (library.getType().equals(LibraryDO.TYPE_IRT)) {
                     extractor.extractForIrt(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
                 } else {
-                    extractor.randomFetchForIrt(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
+                    extractor.extractForIrtWithLib(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
                 }
             }
         } catch (Exception e) {

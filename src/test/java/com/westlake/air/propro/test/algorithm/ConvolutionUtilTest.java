@@ -48,7 +48,7 @@ public class ConvolutionUtilTest extends BaseTest {
         }
 
         long start = System.nanoTime();
-        float result = ConvolutionUtil.accumulation(pairs.getMzArray(), pairs.getIntensityArray(), 173.128f, 175.108f);
+        float result = ConvolutionUtil.accumulation(pairs, 173.128f, 175.108f);
         System.out.println(result+"-"+(System.nanoTime() - start));
     }
 
@@ -56,12 +56,12 @@ public class ConvolutionUtilTest extends BaseTest {
     public void testAcc2(){
         Float[] mzArray = {120f,121f,122f,123f,124f,130f,131f,132f,145f,146f,147f,148f};
         Float[] intArray = {1f,1f,1f,1f,1f,1f,1f,1f,1f,1f,1f,1f};
-        float result1 = ConvolutionUtil.accumulation(mzArray, intArray, 126f, 132f);
-        float result2 = ConvolutionUtil.accumulation(mzArray, intArray, 126f, 132f);
-        float result3 = ConvolutionUtil.accumulation(mzArray, intArray, 130f, 132f);
-        float result4 = ConvolutionUtil.accumulation(mzArray, intArray, 131f, 132f);
-        float result5 = ConvolutionUtil.accumulation(mzArray, intArray, 148f, 152f);
-        float result6 = ConvolutionUtil.accumulation(mzArray, intArray, 112f, 120f);
+        float result1 = ConvolutionUtil.accumulation(new MzIntensityPairs(mzArray, intArray), 126f, 132f);
+        float result2 = ConvolutionUtil.accumulation(new MzIntensityPairs(mzArray, intArray), 126f, 132f);
+        float result3 = ConvolutionUtil.accumulation(new MzIntensityPairs(mzArray, intArray), 130f, 132f);
+        float result4 = ConvolutionUtil.accumulation(new MzIntensityPairs(mzArray, intArray), 131f, 132f);
+        float result5 = ConvolutionUtil.accumulation(new MzIntensityPairs(mzArray, intArray), 148f, 152f);
+        float result6 = ConvolutionUtil.accumulation(new MzIntensityPairs(mzArray, intArray), 112f, 120f);
         assert result1 == 3f;
         assert result2 == 3f;
         assert result3 == 3f;

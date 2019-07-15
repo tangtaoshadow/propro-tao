@@ -166,7 +166,7 @@ public class Extractor {
         }
     }
 
-    public void randomFetchForIrt(List<AnalyseDataDO> finalList, List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float mzExtractWindow, Float rtExtractWindow) {
+    public void extractForIrtWithLib(List<AnalyseDataDO> finalList, List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float mzExtractWindow, Float rtExtractWindow) {
         long start = System.currentTimeMillis();
         int count = 0;
         for (TargetPeptide tp : coordinates) {
@@ -245,7 +245,7 @@ public class Extractor {
             //由于本函数极其注重性能,为整个流程最关键的耗时步骤,每提升10毫秒都可以带来巨大的性能提升  --陆妙善
             if (useAdaptiveWindow) {
                 for (int i = 0; i < rtArray.length; i++) {
-                    float acc = ConvolutionUtil.adaptiveAccumulation(rtMap.get(rtArray[i]).getMzArray(), rtMap.get(rtArray[i]).getIntensityArray(), mz);
+                    float acc = ConvolutionUtil.adaptiveAccumulation(rtMap.get(rtArray[i]), mz);
                     if (acc != 0) {
                         isAllZero = false;
                     }
@@ -253,7 +253,8 @@ public class Extractor {
                 }
             } else {
                 for (int i = 0; i < rtArray.length; i++) {
-                    float acc = ConvolutionUtil.accumulation(rtMap.get(rtArray[i]).getMzArray(), rtMap.get(rtArray[i]).getIntensityArray(), mzStart, mzEnd);
+                    ConvolutionUtil.batchCount++;
+                    float acc = ConvolutionUtil.accumulation(rtMap.get(rtArray[i]), mzStart, mzEnd);
                     if (acc != 0) {
                         isAllZero = false;
                     }
