@@ -40,9 +40,6 @@ public class AirdFileParser extends BaseParser {
             start = start + intensitySizes.get(i).intValue();
             try {
                 MzIntensityPairs pairs = new MzIntensityPairs(getMzValues(mz, mzCompressor), getIntValues(intensity, intCompressor));
-                if(indexDO.getAnchors() != null){
-                    pairs.setAnchors(indexDO.getAnchors().get(i));
-                }
                 map.put(rts.get(i), pairs);
             } catch (Exception e) {
                 logger.error("index size error:" + i);

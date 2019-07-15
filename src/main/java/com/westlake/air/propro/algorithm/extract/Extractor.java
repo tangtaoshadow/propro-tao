@@ -196,6 +196,9 @@ public class Extractor {
         }
         if (mzExtractWindow > 1) {
             isPpm = true;
+            mzExtractWindow = (mzExtractWindow / 2f) * 1E-6f;
+        }else{
+            mzExtractWindow = mzExtractWindow / 2f;
         }
         //所有的碎片共享同一个RT数组
         ArrayList<Float> rtList = new ArrayList<>();
@@ -222,12 +225,6 @@ public class Extractor {
         dataDO.setMz(tp.getMz());
 
         boolean isHit = false;
-        //take half for each side
-        if (isPpm) {
-            mzExtractWindow = (mzExtractWindow / 2f) * 1E-6f;
-        } else {
-            mzExtractWindow = mzExtractWindow / 2f;
-        }
 
         for (FragmentInfo fi : tp.getFragmentMap().values()) {
             float mz = fi.getMz().floatValue();
@@ -253,7 +250,6 @@ public class Extractor {
                 }
             } else {
                 for (int i = 0; i < rtArray.length; i++) {
-                    ConvolutionUtil.batchCount++;
                     float acc = ConvolutionUtil.accumulation(rtMap.get(rtArray[i]), mzStart, mzEnd);
                     if (acc != 0) {
                         isAllZero = false;
@@ -376,19 +372,16 @@ public class Extractor {
      * @return
      */
     private List<AnalyseDataDO> epps(List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, LumsParams lumsParams) {
-        List<AnalyseDataDO> dataList = new ArrayList<>();
+        List<AnalyseDataDO> dataList = Collections.synchronizedList(new ArrayList<>());
         long start = System.currentTimeMillis();
 
-        HashSet<String> targetIgnorePeptides = new HashSet<>();
-        List<TargetPeptide> decoyList = new ArrayList<>();
+        Set<String> targetIgnorePeptides = Collections.synchronizedSet(new HashSet<>());
+        List<TargetPeptide> decoyList = Collections.synchronizedList(new ArrayList<>());
         //传入的coordinates是没有经过排序的,需要排序先处理真实肽段,再处理伪肽段.如果先处理的真肽段没有被卷积到任何信息,或者卷积后的峰太差被忽略掉,都会同时删掉对应的伪肽段的卷积
         coordinates.parallelStream().forEach(tp -> {
-
-        });
-        for (TargetPeptide tp : coordinates) {
             if (tp.getIsDecoy()) {
                 decoyList.add(tp);
-                continue;
+                return;
             }
             //Step1. 常规卷积,卷积结果不进行压缩处理
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, lumsParams.getMzExtractWindow(), lumsParams.getRtExtractWindow(), overviewId);
@@ -396,7 +389,7 @@ public class Extractor {
             //如果没有卷积到任何结果,那么加入忽略列表
             if (dataDO == null) {
                 targetIgnorePeptides.add(tp.getPeptideRef());
-                continue;
+                return;
             }
 
             //Step2. 常规选峰及打分
@@ -405,29 +398,34 @@ public class Extractor {
             //未满足条件的直接忽略
             if (dataDO.getFeatureScoresList() == null) {
                 targetIgnorePeptides.add(tp.getPeptideRef());
-                continue;
+                return;
             }
             AnalyseUtil.compress(dataDO);
             dataList.add(dataDO);
-        }
-        for (TargetPeptide tp : decoyList) {
+        });
+
+//        for (TargetPeptide tp : coordinates) {
+//
+//        }
+        decoyList.parallelStream().forEach(tp -> {
+//        for (TargetPeptide tp : decoyList) {
             //如果伪肽段在忽略列表里面,那么直接忽略
             if (targetIgnorePeptides.contains(tp.getPeptideRef()) && !lumsParams.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM)) {
-                continue;
+                return;
             }
             //Step1. 常规卷积,卷积结果不进行压缩处理,因为后续会立即进行子分数打分,等到打分结束以后再进行压缩
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, lumsParams.getMzExtractWindow(), lumsParams.getRtExtractWindow(), overviewId);
             if (dataDO == null) {
-                continue;
+                return;
             }
             //Step2. 常规选峰及打分
             scoreService.scoreForOne(dataDO, tp, rtMap, lumsParams);
             if (dataDO.getFeatureScoresList() == null) {
-                continue;
+                return;
             }
             AnalyseUtil.compress(dataDO);
             dataList.add(dataDO);
-        }
+        });
         logger.info("卷积+选峰+打分耗时:" + (System.currentTimeMillis() - start) / 1000 + "秒");
         return dataList;
     }

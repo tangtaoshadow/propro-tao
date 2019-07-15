@@ -121,7 +121,7 @@ public class Airus {
         giveDecoyFdr(featureScoresList);
         long start = System.currentTimeMillis();
         analyseDataService.removeMultiDecoy(overviewId, featureScoresList, 0.01d);
-        logger.info("删除无用数据一共用时："+(System.currentTimeMillis() - start));
+        logger.info("删除无用数据一共用时："+(System.currentTimeMillis() - start)+"毫秒");
         start = System.currentTimeMillis();
         analyseDataService.updateMulti(overviewDO.getId(), featureScoresList);
         logger.info("更新数据"+featureScoresList.size()+"条一共用时："+(System.currentTimeMillis() - start));
