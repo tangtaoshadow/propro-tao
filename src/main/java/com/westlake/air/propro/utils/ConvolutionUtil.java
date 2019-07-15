@@ -29,14 +29,14 @@ public class ConvolutionUtil {
 
         Float[] mzArray = pairs.getMzArray();
         Float[] intensityArray = pairs.getIntensityArray();
-        Integer[] anchors = pairs.getAnchors();
+        Integer[] anchors = null;
 
         float result = 0f;
         try {
             //Index of first mz bigger than mzStart
             int rightIndex;
             if (anchors != null) {
-                int index = (int) (mzStart / 100);
+                int index = mzStart.intValue() >> 7;
                 int start = anchors[index] == -1 ? 0 : anchors[index];
                 int end = anchors[index + 1] == -1 ? (mzArray.length - 1) : anchors[index + 1];
                 rightIndex = findRightIndex(mzArray, mzStart, start, end);
