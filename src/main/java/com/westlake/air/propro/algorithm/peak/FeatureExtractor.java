@@ -107,12 +107,9 @@ public class FeatureExtractor {
             //根据信噪比和最高峰选择谱图
             if (maxPeakPairs == null) {
                 logger.info("Error: MaxPeakPairs were null!" + rtDoubleArray.length);
-                continue;
+                break;
             }
             List<IonPeak> ionPeakList = chromatogramPicker.pickChromatogram(rtDoubleArray, intensitiesMap.get(cutInfo), smoothIntensitiesMap.get(cutInfo), noisesOri1000, maxPeakPairs);
-            if (ionPeakList.isEmpty()){
-                continue;
-            }
             ionPeaks.put(cutInfo, maxPeakPairs);
             ionPeakParams.put(cutInfo, ionPeakList);
             noise1000Map.put(cutInfo, noisesOri1000);

@@ -217,6 +217,9 @@ public class FeatureFinder {
                 //信噪比
                 signalToNoiseSum += noise1000Map.get(cutInfo)[maxSpectrumIndex];
             }
+            if (peakGroupInt == 0D) {
+                continue;
+            }
             peakGroup.setIonCount(ionPeaks.size());
             peakGroup.setIonHullRt(rasteredRt);
             peakGroup.setIonHullInt(ionHullInt);
