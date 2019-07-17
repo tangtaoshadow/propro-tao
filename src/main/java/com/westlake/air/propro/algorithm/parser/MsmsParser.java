@@ -202,11 +202,10 @@ public class MsmsParser extends BaseLibraryParser {
             peptideDO.setMz(Double.parseDouble(row[columnMap.get("m/z")]));
             String protName = row[columnMap.get("proteins")];
             peptideDO.setProteinName(protName.startsWith("sp|iRT") ? "iRT" : protName);
-            peptideDO.setLibraryName(library.getName());
+
             peptideDO.setLibraryId(library.getId());
             peptideDO.setSequence(row[columnMap.get("sequence")]);
-            peptideDO.setTargetSequence(row[columnMap.get("sequence")]);
-            peptideDO.setIsDecoy(false);
+
             peptideDO.setCharge(Integer.parseInt(row[columnMap.get("charge")]));
             peptideDO.setRt(Double.parseDouble(row[columnMap.get("retentiontime")]));
             peptideDO.setFullName(peptideRef.split("_")[0]);

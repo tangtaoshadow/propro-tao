@@ -62,7 +62,7 @@ public class Irt {
     LinearFitter linearFitter;
 
     /**
-     * 卷积并且求出iRT
+     * XIC并且求出iRT
      *
      * @param experimentDO
      * @param library
@@ -92,7 +92,7 @@ public class Irt {
     }
 
     /**
-     * 卷积iRT校准库的数据
+     * XIC iRT校准库的数据
      *
      * @param exp
      * @param library
@@ -134,7 +134,7 @@ public class Irt {
                     throw e;
                 }
 
-                //Step4.卷积并且存储数据,如果传入的库是标准库,那么使用采样的方式进行卷积
+                //Step4.提取数据并且存储数据,如果传入的库是标准库,那么使用采样的方式进行数据提取
                 if (library.getType().equals(LibraryDO.TYPE_IRT)) {
                     extractor.extractForIrt(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
                 } else {
@@ -151,7 +151,7 @@ public class Irt {
     }
 
     /**
-     * 从一个卷积结果列表中求出iRT
+     * 从一个数据提取结果列表中求出iRT
      *
      * @param dataList
      * @param library
@@ -165,7 +165,7 @@ public class Irt {
         ResultDO<IrtResult> resultDO = new ResultDO<>();
         double minGroupRt = Double.MAX_VALUE, maxGroupRt = Double.MIN_VALUE;
         for (AnalyseDataDO dataDO : dataList) {
-            TargetPeptide tp = peptideService.getTargetPeptideByDataRef(library.getId(), dataDO.getPeptideRef(), dataDO.getIsDecoy());
+            TargetPeptide tp = peptideService.getTargetPeptideByDataRef(library.getId(), dataDO.getPeptideRef());
             PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(dataDO, tp.buildIntensityMap(), sigmaSpacing);
             if (!peptideFeature.isFeatureFound()) {
                 continue;

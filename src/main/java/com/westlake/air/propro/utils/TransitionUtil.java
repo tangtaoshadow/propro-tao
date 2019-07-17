@@ -46,13 +46,11 @@ public class TransitionUtil {
     public static PeptideDO cloneForDecoy(PeptideDO peptideDO) {
         PeptideDO decoy = new PeptideDO();
         decoy.setTargetSequence(peptideDO.getSequence());
-        decoy.setLibraryName(peptideDO.getLibraryName());
         decoy.setLibraryId(peptideDO.getLibraryId());
         decoy.setCharge(peptideDO.getCharge());
         decoy.setFullName(peptideDO.getFullName());
         decoy.setPeptideRef(peptideDO.getPeptideRef());
         decoy.setProteinName(peptideDO.getProteinName());
-        decoy.setIsDecoy(true);
         decoy.setRt(peptideDO.getRt());
         decoy.setMz(peptideDO.getMz());
 

@@ -184,7 +184,7 @@ public class DIAScorer {
                 Double left = leftPeakMz - Constants.DIA_EXTRACT_WINDOW / 2d;
                 Double right = leftPeakMz + Constants.DIA_EXTRACT_WINDOW / 2d;
 
-                //对于多种带电量，对-i同位素的mz位置进行卷积，若强度高于0同位素强度，且-i同位素的理论mz与实际mz差距小于阈值，认为-i同位素出现
+                //对于多种带电量，对-i同位素的mz位置进行数据提取，若强度高于0同位素强度，且-i同位素的理论mz与实际mz差距小于阈值，认为-i同位素出现
                 IntegrateWindowMzIntensity mzIntensity = ScoreUtil.integrateWindow(spectrumMzArray, spectrumIntArray, left.floatValue(), right.floatValue());
                 if (!mzIntensity.isSignalFound()) {
                     continue;

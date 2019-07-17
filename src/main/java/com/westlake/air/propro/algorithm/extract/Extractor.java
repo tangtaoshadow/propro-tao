@@ -50,10 +50,10 @@ public class Extractor {
     TaskService taskService;
 
     /**
-     * 卷积的核心函数,最终返回卷积到的Peptide数目
-     * 目前只支持MS2的卷积
+     * 提取XIC的核心函数,最终返回提取到XIC的Peptide数目
+     * 目前只支持MS2的XIC提取
      *
-     * @param lumsParams 将卷积,选峰及打分合并在一个步骤中执行,可以完整的省去一次IO读取及解析,提升分析速度,
+     * @param lumsParams 将XIC提取,选峰及打分合并在一个步骤中执行,可以完整的省去一次IO读取及解析,提升分析速度,
      *                   需要experimentDO,libraryId,rtExtractionWindow,mzExtractionWindow,SlopeIntercept
      */
     public ResultDO<AnalyseOverviewDO> extract(LumsParams lumsParams) {
@@ -83,7 +83,7 @@ public class Extractor {
     }
 
     /**
-     * 实时卷积某一个PeptideRef的图谱,即全时间段卷积
+     * 实时提取某一个PeptideRef的XIC图谱,即全时间段XIC提取
      *
      * @param exp
      * @param peptide
@@ -146,8 +146,8 @@ public class Extractor {
 
     /**
      * 需要传入最终结果集的List对象
-     * 最终的卷积结果存储在内存中不落盘,一般用于iRT的计算
-     * 由于是直接在内存中的,所以卷积的结果不进行压缩
+     * 最终的XIC结果存储在内存中不落盘,一般用于iRT的计算
+     * 由于是直接在内存中的,所以XIC的结果不进行压缩
      *
      * @param finalList
      * @param coordinates
@@ -266,7 +266,7 @@ public class Extractor {
             dataDO.getMzMap().put(fi.getCutInfo(), fi.getMz().floatValue());
         }
 
-        //如果所有的片段均没有卷积到结果,则直接返回null
+        //如果所有的片段均没有提取到XIC的结果,则直接返回null
         if (!isHit) {
             return null;
         }
@@ -275,9 +275,9 @@ public class Extractor {
     }
 
     /**
-     * 卷积MS2图谱并且输出最终结果,不返回最终的卷积结果以减少内存的使用
+     * 提取MS2 XIC图谱并且输出最终结果,不返回最终的XIC结果以减少内存的使用
      *
-     * @param raf        用于读取Aird文件
+     * @param raf  用于读取Aird文件
      * @param overviewDO
      * @param lumsParams
      */
@@ -297,8 +297,8 @@ public class Extractor {
             lumsParams.setRtRangeMap(rtRangeMap);
         }
 
-        taskService.update(task, "总计有窗口:" + rangs.size() + "个,开始进行MS2卷积计算");
-        //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行扫描卷积
+        taskService.update(task, "总计有窗口:" + rangs.size() + "个,开始进行MS2 提取XIC计算");
+        //按窗口开始扫描.如果一共有N个窗口,则一共分N个批次进行XIC提取
         int count = 1;
         try {
             long peakCount = 0L;
@@ -313,7 +313,7 @@ public class Extractor {
                     dataCount += dataList.size();
                 }
                 analyseDataService.insertAll(dataList, false);
-                taskService.update(task,"第" + count + "轮数据卷积完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start) / 1000 + "秒");
+                taskService.update(task,"第" + count + "轮数据XIC提取完毕,有效肽段:" + (dataList == null ? 0 : dataList.size()) + "个,耗时:" + (System.currentTimeMillis() - start) / 1000 + "秒");
                 count++;
             }
 
@@ -328,7 +328,7 @@ public class Extractor {
     }
 
     /**
-     * 返回卷积到的数目
+     * 返回提取到的数目
      *
      * @param raf
      * @param lumsParams
@@ -363,7 +363,7 @@ public class Extractor {
     }
 
     /**
-     * 最终的卷积结果需要落盘数据库,一般用于正式卷积的计算
+     * 最终的提取XIC结果需要落盘数据库,一般用于正式XIC提取的计算
      *
      * @param coordinates
      * @param rtMap
@@ -377,16 +377,16 @@ public class Extractor {
 
         Set<String> targetIgnorePeptides = Collections.synchronizedSet(new HashSet<>());
         List<TargetPeptide> decoyList = Collections.synchronizedList(new ArrayList<>());
-        //传入的coordinates是没有经过排序的,需要排序先处理真实肽段,再处理伪肽段.如果先处理的真肽段没有被卷积到任何信息,或者卷积后的峰太差被忽略掉,都会同时删掉对应的伪肽段的卷积
+        //传入的coordinates是没有经过排序的,需要排序先处理真实肽段,再处理伪肽段.如果先处理的真肽段没有被提取到任何信息,或者提取后的峰太差被忽略掉,都会同时删掉对应的伪肽段的XIC
         coordinates.parallelStream().forEach(tp -> {
             if (tp.getIsDecoy()) {
                 decoyList.add(tp);
                 return;
             }
-            //Step1. 常规卷积,卷积结果不进行压缩处理
+            //Step1. 常规提取XIC,XIC结果不进行压缩处理
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, lumsParams.getMzExtractWindow(), lumsParams.getRtExtractWindow(), overviewId);
 
-            //如果没有卷积到任何结果,那么加入忽略列表
+            //如果没有提取到任何结果,那么加入忽略列表
             if (dataDO == null) {
                 targetIgnorePeptides.add(tp.getPeptideRef());
                 return;
@@ -413,7 +413,7 @@ public class Extractor {
             if (targetIgnorePeptides.contains(tp.getPeptideRef()) && !lumsParams.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM)) {
                 return;
             }
-            //Step1. 常规卷积,卷积结果不进行压缩处理,因为后续会立即进行子分数打分,等到打分结束以后再进行压缩
+            //Step1. 常规提取XIC,XIC结果不进行压缩处理,因为后续会立即进行子分数打分,等到打分结束以后再进行压缩
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, lumsParams.getMzExtractWindow(), lumsParams.getRtExtractWindow(), overviewId);
             if (dataDO == null) {
                 return;
@@ -426,7 +426,7 @@ public class Extractor {
             AnalyseUtil.compress(dataDO);
             dataList.add(dataDO);
         });
-        logger.info("卷积+选峰+打分耗时:" + (System.currentTimeMillis() - start) / 1000 + "秒");
+        logger.info("提取XIC+选峰+打分耗时:" + (System.currentTimeMillis() - start) / 1000 + "秒");
         return dataList;
     }
 

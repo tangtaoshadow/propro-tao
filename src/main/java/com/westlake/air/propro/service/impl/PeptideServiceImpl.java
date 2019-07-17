@@ -59,23 +59,18 @@ public class PeptideServiceImpl implements PeptideService {
     }
 
     @Override
-    public PeptideDO getByLibraryIdAndPeptideRefAndIsDecoy(String libraryId, String peptideRef, boolean isDecoy) {
-        return peptideDAO.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, isDecoy);
+    public PeptideDO getByLibraryIdAndPeptideRef(String libraryId, String peptideRef) {
+        return peptideDAO.getByLibraryIdAndPeptideRef(libraryId, peptideRef);
     }
 
     @Override
-    public TargetPeptide getTargetPeptideByDataRef(String libraryId, String peptideRef, boolean isDecoy) {
-        return peptideDAO.getTargetPeptideByDataRef(libraryId, peptideRef, isDecoy);
+    public TargetPeptide getTargetPeptideByDataRef(String libraryId, String peptideRef) {
+        return peptideDAO.getTargetPeptideByDataRef(libraryId, peptideRef);
     }
 
     @Override
-    public List<PeptideDO> getAllByLibraryIdAndIsDecoy(String libraryId, boolean isDecoy) {
-        return peptideDAO.getAllByLibraryIdAndIsDecoy(libraryId, isDecoy);
-    }
-
-    @Override
-    public List<PeptideDO> getAllByLibraryIdAndProteinNameAndIsDecoy(String libraryId, String proteinName, boolean isDecoy) {
-        return peptideDAO.getAllByLibraryIdAndProteinNameAndIsDecoy(libraryId, proteinName, isDecoy);
+    public List<PeptideDO> getAllByLibraryIdAndProteinName(String libraryId, String proteinName) {
+        return peptideDAO.getAllByLibraryIdAndProteinName(libraryId, proteinName);
     }
 
     @Override
@@ -239,43 +234,12 @@ public class PeptideServiceImpl implements PeptideService {
         if (uniqueCheck) {
             query.setIsUnique(true);
         }
-        if (noDecoy) {
-            query.setIsDecoy(false);
-        }
 
         List<TargetPeptide> targetList = peptideDAO.getTPAll(query);
-        if (!targetList.isEmpty() && targetList.size() != 2 && type.equals(Constants.EXP_TYPE_PRM)) {
-            //PRM模式下, rtRange不为空;
-            TargetPeptide bestTarget = null, bestDecoy = null;
-            float mzDistance = Float.MAX_VALUE;
-            for (TargetPeptide peptide : targetList) {
-                if (rtExtractionWindows != -1) {
-                    float iRt = (peptide.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue();
-                    if (iRt < rtRange[0] - 30 || iRt > rtRange[1] + 30) {
-                        continue;
-                    }
-                }
-                float tempMzDistance = Math.abs(peptide.getMz() - precursorMz);
-                if (tempMzDistance <= mzDistance) {
-                    if (peptide.getIsDecoy()) {
-                        bestDecoy = peptide;
-                    } else {
-                        bestTarget = peptide;
-                    }
-                    mzDistance = tempMzDistance;
-                }
-            }
-            targetList.clear();
-            if (bestTarget != null) {
-                targetList.add(bestTarget);
-            }
-            if (bestDecoy != null) {
-                targetList.add(bestDecoy);
-            }
-            if (mzDistance >= 0.0002f && bestTarget != null) {
-                System.out.println("Coordinate: " + bestTarget.getPeptideRef() + " " + mzDistance);
-            }
+        if(type.equals(Constants.EXP_TYPE_PRM)){
+            prmFilter(targetList,rtExtractionWindows,slopeIntercept,rtRange,precursorMz);
         }
+
         long readDB = System.currentTimeMillis() - start;
         if (rtExtractionWindows != -1) {
             for (TargetPeptide targetPeptide : targetList) {
@@ -290,7 +254,7 @@ public class PeptideServiceImpl implements PeptideService {
             }
         }
 
-        logger.info("构建卷积MS2坐标,总计" + targetList.size() + "条记录,读取标准库耗时:" + readDB + "毫秒");
+        logger.info("构建提取XIC的MS2坐标,总计" + targetList.size() + "条记录,读取标准库耗时:" + readDB + "毫秒");
         return targetList;
     }
 
@@ -328,7 +292,6 @@ public class PeptideServiceImpl implements PeptideService {
         peptide.setFullName(fullName);
         peptide.setCharge(charge);
         peptide.setSequence(fullName.replaceAll("\\([^)]+\\)", ""));
-        peptide.setIsDecoy(false);
         HashMap<Integer, String> unimodMap = PeptideUtil.parseModification(fullName);
         peptide.setUnimodMap(unimodMap);
         peptide.setMz(formulaCalculator.getMonoMz(peptide.getSequence(), ResidueType.Full, charge, 0, 0, false, new ArrayList<>(unimodMap.values())));
@@ -337,5 +300,33 @@ public class PeptideServiceImpl implements PeptideService {
 
         peptide.setFragmentMap(fragmentFactory.buildFragmentMap(peptide, minLength, ionTypes, chargeTypes));
         return peptide;
+    }
+
+    private void prmFilter(List<TargetPeptide> targetList, float rtExtractionWindows, SlopeIntercept slopeIntercept,Float[] rtRange, float precursorMz){
+        if (!targetList.isEmpty() && targetList.size() != 2) {
+            //PRM模式下, rtRange不为空;
+            TargetPeptide bestTarget = null;
+            float mzDistance = Float.MAX_VALUE;
+            for (TargetPeptide peptide : targetList) {
+                if (rtExtractionWindows != -1) {
+                    float iRt = (peptide.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue();
+                    if (iRt < rtRange[0] - 30 || iRt > rtRange[1] + 30) {
+                        continue;
+                    }
+                }
+                float tempMzDistance = Math.abs(peptide.getMz() - precursorMz);
+                if (tempMzDistance <= mzDistance) {
+                    bestTarget = peptide;
+                    mzDistance = tempMzDistance;
+                }
+            }
+            targetList.clear();
+            if (bestTarget != null) {
+                targetList.add(bestTarget);
+            }
+            if (mzDistance >= 0.0002f && bestTarget != null) {
+                System.out.println("Coordinate: " + bestTarget.getPeptideRef() + " " + mzDistance);
+            }
+        }
     }
 }

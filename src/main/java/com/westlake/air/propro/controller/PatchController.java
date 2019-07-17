@@ -57,7 +57,6 @@ public class PatchController {
             PeptideDO peptideDO = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(fromLibId, pep, false);
             if (peptideDO != null) {
                 peptideDO.setLibraryId(toLibId);
-                peptideDO.setLibraryName(toLibraryDO.getName());
                 peptideDO.setId(null);
                 peptideService.insert(peptideDO);
             } else {
@@ -120,7 +119,6 @@ public class PatchController {
 
 
             peptideDO.setId(null);
-            peptideDO.setLibraryName(newLibrary.getName());
             peptideDO.setLibraryId(newLibrary.getId());
             peptideDO.setFragmentMap(topFragMap);
         }
@@ -215,7 +213,6 @@ public class PatchController {
         libraryDO = libraryService.getByName(libraryDO.getName());
         for (PeptideDO peptideDO : filteredList) {
             peptideDO.setLibraryId(libraryDO.getId());
-            peptideDO.setLibraryName(libraryDO.getName());
             peptideDO.setId(null);
         }
         peptideService.insertAll(filteredList, false);
@@ -279,7 +276,6 @@ public class PatchController {
             if (peptideDO.getProteinName().toLowerCase().contains("irt")){
                 peptideDO.setProteinName("iRT");
                 peptideDO.setId(null);
-                peptideDO.setLibraryName(libraryDO.getName());
                 peptideDO.setLibraryId(libraryDO.getId());
                 irtPeptides.add(peptideDO);
             }

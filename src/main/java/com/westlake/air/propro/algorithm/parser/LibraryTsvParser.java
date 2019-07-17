@@ -76,14 +76,14 @@ public class LibraryTsvParser extends BaseLibraryParser {
                 return ResultDO.buildError(ResultCode.LINE_IS_EMPTY);
             }
             HashMap<String, Integer> columnMap = parseColumns(line);
-
-
             HashMap<String, PeptideDO> map = new HashMap<>();
 
             while ((line = reader.readLine()) != null) {
                 ResultDO<PeptideDO> resultDO = parseTransition(line, columnMap, library);
                 if (resultDO.isFailed()) {
-                    tranResult.addErrorMsg(resultDO.getMsgInfo());
+                    if(!resultDO.getMsgCode().equals(ResultCode.NO_DECOY.getCode())){
+                        tranResult.addErrorMsg(resultDO.getMsgInfo());
+                    }
                     continue;
                 }
                 PeptideDO peptide = resultDO.getModel();
@@ -188,18 +188,19 @@ public class LibraryTsvParser extends BaseLibraryParser {
         String[] row = StringUtils.splitByWholeSeparator(line, "\t");
         PeptideDO peptideDO = new PeptideDO();
         boolean isDecoy = !row[columnMap.get(IsDecoy)].equals("0");
-
+        if(isDecoy){
+            return ResultDO.buildError(ResultCode.NO_DECOY);
+        }
         FragmentInfo fi = new FragmentInfo();
-        peptideDO.setIsDecoy(isDecoy);
+
         peptideDO.setLibraryId(library.getId());
-        peptideDO.setLibraryName(library.getName());
         peptideDO.setMz(Double.parseDouble(row[columnMap.get(PrecursorMz)]));
         fi.setMz(Double.parseDouble(row[columnMap.get(ProductMz)]));
         peptideDO.setRt(Double.parseDouble(row[columnMap.get(NormalizedRetentionTime)]));
 
         fi.setIntensity(Double.parseDouble(row[columnMap.get(ProductIonIntensity)]));
         peptideDO.setSequence(row[columnMap.get(PeptideSequence)]);
-        peptideDO.setProteinName(row[columnMap.get(ProteinName)].replace("DECOY_", ""));
+        peptideDO.setProteinName(row[columnMap.get(ProteinName)]);
         if (peptideDO.getProteinName().toLowerCase().contains("irt")) {
             peptideDO.setProteinName("iRT");
         }
@@ -211,13 +212,9 @@ public class LibraryTsvParser extends BaseLibraryParser {
         if (fullName == null) {
             logger.info("Full Peptide Name cannot be empty");
         } else {
-            if (!isDecoy) {
-                peptideDO.setFullName(transitionGroupId[1]);
-            } else {
-                peptideDO.setFullName(transitionGroupId[2]);
-            }
+            peptideDO.setFullName(transitionGroupId[1]);
         }
-        peptideDO.setTargetSequence(removeUnimod(peptideDO.getFullName()));
+        peptideDO.setSequence(removeUnimod(peptideDO.getFullName()));
         try {
             peptideDO.setCharge(Integer.parseInt(row[columnMap.get(PrecursorCharge)]));
         } catch (Exception e) {
@@ -280,14 +277,11 @@ public class LibraryTsvParser extends BaseLibraryParser {
                         .replace(" ", "");
 
                 PeptideDO peptideDO = new PeptideDO();
-//                peptideDO.setPrmRtStart(Double.parseDouble(columns[columnMap.get("start[min]")]));
                 if (columnMap.containsKey("rt[min]")) {
                     peptideDO.setPrmRt(Double.parseDouble(columns[columnMap.get("rt[min]")]));
                 }
-                peptideDO.setIsDecoy(false);
                 peptideDO.setFullName(modSequence);
                 peptideDO.setSequence(removeUnimod(modSequence));
-                peptideDO.setTargetSequence(peptideDO.getSequence());
                 peptideDO.setUnimodMap(parseModification(modSequence));
                 if (withCharge) {
                     peptideDO.setCharge(Integer.parseInt(columns[columnMap.get("charge")]));

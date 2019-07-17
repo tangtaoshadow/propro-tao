@@ -50,7 +50,7 @@ public class FeatureExtractor {
     TaskService taskService;
 
     /**
-     * @param dataDO       卷积后的数据对象
+     * @param dataDO       XIC后的数据对象
      * @param intensityMap 得到标准库中peptideRef对应的碎片和强度的键值对
      * @param sigmaSpacing
      * @return
@@ -67,11 +67,11 @@ public class FeatureExtractor {
         HashMap<String, double[]> noise1000Map = new HashMap<>();
         HashMap<String, Double[]> intensitiesMap = new HashMap<>();
 
-        //将没有卷积到信号的CutInfo过滤掉,同时将Float类型的参数调整为Double类型进行计算
+        //将没有提取到信号的CutInfo过滤掉,同时将Float类型的参数调整为Double类型进行计算
         for (String cutInfo : intensityMap.keySet()) {
-            //获取对应的卷积数据
+            //获取对应的XIC数据
             Float[] intensityArray = dataDO.getIntensityMap().get(cutInfo);
-            //如果没有卷积到信号,dataDO为null
+            //如果没有提取到信号,dataDO为null
             if (intensityArray == null) {
                 continue;
             }

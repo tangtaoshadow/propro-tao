@@ -78,25 +78,12 @@ public class Constants {
     public static final double B_SIDE_MASS = 1.007276466771d;
     public static final double ELEMENT_TOLERANCE = 0.5d;
 
-    public static final int SCORE_RANGE = 20;
-
     public static final double EMG_CONST = 2.4055;
     public static final int EMG_MAX_ITERATION = 500;
-
-    //卷积前的原始数据及索引
-    public static final String SUFFIX_AIRUS_DATA = ".aird";
-    public static final String SUFFIX_AIRUS_DATA_INFO = ".aird.json";
-    //卷积以后的数据格式及索引
-    public static final String SUFFIX_AIRUS_CONVOLUTION= ".airc";
-    public static final String SUFFIX_AIRUS_CONVOLUTION_INFO= ".airc.json";
 
     public static final String CHANGE_LINE = "\r\n";
     public static final String TAB = "\t";
     public static final String COMMA = ",";
-
-    public static final String AIRD_COMPRESSION_TYPE_ZLIB = "zlib";
-
-    public static final String CUTINFO_PREFIX = "CUTINFO_";
 
     public static final String EXP_TYPE_DIA_SWATH = "DIA_SWATH";
     public static final String EXP_TYPE_PRM = "PRM";

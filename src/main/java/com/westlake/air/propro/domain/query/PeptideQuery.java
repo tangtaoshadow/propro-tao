@@ -23,19 +23,12 @@ public class PeptideQuery extends PageQuery {
      */
     Double rt;
 
-    /**
-     * 是否是伪肽段
-     */
-    Boolean isDecoy;
-
     Boolean isUnique;
 
     /**
      * 对应肽段序列
      */
     String sequence;
-
-    String likeSequence;
 
     /**
      * 对应蛋白质名称
@@ -46,6 +39,7 @@ public class PeptideQuery extends PageQuery {
      * 肽段
      */
     String peptideRef;
+
     /**
      * 完整版肽段名称(含修饰基团)
      */

@@ -2,15 +2,12 @@ package com.westlake.air.propro.domain.db;
 
 import com.westlake.air.propro.domain.BaseDO;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
-import com.westlake.air.propro.algorithm.parser.model.chemistry.AminoAcid;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by James Lu MiaoShan
@@ -42,17 +39,6 @@ public class PeptideDO extends BaseDO {
     Double mz;
 
     /**
-     * 是否是伪肽段
-     */
-    @Indexed
-    Boolean isDecoy;
-
-    /**
-     * 标准库名称
-     */
-    String libraryName;
-
-    /**
      * 对应蛋白质名称
      */
     String proteinName;
@@ -77,13 +63,16 @@ public class PeptideDO extends BaseDO {
      */
     Double prmRt;
 
-    /**
-     * 对应肽段序列,如果是伪肽段,则本字段为伪肽段对应的原始真肽段的序列(不包含UniModId)
-     */
-    String targetSequence;
+//    /**
+//     * 对应肽段序列,如果是伪肽段,则本字段为伪肽段对应的原始真肽段的序列(不包含UniModId)
+//     */
+//    String targetSequence;
 
+//    /**
+//     * 对应肽段序列,如果是伪肽段,则为对应的伪肽段的序列(不包含UniModId)
+//     */
     /**
-     * 对应肽段序列,如果是伪肽段,则为对应的伪肽段的序列(不包含UniModId)
+     * 去除了修饰基团的肽段序列
      */
     String sequence;
 
@@ -105,17 +94,25 @@ public class PeptideDO extends BaseDO {
 
     /**
      * 对应的肽段碎片的信息
+     * key为cutinfo
      */
     HashMap<String, FragmentInfo> fragmentMap = new HashMap<>();
 
+    /**
+     * 伪肽段的信息
+     */
+    String decoySequence;
+    String decoyFullName;
+    HashMap<Integer, String> decoyUnimodMap;
+    HashMap<String, FragmentInfo> decoyFragmentMap;
+
+    /**
+     * 扩展字段
+     */
     String features;
 
     public void putFragment(String cutInfo, FragmentInfo fi){
         fragmentMap.put(cutInfo, fi);
-    }
-
-    public void removeFragment(String cutInfo){
-        fragmentMap.remove(cutInfo);
     }
 
     public TargetPeptide toTargetPeptide(){
@@ -123,10 +120,13 @@ public class PeptideDO extends BaseDO {
         tp.setPeptideRef(getPeptideRef());
         tp.setRt(getRt().floatValue());
         tp.setFragmentMap(getFragmentMap());
-        tp.setIsDecoy(getIsDecoy());
         tp.setMz(getMz().floatValue());
         tp.setProteinName(getProteinName());
         tp.setUnimodMap(getUnimodMap());
+        tp.setDecoySequence(getSequence());
+        tp.setDecoyFullName(getFullName());
+        tp.setDecoyUnimodMap(getDecoyUnimodMap());
+        tp.setDecoyFragmentMap(getDecoyFragmentMap());
         return tp;
     }
 }

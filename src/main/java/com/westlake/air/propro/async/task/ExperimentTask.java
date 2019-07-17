@@ -93,7 +93,7 @@ public class ExperimentTask extends BaseTask {
             long start = System.currentTimeMillis();
             //如果还没有计算irt,先执行计算irt的步骤
             if (lumsParams.getIRtLibrary() != null) {
-                taskService.update(taskDO, "开始卷积IRT校准库并且计算iRT值");
+                taskService.update(taskDO, "开始提取IRT校准库数据并且计算iRT值");
                 ResultDO<IrtResult> resultDO = irt.extractAndAlign(lumsParams.getExperimentDO(), lumsParams.getIRtLibrary(), lumsParams.getMzExtractWindow(), lumsParams.getSigmaSpacing());
                 if (resultDO.isFailed()) {
                     taskService.finish(taskDO, TaskStatus.FAILED.getName(), "iRT计算失败:" + resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
@@ -107,14 +107,14 @@ public class ExperimentTask extends BaseTask {
                 taskDO.addLog("斜率:" + lumsParams.getSlopeIntercept().getSlope() + "截距:" + lumsParams.getSlopeIntercept().getIntercept());
             }
 
-            taskService.update(taskDO, "入参准备完毕,开始卷积(打分)");
+            taskService.update(taskDO, "入参准备完毕,开始提取数据(打分)");
             lumsParams.setTaskDO(taskDO);
             ResultDO result = extractor.extract(lumsParams);
             if (result.isFailed()) {
                 taskService.finish(taskDO, TaskStatus.FAILED.getName(), "任务执行失败:" + result.getMsgInfo());
                 return;
             }
-            taskService.update(taskDO, "处理完毕,卷积(打分)总耗时:" + (System.currentTimeMillis() - start) + "毫秒,开始进行合并打分.....");
+            taskService.update(taskDO, "处理完毕,提取数据(打分)总耗时:" + (System.currentTimeMillis() - start) + "毫秒,开始进行合并打分.....");
             AirusParams ap = new AirusParams();
             ap.setScoreTypes(lumsParams.getScoreTypes());
             FinalResult finalResult = airus.doAirus(lumsParams.getOverviewId(), ap);

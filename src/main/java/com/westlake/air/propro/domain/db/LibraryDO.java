@@ -58,14 +58,6 @@ public class LibraryDO extends BaseDO {
     Long totalCount;
     Long totalUniqueCount;
 
-    //真肽段片段总数目
-    Long totalTargetCount;
-    Long totalUniqueTargetCount;
-
-    //为肽段片段总数目
-    Long totalDecoyCount;
-    Long totalUniqueDecoyCount;
-
     int fastaDeWeightPepCount;
     int libraryDeWeightPepCount;
     int fastaDeWeightProtCount;

@@ -75,22 +75,22 @@ public class TraMLParser extends BaseLibraryParser {
         ResultDO<PeptideDO> resultDO = new ResultDO<>(true);
         PeptideDO peptideDO = new PeptideDO();
         peptideDO.setLibraryId(library.getId());
-        peptideDO.setLibraryName(library.getName());
 
         FragmentInfo fi = new FragmentInfo();
 
         // parse transition attribution
         boolean isDecoy = transition.getPeptideRef().toLowerCase().contains("decoy");
-        peptideDO.setIsDecoy(isDecoy);
+        //不处理伪肽段信息
+        if(isDecoy){
+            return ResultDO.buildError(ResultCode.NO_DECOY);
+        }
         // parse transition cvparams
         List<CvParam> listCvParams = transition.getCvParams();
         for (CvParam cvParam : listCvParams) {
             if (cvParam.getName().equals("product ion intensity")) {
                 fi.setIntensity(Double.valueOf(cvParam.getValue()));
             } else if (cvParam.getName().equals("decoy SRM transition")) {
-                peptideDO.setIsDecoy(true);
-            } else if (cvParam.getName().equals("target SRM transition")) {
-                peptideDO.setIsDecoy(false);
+                return ResultDO.buildError(ResultCode.NO_DECOY);
             }
         }
         // parse transition userparam
@@ -135,9 +135,8 @@ public class TraMLParser extends BaseLibraryParser {
         String rt = peptide.getRetentionTimeList().get(0).getCvParams().get(0).getValue();
         peptideDO.setRt(Double.valueOf(rt));
         peptideDO.setSequence(peptide.getSequence());
-        peptideDO.setProteinName(peptide.getProteinRefList().get(0).getRef().replace("DECOY_",""));
+        peptideDO.setProteinName(peptide.getProteinRefList().get(0).getRef());
         peptideDO.setFullName(peptide.getUserParams().get(0).getValue());
-        peptideDO.setTargetSequence(removeUnimod(peptideDO.getFullName()));
         for(CvParam cvParam : peptide.getCvParams()){
             if(cvParam.getName().equals("charge state")){
                 peptideDO.setCharge(Integer.valueOf(cvParam.getValue()));
@@ -188,7 +187,9 @@ public class TraMLParser extends BaseLibraryParser {
             for (Transition transition : traML.getTransitionList()) {
                 ResultDO<PeptideDO> resultDO = parseTransition(transition, peptideMap, library);
                 if (resultDO.isFailed()) {
-                    tranResult.addErrorMsg(resultDO.getMsgInfo());
+                    if(!resultDO.getMsgCode().equals(ResultCode.NO_DECOY.getCode())){
+                        tranResult.addErrorMsg(resultDO.getMsgInfo());
+                    }
                     continue;
                 }
                 PeptideDO peptide = resultDO.getModel();

@@ -6,6 +6,9 @@ import lombok.Data;
 @Data
 public class FragmentInfo {
 
+    /**
+     * format : y3^2
+     */
     String cutInfo;
 
     /**

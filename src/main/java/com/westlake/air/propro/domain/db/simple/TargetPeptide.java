@@ -32,8 +32,6 @@ public class TargetPeptide {
 
     HashMap<String, FragmentInfo> fragmentMap;
 
-    Boolean isDecoy;
-
     Boolean isUnique;
 
     float rt;
@@ -48,6 +46,14 @@ public class TargetPeptide {
      */
     HashMap<Integer, String> unimodMap;
 
+    /**
+     * 伪肽段的信息
+     */
+    String decoySequence;
+    String decoyFullName;
+    HashMap<Integer, String> decoyUnimodMap;
+    HashMap<String, FragmentInfo> decoyFragmentMap;
+
     public TargetPeptide(){}
 
     public TargetPeptide(PeptideDO peptide){
@@ -56,17 +62,11 @@ public class TargetPeptide {
         this.peptideRef = peptide.getPeptideRef();
         this.mz = peptide.getMz().floatValue();
         this.fragmentMap = peptide.getFragmentMap();
-        this.isDecoy = peptide.getIsDecoy();
         this.rt = peptide.getRt().floatValue();
-    }
-
-    //根据PeptideDO构建其IntensityMap,key为cutInfo,value为对应的Intensity值
-    public static HashMap<String, Float> buildIntensityMap(PeptideDO peptide){
-        HashMap<String, Float> intensityMap = new HashMap<>();
-        for(String cutInfo : peptide.getFragmentMap().keySet()){
-            intensityMap.put(cutInfo, peptide.getFragmentMap().get(cutInfo).getIntensity().floatValue());
-        }
-        return intensityMap;
+        this.decoySequence = peptide.getDecoySequence();
+        this.decoyFullName = peptide.getFullName();
+        this.decoyUnimodMap = peptide.getDecoyUnimodMap();
+        this.decoyFragmentMap = peptide.getDecoyFragmentMap();
     }
 
     //根据自身构建IntensityMap,key为cutInfo,value为对应的Intensity值

@@ -221,15 +221,7 @@ public class LibraryServiceImpl implements LibraryService {
             PeptideQuery query = new PeptideQuery();
             query.setLibraryId(library.getId());
             library.setTotalCount(peptideService.count(query));
-            query.setIsDecoy(false);
-            library.setTotalTargetCount(peptideService.count(query));
-            query.setIsDecoy(true);
-            library.setTotalDecoyCount(peptideService.count(query));
             query.setIsUnique(true);
-            library.setTotalUniqueDecoyCount(peptideService.count(query));
-            query.setIsDecoy(false);
-            library.setTotalUniqueTargetCount(peptideService.count(query));
-            query.setIsDecoy(null);
             library.setTotalUniqueCount(peptideService.count(query));
 
             update(library);

@@ -44,9 +44,6 @@ public class PeptideDAO extends BaseDAO<PeptideDO, PeptideQuery>{
         if (peptideQuery.getId() != null) {
             query.addCriteria(where("id").is(peptideQuery.getId()));
         }
-        if (peptideQuery.getIsDecoy() != null) {
-            query.addCriteria(where("isDecoy").is(peptideQuery.getIsDecoy()));
-        }
         if (peptideQuery.getIsUnique() != null) {
             query.addCriteria(where("isUnique").is(peptideQuery.getIsUnique()));
         }
@@ -68,9 +65,6 @@ public class PeptideDAO extends BaseDAO<PeptideDO, PeptideQuery>{
         if (peptideQuery.getMzStart() != null) {
             query.addCriteria(where("mz").gte(peptideQuery.getMzStart()).lt(peptideQuery.getMzEnd()));
         }
-        if (peptideQuery.getLikeSequence() != null) {
-            query.addCriteria(where("sequence").regex(peptideQuery.getLikeSequence(), "i"));
-        }
         return query;
     }
 
@@ -80,29 +74,20 @@ public class PeptideDAO extends BaseDAO<PeptideDO, PeptideQuery>{
         return mongoTemplate.find(query, PeptideDO.class, CollectionName);
     }
 
-    public List<PeptideDO> getAllByLibraryIdAndIsDecoy(String libraryId, boolean isDecoy) {
-        Query query = new Query(where("libraryId").is(libraryId));
-        query.addCriteria(where("isDecoy").is(isDecoy));
-        return mongoTemplate.find(query, PeptideDO.class, CollectionName);
-    }
-
-    public List<PeptideDO> getAllByLibraryIdAndProteinNameAndIsDecoy(String libraryId, String proteinName, boolean isDecoy) {
+    public List<PeptideDO> getAllByLibraryIdAndProteinName(String libraryId, String proteinName) {
         Query query = new Query(where("libraryId").is(libraryId));
         query.addCriteria(where("proteinName").is(proteinName));
-        query.addCriteria(where("isDecoy").is(isDecoy));
         return mongoTemplate.find(query, PeptideDO.class, CollectionName);
     }
 
-    public PeptideDO getByLibraryIdAndPeptideRefAndIsDecoy(String libraryId, String peptideRef, boolean isDecoy) {
+    public PeptideDO getByLibraryIdAndPeptideRef(String libraryId, String peptideRef) {
         Query query = new Query(where("libraryId").is(libraryId));
-        query.addCriteria(where("isDecoy").is(isDecoy));
         query.addCriteria(where("peptideRef").is(peptideRef));
         return mongoTemplate.findOne(query, PeptideDO.class, CollectionName);
     }
 
-    public TargetPeptide getTargetPeptideByDataRef(String libraryId, String peptideRef, boolean isDecoy) {
+    public TargetPeptide getTargetPeptideByDataRef(String libraryId, String peptideRef) {
         Query query = new Query(where("libraryId").is(libraryId));
-        query.addCriteria(where("isDecoy").is(isDecoy));
         query.addCriteria(where("peptideRef").is(peptideRef));
         return mongoTemplate.findOne(query, TargetPeptide.class, CollectionName);
     }

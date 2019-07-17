@@ -1,6 +1,5 @@
 package com.westlake.air.propro.utils;
 
-import com.westlake.air.propro.domain.db.ExperimentDO;
 import org.apache.commons.io.FilenameUtils;
 
 public class RepositoryUtil {

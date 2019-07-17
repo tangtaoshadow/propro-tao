@@ -28,7 +28,7 @@ public class AnalyseOverviewDO extends BaseDO {
     @Indexed
     String expId;
 
-    //卷积实验的创建者
+    //分析实验的创建者
     @Indexed
     String ownerName;
 
@@ -38,7 +38,7 @@ public class AnalyseOverviewDO extends BaseDO {
     //0:SWATH_DIA 1:PRM
     String type;
 
-    //卷积代号
+    //分析代号
     String name;
 
     //标签
@@ -50,10 +50,10 @@ public class AnalyseOverviewDO extends BaseDO {
     //标准库名称
     String libraryName;
 
-    //使用的斜率,一般来源于experimentDO对象,也可以在执行单独的卷积步骤自由设定
+    //使用的斜率,一般来源于experimentDO对象,也可以在执行单独的数据提取步骤自由设定
     Double slope;
 
-    //使用的截距,一般来源于experimentDO对象,也可以在执行单独的卷积步骤自由设定
+    //使用的截距,一般来源于experimentDO对象,也可以在执行单独的数据提取步骤自由设定
     Double intercept;
 
     //在打分时设定的shape分的阈值,如果低于这个阈值的峰组会被直接忽略掉,从而节省运算时间
@@ -62,10 +62,10 @@ public class AnalyseOverviewDO extends BaseDO {
     //在打分时设定的shapeWeight分的阈值,如果低于这个阈值的峰组会被直接忽略掉,从而节省运算时间
     Float shapeScoreWeightThreshold;
 
-    //rt卷积窗口,一般设定为600或者800,一般来源于experimentDO对象,也可以在执行单独的卷积步骤自由设定
+    //rt数据提取窗口,一般设定为600或者800,一般来源于experimentDO对象,也可以在执行单独的数据提取步骤自由设定
     Float rtExtractWindow;
 
-    //mz卷积窗口,一般设定为0.05或者0.03,一般来源于experimentDO对象,也可以在执行单独的卷积步骤自由设定
+    //mz数据提取窗口,一般设定为0.05或者0.03,一般来源于experimentDO对象,也可以在执行单独的数据提取步骤自由设定
     Float mzExtractWindow;
 
     //最终使用的分类器:lda, xgboost
@@ -77,10 +77,10 @@ public class AnalyseOverviewDO extends BaseDO {
     //在计算高斯平滑时使用的Sigma值,一般为0.01
     Float spacing;
 
-    //卷积实验的创建时间
+    //分析实验的创建时间
     Date createDate;
 
-    //卷积实验的最后一次修改时间
+    //分析实验的最后一次修改时间
     Date lastModifiedDate;
 
     //最终计算所得的子分数的权重,LDA算法才有
@@ -89,7 +89,7 @@ public class AnalyseOverviewDO extends BaseDO {
     //最终计算鉴定到的肽段数目
     Integer matchedPeptideCount;
 
-    //最终卷积到的肽段数目
+    //最终提取到的肽段数目
     Integer totalPeptideCount;
 
     //对应标准库中的肽段数目

@@ -20,13 +20,11 @@ public interface PeptideService {
 
     List<PeptideDO> getAllByLibraryId(String libraryId);
 
-    PeptideDO getByLibraryIdAndPeptideRefAndIsDecoy(String libraryId, String peptideRef, boolean isDecoy);
+    PeptideDO getByLibraryIdAndPeptideRef(String libraryId, String peptideRef);
 
-    TargetPeptide getTargetPeptideByDataRef(String libraryId, String peptideRef, boolean isDecoy);
+    TargetPeptide getTargetPeptideByDataRef(String libraryId, String peptideRef);
 
-    List<PeptideDO> getAllByLibraryIdAndIsDecoy(String libraryId, boolean isDecoy);
-
-    List<PeptideDO> getAllByLibraryIdAndProteinNameAndIsDecoy(String libraryId, String proteinName, boolean isDecoy);
+    List<PeptideDO> getAllByLibraryIdAndProteinName(String libraryId, String proteinName);
 
     Long count(PeptideQuery query);
 

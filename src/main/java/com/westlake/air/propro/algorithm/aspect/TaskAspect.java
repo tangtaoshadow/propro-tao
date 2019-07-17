@@ -33,7 +33,7 @@ public class TaskAspect {
         ArrayList exps = (ArrayList) args[2];
         taskDO.start();
         if (exps != null && library != null) {
-            taskService.update(taskDO, TaskStatus.RUNNING.getName(), "开始卷积IRT校准库并且计算iRT值,总计" + exps.size() + "个目标实验,Library ID:" + library.getId() + ";Type:" + library.getType());
+            taskService.update(taskDO, TaskStatus.RUNNING.getName(), "开始分析IRT校准库并且计算iRT值,总计" + exps.size() + "个目标实验,Library ID:" + library.getId() + ";Type:" + library.getType());
         }
 
         try {
@@ -56,7 +56,7 @@ public class TaskAspect {
         LumsParams lumsParams = (LumsParams) args[1];
         taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());
-        taskDO.addLog("mz卷积窗口:" + lumsParams.getMzExtractWindow() + ",RT卷积窗口:" + lumsParams.getRtExtractWindow())
+        taskDO.addLog("mz窗口:" + lumsParams.getMzExtractWindow() + ",RT窗口:" + lumsParams.getRtExtractWindow())
                 .addLog("Sigma:" + lumsParams.getSigmaSpacing().getSigma() + ",Spacing:" + lumsParams.getSigmaSpacing().getSpacing())
                 .addLog("使用标准库ID:" + lumsParams.getLibrary().getId())
                 .addLog("Note:" + lumsParams.getNote())
