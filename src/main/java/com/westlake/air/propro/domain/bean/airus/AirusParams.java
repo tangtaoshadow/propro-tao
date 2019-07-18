@@ -20,7 +20,7 @@ public class AirusParams {
 
     double trainTestRatio = 1;
 
-    int xevalNumIter = 30;
+    int xevalNumIter = 20;
 
     double ssInitialFdr = 0.15;
 

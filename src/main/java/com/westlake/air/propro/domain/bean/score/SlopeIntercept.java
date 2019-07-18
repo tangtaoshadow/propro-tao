@@ -13,14 +13,15 @@ public class SlopeIntercept {
 
     Double intercept;
 
-    public SlopeIntercept(){}
+    public SlopeIntercept() {
+    }
 
-    public SlopeIntercept(double slope, double intercept){
+    public SlopeIntercept(double slope, double intercept) {
         this.slope = slope;
         this.intercept = intercept;
     }
 
-    public static SlopeIntercept create(){
+    public static SlopeIntercept create() {
         SlopeIntercept si = new SlopeIntercept();
         si.setIntercept(0d);
         si.setSlope(0d);
@@ -30,5 +31,9 @@ public class SlopeIntercept {
     @Override
     public String toString() {
         return "slope:" + slope + ";intercept:" + intercept;
+    }
+
+    public String printFormula() {
+        return "y=" + slope + "x" + (intercept > 0 ? ("+" + intercept) : intercept);
     }
 }

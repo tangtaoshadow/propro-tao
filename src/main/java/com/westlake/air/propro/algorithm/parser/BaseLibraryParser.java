@@ -30,8 +30,6 @@ public abstract class BaseLibraryParser {
     public final Logger logger = LoggerFactory.getLogger(BaseLibraryParser.class);
 
     @Autowired
-    AirXStream airXStream;
-    @Autowired
     PeptideService peptideService;
 
     boolean drop = true;
