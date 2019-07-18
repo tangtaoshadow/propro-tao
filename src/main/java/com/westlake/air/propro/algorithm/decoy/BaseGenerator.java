@@ -3,6 +3,8 @@ package com.westlake.air.propro.algorithm.decoy;
 import com.westlake.air.propro.algorithm.parser.model.traml.Modification;
 import com.westlake.air.propro.algorithm.parser.model.traml.Peptide;
 import com.westlake.air.propro.domain.db.PeptideDO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +15,16 @@ import java.util.List;
  */
 public abstract class BaseGenerator {
 
+    public final Logger logger = LoggerFactory.getLogger(BaseGenerator.class);
+
     protected abstract void generate(PeptideDO peptide);
+
+    public void generate(List<PeptideDO> list) {
+        for (PeptideDO target : list) {
+            generate(target);
+        }
+        logger.info("伪肽段生成完毕,总计:"+list.size()+"个");
+    }
     /**
      * Compute relative identity (relative number of matches of amino acids at the same position) between two sequences
      *

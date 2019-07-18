@@ -34,13 +34,6 @@ public class ShuffleGenerator extends BaseGenerator {
     @Autowired
     FragmentFactory fragmentFactory;
 
-    public void generate(List<PeptideDO> list) {
-        for (PeptideDO target : list) {
-            generate(target);
-        }
-        logger.info("伪肽段生成完毕,总计:"+list.size()+"个");
-    }
-
     @Override
     public void generate(PeptideDO peptideDO) {
 

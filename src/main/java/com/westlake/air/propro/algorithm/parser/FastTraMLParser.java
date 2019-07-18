@@ -1,6 +1,5 @@
 package com.westlake.air.propro.algorithm.parser;
 
-import com.westlake.air.propro.algorithm.parser.xml.AirXStream;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.TaskDO;
@@ -17,8 +16,6 @@ import java.util.HashSet;
 @Component("fastTraMLParser")
 public class FastTraMLParser extends BaseLibraryParser {
 
-    @Autowired
-    AirXStream airXStream;
     @Autowired
     TaskService taskService;
 

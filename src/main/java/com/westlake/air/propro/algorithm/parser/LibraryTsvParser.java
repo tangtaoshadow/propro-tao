@@ -148,12 +148,16 @@ public class LibraryTsvParser extends BaseLibraryParser {
                 }
                 ResultDO<PeptideDO> resultDO = parseTransition(line, columnMap, library);
                 if (resultDO.isFailed()) {
-                    tranResult.addErrorMsg(resultDO.getMsgInfo());
+                    if(!resultDO.getMsgCode().equals(ResultCode.NO_DECOY.getCode())){
+                        tranResult.addErrorMsg(resultDO.getMsgInfo());
+                    }
                     continue;
                 }
 
                 PeptideDO peptide = resultDO.getModel();
                 addFragment(peptide, map);
+                //在导入Peptide的同时生成伪肽段
+                shuffleGenerator.generate(peptide);
             }
 
             //删除命中的部分, 得到未命中的Set

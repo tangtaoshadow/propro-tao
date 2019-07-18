@@ -1,5 +1,6 @@
 package com.westlake.air.propro.algorithm.parser;
 
+import com.westlake.air.propro.algorithm.decoy.generator.ShuffleGenerator;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.peptide.Annotation;
@@ -30,6 +31,8 @@ public class TraMLParser extends BaseLibraryParser {
     AirXStream airXStream;
     @Autowired
     TaskService taskService;
+    @Autowired
+    ShuffleGenerator shuffleGenerator;
 
     public Class<?>[] classes = new Class[]{
             Compound.class, CompoundList.class, Configuration.class, Contact.class, Cv.class, CvParam.class,
@@ -242,11 +245,15 @@ public class TraMLParser extends BaseLibraryParser {
                 ResultDO<PeptideDO> resultDO = parseTransition(transition, peptideMap, library);
 
                 if (resultDO.isFailed()) {
-                    tranResult.addErrorMsg(resultDO.getMsgInfo());
+                    if(!resultDO.getMsgCode().equals(ResultCode.NO_DECOY.getCode())){
+                        tranResult.addErrorMsg(resultDO.getMsgInfo());
+                    }
                     continue;
                 }
                 PeptideDO peptide = resultDO.getModel();
                 addFragment(peptide, map);
+                //在导入Peptide的同时生成伪肽段
+                shuffleGenerator.generate(peptide);
             }
             for (PeptideDO peptideDO: map.values()){
                 selectedPepSet.remove(peptideDO.getPeptideRef());
