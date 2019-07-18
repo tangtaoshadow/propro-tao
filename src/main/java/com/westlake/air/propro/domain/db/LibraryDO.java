@@ -39,7 +39,6 @@ public class LibraryDO extends BaseDO {
     @Indexed(unique = true)
     String name;
 
-    //,
     /**
      * 0:标准库,1:iRT校准库
      * @see com.westlake.air.propro.constants.Constants
