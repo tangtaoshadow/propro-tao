@@ -55,7 +55,7 @@ public class Airus {
     public FinalResult doAirus(String overviewId, AirusParams airusParams) {
         String type = "";
         FinalResult finalResult = new FinalResult();
-        logger.info("开始清理已识别的肽段数目");
+        logger.info("开始处理已识别的肽段数目");
         ResultDO<AnalyseOverviewDO> overviewDOResultDO = analyseOverviewService.getById(overviewId);
         if (overviewDOResultDO.isFailed()) {
             finalResult.setErrorInfo(ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());

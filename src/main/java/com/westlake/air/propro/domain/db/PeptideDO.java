@@ -63,21 +63,13 @@ public class PeptideDO extends BaseDO {
      */
     Double prmRt;
 
-//    /**
-//     * 对应肽段序列,如果是伪肽段,则本字段为伪肽段对应的原始真肽段的序列(不包含UniModId)
-//     */
-//    String targetSequence;
-
-//    /**
-//     * 对应肽段序列,如果是伪肽段,则为对应的伪肽段的序列(不包含UniModId)
-//     */
     /**
      * 去除了修饰基团的肽段序列
      */
     String sequence;
 
     /**
-     * 完整版肽段名称(含修饰基团),如果是伪肽段则为原始的肽段的完整序列而不是伪肽段的完整序列
+     * 完整版肽段名称(含修饰基团)
      */
     String fullName;
 
@@ -102,9 +94,8 @@ public class PeptideDO extends BaseDO {
      * 伪肽段的信息
      */
     String decoySequence;
-    String decoyFullName;
     HashMap<Integer, String> decoyUnimodMap;
-    HashMap<String, FragmentInfo> decoyFragmentMap;
+    HashMap<String, FragmentInfo> decoyFragmentMap = new HashMap<>();
 
     /**
      * 扩展字段
@@ -113,6 +104,10 @@ public class PeptideDO extends BaseDO {
 
     public void putFragment(String cutInfo, FragmentInfo fi){
         fragmentMap.put(cutInfo, fi);
+    }
+
+    public void putDecoyFragment(String cutInfo, FragmentInfo fi){
+        decoyFragmentMap.put(cutInfo, fi);
     }
 
     public TargetPeptide toTargetPeptide(){
@@ -124,7 +119,6 @@ public class PeptideDO extends BaseDO {
         tp.setProteinName(getProteinName());
         tp.setUnimodMap(getUnimodMap());
         tp.setDecoySequence(getSequence());
-        tp.setDecoyFullName(getFullName());
         tp.setDecoyUnimodMap(getDecoyUnimodMap());
         tp.setDecoyFragmentMap(getDecoyFragmentMap());
         return tp;

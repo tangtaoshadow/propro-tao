@@ -90,36 +90,13 @@ public class TestController extends BaseController {
     @RequestMapping("test2")
     @ResponseBody
     int test2(Model model, RedirectAttributes redirectAttributes) {
-        List<PeptideDO> peptides = peptideService.getAllByLibraryId("5c754e9ddfdfdd68309f0fce");
-        List<String> realList = new ArrayList<>();
-
-        HashMap<String, PeptideDO> targetMap = new HashMap<>();
-        HashMap<String, PeptideDO> decoyMap = new HashMap<>();
-        for (PeptideDO pep : peptides) {
-            if (!pep.getIsDecoy()) {
-                targetMap.put(pep.getPeptideRef(), pep);
-            } else {
-                decoyMap.put(pep.getPeptideRef(), pep);
-            }
-        }
-
-        int count = 0;
-        for (Map.Entry<String, PeptideDO> entry : targetMap.entrySet()) {
-            char[] target = entry.getValue().getSequence().toCharArray();
-            char[] decoy = decoyMap.get(entry.getKey()).getSequence().toCharArray();
-            for (int i = 0; i < target.length; i++) {
-                if(target[i] == decoy[i]){
-                    count++;
-                }
-            }
-        }
-        return count-targetMap.size();
+        return 1;
     }
 
     @RequestMapping("test6")
     @ResponseBody
     List<String> test6(Model model, RedirectAttributes redirectAttributes) throws IOException {
-        List<PeptideDO> peptides = peptideService.getAllByLibraryIdAndIsDecoy("5c754e9ddfdfdd68309f0fce", false);
+        List<PeptideDO> peptides = peptideService.getAllByLibraryId("5c754e9ddfdfdd68309f0fce");
         List<String> realList = new ArrayList<>();
         for(PeptideDO peptide : peptides){
             realList.add(peptide.getSequence());
@@ -427,7 +404,7 @@ public class TestController extends BaseController {
     @ResponseBody
     String getSequenceNum() {
         String libraryId = "5d08739ee0073c9b70042eb5";
-        List<PeptideDO> peptideDOList = peptideService.getAllByLibraryIdAndIsDecoy(libraryId, false);
+        List<PeptideDO> peptideDOList = peptideService.getAllByLibraryId(libraryId);
         HashSet<String> sequenceSet = new HashSet<>();
         for (PeptideDO peptideDO : peptideDOList) {
             sequenceSet.add(peptideDO.getSequence());
@@ -441,7 +418,7 @@ public class TestController extends BaseController {
     String libConfirmTest() {
         String filePath = "P:\\data\\HCC_sciex\\HCC_20190114_swath_os_peptides_matrix.tsv";
         String libraryId = "5d08739ee0073c9b70042eb5";
-        List<PeptideDO> peptideDOList = peptideService.getAllByLibraryIdAndIsDecoy(libraryId, false);
+        List<PeptideDO> peptideDOList = peptideService.getAllByLibraryId(libraryId);
         HashSet<String> libPepRefSet = new HashSet<>();
         for (PeptideDO peptideDO : peptideDOList) {
             libPepRefSet.add(peptideDO.getPeptideRef());

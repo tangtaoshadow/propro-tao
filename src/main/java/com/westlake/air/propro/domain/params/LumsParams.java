@@ -28,9 +28,7 @@ public class LumsParams {
 
     LibraryDO library;
 
-    Float mzExtractWindow;
-
-    Float rtExtractWindow;
+    ExtractParams extractParams;
 
     /**
      * iRT求得的斜率和截距

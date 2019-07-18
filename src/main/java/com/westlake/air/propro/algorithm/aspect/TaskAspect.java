@@ -56,7 +56,7 @@ public class TaskAspect {
         LumsParams lumsParams = (LumsParams) args[1];
         taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());
-        taskDO.addLog("mz窗口:" + lumsParams.getMzExtractWindow() + ",RT窗口:" + lumsParams.getRtExtractWindow())
+        taskDO.addLog("数据提取窗口:" + lumsParams.getExtractParams().toString())
                 .addLog("Sigma:" + lumsParams.getSigmaSpacing().getSigma() + ",Spacing:" + lumsParams.getSigmaSpacing().getSpacing())
                 .addLog("使用标准库ID:" + lumsParams.getLibrary().getId())
                 .addLog("Note:" + lumsParams.getNote())

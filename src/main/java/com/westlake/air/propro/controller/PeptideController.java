@@ -41,12 +41,11 @@ public class PeptideController extends BaseController {
 
     @RequestMapping(value = "/list")
     String list(Model model,
-                @RequestParam(value = "libraryId", required = false) String libraryId,
+                @RequestParam(value = "libraryId", required = true) String libraryId,
                 @RequestParam(value = "proteinName", required = false) String proteinName,
                 @RequestParam(value = "peptideRef", required = false) String peptideRef,
                 @RequestParam(value = "sequence", required = false) String sequence,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                @RequestParam(value = "decoyFilter", required = false, defaultValue = "All") String decoyFilter,
                 @RequestParam(value = "uniqueFilter", required = false, defaultValue = "All") String uniqueFilter,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
         long startTime = System.currentTimeMillis();
@@ -54,10 +53,10 @@ public class PeptideController extends BaseController {
         PermissionUtil.check(temp);
 
         model.addAttribute("libraryId", libraryId);
+        model.addAttribute("libraryName", temp.getName());
         model.addAttribute("proteinName", proteinName);
         model.addAttribute("peptideRef", peptideRef);
         model.addAttribute("pageSize", pageSize);
-        model.addAttribute("decoyFilter", decoyFilter);
         model.addAttribute("uniqueFilter", uniqueFilter);
         model.addAttribute("libraries",getLibraryList(null, true));
         model.addAttribute("sequence",sequence);
@@ -74,14 +73,7 @@ public class PeptideController extends BaseController {
             query.setProteinName(proteinName);
         }
         if(sequence != null && !sequence.isEmpty()){
-            query.setLikeSequence(sequence);
-        }
-        if (!decoyFilter.equals("All")) {
-            if(decoyFilter.equals("Yes")){
-                query.setIsDecoy(true);
-            }else if(decoyFilter.equals("No")){
-                query.setIsDecoy(false);
-            }
+            query.setSequence(sequence);
         }
         if (!uniqueFilter.equals("All")) {
             if(uniqueFilter.equals("Yes")){
@@ -152,28 +144,6 @@ public class PeptideController extends BaseController {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
             return "redirect:/peptide/list";
         }
-    }
-
-    @RequestMapping(value = "/createdecoy/{id}")
-    String generateDecoy(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
-        ResultDO<PeptideDO> resultDO = peptideService.getById(id);
-
-        if (resultDO.isFailed()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/peptide/list";
-        }
-
-        LibraryDO temp = libraryService.getById(resultDO.getModel().getLibraryId());
-        PermissionUtil.check(temp);
-
-        PeptideDO peptideDO = shuffleGenerator.generate(resultDO.getModel());
-        if(peptideDO != null){
-            logger.info(JSON.toJSONString(peptideDO));
-        }else{
-            logger.info("未能够生成伪肽段");
-        }
-        model.addAttribute("peptide", resultDO.getModel());
-        return "peptide/detail";
     }
 
     @RequestMapping(value = "/calculator")

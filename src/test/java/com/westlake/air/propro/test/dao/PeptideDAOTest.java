@@ -26,7 +26,7 @@ public class PeptideDAOTest extends BaseTest {
 
     @Test
     public void getAllByLibraryIdAndIsDecoy() {
-        List<PeptideDO> result = peptideDAO.getAllByLibraryIdAndIsDecoy("5b67136d2ada5f15749a0140", false);
+        List<PeptideDO> result = peptideDAO.getAllByLibraryId("5b67136d2ada5f15749a0140");
         assert true;
     }
 

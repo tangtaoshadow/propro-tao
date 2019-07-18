@@ -27,7 +27,7 @@
 
             <div class="alert alert-success" role="alert" th:if="${success_msg}" th:text="${success_msg}"></div>
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-8">
                     <!--begin::Portlet-->
                     <div class="m-portlet m-portlet--tab">
                         <div class="m-portlet__head">
@@ -61,15 +61,6 @@
                                         <span class="m-form__help">
                                             <a th:href="@{/library/detail/{id}(id=${peptide?.libraryId})}" th:text="#{btn_click_to_view}"></a>
                                         </span>
-                                    </div>
-                                </div>
-                                <div class="form-group m-form__group row">
-                                    <label for="sequence" class="col-2 col-form-label" th:text="#{label_peptide_sequence}">
-                                    </label>
-                                    <div class="col-10">
-                                        <input type="text" class="form-control m-input" id="sequence"
-                                               name="sequence" readonly
-                                               th:value="${peptide?.sequence}">
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
@@ -109,15 +100,6 @@
                                     </div>
                                 </div>
                                 <div class="form-group m-form__group row">
-                                    <label for="isDecoy" class="col-2 col-form-label" th:text="#{label_is_decoy}">
-                                    </label>
-                                    <div class="col-10">
-                                        <input type="text" class="form-control m-input" id="isDecoy" name="isDecoy"
-                                               readonly
-                                               th:value="${peptide?.isDecoy}">
-                                    </div>
-                                </div>
-                                <div class="form-group m-form__group row">
                                     <label for="fullUniModPeptideName" class="col-2 col-form-label" th:text="#{label_peptide_full_name}">
                                     </label>
                                     <div class="col-10">
@@ -144,7 +126,15 @@
                                         </div>
                                     </div>
                                 </div>
-
+                                <div class="form-group m-form__group row">
+                                    <label for="sequence" class="col-2 col-form-label" th:text="#{label_peptide_sequence}">
+                                    </label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="sequence"
+                                               name="sequence" readonly
+                                               th:value="${peptide?.sequence}">
+                                    </div>
+                                </div>
                                 <div class="form-group m-form__group row">
                                     <label class="col-2 col-form-label" th:text="#{label_fragment}">
                                     </label>
@@ -161,6 +151,40 @@
                                             </thead>
                                             <tbody>
                                             <tr th:each="fragment:${peptide.fragmentMap.values()}">
+                                                <td th:text="${fragment.cutInfo}"></td>
+                                                <td th:text="${fragment.mz}"></td>
+                                                <td th:text="${fragment.intensity}"></td>
+                                                <td th:text="${fragment.charge}"></td>
+                                                <td th:text="${fragment.annotations}"></td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="form-group m-form__group row">
+                                    <label for="sequence" class="col-2 col-form-label" th:text="#{label_decoy}"></label>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control m-input" id="decoySequence"
+                                               name="decoySequence" readonly
+                                               th:value="${peptide?.decoySequence}">
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group row">
+                                    <label class="col-2 col-form-label" th:text="#{label_decoy_fragment}"></label>
+                                    <div class="col-10">
+                                        <table class="table table-bordered table-hover" style="table-layout:fixed;">
+                                            <thead>
+                                            <tr>
+                                                <th width="20%" th:text="#{label_cutinfo}"></th>
+                                                <th width="20%" th:text="#{label_fragment_mz}"></th>
+                                                <th width="20%" th:text="#{label_fragment_intensity}"></th>
+                                                <th width="10%" th:text="#{label_charge}"></th>
+                                                <th width="30%" th:text="#{label_annotations}"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="fragment:${peptide.decoyFragmentMap?.values()}">
                                                 <td th:text="${fragment.cutInfo}"></td>
                                                 <td th:text="${fragment.mz}"></td>
                                                 <td th:text="${fragment.intensity}"></td>

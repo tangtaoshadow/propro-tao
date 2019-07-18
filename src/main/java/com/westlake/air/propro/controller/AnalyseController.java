@@ -21,6 +21,7 @@ import com.westlake.air.propro.domain.bean.score.PeakGroup;
 import com.westlake.air.propro.domain.bean.score.PeptideFeature;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
+import com.westlake.air.propro.domain.params.ExtractParams;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.domain.query.AnalyseOverviewQuery;
@@ -396,7 +397,7 @@ public class AnalyseController extends BaseController {
          */
         List<String> libraryCutInfos = new ArrayList<>();
         if (libraryId != null) {
-            PeptideDO libraryPeptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, false);
+            PeptideDO libraryPeptide = peptideService.getByLibraryIdAndPeptideRef(libraryId, peptideRef);
             if (libraryPeptide != null) {
                 if (onlyLib) {
                     buildPeptide = libraryPeptide;
@@ -420,7 +421,7 @@ public class AnalyseController extends BaseController {
         /**
          * Step5. Extract with Generated Peptide
          */
-        ResultDO<AnalyseDataDO> realTimeAnalyseDataResult = extractor.extractOneOnRealTime(experiment, buildPeptide, rtExtractWindow, mzExtractWindow);
+        ResultDO<AnalyseDataDO> realTimeAnalyseDataResult = extractor.extractOneOnRealTime(experiment, buildPeptide, new ExtractParams(mzExtractWindow, rtExtractWindow));
         if (realTimeAnalyseDataResult.isFailed()) {
             model.addAttribute(ERROR_MSG, realTimeAnalyseDataResult.getMsgInfo());
             return "analyse/data/clinic";

@@ -34,23 +34,20 @@ public class ShuffleGenerator extends BaseGenerator {
     @Autowired
     FragmentFactory fragmentFactory;
 
-    public List<PeptideDO> generate(List<PeptideDO> list) {
-        List<PeptideDO> decoys = new ArrayList<>();
-        for (PeptideDO trans : list) {
-            PeptideDO decoy = generate(trans);
-            decoy.setIsUnique(trans.getIsUnique());
-            decoys.add(decoy);
+    public void generate(List<PeptideDO> list) {
+        for (PeptideDO target : list) {
+            generate(target);
         }
-        logger.info("伪肽段生成完毕,总计:"+decoys.size()+"个");
-        return decoys;
+        logger.info("伪肽段生成完毕,总计:"+list.size()+"个");
     }
 
-    public PeptideDO generate(PeptideDO peptideDO) {
+    @Override
+    public void generate(PeptideDO peptideDO) {
 
         String sequence = peptideDO.getSequence();
         HashMap<Integer, String> unimodMap = peptideDO.getUnimodMap();
 
-        List<AminoAcid> aminoAcids = new ArrayList<>();
+        List<AminoAcid> aminoAcids = null;
 
         //最后一位是K,P,R时保持最后一位氨基酸位置不变
         char lastAcidChar = sequence.toUpperCase().charAt(sequence.length() - 1);
@@ -102,10 +99,6 @@ public class ShuffleGenerator extends BaseGenerator {
             }
         }
 
-        PeptideDO decoy = TransitionUtil.cloneForDecoy(peptideDO);
-        decoy.setSequence(TransitionUtil.toSequence(bestDecoy, false));
-        decoy.setUnimodMap(newUnimodMap);
-
         for (String cutInfo : peptideDO.getFragmentMap().keySet()) {
             FragmentInfo targetFi = peptideDO.getFragmentMap().get(cutInfo);
             FragmentInfo decoyFi = new FragmentInfo();
@@ -134,9 +127,10 @@ public class ShuffleGenerator extends BaseGenerator {
             );
 
             decoyFi.setMz(productMz);
-            decoy.putFragment(cutInfo, decoyFi);
-        }
 
-        return decoy;
+            peptideDO.setDecoySequence(TransitionUtil.toSequence(bestDecoy, false));
+            peptideDO.setDecoyUnimodMap(newUnimodMap);
+            peptideDO.putDecoyFragment(cutInfo, decoyFi);
+        }
     }
 }

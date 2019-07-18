@@ -38,6 +38,8 @@ public interface PeptideService {
 
     ResultDO insertAll(List<PeptideDO> peptides, boolean isDeleteOld);
 
+    ResultDO updateDecoyInfos(List<PeptideDO> peptides);
+
     ResultDO deleteAllByLibraryId(String libraryId);
 
     ResultDO deleteAllDecoyByLibraryId(String libraryId);

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-import static com.westlake.air.propro.constants.Constants.MAX_INSERT_RECORD_FOR_PEPTIDE;
+import static com.westlake.air.propro.constants.Constants.MAX_UPDATE_RECORD_FOR_PEPTIDE;
 
 /**
  * Created by James Lu MiaoShan
@@ -55,20 +55,20 @@ public class DecoyController extends BaseController {
         logger.info("原有伪肽段删除完毕");
         //计算原始肽段数目
         PeptideQuery query = new PeptideQuery();
-        query.setIsDecoy(false);
         query.setLibraryId(id);
         long totalCount = peptideService.count(query);
-        int totalPage = (int) (totalCount / MAX_INSERT_RECORD_FOR_PEPTIDE) + 1;
-        query.setPageSize(MAX_INSERT_RECORD_FOR_PEPTIDE);
+        int totalPage = (int) (totalCount / MAX_UPDATE_RECORD_FOR_PEPTIDE) + 1;
+        query.setPageSize(MAX_UPDATE_RECORD_FOR_PEPTIDE);
         int countForInsert = 0;
         for (int i = 1; i <= totalPage; i++) {
             query.setPageNo(i);
             ResultDO<List<PeptideDO>> resultDO = peptideService.getList(query);
-            List<PeptideDO> list = shuffleGenerator.generate(resultDO.getModel());
-            ResultDO resultTmp = peptideService.insertAll(list, false);
+            List<PeptideDO> list = resultDO.getModel();
+            shuffleGenerator.generate(list);
+            ResultDO resultTmp = peptideService.updateDecoyInfos(list);
             if (resultTmp.isSuccess()) {
                 countForInsert += list.size();
-                logger.info("插入新生成伪肽段" + countForInsert + "条");
+                logger.info("新生成伪肽段" + countForInsert + "条");
             }
         }
 

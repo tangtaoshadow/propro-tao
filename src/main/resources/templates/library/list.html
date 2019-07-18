@@ -38,12 +38,11 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
+                    <th width="20%" th:text="#{label_library_id}"></th>
                     <th width="20%" th:text="#{label_library_name}"></th>
                     <th width="5%" th:text="#{label_do_public}"></th>
                     <th width="5%" th:text="#{label_proteins_count}"></th>
                     <th width="5%" th:text="#{label_peptides_count}"></th>
-                    <th width="5%" th:text="#{label_target_peptides_count}"></th>
-                    <th width="5%" th:text="#{label_decoy_peptides_count}"></th>
                     <th width="15%" th:text="#{label_create_date}"></th>
                     <th width="15%" th:text="#{label_creator}"></th>
 <!--                    <th width="15%" th:text="#{label_last_modified_date}"></th>-->
@@ -52,7 +51,8 @@
                 </thead>
                 <tbody>
                 <tr th:each="library:${libraryList}">
-                    <td th:text="|${library.name}(${library.id})|"></td>
+                    <td th:text="${library.id}"></td>
+                    <td th:text="${library.name}"></td>
                     <td th:if="${library.doPublic}">
                         <span class="m-badge m-badge--success m-badge--wide">Public</span>
                     </td>
@@ -61,8 +61,6 @@
                     </td>
                     <td th:text="${library.proteinCount}"></td>
                     <td th:text="${library.totalCount}"></td>
-                    <td th:text="${library.totalTargetCount}"></td>
-                    <td th:text="${library.totalDecoyCount}"></td>
                     <td th:text="${#dates.format(library.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${library.creator}"></td>
                     <!--                    <td th:text="${#dates.format(library.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>-->

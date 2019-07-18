@@ -54,7 +54,7 @@ public class PatchController {
 
         List<String> remainPep = new ArrayList<>();
         for (String pep : selectedPeps) {
-            PeptideDO peptideDO = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(fromLibId, pep, false);
+            PeptideDO peptideDO = peptideService.getByLibraryIdAndPeptideRef(fromLibId, pep);
             if (peptideDO != null) {
                 peptideDO.setLibraryId(toLibId);
                 peptideDO.setId(null);
@@ -153,7 +153,7 @@ public class PatchController {
         /**
          * Step2 将不准确的PRM库进行过滤
          */
-        List<PeptideDO> msmsList = peptideService.getAllByLibraryIdAndIsDecoy(msmsLibId, false);
+        List<PeptideDO> msmsList = peptideService.getAllByLibraryId(msmsLibId);
         List<PeptideDO> filteredList = new ArrayList<>();
         HashSet<String> filteredPepSet = new HashSet<>();
         for (PeptideDO peptideDO : msmsList) {
@@ -173,7 +173,7 @@ public class PatchController {
          */
         List<String> errorSelectedList = new ArrayList<>();
         for (String pep : selectedPeps) {
-            PeptideDO selectedPep = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(csvBigLibId, pep, false);
+            PeptideDO selectedPep = peptideService.getByLibraryIdAndPeptideRef(csvBigLibId, pep);
             boolean selected = false;
             for (int i = expMzList.size() - 1; i >= 0; i--) {
                 float expMz = expMzList.get(i);
@@ -194,7 +194,7 @@ public class PatchController {
          * Step4 将msms信息转化为csv信息
          */
         for (PeptideDO pep : filteredList) {
-            PeptideDO csvPep = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(csvBigLibId, pep.getPeptideRef(), false);
+            PeptideDO csvPep = peptideService.getByLibraryIdAndPeptideRef(csvBigLibId, pep.getPeptideRef());
             if (csvPep == null) {
                 continue;
             }
@@ -260,7 +260,7 @@ public class PatchController {
     @RequestMapping("addirt/{id}")
     @ResponseBody
     String generateIrt(@PathVariable("id") String libraryId){
-        List<PeptideDO> allPeptides = peptideService.getAllByLibraryIdAndIsDecoy(libraryId, false);
+        List<PeptideDO> allPeptides = peptideService.getAllByLibraryId(libraryId);
         if (allPeptides.isEmpty()){
             return null;
         }

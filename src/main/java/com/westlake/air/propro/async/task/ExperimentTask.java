@@ -94,7 +94,7 @@ public class ExperimentTask extends BaseTask {
             //如果还没有计算irt,先执行计算irt的步骤
             if (lumsParams.getIRtLibrary() != null) {
                 taskService.update(taskDO, "开始提取IRT校准库数据并且计算iRT值");
-                ResultDO<IrtResult> resultDO = irt.extractAndAlign(lumsParams.getExperimentDO(), lumsParams.getIRtLibrary(), lumsParams.getMzExtractWindow(), lumsParams.getSigmaSpacing());
+                ResultDO<IrtResult> resultDO = irt.extractAndAlign(lumsParams.getExperimentDO(), lumsParams.getIRtLibrary(), lumsParams.getExtractParams().getMzExtractWindow(), lumsParams.getSigmaSpacing());
                 if (resultDO.isFailed()) {
                     taskService.finish(taskDO, TaskStatus.FAILED.getName(), "iRT计算失败:" + resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
                     return;

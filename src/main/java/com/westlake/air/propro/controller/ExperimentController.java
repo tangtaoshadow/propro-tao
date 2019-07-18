@@ -15,6 +15,7 @@ import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.irt.IrtResult;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
+import com.westlake.air.propro.domain.params.ExtractParams;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
@@ -305,8 +306,7 @@ public class ExperimentController extends BaseController {
         input.setSlopeIntercept(si);
         input.setNote(note);
         input.setOwnerName(getCurrentUsername());
-        input.setRtExtractWindow(rtExtractWindow);
-        input.setMzExtractWindow(mzExtractWindow);
+        input.setExtractParams(new ExtractParams(mzExtractWindow, rtExtractWindow));
         input.setUniqueOnly(uniqueOnly);
         input.setScoreTypes(scoreTypes);
         input.setSigmaSpacing(ss);
@@ -316,24 +316,6 @@ public class ExperimentController extends BaseController {
         experimentTask.extract(taskDO, input);
 
         return "redirect:/task/detail/" + taskDO.getId();
-    }
-
-    @RequestMapping(value = "/doextractone")
-    @ResponseBody
-    String doExtractOne(Model model,
-                        @RequestParam(value = "expId", required = true) String expId,
-                        @RequestParam(value = "libraryId", required = true) String libraryId,
-                        @RequestParam(value = "peptideRef", required = true) String peptideRef) {
-
-        ResultDO<ExperimentDO> resultDO = experimentService.getById(expId);
-        PermissionUtil.check(resultDO.getModel());
-
-        PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, false);
-
-
-        ResultDO<AnalyseDataDO> analyseData = extractor.extractOneOnRealTime(resultDO.getModel(), peptide, -1f, 0.05f);
-
-        return JSON.toJSONString(analyseData);
     }
 
     @RequestMapping(value = "/irt")

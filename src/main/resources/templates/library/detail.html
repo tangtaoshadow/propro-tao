@@ -111,37 +111,11 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="totalTargetCount" class="col-2 col-form-label" th:text="#{label_target_peptides_count}">
-                            </label>
-                            <div class="col-2">
-                                <input type="text" class="form-control m-input" id="totalTargetCount"
-                                       name="totalTargetCount" readonly th:value="${library?.totalTargetCount}">
-                            </div>
-                            <label for="totalUniqueTargetCount" class="col-2 col-form-label" th:text="#{label_unique_target_peptides_count}">
-                            </label>
-                            <div class="col-2">
-                                <input type="text" class="form-control m-input" id="totalUniqueTargetCount"
-                                       name="totalUniqueTargetCount" readonly th:value="${library?.totalUniqueTargetCount}">
-                            </div>
                             <label for="fastaDeWeightProtCount" class="col-2 col-form-label" th:text="#{label_unique_proteins_fasta_de_weight_count}">
                             </label>
                             <div class="col-2">
                                 <input type="text" class="form-control m-input" id="fastaDeWeightProtCount"
                                        name="fastaDeWeightProtCount" readonly th:value="${library?.fastaDeWeightProtCount}">
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group row">
-                            <label for="totalDecoyCount" class="col-2 col-form-label" th:text="#{label_decoy_peptides_count}">
-                            </label>
-                            <div class="col-2">
-                                <input type="text" class="form-control m-input" id="totalDecoyCount"
-                                       name="totalDecoyCount" readonly th:value="${library?.totalDecoyCount}">
-                            </div>
-                            <label for="totalUniqueDecoyCount" class="col-2 col-form-label" th:text="#{label_unique_decoy_peptides_count}">
-                            </label>
-                            <div class="col-2">
-                                <input type="text" class="form-control m-input" id="totalUniqueDecoyCount"
-                                       name="totalUniqueDecoyCount" readonly th:value="${library?.totalUniqueDecoyCount}">
                             </div>
                             <label for="fastaDeWeightPepCount" class="col-2 col-form-label" th:text="#{label_unique_target_peptides_fasta_de_weight_count}">
                             </label>

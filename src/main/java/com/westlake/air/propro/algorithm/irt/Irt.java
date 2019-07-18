@@ -20,6 +20,7 @@ import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.SwathIndexDO;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
+import com.westlake.air.propro.domain.params.ExtractParams;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.service.PeptideService;
 import com.westlake.air.propro.service.ScoreService;
@@ -136,9 +137,9 @@ public class Irt {
 
                 //Step4.提取数据并且存储数据,如果传入的库是标准库,那么使用采样的方式进行数据提取
                 if (library.getType().equals(LibraryDO.TYPE_IRT)) {
-                    extractor.extractForIrt(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
+                    extractor.extractForIrt(finalList, coordinates, rtMap, null, new ExtractParams(mzExtractWindow, -1f));
                 } else {
-                    extractor.extractForIrtWithLib(finalList, coordinates, rtMap, null, mzExtractWindow, -1f);
+                    extractor.extractForIrtWithLib(finalList, coordinates, rtMap, null, new ExtractParams(mzExtractWindow, -1f));
                 }
             }
         } catch (Exception e) {

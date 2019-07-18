@@ -5,6 +5,7 @@ import com.westlake.air.propro.constants.*;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.db.*;
+import com.westlake.air.propro.domain.params.ExtractParams;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.ProjectQuery;
@@ -474,8 +475,7 @@ public class ProjectController extends BaseController {
             }
             input.setLibrary(library);
             input.setOwnerName(getCurrentUsername());
-            input.setRtExtractWindow(rtExtractWindow);
-            input.setMzExtractWindow(mzExtractWindow);
+            input.setExtractParams(new ExtractParams(mzExtractWindow,rtExtractWindow));
             input.setScoreTypes(scoreTypes);
 
             input.setXcorrShapeThreshold(shapeScoreThreshold);
@@ -554,7 +554,7 @@ public class ProjectController extends BaseController {
         HashMap<String, String> intMap = new HashMap<>();
         if (!proteinNameInfo.isEmpty()) {
             for (String proteinName : proteinNameInfo.split(";")) {
-                List<PeptideDO> peptideDOList = peptideService.getAllByLibraryIdAndProteinNameAndIsDecoy(libraryId, proteinName, false);
+                List<PeptideDO> peptideDOList = peptideService.getAllByLibraryIdAndProteinName(libraryId, proteinName);
                 for (PeptideDO peptideDO : peptideDOList) {
                     peptideDOMap.put(peptideDO.getPeptideRef(), peptideDO);
                 }
@@ -563,7 +563,7 @@ public class ProjectController extends BaseController {
         if (!peptideRefInfo.isEmpty()) {
             String[] peptideRefs = peptideRefInfo.split(";");
             for (String peptideRef : peptideRefs) {
-                PeptideDO peptideDO = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, false);
+                PeptideDO peptideDO = peptideService.getByLibraryIdAndPeptideRef(libraryId, peptideRef);
                 if (peptideDO == null) {
                     continue;
                 }
@@ -661,7 +661,7 @@ public class ProjectController extends BaseController {
         HashMap<String, HashMap<String, String>> intensityMap = new HashMap<>();
         HashMap<String, String> pepToProt = new HashMap<>();
         if (outputAllPeptides) {
-            List<PeptideDO> peptideDOList = peptideService.getAllByLibraryIdAndIsDecoy(analyseOverviewService.getAllByExpId(experimentDOList.get(0).getId()).get(0).getLibraryId(), false);
+            List<PeptideDO> peptideDOList = peptideService.getAllByLibraryId(analyseOverviewService.getAllByExpId(experimentDOList.get(0).getId()).get(0).getLibraryId());
             for (PeptideDO peptideDO : peptideDOList) {
                 intensityMap.put(peptideDO.getPeptideRef(), new HashMap<>());
                 pepToProt.put(peptideDO.getPeptideRef(), peptideDO.getProteinName());

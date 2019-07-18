@@ -1,6 +1,5 @@
 package com.westlake.air.propro.utils;
 
-import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.algorithm.parser.model.chemistry.AminoAcid;
 
 import java.util.List;
@@ -30,31 +29,6 @@ public class TransitionUtil {
         }
 
         return sb.toString();
-    }
-
-    /**
-     * 克隆一个Transition
-     * 设置Sequence为空
-     * 设置UnimodMap为空
-     * 设置id为空
-     * 设置ProductMz为空
-     * 设置isDecoy为True
-     *
-     * @param peptideDO
-     * @return
-     */
-    public static PeptideDO cloneForDecoy(PeptideDO peptideDO) {
-        PeptideDO decoy = new PeptideDO();
-        decoy.setTargetSequence(peptideDO.getSequence());
-        decoy.setLibraryId(peptideDO.getLibraryId());
-        decoy.setCharge(peptideDO.getCharge());
-        decoy.setFullName(peptideDO.getFullName());
-        decoy.setPeptideRef(peptideDO.getPeptideRef());
-        decoy.setProteinName(peptideDO.getProteinName());
-        decoy.setRt(peptideDO.getRt());
-        decoy.setMz(peptideDO.getMz());
-
-        return decoy;
     }
 
 }

@@ -38,17 +38,6 @@
                     </div>
                     <div class="input-group col-lg-2">
                         <div class="input-group-prepend">
-                            <button class="btn btn-success" type="button" th:text="#{label_is_decoy}">
-                            </button>
-                        </div>
-                        <select class="form-control m-input" id="decoyFilter" name="decoyFilter">
-                            <option th:text="Yes" th:selected="${decoyFilter}=='Yes'?true:false"></option>
-                            <option th:text="No" th:selected="${decoyFilter}=='No'?true:false"></option>
-                            <option th:text="All" th:selected="${decoyFilter}=='All'?true:false"></option>
-                        </select>
-                    </div>
-                    <div class="input-group col-lg-2">
-                        <div class="input-group-prepend">
                             <button class="btn btn-success" type="button" th:text="#{label_is_unique}">
                             </button>
                         </div>
@@ -96,17 +85,14 @@
             <table class="table table-bordered table-hover" style="table-layout:fixed;">
                 <thead>
                 <tr>
-                    <th width="2%">
-                        No.
-                    </th>
-                    <th width="8%" th:text="#{label_library_name}"></th>
+                    <th width="2%">No.</th>
+                    <th width="5%" th:text="#{label_library_name}"></th>
                     <th width="10%" th:text="#{label_protein_name}"></th>
-                    <th width="10%">PeptideRef</th>
-                    <th width="5%" th:text="#{label_peptide_sequence}"></th>
-                    <th width="10%" th:text="#{label_peptide_full_name}"></th>
+                    <th width="13%">PeptideRef</th>
                     <th width="5%" th:text="#{label_peptide_mz}"></th>
                     <th width="5%">RT</th>
-                    <th width="5%" th:text="#{label_is_decoy}"></th>
+                    <th width="10%" th:text="#{label_peptide_sequence}"></th>
+                    <th width="10%" th:text="#{label_decoy}"></th>
                     <th width="35%" th:text="#{label_fragment}"></th>
                     <th width="5%" th:text="#{label_operation}"></th>
                 </tr>
@@ -116,43 +102,23 @@
                     <td th:text="${status.index+1}"></td>
                     <td>
                         <a th:href="@{/library/detail/{id}(id=${peptide.libraryId})}"
-                           th:text="${peptide.libraryName}"></a>
+                           th:text="${libraryName}"></a>
                     </td>
                     <td th:text="${peptide.proteinName}"></td>
                     <td th:text="${peptide.peptideRef}"></td>
-                    <td th:text="${peptide.sequence}"></td>
-                    <td th:text="${peptide.fullName}"></td>
                     <td th:text="${peptide.mz}"></td>
                     <td th:text="${peptide.rt}"></td>
-                    <td th:if="${peptide.isDecoy}">
-                        <span class="m-badge m-badge--danger m-badge--wide">
-                            伪
-                        </span>
-                    </td>
-                    <td th:if="${!peptide.isDecoy}">
-                        <span class="m-badge m-badge--success m-badge--wide">
-                            真
-                        </span>
-                    </td>
+                    <td th:text="${peptide.sequence}"></td>
+                    <td th:text="${peptide.decoySequence}"></td>
                     <td>
                         <table class="table table-bordered table-hover" style="table-layout:fixed;background-color: whitesmoke;text-align: center;border: 1px; border-color: black;">
                             <thead>
                             <tr>
-                                <th width="20%">
-                                    CutInfo
-                                </th>
-                                <th width="20%">
-                                    碎片MZ
-                                </th>
-                                <th width="20%">
-                                    强度
-                                </th>
-                                <th width="10%">
-                                    带电量
-                                </th>
-                                <th width="30%">
-                                    Annotations
-                                </th>
+                                <th width="20%">CutInfo</th>
+                                <th width="20%" th:text="#{label_fragment_mz}"></th>
+                                <th width="20%" th:text="#{label_fragment_intensity}"></th>
+                                <th width="10%" th:text="#{label_charge}"></th>
+                                <th width="30%">Annotations</th>
                             </tr>
                             </thead>
                             <tbody>

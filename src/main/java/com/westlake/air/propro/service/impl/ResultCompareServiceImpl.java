@@ -433,7 +433,7 @@ public class ResultCompareServiceImpl implements ResultCompareService {
 
     private HashMap<String,Double> getLibPPMap(String libraryId){
         HashMap<String,Double> libCountMap = new HashMap<>();
-        List<PeptideDO> peptideDOList = peptideService.getAllByLibraryIdAndIsDecoy(libraryId, false);
+        List<PeptideDO> peptideDOList = peptideService.getAllByLibraryId(libraryId);
         for (PeptideDO peptideDO: peptideDOList){
             Double count = libCountMap.get(peptideDO.getProteinName());
             if (count == null){

@@ -9,6 +9,7 @@ import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
+import com.westlake.air.propro.domain.params.ExtractParams;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.service.*;
@@ -89,7 +90,7 @@ public class Extractor {
      * @param peptide
      * @return
      */
-    public ResultDO<AnalyseDataDO> extractOneOnRealTime(ExperimentDO exp, PeptideDO peptide, Float rtExtractorWindow, Float mzExtractorWindow) {
+    public ResultDO<AnalyseDataDO> extractOneOnRealTime(ExperimentDO exp, PeptideDO peptide, ExtractParams extractParams) {
         ResultDO checkResult = ConvolutionUtil.checkExperiment(exp);
         if (checkResult.isFailed()) {
             logger.error("条件检查失败:" + checkResult.getMsgInfo());
@@ -118,16 +119,16 @@ public class Extractor {
             rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndexDO, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
             TargetPeptide tp = new TargetPeptide(peptide);
             Double rt = peptide.getRt();
-            if (rtExtractorWindow == -1) {
+            if (extractParams.getRtExtractWindow() == -1) {
                 tp.setRtStart(-1);
                 tp.setRtEnd(99999);
             } else {
                 Double targetRt = (rt - exp.getIrtResult().getSi().getIntercept()) / exp.getIrtResult().getSi().getSlope();
-                tp.setRtStart(targetRt.floatValue() - rtExtractorWindow / 2);
-                tp.setRtEnd(targetRt.floatValue() + rtExtractorWindow / 2);
+                tp.setRtStart(targetRt.floatValue() - extractParams.getRtExtractWindow() / 2);
+                tp.setRtEnd(targetRt.floatValue() + extractParams.getRtExtractWindow() / 2);
             }
 
-            AnalyseDataDO dataDO = extractForOne(tp, rtMap, mzExtractorWindow, rtExtractorWindow, null);
+            AnalyseDataDO dataDO = extractForOne(tp, rtMap, extractParams, null);
             if (dataDO == null) {
                 return ResultDO.buildError(ResultCode.ANALYSE_DATA_ARE_ALL_ZERO);
             }
@@ -153,12 +154,11 @@ public class Extractor {
      * @param coordinates
      * @param rtMap
      * @param overviewId
-     * @param mzExtractWindow
-     * @param rtExtractWindow
+     * @param extractParams
      */
-    public void extractForIrt(List<AnalyseDataDO> finalList, List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float mzExtractWindow, Float rtExtractWindow) {
+    public void extractForIrt(List<AnalyseDataDO> finalList, List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, ExtractParams extractParams) {
         for (TargetPeptide tp : coordinates) {
-            AnalyseDataDO dataDO = extractForOne(tp, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
+            AnalyseDataDO dataDO = extractForOne(tp, rtMap, extractParams, overviewId);
             if (dataDO == null) {
                 continue;
             }
@@ -166,14 +166,14 @@ public class Extractor {
         }
     }
 
-    public void extractForIrtWithLib(List<AnalyseDataDO> finalList, List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, Float mzExtractWindow, Float rtExtractWindow) {
+    public void extractForIrtWithLib(List<AnalyseDataDO> finalList, List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, ExtractParams extractParams) {
         long start = System.currentTimeMillis();
         int count = 0;
         for (TargetPeptide tp : coordinates) {
             if (count >= 2) {
                 break;
             }
-            AnalyseDataDO dataDO = extractForOne(tp, rtMap, mzExtractWindow, rtExtractWindow, overviewId);
+            AnalyseDataDO dataDO = extractForOne(tp, rtMap, extractParams, overviewId);
             if (dataDO == null) {
                 continue;
             }
@@ -187,26 +187,16 @@ public class Extractor {
         }
     }
 
-    private AnalyseDataDO extractForOne(TargetPeptide tp, TreeMap<Float, MzIntensityPairs> rtMap, Float mzExtractWindow, Float rtExtractWindow, String overviewId) {
+    private AnalyseDataDO extractForOne(TargetPeptide tp, TreeMap<Float, MzIntensityPairs> rtMap, ExtractParams extractParams, String overviewId) {
         float mzStart = 0;
         float mzEnd = -1;
-        boolean useAdaptiveWindow = false, isPpm = false;
-        if (mzExtractWindow == -1) {
-            useAdaptiveWindow = true;
-        }
-        if (mzExtractWindow > 1) {
-            isPpm = true;
-            mzExtractWindow = (mzExtractWindow / 2f) * 1E-6f;
-        }else{
-            mzExtractWindow = mzExtractWindow / 2f;
-        }
         //所有的碎片共享同一个RT数组
         ArrayList<Float> rtList = new ArrayList<>();
         for (Float rt : rtMap.keySet()) {
-            if (rtExtractWindow != -1 && rt > tp.getRtEnd()) {
+            if (extractParams.getRtExtractWindow() != -1 && rt > tp.getRtEnd()) {
                 break;
             }
-            if (rtExtractWindow == -1 || (rt >= tp.getRtStart() && rt <= tp.getRtEnd())) {
+            if (extractParams.getRtExtractWindow() == -1 || (rt >= tp.getRtStart() && rt <= tp.getRtEnd())) {
                 rtList.add(rt);
             }
         }
@@ -220,7 +210,7 @@ public class Extractor {
         dataDO.setOverviewId(overviewId);
         dataDO.setPeptideRef(tp.getPeptideRef());
         dataDO.setProteinName(tp.getProteinName());
-        dataDO.setIsDecoy(tp.getIsDecoy());
+        dataDO.setIsDecoy(tp.isAsDecoy());
         dataDO.setRt(tp.getRt());
         dataDO.setMz(tp.getMz());
 
@@ -228,19 +218,19 @@ public class Extractor {
 
         for (FragmentInfo fi : tp.getFragmentMap().values()) {
             float mz = fi.getMz().floatValue();
-            if (isPpm) {
-                mzStart = mz - mz * mzExtractWindow;
-                mzEnd = mz + mz * mzExtractWindow;
+            if (extractParams.getIsPpm()) {
+                mzStart = mz - mz * extractParams.getHalfMzWindow();
+                mzEnd = mz + mz * extractParams.getHalfMzWindow();
             } else {
-                mzStart = mz - mzExtractWindow;
-                mzEnd = mz + mzExtractWindow;
+                mzStart = mz - extractParams.getHalfMzWindow();
+                mzEnd = mz + extractParams.getHalfMzWindow();
             }
 
             Float[] intArray = new Float[rtArray.length];
             boolean isAllZero = true;
 
             //由于本函数极其注重性能,为整个流程最关键的耗时步骤,每提升10毫秒都可以带来巨大的性能提升  --陆妙善
-            if (useAdaptiveWindow) {
+            if (extractParams.getUseAdaptiveWindow()) {
                 for (int i = 0; i < rtArray.length; i++) {
                     float acc = ConvolutionUtil.adaptiveAccumulation(rtMap.get(rtArray[i]), mz);
                     if (acc != 0) {
@@ -347,7 +337,7 @@ public class Extractor {
             rtRange = lumsParams.getRtRangeMap().get(precursorMz);
         }
         ExperimentDO exp = lumsParams.getExperimentDO();
-        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibrary(), lumsParams.getSlopeIntercept(), lumsParams.getRtExtractWindow(), swathIndex.getRange(), rtRange, exp.getType(), lumsParams.isUniqueOnly(), false);
+        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibrary(), lumsParams.getSlopeIntercept(), lumsParams.getExtractParams().getRtExtractWindow(), swathIndex.getRange(), rtRange, exp.getType(), lumsParams.isUniqueOnly(), false);
         if (coordinates.isEmpty()) {
             logger.warn("No Coordinates Found,Rang:" + swathIndex.getRange().getStart() + ":" + swathIndex.getRange().getEnd());
             return null;
@@ -374,58 +364,43 @@ public class Extractor {
     private List<AnalyseDataDO> epps(List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, LumsParams lumsParams) {
         List<AnalyseDataDO> dataList = Collections.synchronizedList(new ArrayList<>());
         long start = System.currentTimeMillis();
-
-        Set<String> targetIgnorePeptides = Collections.synchronizedSet(new HashSet<>());
-        List<TargetPeptide> decoyList = Collections.synchronizedList(new ArrayList<>());
         //传入的coordinates是没有经过排序的,需要排序先处理真实肽段,再处理伪肽段.如果先处理的真肽段没有被提取到任何信息,或者提取后的峰太差被忽略掉,都会同时删掉对应的伪肽段的XIC
         coordinates.parallelStream().forEach(tp -> {
-            if (tp.getIsDecoy()) {
-                decoyList.add(tp);
-                return;
-            }
-            //Step1. 常规提取XIC,XIC结果不进行压缩处理
-            AnalyseDataDO dataDO = extractForOne(tp, rtMap, lumsParams.getMzExtractWindow(), lumsParams.getRtExtractWindow(), overviewId);
 
-            //如果没有提取到任何结果,那么加入忽略列表
-            if (dataDO == null) {
-                targetIgnorePeptides.add(tp.getPeptideRef());
-                return;
-            }
-
-            //Step2. 常规选峰及打分
-            scoreService.scoreForOne(dataDO, tp, rtMap, lumsParams);
-
-            //未满足条件的直接忽略
-            if (dataDO.getFeatureScoresList() == null) {
-                targetIgnorePeptides.add(tp.getPeptideRef());
-                return;
-            }
-            AnalyseUtil.compress(dataDO);
-            dataList.add(dataDO);
-        });
-
-//        for (TargetPeptide tp : coordinates) {
-//
-//        }
-        decoyList.parallelStream().forEach(tp -> {
-//        for (TargetPeptide tp : decoyList) {
-            //如果伪肽段在忽略列表里面,那么直接忽略
-            if (targetIgnorePeptides.contains(tp.getPeptideRef()) && !lumsParams.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM)) {
-                return;
-            }
-            //Step1. 常规提取XIC,XIC结果不进行压缩处理,因为后续会立即进行子分数打分,等到打分结束以后再进行压缩
-            AnalyseDataDO dataDO = extractForOne(tp, rtMap, lumsParams.getMzExtractWindow(), lumsParams.getRtExtractWindow(), overviewId);
+            //Step1. 常规提取XIC,XIC结果不进行压缩处理,如果没有提取到任何结果,那么加入忽略列表
+            AnalyseDataDO dataDO = extractForOne(tp, rtMap, lumsParams.getExtractParams(), overviewId);
             if (dataDO == null) {
                 return;
             }
-            //Step2. 常规选峰及打分
+
+            //Step2. 常规选峰及打分,未满足条件的直接忽略
             scoreService.scoreForOne(dataDO, tp, rtMap, lumsParams);
             if (dataDO.getFeatureScoresList() == null) {
                 return;
             }
+
+            //Step3. 忽略过程数据,将数据提取结果加入最终的列表
             AnalyseUtil.compress(dataDO);
             dataList.add(dataDO);
+
+            //Step4. 如果第一,二步均符合条件,那么开始对对应的伪肽段进行数据提取和打分
+            tp.setAsDecoy(true);
+            AnalyseDataDO decoyData = extractForOne(tp, rtMap, lumsParams.getExtractParams(), overviewId);
+            if (decoyData == null) {
+                return;
+            }
+
+            //Step5. 对Decoy进行打分
+            scoreService.scoreForOne(decoyData, tp, rtMap, lumsParams);
+            if (decoyData.getFeatureScoresList() == null) {
+                return;
+            }
+
+            //Step6. 忽略过程数据,将数据提取结果加入最终的列表
+            AnalyseUtil.compress(decoyData);
+            dataList.add(decoyData);
         });
+
         logger.info("提取XIC+选峰+打分耗时:" + (System.currentTimeMillis() - start) / 1000 + "秒");
         return dataList;
     }
@@ -449,8 +424,8 @@ public class Extractor {
         overviewDO.setOwnerName(input.getOwnerName());
         overviewDO.setCreateDate(new Date());
         overviewDO.setNote(input.getNote());
-        overviewDO.setRtExtractWindow(input.getRtExtractWindow());
-        overviewDO.setMzExtractWindow(input.getMzExtractWindow());
+        overviewDO.setRtExtractWindow(input.getExtractParams().getRtExtractWindow());
+        overviewDO.setMzExtractWindow(input.getExtractParams().getMzExtractWindow());
         overviewDO.setSigma(input.getSigmaSpacing().getSigma());
         overviewDO.setSpacing(input.getSigmaSpacing().getSpacing());
         overviewDO.setShapeScoreThreshold(input.getXcorrShapeThreshold());

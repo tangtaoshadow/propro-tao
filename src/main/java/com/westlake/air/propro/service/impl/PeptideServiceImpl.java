@@ -92,8 +92,7 @@ public class PeptideServiceImpl implements PeptideService {
 
     @Override
     public List<PeptideDO> getAll(PeptideQuery query) {
-        List<PeptideDO> peptides = peptideDAO.getAll(query);
-        return peptides;
+        return peptideDAO.getAll(query);
     }
 
     @Override
@@ -139,6 +138,12 @@ public class PeptideServiceImpl implements PeptideService {
             logger.error(e.getMessage());
             return ResultDO.buildError(ResultCode.INSERT_ERROR);
         }
+    }
+
+    @Override
+    public ResultDO updateDecoyInfos(List<PeptideDO> peptides) {
+        peptideDAO.updateDecoyInfos(peptides);
+        return new ResultDO(true);
     }
 
     @Override
@@ -236,8 +241,8 @@ public class PeptideServiceImpl implements PeptideService {
         }
 
         List<TargetPeptide> targetList = peptideDAO.getTPAll(query);
-        if(type.equals(Constants.EXP_TYPE_PRM)){
-            prmFilter(targetList,rtExtractionWindows,slopeIntercept,rtRange,precursorMz);
+        if (type.equals(Constants.EXP_TYPE_PRM)) {
+            prmFilter(targetList, rtExtractionWindows, slopeIntercept, rtRange, precursorMz);
         }
 
         long readDB = System.currentTimeMillis() - start;
@@ -302,7 +307,7 @@ public class PeptideServiceImpl implements PeptideService {
         return peptide;
     }
 
-    private void prmFilter(List<TargetPeptide> targetList, float rtExtractionWindows, SlopeIntercept slopeIntercept,Float[] rtRange, float precursorMz){
+    private void prmFilter(List<TargetPeptide> targetList, float rtExtractionWindows, SlopeIntercept slopeIntercept, Float[] rtRange, float precursorMz) {
         if (!targetList.isEmpty() && targetList.size() != 2) {
             //PRM模式下, rtRange不为空;
             TargetPeptide bestTarget = null;

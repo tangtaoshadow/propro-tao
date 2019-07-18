@@ -47,16 +47,21 @@ public class TargetPeptide {
     HashMap<Integer, String> unimodMap;
 
     /**
+     * 是否作为伪肽段存在,不存储到数据库中
+     */
+    boolean asDecoy = false;
+
+    /**
      * 伪肽段的信息
      */
     String decoySequence;
-    String decoyFullName;
     HashMap<Integer, String> decoyUnimodMap;
     HashMap<String, FragmentInfo> decoyFragmentMap;
 
-    public TargetPeptide(){}
+    public TargetPeptide() {
+    }
 
-    public TargetPeptide(PeptideDO peptide){
+    public TargetPeptide(PeptideDO peptide) {
         this.id = peptide.getId();
         this.proteinName = peptide.getProteinName();
         this.peptideRef = peptide.getPeptideRef();
@@ -64,16 +69,28 @@ public class TargetPeptide {
         this.fragmentMap = peptide.getFragmentMap();
         this.rt = peptide.getRt().floatValue();
         this.decoySequence = peptide.getDecoySequence();
-        this.decoyFullName = peptide.getFullName();
         this.decoyUnimodMap = peptide.getDecoyUnimodMap();
         this.decoyFragmentMap = peptide.getDecoyFragmentMap();
     }
 
+    public HashMap<String, FragmentInfo> getFragmentMap() {
+        return asDecoy ? decoyFragmentMap : fragmentMap;
+    }
+
+    public HashMap<Integer, String> getUnimodMap() {
+        return asDecoy ? decoyUnimodMap : unimodMap;
+    }
+
+    public String getSequence() {
+        return asDecoy ? decoySequence : sequence;
+    }
+
     //根据自身构建IntensityMap,key为cutInfo,value为对应的Intensity值
-    public HashMap<String, Float> buildIntensityMap(){
+    public HashMap<String, Float> buildIntensityMap() {
         HashMap<String, Float> intensityMap = new HashMap<>();
-        for(String cutInfo : fragmentMap.keySet()){
-            intensityMap.put(cutInfo, fragmentMap.get(cutInfo).getIntensity().floatValue());
+        HashMap<String, FragmentInfo> tempFragmentMap = getFragmentMap();
+        for (String cutInfo : tempFragmentMap.keySet()) {
+            intensityMap.put(cutInfo, tempFragmentMap.get(cutInfo).getIntensity().floatValue());
         }
         return intensityMap;
     }

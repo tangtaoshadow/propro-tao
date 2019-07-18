@@ -1,13 +1,19 @@
 package com.westlake.air.propro.dao;
 
 import com.mongodb.BasicDBObject;
+import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
+import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.simple.Protein;
 import com.westlake.air.propro.domain.db.simple.TargetPeptide;
 import com.westlake.air.propro.domain.query.PeptideQuery;
+import com.westlake.air.propro.utils.AnalyseUtil;
+import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -124,6 +130,22 @@ public class PeptideDAO extends BaseDAO<PeptideDO, PeptideQuery>{
                         Aggregation.limit(query.getPageSize())).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
                 Protein.class);
         return a.getMappedResults();
+    }
+
+    public void updateDecoyInfos(List<PeptideDO> peptideList){
+        BulkOperations ops = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, PeptideDO.class);
+        for (PeptideDO peptide : peptideList) {
+
+            Query query = new Query();
+            query.addCriteria(Criteria.where("id").is(peptide.getId()));
+            Update update = new Update();
+            update.set("decoySequence", peptide.getDecoySequence());
+            update.set("decoyUnimodMap", peptide.getDecoyUnimodMap());
+            update.set("decoyFragmentMap", peptide.getDecoyFragmentMap());
+
+            ops.updateOne(query, update);
+        }
+        ops.execute();
     }
 
     public long countByProteinName(String libraryId) {

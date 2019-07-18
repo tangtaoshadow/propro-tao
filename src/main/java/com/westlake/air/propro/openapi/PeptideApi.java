@@ -42,7 +42,6 @@ public class PeptideApi extends BaseController {
     @ApiOperation(value = "Get Peptide List", notes = "根据条件获取标准库中的肽段列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "libraryId", value = "library id", dataType = "string", required = true),
-            @ApiImplicitParam(name = "isDecoy", value = "is decoy or target", dataType = "boolean", required = false),
             @ApiImplicitParam(name = "mzStart", value = "precursor mz start", dataType = "double", required = false),
             @ApiImplicitParam(name = "mzEnd", value = "precursor mz end", dataType = "double", required = false),
             @ApiImplicitParam(name = "pageSize", value = "page size", dataType = "int", required = false, defaultValue = "50"),
@@ -50,7 +49,6 @@ public class PeptideApi extends BaseController {
     })
     public ResultDO<List<PeptideDO>> getList(Model model,
                                                     @RequestParam(value = "libraryId", required = true) String libraryId,
-                                                    @RequestParam(value = "isDecoy", required = false) Boolean isDecoy,
                                                     @RequestParam(value = "mzStart", required = false) Double mzStart,
                                                     @RequestParam(value = "mzEnd", required = false) Double mzEnd,
                                                     @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
@@ -58,9 +56,6 @@ public class PeptideApi extends BaseController {
         PeptideQuery query = new PeptideQuery();
         if (libraryId != null) {
             query.setLibraryId(libraryId);
-        }
-        if (isDecoy != null) {
-            query.setIsDecoy(isDecoy);
         }
         if (mzStart != null) {
             query.setMzStart(mzStart);
@@ -84,10 +79,9 @@ public class PeptideApi extends BaseController {
     })
     public ResultDO<PeptideDO> getByPeptideRefAndIsDecoy(Model model,
                                                          @RequestParam(value = "libraryId", required = true) String libraryId,
-                                                         @RequestParam(value = "isDecoy", required = true) Boolean isDecoy,
                                                          @RequestParam(value = "peptideRef", required = true) String peptideRef) {
 
-        PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy(libraryId, peptideRef, isDecoy);
+        PeptideDO peptide = peptideService.getByLibraryIdAndPeptideRef(libraryId, peptideRef);
         if (peptide == null) {
             return ResultDO.buildError(ResultCode.OBJECT_NOT_EXISTED);
         }

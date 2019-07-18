@@ -376,8 +376,7 @@ public class LibraryController extends BaseController {
         }
         PeptideQuery query = new PeptideQuery();
         query.setLibraryId(libraryId);
-        query.setLikeSequence(fragmentSequence);
-        query.setIsDecoy(false);
+        query.setSequence(fragmentSequence);
         if (targetRang != null) {
             query.setMzStart(Double.parseDouble(targetRang.getStart().toString()));
             query.setMzEnd(Double.parseDouble(targetRang.getEnd().toString()));

@@ -55,7 +55,7 @@ public class AirusTest extends BaseTest {
     public void test2() {
         List<PeptideDO> peptides = peptideService.getAllByLibraryId("5c093e20fc6f9e5a6c2d77a9");
         for (PeptideDO peptideDO : peptides) {
-            PeptideDO humanLibPeptide = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy("5c0a3669fc6f9e1d441ae71f", peptideDO.getPeptideRef(), false);
+            PeptideDO humanLibPeptide = peptideService.getByLibraryIdAndPeptideRef("5c0a3669fc6f9e1d441ae71f", peptideDO.getPeptideRef());
             peptideDO.setRt(humanLibPeptide.getRt());
             peptideService.update(peptideDO);
         }
@@ -84,7 +84,7 @@ public class AirusTest extends BaseTest {
         int count = 0;
         int count1 = 0;
         for (String peptide : peptides) {
-            PeptideDO peptideDO = peptideService.getByLibraryIdAndPeptideRefAndIsDecoy("5c0a237efc6f9e3c5048a6bc", peptide, false);
+            PeptideDO peptideDO = peptideService.getByLibraryIdAndPeptideRef("5c0a237efc6f9e3c5048a6bc", peptide);
             if (peptideDO == null) {
                 count1++;
                 continue;
