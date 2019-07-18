@@ -199,6 +199,10 @@ public class TraMLParser extends BaseLibraryParser {
                 addFragment(peptide, map);
             }
 
+            for (PeptideDO peptide: map.values()){
+                shuffleGenerator.generate(peptide);
+            }
+
             peptideService.insertAll(new ArrayList<>(map.values()), false);
             taskDO.addLog(map.size() + "条肽段数据插入成功");
             taskService.update(taskDO);
@@ -227,15 +231,7 @@ public class TraMLParser extends BaseLibraryParser {
 
             boolean withCharge = new ArrayList<>(selectedPepSet).get(0).contains("_");
             if (selectBySequence){
-                HashSet<String> selectedSeqSet = new HashSet<>();
-                for (String pep: selectedPepSet){
-                    if (withCharge){
-                        selectedSeqSet.add(removeUnimod(pep.split("_")[0]));
-                    } else {
-                        selectedSeqSet.add(removeUnimod(pep));
-                    }
-                }
-                selectedPepSet = selectedSeqSet;
+                selectedPepSet = convertPepToSeq(selectedPepSet, withCharge);
             }
             HashMap<String, PeptideDO> map = new HashMap<>();
             for (Transition transition : traML.getTransitionList()) {

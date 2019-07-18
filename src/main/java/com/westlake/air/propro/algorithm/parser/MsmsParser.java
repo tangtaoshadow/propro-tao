@@ -1,5 +1,6 @@
 package com.westlake.air.propro.algorithm.parser;
 
+import com.westlake.air.propro.algorithm.decoy.generator.ShuffleGenerator;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
@@ -43,6 +44,8 @@ public class MsmsParser extends BaseLibraryParser {
     LibraryService libraryService;
     @Autowired
     FragmentFactory fragmentFactory;
+    @Autowired
+    ShuffleGenerator shuffleGenerator;
 
     public final Logger logger = LoggerFactory.getLogger(MsmsParser.class);
 
@@ -85,7 +88,9 @@ public class MsmsParser extends BaseLibraryParser {
                     lastSequence = sequence;
                 }
             }
-
+            for (PeptideDO peptide: libPepMap.values()){
+                shuffleGenerator.generate(peptide);
+            }
             peptideService.insertAll(new ArrayList<>(libPepMap.values()), false);
             taskDO.addLog(libPepMap.size() + "条肽段数据插入成功");
             taskService.update(taskDO);
@@ -161,6 +166,10 @@ public class MsmsParser extends BaseLibraryParser {
                     }
                     lastSequence = sequence;
                 }
+            }
+
+            for (PeptideDO peptide: selectedPepList){
+                shuffleGenerator.generate(peptide);
             }
 
             peptideService.insertAll(selectedPepList, false);

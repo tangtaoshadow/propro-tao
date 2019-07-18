@@ -1,5 +1,6 @@
 package com.westlake.air.propro.service.impl;
 
+import com.westlake.air.propro.algorithm.parser.*;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.TaskStatus;
 import com.westlake.air.propro.dao.LibraryDAO;
@@ -9,10 +10,6 @@ import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.query.LibraryQuery;
 import com.westlake.air.propro.domain.query.PeptideQuery;
-import com.westlake.air.propro.algorithm.parser.FastaParser;
-import com.westlake.air.propro.algorithm.parser.MsmsParser;
-import com.westlake.air.propro.algorithm.parser.TraMLParser;
-import com.westlake.air.propro.algorithm.parser.LibraryTsvParser;
 import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.TaskService;
 import com.westlake.air.propro.service.PeptideService;
@@ -46,6 +43,8 @@ public class LibraryServiceImpl implements LibraryService {
     LibraryTsvParser tsvParser;
     @Autowired
     TraMLParser traMLParser;
+    @Autowired
+    FastTraMLParser fastTraMLParser;
     @Autowired
     MsmsParser msmsParser;
     @Autowired
@@ -196,9 +195,9 @@ public class LibraryServiceImpl implements LibraryService {
             }
         } else if (fileName.toLowerCase().endsWith("traml")) {
             if (prmPeptideRefMap.isEmpty()){
-                resultDO = traMLParser.parseAndInsert(libFileStream, library, taskDO);
+                resultDO = fastTraMLParser.parseAndInsert(libFileStream, library, taskDO);
             }else {
-                resultDO = traMLParser.selectiveParseAndInsert(libFileStream, library, new HashSet<>(prmPeptideRefMap.keySet()), false, taskDO);
+                resultDO = fastTraMLParser.selectiveParseAndInsert(libFileStream, library, new HashSet<>(prmPeptideRefMap.keySet()), false, taskDO);
             }
         } else if (fileName.toLowerCase().endsWith("txt")){
             if (prmPeptideRefMap.isEmpty()){

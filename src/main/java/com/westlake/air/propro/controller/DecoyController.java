@@ -1,5 +1,6 @@
 package com.westlake.air.propro.controller;
 
+import com.westlake.air.propro.algorithm.decoy.generator.NicoGenerator;
 import com.westlake.air.propro.algorithm.decoy.generator.ShuffleGenerator;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
@@ -27,6 +28,8 @@ public class DecoyController extends BaseController {
 
     @Autowired
     ShuffleGenerator shuffleGenerator;
+    @Autowired
+    NicoGenerator nicoGenerator;
     @Autowired
     PeptideService peptideService;
 
@@ -64,6 +67,7 @@ public class DecoyController extends BaseController {
             query.setPageNo(i);
             ResultDO<List<PeptideDO>> resultDO = peptideService.getList(query);
             List<PeptideDO> list = resultDO.getModel();
+//            List<PeptideDO> list = nicoGenerator.batchGenerate(resultDO.getModel());
             shuffleGenerator.generate(list);
             ResultDO resultTmp = peptideService.updateDecoyInfos(list);
             if (resultTmp.isSuccess()) {

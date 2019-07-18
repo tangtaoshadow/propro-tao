@@ -6,7 +6,6 @@ import com.westlake.air.propro.domain.bean.peptide.Annotation;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.TaskDO;
-import com.westlake.air.propro.algorithm.parser.xml.AirXStream;
 import com.westlake.air.propro.service.PeptideService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -18,8 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import static com.westlake.air.propro.utils.PeptideUtil.removeUnimod;
 
 /**
  * Created by James Lu MiaoShan
@@ -154,5 +153,17 @@ public abstract class BaseLibraryParser {
             columnMap.put(StringUtils.deleteWhitespace(columns[i].toLowerCase()), i);
         }
         return columnMap;
+    }
+
+    protected HashSet<String> convertPepToSeq(HashSet<String> selectedPepSet, boolean withCharge){
+        HashSet<String> selectedSeqSet = new HashSet<>();
+        for (String pep: selectedPepSet){
+            if (withCharge){
+                selectedSeqSet.add(removeUnimod(pep.split("_")[0]));
+            } else {
+                selectedSeqSet.add(removeUnimod(pep));
+            }
+        }
+        return selectedSeqSet;
     }
 }

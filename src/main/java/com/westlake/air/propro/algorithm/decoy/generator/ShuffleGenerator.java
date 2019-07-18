@@ -120,10 +120,10 @@ public class ShuffleGenerator extends BaseGenerator {
             );
 
             decoyFi.setMz(productMz);
-
-            peptideDO.setDecoySequence(TransitionUtil.toSequence(bestDecoy, false));
-            peptideDO.setDecoyUnimodMap(newUnimodMap);
             peptideDO.putDecoyFragment(cutInfo, decoyFi);
         }
+
+        peptideDO.setDecoySequence(TransitionUtil.toSequence(bestDecoy, false));
+        peptideDO.setDecoyUnimodMap(newUnimodMap);
     }
 }

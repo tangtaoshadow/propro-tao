@@ -132,15 +132,7 @@ public class LibraryTsvParser extends BaseLibraryParser {
 
             boolean withCharge = new ArrayList<>(selectedPepSet).get(0).contains("_");
             if (selectBySequence) {
-                HashSet<String> selectedSeqSet = new HashSet<>();
-                for (String pep : selectedPepSet) {
-                    if (withCharge) {
-                        selectedSeqSet.add(removeUnimod(pep.split("_")[0]));
-                    } else {
-                        selectedSeqSet.add(removeUnimod(pep));
-                    }
-                }
-                selectedPepSet = selectedSeqSet;
+                selectedPepSet = convertPepToSeq(selectedPepSet, withCharge);
             }
             while ((line = reader.readLine()) != null) {
                 if (!selectedPepSet.isEmpty() && !isSelectedLine(line, columnMap, selectedPepSet, withCharge, selectBySequence)) {

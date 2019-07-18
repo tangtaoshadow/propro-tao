@@ -135,9 +135,11 @@ public class ScoreServiceImpl implements ScoreService {
         for (PeakGroup peakGroupFeature : peakGroupFeatureList) {
             FeatureScores featureScores = new FeatureScores(input.getScoreTypes().size());
             chromatographicScorer.calculateChromatographicScores(peakGroupFeature, normedLibIntMap, featureScores, input.getScoreTypes());
-            if(!dataDO.getIsDecoy() && featureScores.get(ScoreType.XcorrShapeWeighted, input.getScoreTypes()) != null
-                    && (featureScores.get(ScoreType.XcorrShapeWeighted, input.getScoreTypes()) < input.getXcorrShapeWeightThreshold()
-                    || featureScores.get(ScoreType.XcorrShape, input.getScoreTypes()) < input.getXcorrShapeThreshold())){
+            Double shapeScore = featureScores.get(ScoreType.XcorrShape, input.getScoreTypes());
+            Double shapeScoreWeighted = featureScores.get(ScoreType.XcorrShapeWeighted, input.getScoreTypes());
+            if(!dataDO.getIsDecoy()
+                    && ((shapeScoreWeighted != null && shapeScoreWeighted < input.getXcorrShapeWeightThreshold())
+                        || (shapeScore != null && shapeScore < input.getXcorrShapeThreshold()))){
                 continue;
             }
             //根据RT时间和前体MZ获取最近的一个原始谱图
