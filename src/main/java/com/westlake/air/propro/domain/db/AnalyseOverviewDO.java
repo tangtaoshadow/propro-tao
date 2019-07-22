@@ -77,6 +77,9 @@ public class AnalyseOverviewDO extends BaseDO {
     //在计算高斯平滑时使用的Sigma值,一般为0.01
     Float spacing;
 
+    //最终的划分FDR,一般为0.01
+    Float fdr;
+
     //分析实验的创建时间
     Date createDate;
 

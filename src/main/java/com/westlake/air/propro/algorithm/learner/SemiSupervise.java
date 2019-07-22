@@ -1,5 +1,9 @@
 package com.westlake.air.propro.algorithm.learner;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.westlake.air.propro.algorithm.learner.classifier.LDAClassifier;
+import com.westlake.air.propro.algorithm.learner.classifier.XGBoostClassifier;
 import com.westlake.air.propro.constants.Classifier;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
@@ -33,14 +37,12 @@ import java.util.List;
  * Time: 2018-06-19 09:25
  */
 @Component
-public class Airus {
+public class SemiSupervise {
 
-    public final Logger logger = LoggerFactory.getLogger(Airus.class);
+    public final Logger logger = LoggerFactory.getLogger(SemiSupervise.class);
 
     @Autowired
-    SemiSupervised semiSupervised;
-    @Autowired
-    LDALearner ldaLearner;
+    LDAClassifier ldaClassifier;
     @Autowired
     Stats stats;
     @Autowired
@@ -50,10 +52,9 @@ public class Airus {
     @Autowired
     AnalyseOverviewService analyseOverviewService;
     @Autowired
-    XGBoostLearner xgBoostLearner;
+    XGBoostClassifier xgboostClassifier;
 
-    public FinalResult doAirus(String overviewId, AirusParams airusParams) {
-        String type = "";
+    public FinalResult doSemiSupervise(String overviewId, AirusParams airusParams) {
         FinalResult finalResult = new FinalResult();
         logger.info("开始处理已识别的肽段数目");
         ResultDO<AnalyseOverviewDO> overviewDOResultDO = analyseOverviewService.getById(overviewId);
@@ -67,10 +68,10 @@ public class Airus {
             overviewDO.setMatchedPeptideCount(null);
         }
         analyseOverviewService.update(overviewDO);
-        type = overviewDO.getType();
+        String type = overviewDO.getType();
         logger.info("开始获取打分数据");
 
-        if (airusParams.getScoreTypes()==null){
+        if (airusParams.getScoreTypes() == null) {
             airusParams.setScoreTypes(overviewDO.getScoreTypes());
         }
         List<SimpleScores> scores = analyseDataService.getSimpleScoresByOverviewId(overviewId);
@@ -84,15 +85,23 @@ public class Airus {
         }
         HashMap<String, Double> weightsMap = new HashMap<>();
         HashMap<String, Integer> peptideHitMap = new HashMap<>();
-        if (airusParams.getClassifier().equals(Classifier.lda)) {
-            logger.info("开始训练学习数据权重");
-            weightsMap = LDALearn(scores, peptideHitMap, airusParams, overviewDO.getScoreTypes(), type);
-            logger.info("开始计算合并打分");
-            ldaLearner.score(scores, weightsMap, airusParams.getScoreTypes());
-            finalResult.setWeightsMap(weightsMap);
-        } else if (airusParams.getClassifier().equals(Classifier.xgboost)) {
-            XGBLearn(scores, overviewDO.getScoreTypes(), airusParams);
+        switch (airusParams.getClassifier()) {
+            case lda:
+                logger.info("开始训练学习数据权重");
+                weightsMap = LDALearn(scores, peptideHitMap, airusParams, overviewDO.getScoreTypes(), type);
+                logger.info("开始计算合并打分");
+                ldaClassifier.score(scores, weightsMap, airusParams.getScoreTypes());
+                finalResult.setWeightsMap(weightsMap);
+                break;
+
+            case xgboost:
+                XGBLearn(scores, overviewDO.getScoreTypes(), airusParams);
+                break;
+
+            default:
+                break;
         }
+
         List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), overviewDO.getScoreTypes(), false);
         int hit = 0, count = 0;
         if (type.equals(Constants.EXP_TYPE_PRM)) {
@@ -120,16 +129,16 @@ public class Airus {
         logger.info("将合并打分及定量结果反馈更新到数据库中,总计:" + featureScoresList.size() + "条数据");
         giveDecoyFdr(featureScoresList);
         long start = System.currentTimeMillis();
-        analyseDataService.removeMultiDecoy(overviewId, featureScoresList, 0.01d);
-        logger.info("删除无用数据一共用时："+(System.currentTimeMillis() - start)+"毫秒");
+        analyseDataService.removeMultiDecoy(overviewId, featureScoresList, airusParams.getFdr());
+        logger.info("删除无用数据一共用时：" + (System.currentTimeMillis() - start) + "毫秒");
         start = System.currentTimeMillis();
         analyseDataService.updateMulti(overviewDO.getId(), featureScoresList);
-        logger.info("更新数据"+featureScoresList.size()+"条一共用时："+(System.currentTimeMillis() - start));
+        logger.info("更新数据" + featureScoresList.size() + "条一共用时：" + (System.currentTimeMillis() - start));
 
         for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
             if (!simpleFeatureScores.getIsDecoy()) {
                 //投票策略
-                if (simpleFeatureScores.getFdr() <= 0.01) {
+                if (simpleFeatureScores.getFdr() <= airusParams.getFdr()) {
                     Integer hitCount = peptideHitMap.get(simpleFeatureScores.getPeptideRef());
                     if (hitCount != null && hitCount >= airusParams.getTrainTimes() / 2) {
                         hit++;
@@ -138,13 +147,12 @@ public class Airus {
             }
         }
 
-        logger.info("采用加权法获得的肽段数目为:" + hit);
-        logger.info("打分反馈更新完毕");
+        logger.info("采用加权法获得的肽段数目为:" + hit + ",打分反馈更新完毕");
         finalResult.setMatchedPeptideCount(count);
         overviewDO.setWeights(weightsMap);
         overviewDO.setMatchedPeptideCount(count);
         analyseOverviewService.update(overviewDO);
-        
+
         logger.info("合并打分完成,共找到新肽段" + count + "个");
         return finalResult;
     }
@@ -169,31 +177,29 @@ public class Airus {
     }
 
     /**
-     *
      * @param scores
      * @param peptideHitMap
      * @param airusParams
-     * @param type 实验类型,PRM还是其他
+     * @param type          实验类型,PRM还是其他
      * @return
      */
     public HashMap<String, Double> LDALearn(List<SimpleScores> scores, HashMap<String, Integer> peptideHitMap, AirusParams airusParams, List<String> scoreTypes, String type) {
-        // adjust AirusParams iter times, too much iterations result to deviation
-        if(scores.size() < 500){
+
+        if (scores.size() < 500) {
             airusParams.setXevalNumIter(10);
             airusParams.setSsIterationFdr(0.02);
             airusParams.setProgressiveRate(0.8);
         }
         int neval = airusParams.getTrainTimes();
-//        test(scores);
         List<HashMap<String, Double>> weightsMapList = new ArrayList<>();
         for (int i = 0; i < neval; i++) {
-            logger.info("开始第" + i + "轮尝试,总计"+neval+"轮");
-            LDALearnData ldaLearnData = semiSupervised.learnRandomized(scores, airusParams);
+            logger.info("开始第" + i + "轮尝试,总计" + neval + "轮");
+            LDALearnData ldaLearnData = learnRandomized(scores, airusParams);
             if (ldaLearnData == null) {
                 logger.info("跳过本轮训练");
                 continue;
             }
-            ldaLearner.score(scores, ldaLearnData.getWeightsMap(), scoreTypes);
+            ldaClassifier.score(scores, ldaLearnData.getWeightsMap(), scoreTypes);
             List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), scoreTypes, false);
             int count = 0;
             if (type.equals(Constants.EXP_TYPE_PRM)) {
@@ -238,12 +244,12 @@ public class Airus {
         return AirusUtil.averagedWeights(weightsMapList);
     }
 
-    public void XGBLearn(List<SimpleScores> scores,List<String> scoreTypes, AirusParams airusParams) {
+    public void XGBLearn(List<SimpleScores> scores, List<String> scoreTypes, AirusParams airusParams) {
         logger.info("开始训练Booster");
-        Booster booster = semiSupervised.learnRandomizedXGB(scores, airusParams);
+        Booster booster = learnRandomizedXGB(scores, airusParams);
         try {
             logger.info("开始最终打分");
-            xgBoostLearner.predictAll(booster, scores, ScoreType.MainScore.getTypeName(), airusParams.getScoreTypes());
+            xgboostClassifier.predictAll(booster, scores, ScoreType.MainScore.getTypeName(), airusParams.getScoreTypes());
         } catch (Exception e) {
             logger.error("XGBooster Predict All Fail.\n");
             e.printStackTrace();
@@ -256,88 +262,78 @@ public class Airus {
         }
     }
 
-    private ErrorStat finalErrorTable(ErrorStat errorStat, AirusParams airusParams) {
+    public LDALearnData learnRandomized(List<SimpleScores> scores, AirusParams airusParams) {
+        LDALearnData ldaLearnData = new LDALearnData();
+        try {
+            //Get part of scores as train input.
+            TrainData trainData = AirusUtil.split(scores, airusParams.getTrainTestRatio(), airusParams.isDebug(), airusParams.getScoreTypes());
 
-        StatMetrics statMetrics = errorStat.getStatMetrics();
-        Double[] cutOffs = errorStat.getCutoff();
-        Double[] cutOffsSort = cutOffs.clone();
-        Arrays.sort(cutOffsSort);
-        double minCutOff = cutOffsSort[0];
-        double maxCutOff = cutOffsSort[cutOffs.length - 1];
-        double margin = (maxCutOff - minCutOff) * 0.05;
-        Double[] sampledCutoffs = MathUtil.linspace(minCutOff - margin, maxCutOff - margin, airusParams.getNumCutOffs());
-        Integer[] ix = MathUtil.findNearestMatches(cutOffs, sampledCutoffs, airusParams.getUseSortOrders());
+            //第一次训练数据集使用指定的主分数(默认为MainScore)进行训练
+            //TrainPeaks trainPeaks = selectTrainPeaks(trainData, airusParams.getMainScore(), airusParams, airusParams.getSsInitialFdr());
+            TrainPeaks trainPeaks = selectFirstTrainPeaks(trainData, airusParams);
 
-        ErrorStat sampleErrorStat = new ErrorStat();
-        sampleErrorStat.setCutoff(sampledCutoffs);
-        sampleErrorStat.setQvalue(ArrayUtil.extractRow(errorStat.getQvalue(), ix));
-        sampleErrorStat.setPvalue(ArrayUtil.extractRow(errorStat.getPvalue(), ix));
+            HashMap<String, Double> weightsMap = ldaClassifier.learn(trainPeaks, airusParams.getMainScore(), airusParams.getScoreTypes());
+            logger.info("Train Weight:" + JSONArray.toJSONString(weightsMap));
 
-        StatMetrics sampleStatMatric = new StatMetrics();
-        sampleStatMatric.setSvalue(ArrayUtil.extractRow(statMetrics.getSvalue(), ix));
-        sampleStatMatric.setFn(ArrayUtil.extractRow(statMetrics.getFn(), ix));
-        sampleStatMatric.setFnr(ArrayUtil.extractRow(statMetrics.getFnr(), ix));
-        sampleStatMatric.setFdr(ArrayUtil.extractRow(statMetrics.getFdr(), ix));
-        sampleStatMatric.setFp(ArrayUtil.extractRow(statMetrics.getFp(), ix));
-        sampleStatMatric.setFpr(ArrayUtil.extractRow(statMetrics.getFpr(), ix));
-        sampleStatMatric.setTn(ArrayUtil.extractRow(statMetrics.getTn(), ix));
-        sampleStatMatric.setTp(ArrayUtil.extractRow(statMetrics.getTp(), ix));
+            //根据weightsMap计算子分数的加权总分
+            ldaClassifier.score(trainData, weightsMap, airusParams.getScoreTypes());
+            weightsMap = new HashMap<>();
+            HashMap<String, Double> lastWeightsMap = new HashMap<>();
+            for (int times = 0; times < airusParams.getXevalNumIter(); times++) {
+                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, ScoreType.WeightedTotalScore.getTypeName(), airusParams, airusParams.getSsIterationFdr());
+                lastWeightsMap = weightsMap;
+                weightsMap = ldaClassifier.learn(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName(), airusParams.getScoreTypes());
+                logger.info("Train Weight:" + JSONArray.toJSONString(weightsMap));
+                for (Double value : weightsMap.values()) {
+                    if (value == null || Double.isNaN(value)) {
+                        logger.info("本轮训练一坨屎:" + JSON.toJSONString(weightsMap));
+                        continue;
+                    }
+                }
+                if (lastWeightsMap.size() != 0) {
+                    for (String key : weightsMap.keySet()) {
+                        weightsMap.put(key, weightsMap.get(key) * airusParams.getProgressiveRate() + lastWeightsMap.get(key) * (1d - airusParams.getProgressiveRate()));
+                    }
+                }
+                ldaClassifier.score(trainData, weightsMap, airusParams.getScoreTypes());
+            }
+            ldaLearnData.setWeightsMap(weightsMap);
+            return ldaLearnData;
+        } catch (Exception e) {
+            logger.error("learnRandomized Fail.\n");
+            e.printStackTrace();
+            return null;
+        }
 
-        sampleErrorStat.setStatMetrics(sampleStatMatric);
-
-        return sampleErrorStat;
     }
 
-    private ErrorStat summaryErrorTable(ErrorStat errorStat, AirusParams airusParams) {
-        StatMetrics statMetrics = errorStat.getStatMetrics();
-        Double[] qvalues = airusParams.getQvalues();
-        Integer[] ix = MathUtil.findNearestMatches(errorStat.getQvalue(), qvalues, airusParams.getUseSortOrders());
-
-        ErrorStat subErrorStat = new ErrorStat();
-        subErrorStat.setCutoff(ArrayUtil.extractRow(errorStat.getCutoff(), ix));
-        subErrorStat.setQvalue(qvalues);
-        subErrorStat.setPvalue(ArrayUtil.extractRow(errorStat.getPvalue(), ix));
-
-        StatMetrics subStatMatric = new StatMetrics();
-        subStatMatric.setSvalue(ArrayUtil.extractRow(statMetrics.getSvalue(), ix));
-        subStatMatric.setFn(ArrayUtil.extractRow(statMetrics.getFn(), ix));
-        subStatMatric.setFnr(ArrayUtil.extractRow(statMetrics.getFnr(), ix));
-        subStatMatric.setFdr(ArrayUtil.extractRow(statMetrics.getFdr(), ix));
-        subStatMatric.setFp(ArrayUtil.extractRow(statMetrics.getFp(), ix));
-        subStatMatric.setFpr(ArrayUtil.extractRow(statMetrics.getFpr(), ix));
-        subStatMatric.setTn(ArrayUtil.extractRow(statMetrics.getTn(), ix));
-        subStatMatric.setTp(ArrayUtil.extractRow(statMetrics.getTp(), ix));
-
-        subErrorStat.setStatMetrics(subStatMatric);
-
-        return subErrorStat;
-    }
-
-    /**
-     * Dscore: Normalize clfScores with clfScores' TopDecoyPeaks.
-     */
-    private Double[] calculateDscore(Double[] weights, ScoreData scoreData) {
-        Double[][] scores = AirusUtil.getFeatureMatrix(scoreData.getScoreData(), true);
-        Double[] classifierScore = MathUtil.dot(scores, weights);
-        Double[] classifierTopDecoyPeaks = AirusUtil.getTopDecoyPeaks(classifierScore, scoreData.getIsDecoy(), AirusUtil.findTopIndex(classifierScore, AirusUtil.getGroupNumId(scoreData.getGroupId())));
-        return MathUtil.normalize(classifierScore, classifierTopDecoyPeaks);
-    }
-
-    private void fixMainScore(Double[][] scores) {
-        for (int i = 0; i < scores.length; i++) {
-            logger.info("原始分数:" + scores[i][0]);
-            scores[i][0] =
-                    scores[i][1] * -0.19011762 +
-                            scores[i][2] * 2.47298914 +
-                            scores[i][7] * 5.63906731 +
-                            scores[i][11] * -0.62640133 +
-                            scores[i][12] * 0.36006925 +
-                            scores[i][13] * 0.08814003 +
-                            scores[i][3] * 0.13978311 +
-                            scores[i][5] * -1.16475032 +
-                            scores[i][16] * -0.19267813 +
-                            scores[i][9] * -0.61712054;
-            logger.info("事后分数:" + scores[i][0]);
+    public Booster learnRandomizedXGB(List<SimpleScores> scores, AirusParams airusParams) {
+        try {
+            //Get part of scores as train input.
+            TrainData trainData = AirusUtil.split(scores, airusParams.getTrainTestRatio(), airusParams.isDebug(), airusParams.getScoreTypes());
+            //第一次训练数据集使用MainScore进行训练
+            long startTime = System.currentTimeMillis();
+            TrainPeaks trainPeaks = selectTrainPeaks(trainData, airusParams.getMainScore(), airusParams, airusParams.getSsInitialFdr());
+            logger.info("高可信Target个数：" + trainPeaks.getBestTargets().size());
+            Booster booster = xgboostClassifier.train(trainPeaks, airusParams.getMainScore(), airusParams.getScoreTypes());
+            xgboostClassifier.predict(booster, trainData, airusParams.getMainScore(), airusParams.getScoreTypes());
+            for (int times = 0; times < airusParams.getXevalNumIter(); times++) {
+                logger.info("开始第" + times + "轮训练");
+                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, ScoreType.WeightedTotalScore.getTypeName(), airusParams, airusParams.getXgbIterationFdr());
+                logger.info("高可信Target个数：" + trainPeaksTemp.getBestTargets().size());
+                booster = xgboostClassifier.train(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName(), airusParams.getScoreTypes());
+                xgboostClassifier.predict(booster, trainData, ScoreType.WeightedTotalScore.getTypeName(), airusParams.getScoreTypes());
+            }
+            logger.info("总时间：" + (System.currentTimeMillis() - startTime));
+            List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), airusParams.getScoreTypes(), false);
+            ErrorStat errorStat = stats.errorStatistics(featureScoresList, airusParams);
+            int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr());
+            logger.info("Train count:" + count);
+            return booster;
+        } catch (Exception e) {
+            logger.error("learnRandomizedXGB Fail.\n");
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -415,5 +411,85 @@ public class Airus {
                 }
             }
         }
+    }
+
+    private TrainPeaks selectTrainPeaks(TrainData trainData, String usedScoreType, AirusParams airusParams, Double cutoff) {
+
+        List<SimpleFeatureScores> topTargetPeaks = AirusUtil.findTopFeatureScores(trainData.getTargets(), usedScoreType, airusParams.getScoreTypes(), true);
+        List<SimpleFeatureScores> topDecoyPeaks = AirusUtil.findTopFeatureScores(trainData.getDecoys(), usedScoreType, airusParams.getScoreTypes(), false);
+
+        Double cutoffNew;
+        if (topTargetPeaks.size() < 100) {
+            Double decoyMax = Double.MIN_VALUE, targetMax = Double.MIN_VALUE;
+            for (SimpleFeatureScores scores : topDecoyPeaks) {
+                if (scores.getMainScore() > decoyMax) {
+                    decoyMax = scores.getMainScore();
+                }
+            }
+            for (SimpleFeatureScores scores : topTargetPeaks) {
+                if (scores.getMainScore() > targetMax) {
+                    targetMax = scores.getMainScore();
+                }
+            }
+            cutoffNew = (decoyMax + targetMax) / 2;
+        } else {
+            // find cutoff fdr from scores and only use best target peaks:
+            cutoffNew = stats.findCutoff(topTargetPeaks, topDecoyPeaks, airusParams, cutoff);
+        }
+        List<SimpleFeatureScores> bestTargetPeaks = AirusUtil.peaksFilter(topTargetPeaks, cutoffNew);
+
+        TrainPeaks trainPeaks = new TrainPeaks();
+        trainPeaks.setBestTargets(bestTargetPeaks);
+        trainPeaks.setTopDecoys(topDecoyPeaks);
+        System.out.println(topTargetPeaks.size() + " " + topDecoyPeaks.size() + " " + cutoffNew + " " + bestTargetPeaks.size());
+        return trainPeaks;
+    }
+
+    private TrainPeaks selectFirstTrainPeaks(TrainData trainData, AirusParams airusParams) {
+        List<SimpleFeatureScores> decoyPeaks = new ArrayList<>();
+        List<String> scoreTypes = airusParams.getScoreTypes();
+        for (SimpleScores simpleScores : trainData.getDecoys()) {
+            FeatureScores topDecoy = null;
+            double maxMainScore = -Double.MAX_VALUE;
+            for (FeatureScores featureScores : simpleScores.getFeatureScoresList()) {
+                double mainScore = featureScores.get(ScoreType.MainScore.getTypeName(), scoreTypes);
+                if (mainScore > maxMainScore) {
+                    maxMainScore = mainScore;
+                    topDecoy = featureScores;
+                }
+            }
+            SimpleFeatureScores simpleFeatureScores = new SimpleFeatureScores();
+            simpleFeatureScores.setScores(topDecoy.getScores());
+            decoyPeaks.add(simpleFeatureScores);
+        }
+        TrainPeaks trainPeaks = new TrainPeaks();
+        trainPeaks.setTopDecoys(decoyPeaks);
+
+        SimpleFeatureScores bestTargetScore = new SimpleFeatureScores(airusParams.getScoreTypes().size());
+        bestTargetScore.put(ScoreType.XcorrShape.getTypeName(), 1d, scoreTypes);
+        bestTargetScore.put(ScoreType.XcorrShapeWeighted.getTypeName(), 1d, scoreTypes);
+        bestTargetScore.put(ScoreType.XcorrCoelution.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.XcorrCoelutionWeighted.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.LibraryCorr.getTypeName(), 1d, scoreTypes);
+        bestTargetScore.put(ScoreType.LibraryRsmd.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.LibraryManhattan.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.LibraryDotprod.getTypeName(), 1d, scoreTypes);
+        bestTargetScore.put(ScoreType.LibrarySangle.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.LibraryRootmeansquare.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.LogSnScore.getTypeName(), 5d, scoreTypes);
+        bestTargetScore.put(ScoreType.NormRtScore.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.IntensityScore.getTypeName(), 1d, scoreTypes);
+        bestTargetScore.put(ScoreType.IsotopeCorrelationScore.getTypeName(), 1d, scoreTypes);
+        bestTargetScore.put(ScoreType.IsotopeOverlapScore.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.MassdevScore.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.MassdevScoreWeighted.getTypeName(), 0d, scoreTypes);
+        bestTargetScore.put(ScoreType.BseriesScore.getTypeName(), 4d, scoreTypes);
+        bestTargetScore.put(ScoreType.YseriesScore.getTypeName(), 10d, scoreTypes);
+
+
+        List<SimpleFeatureScores> bestTargets = new ArrayList<>();
+        bestTargets.add(bestTargetScore);
+        trainPeaks.setBestTargets(bestTargets);
+        return trainPeaks;
     }
 }

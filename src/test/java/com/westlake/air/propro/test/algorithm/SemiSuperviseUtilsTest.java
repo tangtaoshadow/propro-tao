@@ -6,7 +6,7 @@ import com.westlake.air.propro.utils.ArrayUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class AirusUtilsTest extends BaseTest {
+public class SemiSuperviseUtilsTest extends BaseTest {
 
     @Autowired
     Stats stats;

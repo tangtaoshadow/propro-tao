@@ -1,4 +1,4 @@
-package com.westlake.air.propro.algorithm.learner;
+package com.westlake.air.propro.algorithm.learner.classifier;
 
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.domain.bean.airus.TrainData;
@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class Learner {
+public abstract class Classifier {
 
-    public final Logger logger = LoggerFactory.getLogger(Learner.class);
+    public final Logger logger = LoggerFactory.getLogger(Classifier.class);
 
     /**
      * Get clfScore with given confidence(params).

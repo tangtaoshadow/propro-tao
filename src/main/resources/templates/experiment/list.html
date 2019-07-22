@@ -88,8 +88,7 @@
                     <td>
                         <a th:data1="${experiment.id}" th:onclick="query(this.getAttribute('data1'))" data-toggle="modal" data-target="#m_modal_irt" href="#" th:text="|${experiment.irtResult?.si?.slope} -> ${experiment.irtResult?.si?.intercept}|"></a>
                     </td>
-                    <td th:text="|${experiment.instrument?.manufacturer} ${experiment.instrument?.model}|">
-                    </td>
+                    <td th:text="|${experiment.instrument?.manufacturer} ${experiment.instrument?.model}|"></td>
                     <td th:text="${#dates.format(experiment.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="|${analyseOverviewDOMap.get(experiment.id)?.matchedPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.totalPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.libraryPeptideCount}|"></td>
                     <td>
@@ -109,12 +108,12 @@
                             <i class="fa fa-calculator"></i>
                         </a>
                         <a th:href="@{/experiment/irtwithlib(id=${experiment.id})}" data-toggle="m-tooltip"
-                           th:title="使用标准库计算irt"
+                           title="使用标准库计算irt(试验功能)"
                            class="btn btn-brand m-btn m-btn--icon m-btn--icon-only">
                             <i class="fa fa-calculator"></i>
                         </a>
                         <a th:href="@{/experiment/extractor(id=${experiment.id})}" data-toggle="m-tooltip"
-                           th:title="#{btn_start_convolution}"
+                           th:title="#{label_do_complete_workflow}"
                            class="btn btn-brand m-btn m-btn--icon m-btn--icon-only">
                             <i class="fa fa-dropbox"></i>
                         </a>
@@ -144,9 +143,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
                     </div>
-                    <div id="modal-body" class="modal-body" style="width: 1000px;height:600px;">
-
-                    </div>
+                    <div id="modal-body" class="modal-body" style="width: 1000px;height:600px;"></div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal"
                                 th:text="#{btn_close}"></button>

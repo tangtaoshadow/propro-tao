@@ -1,6 +1,6 @@
 package com.westlake.air.propro.test.algorithm;
 
-import com.westlake.air.propro.algorithm.learner.Airus;
+import com.westlake.air.propro.algorithm.learner.SemiSupervise;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.PeptideService;
@@ -17,11 +17,11 @@ import java.util.List;
  * Created by James Lu MiaoShan
  * Time: 2018-08-12 21:18
  */
-public class AirusTest extends BaseTest {
+public class SemiSuperviseTest extends BaseTest {
 
 
     @Autowired
-    Airus airus;
+    SemiSupervise semiSupervise;
     @Autowired
     ScoreService scoreService;
     @Autowired

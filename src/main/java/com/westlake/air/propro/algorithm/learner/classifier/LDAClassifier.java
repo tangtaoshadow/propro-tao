@@ -1,4 +1,4 @@
-package com.westlake.air.propro.algorithm.learner;
+package com.westlake.air.propro.algorithm.learner.classifier;
 
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.propro.domain.bean.airus.TrainPeaks;
@@ -10,12 +10,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
-@Component("ldaLearner")
-public class LDALearner extends Learner {
+@Component("ldaClassifier")
+public class LDAClassifier extends Classifier{
 
-    public final Logger logger = LoggerFactory.getLogger(LDALearner.class);
+    public final Logger logger = LoggerFactory.getLogger(LDAClassifier.class);
 
     /**
      * 使用apache的svd库进行计算
@@ -27,8 +26,6 @@ public class LDALearner extends Learner {
     public HashMap<String, Double> learn(TrainPeaks trainPeaks, String skipScoreType, List<String> scoreTypes) {
 
         int totalLength = trainPeaks.getBestTargets().size() + trainPeaks.getTopDecoys().size();
-
-//        List<Double> scoreSamples = trainPeaks.getTopDecoys().get(0).getScores();
         int scoreTypesCount = 0;
         if (scoreTypes.contains(skipScoreType)) {
             scoreTypesCount = scoreTypes.size() - 1;

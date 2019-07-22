@@ -2,7 +2,7 @@ package com.westlake.air.propro.async.task;
 
 import com.westlake.air.propro.algorithm.extract.Extractor;
 import com.westlake.air.propro.algorithm.irt.Irt;
-import com.westlake.air.propro.algorithm.learner.Airus;
+import com.westlake.air.propro.algorithm.learner.SemiSupervise;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.constants.TaskStatus;
 import com.westlake.air.propro.domain.ResultDO;
@@ -16,7 +16,6 @@ import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.service.*;
-import com.westlake.air.propro.utils.ConvolutionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -37,7 +36,7 @@ public class ExperimentTask extends BaseTask {
     @Autowired
     ScoreService scoreService;
     @Autowired
-    Airus airus;
+    SemiSupervise semiSupervise;
     @Autowired
     PeptideService peptideService;
     @Autowired
@@ -117,7 +116,8 @@ public class ExperimentTask extends BaseTask {
             taskService.update(taskDO, "处理完毕,提取数据(打分)总耗时:" + (System.currentTimeMillis() - start) + "毫秒,开始进行合并打分.....");
             AirusParams ap = new AirusParams();
             ap.setScoreTypes(lumsParams.getScoreTypes());
-            FinalResult finalResult = airus.doAirus(lumsParams.getOverviewId(), ap);
+            ap.setFdr(lumsParams.getFdr());
+            FinalResult finalResult = semiSupervise.doSemiSupervise(lumsParams.getOverviewId(), ap);
             taskDO.addLog("流程执行完毕,总耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为" + finalResult.getMatchedPeptideCount());
 
     }

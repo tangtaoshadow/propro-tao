@@ -1,11 +1,10 @@
 package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.algorithm.feature.DIAScorer;
 import com.westlake.air.propro.algorithm.fitter.LinearFitter;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
-import com.westlake.air.propro.algorithm.learner.Airus;
+import com.westlake.air.propro.algorithm.learner.SemiSupervise;
 import com.westlake.air.propro.algorithm.merger.Tric;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.algorithm.parser.MsmsParser;
@@ -51,7 +50,7 @@ public class TestController extends BaseController {
     @Autowired
     ScoreService scoreService;
     @Autowired
-    Airus airus;
+    SemiSupervise semiSupervise;
     @Autowired
     PeptideService peptideService;
     @Autowired

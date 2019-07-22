@@ -2,17 +2,12 @@ package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.westlake.air.propro.async.task.AirusTask;
-import com.westlake.air.propro.constants.Classifier;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.ScoreType;
-import com.westlake.air.propro.constants.TaskTemplate;
 import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.airus.AirusParams;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
-import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.service.AnalyseDataService;
 import com.westlake.air.propro.service.AnalyseOverviewService;
@@ -45,8 +40,6 @@ public class ScoreController extends BaseController {
     AnalyseOverviewService analyseOverviewService;
     @Autowired
     AnalyseDataService analyseDataService;
-    @Autowired
-    AirusTask airusTask;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -195,32 +188,5 @@ public class ScoreController extends BaseController {
         model.addAttribute("scoreTypeArray", JSONArray.parseArray(JSON.toJSONString(ScoreType.getUsedTypes())));
         model.addAttribute("overview", overviewResult.getModel());
         return "scores/detail";
-    }
-
-    @RequestMapping(value = "/airus")
-    String airus(Model model,
-                 @RequestParam(value = "overviewId", required = true) String overviewId,
-                 @RequestParam(value = "classifier", required = false, defaultValue = "lda") String classifier,
-                 RedirectAttributes redirectAttributes) {
-
-        ResultDO<AnalyseOverviewDO> overviewResult = analyseOverviewService.getById(overviewId);
-        if (overviewResult.isFailed()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.ANALYSE_OVERVIEW_NOT_EXISTED.getMessage());
-            return "redirect:/analyse/overview/list";
-        }
-        PermissionUtil.check(overviewResult.getModel());
-
-        TaskDO taskDO = new TaskDO(TaskTemplate.AIRUS, overviewResult.getModel().getName() + "(" + overviewResult.getModel().getId() + ")-classifier:" + classifier);
-        taskService.insert(taskDO);
-        AirusParams airusParams = new AirusParams();
-        if (classifier.equals("xgboost")) {
-            airusParams.setClassifier(Classifier.xgboost);
-        } else {
-            airusParams.setClassifier(Classifier.lda);
-        }
-
-        airusTask.airus(overviewId, airusParams, taskDO);
-
-        return "redirect:/task/detail/" + taskDO.getId();
     }
 }

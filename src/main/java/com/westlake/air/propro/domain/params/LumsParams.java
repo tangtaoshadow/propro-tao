@@ -63,6 +63,11 @@ public class LumsParams {
      */
     Float xcorrShapeWeightThreshold;
 
+    /**
+     * 筛选的FDR值,默认值为0.01
+     */
+    Float fdr;
+
     //上下文备忘录
     String note;
 

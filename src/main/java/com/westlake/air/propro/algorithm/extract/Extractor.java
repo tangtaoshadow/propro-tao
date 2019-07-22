@@ -424,6 +424,7 @@ public class Extractor {
         overviewDO.setOwnerName(input.getOwnerName());
         overviewDO.setCreateDate(new Date());
         overviewDO.setNote(input.getNote());
+        overviewDO.setFdr(input.getFdr());
         overviewDO.setRtExtractWindow(input.getExtractParams().getRtExtractWindow());
         overviewDO.setMzExtractWindow(input.getExtractParams().getMzExtractWindow());
         overviewDO.setSigma(input.getSigmaSpacing().getSigma());

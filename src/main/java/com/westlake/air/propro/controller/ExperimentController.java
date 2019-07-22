@@ -238,7 +238,6 @@ public class ExperimentController extends BaseController {
                      @RequestParam(value = "id", required = true) String id,
                      RedirectAttributes redirectAttributes) {
 
-
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OBJECT_NOT_EXISTED);
@@ -247,10 +246,12 @@ public class ExperimentController extends BaseController {
         PermissionUtil.check(resultDO.getModel());
 
         ProjectDO project = projectService.getById(resultDO.getModel().getProjectId());
-        if(project != null){
+        if (project != null) {
             model.addAttribute("libraryId", project.getLibraryId());
+            model.addAttribute("iRtLibraryId", project.getIRtLibraryId());
         }
 
+        model.addAttribute("iRtLibraries", getLibraryList(1, true));
         model.addAttribute("libraries", getLibraryList(0, true));
         model.addAttribute("experiment", resultDO.getModel());
         model.addAttribute("scoreTypes", ScoreType.getShownTypes());
@@ -270,6 +271,7 @@ public class ExperimentController extends BaseController {
                      //打分相关的入参
                      @RequestParam(value = "sigma", required = false, defaultValue = "3.75") Float sigma,
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
+                     @RequestParam(value = "fdr", required = false, defaultValue = "0.01") Float fdr,
                      @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.5") Float shapeScoreThreshold,
                      @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.6") Float shapeWeightScoreThreshold,
                      @RequestParam(value = "uniqueOnly", required = false, defaultValue = "false") Boolean uniqueOnly,
@@ -282,8 +284,6 @@ public class ExperimentController extends BaseController {
         }
 
         PermissionUtil.check(resultDO.getModel());
-
-        //TODO Library 暂时未作校验
         LibraryDO library = libraryService.getById(libraryId);
         if (library == null) {
             return "redirect:/extractor?id=" + id;
@@ -305,6 +305,7 @@ public class ExperimentController extends BaseController {
         input.setLibrary(library);
         input.setSlopeIntercept(si);
         input.setNote(note);
+        input.setFdr(fdr);
         input.setOwnerName(getCurrentUsername());
         input.setExtractParams(new ExtractParams(mzExtractWindow, rtExtractWindow));
         input.setUniqueOnly(uniqueOnly);
@@ -331,7 +332,7 @@ public class ExperimentController extends BaseController {
         PermissionUtil.check(resultDO.getModel());
 
         ProjectDO project = projectService.getById(resultDO.getModel().getProjectId());
-        if(project != null){
+        if (project != null) {
             model.addAttribute("iRtLibraryId", project.getIRtLibraryId());
         }
 
@@ -354,7 +355,7 @@ public class ExperimentController extends BaseController {
             return "redirect:/irt/" + id;
         }
         PermissionUtil.check(resultDO.getModel());
-        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName() + ":" + iRtLibraryId+"-Num:1");
+        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName() + ":" + iRtLibraryId + "-Num:1");
         taskService.insert(taskDO);
 
         SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);
@@ -370,11 +371,11 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/irtwithlib")
     String irtWithLib(Model model,
-                 @RequestParam(value = "id", required = true) String id,
-                 @RequestParam(value = "sigma", required = true, defaultValue = "3.75") Float sigma,
-                 @RequestParam(value = "spacing", required = true, defaultValue = "0.01") Float spacing,
-                 @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
-                 RedirectAttributes redirectAttributes) {
+                      @RequestParam(value = "id", required = true) String id,
+                      @RequestParam(value = "sigma", required = true, defaultValue = "3.75") Float sigma,
+                      @RequestParam(value = "spacing", required = true, defaultValue = "0.01") Float spacing,
+                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
+                      RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
         if (resultDO.isFailed()) {
@@ -383,7 +384,7 @@ public class ExperimentController extends BaseController {
         PermissionUtil.check(resultDO.getModel());
 
         ProjectDO project = projectService.getById(resultDO.getModel().getProjectId());
-        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName() + ":" + project.getLibraryId()+"-Num:1");
+        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName() + ":" + project.getLibraryId() + "-Num:1");
         taskService.insert(taskDO);
 
         SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);

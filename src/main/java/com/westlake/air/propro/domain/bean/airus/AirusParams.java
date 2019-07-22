@@ -2,7 +2,6 @@ package com.westlake.air.propro.domain.bean.airus;
 
 import com.westlake.air.propro.constants.Classifier;
 import com.westlake.air.propro.constants.ScoreType;
-import com.westlake.air.propro.domain.params.LumsParams;
 import lombok.Data;
 
 import java.util.List;
@@ -15,8 +14,9 @@ import java.util.List;
 @Data
 public class AirusParams {
 
-//    Learner.classifier classifier = Learner.classifier.XgbLearner;
     Classifier classifier = Classifier.lda;
+
+    double fdr = 0.01d;
 
     double trainTestRatio = 1;
 
@@ -45,19 +45,6 @@ public class AirusParams {
     String pi0Method = "bootstrap";
 
     boolean pi0SmoothLogPi0 = false;
-
-    boolean computeLfdr = false;
-
-    boolean lfdrTruncate = true;
-
-    boolean lfdrMonotone = true;
-
-    //not used
-    String lfdrTransformation = "probit";
-
-    double lfdrAdj = 1.5;
-
-    double lfdrEps = Math.pow(10.0, -8);
 
     int numCutOffs = 51;
 

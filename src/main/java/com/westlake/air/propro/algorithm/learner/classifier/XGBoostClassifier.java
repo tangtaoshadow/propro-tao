@@ -1,4 +1,4 @@
-package com.westlake.air.propro.algorithm.learner;
+package com.westlake.air.propro.algorithm.learner.classifier;
 
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.domain.bean.airus.TrainData;
@@ -7,19 +7,22 @@ import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.simple.SimpleScores;
 import ml.dmlc.xgboost4j.java.Booster;
-import ml.dmlc.xgboost4j.java.XGBoost;
 import ml.dmlc.xgboost4j.java.DMatrix;
+import ml.dmlc.xgboost4j.java.XGBoost;
 import ml.dmlc.xgboost4j.java.XGBoostError;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Nico Wang
  * Time: 2018-12-07 10:21
  */
-@Component("xgboostLearner")
-public class XGBoostLearner extends Learner {
+@Component("xgboostClassifier")
+public class XGBoostClassifier extends Classifier{
 
     Map<String, Object> params = new HashMap<String, Object>() {
         {
@@ -139,6 +142,5 @@ public class XGBoostLearner extends Learner {
             return true;
         }
     }
-
 
 }
