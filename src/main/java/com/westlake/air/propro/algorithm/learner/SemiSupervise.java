@@ -1,7 +1,7 @@
 package com.westlake.air.propro.algorithm.learner;
 
-import com.westlake.air.propro.algorithm.learner.classifier.LdaClassifier;
-import com.westlake.air.propro.algorithm.learner.classifier.XgboostClassifier;
+import com.westlake.air.propro.algorithm.learner.classifier.Lda;
+import com.westlake.air.propro.algorithm.learner.classifier.Xgboost;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.ScoreType;
@@ -35,9 +35,9 @@ public class SemiSupervise {
     public final Logger logger = LoggerFactory.getLogger(SemiSupervise.class);
 
     @Autowired
-    LdaClassifier ldaClassifier;
+    Lda lda;
     @Autowired
-    XgboostClassifier xgboostClassifier;
+    Xgboost xgboost;
     @Autowired
     Statistics statistics;
     @Autowired
@@ -85,13 +85,13 @@ public class SemiSupervise {
         HashMap<String, Double> weightsMap = new HashMap<>();
         switch (airusParams.getClassifier()) {
             case lda:
-                weightsMap = ldaClassifier.classifier(scores, airusParams, overviewDO.getScoreTypes());
-                ldaClassifier.score(scores, weightsMap, airusParams.getScoreTypes());
+                weightsMap = lda.classifier(scores, airusParams, overviewDO.getScoreTypes());
+                lda.score(scores, weightsMap, airusParams.getScoreTypes());
                 finalResult.setWeightsMap(weightsMap);
                 break;
 
             case xgboost:
-                xgboostClassifier.classifier(scores, overviewDO.getScoreTypes(), airusParams);
+                xgboost.classifier(scores, overviewDO.getScoreTypes(), airusParams);
                 break;
 
             default:

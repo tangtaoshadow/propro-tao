@@ -9,7 +9,6 @@ import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.simple.PeptideScores;
 import com.westlake.air.propro.utils.AirusUtil;
-import ml.dmlc.xgboost4j.java.Booster;
 import org.apache.commons.math3.linear.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 
 @Component("ldaClassifier")
-public class LdaClassifier extends AbstractClassifier {
+public class Lda extends AbstractClassifier {
 
-    public final Logger logger = LoggerFactory.getLogger(LdaClassifier.class);
+    public final Logger logger = LoggerFactory.getLogger(Lda.class);
 
     /**
      * @param scores

@@ -27,9 +27,9 @@ import java.util.Map;
  * Time: 2018-12-07 10:21
  */
 @Component("xgboostClassifier")
-public class XgboostClassifier extends AbstractClassifier {
+public class Xgboost extends AbstractClassifier {
 
-    public final Logger logger = LoggerFactory.getLogger(XgboostClassifier.class);
+    public final Logger logger = LoggerFactory.getLogger(Xgboost.class);
 
     Map<String, Object> params = new HashMap<String, Object>() {
         {
