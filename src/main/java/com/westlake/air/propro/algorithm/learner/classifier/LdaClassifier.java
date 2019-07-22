@@ -83,11 +83,8 @@ public class LdaClassifier extends AbstractClassifier {
     public LDALearnData learnRandomized(List<PeptideScores> scores, AirusParams airusParams) {
         LDALearnData ldaLearnData = new LDALearnData();
         try {
-            //Get part of scores as train input.
             TrainData trainData = AirusUtil.split(scores, airusParams.getTrainTestRatio(), airusParams.isDebug(), airusParams.getScoreTypes());
 
-            //第一次训练数据集使用指定的主分数(默认为MainScore)进行训练
-            //TrainPeaks trainPeaks = selectTrainPeaks(trainData, airusParams.getMainScore(), airusParams, airusParams.getSsInitialFdr());
             TrainPeaks trainPeaks = selectFirstTrainPeaks(trainData, airusParams);
 
             HashMap<String, Double> weightsMap = learn(trainPeaks, airusParams.getMainScore(), airusParams.getScoreTypes());

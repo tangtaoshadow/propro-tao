@@ -54,7 +54,6 @@ public class XgboostClassifier extends AbstractClassifier {
             put("subsample", 0.5);
         }
     };
-    int nRounds = 100;
 
     public void classifier(List<PeptideScores> scores, List<String> scoreTypes, AirusParams airusParams) {
         logger.info("开始训练Booster");
