@@ -26,6 +26,7 @@ public abstract class Classifier {
     }
 
     public void score(List<SimpleScores> scores, HashMap<String, Double> weightsMap, List<String> scoreTypes) {
+        logger.info("开始计算合并打分");
         Set<Map.Entry<String, Double>> entries = weightsMap.entrySet();
         for (SimpleScores score : scores) {
             if(score.getFeatureScoresList() == null){

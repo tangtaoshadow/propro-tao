@@ -19,13 +19,5 @@ public class ErrorStat {
 
     Pi0Est pi0Est;
 
-    @Deprecated
-    Double[] cutoff;
-    @Deprecated
-    Double[] pvalue;
-    @Deprecated
-    Double[] qvalue;
-
-
 }
 

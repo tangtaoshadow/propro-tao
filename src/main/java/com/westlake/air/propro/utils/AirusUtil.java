@@ -172,19 +172,19 @@ public class AirusUtil {
      * 以scoreType为主分数挑选出所有主分数最高的峰
      *
      * @param scores
-     * @param scoreType 需要作为主分数的分数
+     * @param scoreType  需要作为主分数的分数
      * @param scoreTypes 打分开始的时候所有参与打分的子分数快照列表
      * @return
      */
     public static List<SimpleFeatureScores> findTopFeatureScores(List<SimpleScores> scores, String scoreType, List<String> scoreTypes, Boolean strict) {
         List<SimpleFeatureScores> bestFeatureScoresList = new ArrayList<>();
         for (SimpleScores score : scores) {
-            if(score.getFeatureScoresList() == null || score.getFeatureScoresList().size() == 0){
+            if (score.getFeatureScoresList() == null || score.getFeatureScoresList().size() == 0) {
                 continue;
             }
             SimpleFeatureScores bestFeatureScores = new SimpleFeatureScores(score.getPeptideRef(), score.getIsDecoy());
             for (FeatureScores featureScores : score.getFeatureScoresList()) {
-                if (!featureScores.getThresholdPassed()){
+                if (!featureScores.getThresholdPassed()) {
                     continue;
                 }
                 if (bestFeatureScores.getMainScore() == null) {
@@ -204,10 +204,10 @@ public class AirusUtil {
                     }
                 }
             }
-            if (bestFeatureScores.getMainScore() == null){
-                if (strict){
+            if (bestFeatureScores.getMainScore() == null) {
+                if (strict) {
                     continue;
-                }else {
+                } else {
                     for (FeatureScores featureScores : score.getFeatureScoresList()) {
                         if (bestFeatureScores.getMainScore() == null) {
                             bestFeatureScores.setMainScore(featureScores.get(scoreType, scoreTypes));
@@ -244,7 +244,7 @@ public class AirusUtil {
         for (int i = 0; i < scores.size(); i++) {
             result[i] = scores.get(i).getMainScore();
         }
-        if(needToSort){
+        if (needToSort) {
             Arrays.sort(result);
         }
         return result;
@@ -255,7 +255,7 @@ public class AirusUtil {
         for (int i = 0; i < scores.size(); i++) {
             result[i] = scores.get(i).getPValue();
         }
-        if(needToSort){
+        if (needToSort) {
             Arrays.sort(result);
         }
         return result;

@@ -87,9 +87,7 @@ public class SemiSupervise {
         HashMap<String, Integer> peptideHitMap = new HashMap<>();
         switch (airusParams.getClassifier()) {
             case lda:
-                logger.info("开始训练学习数据权重");
                 weightsMap = LDALearn(scores, peptideHitMap, airusParams, overviewDO.getScoreTypes(), type);
-                logger.info("开始计算合并打分");
                 ldaClassifier.score(scores, weightsMap, airusParams.getScoreTypes());
                 finalResult.setWeightsMap(weightsMap);
                 break;
@@ -184,7 +182,7 @@ public class SemiSupervise {
      * @return
      */
     public HashMap<String, Double> LDALearn(List<SimpleScores> scores, HashMap<String, Integer> peptideHitMap, AirusParams airusParams, List<String> scoreTypes, String type) {
-
+        logger.info("开始训练学习数据权重");
         if (scores.size() < 500) {
             airusParams.setXevalNumIter(10);
             airusParams.setSsIterationFdr(0.02);

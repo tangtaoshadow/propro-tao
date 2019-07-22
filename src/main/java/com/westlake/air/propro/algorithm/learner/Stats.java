@@ -63,6 +63,101 @@ public class Stats {
     }
 
     /**
+     * Calculate qvalues.
+     * targets的qvalue需要从大到小排序
+     */
+    public void qvalue(List<SimpleFeatureScores> targets, double pi0, boolean pfdr) {
+        Double[] pValues = AirusUtil.buildPValueArray(targets, false);
+        int pValueLength = targets.size();
+        double[] v = ArrayUtil.rank(pValues);
+        for (int i = 0; i < pValueLength; i++) {
+            if (pfdr) {
+                targets.get(i).setQValue((pi0 * pValueLength * targets.get(i).getPValue()) / (v[i] * (1 - Math.pow((1 - targets.get(i).getPValue()), pValueLength))));
+            } else {
+                targets.get(i).setQValue((pi0 * pValueLength * targets.get(i).getPValue()) / v[i]);
+            }
+        }
+        targets.get(0).setQValue(Math.min(targets.get(0).getQValue(), 1));
+
+        for (int i = 1; i < pValueLength - 1; i++) {
+            targets.get(i).setQValue(Math.min(targets.get(i).getQValue(), targets.get(i - 1).getQValue()));
+        }
+    }
+
+    /**
+     * Estimate final results.
+     * TODO 没有实现 pep(lfdr);
+     */
+    public ErrorStat errorStatistics(List<SimpleFeatureScores> scores, AirusParams airusParams) {
+
+        List<SimpleFeatureScores> targets = new ArrayList<>();
+        List<SimpleFeatureScores> decoys = new ArrayList<>();
+        for (SimpleFeatureScores featureScores : scores) {
+            if (featureScores.getIsDecoy()) {
+                decoys.add(featureScores);
+            } else {
+                targets.add(featureScores);
+            }
+        }
+
+        return errorStatistics(targets, decoys, airusParams);
+    }
+
+    /**
+     * Estimate final results.
+     * TODO 没有实现 pep(lfdr);
+     */
+    public ErrorStat errorStatistics(List<SimpleFeatureScores> targets, List<SimpleFeatureScores> decoys, AirusParams airusParams) {
+
+        ErrorStat errorStat = new ErrorStat();
+        List<SimpleFeatureScores> sortedTargets = SortUtil.sortByMainScore(targets, false);
+        List<SimpleFeatureScores> sortedDecoys = SortUtil.sortByMainScore(decoys, false);
+
+        //compute p-values using decoy scores;
+        if (airusParams.isParametric()) {
+            pNormalizer(sortedTargets, sortedDecoys);
+        } else {
+            pEmpirical(sortedTargets, sortedDecoys);
+        }
+        Pi0Est pi0Est = new Pi0Est();
+        if (sortedTargets.get(0).getMainScore() > sortedDecoys.get(sortedDecoys.size()-1).getMainScore()){
+            pi0Est.setPi0(1d/Constants.PRECISION);
+        }else {
+            //estimate pi0;
+            pi0Est = pi0Est(sortedTargets, airusParams.getPi0Lambda(), airusParams.getPi0Method(), airusParams.isPi0SmoothLogPi0());
+            if (pi0Est == null) {
+                return null;
+            }
+        }
+
+        //compute q-value;
+        qvalue(sortedTargets, pi0Est.getPi0(), airusParams.isPFdr());
+        //compute other metrics;
+        StatMetrics statMetrics = statMetrics(sortedTargets, pi0Est.getPi0(), airusParams.isPFdr());
+
+        errorStat.setBestFeatureScoresList(targets);
+        errorStat.setStatMetrics(statMetrics);
+        errorStat.setPi0Est(pi0Est);
+
+        return errorStat;
+    }
+
+    /**
+     * Finds cut-off target scoreForAll for specified false discovery rate(fdr).
+     */
+    public Double findCutoff(List<SimpleFeatureScores> topTargets, List<SimpleFeatureScores> topDecoys, AirusParams airusParams, Double cutoff) {
+        ErrorStat errorStat = errorStatistics(topTargets, topDecoys, airusParams);
+
+        List<SimpleFeatureScores> bestScores = errorStat.getBestFeatureScoresList();
+        double[] qvalue_CutoffAbs = new double[bestScores.size()];
+        for (int i = 0; i < bestScores.size(); i++) {
+            qvalue_CutoffAbs[i] = Math.abs(bestScores.get(i).getQValue() - cutoff);
+        }
+        int i0 = MathUtil.argmin(qvalue_CutoffAbs);
+        return bestScores.get(i0).getMainScore();
+    }
+
+    /**
      * Calculate P relative scores.
      */
     private Pi0Est pi0Est(List<SimpleFeatureScores> targets, Double[] lambda, String pi0Method, boolean smoothLogPi0) {
@@ -145,28 +240,6 @@ public class Stats {
         return pi0EstResults;
     }
 
-    /**
-     * Calculate qvalues.
-     * targets的qvalue需要从大到小排序
-     */
-    public void qvalue(List<SimpleFeatureScores> targets, double pi0, boolean pfdr) {
-        Double[] pValues = AirusUtil.buildPValueArray(targets, false);
-        int pValueLength = targets.size();
-        double[] v = ArrayUtil.rank(pValues);
-        for (int i = 0; i < pValueLength; i++) {
-            if (pfdr) {
-                targets.get(i).setQValue((pi0 * pValueLength * targets.get(i).getPValue()) / (v[i] * (1 - Math.pow((1 - targets.get(i).getPValue()), pValueLength))));
-            } else {
-                targets.get(i).setQValue((pi0 * pValueLength * targets.get(i).getPValue()) / v[i]);
-            }
-        }
-        targets.get(0).setQValue(Math.min(targets.get(0).getQValue(), 1));
-
-        for (int i = 1; i < pValueLength - 1; i++) {
-            targets.get(i).setQValue(Math.min(targets.get(i).getQValue(), targets.get(i - 1).getQValue()));
-        }
-    }
-
     private StatMetrics statMetrics(List<SimpleFeatureScores> scores, Double pi0, boolean pfdr) {
         StatMetrics results = new StatMetrics();
         int numOfPvalue = scores.size();
@@ -241,78 +314,5 @@ public class Stats {
         results.setFnr(fnr);
         results.setSvalue(svalues);
         return results;
-    }
-
-    /**
-     * Estimate final results.
-     * TODO 没有实现 pep(lfdr);
-     */
-    public ErrorStat errorStatistics(List<SimpleFeatureScores> scores, AirusParams airusParams) {
-
-        List<SimpleFeatureScores> targets = new ArrayList<>();
-        List<SimpleFeatureScores> decoys = new ArrayList<>();
-        for (SimpleFeatureScores featureScores : scores) {
-            if (featureScores.getIsDecoy()) {
-                decoys.add(featureScores);
-            } else {
-                targets.add(featureScores);
-            }
-        }
-
-        return errorStatistics(targets, decoys, airusParams);
-    }
-
-    /**
-     * Estimate final results.
-     * TODO 没有实现 pep(lfdr);
-     */
-    public ErrorStat errorStatistics(List<SimpleFeatureScores> targets, List<SimpleFeatureScores> decoys, AirusParams airusParams) {
-
-        ErrorStat errorStat = new ErrorStat();
-        List<SimpleFeatureScores> sortedTargets = SortUtil.sortByMainScore(targets, false);
-        List<SimpleFeatureScores> sortedDecoys = SortUtil.sortByMainScore(decoys, false);
-
-        //compute p-values using decoy scores;
-        if (airusParams.isParametric()) {
-            pNormalizer(sortedTargets, sortedDecoys);
-        } else {
-            pEmpirical(sortedTargets, sortedDecoys);
-        }
-        Pi0Est pi0Est = new Pi0Est();
-        if (sortedTargets.get(0).getMainScore() > sortedDecoys.get(sortedDecoys.size()-1).getMainScore()){
-            pi0Est.setPi0(1d/Constants.PRECISION);
-        }else {
-            //estimate pi0;
-            pi0Est = pi0Est(sortedTargets, airusParams.getPi0Lambda(), airusParams.getPi0Method(), airusParams.isPi0SmoothLogPi0());
-            if (pi0Est == null) {
-                return null;
-            }
-        }
-
-        //compute q-value;
-        qvalue(sortedTargets, pi0Est.getPi0(), airusParams.isPFdr());
-        //compute other metrics;
-        StatMetrics statMetrics = statMetrics(sortedTargets, pi0Est.getPi0(), airusParams.isPFdr());
-
-        errorStat.setBestFeatureScoresList(targets);
-        errorStat.setStatMetrics(statMetrics);
-        errorStat.setPi0Est(pi0Est);
-
-        return errorStat;
-    }
-
-    /**
-     * Finds cut-off target scoreForAll for specified false discovery rate(fdr).
-     */
-    public Double findCutoff(List<SimpleFeatureScores> topTargets, List<SimpleFeatureScores> topDecoys, AirusParams airusParams, Double cutoff) {
-        ErrorStat errorStat = errorStatistics(topTargets, topDecoys, airusParams);
-
-        List<SimpleFeatureScores> bestScores = errorStat.getBestFeatureScoresList();
-        double[] qvalue_CutoffAbs = new double[bestScores.size()];
-        for (int i = 0; i < bestScores.size(); i++) {
-            qvalue_CutoffAbs[i] = Math.abs(bestScores.get(i).getQValue() - cutoff);
-        }
-        int i0 = MathUtil.argmin(qvalue_CutoffAbs);
-        return bestScores.get(i0).getMainScore();
     }
 }

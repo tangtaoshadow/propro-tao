@@ -49,8 +49,6 @@ public class FeatureScores extends BaseScores{
     //HashMap --> String
     String fragIntFeature;
 
-    Double finalScore;
-
     Boolean thresholdPassed = true;
 
     public FeatureScores(){}
