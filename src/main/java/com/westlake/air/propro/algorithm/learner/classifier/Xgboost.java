@@ -26,7 +26,7 @@ import java.util.Map;
  * Created by Nico Wang
  * Time: 2018-12-07 10:21
  */
-@Component("xgboostClassifier")
+@Component("xgboost")
 public class Xgboost extends AbstractClassifier {
 
     public final Logger logger = LoggerFactory.getLogger(Xgboost.class);

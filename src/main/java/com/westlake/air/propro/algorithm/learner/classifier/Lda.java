@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-@Component("ldaClassifier")
+@Component("lda")
 public class Lda extends AbstractClassifier {
 
     public final Logger logger = LoggerFactory.getLogger(Lda.class);
