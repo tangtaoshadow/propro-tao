@@ -62,15 +62,16 @@ public class LibraryScorer {
         //library_corr pearson 相关系数
         //需要的前置变量：dotprod, sum, 2sum
         if (scoreTypes.contains(ScoreType.LibraryCorr.getTypeName())) {
-            double expDeno = experiment2Sum - experimentSum * experimentSum / normedLibInt.size();
-            double libDeno = library2Sum - librarySum * librarySum / normedLibInt.size();
-            if (expDeno <= Constants.MIN_DOUBLE || libDeno <= Constants.MIN_DOUBLE) {
-                scores.put(ScoreType.LibraryCorr.getTypeName(), 0d, scoreTypes);
-            } else {
-                double pearsonR = dotprod - experimentSum * librarySum / normedLibInt.size();
-                pearsonR /= FastMath.sqrt(expDeno * libDeno);
-                scores.put(ScoreType.LibraryCorr.getTypeName(), pearsonR, scoreTypes);
-            }
+//            double expDeno = experiment2Sum - experimentSum * experimentSum / normedLibInt.size();
+//            double libDeno = library2Sum - librarySum * librarySum / normedLibInt.size();
+//            if (expDeno <= Constants.MIN_DOUBLE || libDeno <= Constants.MIN_DOUBLE) {
+//                scores.put(ScoreType.LibraryCorr.getTypeName(), 0d, scoreTypes);
+//            } else {
+//                double pearsonR = dotprod - experimentSum * librarySum / normedLibInt.size();
+//                pearsonR /= FastMath.sqrt(expDeno * libDeno);
+//                scores.put(ScoreType.LibraryCorr.getTypeName(), pearsonR, scoreTypes);
+//            }
+            scores.put(ScoreType.LibraryCorr.getTypeName(), calculateLibraryShiftScore(normedLibInt,normedExpInt), scoreTypes);
 
         }
 
@@ -153,6 +154,21 @@ public class LibraryScorer {
             }
         }
         return array;
+    }
+
+    private double calculateLibraryShiftScore(List<Double> libIntensities, List<Double> expIntensities){
+
+        double maxRatio = 0d, minRatio = Double.MAX_VALUE;
+        for (int i = 0; i < libIntensities.size(); i ++){
+            double ratio = expIntensities.get(i) / libIntensities.get(i);
+            if (ratio > maxRatio){
+                maxRatio = ratio;
+            }
+            if (ratio < minRatio){
+                minRatio = ratio;
+            }
+        }
+        return (maxRatio - minRatio) / maxRatio;
     }
 
 }

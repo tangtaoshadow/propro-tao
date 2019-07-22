@@ -159,6 +159,7 @@ public class SemiSupervise {
         return new ResultDO(true);
     }
 
+    //给分布在target中的decoy赋以Fdr值, 最末尾部分的decoy忽略, fdr为null
     private void giveDecoyFdr(List<SimpleFeatureScores> featureScoresList) {
 
         List<SimpleFeatureScores> sortedAll = SortUtil.sortByMainScore(featureScoresList, false);
