@@ -25,11 +25,7 @@ import java.util.*;
 public class NicoGenerator extends BaseGenerator {
     public final Logger logger = LoggerFactory.getLogger(NicoGenerator.class);
 
-    @Autowired
-    FormulaCalculator formulaCalculator;
-
-    @Autowired
-    FragmentFactory fragmentFactory;
+    public static final String NAME = "nico";
 
     @Override
     public void generate(PeptideDO peptideDO) {

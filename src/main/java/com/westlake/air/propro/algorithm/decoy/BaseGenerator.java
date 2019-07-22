@@ -1,10 +1,13 @@
 package com.westlake.air.propro.algorithm.decoy;
 
+import com.westlake.air.propro.algorithm.formula.FormulaCalculator;
+import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.algorithm.parser.model.traml.Modification;
 import com.westlake.air.propro.algorithm.parser.model.traml.Peptide;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +19,12 @@ import java.util.List;
 public abstract class BaseGenerator {
 
     public final Logger logger = LoggerFactory.getLogger(BaseGenerator.class);
+
+    @Autowired
+    public FormulaCalculator formulaCalculator;
+
+    @Autowired
+    public FragmentFactory fragmentFactory;
 
     protected abstract void generate(PeptideDO peptide);
 

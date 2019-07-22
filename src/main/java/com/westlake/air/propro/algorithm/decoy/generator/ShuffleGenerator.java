@@ -31,11 +31,7 @@ public class ShuffleGenerator extends BaseGenerator {
 
     public final Logger logger = LoggerFactory.getLogger(ShuffleGenerator.class);
 
-    @Autowired
-    FormulaCalculator formulaCalculator;
-
-    @Autowired
-    FragmentFactory fragmentFactory;
+    public static final String NAME = "shuffle";
 
     @Override
     public void generate(PeptideDO peptideDO) {

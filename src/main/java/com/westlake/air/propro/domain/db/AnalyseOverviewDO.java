@@ -1,5 +1,6 @@
 package com.westlake.air.propro.domain.db;
 
+import com.westlake.air.propro.constants.Classifier;
 import com.westlake.air.propro.domain.BaseDO;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -69,7 +70,7 @@ public class AnalyseOverviewDO extends BaseDO {
     Float mzExtractWindow;
 
     //最终使用的分类器:lda, xgboost
-    String classifier = "lda";
+    String classifier = Classifier.lda.name();
 
     //在计算高斯平滑时使用的Sigma值,一般为6.25
     Float sigma;

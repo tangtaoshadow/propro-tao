@@ -49,6 +49,11 @@ public class LibraryDO extends BaseDO {
 
     String description;
 
+    /**
+     * 伪肽段的生成算法
+     */
+    String generator;
+
     //蛋白总数目
     Long proteinCount;
     Long uniqueProteinCount;

@@ -1,5 +1,6 @@
 package com.westlake.air.propro.service.impl;
 
+import com.westlake.air.propro.algorithm.decoy.generator.ShuffleGenerator;
 import com.westlake.air.propro.algorithm.parser.*;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.TaskStatus;
@@ -51,6 +52,8 @@ public class LibraryServiceImpl implements LibraryService {
     TaskService taskService;
     @Autowired
     FastaParser fastaParser;
+    @Autowired
+    ShuffleGenerator shuffleGenerator;
 
     @Override
     public List<LibraryDO> getSimpleAll(String username, Integer type, Boolean doPublic) {
@@ -208,6 +211,7 @@ public class LibraryServiceImpl implements LibraryService {
         } else {
             return ResultDO.buildError(ResultCode.INPUT_FILE_TYPE_MUST_BE_TSV_OR_TRAML);
         }
+        library.setGenerator(ShuffleGenerator.NAME);
         return resultDO;
     }
 

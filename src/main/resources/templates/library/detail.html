@@ -63,11 +63,16 @@
                         <div class="form-group m-form__group row">
                             <label for="libraryType" class="col-2 col-form-label" th:text="#{label_library_type}">
                             </label>
-                            <div class="col-10">
+                            <div class="col-4">
                                 <input type="text" class="form-control m-input" id="libraryType" name="type" readonly th:if="${library?.type}==0"
                                        th:value="#{label_library}">
                                 <input type="text" class="form-control m-input" id="libraryType" name="type" readonly th:if="${library?.type}==1"
                                        th:value="#{label_irt_library}">
+                            </div>
+                            <label for="generator" class="col-2 col-form-label">Generator</label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="generator" name="generator" readonly th:if="${library?.type}==0"
+                                       th:value="${library?.generator}">
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
@@ -191,7 +196,8 @@
                 </div>
                 <div class="m-portlet__body">
                     <a th:href="@{/library/aggregate/{id}(id=${library?.id})}" class="btn btn-warning" th:text="#{btn_recount_for_protein_and_peptide}"></a>
-                    <a th:href="@{/decoy/generate(id=${library?.id})}" class="btn btn-success" th:text="#{btn_generate_decoy}"></a>
+                    <a th:href="@{/decoy/generate(id=${library?.id},generator='shuffle')}" class="btn btn-success" th:text="|#{btn_generate_decoy}(Shuffle)|"></a>
+                    <a th:href="@{/decoy/generate(id=${library?.id},generator='nico')}" class="btn btn-success" th:text="|#{btn_generate_decoy}(Nico)|"></a>
                     <a th:href="@{/decoy/delete(id=${library?.id})}" class="btn btn-danger" th:text="#{btn_delete_decoy}"></a>
                 </div>
             </div>

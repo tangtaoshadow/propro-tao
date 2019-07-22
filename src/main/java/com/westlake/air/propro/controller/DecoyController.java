@@ -1,5 +1,6 @@
 package com.westlake.air.propro.controller;
 
+import com.westlake.air.propro.algorithm.decoy.BaseGenerator;
 import com.westlake.air.propro.algorithm.decoy.generator.NicoGenerator;
 import com.westlake.air.propro.algorithm.decoy.generator.ShuffleGenerator;
 import com.westlake.air.propro.domain.ResultDO;
@@ -47,7 +48,8 @@ public class DecoyController extends BaseController {
 
     @RequestMapping(value = "/generate")
     String generate(Model model,
-                    @RequestParam(value = "id", required = true) String id) {
+                    @RequestParam(value = "id", required = true) String id,
+                    @RequestParam(value = "generator", required = false, defaultValue = "shuffle") String generator) {
 
         LibraryDO library = libraryService.getById(id);
         PermissionUtil.check(library);
@@ -63,12 +65,25 @@ public class DecoyController extends BaseController {
         int totalPage = (int) (totalCount / MAX_UPDATE_RECORD_FOR_PEPTIDE) + 1;
         query.setPageSize(MAX_UPDATE_RECORD_FOR_PEPTIDE);
         int countForInsert = 0;
+        BaseGenerator bg = null;
+        switch (generator) {
+            case NicoGenerator.NAME:
+                bg = nicoGenerator;
+                library.setGenerator(NicoGenerator.NAME);
+                break;
+            case ShuffleGenerator.NAME:
+                bg = shuffleGenerator;
+                library.setGenerator(ShuffleGenerator.NAME);
+                break;
+            default:
+                bg = shuffleGenerator;
+                library.setGenerator(NicoGenerator.NAME);
+        }
         for (int i = 1; i <= totalPage; i++) {
             query.setPageNo(i);
             ResultDO<List<PeptideDO>> resultDO = peptideService.getList(query);
             List<PeptideDO> list = resultDO.getModel();
-//            List<PeptideDO> list = nicoGenerator.batchGenerate(resultDO.getModel());
-            shuffleGenerator.generate(list);
+            bg.generate(list);
             ResultDO resultTmp = peptideService.updateDecoyInfos(list);
             if (resultTmp.isSuccess()) {
                 countForInsert += list.size();
