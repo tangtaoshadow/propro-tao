@@ -408,6 +408,7 @@ public class ProjectController extends BaseController {
                      @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
                      @RequestParam(value = "note", required = false) String note,
+                     @RequestParam(value = "fdr", required = true, defaultValue = "0.01") Double fdr,
                      //打分相关的入参
                      @RequestParam(value = "sigma", required = false, defaultValue = "3.75") Float sigma,
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
@@ -468,6 +469,7 @@ public class ProjectController extends BaseController {
             SigmaSpacing ss = new SigmaSpacing(sigma, spacing);
             input.setSigmaSpacing(ss);
             input.setExperimentDO(exp);
+            input.setFdr(fdr);
             if (doIrt) {
                 input.setIRtLibrary(irtLibrary);
             } else {

@@ -161,7 +161,7 @@ public class LibraryServiceImpl implements LibraryService {
     @Override
     public String getNameById(String id) {
         LibraryDO libraryDO = libraryDAO.getById(id);
-        if(libraryDO != null){
+        if (libraryDO != null) {
             return libraryDO.getName();
         }
         return null;
@@ -174,35 +174,35 @@ public class LibraryServiceImpl implements LibraryService {
 
         //parse prm
         HashMap<String, PeptideDO> prmPeptideRefMap = new HashMap<>();
-        if(prmFileStream != null) {
+        if (prmFileStream != null) {
             try {
                 ResultDO<HashMap<String, PeptideDO>> prmResultDO = tsvParser.getPrmPeptideRef(prmFileStream);
                 if (prmResultDO.isFailed()) {
                     logger.warn(prmResultDO.getMsgInfo());
                 }
                 prmPeptideRefMap = prmResultDO.getModel();
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
 
         if (fileName.toLowerCase().endsWith("tsv") || fileName.toLowerCase().endsWith("csv")) {
-            if (prmPeptideRefMap.isEmpty()){
+            if (prmPeptideRefMap.isEmpty()) {
                 resultDO = tsvParser.parseAndInsert(libFileStream, library, taskDO);
-            }else {
+            } else {
                 resultDO = tsvParser.selectiveParseAndInsert(libFileStream, library, new HashSet<>(prmPeptideRefMap.keySet()), false, taskDO);
             }
         } else if (fileName.toLowerCase().endsWith("traml")) {
-            if (prmPeptideRefMap.isEmpty()){
+            if (prmPeptideRefMap.isEmpty()) {
                 resultDO = fastTraMLParser.parseAndInsert(libFileStream, library, taskDO);
-            }else {
+            } else {
                 resultDO = fastTraMLParser.selectiveParseAndInsert(libFileStream, library, new HashSet<>(prmPeptideRefMap.keySet()), false, taskDO);
             }
-        } else if (fileName.toLowerCase().endsWith("txt")){
-            if (prmPeptideRefMap.isEmpty()){
+        } else if (fileName.toLowerCase().endsWith("txt")) {
+            if (prmPeptideRefMap.isEmpty()) {
                 resultDO = msmsParser.parseAndInsert(libFileStream, library, taskDO);
-            }else {
+            } else {
                 resultDO = msmsParser.selectiveParseAndInsert(libFileStream, library, new HashSet<>(prmPeptideRefMap.keySet()), false, taskDO);
             }
         } else {

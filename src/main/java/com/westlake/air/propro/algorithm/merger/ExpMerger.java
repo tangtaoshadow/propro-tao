@@ -20,14 +20,15 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ * 将多个实验的实验结果进行合并处理
  * Created by Nico Wang
  * Time: 2019-03-25 16:08
  */
 
 @Component
-public class Tric {
+public class ExpMerger {
 
-    public final Logger logger = LoggerFactory.getLogger(Tric.class);
+    public final Logger logger = LoggerFactory.getLogger(ExpMerger.class);
 
     @Autowired
     AnalyseDataService analyseDataService;
@@ -47,8 +48,6 @@ public class Tric {
         if (peptideFdrCalculated > peakGroupFdr){
             peptideMatrix = getMatrix(analyseOverviewIdList, peptideFdrCalculated);
         }
-//        test
-//        double testDecoyFrac = getDecoyFrac(peptideMatrix);
 
         double alignedFdr;
         if (peptideFdrCalculated < peakGroupFdr){

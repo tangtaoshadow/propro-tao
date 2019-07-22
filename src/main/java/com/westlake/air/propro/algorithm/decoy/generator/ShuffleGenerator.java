@@ -20,8 +20,11 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ *  一种常规的伪肽段生成算法,控制每一个肽段的最后一位不变,前面的氨基酸进行随机打乱,循环10次,选取其中重复度最低的一次作为最后的生成结果
+ *
  * Created by James Lu MiaoShan
  * Time: 2018-06-07 10:22
+ *
  */
 @Component("shuffleGenerator")
 public class ShuffleGenerator extends BaseGenerator {

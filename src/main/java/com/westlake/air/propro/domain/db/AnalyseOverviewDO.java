@@ -78,7 +78,7 @@ public class AnalyseOverviewDO extends BaseDO {
     Float spacing;
 
     //最终的划分FDR,一般为0.01
-    Float fdr;
+    Double fdr = 0.01;
 
     //分析实验的创建时间
     Date createDate;

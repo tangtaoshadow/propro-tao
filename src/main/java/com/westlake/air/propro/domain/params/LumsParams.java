@@ -66,7 +66,7 @@ public class LumsParams {
     /**
      * 筛选的FDR值,默认值为0.01
      */
-    Float fdr;
+    Double fdr;
 
     //上下文备忘录
     String note;

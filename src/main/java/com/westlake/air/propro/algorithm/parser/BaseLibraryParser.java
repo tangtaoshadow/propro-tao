@@ -31,8 +31,6 @@ public abstract class BaseLibraryParser {
     @Autowired
     PeptideService peptideService;
 
-    boolean drop = true;
-
     public abstract ResultDO parseAndInsert(InputStream in, LibraryDO library, TaskDO taskDO);
 
     public abstract ResultDO selectiveParseAndInsert(InputStream in, LibraryDO library, HashSet<String> selectedPepSet, boolean selectBySequence, TaskDO taskDO);

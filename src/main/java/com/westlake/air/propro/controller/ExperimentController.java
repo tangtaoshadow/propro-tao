@@ -271,7 +271,7 @@ public class ExperimentController extends BaseController {
                      //打分相关的入参
                      @RequestParam(value = "sigma", required = false, defaultValue = "3.75") Float sigma,
                      @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
-                     @RequestParam(value = "fdr", required = false, defaultValue = "0.01") Float fdr,
+                     @RequestParam(value = "fdr", required = false, defaultValue = "0.01") Double fdr,
                      @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.5") Float shapeScoreThreshold,
                      @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.6") Float shapeWeightScoreThreshold,
                      @RequestParam(value = "uniqueOnly", required = false, defaultValue = "false") Boolean uniqueOnly,

@@ -120,6 +120,11 @@
                                 <input type="text" class="form-control m-input" id="peakCount" readonly
                                        th:value="|${overview?.peakCount}|">
                             </div>
+                            <label for="fdr" class="col-2 col-form-label">FDR</label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="fdr" readonly
+                                       th:value="|${overview?.fdr}|">
+                            </div>
                         </div>
                         <div class="m-form__actions">
                             <a th:href="@{/analyse/overview/delete/{id}(id=${overview?.id})}" class="btn btn-danger"
