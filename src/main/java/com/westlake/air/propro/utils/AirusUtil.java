@@ -176,65 +176,34 @@ public class AirusUtil {
      * @param scoreTypes 打分开始的时候所有参与打分的子分数快照列表
      * @return
      */
-    public static List<SimpleFeatureScores> findTopFeatureScores(List<SimpleScores> scores, String scoreType, List<String> scoreTypes, Boolean strict) {
+    public static List<SimpleFeatureScores> findTopFeatureScores(List<SimpleScores> scores, String scoreType, List<String> scoreTypes, boolean strict) {
         List<SimpleFeatureScores> bestFeatureScoresList = new ArrayList<>();
         for (SimpleScores score : scores) {
             if (score.getFeatureScoresList() == null || score.getFeatureScoresList().size() == 0) {
                 continue;
             }
             SimpleFeatureScores bestFeatureScores = new SimpleFeatureScores(score.getPeptideRef(), score.getIsDecoy());
+            double maxScore = -Double.MAX_VALUE;
+            FeatureScores topFeatureScore = null;
             for (FeatureScores featureScores : score.getFeatureScoresList()) {
-                if (!featureScores.getThresholdPassed()) {
+                if (strict && featureScores.getThresholdPassed() != null && !featureScores.getThresholdPassed()){
                     continue;
                 }
-                if (bestFeatureScores.getMainScore() == null) {
-                    bestFeatureScores.setMainScore(featureScores.get(scoreType, scoreTypes));
-                    bestFeatureScores.setScores(featureScores.getScores());
-                    bestFeatureScores.setRt(featureScores.getRt());
-                    bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
-                    bestFeatureScores.setFragIntFeature(featureScores.getFragIntFeature());
-                } else {
-                    Double featureMainScore = featureScores.get(scoreType, scoreTypes);
-                    if (featureMainScore > bestFeatureScores.getMainScore()) {
-                        bestFeatureScores.setMainScore(featureMainScore);
-                        bestFeatureScores.setScores(featureScores.getScores());
-                        bestFeatureScores.setRt(featureScores.getRt());
-                        bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
-                        bestFeatureScores.setFragIntFeature(featureScores.getFragIntFeature());
-                    }
-                }
-            }
-            if (bestFeatureScores.getMainScore() == null) {
-                if (strict) {
-                    continue;
-                } else {
-                    for (FeatureScores featureScores : score.getFeatureScoresList()) {
-                        if (bestFeatureScores.getMainScore() == null) {
-                            bestFeatureScores.setMainScore(featureScores.get(scoreType, scoreTypes));
-                            bestFeatureScores.setScores(featureScores.getScores());
-                            bestFeatureScores.setRt(featureScores.getRt());
-                            bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
-                            bestFeatureScores.setFragIntFeature(featureScores.getFragIntFeature());
-                        } else {
-                            Double featureMainScore = featureScores.get(scoreType, scoreTypes);
-                            if (featureMainScore > bestFeatureScores.getMainScore()) {
-                                bestFeatureScores.setMainScore(featureMainScore);
-                                bestFeatureScores.setScores(featureScores.getScores());
-                                bestFeatureScores.setRt(featureScores.getRt());
-                                bestFeatureScores.setIntensitySum(featureScores.getIntensitySum());
-                                bestFeatureScores.setFragIntFeature(featureScores.getFragIntFeature());
-                            }
-                        }
-                    }
-                    bestFeatureScores.setThresholdPassed(false);
+                Double featureMainScore = featureScores.get(scoreType, scoreTypes);
+                if (featureMainScore > maxScore){
+                    maxScore = featureMainScore;
+                    topFeatureScore = featureScores;
                 }
             }
 
-
-            score.setIntensitySum(bestFeatureScores.getIntensitySum());
-            score.setBestRt(bestFeatureScores.getRt());
-            bestFeatureScoresList.add(bestFeatureScores);
-
+            if (topFeatureScore != null){
+                bestFeatureScores.setMainScore(topFeatureScore.get(scoreType, scoreTypes));
+                bestFeatureScores.setScores(topFeatureScore.getScores());
+                bestFeatureScores.setRt(topFeatureScore.getRt());
+                bestFeatureScores.setIntensitySum(topFeatureScore.getIntensitySum());
+                bestFeatureScores.setFragIntFeature(topFeatureScore.getFragIntFeature());
+                bestFeatureScoresList.add(bestFeatureScores);
+            }
         }
         return bestFeatureScoresList;
     }

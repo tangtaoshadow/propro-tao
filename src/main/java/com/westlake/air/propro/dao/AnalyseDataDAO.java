@@ -58,7 +58,7 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
             query.addCriteria(where("peptideId").is(analyseDataQuery.getPeptideId()));
         }
         if (analyseDataQuery.getPeptideRef() != null) {
-            query.addCriteria(where("peptideRef").regex(analyseDataQuery.getPeptideRef(), "i"));
+            query.addCriteria(where("peptideRef").regex(analyseDataQuery.getPeptideRef().replace("(","\\(").replace(")", "\\)"), "i"));
         }
         if (analyseDataQuery.getProteinName() != null) {
             query.addCriteria(where("proteinName").is(analyseDataQuery.getProteinName()));

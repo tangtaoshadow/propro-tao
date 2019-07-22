@@ -29,8 +29,6 @@ public class SimpleFeatureScores extends BaseScores{
 
     String fragIntFeature;
 
-    Boolean thresholdPassed = true;
-
     public SimpleFeatureScores(){}
 
     public SimpleFeatureScores(int scoreTypesSize){

@@ -68,7 +68,7 @@ public class SemiSupervise {
             overviewDO.setMatchedPeptideCount(null);
         }
         analyseOverviewService.update(overviewDO);
-        String type = overviewDO.getType();
+        airusParams.setType(overviewDO.getType());
         logger.info("开始获取打分数据");
 
         if (airusParams.getScoreTypes() == null) {
@@ -80,14 +80,14 @@ public class SemiSupervise {
             finalResult.setErrorInfo(resultDO.getMsgInfo());
             return finalResult;
         }
-        if (type.equals(Constants.EXP_TYPE_PRM)) {
+        if (airusParams.getType().equals(Constants.EXP_TYPE_PRM)) {
             cleanScore(scores, overviewDO.getScoreTypes());
         }
         HashMap<String, Double> weightsMap = new HashMap<>();
         HashMap<String, Integer> peptideHitMap = new HashMap<>();
         switch (airusParams.getClassifier()) {
             case lda:
-                weightsMap = LDALearn(scores, peptideHitMap, airusParams, overviewDO.getScoreTypes(), type);
+                weightsMap = LDALearn(scores, peptideHitMap, airusParams, overviewDO.getScoreTypes());
                 ldaClassifier.score(scores, weightsMap, airusParams.getScoreTypes());
                 finalResult.setWeightsMap(weightsMap);
                 break;
@@ -102,7 +102,7 @@ public class SemiSupervise {
 
         List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), overviewDO.getScoreTypes(), false);
         int hit = 0, count = 0;
-        if (type.equals(Constants.EXP_TYPE_PRM)) {
+        if (airusParams.getType().equals(Constants.EXP_TYPE_PRM)) {
             double maxDecoy = Double.MIN_VALUE;
             for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
                 if (simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy) {
@@ -110,7 +110,7 @@ public class SemiSupervise {
                 }
             }
             for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
-                if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy && simpleFeatureScores.getThresholdPassed()) {
+                if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy) {
                     simpleFeatureScores.setFdr(0d);
                     count++;
                 } else {
@@ -178,10 +178,9 @@ public class SemiSupervise {
      * @param scores
      * @param peptideHitMap
      * @param airusParams
-     * @param type          实验类型,PRM还是其他
      * @return
      */
-    public HashMap<String, Double> LDALearn(List<SimpleScores> scores, HashMap<String, Integer> peptideHitMap, AirusParams airusParams, List<String> scoreTypes, String type) {
+    public HashMap<String, Double> LDALearn(List<SimpleScores> scores, HashMap<String, Integer> peptideHitMap, AirusParams airusParams, List<String> scoreTypes) {
         logger.info("开始训练学习数据权重");
         if (scores.size() < 500) {
             airusParams.setXevalNumIter(10);
@@ -200,7 +199,7 @@ public class SemiSupervise {
             ldaClassifier.score(scores, ldaLearnData.getWeightsMap(), scoreTypes);
             List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), scoreTypes, false);
             int count = 0;
-            if (type.equals(Constants.EXP_TYPE_PRM)) {
+            if (airusParams.getType().equals(Constants.EXP_TYPE_PRM)) {
                 double maxDecoy = Double.MIN_VALUE;
                 for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
                     if (simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy) {
@@ -208,7 +207,7 @@ public class SemiSupervise {
                     }
                 }
                 for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
-                    if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy && simpleFeatureScores.getThresholdPassed()) {
+                    if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy) {
                         count++;
                         simpleFeatureScores.setFdr(0d);
                     } else {

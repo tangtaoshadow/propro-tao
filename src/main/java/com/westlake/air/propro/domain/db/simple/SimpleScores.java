@@ -12,10 +12,6 @@ public class SimpleScores {
     String peptideRef;
     //是否是伪肽段
     Boolean isDecoy = false;
-    //最后算法确定的最佳RT
-    Double bestRt;
-    //最后得出的定量值
-    Double intensitySum;
     //所有峰组的打分情况
     List<FeatureScores> featureScoresList;
 }
