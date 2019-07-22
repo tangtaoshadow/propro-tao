@@ -49,13 +49,16 @@
                 </thead>
                 <tbody>
                 <tr th:each="project:${projectList}">
-                    <td th:text="${project.name}"></td>
+                    <td>
+                        <a th:href="@{/experiment/list(projectName=${project.name})}" data-toggle="m-tooltip"
+                           th:title="#{label_project_exps}" th:text="${project.name}">
+                        </a>
+                    </td>
                     <td th:text="${project.type}"></td>
                     <td th:text="|${repository}${project.name}|"></td>
                     <td th:text="${project.ownerName}"></td>
                     <td th:text="${project.iRtLibraryName}"></td>
                     <td th:text="${project.libraryName}"></td>
-
                     <td th:text="${#dates.format(project.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
                         <span th:each="label:${project.labels}" class="m-badge m-badge--brand m-badge--wide" th:text="${label}"></span>
@@ -70,11 +73,6 @@
                            th:title="#{btn_edit}"
                            class="btn btn-brand m-btn m-btn--icon m-btn--icon-only">
                             <i class="fa fa-edit"></i>
-                        </a>
-                        <a th:href="@{/experiment/list(projectName=${project.name})}" data-toggle="m-tooltip"
-                           th:title="#{label_project_exps}"
-                           class="btn btn-primary m-btn m-btn--icon m-btn--icon-only">
-                            <i class="fa fa-list"></i>
                         </a>
                         <a th:href="@{/project/irt(id=${project.id})}" data-toggle="m-tooltip"
                            th:title="#{label_batch_irt}"

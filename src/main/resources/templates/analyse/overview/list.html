@@ -49,13 +49,14 @@
                     <th width="5%" th:text="#{label_mz_rt_extract_window}"></th>
                     <th width="5%" th:text="#{label_sigma_spacing}"></th>
                     <th width="5%" th:text="#{label_threshold_for_shape_and_shape_weight}"></th>
-                    <th width="10%" th:text="#{label_create_date}"></th>
+
                     <th width="5%">fdr</th>
                     <th width="5%" th:text="#{label_classifier}"></th>
                     <th width="5%" th:text="#{label_slope_intercept}"></th>
                     <th width="5%" th:text="#{label_reco_conv_total}"></th>
                     <th width="5%" th:text="#{label_owner}"></th>
                     <th width="5%" th:text="#{label_note}"></th>
+                    <th width="10%" th:text="#{label_create_date}"></th>
                     <th width="25%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
@@ -68,13 +69,14 @@
                     <td th:text="|${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></td>
                     <td th:text="|${overview.sigma}/${overview.spacing}|"></td>
                     <td th:text="|${overview.shapeScoreThreshold}/${overview.shapeScoreWeightThreshold}|"></td>
-                    <td th:text="${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
+
                     <td th:text="|${overview.fdr}|"></td>
                     <td th:text="|${overview.classifier}|"></td>
                     <td th:text="|${overview.slope}/${overview.intercept}|"></td>
                     <td th:text="|${overview.matchedPeptideCount}/${overview.totalPeptideCount}/${overview.libraryPeptideCount}|"></td>
                     <td th:text="${overview.ownerName}"></td>
                     <td th:text="${overview?.note}"></td>
+                    <td th:text="${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
                         <a th:href="@{/analyse/overview/detail/{id}(id=${overview?.id})}" data-toggle="m-tooltip"
                            th:title="#{label_analyse_report}"
@@ -108,8 +110,6 @@
                             </button>
                             <div class="dropdown-menu" aria-labelledby="scoresBtn">
                                 <a class="dropdown-item" th:href="@{/analyse/overview/delete/{id}(id=${overview?.id})}" th:text="#{btn_delete}"></a>
-<!--                                <a class="dropdown-item" th:href="@{/score/airus(overviewId=${overview.id},classifier=xgboost)}"  th:text="#{label_use_xgboost}"></a>-->
-                                <!--<a class="dropdown-item" onclick="alert('Not Open!')" th:text="#{label_identified_score_with_xgboost}"></a>-->
                             </div>
                         </div>
                     </td>

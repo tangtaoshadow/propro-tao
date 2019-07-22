@@ -69,7 +69,11 @@
                 <tbody>
                 <tr th:each="experiment:${experiments}">
                     <td th:text="|${experiment.projectName}|"></td>
-                    <td th:text="|${experiment.name}|"></td>
+                    <td>
+                        <a th:href="@{/experiment/detail/{id}(id=${experiment.id})}" data-toggle="m-tooltip"
+                           th:title="#{btn_detail}" th:text="${experiment.name}">
+                        </a>
+                    </td>
                     <td th:text="|${experiment.id}|"></td>
                     <td th:text="${experiment.type}">
                     </td>
@@ -82,25 +86,25 @@
                               th:text="|${experiment.vendorFileSize/1024/1024}MB|"></span>
                     </td>
                     <td>
-                        <span class="m-badge m-badge--brand m-badge--wide"
-                              th:text="${experiment.windowRanges?.size()}"></span>
+                        <a th:href="@{/swathindex/list(expId=${experiment.id})}" data-toggle="m-tooltip"
+                           th:title="#{label_spectrum_list}" th:text="${experiment.windowRanges?.size()}"
+                           class="btn btn-sm btn-info">
+                        </a>
                     </td>
                     <td>
                         <a th:data1="${experiment.id}" th:onclick="query(this.getAttribute('data1'))" data-toggle="modal" data-target="#m_modal_irt" href="#" th:text="|${experiment.irtResult?.si?.slope} -> ${experiment.irtResult?.si?.intercept}|"></a>
                     </td>
                     <td th:text="|${experiment.instrument?.manufacturer} ${experiment.instrument?.model}|"></td>
                     <td th:text="${#dates.format(experiment.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
-                    <td th:text="|${analyseOverviewDOMap.get(experiment.id)?.matchedPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.totalPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.libraryPeptideCount}|"></td>
+                    <td>
+                        <a th:href="@{/analyse/overview/list(expId=${experiment.id})}" data-toggle="m-tooltip"
+                           th:title="#{label_analyse_overview}" th:text="|${analyseOverviewDOMap.get(experiment.id)?.matchedPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.totalPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.libraryPeptideCount}|"></a>
+                    </td>
                     <td>
                         <a th:href="@{/experiment/edit/{id}(id=${experiment.id})}" data-toggle="m-tooltip"
                            th:title="#{btn_modify}"
                            class="btn btn-warning m-btn m-btn--icon m-btn--icon-only">
                             <i class="fa fa-edit"></i>
-                        </a>
-                        <a th:href="@{/experiment/detail/{id}(id=${experiment.id})}" data-toggle="m-tooltip"
-                           th:title="#{btn_detail}"
-                           class="btn btn-accent m-btn m-btn--icon m-btn--icon-only">
-                            <i class="fa fa-wpforms"></i>
                         </a>
                         <a th:href="@{/experiment/irt(id=${experiment.id})}" data-toggle="m-tooltip"
                            th:title="#{btn_start_irt}"
@@ -116,16 +120,6 @@
                            th:title="#{label_do_complete_workflow}"
                            class="btn btn-brand m-btn m-btn--icon m-btn--icon-only">
                             <i class="fa fa-dropbox"></i>
-                        </a>
-                        <a th:href="@{/swathindex/list(expId=${experiment.id})}" data-toggle="m-tooltip"
-                           th:title="#{label_spectrum_list}"
-                           class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
-                            <i class="fa fa-th-list"></i>
-                        </a>
-                        <a th:href="@{/analyse/overview/list(expId=${experiment.id})}" data-toggle="m-tooltip"
-                           th:title="#{label_analyse_overview}"
-                           class="btn btn-warning m-btn m-btn--icon m-btn--icon-only">
-                            <i class="fa fa-list-ol"></i>
                         </a>
                     </td>
                 </tr>
