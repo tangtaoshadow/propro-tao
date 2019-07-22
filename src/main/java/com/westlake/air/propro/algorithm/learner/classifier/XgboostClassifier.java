@@ -76,6 +76,7 @@ public class XgboostClassifier extends AbstractClassifier {
 
     public Booster learnRandomized(List<PeptideScores> scores, AirusParams airusParams) {
         try {
+            //Get part of scores as train input.
             TrainData trainData = AirusUtil.split(scores, airusParams.getTrainTestRatio(), airusParams.isDebug(), airusParams.getScoreTypes());
             //第一次训练数据集使用MainScore进行训练
             long startTime = System.currentTimeMillis();
@@ -97,7 +98,7 @@ public class XgboostClassifier extends AbstractClassifier {
             logger.info("Train count:" + count);
             return booster;
         } catch (Exception e) {
-            logger.error("learnRandomized Fail.\n");
+            logger.error("learnRandomizedXGB Fail.\n");
             e.printStackTrace();
             return null;
         }

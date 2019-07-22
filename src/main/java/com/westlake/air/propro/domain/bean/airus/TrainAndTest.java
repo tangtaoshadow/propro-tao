@@ -1,6 +1,6 @@
 package com.westlake.air.propro.domain.bean.airus;
 
-import com.westlake.air.propro.domain.db.simple.SimpleScores;
+import com.westlake.air.propro.domain.db.simple.PeptideScores;
 import lombok.Data;
 
 import java.util.List;
@@ -18,14 +18,14 @@ public class TrainAndTest {
     Integer[] testId;
     Boolean[] testIsDecoy;
 
-    List<SimpleScores> trainTargets;
-    List<SimpleScores> trainDecoys;
-    List<SimpleScores> testTargets;
-    List<SimpleScores> testDecoys;
+    List<PeptideScores> trainTargets;
+    List<PeptideScores> trainDecoys;
+    List<PeptideScores> testTargets;
+    List<PeptideScores> testDecoys;
 
     public TrainAndTest(){}
 
-    public TrainAndTest(List<SimpleScores> trainTargets, List<SimpleScores> trainDecoys, List<SimpleScores> testTargets, List<SimpleScores> testDecoys){
+    public TrainAndTest(List<PeptideScores> trainTargets, List<PeptideScores> trainDecoys, List<PeptideScores> testTargets, List<PeptideScores> testDecoys){
         this.trainTargets = trainTargets;
         this.trainDecoys = trainDecoys;
         this.testTargets = testTargets;

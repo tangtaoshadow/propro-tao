@@ -5,7 +5,7 @@ import com.westlake.air.propro.domain.bean.analyse.AnalyseDataRT;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
-import com.westlake.air.propro.domain.db.simple.SimpleScores;
+import com.westlake.air.propro.domain.db.simple.PeptideScores;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public interface AnalyseDataService {
 
     List<AnalyseDataDO> getAllByOverviewId(String overviewId);
 
-    List<SimpleScores> getSimpleScoresByOverviewId(String overviewId);
+    List<PeptideScores> getSimpleScoresByOverviewId(String overviewId);
 
     List<MatchedPeptide> getAllSuccessMatchedPeptides(String overviewId);
 
@@ -46,6 +46,5 @@ public interface AnalyseDataService {
 
     void updateMulti(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList);
 
-    //将数组中的FDR小于指定值的伪肽段删除,同时将数据库中对应的伪肽段也删除
     void removeMultiDecoy(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList, Double fdr);
 }

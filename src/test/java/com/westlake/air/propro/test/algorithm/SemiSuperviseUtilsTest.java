@@ -1,6 +1,6 @@
 package com.westlake.air.propro.test.algorithm;
 
-import com.westlake.air.propro.algorithm.learner.Stats;
+import com.westlake.air.propro.algorithm.learner.Statistics;
 import com.westlake.air.propro.test.BaseTest;
 import com.westlake.air.propro.utils.ArrayUtil;
 import org.junit.Test;
@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class SemiSuperviseUtilsTest extends BaseTest {
 
     @Autowired
-    Stats stats;
+    Statistics statistics;
 
     @Test
     public void argSortTest() {

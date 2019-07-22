@@ -2,19 +2,13 @@ package com.westlake.air.propro.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.propro.algorithm.fitter.LinearFitter;
-import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.dao.ConfigDAO;
-import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.aird.Compressor;
-import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.analyse.*;
-import com.westlake.air.propro.domain.bean.irt.IrtResult;
-import com.westlake.air.propro.domain.db.simple.TargetPeptide;
+import com.westlake.air.propro.domain.db.simple.SimplePeptide;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.bean.score.*;
 import com.westlake.air.propro.domain.db.*;
-import com.westlake.air.propro.domain.query.PeptideQuery;
 import com.westlake.air.propro.algorithm.peak.*;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.algorithm.feature.RtNormalizerScorer;
@@ -28,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.io.RandomAccessFile;
+
 import java.util.*;
 
 /**
@@ -84,7 +78,7 @@ public class ScoreServiceImpl implements ScoreService {
     SwathIndexService swathIndexService;
 
     @Override
-    public void scoreForOne(AnalyseDataDO dataDO, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input) {
+    public void scoreForOne(AnalyseDataDO dataDO, SimplePeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input) {
 
         if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() <= peptide.getFragmentMap().size()/2) {
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
@@ -187,7 +181,7 @@ public class ScoreServiceImpl implements ScoreService {
     }
 
     @Override
-    public void strictScoreForOne(AnalyseDataDO dataDO, TargetPeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap) {
+    public void strictScoreForOne(AnalyseDataDO dataDO, SimplePeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap) {
         if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() < peptide.getFragmentMap().size()) {
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);
             return;

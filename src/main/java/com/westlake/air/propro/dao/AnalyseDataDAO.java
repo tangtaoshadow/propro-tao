@@ -4,7 +4,7 @@ import com.westlake.air.propro.domain.bean.analyse.AnalyseDataRT;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
-import com.westlake.air.propro.domain.db.simple.SimpleScores;
+import com.westlake.air.propro.domain.db.simple.PeptideScores;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.utils.AnalyseUtil;
 import org.springframework.data.mongodb.core.BulkOperations;
@@ -13,7 +13,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
@@ -86,9 +85,9 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
         return mongoTemplate.find(query, AnalyseDataDO.class, CollectionName);
     }
 
-    public List<SimpleScores> getSimpleScoresByOverviewId(String overviewId){
+    public List<PeptideScores> getSimpleScoresByOverviewId(String overviewId){
         AnalyseDataQuery query = new AnalyseDataQuery(overviewId);
-        return mongoTemplate.find(buildQueryWithoutPage(query), SimpleScores.class, CollectionName);
+        return mongoTemplate.find(buildQueryWithoutPage(query), PeptideScores.class, CollectionName);
     }
 
     public List<MatchedPeptide> getAllMatchedPeptide(AnalyseDataQuery query) {

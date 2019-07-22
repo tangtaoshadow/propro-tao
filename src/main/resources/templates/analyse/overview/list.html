@@ -64,7 +64,11 @@
                 <tr th:each="overview:${overviews}">
                     <td th:text="${overview.id}"></td>
                     <td th:text="${overview.name}"></td>
-                    <td th:text="${overview.expName}"></td>
+                    <td>
+                        <a th:href="@{/experiment/listByExpId(expId=${overview.expId})}" data-toggle="m-tooltip"
+                           th:title="#{label_project_exps}" th:text="${overview.expName}">
+                        </a>
+                    </td>
                     <td th:text="${overview.libraryName}"></td>
                     <td th:text="|${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></td>
                     <td th:text="|${overview.sigma}/${overview.spacing}|"></td>

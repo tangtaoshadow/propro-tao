@@ -4,7 +4,7 @@ import com.westlake.air.propro.domain.bean.airus.IndexValue;
 import com.westlake.air.propro.domain.bean.airus.TrainAndTest;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.PeptideDO;
-import com.westlake.air.propro.domain.db.simple.TargetPeptide;
+import com.westlake.air.propro.domain.db.simple.SimplePeptide;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -546,10 +546,10 @@ public class ArrayUtil {
         }
     }
 
-    public static List<TargetPeptide> toTargetPeptideList(List<PeptideDO> peptides, SlopeIntercept slopeIntercept, Float rtExtractionWindows){
-        List<TargetPeptide> tps = new ArrayList<>();
+    public static List<SimplePeptide> toTargetPeptideList(List<PeptideDO> peptides, SlopeIntercept slopeIntercept, Float rtExtractionWindows){
+        List<SimplePeptide> tps = new ArrayList<>();
         for(PeptideDO peptide : peptides){
-            TargetPeptide tp = peptide.toTargetPeptide();
+            SimplePeptide tp = peptide.toTargetPeptide();
             if (rtExtractionWindows != -1) {
                 float iRt = (tp.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue();
                 tp.setRtStart(iRt - rtExtractionWindows / 2.0f);

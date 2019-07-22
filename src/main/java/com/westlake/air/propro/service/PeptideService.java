@@ -6,10 +6,9 @@ import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.simple.Protein;
-import com.westlake.air.propro.domain.db.simple.TargetPeptide;
+import com.westlake.air.propro.domain.db.simple.SimplePeptide;
 import com.westlake.air.propro.domain.query.PeptideQuery;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -22,7 +21,7 @@ public interface PeptideService {
 
     PeptideDO getByLibraryIdAndPeptideRef(String libraryId, String peptideRef);
 
-    TargetPeptide getTargetPeptideByDataRef(String libraryId, String peptideRef);
+    SimplePeptide getTargetPeptideByDataRef(String libraryId, String peptideRef);
 
     List<PeptideDO> getAllByLibraryIdAndProteinName(String libraryId, String proteinName);
 
@@ -73,7 +72,7 @@ public interface PeptideService {
      * @param range
      * @return
      */
-    List<TargetPeptide> buildMS2Coordinates(LibraryDO library, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange range, Float[] rtRange, String type, boolean uniqueCheck, Boolean noDecoy);
+    List<SimplePeptide> buildMS2Coordinates(LibraryDO library, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange range, Float[] rtRange, String type, boolean uniqueCheck, Boolean noDecoy);
 
     /**
      * 根据PeptideRef生成一个全新的PeptideDO

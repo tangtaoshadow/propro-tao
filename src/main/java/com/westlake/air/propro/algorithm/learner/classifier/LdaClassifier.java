@@ -9,6 +9,7 @@ import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.simple.PeptideScores;
 import com.westlake.air.propro.utils.AirusUtil;
+import ml.dmlc.xgboost4j.java.Booster;
 import org.apache.commons.math3.linear.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +26,10 @@ public class LdaClassifier extends AbstractClassifier {
 
     /**
      * @param scores
-     * @param peptideHitMap
      * @param airusParams
-     * @param type          实验类型,PRM还是其他
      * @return
      */
-    public HashMap<String, Double> classifier(List<PeptideScores> scores, AirusParams airusParams, List<String> scoreTypes, String type) {
+    public HashMap<String, Double> classifier(List<PeptideScores> scores, AirusParams airusParams, List<String> scoreTypes) {
         logger.info("开始训练学习数据权重");
         if (scores.size() < 500) {
             airusParams.setXevalNumIter(10);
@@ -49,7 +48,7 @@ public class LdaClassifier extends AbstractClassifier {
             score(scores, ldaLearnData.getWeightsMap(), scoreTypes);
             List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), scoreTypes, false);
             int count = 0;
-            if (type.equals(Constants.EXP_TYPE_PRM)) {
+            if (airusParams.getType().equals(Constants.EXP_TYPE_PRM)) {
                 double maxDecoy = Double.MIN_VALUE;
                 for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
                     if (simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy) {
@@ -57,7 +56,7 @@ public class LdaClassifier extends AbstractClassifier {
                     }
                 }
                 for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
-                    if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy && simpleFeatureScores.getThresholdPassed()) {
+                    if (!simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy) {
                         count++;
                         simpleFeatureScores.setFdr(0d);
                     } else {
@@ -81,7 +80,6 @@ public class LdaClassifier extends AbstractClassifier {
         return AirusUtil.averagedWeights(weightsMapList);
     }
 
-
     public LDALearnData learnRandomized(List<PeptideScores> scores, AirusParams airusParams) {
         LDALearnData ldaLearnData = new LDALearnData();
         try {
@@ -89,6 +87,7 @@ public class LdaClassifier extends AbstractClassifier {
             TrainData trainData = AirusUtil.split(scores, airusParams.getTrainTestRatio(), airusParams.isDebug(), airusParams.getScoreTypes());
 
             //第一次训练数据集使用指定的主分数(默认为MainScore)进行训练
+            //TrainPeaks trainPeaks = selectTrainPeaks(trainData, airusParams.getMainScore(), airusParams, airusParams.getSsInitialFdr());
             TrainPeaks trainPeaks = selectFirstTrainPeaks(trainData, airusParams);
 
             HashMap<String, Double> weightsMap = learn(trainPeaks, airusParams.getMainScore(), airusParams.getScoreTypes());
@@ -97,7 +96,7 @@ public class LdaClassifier extends AbstractClassifier {
             //根据weightsMap计算子分数的加权总分
             score(trainData, weightsMap, airusParams.getScoreTypes());
             weightsMap = new HashMap<>();
-            HashMap<String, Double> lastWeightsMap;
+            HashMap<String, Double> lastWeightsMap = new HashMap<>();
             for (int times = 0; times < airusParams.getXevalNumIter(); times++) {
                 TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, ScoreType.WeightedTotalScore.getTypeName(), airusParams, airusParams.getSsIterationFdr());
                 lastWeightsMap = weightsMap;
@@ -105,7 +104,8 @@ public class LdaClassifier extends AbstractClassifier {
                 logger.info("Train Weight:" + JSONArray.toJSONString(weightsMap));
                 for (Double value : weightsMap.values()) {
                     if (value == null || Double.isNaN(value)) {
-                        logger.info("本轮训练质量较差:" + JSON.toJSONString(weightsMap));
+                        logger.info("本轮训练一坨屎:" + JSON.toJSONString(weightsMap));
+                        continue;
                     }
                 }
                 if (lastWeightsMap.size() != 0) {

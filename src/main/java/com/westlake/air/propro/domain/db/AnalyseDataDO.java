@@ -87,18 +87,6 @@ public class AnalyseDataDO extends BaseDO {
     //结束时间,闭区间
     Float rtEnd;
 
-    //是否处于压缩状态
-//    @JSONField(serialize=false)
-//    boolean compressed = false;
-
-    //rtArray的压缩版本
-//    @JSONField(serialize=false)
-//    byte[] convRtArray;
-
-    //intensityMap的压缩版本
-//    @JSONField(serialize=false)
-//    HashMap<String, byte[]> convIntensityMap = new HashMap<>();
-
     @JSONField(serialize=false)
     List<FeatureScores> featureScoresList;
 

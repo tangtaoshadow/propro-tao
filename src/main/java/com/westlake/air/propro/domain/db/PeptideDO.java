@@ -1,7 +1,7 @@
 package com.westlake.air.propro.domain.db;
 
 import com.westlake.air.propro.domain.BaseDO;
-import com.westlake.air.propro.domain.db.simple.TargetPeptide;
+import com.westlake.air.propro.domain.db.simple.SimplePeptide;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -110,8 +110,8 @@ public class PeptideDO extends BaseDO {
         decoyFragmentMap.put(cutInfo, fi);
     }
 
-    public TargetPeptide toTargetPeptide(){
-        TargetPeptide tp = new TargetPeptide();
+    public SimplePeptide toTargetPeptide(){
+        SimplePeptide tp = new SimplePeptide();
         tp.setPeptideRef(getPeptideRef());
         tp.setRt(getRt().floatValue());
         tp.setFragmentMap(getFragmentMap());

@@ -6,17 +6,17 @@ import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
-import com.westlake.air.propro.domain.db.simple.SimpleScores;
+import com.westlake.air.propro.domain.db.simple.PeptideScores;
 
 import java.util.Comparator;
 import java.util.List;
 
 public class SortUtil {
 
-    public static List<SimpleScores> sortByPeptideRef(List<SimpleScores> scores) {
-        Ordering<SimpleScores> ordering = Ordering.from(new Comparator<SimpleScores>() {
+    public static List<PeptideScores> sortByPeptideRef(List<PeptideScores> scores) {
+        Ordering<PeptideScores> ordering = Ordering.from(new Comparator<PeptideScores>() {
             @Override
-            public int compare(SimpleScores o1, SimpleScores o2) {
+            public int compare(PeptideScores o1, PeptideScores o2) {
                 return o1.getPeptideRef().compareTo(o2.getPeptideRef());
             }
         });

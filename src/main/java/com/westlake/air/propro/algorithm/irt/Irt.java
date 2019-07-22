@@ -19,7 +19,7 @@ import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.SwathIndexDO;
-import com.westlake.air.propro.domain.db.simple.TargetPeptide;
+import com.westlake.air.propro.domain.db.simple.SimplePeptide;
 import com.westlake.air.propro.domain.params.ExtractParams;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.service.PeptideService;
@@ -122,7 +122,7 @@ public class Irt {
                 //Step2.获取标准库的目标肽段片段的坐标
                 //key为rt
                 TreeMap<Float, MzIntensityPairs> rtMap;
-                List<TargetPeptide> coordinates = peptideService.buildMS2Coordinates(library, SlopeIntercept.create(), -1, swathIndexDO.getRange(), null, exp.getType(), false, true);
+                List<SimplePeptide> coordinates = peptideService.buildMS2Coordinates(library, SlopeIntercept.create(), -1, swathIndexDO.getRange(), null, exp.getType(), false, true);
                 if (coordinates.size() == 0) {
                     logger.warn("No iRT Coordinates Found,Rang:" + swathIndexDO.getRange().getStart() + ":" + swathIndexDO.getRange().getEnd());
                     continue;
@@ -166,7 +166,7 @@ public class Irt {
         ResultDO<IrtResult> resultDO = new ResultDO<>();
         double minGroupRt = Double.MAX_VALUE, maxGroupRt = Double.MIN_VALUE;
         for (AnalyseDataDO dataDO : dataList) {
-            TargetPeptide tp = peptideService.getTargetPeptideByDataRef(library.getId(), dataDO.getPeptideRef());
+            SimplePeptide tp = peptideService.getTargetPeptideByDataRef(library.getId(), dataDO.getPeptideRef());
             PeptideFeature peptideFeature = featureExtractor.getExperimentFeature(dataDO, tp.buildIntensityMap(), sigmaSpacing);
             if (!peptideFeature.isFeatureFound()) {
                 continue;

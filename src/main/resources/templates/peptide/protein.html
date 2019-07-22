@@ -32,9 +32,7 @@
                             <tr>
                                 <th width="5%">No.</th>
                                 <th width="10%">PeptideId</th>
-                                <th width="10%" th:text="#{label_library_id}"></th>
-                                <th width="10%" th:text="#{label_library_name}"></th>
-                                <th width="65%" th:text="#{label_protein_name}"></th>
+                                <th width="85%" th:text="#{label_protein_name}"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -43,8 +41,6 @@
                                 <td>
                                     <a th:href="@{/peptide/detail/{id}(id=${protein.peptideId})}" th:text="${protein.peptideId}"></a>
                                 </td>
-                                <td th:text="${protein.libraryId}"></td>
-                                <td th:text="${protein.libraryName}"></td>
                                 <td th:text="${protein.proteinName}"></td>
                             </tr>
                         </tbody>

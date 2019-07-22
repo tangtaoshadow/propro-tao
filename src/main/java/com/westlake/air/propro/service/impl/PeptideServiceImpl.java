@@ -13,7 +13,7 @@ import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.simple.Protein;
-import com.westlake.air.propro.domain.db.simple.TargetPeptide;
+import com.westlake.air.propro.domain.db.simple.SimplePeptide;
 import com.westlake.air.propro.domain.query.PeptideQuery;
 import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.PeptideService;
@@ -64,7 +64,7 @@ public class PeptideServiceImpl implements PeptideService {
     }
 
     @Override
-    public TargetPeptide getTargetPeptideByDataRef(String libraryId, String peptideRef) {
+    public SimplePeptide getTargetPeptideByDataRef(String libraryId, String peptideRef) {
         return peptideDAO.getTargetPeptideByDataRef(libraryId, peptideRef);
     }
 
@@ -223,7 +223,7 @@ public class PeptideServiceImpl implements PeptideService {
     }
 
     @Override
-    public List<TargetPeptide> buildMS2Coordinates(LibraryDO library, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange mzRange, Float[] rtRange, String type, boolean uniqueCheck, Boolean noDecoy) {
+    public List<SimplePeptide> buildMS2Coordinates(LibraryDO library, SlopeIntercept slopeIntercept, float rtExtractionWindows, WindowRange mzRange, Float[] rtRange, String type, boolean uniqueCheck, Boolean noDecoy) {
 
         long start = System.currentTimeMillis();
         PeptideQuery query = new PeptideQuery(library.getId());
@@ -240,22 +240,22 @@ public class PeptideServiceImpl implements PeptideService {
             query.setIsUnique(true);
         }
 
-        List<TargetPeptide> targetList = peptideDAO.getTPAll(query);
+        List<SimplePeptide> targetList = peptideDAO.getSPAll(query);
         if (type.equals(Constants.EXP_TYPE_PRM)) {
             prmFilter(targetList, rtExtractionWindows, slopeIntercept, rtRange, precursorMz);
         }
 
         long readDB = System.currentTimeMillis() - start;
         if (rtExtractionWindows != -1) {
-            for (TargetPeptide targetPeptide : targetList) {
-                float iRt = (targetPeptide.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue();
-                targetPeptide.setRtStart(iRt - rtExtractionWindows / 2.0f);
-                targetPeptide.setRtEnd(iRt + rtExtractionWindows / 2.0f);
+            for (SimplePeptide simplePeptide : targetList) {
+                float iRt = (simplePeptide.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue();
+                simplePeptide.setRtStart(iRt - rtExtractionWindows / 2.0f);
+                simplePeptide.setRtEnd(iRt + rtExtractionWindows / 2.0f);
             }
         } else {
-            for (TargetPeptide targetPeptide : targetList) {
-                targetPeptide.setRtStart(-1);
-                targetPeptide.setRtEnd(99999);
+            for (SimplePeptide simplePeptide : targetList) {
+                simplePeptide.setRtStart(-1);
+                simplePeptide.setRtEnd(99999);
             }
         }
 
@@ -307,12 +307,12 @@ public class PeptideServiceImpl implements PeptideService {
         return peptide;
     }
 
-    private void prmFilter(List<TargetPeptide> targetList, float rtExtractionWindows, SlopeIntercept slopeIntercept, Float[] rtRange, float precursorMz) {
+    private void prmFilter(List<SimplePeptide> targetList, float rtExtractionWindows, SlopeIntercept slopeIntercept, Float[] rtRange, float precursorMz) {
         if (!targetList.isEmpty() && targetList.size() != 2) {
             //PRM模式下, rtRange不为空;
-            TargetPeptide bestTarget = null;
+            SimplePeptide bestTarget = null;
             float mzDistance = Float.MAX_VALUE;
-            for (TargetPeptide peptide : targetList) {
+            for (SimplePeptide peptide : targetList) {
                 if (rtExtractionWindows != -1) {
                     float iRt = (peptide.getRt() - slopeIntercept.getIntercept().floatValue()) / slopeIntercept.getSlope().floatValue();
                     if (iRt < rtRange[0] - 30 || iRt > rtRange[1] + 30) {

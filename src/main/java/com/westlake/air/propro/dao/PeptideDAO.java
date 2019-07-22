@@ -1,13 +1,10 @@
 package com.westlake.air.propro.dao;
 
 import com.mongodb.BasicDBObject;
-import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
-import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.simple.Protein;
-import com.westlake.air.propro.domain.db.simple.TargetPeptide;
+import com.westlake.air.propro.domain.db.simple.SimplePeptide;
 import com.westlake.air.propro.domain.query.PeptideQuery;
-import com.westlake.air.propro.utils.AnalyseUtil;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
@@ -92,16 +89,16 @@ public class PeptideDAO extends BaseDAO<PeptideDO, PeptideQuery>{
         return mongoTemplate.findOne(query, PeptideDO.class, CollectionName);
     }
 
-    public TargetPeptide getTargetPeptideByDataRef(String libraryId, String peptideRef) {
+    public SimplePeptide getTargetPeptideByDataRef(String libraryId, String peptideRef) {
         Query query = new Query(where("libraryId").is(libraryId));
         query.addCriteria(where("peptideRef").is(peptideRef));
-        return mongoTemplate.findOne(query, TargetPeptide.class, CollectionName);
+        return mongoTemplate.findOne(query, SimplePeptide.class, CollectionName);
     }
 
-    public List<TargetPeptide> getTPAll(PeptideQuery query) {
+    public List<SimplePeptide> getSPAll(PeptideQuery query) {
         Query q = buildQueryWithoutPage(query);
         q.withHint("{'libraryId':1}");//使用libraryId作为第一优先索引
-        return mongoTemplate.find(q, TargetPeptide.class, CollectionName);
+        return mongoTemplate.find(q, SimplePeptide.class, CollectionName);
     }
 
     public void deleteAllByLibraryId(String libraryId) {
@@ -115,7 +112,6 @@ public class PeptideDAO extends BaseDAO<PeptideDO, PeptideQuery>{
         mongoTemplate.remove(query, PeptideDO.class, CollectionName);
     }
 
-    //TODO 本接口后续可以通过使用缓存进行优化
     public List<Protein> getProteinList(PeptideQuery query) {
         AggregationResults<Protein> a = mongoTemplate.aggregate(
                 Aggregation.newAggregation(
@@ -123,9 +119,7 @@ public class PeptideDAO extends BaseDAO<PeptideDO, PeptideQuery>{
                         Aggregation.match(where("libraryId").is(query.getLibraryId())),
                         Aggregation.group("proteinName").
                                 first("proteinName").as("proteinName").
-                                first("id").as("peptideId").
-                                first("libraryId").as("libraryId").
-                                first("libraryName").as("libraryName"),
+                                first("id").as("peptideId"),
                         Aggregation.skip((query.getPageNo() - 1) * query.getPageSize()),
                         Aggregation.limit(query.getPageSize())).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build()), CollectionName,
                 Protein.class);

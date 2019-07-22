@@ -1,8 +1,6 @@
 package com.westlake.air.propro.domain.bean.airus;
 
-import com.westlake.air.propro.constants.ScoreType;
-import com.westlake.air.propro.domain.bean.score.FeatureScores;
-import com.westlake.air.propro.domain.db.simple.SimpleScores;
+import com.westlake.air.propro.domain.db.simple.PeptideScores;
 import lombok.Data;
 
 import java.util.List;
@@ -14,12 +12,12 @@ import java.util.List;
 @Data
 public class TrainData {
 
-    List<SimpleScores> targets;
-    List<SimpleScores> decoys;
+    List<PeptideScores> targets;
+    List<PeptideScores> decoys;
 
     public TrainData() {}
 
-    public TrainData(List<SimpleScores> targets, List<SimpleScores> decoys) {
+    public TrainData(List<PeptideScores> targets, List<PeptideScores> decoys) {
         this.targets = targets;
         this.decoys = decoys;
     }

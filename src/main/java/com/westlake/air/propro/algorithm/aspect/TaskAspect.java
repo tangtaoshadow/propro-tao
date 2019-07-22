@@ -59,6 +59,7 @@ public class TaskAspect {
         taskDO.addLog("数据提取窗口:" + lumsParams.getExtractParams().toString())
                 .addLog("Sigma:" + lumsParams.getSigmaSpacing().getSigma() + ",Spacing:" + lumsParams.getSigmaSpacing().getSpacing())
                 .addLog("使用标准库ID:" + lumsParams.getLibrary().getId())
+                .addLog("FDR:" + lumsParams.getFdr())
                 .addLog("Note:" + lumsParams.getNote())
                 .addLog("使用限制阈值Shape/ShapeWeight:" + lumsParams.getXcorrShapeThreshold() + "/" + lumsParams.getXcorrShapeWeightThreshold());
         taskService.update(taskDO, TaskStatus.RUNNING.getName(), "");

@@ -99,7 +99,7 @@ public class PeptideController extends BaseController {
 
     @RequestMapping(value = "/protein")
     String protein(Model model,
-                @RequestParam(value = "libraryId", required = false) String libraryId,
+                @RequestParam(value = "libraryId", required = true) String libraryId,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "30") Integer pageSize) {
         long startTime = System.currentTimeMillis();

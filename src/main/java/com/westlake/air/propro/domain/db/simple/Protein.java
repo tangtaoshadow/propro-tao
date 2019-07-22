@@ -13,10 +13,5 @@ public class Protein {
 
     String peptideId;
 
-    String libraryId;
-
-    String libraryName;
-
     String proteinName;
-
 }

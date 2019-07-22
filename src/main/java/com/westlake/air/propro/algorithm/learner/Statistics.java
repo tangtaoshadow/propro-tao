@@ -22,11 +22,12 @@ import java.util.List;
 /**
  * Created by Nico Wang Ruimin
  * Time: 2018-06-13 16:55
+ *
  */
-@Component
-public class Stats {
+@Component("statistics")
+public class Statistics {
 
-    public static final Logger logger = LoggerFactory.getLogger(Stats.class);
+    public static final Logger logger = LoggerFactory.getLogger(Statistics.class);
 
     public void pNormalizer(List<SimpleFeatureScores> targetScores, List<SimpleFeatureScores> decoyScores) {
         Double[] decoyScoresArray = AirusUtil.buildMainScoreArray(decoyScores, false);

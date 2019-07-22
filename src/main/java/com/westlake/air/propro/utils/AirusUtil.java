@@ -7,7 +7,7 @@ import com.westlake.air.propro.domain.bean.airus.TrainAndTest;
 import com.westlake.air.propro.domain.bean.airus.TrainData;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
-import com.westlake.air.propro.domain.db.simple.SimpleScores;
+import com.westlake.air.propro.domain.db.simple.PeptideScores;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -176,9 +176,9 @@ public class AirusUtil {
      * @param scoreTypes 打分开始的时候所有参与打分的子分数快照列表
      * @return
      */
-    public static List<SimpleFeatureScores> findTopFeatureScores(List<SimpleScores> scores, String scoreType, List<String> scoreTypes, boolean strict) {
+    public static List<SimpleFeatureScores> findTopFeatureScores(List<PeptideScores> scores, String scoreType, List<String> scoreTypes, boolean strict) {
         List<SimpleFeatureScores> bestFeatureScoresList = new ArrayList<>();
-        for (SimpleScores score : scores) {
+        for (PeptideScores score : scores) {
             if (score.getFeatureScoresList() == null || score.getFeatureScoresList().size() == 0) {
                 continue;
             }
@@ -320,19 +320,19 @@ public class AirusUtil {
      * @param isDebug  是否取测试集
      * @return
      */
-    public static TrainData split(List<SimpleScores> scores, double fraction, boolean isDebug, List<String> scoreTypes) {
+    public static TrainData split(List<PeptideScores> scores, double fraction, boolean isDebug, List<String> scoreTypes) {
 
         //每一轮开始前将上一轮的加权总分去掉
-        for (SimpleScores ss : scores) {
+        for (PeptideScores ss : scores) {
             for (FeatureScores sft : ss.getFeatureScoresList()) {
                 sft.remove(ScoreType.WeightedTotalScore.getTypeName(), scoreTypes);
             }
         }
 
-        List<SimpleScores> targets = new ArrayList<>();
-        List<SimpleScores> decoys = new ArrayList<>();
+        List<PeptideScores> targets = new ArrayList<>();
+        List<PeptideScores> decoys = new ArrayList<>();
         //按照是否是伪肽段分为两个数组
-        for (SimpleScores score : scores) {
+        for (PeptideScores score : scores) {
             if (score.getIsDecoy()) {
                 decoys.add(score);
             } else {
@@ -382,14 +382,14 @@ public class AirusUtil {
         return scoreData;
     }
 
-    public static int checkFdr(FinalResult finalResult) {
-        return checkFdr(finalResult.getAllInfo().getStatMetrics().getFdr());
+    public static int checkFdr(FinalResult finalResult, Double fdrLimit) {
+        return checkFdr(finalResult.getAllInfo().getStatMetrics().getFdr(), fdrLimit);
     }
 
-    public static int checkFdr(double[] dArray) {
+    public static int checkFdr(double[] dArray, Double fdrLimit) {
         int count = 0;
         for (double d : dArray) {
-            if (d <= 0.01) {
+            if (d <= fdrLimit) {
                 count++;
             }
         }

@@ -8,7 +8,7 @@ import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.db.*;
-import com.westlake.air.propro.domain.db.simple.TargetPeptide;
+import com.westlake.air.propro.domain.db.simple.SimplePeptide;
 import com.westlake.air.propro.domain.params.ExtractParams;
 import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
@@ -117,7 +117,7 @@ public class Extractor {
                 return ResultDO.buildError(ResultCode.SWATH_INDEX_NOT_EXISTED);
             }
             rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndexDO, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
-            TargetPeptide tp = new TargetPeptide(peptide);
+            SimplePeptide tp = new SimplePeptide(peptide);
             Double rt = peptide.getRt();
             if (extractParams.getRtExtractWindow() == -1) {
                 tp.setRtStart(-1);
@@ -156,8 +156,8 @@ public class Extractor {
      * @param overviewId
      * @param extractParams
      */
-    public void extractForIrt(List<AnalyseDataDO> finalList, List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, ExtractParams extractParams) {
-        for (TargetPeptide tp : coordinates) {
+    public void extractForIrt(List<AnalyseDataDO> finalList, List<SimplePeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, ExtractParams extractParams) {
+        for (SimplePeptide tp : coordinates) {
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, extractParams, overviewId);
             if (dataDO == null) {
                 continue;
@@ -166,10 +166,10 @@ public class Extractor {
         }
     }
 
-    public void extractForIrtWithLib(List<AnalyseDataDO> finalList, List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, ExtractParams extractParams) {
+    public void extractForIrtWithLib(List<AnalyseDataDO> finalList, List<SimplePeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, ExtractParams extractParams) {
         long start = System.currentTimeMillis();
         int count = 0;
-        for (TargetPeptide tp : coordinates) {
+        for (SimplePeptide tp : coordinates) {
             if (count >= 2) {
                 break;
             }
@@ -187,7 +187,7 @@ public class Extractor {
         }
     }
 
-    private AnalyseDataDO extractForOne(TargetPeptide tp, TreeMap<Float, MzIntensityPairs> rtMap, ExtractParams extractParams, String overviewId) {
+    private AnalyseDataDO extractForOne(SimplePeptide tp, TreeMap<Float, MzIntensityPairs> rtMap, ExtractParams extractParams, String overviewId) {
         float mzStart = 0;
         float mzEnd = -1;
         //所有的碎片共享同一个RT数组
@@ -328,7 +328,7 @@ public class Extractor {
      * @throws Exception
      */
     private List<AnalyseDataDO> doExtract(RandomAccessFile raf, SwathIndexDO swathIndex, String overviewId, LumsParams lumsParams) throws Exception {
-        List<TargetPeptide> coordinates;
+        List<SimplePeptide> coordinates;
         TreeMap<Float, MzIntensityPairs> rtMap;
         //Step2.获取标准库的目标肽段片段的坐标
         Float[] rtRange = null;
@@ -361,7 +361,7 @@ public class Extractor {
      * @param lumsParams
      * @return
      */
-    private List<AnalyseDataDO> epps(List<TargetPeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, LumsParams lumsParams) {
+    private List<AnalyseDataDO> epps(List<SimplePeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, LumsParams lumsParams) {
         List<AnalyseDataDO> dataList = Collections.synchronizedList(new ArrayList<>());
         long start = System.currentTimeMillis();
         //传入的coordinates是没有经过排序的,需要排序先处理真实肽段,再处理伪肽段.如果先处理的真肽段没有被提取到任何信息,或者提取后的峰太差被忽略掉,都会同时删掉对应的伪肽段的XIC

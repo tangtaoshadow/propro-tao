@@ -112,6 +112,19 @@ public class ExperimentController extends BaseController {
         return "experiment/list";
     }
 
+    @RequestMapping(value = "/listByExpId")
+    String listByExpId(Model model,
+                @RequestParam(value = "expId", required = true) String expId) {
+
+        ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
+        if(expResult.isFailed()){
+            return "redirect:/experiment/list";
+        }
+
+        ExperimentDO exp = expResult.getModel();
+        return "redirect:/experiment/list?projectName="+exp.getProjectName();
+    }
+
     @RequestMapping(value = "/create")
     String create(Model model) {
         return "experiment/create";

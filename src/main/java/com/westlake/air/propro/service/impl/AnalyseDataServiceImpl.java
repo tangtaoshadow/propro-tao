@@ -9,20 +9,16 @@ import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.AnalyseDataRT;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
-import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
-import com.westlake.air.propro.domain.db.simple.SimpleScores;
+import com.westlake.air.propro.domain.db.simple.PeptideScores;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.service.AnalyseDataService;
 import com.westlake.air.propro.utils.AnalyseUtil;
-import com.westlake.air.propro.utils.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +46,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     @Override
-    public List<SimpleScores> getSimpleScoresByOverviewId(String overviewId) {
+    public List<PeptideScores> getSimpleScoresByOverviewId(String overviewId) {
         return analyseDataDAO.getSimpleScoresByOverviewId(overviewId);
     }
 
@@ -191,6 +187,12 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
         analyseDataDAO.updateMulti(overviewId, simpleFeatureScoresList);
     }
 
+    /**
+     * 将数组中的FDR小于指定值的伪肽段删除,同时将数据库中对应的伪肽段也删除
+     * @param overviewId
+     * @param simpleFeatureScoresList
+     * @param fdr
+     */
     @Override
     public void removeMultiDecoy(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList, Double fdr) {
         List<SimpleFeatureScores> decoyNeedToRemove = new ArrayList<>();

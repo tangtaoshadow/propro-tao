@@ -1,7 +1,6 @@
 package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSONArray;
-import com.google.common.collect.Lists;
 import com.westlake.air.propro.algorithm.extract.Extractor;
 import com.westlake.air.propro.algorithm.feature.ChromatographicScorer;
 import com.westlake.air.propro.algorithm.feature.LibraryScorer;
@@ -15,14 +14,9 @@ import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.AnalyseDataRT;
 import com.westlake.air.propro.domain.bean.analyse.ComparisonResult;
-import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
-import com.westlake.air.propro.domain.bean.score.PeakGroup;
-import com.westlake.air.propro.domain.bean.score.PeptideFeature;
 import com.westlake.air.propro.domain.db.*;
-import com.westlake.air.propro.domain.db.simple.TargetPeptide;
 import com.westlake.air.propro.domain.params.ExtractParams;
-import com.westlake.air.propro.domain.params.LumsParams;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.domain.query.AnalyseOverviewQuery;
 import com.westlake.air.propro.service.*;
@@ -94,9 +88,9 @@ public class AnalyseController extends BaseController {
 
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("expId", expId);
-
+        ResultDO<ExperimentDO> expResult = null;
         if (StringUtils.isNotEmpty(expId)) {
-            ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
+            expResult = experimentService.getById(expId);
             if (expResult.isFailed()) {
                 model.addAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED);
                 return "analyse/overview/list";

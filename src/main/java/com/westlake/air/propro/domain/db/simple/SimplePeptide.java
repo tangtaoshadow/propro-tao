@@ -12,7 +12,7 @@ import java.util.HashMap;
  * 具体的注释说明请参考PeptideDO类
  */
 @Data
-public class TargetPeptide {
+public class SimplePeptide {
 
     String id;
 
@@ -32,13 +32,12 @@ public class TargetPeptide {
 
     HashMap<String, FragmentInfo> fragmentMap;
 
+    /**
+     * 是否在蛋白中是unique类型的肽段
+     */
     Boolean isUnique;
 
     float rt;
-
-    //rtStart和rtEnd是在计算时使用的,并不会存在数据库中
-    float rtStart;
-    float rtEnd;
 
     /**
      * 如果是伪肽段,则本字段代表的是伪肽段中unimod的位置
@@ -47,21 +46,30 @@ public class TargetPeptide {
     HashMap<Integer, String> unimodMap;
 
     /**
-     * 是否作为伪肽段存在,不存储到数据库中
-     */
-    boolean asDecoy = false;
-
-    /**
      * 伪肽段的信息
      */
     String decoySequence;
     HashMap<Integer, String> decoyUnimodMap;
     HashMap<String, FragmentInfo> decoyFragmentMap;
 
-    public TargetPeptide() {
+    /**
+     * 是否作为伪肽段存在,不存储到数据库中
+     */
+    boolean asDecoy = false;
+    /**
+     * rtStart是在计算时使用的,并不会存在数据库中
+     */
+    float rtStart;
+    /**
+     * rtEnd是在计算时使用的,并不会存在数据库中
+     */
+    float rtEnd;
+
+
+    public SimplePeptide() {
     }
 
-    public TargetPeptide(PeptideDO peptide) {
+    public SimplePeptide(PeptideDO peptide) {
         this.id = peptide.getId();
         this.proteinName = peptide.getProteinName();
         this.peptideRef = peptide.getPeptideRef();
@@ -101,8 +109,8 @@ public class TargetPeptide {
             return false;
         }
 
-        if (obj instanceof TargetPeptide) {
-            TargetPeptide target = (TargetPeptide) obj;
+        if (obj instanceof SimplePeptide) {
+            SimplePeptide target = (SimplePeptide) obj;
             if (this.getPeptideRef().equals(target.getPeptideRef())) {
                 return true;
             }
