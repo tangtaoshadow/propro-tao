@@ -207,27 +207,16 @@ public class SemiSupervise {
     private void targetDecoyDistribution(List<SimpleFeatureScores> featureScoresList, AnalyseOverviewDO overviewDO) {
         HashMap<String, Integer> targetDistributions = AirusUtil.buildDistributionMap();
         HashMap<String, Integer> decoyDistributions = AirusUtil.buildDistributionMap();
-
-        int notNullCount = 0;
-        int nullCount = 0;
-        int decoysCount = 0;
-        int targetCount = 0;
         for (SimpleFeatureScores sfs : featureScoresList) {
             if (sfs.getFdr() != null) {
-                notNullCount++;
                 if (sfs.getIsDecoy()) {
-                    decoysCount++;
                     AirusUtil.addOneForFdrDistributionMap(sfs.getFdr(), decoyDistributions);
                 } else {
-                    targetCount++;
                     AirusUtil.addOneForFdrDistributionMap(sfs.getFdr(), targetDistributions);
                 }
-            } else {
-                nullCount++;
             }
         }
 
-        System.out.println(notNullCount + "|" + nullCount + "|" + decoysCount + "|" + targetCount);
         overviewDO.setTargetDistributions(targetDistributions);
         overviewDO.setDecoyDistributions(decoyDistributions);
 

@@ -171,7 +171,16 @@ public class AirusUtil {
 
     public static HashMap<String, Integer> buildDistributionMap() {
         HashMap<String, Integer> distributionMap = new HashMap<>();
-        distributionMap.put(FdrConst.GROUP_0_001, 0);
+        distributionMap.put(FdrConst.GROUP_0_0001, 0);
+        distributionMap.put(FdrConst.GROUP_0001_0002, 0);
+        distributionMap.put(FdrConst.GROUP_0002_0003, 0);
+        distributionMap.put(FdrConst.GROUP_0003_0004, 0);
+        distributionMap.put(FdrConst.GROUP_0004_0005, 0);
+        distributionMap.put(FdrConst.GROUP_0005_0006, 0);
+        distributionMap.put(FdrConst.GROUP_0006_0007, 0);
+        distributionMap.put(FdrConst.GROUP_0007_0008, 0);
+        distributionMap.put(FdrConst.GROUP_0008_0009, 0);
+        distributionMap.put(FdrConst.GROUP_0009_001, 0);
         distributionMap.put(FdrConst.GROUP_001_002, 0);
         distributionMap.put(FdrConst.GROUP_002_003, 0);
         distributionMap.put(FdrConst.GROUP_003_004, 0);
@@ -189,7 +198,8 @@ public class AirusUtil {
         distributionMap.put(FdrConst.GROUP_06_07, 0);
         distributionMap.put(FdrConst.GROUP_07_08, 0);
         distributionMap.put(FdrConst.GROUP_08_09, 0);
-        distributionMap.put(FdrConst.GROUP_09_1, 0);
+        distributionMap.put(FdrConst.GROUP_09_10, 0);
+        distributionMap.put(FdrConst.GROUP_10_N, 0);
         return distributionMap;
     }
 
@@ -199,26 +209,35 @@ public class AirusUtil {
      * @see FdrConst
      */
     public static void addOneForFdrDistributionMap(Double fdr, HashMap<String, Integer> map) {
-        if (fdr >= 0 && fdr < 0.001) { map.computeIfPresent(FdrConst.GROUP_0_001, (k, v) -> v + 1);return; }
-        if (fdr >= 0.001 && fdr < 0.002) { map.computeIfPresent(FdrConst.GROUP_001_002, (k, v) -> v + 1);return; }
-        if (fdr >= 0.002 && fdr < 0.003) { map.computeIfPresent(FdrConst.GROUP_002_003, (k, v) -> v + 1);return; }
-        if (fdr >= 0.003 && fdr < 0.004) { map.computeIfPresent(FdrConst.GROUP_003_004, (k, v) -> v + 1);return; }
-        if (fdr >= 0.004 && fdr < 0.005) { map.computeIfPresent(FdrConst.GROUP_004_005, (k, v) -> v + 1);return; }
-        if (fdr >= 0.005 && fdr < 0.006) { map.computeIfPresent(FdrConst.GROUP_005_006, (k, v) -> v + 1);return; }
-        if (fdr >= 0.006 && fdr < 0.007) { map.computeIfPresent(FdrConst.GROUP_006_007, (k, v) -> v + 1);return; }
-        if (fdr >= 0.007 && fdr < 0.008) { map.computeIfPresent(FdrConst.GROUP_007_008, (k, v) -> v + 1);return; }
-        if (fdr >= 0.008 && fdr < 0.009) { map.computeIfPresent(FdrConst.GROUP_008_009, (k, v) -> v + 1);return; }
-        if (fdr >= 0.009 && fdr < 0.01) { map.computeIfPresent(FdrConst.GROUP_009_01, (k, v) -> v + 1);return; }
-        if (fdr >= 0.01 && fdr < 0.02) { map.computeIfPresent(FdrConst.GROUP_01_02, (k, v) -> v + 1);return; }
-        if (fdr >= 0.02 && fdr < 0.03) { map.computeIfPresent(FdrConst.GROUP_02_03, (k, v) -> v + 1);return; }
-        if (fdr >= 0.03 && fdr < 0.04) { map.computeIfPresent(FdrConst.GROUP_03_04, (k, v) -> v + 1);return; }
-        if (fdr >= 0.04 && fdr < 0.05) { map.computeIfPresent(FdrConst.GROUP_04_05, (k, v) -> v + 1);return; }
-        if (fdr >= 0.05 && fdr < 0.06) { map.computeIfPresent(FdrConst.GROUP_05_06, (k, v) -> v + 1);return; }
-        if (fdr >= 0.06 && fdr < 0.07) { map.computeIfPresent(FdrConst.GROUP_06_07, (k, v) -> v + 1);return; }
-        if (fdr >= 0.07 && fdr < 0.08) { map.computeIfPresent(FdrConst.GROUP_07_08, (k, v) -> v + 1);return; }
-        if (fdr >= 0.08 && fdr < 0.09) { map.computeIfPresent(FdrConst.GROUP_08_09, (k, v) -> v + 1);return; }
-        if (fdr >= 0.09 && fdr <= 0.1) { map.computeIfPresent(FdrConst.GROUP_09_1, (k, v) -> v + 1); }
-
+        if (fdr >= 0 && fdr < 0.001) { map.computeIfPresent(FdrConst.GROUP_0_0001, (k, v) -> v + 1);return; }
+        if (fdr >= 0.001 && fdr < 0.002) { map.computeIfPresent(FdrConst.GROUP_0001_0002, (k, v) -> v + 1);return; }
+        if (fdr >= 0.002 && fdr < 0.003) { map.computeIfPresent(FdrConst.GROUP_0002_0003, (k, v) -> v + 1);return; }
+        if (fdr >= 0.003 && fdr < 0.004) { map.computeIfPresent(FdrConst.GROUP_0003_0004, (k, v) -> v + 1);return; }
+        if (fdr >= 0.004 && fdr < 0.005) { map.computeIfPresent(FdrConst.GROUP_0004_0005, (k, v) -> v + 1);return; }
+        if (fdr >= 0.005 && fdr < 0.006) { map.computeIfPresent(FdrConst.GROUP_0005_0006, (k, v) -> v + 1);return; }
+        if (fdr >= 0.006 && fdr < 0.007) { map.computeIfPresent(FdrConst.GROUP_0006_0007, (k, v) -> v + 1);return; }
+        if (fdr >= 0.007 && fdr < 0.008) { map.computeIfPresent(FdrConst.GROUP_0007_0008, (k, v) -> v + 1);return; }
+        if (fdr >= 0.008 && fdr < 0.009) { map.computeIfPresent(FdrConst.GROUP_0008_0009, (k, v) -> v + 1);return; }
+        if (fdr >= 0.009 && fdr < 0.010) { map.computeIfPresent(FdrConst.GROUP_0009_001, (k, v) -> v + 1);return; }
+        if (fdr >= 0.01 && fdr < 0.02) { map.computeIfPresent(FdrConst.GROUP_001_002, (k, v) -> v + 1);return; }
+        if (fdr >= 0.02 && fdr < 0.03) { map.computeIfPresent(FdrConst.GROUP_002_003, (k, v) -> v + 1);return; }
+        if (fdr >= 0.03 && fdr < 0.04) { map.computeIfPresent(FdrConst.GROUP_003_004, (k, v) -> v + 1);return; }
+        if (fdr >= 0.04 && fdr < 0.05) { map.computeIfPresent(FdrConst.GROUP_004_005, (k, v) -> v + 1);return; }
+        if (fdr >= 0.05 && fdr < 0.06) { map.computeIfPresent(FdrConst.GROUP_005_006, (k, v) -> v + 1);return; }
+        if (fdr >= 0.06 && fdr < 0.07) { map.computeIfPresent(FdrConst.GROUP_006_007, (k, v) -> v + 1);return; }
+        if (fdr >= 0.07 && fdr < 0.08) { map.computeIfPresent(FdrConst.GROUP_007_008, (k, v) -> v + 1);return; }
+        if (fdr >= 0.08 && fdr < 0.09) { map.computeIfPresent(FdrConst.GROUP_008_009, (k, v) -> v + 1);return; }
+        if (fdr >= 0.09 && fdr < 0.10) { map.computeIfPresent(FdrConst.GROUP_009_01, (k, v) -> v + 1);return;}
+        if (fdr >= 0.1 && fdr < 0.2) { map.computeIfPresent(FdrConst.GROUP_01_02, (k, v) -> v + 1);return; }
+        if (fdr >= 0.2 && fdr < 0.3) { map.computeIfPresent(FdrConst.GROUP_02_03, (k, v) -> v + 1);return; }
+        if (fdr >= 0.3 && fdr < 0.4) { map.computeIfPresent(FdrConst.GROUP_03_04, (k, v) -> v + 1);return; }
+        if (fdr >= 0.4 && fdr < 0.5) { map.computeIfPresent(FdrConst.GROUP_04_05, (k, v) -> v + 1);return; }
+        if (fdr >= 0.5 && fdr < 0.6) { map.computeIfPresent(FdrConst.GROUP_05_06, (k, v) -> v + 1);return; }
+        if (fdr >= 0.6 && fdr < 0.7) { map.computeIfPresent(FdrConst.GROUP_06_07, (k, v) -> v + 1);return; }
+        if (fdr >= 0.7 && fdr < 0.8) { map.computeIfPresent(FdrConst.GROUP_07_08, (k, v) -> v + 1);return; }
+        if (fdr >= 0.8 && fdr < 0.9) { map.computeIfPresent(FdrConst.GROUP_08_09, (k, v) -> v + 1);return; }
+        if (fdr >= 0.9 && fdr < 1.0) { map.computeIfPresent(FdrConst.GROUP_09_10, (k, v) -> v + 1);return; }
+        if (fdr >= 1.0)               { map.computeIfPresent(FdrConst.GROUP_10_N, (k, v) -> v + 1); }
     }
 
     /**
