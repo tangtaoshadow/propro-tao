@@ -90,6 +90,9 @@ public class AnalyseOverviewDO extends BaseDO {
     //最终计算所得的子分数的权重,LDA算法才有
     HashMap<String, Double> weights = new HashMap<>();
 
+    HashMap<String, Integer> targetDistributions = new HashMap<>();
+    HashMap<String, Integer> decoyDistributions = new HashMap<>();
+
     //最终计算鉴定到的肽段数目
     Integer matchedPeptideCount;
 

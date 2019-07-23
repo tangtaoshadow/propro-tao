@@ -44,6 +44,32 @@ public class SortUtil {
         return ordering.sortedCopy(scores);
     }
 
+    public static List<SimpleFeatureScores> sortByFdr(List<SimpleFeatureScores> scores, boolean isDesc) {
+        Ordering<SimpleFeatureScores> ordering = Ordering.from(new Comparator<SimpleFeatureScores>() {
+            @Override
+            public int compare(SimpleFeatureScores o1, SimpleFeatureScores o2) {
+                try {
+                    if(o1.getFdr() == null){
+                        return 1;
+                    }
+                    if(o2.getFdr() == null){
+                        return -1;
+                    }
+                    if (isDesc) {
+                        return o2.getFdr().compareTo(o1.getFdr());
+                    } else {
+                        return o1.getFdr().compareTo(o2.getFdr());
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return 0;
+                }
+            }
+        });
+
+        return ordering.sortedCopy(scores);
+    }
+
     public static List<FeatureScores> sortBySelectedScore(List<FeatureScores> scores, String scoreName, boolean isDesc, List<String> scoreTypes) {
         Ordering<FeatureScores> ordering = Ordering.from(new Comparator<FeatureScores>() {
             @Override

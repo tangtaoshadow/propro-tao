@@ -139,6 +139,8 @@ public class AnalyseController extends BaseController {
             model.addAttribute("overview", resultDO.getModel());
             model.addAttribute("slope", resultDO.getModel().getSlope());
             model.addAttribute("intercept", resultDO.getModel().getIntercept());
+            model.addAttribute("targetMap", overview.getTargetDistributions());
+            model.addAttribute("decoyMap", overview.getDecoyDistributions());
             return "analyse/overview/detail";
         } else {
             redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
@@ -382,7 +384,7 @@ public class AnalyseController extends BaseController {
             for (int i = 1; i <= maxCharge; i++) {
                 charges.add(i);
             }
-            model.addAttribute("charges",charges);
+            model.addAttribute("charges", charges);
             buildPeptide = peptideService.buildWithPeptideRef(peptideRef, minLength, ResidueType.abcxyz, charges);
         }
 
@@ -400,13 +402,19 @@ public class AnalyseController extends BaseController {
                     buildPeptide.setRt(libraryPeptide.getRt());
                     for (FragmentInfo fi : libraryPeptide.getFragmentMap().values()) {
                         FragmentInfo buildFi = buildPeptide.getFragmentMap().get(fi.getCutInfo());
-                        if(buildFi != null){
+                        if (buildFi != null) {
                             buildFi.setIntensity(fi.getIntensity());
                             libraryCutInfos.add(fi.getCutInfo());
                         }
 
                     }
                 }
+            } else {
+                List<Integer> charges = new ArrayList<>();
+                for (int i = 1; i <= maxCharge; i++) {
+                    charges.add(i);
+                }
+                buildPeptide = peptideService.buildWithPeptideRef(peptideRef, minLength, ResidueType.abcxyz, charges);
             }
         }
         model.addAttribute("libCutInfos", libraryCutInfos);

@@ -6,7 +6,9 @@ import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.airus.*;
+import com.westlake.air.propro.domain.bean.airus.AirusParams;
+import com.westlake.air.propro.domain.bean.airus.ErrorStat;
+import com.westlake.air.propro.domain.bean.airus.FinalResult;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Nico Wang Ruimin
@@ -125,8 +128,9 @@ public class SemiSupervise {
         //Step4. 对于最终的打分结果和选峰结果保存到数据库中
         logger.info("将合并打分及定量结果反馈更新到数据库中,总计:" + featureScoresList.size() + "条数据");
         giveDecoyFdr(featureScoresList);
+        targetDecoyDistribution(featureScoresList, overviewDO);
         analyseDataService.removeMultiDecoy(overviewId, featureScoresList, airusParams.getFdr());
-        long  start = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         analyseDataService.updateMulti(overviewDO.getId(), featureScoresList);
         logger.info("更新数据" + featureScoresList.size() + "条一共用时：" + (System.currentTimeMillis() - start));
 
@@ -161,7 +165,6 @@ public class SemiSupervise {
 
     //给分布在target中的decoy赋以Fdr值, 最末尾部分的decoy忽略, fdr为null
     private void giveDecoyFdr(List<SimpleFeatureScores> featureScoresList) {
-
         List<SimpleFeatureScores> sortedAll = SortUtil.sortByMainScore(featureScoresList, false);
         SimpleFeatureScores leftFeatureScore = null;
         SimpleFeatureScores rightFeatureScore;
@@ -192,6 +195,42 @@ public class SemiSupervise {
                 decoy.setQValue(leftFeatureScore.getQValue());
             }
         }
+    }
+
+    /**
+     * 对于FDR<=0.01,每0.001个间隔存储为一组
+     * 对于FDR>0.01,每0.1间隔存储为一组
+     *
+     * @param featureScoresList
+     * @param overviewDO
+     */
+    private void targetDecoyDistribution(List<SimpleFeatureScores> featureScoresList, AnalyseOverviewDO overviewDO) {
+        HashMap<String, Integer> targetDistributions = AirusUtil.buildDistributionMap();
+        HashMap<String, Integer> decoyDistributions = AirusUtil.buildDistributionMap();
+
+        int notNullCount = 0;
+        int nullCount = 0;
+        int decoysCount = 0;
+        int targetCount = 0;
+        for (SimpleFeatureScores sfs : featureScoresList) {
+            if (sfs.getFdr() != null) {
+                notNullCount++;
+                if (sfs.getIsDecoy()) {
+                    decoysCount++;
+                    AirusUtil.addOneForFdrDistributionMap(sfs.getFdr(), decoyDistributions);
+                } else {
+                    targetCount++;
+                    AirusUtil.addOneForFdrDistributionMap(sfs.getFdr(), targetDistributions);
+                }
+            } else {
+                nullCount++;
+            }
+        }
+
+        System.out.println(notNullCount + "|" + nullCount + "|" + decoysCount + "|" + targetCount);
+        overviewDO.setTargetDistributions(targetDistributions);
+        overviewDO.setDecoyDistributions(decoyDistributions);
+
     }
 
     private void cleanScore(List<PeptideScores> scoresList, List<String> scoreTypes) {

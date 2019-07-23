@@ -62,7 +62,6 @@ public class Xgboost extends AbstractClassifier {
             logger.info("开始最终打分");
             predictAll(booster, scores, ScoreType.MainScore.getTypeName(), airusParams.getScoreTypes());
         } catch (Exception e) {
-            logger.error("XGBooster Predict All Fail.\n");
             e.printStackTrace();
         }
         List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), scoreTypes, false);

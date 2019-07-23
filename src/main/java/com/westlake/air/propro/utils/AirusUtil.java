@@ -1,5 +1,6 @@
 package com.westlake.air.propro.utils;
 
+import com.westlake.air.propro.constants.FdrConst;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.domain.bean.airus.FinalResult;
 import com.westlake.air.propro.domain.bean.airus.ScoreData;
@@ -168,6 +169,58 @@ public class AirusUtil {
         }
     }
 
+    public static HashMap<String, Integer> buildDistributionMap() {
+        HashMap<String, Integer> distributionMap = new HashMap<>();
+        distributionMap.put(FdrConst.GROUP_0_001, 0);
+        distributionMap.put(FdrConst.GROUP_001_002, 0);
+        distributionMap.put(FdrConst.GROUP_002_003, 0);
+        distributionMap.put(FdrConst.GROUP_003_004, 0);
+        distributionMap.put(FdrConst.GROUP_004_005, 0);
+        distributionMap.put(FdrConst.GROUP_005_006, 0);
+        distributionMap.put(FdrConst.GROUP_006_007, 0);
+        distributionMap.put(FdrConst.GROUP_007_008, 0);
+        distributionMap.put(FdrConst.GROUP_008_009, 0);
+        distributionMap.put(FdrConst.GROUP_009_01, 0);
+        distributionMap.put(FdrConst.GROUP_01_02, 0);
+        distributionMap.put(FdrConst.GROUP_02_03, 0);
+        distributionMap.put(FdrConst.GROUP_03_04, 0);
+        distributionMap.put(FdrConst.GROUP_04_05, 0);
+        distributionMap.put(FdrConst.GROUP_05_06, 0);
+        distributionMap.put(FdrConst.GROUP_06_07, 0);
+        distributionMap.put(FdrConst.GROUP_07_08, 0);
+        distributionMap.put(FdrConst.GROUP_08_09, 0);
+        distributionMap.put(FdrConst.GROUP_09_1, 0);
+        return distributionMap;
+    }
+
+    /**
+     * @param fdr
+     * @param map
+     * @see FdrConst
+     */
+    public static void addOneForFdrDistributionMap(Double fdr, HashMap<String, Integer> map) {
+        if (fdr >= 0 && fdr < 0.001) { map.computeIfPresent(FdrConst.GROUP_0_001, (k, v) -> v + 1);return; }
+        if (fdr >= 0.001 && fdr < 0.002) { map.computeIfPresent(FdrConst.GROUP_001_002, (k, v) -> v + 1);return; }
+        if (fdr >= 0.002 && fdr < 0.003) { map.computeIfPresent(FdrConst.GROUP_002_003, (k, v) -> v + 1);return; }
+        if (fdr >= 0.003 && fdr < 0.004) { map.computeIfPresent(FdrConst.GROUP_003_004, (k, v) -> v + 1);return; }
+        if (fdr >= 0.004 && fdr < 0.005) { map.computeIfPresent(FdrConst.GROUP_004_005, (k, v) -> v + 1);return; }
+        if (fdr >= 0.005 && fdr < 0.006) { map.computeIfPresent(FdrConst.GROUP_005_006, (k, v) -> v + 1);return; }
+        if (fdr >= 0.006 && fdr < 0.007) { map.computeIfPresent(FdrConst.GROUP_006_007, (k, v) -> v + 1);return; }
+        if (fdr >= 0.007 && fdr < 0.008) { map.computeIfPresent(FdrConst.GROUP_007_008, (k, v) -> v + 1);return; }
+        if (fdr >= 0.008 && fdr < 0.009) { map.computeIfPresent(FdrConst.GROUP_008_009, (k, v) -> v + 1);return; }
+        if (fdr >= 0.009 && fdr < 0.01) { map.computeIfPresent(FdrConst.GROUP_009_01, (k, v) -> v + 1);return; }
+        if (fdr >= 0.01 && fdr < 0.02) { map.computeIfPresent(FdrConst.GROUP_01_02, (k, v) -> v + 1);return; }
+        if (fdr >= 0.02 && fdr < 0.03) { map.computeIfPresent(FdrConst.GROUP_02_03, (k, v) -> v + 1);return; }
+        if (fdr >= 0.03 && fdr < 0.04) { map.computeIfPresent(FdrConst.GROUP_03_04, (k, v) -> v + 1);return; }
+        if (fdr >= 0.04 && fdr < 0.05) { map.computeIfPresent(FdrConst.GROUP_04_05, (k, v) -> v + 1);return; }
+        if (fdr >= 0.05 && fdr < 0.06) { map.computeIfPresent(FdrConst.GROUP_05_06, (k, v) -> v + 1);return; }
+        if (fdr >= 0.06 && fdr < 0.07) { map.computeIfPresent(FdrConst.GROUP_06_07, (k, v) -> v + 1);return; }
+        if (fdr >= 0.07 && fdr < 0.08) { map.computeIfPresent(FdrConst.GROUP_07_08, (k, v) -> v + 1);return; }
+        if (fdr >= 0.08 && fdr < 0.09) { map.computeIfPresent(FdrConst.GROUP_08_09, (k, v) -> v + 1);return; }
+        if (fdr >= 0.09 && fdr <= 0.1) { map.computeIfPresent(FdrConst.GROUP_09_1, (k, v) -> v + 1); }
+
+    }
+
     /**
      * 以scoreType为主分数挑选出所有主分数最高的峰
      *
@@ -186,17 +239,17 @@ public class AirusUtil {
             double maxScore = -Double.MAX_VALUE;
             FeatureScores topFeatureScore = null;
             for (FeatureScores featureScores : score.getFeatureScoresList()) {
-                if (strict && featureScores.getThresholdPassed() != null && !featureScores.getThresholdPassed()){
+                if (strict && featureScores.getThresholdPassed() != null && !featureScores.getThresholdPassed()) {
                     continue;
                 }
                 Double featureMainScore = featureScores.get(scoreType, scoreTypes);
-                if (featureMainScore > maxScore){
+                if (featureMainScore > maxScore) {
                     maxScore = featureMainScore;
                     topFeatureScore = featureScores;
                 }
             }
 
-            if (topFeatureScore != null){
+            if (topFeatureScore != null) {
                 bestFeatureScores.setMainScore(topFeatureScore.get(scoreType, scoreTypes));
                 bestFeatureScores.setScores(topFeatureScore.getScores());
                 bestFeatureScores.setRt(topFeatureScore.getRt());
