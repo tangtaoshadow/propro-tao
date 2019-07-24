@@ -68,11 +68,12 @@
                 </thead>
                 <tbody>
                 <tr th:each="experiment:${experiments}">
-                    <td th:text="|${experiment.projectName}|"></td>
+                    <td >
+                        <a th:href="@{/project/list}" th:text="|${experiment.projectName}|"></a>
+                    </td>
                     <td>
                         <a th:href="@{/experiment/detail/{id}(id=${experiment.id})}" data-toggle="m-tooltip"
-                           th:title="#{btn_detail}" th:text="${experiment.name}">
-                        </a>
+                           th:title="#{btn_detail}" th:text="${experiment.name}"></a>
                     </td>
                     <td th:text="|${experiment.id}|"></td>
                     <td th:text="${experiment.type}">
