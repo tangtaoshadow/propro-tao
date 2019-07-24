@@ -7,6 +7,7 @@ import com.westlake.air.propro.domain.query.UserQuery;
 import java.util.List;
 import java.util.Set;
 
+
 public interface UserService {
 
     UserDO getByUsername(String username);

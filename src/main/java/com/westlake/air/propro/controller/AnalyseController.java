@@ -318,8 +318,8 @@ public class AnalyseController extends BaseController {
                   @RequestParam(value = "rtExtractWindow", required = false, defaultValue = "800") Float rtExtractWindow,
                   @RequestParam(value = "minLength", required = false, defaultValue = "3") Integer minLength,
                   @RequestParam(value = "maxCharge", required = false, defaultValue = "3") Integer maxCharge,
-                  @RequestParam(value = "onlyLib", required = false, defaultValue = "false") Boolean onlyLib,
-                  HttpServletRequest request) {
+                  @RequestParam(value = "onlyLib", required = false, defaultValue = "false") Boolean onlyLib
+                  ) {
         model.addAttribute("mzExtractWindow", mzExtractWindow);
         model.addAttribute("rtExtractWindow", rtExtractWindow);
         model.addAttribute("minLength", minLength);
@@ -485,4 +485,6 @@ public class AnalyseController extends BaseController {
 
         return noiseIntensityArray;
     }
+
+
 }

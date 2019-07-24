@@ -10,6 +10,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+
+// UserDO 对应数据库中的user表
+
 @Data
 @Document(collection = "user")
 public class UserDO extends BaseDO {
@@ -41,9 +44,12 @@ public class UserDO extends BaseDO {
     //已使用空间大小,单位GB
     Float usedSpace;
 
+
     Date created;   // 创建时间
     Date updated;   // 修改时间
+
     Set<String> roles = new HashSet<>();    //用户所有角色值，用于shiro做角色权限的判断
+
     Set<String> perms = new HashSet<>();    //用户所有权限值，用于shiro做资源权限的判断
 
 }

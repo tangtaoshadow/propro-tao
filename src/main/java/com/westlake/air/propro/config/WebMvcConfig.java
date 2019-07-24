@@ -6,6 +6,16 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
+
+
+/***
+ * @UpdateAuthor    TangTao
+ * @CreateTime
+ * @UpdateTime      2019-7-23 13:40:23
+ * @Achieve         修改了跨域规则 允许跨域
+ * @Copyright       西湖 PROPRO http://www.proteomics.pro/
+ *
+ */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
@@ -17,7 +27,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
 //				registry.addMapping("/api/**");
         registry.addMapping("/**")
-                .allowedOrigins("http://wias.oss-cn-shanghai.aliyuncs.com")
+                // .allowedOrigins("http://wias.oss-cn-shanghai.aliyuncs.com")
+                .allowedOrigins("*")
                 .allowedHeaders("*")
                 .allowedMethods("GET", "POST", "DELETE", "PUT", "OPTIONS")
                 .allowCredentials(false).maxAge(3600);

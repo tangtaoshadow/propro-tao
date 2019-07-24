@@ -9,11 +9,15 @@ import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.TaskService;
 import com.westlake.air.propro.async.task.LibraryTask;
+import com.westlake.air.propro.service.UserService;
+import com.westlake.air.propro.utils.JWTUtil;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.support.HttpRequestHandlerServlet;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -34,6 +38,10 @@ public class BaseController {
     LibraryTask libraryTask;
     @Autowired
     ExperimentTask experimentTask;
+    @Autowired
+    HttpServletRequest request;
+    @Autowired
+    UserService userService;
 
     public final Logger logger = LoggerFactory.getLogger(getClass());
     public static String ERROR_MSG = "error_msg";
@@ -66,9 +74,24 @@ public class BaseController {
     }
 
     public UserDO getCurrentUser() {
-        Object object = SecurityUtils.getSubject().getPrincipal();
-        if (object != null) {
-            return (UserDO) object;
+
+        // Object object = SecurityUtils.getSubject().getPrincipal();
+        String token = request.getHeader("token");
+        System.out.println(token);
+
+        if(null==token){
+            return null;
+        }
+
+        // 获取真实用户名
+        String username = JWTUtil.getUsername(token);
+        System.out.println("username="+username);
+        // 获取数据库中对应的用户
+        UserDO userInfo = userService.getByUsername(username);
+        System.out.println(userInfo);
+
+        if (userInfo != null) {
+            return userInfo;
         }
 
         return null;

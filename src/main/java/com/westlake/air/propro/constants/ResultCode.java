@@ -5,6 +5,9 @@ import java.io.Serializable;
 /**
  * Created by James Lu MiaoShan
  * Time: 2018-06-06 09:38
+ * @Update by TangTao
+ * @Update_Time 2019-7-17 23:08:46
+ * @Statement 定义的错误码返回 枚举类型
  */
 public enum ResultCode implements Serializable {
 
@@ -150,7 +153,7 @@ public enum ResultCode implements Serializable {
 
     /**
      * ******
-     * User
+     * User 登录
      * *******
      */
     USER_ALREADY_EXISTED("USER_ALREADY_EXISTED","该用户名已被注册"),

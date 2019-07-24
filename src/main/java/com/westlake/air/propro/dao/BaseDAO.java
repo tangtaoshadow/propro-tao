@@ -65,6 +65,7 @@ public abstract class BaseDAO<T, Q extends PageQuery> {
         mongoTemplate.remove(query, getDomainClass(), getCollectionName());
     }
 
+
     protected Query buildQuery(Q targetQuery) {
         Query query = buildQueryWithoutPage(targetQuery);
 
