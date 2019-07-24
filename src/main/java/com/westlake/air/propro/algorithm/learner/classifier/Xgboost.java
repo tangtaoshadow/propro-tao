@@ -1,10 +1,10 @@
 package com.westlake.air.propro.algorithm.learner.classifier;
 
 import com.westlake.air.propro.constants.ScoreType;
-import com.westlake.air.propro.domain.bean.airus.AirusParams;
-import com.westlake.air.propro.domain.bean.airus.ErrorStat;
-import com.westlake.air.propro.domain.bean.airus.TrainData;
-import com.westlake.air.propro.domain.bean.airus.TrainPeaks;
+import com.westlake.air.propro.domain.bean.learner.LearningParams;
+import com.westlake.air.propro.domain.bean.learner.ErrorStat;
+import com.westlake.air.propro.domain.bean.learner.TrainData;
+import com.westlake.air.propro.domain.bean.learner.TrainPeaks;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.simple.PeptideScores;
@@ -55,44 +55,44 @@ public class Xgboost extends AbstractClassifier {
         }
     };
 
-    public void classifier(List<PeptideScores> scores, List<String> scoreTypes, AirusParams airusParams) {
+    public void classifier(List<PeptideScores> scores, List<String> scoreTypes, LearningParams learningParams) {
         logger.info("开始训练Booster");
-        Booster booster = learnRandomized(scores, airusParams);
+        Booster booster = learnRandomized(scores, learningParams);
         try {
             logger.info("开始最终打分");
-            predictAll(booster, scores, ScoreType.MainScore.getTypeName(), airusParams.getScoreTypes());
+            predictAll(booster, scores, ScoreType.MainScore.getTypeName(), learningParams.getScoreTypes());
         } catch (Exception e) {
             e.printStackTrace();
         }
         List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), scoreTypes, false);
-        ErrorStat errorStat = statistics.errorStatistics(featureScoresList, airusParams);
-        int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr(), airusParams.getFdr());
+        ErrorStat errorStat = statistics.errorStatistics(featureScoresList, learningParams);
+        int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr(), learningParams.getFdr());
         if (count > 0) {
             logger.info("XGBooster:检测结果:" + count + "个.");
         }
     }
 
-    public Booster learnRandomized(List<PeptideScores> scores, AirusParams airusParams) {
+    public Booster learnRandomized(List<PeptideScores> scores, LearningParams learningParams) {
         try {
             //Get part of scores as train input.
-            TrainData trainData = AirusUtil.split(scores, airusParams.getTrainTestRatio(), airusParams.isDebug(), airusParams.getScoreTypes());
+            TrainData trainData = AirusUtil.split(scores, learningParams.getTrainTestRatio(), learningParams.isDebug(), learningParams.getScoreTypes());
             //第一次训练数据集使用MainScore进行训练
             long startTime = System.currentTimeMillis();
-            TrainPeaks trainPeaks = selectTrainPeaks(trainData, airusParams.getMainScore(), airusParams, airusParams.getSsInitialFdr());
+            TrainPeaks trainPeaks = selectTrainPeaks(trainData, learningParams.getMainScore(), learningParams, learningParams.getSsInitialFdr());
             logger.info("高可信Target个数：" + trainPeaks.getBestTargets().size());
-            Booster booster = train(trainPeaks, airusParams.getMainScore(), airusParams.getScoreTypes());
-            predict(booster, trainData, airusParams.getMainScore(), airusParams.getScoreTypes());
-            for (int times = 0; times < airusParams.getXevalNumIter(); times++) {
+            Booster booster = train(trainPeaks, learningParams.getMainScore(), learningParams.getScoreTypes());
+            predict(booster, trainData, learningParams.getMainScore(), learningParams.getScoreTypes());
+            for (int times = 0; times < learningParams.getXevalNumIter(); times++) {
                 logger.info("开始第" + times + "轮训练");
-                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, ScoreType.WeightedTotalScore.getTypeName(), airusParams, airusParams.getXgbIterationFdr());
+                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, ScoreType.WeightedTotalScore.getTypeName(), learningParams, learningParams.getXgbIterationFdr());
                 logger.info("高可信Target个数：" + trainPeaksTemp.getBestTargets().size());
-                booster = train(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName(), airusParams.getScoreTypes());
-                predict(booster, trainData, ScoreType.WeightedTotalScore.getTypeName(), airusParams.getScoreTypes());
+                booster = train(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName(), learningParams.getScoreTypes());
+                predict(booster, trainData, ScoreType.WeightedTotalScore.getTypeName(), learningParams.getScoreTypes());
             }
             logger.info("总时间：" + (System.currentTimeMillis() - startTime));
-            List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), airusParams.getScoreTypes(), false);
-            ErrorStat errorStat = statistics.errorStatistics(featureScoresList, airusParams);
-            int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr(), airusParams.getFdr());
+            List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), learningParams.getScoreTypes(), false);
+            ErrorStat errorStat = statistics.errorStatistics(featureScoresList, learningParams);
+            int count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr(), learningParams.getFdr());
             logger.info("Train count:" + count);
             return booster;
         } catch (Exception e) {

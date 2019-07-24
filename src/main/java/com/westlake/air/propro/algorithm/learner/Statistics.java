@@ -2,10 +2,10 @@ package com.westlake.air.propro.algorithm.learner;
 
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.airus.AirusParams;
-import com.westlake.air.propro.domain.bean.airus.ErrorStat;
-import com.westlake.air.propro.domain.bean.airus.Pi0Est;
-import com.westlake.air.propro.domain.bean.airus.StatMetrics;
+import com.westlake.air.propro.domain.bean.learner.LearningParams;
+import com.westlake.air.propro.domain.bean.learner.ErrorStat;
+import com.westlake.air.propro.domain.bean.learner.Pi0Est;
+import com.westlake.air.propro.domain.bean.learner.StatMetrics;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.utils.AirusUtil;
 import com.westlake.air.propro.utils.ArrayUtil;
@@ -89,7 +89,7 @@ public class Statistics {
      * Estimate final results.
      * TODO 没有实现 pep(lfdr);
      */
-    public ErrorStat errorStatistics(List<SimpleFeatureScores> scores, AirusParams airusParams) {
+    public ErrorStat errorStatistics(List<SimpleFeatureScores> scores, LearningParams learningParams) {
 
         List<SimpleFeatureScores> targets = new ArrayList<>();
         List<SimpleFeatureScores> decoys = new ArrayList<>();
@@ -101,21 +101,21 @@ public class Statistics {
             }
         }
 
-        return errorStatistics(targets, decoys, airusParams);
+        return errorStatistics(targets, decoys, learningParams);
     }
 
     /**
      * Estimate final results.
      * TODO 没有实现 pep(lfdr);
      */
-    public ErrorStat errorStatistics(List<SimpleFeatureScores> targets, List<SimpleFeatureScores> decoys, AirusParams airusParams) {
+    public ErrorStat errorStatistics(List<SimpleFeatureScores> targets, List<SimpleFeatureScores> decoys, LearningParams learningParams) {
 
         ErrorStat errorStat = new ErrorStat();
         List<SimpleFeatureScores> sortedTargets = SortUtil.sortByMainScore(targets, false);
         List<SimpleFeatureScores> sortedDecoys = SortUtil.sortByMainScore(decoys, false);
 
         //compute p-values using decoy scores;
-        if (airusParams.isParametric()) {
+        if (learningParams.isParametric()) {
             pNormalizer(sortedTargets, sortedDecoys);
         } else {
             pEmpirical(sortedTargets, sortedDecoys);
@@ -125,16 +125,16 @@ public class Statistics {
             pi0Est.setPi0(1d/Constants.PRECISION);
         }else {
             //estimate pi0;
-            pi0Est = pi0Est(sortedTargets, airusParams.getPi0Lambda(), airusParams.getPi0Method(), airusParams.isPi0SmoothLogPi0());
+            pi0Est = pi0Est(sortedTargets, learningParams.getPi0Lambda(), learningParams.getPi0Method(), learningParams.isPi0SmoothLogPi0());
             if (pi0Est == null) {
                 return null;
             }
         }
 
         //compute q-value;
-        qvalue(sortedTargets, pi0Est.getPi0(), airusParams.isPFdr());
+        qvalue(sortedTargets, pi0Est.getPi0(), learningParams.isPFdr());
         //compute other metrics;
-        StatMetrics statMetrics = statMetrics(sortedTargets, pi0Est.getPi0(), airusParams.isPFdr());
+        StatMetrics statMetrics = statMetrics(sortedTargets, pi0Est.getPi0(), learningParams.isPFdr());
 
         errorStat.setBestFeatureScoresList(targets);
         errorStat.setStatMetrics(statMetrics);
@@ -146,8 +146,8 @@ public class Statistics {
     /**
      * Finds cut-off target scoreForAll for specified false discovery rate(fdr).
      */
-    public Double findCutoff(List<SimpleFeatureScores> topTargets, List<SimpleFeatureScores> topDecoys, AirusParams airusParams, Double cutoff) {
-        ErrorStat errorStat = errorStatistics(topTargets, topDecoys, airusParams);
+    public Double findCutoff(List<SimpleFeatureScores> topTargets, List<SimpleFeatureScores> topDecoys, LearningParams learningParams, Double cutoff) {
+        ErrorStat errorStat = errorStatistics(topTargets, topDecoys, learningParams);
 
         List<SimpleFeatureScores> bestScores = errorStat.getBestFeatureScoresList();
         double[] qvalue_CutoffAbs = new double[bestScores.size()];

@@ -1,7 +1,7 @@
 package com.westlake.air.propro.utils;
 
-import com.westlake.air.propro.domain.bean.airus.IndexValue;
-import com.westlake.air.propro.domain.bean.airus.TrainAndTest;
+import com.westlake.air.propro.domain.bean.learner.IndexValue;
+import com.westlake.air.propro.domain.bean.learner.TrainAndTest;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.simple.SimplePeptide;

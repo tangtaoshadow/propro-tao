@@ -6,8 +6,8 @@ import com.westlake.air.propro.algorithm.learner.SemiSupervise;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.constants.TaskStatus;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.airus.AirusParams;
-import com.westlake.air.propro.domain.bean.airus.FinalResult;
+import com.westlake.air.propro.domain.bean.learner.LearningParams;
+import com.westlake.air.propro.domain.bean.learner.FinalResult;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.irt.IrtResult;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
@@ -114,7 +114,7 @@ public class ExperimentTask extends BaseTask {
             return;
         }
         taskService.update(taskDO, "处理完毕,提取数据(打分)总耗时:" + (System.currentTimeMillis() - start) + "毫秒,开始进行合并打分.....");
-        AirusParams ap = new AirusParams();
+        LearningParams ap = new LearningParams();
         ap.setScoreTypes(lumsParams.getScoreTypes());
         ap.setFdr(lumsParams.getFdr());
         FinalResult finalResult = semiSupervise.doSemiSupervise(lumsParams.getOverviewId(), ap);

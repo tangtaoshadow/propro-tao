@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ScoreType;
-import com.westlake.air.propro.domain.bean.airus.*;
+import com.westlake.air.propro.domain.bean.learner.*;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.simple.PeptideScores;
@@ -25,21 +25,21 @@ public class Lda extends AbstractClassifier {
 
     /**
      * @param scores
-     * @param airusParams
+     * @param learningParams
      * @return
      */
-    public HashMap<String, Double> classifier(List<PeptideScores> scores, AirusParams airusParams, List<String> scoreTypes) {
+    public HashMap<String, Double> classifier(List<PeptideScores> scores, LearningParams learningParams, List<String> scoreTypes) {
         logger.info("开始训练学习数据权重");
         if (scores.size() < 500) {
-            airusParams.setXevalNumIter(10);
-            airusParams.setSsIterationFdr(0.02);
-            airusParams.setProgressiveRate(0.8);
+            learningParams.setXevalNumIter(10);
+            learningParams.setSsIterationFdr(0.02);
+            learningParams.setProgressiveRate(0.8);
         }
-        int neval = airusParams.getTrainTimes();
+        int neval = learningParams.getTrainTimes();
         List<HashMap<String, Double>> weightsMapList = new ArrayList<>();
         for (int i = 0; i < neval; i++) {
             logger.info("开始第" + i + "轮尝试,总计" + neval + "轮");
-            LDALearnData ldaLearnData = learnRandomized(scores, airusParams);
+            LDALearnData ldaLearnData = learnRandomized(scores, learningParams);
             if (ldaLearnData == null) {
                 logger.info("跳过本轮训练");
                 continue;
@@ -47,7 +47,7 @@ public class Lda extends AbstractClassifier {
             score(scores, ldaLearnData.getWeightsMap(), scoreTypes);
             List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), scoreTypes, false);
             int count = 0;
-            if (airusParams.getType().equals(Constants.EXP_TYPE_PRM)) {
+            if (learningParams.getType().equals(Constants.EXP_TYPE_PRM)) {
                 double maxDecoy = Double.MIN_VALUE;
                 for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
                     if (simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy) {
@@ -63,15 +63,15 @@ public class Lda extends AbstractClassifier {
                     }
                 }
             } else {
-                ErrorStat errorStat = statistics.errorStatistics(featureScoresList, airusParams);
-                count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr(), airusParams.getFdr());
+                ErrorStat errorStat = statistics.errorStatistics(featureScoresList, learningParams);
+                count = AirusUtil.checkFdr(errorStat.getStatMetrics().getFdr(), learningParams.getFdr());
             }
 
             if (count > 0) {
                 logger.info("本轮尝试有效果:检测结果:" + count + "个");
             }
             weightsMapList.add(ldaLearnData.getWeightsMap());
-            if (airusParams.isDebug()) {
+            if (learningParams.isDebug()) {
                 break;
             }
         }
@@ -79,24 +79,24 @@ public class Lda extends AbstractClassifier {
         return AirusUtil.averagedWeights(weightsMapList);
     }
 
-    public LDALearnData learnRandomized(List<PeptideScores> scores, AirusParams airusParams) {
+    public LDALearnData learnRandomized(List<PeptideScores> scores, LearningParams learningParams) {
         LDALearnData ldaLearnData = new LDALearnData();
         try {
-            TrainData trainData = AirusUtil.split(scores, airusParams.getTrainTestRatio(), airusParams.isDebug(), airusParams.getScoreTypes());
+            TrainData trainData = AirusUtil.split(scores, learningParams.getTrainTestRatio(), learningParams.isDebug(), learningParams.getScoreTypes());
 
-            TrainPeaks trainPeaks = selectFirstTrainPeaks(trainData, airusParams);
+            TrainPeaks trainPeaks = selectFirstTrainPeaks(trainData, learningParams);
 
-            HashMap<String, Double> weightsMap = learn(trainPeaks, airusParams.getMainScore(), airusParams.getScoreTypes());
+            HashMap<String, Double> weightsMap = learn(trainPeaks, learningParams.getMainScore(), learningParams.getScoreTypes());
             logger.info("Train Weight:" + JSONArray.toJSONString(weightsMap));
 
             //根据weightsMap计算子分数的加权总分
-            score(trainData, weightsMap, airusParams.getScoreTypes());
+            score(trainData, weightsMap, learningParams.getScoreTypes());
             weightsMap = new HashMap<>();
             HashMap<String, Double> lastWeightsMap = new HashMap<>();
-            for (int times = 0; times < airusParams.getXevalNumIter(); times++) {
-                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, ScoreType.WeightedTotalScore.getTypeName(), airusParams, airusParams.getSsIterationFdr());
+            for (int times = 0; times < learningParams.getXevalNumIter(); times++) {
+                TrainPeaks trainPeaksTemp = selectTrainPeaks(trainData, ScoreType.WeightedTotalScore.getTypeName(), learningParams, learningParams.getSsIterationFdr());
                 lastWeightsMap = weightsMap;
-                weightsMap = learn(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName(), airusParams.getScoreTypes());
+                weightsMap = learn(trainPeaksTemp, ScoreType.WeightedTotalScore.getTypeName(), learningParams.getScoreTypes());
                 logger.info("Train Weight:" + JSONArray.toJSONString(weightsMap));
                 for (Double value : weightsMap.values()) {
                     if (value == null || Double.isNaN(value)) {
@@ -106,10 +106,10 @@ public class Lda extends AbstractClassifier {
                 }
                 if (lastWeightsMap.size() != 0) {
                     for (String key : weightsMap.keySet()) {
-                        weightsMap.put(key, weightsMap.get(key) * airusParams.getProgressiveRate() + lastWeightsMap.get(key) * (1d - airusParams.getProgressiveRate()));
+                        weightsMap.put(key, weightsMap.get(key) * learningParams.getProgressiveRate() + lastWeightsMap.get(key) * (1d - learningParams.getProgressiveRate()));
                     }
                 }
-                score(trainData, weightsMap, airusParams.getScoreTypes());
+                score(trainData, weightsMap, learningParams.getScoreTypes());
             }
             ldaLearnData.setWeightsMap(weightsMap);
             return ldaLearnData;
@@ -119,9 +119,9 @@ public class Lda extends AbstractClassifier {
         }
     }
 
-    private TrainPeaks selectFirstTrainPeaks(TrainData trainData, AirusParams airusParams) {
+    private TrainPeaks selectFirstTrainPeaks(TrainData trainData, LearningParams learningParams) {
         List<SimpleFeatureScores> decoyPeaks = new ArrayList<>();
-        List<String> scoreTypes = airusParams.getScoreTypes();
+        List<String> scoreTypes = learningParams.getScoreTypes();
         for (PeptideScores peptideScores : trainData.getDecoys()) {
             FeatureScores topDecoy = null;
             double maxMainScore = -Double.MAX_VALUE;
@@ -139,7 +139,7 @@ public class Lda extends AbstractClassifier {
         TrainPeaks trainPeaks = new TrainPeaks();
         trainPeaks.setTopDecoys(decoyPeaks);
 
-        SimpleFeatureScores bestTargetScore = new SimpleFeatureScores(airusParams.getScoreTypes().size());
+        SimpleFeatureScores bestTargetScore = new SimpleFeatureScores(learningParams.getScoreTypes().size());
         bestTargetScore.put(ScoreType.XcorrShape.getTypeName(), 1d, scoreTypes);
         bestTargetScore.put(ScoreType.XcorrShapeWeighted.getTypeName(), 1d, scoreTypes);
         bestTargetScore.put(ScoreType.XcorrCoelution.getTypeName(), 0d, scoreTypes);

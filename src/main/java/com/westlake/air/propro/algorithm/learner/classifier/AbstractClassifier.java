@@ -2,9 +2,9 @@ package com.westlake.air.propro.algorithm.learner.classifier;
 
 import com.westlake.air.propro.algorithm.learner.Statistics;
 import com.westlake.air.propro.constants.ScoreType;
-import com.westlake.air.propro.domain.bean.airus.AirusParams;
-import com.westlake.air.propro.domain.bean.airus.TrainData;
-import com.westlake.air.propro.domain.bean.airus.TrainPeaks;
+import com.westlake.air.propro.domain.bean.learner.LearningParams;
+import com.westlake.air.propro.domain.bean.learner.TrainData;
+import com.westlake.air.propro.domain.bean.learner.TrainPeaks;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.simple.PeptideScores;
@@ -54,10 +54,10 @@ public abstract class AbstractClassifier {
         }
     }
 
-    public TrainPeaks selectTrainPeaks(TrainData trainData, String usedScoreType, AirusParams airusParams, Double cutoff) {
+    public TrainPeaks selectTrainPeaks(TrainData trainData, String usedScoreType, LearningParams learningParams, Double cutoff) {
 
-        List<SimpleFeatureScores> topTargetPeaks = AirusUtil.findTopFeatureScores(trainData.getTargets(), usedScoreType, airusParams.getScoreTypes(), true);
-        List<SimpleFeatureScores> topDecoyPeaks = AirusUtil.findTopFeatureScores(trainData.getDecoys(), usedScoreType, airusParams.getScoreTypes(), false);
+        List<SimpleFeatureScores> topTargetPeaks = AirusUtil.findTopFeatureScores(trainData.getTargets(), usedScoreType, learningParams.getScoreTypes(), true);
+        List<SimpleFeatureScores> topDecoyPeaks = AirusUtil.findTopFeatureScores(trainData.getDecoys(), usedScoreType, learningParams.getScoreTypes(), false);
 
         Double cutoffNew;
         if (topTargetPeaks.size() < 100) {
@@ -75,7 +75,7 @@ public abstract class AbstractClassifier {
             cutoffNew = (decoyMax + targetMax) / 2;
         } else {
             // find cutoff fdr from scores and only use best target peaks:
-            cutoffNew = statistics.findCutoff(topTargetPeaks, topDecoyPeaks, airusParams, cutoff);
+            cutoffNew = statistics.findCutoff(topTargetPeaks, topDecoyPeaks, learningParams, cutoff);
         }
         List<SimpleFeatureScores> bestTargetPeaks = AirusUtil.peaksFilter(topTargetPeaks, cutoffNew);
 

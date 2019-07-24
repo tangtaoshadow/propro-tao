@@ -1,6 +1,5 @@
 package com.westlake.air.propro.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.algorithm.extract.Extractor;
@@ -10,7 +9,6 @@ import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.constants.SuccessMsg;
 import com.westlake.air.propro.constants.TaskTemplate;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.bean.irt.IrtResult;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
@@ -23,6 +21,7 @@ import com.westlake.air.propro.exception.UnauthorizedAccessException;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.PermissionUtil;
 import com.westlake.air.propro.utils.ScoreUtil;
+import com.westlake.aird.bean.WindowRange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -85,6 +84,7 @@ public class ExperimentController extends BaseController {
             } else {
                 query.setProjectId(project.getId());
             }
+            pageSize = Integer.MAX_VALUE;//如果是根据项目名称进行搜索的,直接全部展示出来
         }
 
         if (type != null && !type.isEmpty()) {

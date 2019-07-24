@@ -1,4 +1,4 @@
-package com.westlake.air.propro.domain.bean.airus;
+package com.westlake.air.propro.domain.bean.learner;
 
 import com.westlake.air.propro.constants.Classifier;
 import com.westlake.air.propro.constants.ScoreType;
@@ -12,7 +12,7 @@ import java.util.List;
  */
 
 @Data
-public class AirusParams {
+public class LearningParams {
 
     Classifier classifier = Classifier.lda;
 

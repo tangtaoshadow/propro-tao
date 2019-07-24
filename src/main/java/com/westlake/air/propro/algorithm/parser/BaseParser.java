@@ -1,7 +1,7 @@
 package com.westlake.air.propro.algorithm.parser;
 
-import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.utils.CompressUtil;
+import com.westlake.aird.bean.Compressor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

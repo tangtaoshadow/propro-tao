@@ -2,10 +2,10 @@ package com.westlake.air.propro.utils;
 
 import com.westlake.air.propro.constants.FdrConst;
 import com.westlake.air.propro.constants.ScoreType;
-import com.westlake.air.propro.domain.bean.airus.FinalResult;
-import com.westlake.air.propro.domain.bean.airus.ScoreData;
-import com.westlake.air.propro.domain.bean.airus.TrainAndTest;
-import com.westlake.air.propro.domain.bean.airus.TrainData;
+import com.westlake.air.propro.domain.bean.learner.FinalResult;
+import com.westlake.air.propro.domain.bean.learner.ScoreData;
+import com.westlake.air.propro.domain.bean.learner.TrainAndTest;
+import com.westlake.air.propro.domain.bean.learner.TrainData;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.simple.PeptideScores;

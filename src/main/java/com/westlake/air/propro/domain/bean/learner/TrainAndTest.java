@@ -1,4 +1,4 @@
-package com.westlake.air.propro.domain.bean.airus;
+package com.westlake.air.propro.domain.bean.learner;
 
 import com.westlake.air.propro.domain.db.simple.PeptideScores;
 import lombok.Data;

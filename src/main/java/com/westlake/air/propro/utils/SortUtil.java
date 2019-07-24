@@ -1,12 +1,12 @@
 package com.westlake.air.propro.utils;
 
 import com.google.common.collect.Ordering;
-import com.westlake.air.propro.domain.bean.aird.WindowRange;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
 import com.westlake.air.propro.domain.db.PeptideDO;
 import com.westlake.air.propro.domain.db.simple.PeptideScores;
+import com.westlake.aird.bean.WindowRange;
 
 import java.util.Comparator;
 import java.util.List;

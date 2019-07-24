@@ -8,7 +8,6 @@ import com.westlake.air.propro.dao.ExperimentDAO;
 import com.westlake.air.propro.dao.ProjectDAO;
 import com.westlake.air.propro.dao.SwathIndexDAO;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.aird.AirdInfo;
 import com.westlake.air.propro.domain.bean.experiment.ExpFileSize;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.ProjectDO;
@@ -18,6 +17,8 @@ import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.FileUtil;
+import com.westlake.aird.bean.AirdInfo;
+import com.westlake.aird.bean.SwathIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -214,11 +216,14 @@ public class ExperimentServiceImpl implements ExperimentService {
             experimentDO.setParentFiles(airdInfo.getParentFiles());
             experimentDO.setSoftwares(airdInfo.getSoftwares());
             experimentDO.setVendorFileSize(airdInfo.getFileSize());
-            for (SwathIndexDO swathIndex : airdInfo.getIndexList()) {
-                swathIndex.setExpId(experimentDO.getId());
+            List<SwathIndexDO> swathIndexList = new ArrayList<>();
+            for (SwathIndex swathIndex : airdInfo.getIndexList()) {
+                SwathIndexDO swathIndexDO  = new SwathIndexDO(swathIndex);
+                swathIndexDO.setExpId(experimentDO.getId());
+                swathIndexList.add(swathIndexDO);
             }
 
-            swathIndexDAO.insert(airdInfo.getIndexList());
+            swathIndexDAO.insert(swathIndexList);
             taskDO.addLog("Swath Index Store Success.索引存储成功");
             taskService.update(taskDO);
 

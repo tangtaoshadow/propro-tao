@@ -6,9 +6,9 @@ import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.airus.AirusParams;
-import com.westlake.air.propro.domain.bean.airus.ErrorStat;
-import com.westlake.air.propro.domain.bean.airus.FinalResult;
+import com.westlake.air.propro.domain.bean.learner.LearningParams;
+import com.westlake.air.propro.domain.bean.learner.ErrorStat;
+import com.westlake.air.propro.domain.bean.learner.FinalResult;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseOverviewDO;
@@ -26,7 +26,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Nico Wang Ruimin
@@ -50,7 +49,7 @@ public class SemiSupervise {
     @Autowired
     AnalyseOverviewService analyseOverviewService;
 
-    public FinalResult doSemiSupervise(String overviewId, AirusParams airusParams) {
+    public FinalResult doSemiSupervise(String overviewId, LearningParams learningParams) {
         FinalResult finalResult = new FinalResult();
 
         //Step1. 数据预处理
@@ -61,16 +60,16 @@ public class SemiSupervise {
             return finalResult;
         }
         AnalyseOverviewDO overviewDO = overviewDOResultDO.getModel();
-        overviewDO.setClassifier(airusParams.getClassifier().name());
-        if (airusParams.getScoreTypes() == null) {
-            airusParams.setScoreTypes(overviewDO.getScoreTypes());
+        overviewDO.setClassifier(learningParams.getClassifier().name());
+        if (learningParams.getScoreTypes() == null) {
+            learningParams.setScoreTypes(overviewDO.getScoreTypes());
         }
 
         if (overviewDO.getMatchedPeptideCount() != null) {
             overviewDO.setMatchedPeptideCount(null);
         }
         analyseOverviewService.update(overviewDO);
-        airusParams.setType(overviewDO.getType());
+        learningParams.setType(overviewDO.getType());
 
         //Step2. 从数据库读取全部打分数据
         logger.info("开始获取打分数据");
@@ -80,21 +79,21 @@ public class SemiSupervise {
             finalResult.setErrorInfo(resultDO.getMsgInfo());
             return finalResult;
         }
-        if (airusParams.getType().equals(Constants.EXP_TYPE_PRM)) {
+        if (learningParams.getType().equals(Constants.EXP_TYPE_PRM)) {
             cleanScore(scores, overviewDO.getScoreTypes());
         }
 
         //Step3. 开始训练数据集
         HashMap<String, Double> weightsMap = new HashMap<>();
-        switch (airusParams.getClassifier()) {
+        switch (learningParams.getClassifier()) {
             case lda:
-                weightsMap = lda.classifier(scores, airusParams, overviewDO.getScoreTypes());
-                lda.score(scores, weightsMap, airusParams.getScoreTypes());
+                weightsMap = lda.classifier(scores, learningParams, overviewDO.getScoreTypes());
+                lda.score(scores, weightsMap, learningParams.getScoreTypes());
                 finalResult.setWeightsMap(weightsMap);
                 break;
 
             case xgboost:
-                xgboost.classifier(scores, overviewDO.getScoreTypes(), airusParams);
+                xgboost.classifier(scores, overviewDO.getScoreTypes(), learningParams);
                 break;
 
             default:
@@ -103,7 +102,7 @@ public class SemiSupervise {
 
         List<SimpleFeatureScores> featureScoresList = AirusUtil.findTopFeatureScores(scores, ScoreType.WeightedTotalScore.getTypeName(), overviewDO.getScoreTypes(), false);
         int count = 0;
-        if (airusParams.getType().equals(Constants.EXP_TYPE_PRM)) {
+        if (learningParams.getType().equals(Constants.EXP_TYPE_PRM)) {
             double maxDecoy = Double.MIN_VALUE;
             for (SimpleFeatureScores simpleFeatureScores : featureScoresList) {
                 if (simpleFeatureScores.getIsDecoy() && simpleFeatureScores.getMainScore() > maxDecoy) {
@@ -120,16 +119,16 @@ public class SemiSupervise {
             }
 
         } else {
-            ErrorStat errorStat = statistics.errorStatistics(featureScoresList, airusParams);
+            ErrorStat errorStat = statistics.errorStatistics(featureScoresList, learningParams);
             finalResult.setAllInfo(errorStat);
-            count = AirusUtil.checkFdr(finalResult, airusParams.getFdr());
+            count = AirusUtil.checkFdr(finalResult, learningParams.getFdr());
         }
 
         //Step4. 对于最终的打分结果和选峰结果保存到数据库中
         logger.info("将合并打分及定量结果反馈更新到数据库中,总计:" + featureScoresList.size() + "条数据");
         giveDecoyFdr(featureScoresList);
         targetDecoyDistribution(featureScoresList, overviewDO);
-        analyseDataService.removeMultiDecoy(overviewId, featureScoresList, airusParams.getFdr());
+        analyseDataService.removeMultiDecoy(overviewId, featureScoresList, learningParams.getFdr());
         long start = System.currentTimeMillis();
         analyseDataService.updateMulti(overviewDO.getId(), featureScoresList);
         logger.info("更新数据" + featureScoresList.size() + "条一共用时：" + (System.currentTimeMillis() - start));

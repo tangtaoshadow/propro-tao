@@ -1,9 +1,9 @@
 package com.westlake.air.propro.domain.db;
 
 import com.westlake.air.propro.domain.BaseDO;
-import com.westlake.air.propro.domain.bean.aird.*;
 import com.westlake.air.propro.domain.bean.irt.IrtResult;
 import com.westlake.air.propro.utils.RepositoryUtil;
+import com.westlake.aird.bean.*;
 import lombok.Data;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.data.annotation.Id;
