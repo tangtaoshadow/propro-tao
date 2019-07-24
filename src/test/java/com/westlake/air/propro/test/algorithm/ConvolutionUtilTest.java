@@ -3,6 +3,7 @@ package com.westlake.air.propro.test.algorithm;
 
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.SwathIndexDO;
@@ -11,7 +12,6 @@ import com.westlake.air.propro.service.SwathIndexService;
 import com.westlake.air.propro.test.BaseTest;
 import com.westlake.air.propro.utils.ConvolutionUtil;
 import com.westlake.air.propro.utils.FileUtil;
-import com.westlake.aird.bean.Compressor;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

@@ -8,6 +8,7 @@ import com.westlake.air.propro.dao.ExperimentDAO;
 import com.westlake.air.propro.dao.ProjectDAO;
 import com.westlake.air.propro.dao.SwathIndexDAO;
 import com.westlake.air.propro.domain.ResultDO;
+import com.westlake.air.propro.domain.bean.aird.AirdInfo;
 import com.westlake.air.propro.domain.bean.experiment.ExpFileSize;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.ProjectDO;
@@ -17,8 +18,6 @@ import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.FileUtil;
-import com.westlake.aird.bean.AirdInfo;
-import com.westlake.aird.bean.SwathIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -216,14 +215,12 @@ public class ExperimentServiceImpl implements ExperimentService {
             experimentDO.setParentFiles(airdInfo.getParentFiles());
             experimentDO.setSoftwares(airdInfo.getSoftwares());
             experimentDO.setVendorFileSize(airdInfo.getFileSize());
-            List<SwathIndexDO> swathIndexList = new ArrayList<>();
-            for (SwathIndex swathIndex : airdInfo.getIndexList()) {
-                SwathIndexDO swathIndexDO  = new SwathIndexDO(swathIndex);
-                swathIndexDO.setExpId(experimentDO.getId());
-                swathIndexList.add(swathIndexDO);
+
+            for (SwathIndexDO swathIndex : airdInfo.getIndexList()) {
+                swathIndex.setExpId(experimentDO.getId());
             }
 
-            swathIndexDAO.insert(swathIndexList);
+            swathIndexDAO.insert(airdInfo.getIndexList());
             taskDO.addLog("Swath Index Store Success.索引存储成功");
             taskService.update(taskDO);
 

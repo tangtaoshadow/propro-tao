@@ -1,8 +1,8 @@
 package com.westlake.air.propro.algorithm.parser;
 
+import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.db.SwathIndexDO;
-import com.westlake.aird.bean.Compressor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Component;
 
