@@ -14,7 +14,7 @@ import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.TaskDO;
-import com.westlake.air.propro.domain.params.LumsParams;
+import com.westlake.air.propro.domain.params.WorkflowParams;
 import com.westlake.air.propro.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -71,7 +71,7 @@ public class ExperimentTask extends BaseTask {
     }
 
     /**
-     * LumsParams 包含
+     * WorkflowParams 包含
      * experimentDO
      * libraryId
      * slopeIntercept
@@ -87,37 +87,37 @@ public class ExperimentTask extends BaseTask {
      * @return
      */
     @Async(value = "extractorExecutor")
-    public void extract(TaskDO taskDO, LumsParams lumsParams) {
+    public void extract(TaskDO taskDO, WorkflowParams workflowParams) {
 
         long start = System.currentTimeMillis();
         //如果还没有计算irt,先执行计算irt的步骤
-        if (lumsParams.getIRtLibrary() != null) {
+        if (workflowParams.getIRtLibrary() != null) {
             taskService.update(taskDO, "开始提取IRT校准库数据并且计算iRT值");
-            ResultDO<IrtResult> resultDO = irt.extractAndAlign(lumsParams.getExperimentDO(), lumsParams.getIRtLibrary(), lumsParams.getExtractParams().getMzExtractWindow(), lumsParams.getSigmaSpacing());
+            ResultDO<IrtResult> resultDO = irt.extractAndAlign(workflowParams.getExperimentDO(), workflowParams.getIRtLibrary(), workflowParams.getExtractParams().getMzExtractWindow(), workflowParams.getSigmaSpacing());
             if (resultDO.isFailed()) {
                 taskService.finish(taskDO, TaskStatus.FAILED.getName(), "iRT计算失败:" + resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
                 return;
             }
             SlopeIntercept si = resultDO.getModel().getSi();
-            lumsParams.setSlopeIntercept(si);
+            workflowParams.setSlopeIntercept(si);
             taskDO.addLog("iRT计算完毕,斜率:" + si.getSlope() + "截距:" + si.getIntercept());
-            experimentService.update(lumsParams.getExperimentDO());
+            experimentService.update(workflowParams.getExperimentDO());
         } else {
-            taskDO.addLog("斜率:" + lumsParams.getSlopeIntercept().getSlope() + "截距:" + lumsParams.getSlopeIntercept().getIntercept());
+            taskDO.addLog("斜率:" + workflowParams.getSlopeIntercept().getSlope() + "截距:" + workflowParams.getSlopeIntercept().getIntercept());
         }
 
         taskService.update(taskDO, "入参准备完毕,开始提取数据(打分)");
-        lumsParams.setTaskDO(taskDO);
-        ResultDO result = extractor.extract(lumsParams);
+        workflowParams.setTaskDO(taskDO);
+        ResultDO result = extractor.extract(workflowParams);
         if (result.isFailed()) {
             taskService.finish(taskDO, TaskStatus.FAILED.getName(), "任务执行失败:" + result.getMsgInfo());
             return;
         }
         taskService.update(taskDO, "处理完毕,提取数据(打分)总耗时:" + (System.currentTimeMillis() - start) + "毫秒,开始进行合并打分.....");
         LearningParams ap = new LearningParams();
-        ap.setScoreTypes(lumsParams.getScoreTypes());
-        ap.setFdr(lumsParams.getFdr());
-        FinalResult finalResult = semiSupervise.doSemiSupervise(lumsParams.getOverviewId(), ap);
+        ap.setScoreTypes(workflowParams.getScoreTypes());
+        ap.setFdr(workflowParams.getFdr());
+        FinalResult finalResult = semiSupervise.doSemiSupervise(workflowParams.getOverviewId(), ap);
         taskDO.addLog("流程执行完毕,总耗时:" + (System.currentTimeMillis() - start) + ",最终识别的肽段数为" + finalResult.getMatchedPeptideCount());
 
     }

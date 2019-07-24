@@ -6,7 +6,7 @@ import com.westlake.air.propro.constants.ScoreType;
 import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.domain.bean.analyse.*;
 import com.westlake.air.propro.domain.db.simple.SimplePeptide;
-import com.westlake.air.propro.domain.params.LumsParams;
+import com.westlake.air.propro.domain.params.WorkflowParams;
 import com.westlake.air.propro.domain.bean.score.*;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.algorithm.peak.*;
@@ -78,7 +78,7 @@ public class ScoreServiceImpl implements ScoreService {
     SwathIndexService swathIndexService;
 
     @Override
-    public void scoreForOne(AnalyseDataDO dataDO, SimplePeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, LumsParams input) {
+    public void scoreForOne(AnalyseDataDO dataDO, SimplePeptide peptide, TreeMap<Float, MzIntensityPairs> rtMap, WorkflowParams input) {
 
         if (dataDO.getIntensityMap() == null || dataDO.getIntensityMap().size() <= peptide.getFragmentMap().size()/2) {
             dataDO.setIdentifiedStatus(AnalyseDataDO.IDENTIFIED_STATUS_NO_FIT);

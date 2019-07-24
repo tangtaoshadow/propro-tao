@@ -3,7 +3,7 @@ package com.westlake.air.propro.algorithm.aspect;
 import com.westlake.air.propro.constants.TaskStatus;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.TaskDO;
-import com.westlake.air.propro.domain.params.LumsParams;
+import com.westlake.air.propro.domain.params.WorkflowParams;
 import com.westlake.air.propro.service.TaskService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -53,15 +53,15 @@ public class TaskAspect {
         Object result = null;
         Object[] args = joinPoint.getArgs();
         TaskDO taskDO = (TaskDO) args[0];
-        LumsParams lumsParams = (LumsParams) args[1];
+        WorkflowParams workflowParams = (WorkflowParams) args[1];
         taskDO.start();
         taskDO.setStatus(TaskStatus.RUNNING.getName());
-        taskDO.addLog("数据提取窗口:" + lumsParams.getExtractParams().toString())
-                .addLog("Sigma:" + lumsParams.getSigmaSpacing().getSigma() + ",Spacing:" + lumsParams.getSigmaSpacing().getSpacing())
-                .addLog("使用标准库ID:" + lumsParams.getLibrary().getId())
-                .addLog("FDR:" + lumsParams.getFdr())
-                .addLog("Note:" + lumsParams.getNote())
-                .addLog("使用限制阈值Shape/ShapeWeight:" + lumsParams.getXcorrShapeThreshold() + "/" + lumsParams.getXcorrShapeWeightThreshold());
+        taskDO.addLog("数据提取窗口:" + workflowParams.getExtractParams().toString())
+                .addLog("Sigma:" + workflowParams.getSigmaSpacing().getSigma() + ",Spacing:" + workflowParams.getSigmaSpacing().getSpacing())
+                .addLog("使用标准库ID:" + workflowParams.getLibrary().getId())
+                .addLog("FDR:" + workflowParams.getFdr())
+                .addLog("Note:" + workflowParams.getNote())
+                .addLog("使用限制阈值Shape/ShapeWeight:" + workflowParams.getXcorrShapeThreshold() + "/" + workflowParams.getXcorrShapeWeightThreshold());
         taskService.update(taskDO, TaskStatus.RUNNING.getName(), "");
 
         try {

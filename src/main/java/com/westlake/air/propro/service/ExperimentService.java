@@ -2,13 +2,9 @@ package com.westlake.air.propro.service;
 
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.experiment.ExpFileSize;
-import com.westlake.air.propro.domain.params.LumsParams;
-import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
-import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 

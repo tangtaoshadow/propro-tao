@@ -13,7 +13,7 @@ import com.westlake.air.propro.dao.AnalyseDataDAO;
 import com.westlake.air.propro.domain.bean.file.TableFile;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.db.*;
-import com.westlake.air.propro.domain.params.LumsParams;
+import com.westlake.air.propro.domain.params.WorkflowParams;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.FileUtil;
@@ -338,7 +338,7 @@ public class TestController extends BaseController {
                 mzArray[i] = Float.parseFloat(mz[i]);
                 intArray[i] = Float.parseFloat(intensity[i]);
             }
-            LumsParams lp = new LumsParams();
+            WorkflowParams lp = new WorkflowParams();
             List<String> defaultScoreTypes = lp.getScoreTypes();
             FeatureScores featureScores = new FeatureScores(defaultScoreTypes.size());
             diaScorer.calculateBYIonScore(mzArray, intArray, new HashMap<>(), "AAMTLVQSLLNGNK", 2, featureScores, defaultScoreTypes);

@@ -6,7 +6,7 @@ import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.params.ExtractParams;
-import com.westlake.air.propro.domain.params.LumsParams;
+import com.westlake.air.propro.domain.params.WorkflowParams;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.ProjectQuery;
 import com.westlake.air.propro.service.*;
@@ -465,7 +465,7 @@ public class ProjectController extends BaseController {
             TaskDO taskDO = new TaskDO(template, exp.getName() + ":" + library.getName() + "(" + libraryId + ")");
             taskService.insert(taskDO);
 
-            LumsParams input = new LumsParams();
+            WorkflowParams input = new WorkflowParams();
             SigmaSpacing ss = new SigmaSpacing(sigma, spacing);
             input.setSigmaSpacing(ss);
             input.setExperimentDO(exp);

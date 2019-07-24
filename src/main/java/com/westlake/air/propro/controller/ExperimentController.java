@@ -14,7 +14,7 @@ import com.westlake.air.propro.domain.bean.irt.IrtResult;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.params.ExtractParams;
-import com.westlake.air.propro.domain.params.LumsParams;
+import com.westlake.air.propro.domain.params.WorkflowParams;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.exception.UnauthorizedAccessException;
@@ -313,7 +313,7 @@ public class ExperimentController extends BaseController {
         }
         SigmaSpacing ss = new SigmaSpacing(sigma, spacing);
 
-        LumsParams input = new LumsParams();
+        WorkflowParams input = new WorkflowParams();
         input.setExperimentDO(resultDO.getModel());
         input.setLibrary(library);
         input.setSlopeIntercept(si);

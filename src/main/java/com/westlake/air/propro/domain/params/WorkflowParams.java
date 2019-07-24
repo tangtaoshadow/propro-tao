@@ -10,7 +10,6 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -18,7 +17,7 @@ import java.util.List;
  * Time: 2018-08-29 13:55
  */
 @Data
-public class LumsParams {
+public class WorkflowParams {
 
     ExperimentDO experimentDO;
 
@@ -78,7 +77,7 @@ public class LumsParams {
 
     HashMap<String, Object> resultMap = new HashMap<>();
 
-    public LumsParams(){
+    public WorkflowParams(){
         scoreTypes = ScoreType.getAllTypesName();
     }
 

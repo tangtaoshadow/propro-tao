@@ -8,7 +8,7 @@ import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.db.simple.SimplePeptide;
 import com.westlake.air.propro.domain.params.ExtractParams;
-import com.westlake.air.propro.domain.params.LumsParams;
+import com.westlake.air.propro.domain.params.WorkflowParams;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.AnalyseUtil;
@@ -54,24 +54,24 @@ public class Extractor {
      * 提取XIC的核心函数,最终返回提取到XIC的Peptide数目
      * 目前只支持MS2的XIC提取
      *
-     * @param lumsParams 将XIC提取,选峰及打分合并在一个步骤中执行,可以完整的省去一次IO读取及解析,提升分析速度,
+     * @param workflowParams 将XIC提取,选峰及打分合并在一个步骤中执行,可以完整的省去一次IO读取及解析,提升分析速度,
      *                   需要experimentDO,libraryId,rtExtractionWindow,mzExtractionWindow,SlopeIntercept
      */
-    public ResultDO<AnalyseOverviewDO> extract(LumsParams lumsParams) {
+    public ResultDO<AnalyseOverviewDO> extract(WorkflowParams workflowParams) {
         ResultDO<AnalyseOverviewDO> resultDO = new ResultDO(true);
-        TaskDO task = lumsParams.getTaskDO();
+        TaskDO task = workflowParams.getTaskDO();
         task.addLog("基本条件检查开始");
-        ResultDO checkResult = ConvolutionUtil.checkExperiment(lumsParams.getExperimentDO());
+        ResultDO checkResult = ConvolutionUtil.checkExperiment(workflowParams.getExperimentDO());
         if (checkResult.isFailed()) {
             return checkResult;
         }
 
-        AnalyseOverviewDO overviewDO = createOverview(lumsParams);
+        AnalyseOverviewDO overviewDO = createOverview(workflowParams);
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile((File) checkResult.getModel(), "r");
             //核心函数在这里
-            extract(raf, overviewDO, lumsParams);
+            extract(raf, overviewDO, workflowParams);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -269,22 +269,22 @@ public class Extractor {
      *
      * @param raf  用于读取Aird文件
      * @param overviewDO
-     * @param lumsParams
+     * @param workflowParams
      */
-    private void extract(RandomAccessFile raf, AnalyseOverviewDO overviewDO, LumsParams lumsParams) {
+    private void extract(RandomAccessFile raf, AnalyseOverviewDO overviewDO, WorkflowParams workflowParams) {
 
-        TaskDO task = lumsParams.getTaskDO();
+        TaskDO task = workflowParams.getTaskDO();
         //Step1.获取窗口信息.
-        List<WindowRange> rangs = lumsParams.getExperimentDO().getWindowRanges();
-        SwathIndexQuery query = new SwathIndexQuery(lumsParams.getExperimentDO().getId(), 2);
+        List<WindowRange> rangs = workflowParams.getExperimentDO().getWindowRanges();
+        SwathIndexQuery query = new SwathIndexQuery(workflowParams.getExperimentDO().getId(), 2);
 
         //获取所有MS2的窗口
         List<SwathIndexDO> swathIndexList = swathIndexService.getAll(query);
         HashMap<Float, Float[]> rtRangeMap = null;
 
-        if (lumsParams.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM)) {
+        if (workflowParams.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM)) {
             rtRangeMap = experimentService.getPrmRtWindowMap(swathIndexList);
-            lumsParams.setRtRangeMap(rtRangeMap);
+            workflowParams.setRtRangeMap(rtRangeMap);
         }
 
         taskService.update(task, "总计有窗口:" + rangs.size() + "个,开始进行MS2 提取XIC计算");
@@ -295,7 +295,7 @@ public class Extractor {
             int dataCount = 0;
             for (SwathIndexDO index : swathIndexList) {
                 long start = System.currentTimeMillis();
-                List<AnalyseDataDO> dataList = doExtract(raf, index, overviewDO.getId(), lumsParams);
+                List<AnalyseDataDO> dataList = doExtract(raf, index, overviewDO.getId(), workflowParams);
                 if (dataList != null) {
                     for (AnalyseDataDO dataDO : dataList) {
                         peakCount += dataDO.getFeatureScoresList().size();
@@ -321,34 +321,34 @@ public class Extractor {
      * 返回提取到的数目
      *
      * @param raf
-     * @param lumsParams
+     * @param workflowParams
      * @param swathIndex
      * @param overviewId
      * @return
      * @throws Exception
      */
-    private List<AnalyseDataDO> doExtract(RandomAccessFile raf, SwathIndexDO swathIndex, String overviewId, LumsParams lumsParams) throws Exception {
+    private List<AnalyseDataDO> doExtract(RandomAccessFile raf, SwathIndexDO swathIndex, String overviewId, WorkflowParams workflowParams) throws Exception {
         List<SimplePeptide> coordinates;
         TreeMap<Float, MzIntensityPairs> rtMap;
         //Step2.获取标准库的目标肽段片段的坐标
         Float[] rtRange = null;
-        if (lumsParams.getRtRangeMap() != null) {
+        if (workflowParams.getRtRangeMap() != null) {
             float precursorMz = swathIndex.getRange().getMz();
-            rtRange = lumsParams.getRtRangeMap().get(precursorMz);
+            rtRange = workflowParams.getRtRangeMap().get(precursorMz);
         }
-        ExperimentDO exp = lumsParams.getExperimentDO();
-        coordinates = peptideService.buildMS2Coordinates(lumsParams.getLibrary(), lumsParams.getSlopeIntercept(), lumsParams.getExtractParams().getRtExtractWindow(), swathIndex.getRange(), rtRange, exp.getType(), lumsParams.isUniqueOnly(), false);
+        ExperimentDO exp = workflowParams.getExperimentDO();
+        coordinates = peptideService.buildMS2Coordinates(workflowParams.getLibrary(), workflowParams.getSlopeIntercept(), workflowParams.getExtractParams().getRtExtractWindow(), swathIndex.getRange(), rtRange, exp.getType(), workflowParams.isUniqueOnly(), false);
         if (coordinates.isEmpty()) {
             logger.warn("No Coordinates Found,Rang:" + swathIndex.getRange().getStart() + ":" + swathIndex.getRange().getEnd());
             return null;
         }
-        if (lumsParams.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM) && coordinates.size() != 2) {
+        if (workflowParams.getExperimentDO().getType().equals(Constants.EXP_TYPE_PRM) && coordinates.size() != 2) {
             logger.warn("coordinate size != 2,Rang:" + swathIndex.getRange().getStart() + ":" + swathIndex.getRange().getEnd());
         }
         //Step3.提取指定原始谱图
         rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndex, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
 
-        return epps(coordinates, rtMap, overviewId, lumsParams);
+        return epps(coordinates, rtMap, overviewId, workflowParams);
 
     }
 
@@ -358,23 +358,23 @@ public class Extractor {
      * @param coordinates
      * @param rtMap
      * @param overviewId
-     * @param lumsParams
+     * @param workflowParams
      * @return
      */
-    private List<AnalyseDataDO> epps(List<SimplePeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, LumsParams lumsParams) {
+    private List<AnalyseDataDO> epps(List<SimplePeptide> coordinates, TreeMap<Float, MzIntensityPairs> rtMap, String overviewId, WorkflowParams workflowParams) {
         List<AnalyseDataDO> dataList = Collections.synchronizedList(new ArrayList<>());
         long start = System.currentTimeMillis();
         //传入的coordinates是没有经过排序的,需要排序先处理真实肽段,再处理伪肽段.如果先处理的真肽段没有被提取到任何信息,或者提取后的峰太差被忽略掉,都会同时删掉对应的伪肽段的XIC
         coordinates.parallelStream().forEach(tp -> {
 
             //Step1. 常规提取XIC,XIC结果不进行压缩处理,如果没有提取到任何结果,那么加入忽略列表
-            AnalyseDataDO dataDO = extractForOne(tp, rtMap, lumsParams.getExtractParams(), overviewId);
+            AnalyseDataDO dataDO = extractForOne(tp, rtMap, workflowParams.getExtractParams(), overviewId);
             if (dataDO == null) {
                 return;
             }
 
             //Step2. 常规选峰及打分,未满足条件的直接忽略
-            scoreService.scoreForOne(dataDO, tp, rtMap, lumsParams);
+            scoreService.scoreForOne(dataDO, tp, rtMap, workflowParams);
             if (dataDO.getFeatureScoresList() == null) {
                 return;
             }
@@ -385,13 +385,13 @@ public class Extractor {
 
             //Step4. 如果第一,二步均符合条件,那么开始对对应的伪肽段进行数据提取和打分
             tp.setAsDecoy(true);
-            AnalyseDataDO decoyData = extractForOne(tp, rtMap, lumsParams.getExtractParams(), overviewId);
+            AnalyseDataDO decoyData = extractForOne(tp, rtMap, workflowParams.getExtractParams(), overviewId);
             if (decoyData == null) {
                 return;
             }
 
             //Step5. 对Decoy进行打分
-            scoreService.scoreForOne(decoyData, tp, rtMap, lumsParams);
+            scoreService.scoreForOne(decoyData, tp, rtMap, workflowParams);
             if (decoyData.getFeatureScoresList() == null) {
                 return;
             }
@@ -411,7 +411,7 @@ public class Extractor {
      * @param input
      * @return
      */
-    public AnalyseOverviewDO createOverview(LumsParams input) {
+    public AnalyseOverviewDO createOverview(WorkflowParams input) {
         AnalyseOverviewDO overviewDO = new AnalyseOverviewDO();
         overviewDO.setExpId(input.getExperimentDO().getId());
         overviewDO.setExpName(input.getExperimentDO().getName());
