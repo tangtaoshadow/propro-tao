@@ -2,6 +2,9 @@ package com.westlake.air.propro.controller;
 
 import com.westlake.air.propro.config.VMProperties;
 import com.westlake.air.propro.constants.*;
+import com.westlake.air.propro.constants.enums.ResultCode;
+import com.westlake.air.propro.constants.enums.ScoreType;
+import com.westlake.air.propro.constants.enums.TaskTemplate;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.db.*;

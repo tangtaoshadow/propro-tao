@@ -2,7 +2,7 @@ package com.westlake.air.propro.algorithm.extract;
 
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.constants.Constants;
-import com.westlake.air.propro.constants.ResultCode;
+import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;

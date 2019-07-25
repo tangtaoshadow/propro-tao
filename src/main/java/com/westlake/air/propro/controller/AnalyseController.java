@@ -10,6 +10,8 @@ import com.westlake.air.propro.algorithm.peak.FeatureExtractor;
 import com.westlake.air.propro.algorithm.peak.GaussFilter;
 import com.westlake.air.propro.algorithm.peak.SignalToNoiseEstimator;
 import com.westlake.air.propro.constants.*;
+import com.westlake.air.propro.constants.enums.ResultCode;
+import com.westlake.air.propro.constants.enums.ScoreType;
 import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.AnalyseDataRT;

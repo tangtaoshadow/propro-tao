@@ -1,7 +1,7 @@
 package com.westlake.air.propro.domain.bean.learner;
 
-import com.westlake.air.propro.constants.Classifier;
-import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.constants.enums.Classifier;
+import com.westlake.air.propro.constants.enums.ScoreType;
 import lombok.Data;
 
 import java.util.List;

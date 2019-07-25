@@ -1,7 +1,7 @@
 package com.westlake.air.propro.algorithm.learner.classifier;
 
 import com.westlake.air.propro.algorithm.learner.Statistics;
-import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.constants.enums.ScoreType;
 import com.westlake.air.propro.domain.bean.learner.LearningParams;
 import com.westlake.air.propro.domain.bean.learner.TrainData;
 import com.westlake.air.propro.domain.bean.learner.TrainPeaks;

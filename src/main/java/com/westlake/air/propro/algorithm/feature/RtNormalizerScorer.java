@@ -1,6 +1,6 @@
 package com.westlake.air.propro.algorithm.feature;
 
-import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.constants.enums.ScoreType;
 import com.westlake.air.propro.domain.bean.score.*;
 import com.westlake.air.propro.domain.params.WorkflowParams;
 import org.springframework.beans.factory.annotation.Autowired;

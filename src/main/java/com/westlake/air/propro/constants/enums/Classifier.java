@@ -1,4 +1,4 @@
-package com.westlake.air.propro.constants;
+package com.westlake.air.propro.constants.enums;
 
 public enum Classifier {
 

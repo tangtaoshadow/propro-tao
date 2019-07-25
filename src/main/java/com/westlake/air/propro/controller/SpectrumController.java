@@ -2,7 +2,7 @@ package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.westlake.air.propro.constants.ResultCode;
+import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;

@@ -4,7 +4,7 @@ import com.westlake.air.propro.algorithm.extract.Extractor;
 import com.westlake.air.propro.algorithm.irt.Irt;
 import com.westlake.air.propro.algorithm.learner.SemiSupervise;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
-import com.westlake.air.propro.constants.TaskStatus;
+import com.westlake.air.propro.constants.enums.TaskStatus;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.learner.LearningParams;
 import com.westlake.air.propro.domain.bean.learner.FinalResult;

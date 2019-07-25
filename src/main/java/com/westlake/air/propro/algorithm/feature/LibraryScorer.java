@@ -1,7 +1,6 @@
 package com.westlake.air.propro.algorithm.feature;
 
-import com.westlake.air.propro.constants.Constants;
-import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.constants.enums.ScoreType;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.bean.score.PeakGroup;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 /**

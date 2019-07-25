@@ -2,7 +2,7 @@ package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.propro.config.VMProperties;
-import com.westlake.air.propro.constants.ResultCode;
+import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.message.ApplyMessage;
 import com.westlake.air.propro.domain.bean.message.DingtalkMessage;

@@ -1,6 +1,7 @@
 package com.westlake.air.propro.utils;
 
 import com.alibaba.fastjson.JSONArray;
+import com.westlake.air.propro.constants.SuffixConst;
 import com.westlake.air.propro.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.propro.domain.bean.file.TableFile;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
@@ -94,19 +95,19 @@ public class FileUtil {
 
     //根据Aird文件获取同名同目录下的Aird索引文件的文件路径
     public static String getAirdIndexFilePath(String airdFilePath){
-        return airdFilePath.substring(0,airdFilePath.lastIndexOf(".")) + ".json";
+        return airdFilePath.substring(0,airdFilePath.lastIndexOf(".")) + SuffixConst.JSON;
     }
 
     public static boolean isAirdFile(String airdFilePath){
-        return airdFilePath.toLowerCase().endsWith(".aird");
+        return airdFilePath.toLowerCase().endsWith(SuffixConst.AIRD);
     }
 
     public static boolean isAirdIndexFile(String airdIndexFilePath){
-        return airdIndexFilePath.toLowerCase().endsWith(".json");
+        return airdIndexFilePath.toLowerCase().endsWith(SuffixConst.JSON);
     }
 
     public static boolean isMzXMLFile(String mzXMLFilePath){
-        return mzXMLFilePath.toLowerCase().endsWith(".mzxml");
+        return mzXMLFilePath.toLowerCase().endsWith(SuffixConst.MZXML);
     }
 
     public static List<AnalyseDataDO> getAnalyseDataList(String filePath) throws IOException {

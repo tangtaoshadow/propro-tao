@@ -3,7 +3,7 @@ package com.westlake.air.propro.algorithm.feature;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.IsotopeConstants;
-import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.constants.enums.ScoreType;
 import com.westlake.air.propro.dao.AminoAcidDAO;
 import com.westlake.air.propro.dao.ElementsDAO;
 import com.westlake.air.propro.dao.UnimodDAO;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 /**

@@ -2,8 +2,8 @@ package com.westlake.air.propro.service.impl;
 
 import com.westlake.air.propro.algorithm.decoy.generator.ShuffleGenerator;
 import com.westlake.air.propro.algorithm.parser.*;
-import com.westlake.air.propro.constants.ResultCode;
-import com.westlake.air.propro.constants.TaskStatus;
+import com.westlake.air.propro.constants.enums.ResultCode;
+import com.westlake.air.propro.constants.enums.TaskStatus;
 import com.westlake.air.propro.dao.LibraryDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.LibraryDO;

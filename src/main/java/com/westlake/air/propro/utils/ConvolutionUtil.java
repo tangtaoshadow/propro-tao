@@ -1,6 +1,6 @@
 package com.westlake.air.propro.utils;
 
-import com.westlake.air.propro.constants.ResultCode;
+import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
 import com.westlake.air.propro.domain.db.ExperimentDO;

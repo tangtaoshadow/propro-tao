@@ -1,6 +1,6 @@
 package com.westlake.air.propro.domain.db;
 
-import com.westlake.air.propro.constants.Classifier;
+import com.westlake.air.propro.constants.enums.Classifier;
 import com.westlake.air.propro.domain.BaseDO;
 import lombok.Data;
 import org.springframework.data.annotation.Id;

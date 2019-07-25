@@ -1,8 +1,7 @@
 package com.westlake.air.propro.service.impl;
 
-import com.westlake.air.propro.constants.ResultCode;
-import com.westlake.air.propro.constants.TaskStatus;
-import com.westlake.air.propro.constants.TaskTemplate;
+import com.westlake.air.propro.constants.enums.ResultCode;
+import com.westlake.air.propro.constants.enums.TaskTemplate;
 import com.westlake.air.propro.dao.TaskDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.TaskDO;

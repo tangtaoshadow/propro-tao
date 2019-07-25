@@ -8,7 +8,7 @@ import com.westlake.air.propro.algorithm.learner.SemiSupervise;
 import com.westlake.air.propro.algorithm.merger.ExpMerger;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.algorithm.parser.MsmsParser;
-import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.constants.enums.ScoreType;
 import com.westlake.air.propro.dao.AnalyseDataDAO;
 import com.westlake.air.propro.domain.bean.file.TableFile;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;

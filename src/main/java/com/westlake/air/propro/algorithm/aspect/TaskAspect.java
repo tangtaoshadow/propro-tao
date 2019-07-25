@@ -1,6 +1,6 @@
 package com.westlake.air.propro.algorithm.aspect;
 
-import com.westlake.air.propro.constants.TaskStatus;
+import com.westlake.air.propro.constants.enums.TaskStatus;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.params.WorkflowParams;

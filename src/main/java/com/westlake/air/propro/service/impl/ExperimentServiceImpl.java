@@ -2,8 +2,8 @@ package com.westlake.air.propro.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
-import com.westlake.air.propro.constants.ResultCode;
-import com.westlake.air.propro.constants.TaskStatus;
+import com.westlake.air.propro.constants.enums.ResultCode;
+import com.westlake.air.propro.constants.enums.TaskStatus;
 import com.westlake.air.propro.dao.ExperimentDAO;
 import com.westlake.air.propro.dao.ProjectDAO;
 import com.westlake.air.propro.dao.SwathIndexDAO;
@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
