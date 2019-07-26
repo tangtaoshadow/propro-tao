@@ -2,6 +2,8 @@ package com.westlake.air.propro.utils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.westlake.air.propro.constants.SuffixConst;
+import com.westlake.air.propro.constants.SymbolConst;
+import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.propro.domain.bean.file.TableFile;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
@@ -10,9 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by James Lu MiaoShan
@@ -21,8 +21,6 @@ import java.util.List;
 public class FileUtil {
 
     public final Logger logger = LoggerFactory.getLogger(getClass());
-    public static final String COMMA = ",";
-    public static final String TAB = "\t";
 
     public static String readFile(File file) throws IOException {
         FileInputStream fis = new FileInputStream(file);
@@ -49,10 +47,10 @@ public class FileUtil {
         if (line == null){
             return null;
         }
-        String splitter = TAB;
+        String splitter = SymbolConst.TAB;
         String[] columns = line.split(splitter);
         if (columns.length == 1){
-            splitter = COMMA;
+            splitter = SymbolConst.COMMA;
             columns = line.split(splitter);
         }
         HashMap<String, Integer> columnMap = new HashMap<>();
@@ -62,9 +60,6 @@ public class FileUtil {
         }
         while ((line = reader.readLine()) != null){
             String[] lineSplit = line.split(splitter);
-//            if (lineSplit.length != columnMap.size()){
-//                return null;
-//            }
             fileData.add(lineSplit);
         }
         return new TableFile(columnMap, fileData);
@@ -108,6 +103,141 @@ public class FileUtil {
 
     public static boolean isMzXMLFile(String mzXMLFilePath){
         return mzXMLFilePath.toLowerCase().endsWith(SuffixConst.MZXML);
+    }
+
+    public static List<File> readChunks(File chunkDir) {
+        // 读取分片文件
+        File[] chunks = null;
+        if (chunkDir.exists()) {
+            chunks = chunkDir.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File pathname) {
+                    if (pathname.isDirectory()) {
+                        return false;
+                    }
+                    return true;
+                }
+            });
+        }
+        // 分片文件排序
+        List<File> chunkList = null;
+        if (chunks != null && chunks.length > 0) {
+            chunkList = Arrays.asList(chunks);
+            Collections.sort(chunkList, new Comparator<File>() {
+                @Override
+                public int compare(File o1, File o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
+        }
+        return chunkList;
+    }
+
+    public static void randomAccessFile(File in, File out, Long seek) throws IOException {
+        RandomAccessFile raFile = null;
+        BufferedInputStream inputStream = null;
+        try {
+            // 以读写的方式打开目标文件
+            raFile = new RandomAccessFile(out, "rw");
+            raFile.seek(seek);
+            inputStream = new BufferedInputStream(new FileInputStream(in));
+            byte[] buf = new byte[1024];
+            int length = 0;
+            while ((length = inputStream.read(buf)) != -1) {
+                raFile.write(buf, 0, length);
+            }
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (raFile != null) {
+                    raFile.close();
+                }
+            } catch (Exception e) {
+                throw new IOException(e.getMessage());
+            }
+        }
+    }
+
+    public static List<File> scanFiles(String projectName){
+        String directoryPath = RepositoryUtil.getProjectRepo(projectName);
+        File directory = new File(directoryPath);
+
+        List<File> newFileList = new ArrayList<>();
+        File[] fileArray = directory.listFiles();
+        if(fileArray != null){
+            newFileList.addAll(Arrays.asList(fileArray));
+        }
+        return newFileList;
+    }
+
+    /**
+     * 删除单个文件
+     *
+     * @param sPath
+     *            被删除文件的文件名
+     * @return 单个文件删除成功返回true，否则返回false
+     */
+    public static boolean deleteFile(String sPath) {
+        boolean flag = false;
+        File file = new File(sPath);
+        // 路径为文件且不为空则进行删除
+        if (file.isFile() && file.exists()) {
+            file.delete();
+            flag = true;
+        }
+        return flag;
+    }
+
+    /**
+     * 删除目录（文件夹）以及目录下的文件
+     *
+     * @param sPath
+     *            被删除目录的文件路径
+     * @return 目录删除成功返回true，否则返回false
+     */
+    public static boolean deleteDirectory(String sPath) {
+        // 如果sPath不以文件分隔符结尾，自动添加文件分隔符
+        if (!sPath.endsWith(File.separator)) {
+            sPath = sPath + File.separator;
+        }
+        File dirFile = new File(sPath);
+        // 如果dir对应的文件不存在，或者不是一个目录，则退出
+        if (!dirFile.exists() || !dirFile.isDirectory()) {
+            return false;
+        }
+        boolean flag = true;
+        // 删除文件夹下的所有文件(包括子目录)
+        File[] files = dirFile.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            // 删除子文件
+            if (files[i].isFile()) {
+                flag = deleteFile(files[i].getAbsolutePath());
+                if (!flag) {
+                    break;
+                }
+            } // 删除子目录
+            else {
+                flag = deleteDirectory(files[i].getAbsolutePath());
+                if (!flag) {
+                    break;
+                }
+            }
+        }
+        if (!flag) {
+            return false;
+        }
+        // 删除当前目录
+        if (dirFile.delete()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static String getFileSuffix(String fileName) {
+        return fileName.substring(fileName.lastIndexOf("."));
     }
 
     public static List<AnalyseDataDO> getAnalyseDataList(String filePath) throws IOException {

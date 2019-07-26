@@ -1,7 +1,9 @@
 package com.westlake.air.propro.controller;
 
+import com.westlake.air.propro.component.ChunkUploader;
 import com.westlake.air.propro.config.VMProperties;
-import com.westlake.air.propro.constants.*;
+import com.westlake.air.propro.constants.SuccessMsg;
+import com.westlake.air.propro.constants.SuffixConst;
 import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.constants.enums.ScoreType;
 import com.westlake.air.propro.constants.enums.TaskTemplate;
@@ -10,22 +12,22 @@ import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.params.ExtractParams;
 import com.westlake.air.propro.domain.params.WorkflowParams;
-import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.ProjectQuery;
+import com.westlake.air.propro.domain.vo.FileBlockVO;
+import com.westlake.air.propro.domain.vo.UploadVO;
 import com.westlake.air.propro.service.*;
-import com.westlake.air.propro.utils.FeatureUtil;
-import com.westlake.air.propro.utils.PermissionUtil;
-import com.westlake.air.propro.utils.RepositoryUtil;
-import com.westlake.air.propro.utils.ScoreUtil;
+import com.westlake.air.propro.utils.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.FormParam;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -55,6 +57,8 @@ public class ProjectController extends BaseController {
     SwathIndexService swathIndexService;
     @Autowired
     VMProperties vmProperties;
+    @Autowired
+    ChunkUploader chunkUploader;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -195,6 +199,48 @@ public class ProjectController extends BaseController {
         return "redirect:/project/list";
     }
 
+    @RequestMapping(value = "/upload")
+    String upload(Model model, @RequestParam(value = "name", required = true) String name,
+                  RedirectAttributes redirectAttributes) {
+
+        ProjectDO project = projectService.getByName(name);
+        if (project == null) {
+            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED.getMessage());
+            return "redirect:/project/list";
+        }
+
+        PermissionUtil.check(project);
+        List<File> fileList = FileUtil.scanFiles(name);
+        List<String> fileNameList = new ArrayList<>();
+        fileList.forEach(file -> fileNameList.add(file.getName()));
+
+        model.addAttribute("project", project);
+        model.addAttribute("fileNameList", fileNameList);
+        return "project/upload";
+
+    }
+
+    @RequestMapping(value = "/doupload", method = RequestMethod.POST)
+    @ResponseBody
+    ResultDO doUpload(Model model,
+                      @RequestParam(value = "projectName", required = true) String projectName,
+                      @RequestParam("file") MultipartFile file,
+                      @FormParam("form-data") UploadVO uploadVO) {
+
+        ProjectDO project = projectService.getByName(projectName);
+        PermissionUtil.check(project);
+        model.addAttribute("project", project);
+        chunkUploader.chunkUpload(file, uploadVO, projectName);
+        return new ResultDO(true);
+    }
+
+    @RequestMapping(value = "/check", method = RequestMethod.POST)
+    @ResponseBody
+    public Object check(FileBlockVO block,
+                        @RequestParam(value = "projectName", required = true) String projectName) {
+        return chunkUploader.check(block, projectName);
+    }
+
     @RequestMapping(value = "/scan")
     String scan(Model model,
                 @RequestParam(value = "projectId", required = true) String projectId,
@@ -202,21 +248,8 @@ public class ProjectController extends BaseController {
         ProjectDO project = projectService.getById(projectId);
         PermissionUtil.check(project);
 
-        String directoryPath = RepositoryUtil.getProjectRepo(project.getName());
-        File directory = new File(directoryPath);
-
+        List<File> fileList = FileUtil.scanFiles(project.getName());
         List<File> newFileList = new ArrayList<>();
-        if (!directory.isDirectory()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.FILE_NOT_SET);
-            return "redirect:/project/list";
-        }
-
-        File[] fileList = directory.listFiles();
-        if (fileList == null) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED);
-            return "redirect:/project/list";
-        }
-
         List<ExperimentDO> exps = experimentService.getAllByProjectId(projectId);
         List<String> existedExpNames = new ArrayList<>();
         for (ExperimentDO exp : exps) {
@@ -224,7 +257,7 @@ public class ProjectController extends BaseController {
         }
         //过滤文件
         for (File file : fileList) {
-            if (file.isFile() && file.getName().toLowerCase().endsWith(".json") && !existedExpNames.contains(FilenameUtils.getBaseName(file.getName()))) {
+            if (file.isFile() && file.getName().toLowerCase().endsWith(SuffixConst.JSON) && !existedExpNames.contains(FilenameUtils.getBaseName(file.getName()))) {
                 newFileList.add(file);
             }
         }
@@ -288,7 +321,7 @@ public class ProjectController extends BaseController {
         ProjectDO project = projectService.getById(id);
         PermissionUtil.check(project);
 
-        List<ExperimentDO> expList = getAllExperimentsByProjectId(id);
+        List<ExperimentDO> expList = experimentService.getAllByProjectId(id);
         if (expList == null) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.NO_EXPERIMENT_UNDER_PROJECT);
             return "redirect:/project/list";
@@ -329,7 +362,7 @@ public class ProjectController extends BaseController {
         ProjectDO project = projectService.getById(id);
         PermissionUtil.check(project);
 
-        List<ExperimentDO> expList = getAllExperimentsByProjectId(id);
+        List<ExperimentDO> expList = experimentService.getAllByProjectId(id);
         if (expList == null) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.NO_EXPERIMENT_UNDER_PROJECT);
             return "redirect:/project/list";
@@ -446,7 +479,7 @@ public class ProjectController extends BaseController {
 
         List<String> scoreTypes = ScoreUtil.getScoreTypes(request);
 
-        List<ExperimentDO> exps = getAllExperimentsByProjectId(id);
+        List<ExperimentDO> exps = experimentService.getAllByProjectId(id);
         if (exps == null) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.NO_EXPERIMENT_UNDER_PROJECT.getMessage());
             return "redirect:/project/list";
@@ -480,7 +513,7 @@ public class ProjectController extends BaseController {
             }
             input.setLibrary(library);
             input.setOwnerName(getCurrentUsername());
-            input.setExtractParams(new ExtractParams(mzExtractWindow,rtExtractWindow));
+            input.setExtractParams(new ExtractParams(mzExtractWindow, rtExtractWindow));
             input.setScoreTypes(scoreTypes);
 
             input.setXcorrShapeThreshold(shapeScoreThreshold);
@@ -642,7 +675,7 @@ public class ProjectController extends BaseController {
 
         ProjectDO projectDO = projectService.getById(id);
         PermissionUtil.check(projectDO);
-        List<ExperimentDO> experimentDOList = getAllExperimentsByProjectId(id);
+        List<ExperimentDO> experimentDOList = experimentService.getAllByProjectId(id);
         String defaultOutputPath = RepositoryUtil.buildOutputPath(projectDO.getName(), projectDO.getName() + ".tsv");
         model.addAttribute("expList", experimentDOList);
         model.addAttribute("project", projectDO);
@@ -662,7 +695,7 @@ public class ProjectController extends BaseController {
         ProjectDO projectDO = projectService.getById(projectId);
         PermissionUtil.check(projectDO);
 
-        List<ExperimentDO> experimentDOList = getAllExperimentsByProjectId(projectId);
+        List<ExperimentDO> experimentDOList = experimentService.getAllByProjectId(projectId);
         HashMap<String, HashMap<String, String>> intensityMap = new HashMap<>();
         HashMap<String, String> pepToProt = new HashMap<>();
         if (outputAllPeptides) {
@@ -733,11 +766,5 @@ public class ProjectController extends BaseController {
         }
 
         return "redirect:/project/list";
-    }
-
-    private List<ExperimentDO> getAllExperimentsByProjectId(String projectId) {
-        ExperimentQuery query = new ExperimentQuery();
-        query.setProjectId(projectId);
-        return experimentService.getAll(query);
     }
 }

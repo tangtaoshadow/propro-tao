@@ -8,7 +8,7 @@ import com.westlake.air.propro.domain.bean.message.ApplyMessage;
 import com.westlake.air.propro.domain.bean.message.DingtalkMessage;
 import com.westlake.air.propro.domain.db.UserDO;
 import com.westlake.air.propro.service.UserService;
-import com.westlake.air.propro.service.impl.HttpClient;
+import com.westlake.air.propro.component.HttpClient;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.subject.Subject;

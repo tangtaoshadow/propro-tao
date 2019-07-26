@@ -1,12 +1,13 @@
-package com.westlake.air.propro.service.impl;
+package com.westlake.air.propro.component;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-@Service("httpClient")
+@Component("httpClient")
 public class HttpClient {
 
     public String client(String url, String body){
