@@ -15,7 +15,7 @@ jQuery(function () {
 
         // 总体进度条
         $progress = $statusBar.find('.progress').hide(),
-        chunkSize = 5 * 1024 * 1024,  //5M
+        chunkSize = 20 * 1024 * 1024,  //5M
         //文件校验的地址
         checkUrl = '/project/check?projectName=' + projectName,
         //文件上传的地址
