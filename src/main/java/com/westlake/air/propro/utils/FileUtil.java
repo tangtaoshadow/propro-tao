@@ -44,21 +44,21 @@ public class FileUtil {
         InputStreamReader isr = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8);
         BufferedReader reader = new BufferedReader(isr);
         String line = reader.readLine();
-        if (line == null){
+        if (line == null) {
             return null;
         }
         String splitter = SymbolConst.TAB;
         String[] columns = line.split(splitter);
-        if (columns.length == 1){
+        if (columns.length == 1) {
             splitter = SymbolConst.COMMA;
             columns = line.split(splitter);
         }
         HashMap<String, Integer> columnMap = new HashMap<>();
         List<String[]> fileData = new ArrayList<>();
-        for (int i=0; i<columns.length; i++){
+        for (int i = 0; i < columns.length; i++) {
             columnMap.put(columns[i].toLowerCase(), i);
         }
-        while ((line = reader.readLine()) != null){
+        while ((line = reader.readLine()) != null) {
             String[] lineSplit = line.split(splitter);
             fileData.add(lineSplit);
         }
@@ -89,19 +89,19 @@ public class FileUtil {
     }
 
     //根据Aird文件获取同名同目录下的Aird索引文件的文件路径
-    public static String getAirdIndexFilePath(String airdFilePath){
-        return airdFilePath.substring(0,airdFilePath.lastIndexOf(".")) + SuffixConst.JSON;
+    public static String getAirdIndexFilePath(String airdFilePath) {
+        return airdFilePath.substring(0, airdFilePath.lastIndexOf(".")) + SuffixConst.JSON;
     }
 
-    public static boolean isAirdFile(String airdFilePath){
+    public static boolean isAirdFile(String airdFilePath) {
         return airdFilePath.toLowerCase().endsWith(SuffixConst.AIRD);
     }
 
-    public static boolean isAirdIndexFile(String airdIndexFilePath){
+    public static boolean isAirdIndexFile(String airdIndexFilePath) {
         return airdIndexFilePath.toLowerCase().endsWith(SuffixConst.JSON);
     }
 
-    public static boolean isMzXMLFile(String mzXMLFilePath){
+    public static boolean isMzXMLFile(String mzXMLFilePath) {
         return mzXMLFilePath.toLowerCase().endsWith(SuffixConst.MZXML);
     }
 
@@ -160,14 +160,18 @@ public class FileUtil {
         }
     }
 
-    public static List<File> scanFiles(String projectName){
+    public static List<File> scanFiles(String projectName) {
         String directoryPath = RepositoryUtil.getProjectRepo(projectName);
         File directory = new File(directoryPath);
 
         List<File> newFileList = new ArrayList<>();
         File[] fileArray = directory.listFiles();
-        if(fileArray != null){
-            newFileList.addAll(Arrays.asList(fileArray));
+        if (fileArray != null) {
+            for (File file : fileArray) {
+                if (file.isFile()) {
+                    newFileList.add(file);
+                }
+            }
         }
         return newFileList;
     }
@@ -175,8 +179,7 @@ public class FileUtil {
     /**
      * 删除单个文件
      *
-     * @param sPath
-     *            被删除文件的文件名
+     * @param sPath 被删除文件的文件名
      * @return 单个文件删除成功返回true，否则返回false
      */
     public static boolean deleteFile(String sPath) {
@@ -193,8 +196,7 @@ public class FileUtil {
     /**
      * 删除目录（文件夹）以及目录下的文件
      *
-     * @param sPath
-     *            被删除目录的文件路径
+     * @param sPath 被删除目录的文件路径
      * @return 目录删除成功返回true，否则返回false
      */
     public static boolean deleteDirectory(String sPath) {

@@ -53,6 +53,9 @@ public class ProjectDO extends BaseDO {
     //项目描述
     String description;
 
+    //单位Byte
+    Long totalSize;
+
     //实验的创建日期
     Date createDate;
 

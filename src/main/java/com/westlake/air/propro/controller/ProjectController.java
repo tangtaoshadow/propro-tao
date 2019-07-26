@@ -14,6 +14,7 @@ import com.westlake.air.propro.domain.params.ExtractParams;
 import com.westlake.air.propro.domain.params.WorkflowParams;
 import com.westlake.air.propro.domain.query.ProjectQuery;
 import com.westlake.air.propro.domain.vo.FileBlockVO;
+import com.westlake.air.propro.domain.vo.FileVO;
 import com.westlake.air.propro.domain.vo.UploadVO;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.*;
@@ -199,24 +200,29 @@ public class ProjectController extends BaseController {
         return "redirect:/project/list";
     }
 
-    @RequestMapping(value = "/upload")
-    String upload(Model model, @RequestParam(value = "name", required = true) String name,
-                  RedirectAttributes redirectAttributes) {
+    @RequestMapping(value = "/filemanager")
+    String fileManager(Model model, @RequestParam(value = "name", required = true) String name,
+                       RedirectAttributes redirectAttributes) {
 
         ProjectDO project = projectService.getByName(name);
-        if (project == null) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.PROJECT_NOT_EXISTED.getMessage());
-            return "redirect:/project/list";
-        }
-
         PermissionUtil.check(project);
-        List<File> fileList = FileUtil.scanFiles(name);
-        List<String> fileNameList = new ArrayList<>();
-        fileList.forEach(file -> fileNameList.add(file.getName()));
 
+        List<File> fileList = FileUtil.scanFiles(name);
+        List<FileVO> fileVOList = new ArrayList<>();
+        for (File file : fileList) {
+            FileVO fileVO = new FileVO();
+            fileVO.setName(file.getName());
+            fileVO.setSize(file.length());
+            if (file.length() / 1024 / 1024 > 0) {
+                fileVO.setSizeStr(file.length() / 1024 / 1024 + " MB");
+            } else {
+                fileVO.setSizeStr(file.length() / 1024 + " KB");
+            }
+            fileVOList.add(fileVO);
+        }
         model.addAttribute("project", project);
-        model.addAttribute("fileNameList", fileNameList);
-        return "project/upload";
+        model.addAttribute("fileList", fileVOList);
+        return "project/file_manager";
 
     }
 
