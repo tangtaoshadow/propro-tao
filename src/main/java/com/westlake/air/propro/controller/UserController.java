@@ -1,7 +1,7 @@
 package com.westlake.air.propro.controller;
 
-import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.constants.SuccessMsg;
+import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.domain.db.UserDO;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.ProjectQuery;
@@ -9,7 +9,6 @@ import com.westlake.air.propro.service.ExperimentService;
 import com.westlake.air.propro.service.ProjectService;
 import com.westlake.air.propro.service.UserService;
 import com.westlake.air.propro.utils.PasswordUtil;
-import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,20 +30,16 @@ public class UserController extends BaseController {
 
     @RequestMapping(value = "/profile")
     String profile(Model model, RedirectAttributes redirectAttributes) {
-        Object object = SecurityUtils.getSubject().getPrincipal();
-        if (object != null) {
-            UserDO userDO = userService.getByUsername(((UserDO) object).getUsername());
-
-            model.addAttribute("user", userDO);
-
-            if (isAdmin()) {
-                model.addAttribute("projectCount", projectService.count(new ProjectQuery()));
-                model.addAttribute("expCount", experimentService.count(new ExperimentQuery()));
-            } else {
-                model.addAttribute("projectCount", projectService.count(new ProjectQuery(userDO.getUsername())));
-                model.addAttribute("expCount", experimentService.count(new ExperimentQuery(userDO.getUsername())));
-            }
+        UserDO userDO = getCurrentUser();
+        model.addAttribute("user", userDO);
+        if (isAdmin()) {
+            model.addAttribute("projectCount", projectService.count(new ProjectQuery()));
+            model.addAttribute("expCount", experimentService.count(new ExperimentQuery()));
+        } else {
+            model.addAttribute("projectCount", projectService.count(new ProjectQuery(userDO.getUsername())));
+            model.addAttribute("expCount", experimentService.count(new ExperimentQuery(userDO.getUsername())));
         }
+
         return "user/profile";
     }
 
@@ -55,18 +50,7 @@ public class UserController extends BaseController {
                   @RequestParam(value = "telephone", required = false) String telephone,
                   @RequestParam(value = "organization", required = false) String organization,
                   RedirectAttributes redirectAttributes) {
-        String username = getCurrentUsername();
-        if (username == null) {
-            SecurityUtils.getSubject().logout();
-            return redirectToLoginPage;
-        }
-
-        UserDO user = userService.getByUsername(username);
-        if (user == null) {
-            SecurityUtils.getSubject().logout();
-            return redirectToLoginPage;
-        }
-
+        UserDO user = getCurrentUser();
         user.setNick(nick);
         user.setEmail(email);
         user.setTelephone(telephone);
@@ -81,26 +65,17 @@ public class UserController extends BaseController {
                      @RequestParam(value = "newPwd", required = false) String newPwd,
                      @RequestParam(value = "repeatPwd", required = false) String repeatPwd,
                      RedirectAttributes redirectAttributes) {
-        String username = getCurrentUsername();
-        if (username == null) {
-            SecurityUtils.getSubject().logout();
-            return redirectToLoginPage;
-        }
 
-        UserDO user = userService.getByUsername(username);
-        if (user == null) {
-            SecurityUtils.getSubject().logout();
-            return redirectToLoginPage;
-        }
 
+        UserDO user = getCurrentUser();
         if (!newPwd.equals(repeatPwd)) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.NEW_PASSWORD_NOT_EQUALS_WITH_REPEAT_PASSWORD.getMessage());
             redirectAttributes.addFlashAttribute("tab", "changepwd");
             return "redirect:/user/profile";
         }
 
-        String oldMD5Pwd = PasswordUtil.getHashPassword(oldPwd, user.getSalt());
-        if (!user.getPassword().equals(oldMD5Pwd)) {
+        String oldMd5Pwd = PasswordUtil.getHashPassword(oldPwd, user.getSalt());
+        if (!user.getPassword().equals(oldMd5Pwd)) {
             redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.OLD_PASSWORD_ERROR.getMessage());
             redirectAttributes.addFlashAttribute("tab", "changepwd");
             return "redirect:/user/profile";
