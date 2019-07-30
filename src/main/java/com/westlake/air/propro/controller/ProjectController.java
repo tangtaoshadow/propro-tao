@@ -705,6 +705,7 @@ public class ProjectController extends BaseController {
         HashMap<String, HashMap<String, String>> intensityMap = new HashMap<>();
         HashMap<String, String> pepToProt = new HashMap<>();
         if (outputAllPeptides) {
+            //取第一份分析数据
             List<PeptideDO> peptideDOList = peptideService.getAllByLibraryId(analyseOverviewService.getAllByExpId(experimentDOList.get(0).getId()).get(0).getLibraryId());
             for (PeptideDO peptideDO : peptideDOList) {
                 intensityMap.put(peptideDO.getPeptideRef(), new HashMap<>());

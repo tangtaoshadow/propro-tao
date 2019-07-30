@@ -90,8 +90,8 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
             return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
         }
         try {
-            analyseOverviewDAO.delete(id);
             analyseDataService.deleteAllByOverviewId(id);
+            analyseOverviewDAO.delete(id);
 
             return new ResultDO(true);
         } catch (Exception e) {
