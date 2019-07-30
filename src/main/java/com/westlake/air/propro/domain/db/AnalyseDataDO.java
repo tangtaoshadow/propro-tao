@@ -79,14 +79,6 @@ public class AnalyseDataDO extends BaseDO {
     //key为cutInfo, value为对应的mz
     HashMap<String, Float> mzMap = new HashMap<>();
 
-    /**
-     * 压缩相关的字段
-     */
-    //开始的时间,闭区间
-    Float rtStart;
-    //结束时间,闭区间
-    Float rtEnd;
-
     @JSONField(serialize=false)
     List<FeatureScores> featureScoresList;
 

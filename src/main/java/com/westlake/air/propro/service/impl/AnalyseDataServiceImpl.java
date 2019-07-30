@@ -188,26 +188,26 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     /**
-     * 将数组中的FDR小于指定值的伪肽段删除,同时将数据库中对应的伪肽段也删除
+     * 将数组中的FDR小于指定值的肽段删除,同时将数据库中对应的肽段也删除
      * @param overviewId
      * @param simpleFeatureScoresList
      * @param fdr
      */
     @Override
-    public void removeMultiDecoy(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList, Double fdr) {
-        List<SimpleFeatureScores> decoyNeedToRemove = new ArrayList<>();
+    public void removeUselessData(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList, Double fdr) {
+        List<SimpleFeatureScores> dataNeedToRemove = new ArrayList<>();
         for (int i = simpleFeatureScoresList.size() - 1; i >= 0; i--) {
-            //如果是伪肽段,并且fdr为空或者fdr小于指定的值,那么删除它
-            if(simpleFeatureScoresList.get(i).getIsDecoy() &&
-                    (simpleFeatureScoresList.get(i).getFdr() == null || simpleFeatureScoresList.get(i).getFdr() > fdr)){
-                decoyNeedToRemove.add(simpleFeatureScoresList.get(i));
+            //如果fdr为空或者fdr小于指定的值,那么删除它
+            if(simpleFeatureScoresList.get(i).getFdr() == null || simpleFeatureScoresList.get(i).getFdr() > fdr){
+                dataNeedToRemove.add(simpleFeatureScoresList.get(i));
                 simpleFeatureScoresList.remove(i);
             }
         }
 
-        logger.info("删除数据:"+decoyNeedToRemove.size()+"条");
-        if(decoyNeedToRemove.size() != 0){
-            analyseDataDAO.deleteMulti(overviewId, decoyNeedToRemove);
+        long start = System.currentTimeMillis();
+        if(dataNeedToRemove.size() != 0){
+            analyseDataDAO.deleteMulti(overviewId, dataNeedToRemove);
         }
+        logger.info("删除无用数据:"+dataNeedToRemove.size()+"条,总计耗时:"+(System.currentTimeMillis() - start)+"毫秒");
     }
 }

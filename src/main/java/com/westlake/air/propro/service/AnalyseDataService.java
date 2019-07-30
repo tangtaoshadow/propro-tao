@@ -46,5 +46,5 @@ public interface AnalyseDataService {
 
     void updateMulti(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList);
 
-    void removeMultiDecoy(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList, Double fdr);
+    void removeUselessData(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList, Double fdr);
 }

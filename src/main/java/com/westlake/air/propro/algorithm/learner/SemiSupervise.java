@@ -128,10 +128,10 @@ public class SemiSupervise {
         logger.info("将合并打分及定量结果反馈更新到数据库中,总计:" + featureScoresList.size() + "条数据");
         giveDecoyFdr(featureScoresList);
         targetDecoyDistribution(featureScoresList, overviewDO);
-        analyseDataService.removeMultiDecoy(overviewId, featureScoresList, learningParams.getFdr());
+        analyseDataService.removeUselessData(overviewId, featureScoresList, learningParams.getFdr());
         long start = System.currentTimeMillis();
         analyseDataService.updateMulti(overviewDO.getId(), featureScoresList);
-        logger.info("更新数据" + featureScoresList.size() + "条一共用时：" + (System.currentTimeMillis() - start));
+        logger.info("更新数据" + featureScoresList.size() + "条一共用时：" + (System.currentTimeMillis() - start)+"毫秒");
 
         logger.info("最终鉴定肽段数目为:" + count + ",打分反馈更新完毕");
         finalResult.setMatchedPeptideCount(count);

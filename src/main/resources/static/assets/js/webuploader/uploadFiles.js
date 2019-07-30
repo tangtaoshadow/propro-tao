@@ -56,8 +56,8 @@ jQuery(function () {
         threads: 1,
         chunkSize: chunkSize,
         server: uploadUrl,
-        fileNumLimit: 200,  //一次上传的文件总数目,200个,相当于100个Aird实验(包含100个Aird文件和100个JSON文件)
-        fileSizeLimit: 40 * 1024 * 1024 * 1024,    // 40GB
+        fileNumLimit: 500,  //一次上传的文件总数目,200个,相当于100个Aird实验(包含100个Aird文件和100个JSON文件)
+        fileSizeLimit: 500 * 1024 * 1024 * 1024,    // 200GB
         fileSingleSizeLimit: 10 * 1024 * 1024 * 1024    // 2GB
     });
 
