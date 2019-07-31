@@ -29,10 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by James Lu MiaoShan
@@ -458,21 +455,21 @@ public class ExperimentController extends BaseController {
         ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
         PermissionUtil.check(expResult.getModel());
 
-        List<WindowRange> rangs = expResult.getModel().getWindowRanges();
+        List<WindowRange> ranges = expResult.getModel().getWindowRanges();
         ResultDO<JSONObject> resultDO = new ResultDO<>(true);
-
+        //按照mz进行排序
+        ranges.sort(Comparator.comparingDouble(WindowRange::getMz));
         JSONObject res = new JSONObject();
         JSONArray mzStartArray = new JSONArray();
         JSONArray mzRangArray = new JSONArray();
-        for (int i = 0; i < rangs.size(); i++) {
-
-            mzStartArray.add(rangs.get(i).getStart());
-            mzRangArray.add((rangs.get(i).getEnd() - rangs.get(i).getStart()));
+        for (int i = 0; i < ranges.size(); i++) {
+            mzStartArray.add(ranges.get(i).getStart());
+            mzRangArray.add((ranges.get(i).getEnd() - ranges.get(i).getStart()));
         }
         res.put("starts", mzStartArray);
         res.put("rangs", mzRangArray);
-        res.put("min", rangs.get(0).getStart());
-        res.put("max", rangs.get(rangs.size() - 1).getEnd());
+        res.put("min", ranges.get(0).getStart());
+        res.put("max", ranges.get(ranges.size() - 1).getEnd());
         resultDO.setModel(res);
         return resultDO;
     }
