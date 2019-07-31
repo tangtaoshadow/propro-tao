@@ -176,6 +176,8 @@ public class ExperimentController extends BaseController {
                   @RequestParam(value = "name") String name,
                   @RequestParam(value = "type") String type,
                   @RequestParam(value = "iRtLibraryId") String iRtLibraryId,
+                  @RequestParam(value = "libraryId") String libraryId,
+                  @RequestParam(value = "useLibrary",defaultValue = "false") Boolean useLibrary,
                   @RequestParam(value = "slope") Double slope,
                   @RequestParam(value = "intercept") Double intercept,
                   @RequestParam(value = "description") String description,
@@ -344,9 +346,11 @@ public class ExperimentController extends BaseController {
         ProjectDO project = projectService.getById(resultDO.getModel().getProjectId());
         if (project != null) {
             model.addAttribute("iRtLibraryId", project.getIRtLibraryId());
+            model.addAttribute("libraryId", project.getLibraryId());
         }
 
-        model.addAttribute("libraries", getLibraryList(1, true));
+        model.addAttribute("irtLibraries", getLibraryList(1, true));
+        model.addAttribute("libraries", getLibraryList(0, true));
         model.addAttribute("experiment", resultDO.getModel());
         return "experiment/irt";
     }
@@ -354,7 +358,8 @@ public class ExperimentController extends BaseController {
     @RequestMapping(value = "/doirt")
     String doIrt(Model model,
                  @RequestParam(value = "id", required = true) String id,
-                 @RequestParam(value = "iRtLibraryId", required = true) String iRtLibraryId,
+                 @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
+                 @RequestParam(value = "libraryId", required = false) String libraryId,
                  @RequestParam(value = "sigma", required = true, defaultValue = "3.75") Float sigma,
                  @RequestParam(value = "spacing", required = true, defaultValue = "0.01") Float spacing,
                  @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,

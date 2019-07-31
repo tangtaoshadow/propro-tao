@@ -64,12 +64,25 @@
                             </label>
                             <div class="col-10">
                                 <select class="form-control m-input" id="iRtLibraryId" name="iRtLibraryId">
-                                    <option th:each="library:${libraries}" th:value="${library.id}"
-                                            th:text="|${library.name}(${library.id})|"
-                                            th:selected="${iRtLibraryId}==${library.id}?true:false"></option>
+                                    <option th:each="irtLibrary:${irtLibraries}" th:value="${irtLibrary.id}"
+                                            th:text="|${irtLibrary.name}(${irtLibrary.id})|"
+                                            th:selected="${iRtLibraryId}==${irtLibrary.id}?true:false"></option>
                                 </select>
                             </div>
                         </div>
+
+                        <div class="form-group m-form__group row">
+                            <label for="libraryId" class="col-2 col-form-label" th:text="#{label_library}">
+                            </label>
+                            <div class="col-10">
+                                <select class="form-control m-input" id="libraryId" name="libraryId">
+                                    <option th:each="library:${libraries}" th:value="${library.id}"
+                                            th:text="|${library.name}(${library.id})|"
+                                            th:selected="${libraryId}==${library.id}?true:false"></option>
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="form-group m-form__group row">
                             <label for="sigma" class="col-2 col-form-label" th:text="#{label_set_sigma}">
                             </label>
