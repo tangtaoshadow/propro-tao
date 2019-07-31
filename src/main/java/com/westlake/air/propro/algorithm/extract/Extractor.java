@@ -170,7 +170,7 @@ public class Extractor {
         long start = System.currentTimeMillis();
         int count = 0;
         for (SimplePeptide tp : coordinates) {
-            if (count >= 2) {
+            if (count >= 1) {
                 break;
             }
             AnalyseDataDO dataDO = extractForOne(tp, rtMap, extractParams, overviewId);

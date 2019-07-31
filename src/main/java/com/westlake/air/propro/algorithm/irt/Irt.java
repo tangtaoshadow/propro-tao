@@ -172,23 +172,23 @@ public class Irt {
                 continue;
             }
             double groupRt = dataDO.getRt();
-            if (groupRt > maxGroupRt){
+            if (groupRt > maxGroupRt) {
                 maxGroupRt = groupRt;
             }
-            if (groupRt < minGroupRt){
+            if (groupRt < minGroupRt) {
                 minGroupRt = groupRt;
             }
             List<ScoreRtPair> scoreRtPairs = rtNormalizerScorer.score(peptideFeature.getPeakGroupList(), peptideFeature.getNormedLibIntMap(), groupRt);
-            if (scoreRtPairs.size() == 0){
+            if (scoreRtPairs.size() == 0) {
                 continue;
             }
             scoreRtList.add(scoreRtPairs);
             compoundRt.add(groupRt);
         }
 
-        List<Pair<Double,Double>> pairs = simpleFindBestFeature(scoreRtList, compoundRt);
-        double delta = (maxGroupRt - minGroupRt)/30d;
-        List<Pair<Double,Double>> pairsCorrected = chooseReliablePairs(pairs, delta);
+        List<Pair<Double, Double>> pairs = simpleFindBestFeature(scoreRtList, compoundRt);
+        double delta = (maxGroupRt - minGroupRt) / 30d;
+        List<Pair<Double, Double>> pairsCorrected = chooseReliablePairs(pairs, delta);
 
         System.out.println("choose finish ------------------------");
         IrtResult irtResult = new IrtResult();
@@ -196,10 +196,10 @@ public class Irt {
         List<Double[]> selectedList = new ArrayList<>();
         List<Double[]> unselectedList = new ArrayList<>();
         for (int i = 0; i < pairs.size(); i++) {
-            if(pairsCorrected.contains(pairs.get(i))){
-                selectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
-            }else{
-                unselectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
+            if (pairsCorrected.contains(pairs.get(i))) {
+                selectedList.add(new Double[]{pairs.get(i).getLeft(), pairs.get(i).getRight()});
+            } else {
+                unselectedList.add(new Double[]{pairs.get(i).getLeft(), pairs.get(i).getRight()});
             }
         }
         irtResult.setSelectedPairs(selectedList);
@@ -219,9 +219,9 @@ public class Irt {
      * @param rt         get from groupsResult.getModel()
      * @return rt pairs
      */
-    private List<Pair<Double,Double>> simpleFindBestFeature(List<List<ScoreRtPair>> scoresList, List<Double> rt) {
+    private List<Pair<Double, Double>> simpleFindBestFeature(List<List<ScoreRtPair>> scoresList, List<Double> rt) {
 
-        List<Pair<Double,Double>> pairs = new ArrayList<>();
+        List<Pair<Double, Double>> pairs = new ArrayList<>();
 
         for (int i = 0; i < scoresList.size(); i++) {
             List<ScoreRtPair> scores = scoresList.get(i);
@@ -237,26 +237,26 @@ public class Irt {
             if (Constants.ESTIMATE_BEST_PEPTIDES && max < Constants.OVERALL_QUALITY_CUTOFF) {
                 continue;
             }
-            Pair<Double,Double> rtPair = Pair.of(rt.get(i), expRt);
+            Pair<Double, Double> rtPair = Pair.of(rt.get(i), expRt);
             pairs.add(rtPair);
         }
         return pairs;
     }
 
-    private List<Pair<Double,Double>> chooseReliablePairs(List<Pair<Double,Double>> rtPairs, double delta) throws Exception {
+    private List<Pair<Double, Double>> chooseReliablePairs(List<Pair<Double, Double>> rtPairs, double delta) throws Exception {
         SlopeIntercept slopeIntercept = linearFitter.huberFit(rtPairs, delta);
-        TreeMap<Double, Pair<Double,Double>> errorMap = new TreeMap<>();
-        for (Pair<Double, Double> pair: rtPairs){
+        TreeMap<Double, Pair<Double, Double>> errorMap = new TreeMap<>();
+        for (Pair<Double, Double> pair : rtPairs) {
             errorMap.put(Math.abs(pair.getRight() * slopeIntercept.getSlope() + slopeIntercept.getIntercept() - pair.getLeft()), pair);
         }
-        List<Pair<Double,Double>> sortedPairs = new ArrayList<>(errorMap.values());
+        List<Pair<Double, Double>> sortedPairs = new ArrayList<>(errorMap.values());
         int cutLine = 2;
-        for (int i = sortedPairs.size(); i > 2; i--){
-            if (MathUtil.getRsq(sortedPairs.subList(0,i)) >= 0.95){
+        for (int i = sortedPairs.size(); i > 2; i--) {
+            if (MathUtil.getRsq(sortedPairs.subList(0, i)) >= 0.95) {
                 cutLine = i;
                 break;
             }
         }
-        return sortedPairs.subList(0,cutLine);
+        return sortedPairs.subList(0, cutLine);
     }
 }
