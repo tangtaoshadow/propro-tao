@@ -176,8 +176,6 @@ public class ExperimentController extends BaseController {
                   @RequestParam(value = "name") String name,
                   @RequestParam(value = "type") String type,
                   @RequestParam(value = "iRtLibraryId") String iRtLibraryId,
-                  @RequestParam(value = "libraryId") String libraryId,
-                  @RequestParam(value = "useLibrary",defaultValue = "false") Boolean useLibrary,
                   @RequestParam(value = "slope") Double slope,
                   @RequestParam(value = "intercept") Double intercept,
                   @RequestParam(value = "description") String description,
@@ -216,7 +214,7 @@ public class ExperimentController extends BaseController {
         ResultDO result = experimentService.update(experimentDO);
         if (result.isFailed()) {
             model.addAttribute(ERROR_MSG, result.getMsgInfo());
-            return "experiment/create";
+            return "redirect:/experiment/list";
         }
         return "redirect:/experiment/list";
 
