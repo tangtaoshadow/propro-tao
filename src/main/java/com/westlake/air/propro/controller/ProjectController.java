@@ -2,6 +2,7 @@ package com.westlake.air.propro.controller;
 
 import com.westlake.air.propro.component.ChunkUploader;
 import com.westlake.air.propro.config.VMProperties;
+import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.SuccessMsg;
 import com.westlake.air.propro.constants.SuffixConst;
 import com.westlake.air.propro.constants.enums.ResultCode;
@@ -11,6 +12,7 @@ import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.params.ExtractParams;
+import com.westlake.air.propro.domain.params.IrtParams;
 import com.westlake.air.propro.domain.params.WorkflowParams;
 import com.westlake.air.propro.domain.query.ProjectQuery;
 import com.westlake.air.propro.domain.vo.FileBlockVO;
@@ -319,9 +321,9 @@ public class ProjectController extends BaseController {
     String doIrt(Model model,
                  @RequestParam(value = "id", required = true) String id,
                  @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
-                 @RequestParam(value = "sigma", required = true, defaultValue = "3.75") Float sigma,
-                 @RequestParam(value = "spacing", required = true, defaultValue = "0.01") Float spacing,
-                 @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
+                 @RequestParam(value = "sigma", required = true, defaultValue = Constants.DEFAULT_SIGMA_STR) Float sigma,
+                 @RequestParam(value = "spacing", required = true, defaultValue = Constants.DEFAULT_SPACING_STR) Float spacing,
+                 @RequestParam(value = "mzExtractWindow", required = true, defaultValue = Constants.DEFAULT_MZ_EXTRACTION_WINDOW_STR) Float mzExtractWindow,
                  RedirectAttributes redirectAttributes) {
 
         ProjectDO project = projectService.getById(id);
@@ -339,7 +341,11 @@ public class ProjectController extends BaseController {
 
         //支持直接使用标准库进行irt预测,在这里进行库的类型的检测,已进入不同的流程渠道
         LibraryDO lib = libraryService.getById(iRtLibraryId);
-        experimentTask.irt(taskDO, lib, expList, mzExtractWindow, sigmaSpacing);
+        IrtParams irtParams = new IrtParams();
+        irtParams.setLibrary(lib);
+        irtParams.setMzExtractWindow(mzExtractWindow);
+        irtParams.setSigmaSpacing(sigmaSpacing);
+        experimentTask.irt(taskDO, expList, irtParams);
 
         return "redirect:/task/list";
     }
@@ -447,15 +453,15 @@ public class ProjectController extends BaseController {
                      @RequestParam(value = "id", required = true) String id,
                      @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
-                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
-                     @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
+                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = Constants.DEFAULT_RT_EXTRACTION_WINDOW_STR) Float rtExtractWindow,
+                     @RequestParam(value = "mzExtractWindow", required = true, defaultValue = Constants.DEFAULT_MZ_EXTRACTION_WINDOW_STR) Float mzExtractWindow,
                      @RequestParam(value = "note", required = false) String note,
-                     @RequestParam(value = "fdr", required = true, defaultValue = "0.01") Double fdr,
+                     @RequestParam(value = "fdr", required = true, defaultValue = Constants.DEFAULT_FDR_STR) Double fdr,
                      //打分相关的入参
-                     @RequestParam(value = "sigma", required = false, defaultValue = "3.75") Float sigma,
-                     @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
-                     @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.5") Float shapeScoreThreshold,
-                     @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.6") Float shapeWeightScoreThreshold,
+                     @RequestParam(value = "sigma", required = false, defaultValue = Constants.DEFAULT_SIGMA_STR) Float sigma,
+                     @RequestParam(value = "spacing", required = false, defaultValue = Constants.DEFAULT_SPACING_STR) Float spacing,
+                     @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = Constants.DEFAULT_SHAPE_SCORE_THRESHOLD_STR) Float shapeScoreThreshold,
+                     @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = Constants.DEFAULT_SHAPE_WEIGHT_SCORE_THRESHOLD_STR) Float shapeWeightScoreThreshold,
                      HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
 

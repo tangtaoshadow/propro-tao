@@ -21,6 +21,7 @@ import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.SwathIndexDO;
 import com.westlake.air.propro.domain.db.simple.SimplePeptide;
 import com.westlake.air.propro.domain.params.ExtractParams;
+import com.westlake.air.propro.domain.params.IrtParams;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.service.PeptideService;
 import com.westlake.air.propro.service.ScoreService;
@@ -29,6 +30,7 @@ import com.westlake.air.propro.utils.ConvolutionUtil;
 import com.westlake.air.propro.utils.FileUtil;
 import com.westlake.air.propro.utils.MathUtil;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jblas.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,20 +68,18 @@ public class Irt {
      * XIC并且求出iRT
      *
      * @param experimentDO
-     * @param library
-     * @param mzExtractWindow
-     * @param sigmaSpacing
+     * @param irtParams
      * @return
      */
-    public ResultDO<IrtResult> extractAndAlign(ExperimentDO experimentDO, LibraryDO library, Float mzExtractWindow, SigmaSpacing sigmaSpacing) {
+    public ResultDO<IrtResult> extractAndAlign(ExperimentDO experimentDO, IrtParams irtParams) {
         try {
-            List<AnalyseDataDO> dataList = extract(experimentDO, library, mzExtractWindow);
+            List<AnalyseDataDO> dataList = extract(experimentDO, irtParams);
             if (dataList == null) {
                 return ResultDO.buildError(ResultCode.IRT_EXCEPTION);
             }
             ResultDO<IrtResult> resultDO = new ResultDO<>(false);
             try {
-                resultDO = align(dataList, library, sigmaSpacing);
+                resultDO = align(dataList, irtParams.getLibrary(), irtParams.getSigmaSpacing());
             } catch (Exception e) {
                 e.printStackTrace();
                 resultDO.setMsgInfo(e.getMessage());
@@ -96,11 +96,10 @@ public class Irt {
      * XIC iRT校准库的数据
      *
      * @param exp
-     * @param library
-     * @param mzExtractWindow
+     * @param irtParams
      * @return
      */
-    private List<AnalyseDataDO> extract(ExperimentDO exp, LibraryDO library, float mzExtractWindow) {
+    private List<AnalyseDataDO> extract(ExperimentDO exp, IrtParams irtParams) {
 
         ResultDO checkResult = ConvolutionUtil.checkExperiment(exp);
         if (checkResult.isFailed()) {
@@ -116,9 +115,23 @@ public class Irt {
         SwathIndexQuery query = new SwathIndexQuery(exp.getId(), 2);
         List<SwathIndexDO> swathList = swathIndexService.getAll(query);
 
+        LibraryDO library = irtParams.getLibrary();
+        float mzExtractWindow = irtParams.getMzExtractWindow();
+        int selectPoints, step;
+        if (irtParams.isUseLibrary()) {
+            int rangeSize = exp.getWindowRanges().size();
+            selectPoints = Math.min(rangeSize, 50);//获取windowRange Size大小,如果超过50的话则采用采样录取的方式
+            step = rangeSize / selectPoints;
+        } else {
+            selectPoints = swathList.size();
+            step = 1;
+        }
         try {
             raf = new RandomAccessFile(file, "r");
-            for (SwathIndexDO swathIndexDO : swathList) {
+            for (int i = 0; i < selectPoints; i++) {
+                //Step1.按照步长获取SwathList的点位库
+                SwathIndexDO swathIndexDO = swathList.get(i * step);
+
                 //Step2.获取标准库的目标肽段片段的坐标
                 //key为rt
                 TreeMap<Float, MzIntensityPairs> rtMap;
@@ -137,8 +150,10 @@ public class Irt {
 
                 //Step4.提取数据并且存储数据,如果传入的库是标准库,那么使用采样的方式进行数据提取
                 if (library.getType().equals(LibraryDO.TYPE_IRT)) {
+                    //如果使用的是irt校准库进行校准,那么会检索校准库中的所有数据集
                     extractor.extractForIrt(finalList, coordinates, rtMap, null, new ExtractParams(mzExtractWindow, -1f));
                 } else {
+                    //如果是使用标准库进行校准的,那么会按照需要选择的总点数进行抽取选择
                     extractor.extractForIrtWithLib(finalList, coordinates, rtMap, null, new ExtractParams(mzExtractWindow, -1f));
                 }
             }

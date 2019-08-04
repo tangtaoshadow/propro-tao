@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.algorithm.extract.Extractor;
 import com.westlake.air.propro.config.VMProperties;
+import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.constants.enums.ScoreType;
 import com.westlake.air.propro.constants.SuccessMsg;
@@ -15,6 +16,7 @@ import com.westlake.air.propro.domain.bean.irt.IrtResult;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.params.ExtractParams;
+import com.westlake.air.propro.domain.params.IrtParams;
 import com.westlake.air.propro.domain.params.WorkflowParams;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
@@ -111,15 +113,15 @@ public class ExperimentController extends BaseController {
 
     @RequestMapping(value = "/listByExpId")
     String listByExpId(Model model,
-                @RequestParam(value = "expId", required = true) String expId) {
+                       @RequestParam(value = "expId", required = true) String expId) {
 
         ResultDO<ExperimentDO> expResult = experimentService.getById(expId);
-        if(expResult.isFailed()){
+        if (expResult.isFailed()) {
             return "redirect:/experiment/list";
         }
 
         ExperimentDO exp = expResult.getModel();
-        return "redirect:/experiment/list?projectName="+exp.getProjectName();
+        return "redirect:/experiment/list?projectName=" + exp.getProjectName();
     }
 
     @RequestMapping(value = "/create")
@@ -273,17 +275,17 @@ public class ExperimentController extends BaseController {
     String doExtract(Model model,
                      @RequestParam(value = "id", required = true) String id,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
-                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
-                     @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
+                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = Constants.DEFAULT_RT_EXTRACTION_WINDOW_STR) Float rtExtractWindow,
+                     @RequestParam(value = "mzExtractWindow", required = true, defaultValue = Constants.DEFAULT_MZ_EXTRACTION_WINDOW_STR) Float mzExtractWindow,
                      @RequestParam(value = "slope", required = false) Double slope,
                      @RequestParam(value = "intercept", required = false) Double intercept,
                      @RequestParam(value = "note", required = false) String note,
                      //打分相关的入参
-                     @RequestParam(value = "sigma", required = false, defaultValue = "3.75") Float sigma,
-                     @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
-                     @RequestParam(value = "fdr", required = false, defaultValue = "0.01") Double fdr,
-                     @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.5") Float shapeScoreThreshold,
-                     @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.6") Float shapeWeightScoreThreshold,
+                     @RequestParam(value = "sigma", required = false, defaultValue = Constants.DEFAULT_SIGMA_STR) Float sigma,
+                     @RequestParam(value = "spacing", required = false, defaultValue = Constants.DEFAULT_SPACING_STR) Float spacing,
+                     @RequestParam(value = "fdr", required = false, defaultValue = Constants.DEFAULT_FDR_STR) Double fdr,
+                     @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = Constants.DEFAULT_SHAPE_SCORE_THRESHOLD_STR) Float shapeScoreThreshold,
+                     @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = Constants.DEFAULT_SHAPE_WEIGHT_SCORE_THRESHOLD_STR) Float shapeWeightScoreThreshold,
                      @RequestParam(value = "uniqueOnly", required = false, defaultValue = "false") Boolean uniqueOnly,
                      HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
@@ -357,10 +359,11 @@ public class ExperimentController extends BaseController {
     String doIrt(Model model,
                  @RequestParam(value = "id", required = true) String id,
                  @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
+                 @RequestParam(value = "useLibrary", required = true, defaultValue = "false") boolean useLibrary,
                  @RequestParam(value = "libraryId", required = false) String libraryId,
-                 @RequestParam(value = "sigma", required = true, defaultValue = "3.75") Float sigma,
-                 @RequestParam(value = "spacing", required = true, defaultValue = "0.01") Float spacing,
-                 @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
+                 @RequestParam(value = "sigma", required = true, defaultValue = Constants.DEFAULT_SIGMA_STR) Float sigma,
+                 @RequestParam(value = "spacing", required = true, defaultValue = Constants.DEFAULT_SPACING_STR) Float spacing,
+                 @RequestParam(value = "mzExtractWindow", required = true, defaultValue = Constants.DEFAULT_MZ_EXTRACTION_WINDOW_STR) Float mzExtractWindow,
                  RedirectAttributes redirectAttributes) {
 
         ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
@@ -368,45 +371,22 @@ public class ExperimentController extends BaseController {
             return "redirect:/irt/" + id;
         }
         PermissionUtil.check(resultDO.getModel());
-        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName() + ":" + iRtLibraryId + "-Num:1");
+        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName() + ":" + (useLibrary ? libraryId : iRtLibraryId) + "-Num:1");
         taskService.insert(taskDO);
 
         SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);
         List<ExperimentDO> exps = new ArrayList<>();
         exps.add(resultDO.getModel());
 
-        LibraryDO lib = libraryService.getById(iRtLibraryId);
-//        LibraryDO lib = libraryService.getById("5d0848fee0073c6ffc69752d");
-        experimentTask.irt(taskDO, lib, exps, mzExtractWindow, sigmaSpacing);
+        LibraryDO lib = libraryService.getById((useLibrary ? libraryId : iRtLibraryId));
 
-        return "redirect:/task/detail/" + taskDO.getId();
-    }
+        IrtParams irtParams = new IrtParams();
+        irtParams.setMzExtractWindow(mzExtractWindow);
+        irtParams.setSigmaSpacing(sigmaSpacing);
+        irtParams.setUseLibrary(useLibrary);
+        irtParams.setLibrary(lib);
 
-    @RequestMapping(value = "/irtwithlib")
-    String irtWithLib(Model model,
-                      @RequestParam(value = "id", required = true) String id,
-                      @RequestParam(value = "sigma", required = true, defaultValue = "3.75") Float sigma,
-                      @RequestParam(value = "spacing", required = true, defaultValue = "0.01") Float spacing,
-                      @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
-                      RedirectAttributes redirectAttributes) {
-
-        ResultDO<ExperimentDO> resultDO = experimentService.getById(id);
-        if (resultDO.isFailed()) {
-            return "redirect:/irt/" + id;
-        }
-        PermissionUtil.check(resultDO.getModel());
-
-        ProjectDO project = projectService.getById(resultDO.getModel().getProjectId());
-        TaskDO taskDO = new TaskDO(TaskTemplate.IRT, resultDO.getModel().getName() + ":" + project.getLibraryId() + "-Num:1");
-        taskService.insert(taskDO);
-
-        SigmaSpacing sigmaSpacing = new SigmaSpacing(sigma, spacing);
-        List<ExperimentDO> exps = new ArrayList<>();
-        exps.add(resultDO.getModel());
-
-        LibraryDO lib = libraryService.getById(project.getLibraryId());
-//        LibraryDO lib = libraryService.getById("5d0848fee0073c6ffc69752d");
-        experimentTask.irt(taskDO, lib, exps, mzExtractWindow, sigmaSpacing);
+        experimentTask.irt(taskDO, exps, irtParams);
 
         return "redirect:/task/detail/" + taskDO.getId();
     }

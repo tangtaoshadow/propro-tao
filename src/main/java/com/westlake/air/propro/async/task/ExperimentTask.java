@@ -14,6 +14,7 @@ import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.TaskDO;
+import com.westlake.air.propro.domain.params.IrtParams;
 import com.westlake.air.propro.domain.params.WorkflowParams;
 import com.westlake.air.propro.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +94,11 @@ public class ExperimentTask extends BaseTask {
         //如果还没有计算irt,先执行计算irt的步骤
         if (workflowParams.getIRtLibrary() != null) {
             taskService.update(taskDO, "开始提取IRT校准库数据并且计算iRT值");
-            ResultDO<IrtResult> resultDO = irt.extractAndAlign(workflowParams.getExperimentDO(), workflowParams.getIRtLibrary(), workflowParams.getExtractParams().getMzExtractWindow(), workflowParams.getSigmaSpacing());
+            IrtParams irtParams = new IrtParams();
+            irtParams.setLibrary(workflowParams.getIRtLibrary());
+            irtParams.setMzExtractWindow(workflowParams.getExtractParams().getMzExtractWindow());
+            irtParams.setSigmaSpacing(workflowParams.getSigmaSpacing());
+            ResultDO<IrtResult> resultDO = irt.extractAndAlign(workflowParams.getExperimentDO(), irtParams);
             if (resultDO.isFailed()) {
                 taskService.finish(taskDO, TaskStatus.FAILED.getName(), "iRT计算失败:" + resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());
                 return;
@@ -123,12 +128,14 @@ public class ExperimentTask extends BaseTask {
     }
 
     @Async(value = "extractorExecutor")
-    public void irt(TaskDO taskDO, LibraryDO library, List<ExperimentDO> exps, Float mzExtractWindow, SigmaSpacing sigmaSpacing) {
+    public void irt(TaskDO taskDO, List<ExperimentDO> exps, IrtParams irtParams) {
+
+        LibraryDO library = irtParams.getLibrary();
 
         for (ExperimentDO exp : exps) {
             taskService.update(taskDO, "Processing " + exp.getName() + "-" + exp.getId());
 
-            ResultDO<IrtResult> resultDO = irt.extractAndAlign(exp, library, mzExtractWindow, sigmaSpacing);
+            ResultDO<IrtResult> resultDO = irt.extractAndAlign(exp, irtParams);
 
             if (resultDO.isFailed()) {
                 taskService.update(taskDO, "iRT计算失败:" + resultDO.getMsgInfo() + ":" + resultDO.getMsgInfo());

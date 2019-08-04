@@ -1,5 +1,6 @@
 package com.westlake.air.propro.domain.bean.learner;
 
+import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.enums.Classifier;
 import com.westlake.air.propro.constants.enums.ScoreType;
 import lombok.Data;
@@ -16,7 +17,7 @@ public class LearningParams {
 
     Classifier classifier = Classifier.lda;
 
-    double fdr = 0.01d;
+    double fdr = Constants.DEFAULT_FDR;
 
     double trainTestRatio = 1;
 

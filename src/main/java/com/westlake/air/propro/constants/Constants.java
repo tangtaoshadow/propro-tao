@@ -48,8 +48,17 @@ public class Constants {
 
     //Extractor
     public static final String TRAFO_INVERT_MODEL = "LINEAR";
+    public static final double DEFAULT_FDR = 0.01d;
     public static final double DEFAULT_RT_EXTRACTION_WINDOW = 600.0d;
     public static final float DEFAULT_MZ_EXTRACTION_WINDOW = 0.05f;
+
+    public static final String DEFAULT_RT_EXTRACTION_WINDOW_STR = "600";
+    public static final String DEFAULT_MZ_EXTRACTION_WINDOW_STR = "0.05";
+    public static final String DEFAULT_SIGMA_STR = "3.75";
+    public static final String DEFAULT_SPACING_STR = "0.01";
+    public static final String DEFAULT_FDR_STR = "0.01";
+    public static final String DEFAULT_SHAPE_SCORE_THRESHOLD_STR = "0.5";
+    public static final String DEFAULT_SHAPE_WEIGHT_SCORE_THRESHOLD_STR = "0.6";
 
     public static final float DIA_EXTRACT_WINDOW = 0.05f;
     public static final int DIA_NR_ISOTOPES = 4;

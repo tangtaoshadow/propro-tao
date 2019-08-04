@@ -59,6 +59,7 @@
                                        th:value="${experiment?.airdPath}">
                             </div>
                         </div>
+
                         <div class="form-group m-form__group row">
                             <label for="iRtLibraryId" class="col-2 col-form-label" th:text="#{label_irt_library}">
                             </label>
@@ -72,6 +73,16 @@
                         </div>
 
                         <div class="form-group m-form__group row">
+                            <div class="col-2"></div>
+                            <div class="m-checkbox-list col-10">
+                                <label class="m-checkbox">
+                                    <input type="checkbox" id="useLibrary" name="useLibrary" th:checked="${useLibrary}" th:text="#{label_use_library_for_irt}" onchange="changeVisible()">
+                                    <span></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="librarySelectDiv" class="form-group m-form__group row">
                             <label for="libraryId" class="col-2 col-form-label" th:text="#{label_library}">
                             </label>
                             <div class="col-10">
@@ -103,8 +114,7 @@
                             </div>
                         </div>
                         <div class="form-group m-form__group row">
-                            <label for="mzExtractWindow" class="col-2 col-form-label" th:text="#{label_mz_extract_window}">
-                            </label>
+                            <label for="mzExtractWindow" class="col-2 col-form-label" th:text="#{label_mz_extract_window}"></label>
                             <div class="col-10">
                                 <input type="text" class="form-control m-input" id="mzExtractWindow"
                                        name="mzExtractWindow"
@@ -126,5 +136,29 @@
 
 </div>
 </body>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+
+        var useLibrary =  document.getElementById("useLibrary").checked;
+        $librarySelectDiv = $('#librarySelectDiv');
+        $selectPointsCount = $('#selectPointsCountDiv');
+
+        $(document).ready(function () {
+            changeVisible();
+        });
+
+        function changeVisible(){
+            useLibrary =  document.getElementById("useLibrary").checked;
+            if (useLibrary){
+                $librarySelectDiv.show();
+                $selectPointsCount.show();
+            }else{
+                $librarySelectDiv.hide();
+                $selectPointsCount.hide();
+            }
+        }
+
+    </script>
+</th:block>
 <!-- end::Body -->
 </html>
