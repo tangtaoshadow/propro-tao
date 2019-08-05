@@ -4,6 +4,7 @@ import com.westlake.air.propro.domain.bean.analyse.AnalyseDataRT;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
+import com.westlake.air.propro.domain.db.simple.PeptideIntensity;
 import com.westlake.air.propro.domain.db.simple.PeptideScores;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.utils.AnalyseUtil;
@@ -85,7 +86,12 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
         return mongoTemplate.find(query, AnalyseDataDO.class, CollectionName);
     }
 
-    public List<PeptideScores> getSimpleScoresByOverviewId(String overviewId){
+    public List<PeptideIntensity> getPeptideIntensityByOverviewId(String overviewId) {
+        Query query = new Query(where("overviewId").is(overviewId));
+        return mongoTemplate.find(query, PeptideIntensity.class, CollectionName);
+    }
+
+    public List<PeptideScores> getPeptideScoresByOverviewId(String overviewId){
         AnalyseDataQuery query = new AnalyseDataQuery(overviewId);
         return mongoTemplate.find(buildQueryWithoutPage(query), PeptideScores.class, CollectionName);
     }

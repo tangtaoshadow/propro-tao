@@ -330,7 +330,7 @@ public class PeptideServiceImpl implements PeptideService {
                 targetList.add(bestTarget);
             }
             if (mzDistance >= 0.0002f && bestTarget != null) {
-                System.out.println("Coordinate: " + bestTarget.getPeptideRef() + " " + mzDistance);
+                logger.info("Coordinate: " + bestTarget.getPeptideRef() + " " + mzDistance);
             }
         }
     }

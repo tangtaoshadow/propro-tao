@@ -59,7 +59,7 @@ public class MsmsParser extends BaseLibraryParser {
                 logger.error(resultDOTmp.getMsgInfo());
                 return ResultDO.buildError(ResultCode.DELETE_ERROR);
             }
-            taskDO.addLog("删除旧数据完毕,开始文件解析");
+            taskDO.addLog("Delete the old data already, starting parsing file, 删除旧数据完毕,开始文件解析");
             taskService.update(taskDO);
 
             InputStreamReader isr = new InputStreamReader(in, StandardCharsets.UTF_8);

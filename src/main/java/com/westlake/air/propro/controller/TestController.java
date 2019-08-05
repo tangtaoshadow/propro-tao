@@ -268,19 +268,19 @@ public class TestController extends BaseController {
         }
 
         int dimension = 3;
-        System.out.println("file: " + fileTargetMap.size() + " + " + fileDecoyMap.size());
-        System.out.println("propro: " + (proproMatchTarget.size() + proproOnlyTarget.size()) + " + " + (proproMatchDecoy.size() + proproOnlyDecoy.size()));
-        System.out.println("match: " + proproMatchTarget.size() + " + " + proproMatchDecoy.size());
-        System.out.println("propro only: " + proproOnlyTarget.size() + " + " + proproOnlyDecoy.size());
-        System.out.println("file only: " + fileOnlyTarget.size() + " + " + fileOnlyDecoy.size());
-        System.out.println("match file target:   " + JSON.toJSON(getHitMap(fileMatchTarget, dimension)));
-        System.out.println("match propro target: " + JSON.toJSON(getHitMap(proproMatchTarget, dimension)));
-        System.out.println("match file decoy:    " + JSON.toJSON(getHitMap(fileMatchDecoy, dimension)));
-        System.out.println("match propro decoy:  " + JSON.toJSON(getHitMap(proproMatchDecoy, dimension)));
-        System.out.println("only file target:    " + JSON.toJSON(getHitMap(fileOnlyTarget, dimension)));
-        System.out.println("only file decoy:     " + JSON.toJSON(getHitMap(fileOnlyDecoy, dimension)));
-        System.out.println("only propro target:  " + JSON.toJSON(getHitMap(proproOnlyTarget, dimension)));
-        System.out.println("only propro decoy:   " + JSON.toJSON(getHitMap(proproOnlyDecoy, dimension)));
+        logger.info("file: " + fileTargetMap.size() + " + " + fileDecoyMap.size());
+        logger.info("propro: " + (proproMatchTarget.size() + proproOnlyTarget.size()) + " + " + (proproMatchDecoy.size() + proproOnlyDecoy.size()));
+        logger.info("match: " + proproMatchTarget.size() + " + " + proproMatchDecoy.size());
+        logger.info("propro only: " + proproOnlyTarget.size() + " + " + proproOnlyDecoy.size());
+        logger.info("file only: " + fileOnlyTarget.size() + " + " + fileOnlyDecoy.size());
+        logger.info("match file target:   " + JSON.toJSON(getHitMap(fileMatchTarget, dimension)));
+        logger.info("match propro target: " + JSON.toJSON(getHitMap(proproMatchTarget, dimension)));
+        logger.info("match file decoy:    " + JSON.toJSON(getHitMap(fileMatchDecoy, dimension)));
+        logger.info("match propro decoy:  " + JSON.toJSON(getHitMap(proproMatchDecoy, dimension)));
+        logger.info("only file target:    " + JSON.toJSON(getHitMap(fileOnlyTarget, dimension)));
+        logger.info("only file decoy:     " + JSON.toJSON(getHitMap(fileOnlyDecoy, dimension)));
+        logger.info("only propro target:  " + JSON.toJSON(getHitMap(proproOnlyTarget, dimension)));
+        logger.info("only propro decoy:   " + JSON.toJSON(getHitMap(proproOnlyDecoy, dimension)));
 //        printScoreDistribution(analyseOverviewIdList, proproMatchTarget, ScoreType.XcorrShape.getTypeName(), 0);
 //        printScoreDistribution(analyseOverviewIdList, proproMatchTarget, ScoreType.XcorrShape.getTypeName(), 0);
         return null;

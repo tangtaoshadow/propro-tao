@@ -82,7 +82,7 @@ public abstract class AbstractClassifier {
         TrainPeaks trainPeaks = new TrainPeaks();
         trainPeaks.setBestTargets(bestTargetPeaks);
         trainPeaks.setTopDecoys(topDecoyPeaks);
-        System.out.println(topTargetPeaks.size() + " " + topDecoyPeaks.size() + " " + cutoffNew + " " + bestTargetPeaks.size());
+        logger.info(topTargetPeaks.size() + " " + topDecoyPeaks.size() + " " + cutoffNew + " " + bestTargetPeaks.size());
         return trainPeaks;
     }
 }

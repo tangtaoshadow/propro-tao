@@ -14,6 +14,7 @@ import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.ProjectDO;
 import com.westlake.air.propro.domain.db.SwathIndexDO;
 import com.westlake.air.propro.domain.db.TaskDO;
+import com.westlake.air.propro.domain.db.simple.SimpleExperiment;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.service.*;
@@ -86,6 +87,11 @@ public class ExperimentServiceImpl implements ExperimentService {
         ExperimentQuery query = new ExperimentQuery();
         query.setProjectId(projectId);
         return experimentDAO.getAll(query);
+    }
+
+    @Override
+    public List<SimpleExperiment> getAllSimpleExperimentByProjectId(String projectId) {
+        return experimentDAO.getSimpleExperimentByProjectId(projectId);
     }
 
     @Override

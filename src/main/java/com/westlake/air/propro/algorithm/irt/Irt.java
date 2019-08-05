@@ -126,6 +126,7 @@ public class Irt {
             selectPoints = swathList.size();
             step = 1;
         }
+        logger.info("Irt Selected Points Count:" + selectPoints + "; Step:" + step);
         try {
             raf = new RandomAccessFile(file, "r");
             for (int i = 0; i < selectPoints; i++) {
@@ -133,13 +134,13 @@ public class Irt {
                 SwathIndexDO swathIndexDO = swathList.get(i * step);
 
                 //Step2.获取标准库的目标肽段片段的坐标
-                //key为rt
-                TreeMap<Float, MzIntensityPairs> rtMap;
+                TreeMap<Float, MzIntensityPairs> rtMap; //key为rt
                 List<SimplePeptide> coordinates = peptideService.buildMS2Coordinates(library, SlopeIntercept.create(), -1, swathIndexDO.getRange(), null, exp.getType(), false, true);
                 if (coordinates.size() == 0) {
                     logger.warn("No iRT Coordinates Found,Rang:" + swathIndexDO.getRange().getStart() + ":" + swathIndexDO.getRange().getEnd());
                     continue;
                 }
+
                 //Step3.提取指定原始谱图
                 try {
                     rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndexDO, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
@@ -205,7 +206,7 @@ public class Irt {
         double delta = (maxGroupRt - minGroupRt) / 30d;
         List<Pair<Double, Double>> pairsCorrected = chooseReliablePairs(pairs, delta);
 
-        System.out.println("choose finish ------------------------");
+        logger.info("choose finish ------------------------");
         IrtResult irtResult = new IrtResult();
 
         List<Double[]> selectedList = new ArrayList<>();

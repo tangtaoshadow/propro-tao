@@ -261,7 +261,7 @@ public class ScoreServiceImpl implements ScoreService {
             }
         }
         if (rsq < minRsq) {
-            System.out.println("RTNormalizer: unable to perform outlier detection.");
+            logger.error("RTNormalizer: unable to perform outlier detection.");
             return null;
         } else {
             return pairs;

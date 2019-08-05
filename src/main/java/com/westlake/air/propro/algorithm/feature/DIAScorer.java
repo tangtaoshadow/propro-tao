@@ -333,33 +333,4 @@ public class DIAScorer {
         }
         return seriesScore;
     }
-
-//    @Test
-//    public void test(){
-//        System.out.println(1<<2);
-//        System.out.println(Math.ceil(Math.log(2d)));
-//        System.out.println(FastMath.log(2,2));
-//        List<Double[]> distributionCHNOSList = new ArrayList<>();
-//        distributionCHNOSList.add(new Double[]{0.9893, 0.0107});
-//        distributionCHNOSList.add(new Double[]{0.999885, 0.000115});
-//        distributionCHNOSList.add(new Double[]{0.99632, 0.00368});
-//        distributionCHNOSList.add(new Double[]{0.99757, 0.00038, 0.00205});
-//        distributionCHNOSList.add(new Double[]{0.9493,0.0076, 0.0429, 0d, 0.0002});
-//
-//        List<List<Double[]>> totalResultList = new ArrayList<>();
-//        for(Double[] distribution: distributionCHNOSList){
-//            List<Double[]> resultList = new ArrayList<>();
-//            resultList.add(distribution);
-//            for(int i=1; i<11; i++){
-//                resultList.add(convolveSquare(Arrays.asList(resultList.get(i-1)), Constants.DIA_NR_ISOTOPES + 1));
-//            }
-//            totalResultList.add(resultList);
-//        }
-//        for(List<Double[]> elementResultList: totalResultList){
-//            for(Double[] result: elementResultList){
-//                System.out.println(JSON.toJSON(result));
-//            }
-//        }
-//        System.out.println("finish.");
-//    }
 }

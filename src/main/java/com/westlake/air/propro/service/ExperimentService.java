@@ -3,6 +3,7 @@ package com.westlake.air.propro.service;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.experiment.ExpFileSize;
 import com.westlake.air.propro.domain.db.*;
+import com.westlake.air.propro.domain.db.simple.SimpleExperiment;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 
 import java.util.HashMap;
@@ -21,6 +22,8 @@ public interface ExperimentService {
     List<ExperimentDO> getAll(ExperimentQuery query);
 
     List<ExperimentDO> getAllByProjectId(String projectId);
+
+    List<SimpleExperiment> getAllSimpleExperimentByProjectId(String projectId);
 
     List<ExperimentDO> getAllByProjectName(String projectName);
 

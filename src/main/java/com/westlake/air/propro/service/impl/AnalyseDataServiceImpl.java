@@ -10,6 +10,7 @@ import com.westlake.air.propro.domain.bean.analyse.AnalyseDataRT;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
+import com.westlake.air.propro.domain.db.simple.PeptideIntensity;
 import com.westlake.air.propro.domain.db.simple.PeptideScores;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.service.AnalyseDataService;
@@ -46,8 +47,13 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
     }
 
     @Override
+    public List<PeptideIntensity> getPeptideIntensityByOverviewId(String overviewId) {
+        return analyseDataDAO.getPeptideIntensityByOverviewId(overviewId);
+    }
+
+    @Override
     public List<PeptideScores> getSimpleScoresByOverviewId(String overviewId) {
-        return analyseDataDAO.getSimpleScoresByOverviewId(overviewId);
+        return analyseDataDAO.getPeptideScoresByOverviewId(overviewId);
     }
 
     @Override

@@ -280,7 +280,7 @@ public class ElutionScorer {
             return optimizer.getBestFitParameters();
         } catch (SolverException exception) {
             exception.printStackTrace();
-            System.out.println("LevenbergMarquardt SolverException.");
+            logger.error("LevenbergMarquardt SolverException.");
             return null;
         }
     }

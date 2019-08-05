@@ -160,22 +160,4 @@ public class ElementsDAO {
         element.setAverageWeight(averageWeight);
 
     }
-
-    /**
-     * check if the database file is right
-     */
-    private void check() {
-        //check if all the isotopes' abundance summary is 100
-        for (Element element : elementList) {
-            List<String> isotopes = element.getIsotopes();
-            double count = 0;
-            for (String isotope : isotopes) {
-                String[] isotopeArray = isotope.split(":");
-                count += Double.parseDouble(isotopeArray[0]);
-            }
-            if (count != 100) {
-                System.out.println("同位素分布不完整,得出的分布总和为:" + count + ";元素名称为:" + element.getName());
-            }
-        }
-    }
 }

@@ -27,14 +27,10 @@ public class TestScore {
 
     public double getSlope(List<Double> libIntList, List<Double> expIntList){
         double slope = MathUtil.sum(expIntList) / MathUtil.sum(libIntList);
-//        double loss = getLoss(libIntList, expIntList, slope);
         double lastSlope = Double.MAX_VALUE;
-//        System.out.println("Slope: "+slope+", loss: " + loss);
         while (Math.abs(slope - lastSlope) >= slopeThreshold) {
             lastSlope = slope;
             slope = updateSlope(libIntList, expIntList, slope);
-//            loss = getLoss(libIntList, expIntList, slope);
-//            System.out.println("Slope: "+slope+", loss: " + loss);
         }
         return slope;
     }
@@ -85,27 +81,4 @@ public class TestScore {
         slope -= Math.random() * gradient * slopeStep;
         return slope;
     }
-
-//    @Test
-//    public void test(){
-//        List<Double> expList = new ArrayList<>();
-//        expList.add(0.1d);expList.add(0.2d);expList.add(0.3d);expList.add(0.4d);
-//        List<Double> libList = new ArrayList<>();
-//        libList.add(0.05d);libList.add(0.1d);libList.add(0.15d);libList.add(0.7d);
-//        System.out.println("Score: " + getIntensityScore(libList, expList));
-//
-//        PeakGroup peakGroup = new PeakGroup();
-//        HashMap<String, Double> ionIntMap = new HashMap<>();
-//        HashMap<String, Double> libIntMap = new HashMap<>();
-//        for (Integer i=0; i<libList.size(); i++){
-//            ionIntMap.put(i.toString(), expList.get(i));
-//            libIntMap.put(i.toString(), libList.get(i));
-//        }
-//        peakGroup.setIonIntensity(ionIntMap);
-//        peakGroup.setPeakGroupInt(1);
-//        FeatureScores featureScores = new FeatureScores();
-//        LibraryScorer libraryScorer = new LibraryScorer();
-//        libraryScorer.calculateLibraryScores(peakGroup, libIntMap, featureScores, null);
-//        System.out.println("finish");
-//    }
 }

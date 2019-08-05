@@ -16,6 +16,8 @@ public interface AnalyseOverviewService {
 
     List<AnalyseOverviewDO> getAllByExpId(String expId);
 
+    AnalyseOverviewDO getFirstAnalyseOverviewByExpId(String expId);
+
     Long count(AnalyseOverviewQuery query);
 
     ResultDO<List<AnalyseOverviewDO>> getList(AnalyseOverviewQuery targetQuery);

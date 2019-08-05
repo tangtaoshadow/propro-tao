@@ -5,12 +5,15 @@ import com.westlake.air.propro.config.VMProperties;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.SuccessMsg;
 import com.westlake.air.propro.constants.SuffixConst;
+import com.westlake.air.propro.constants.SymbolConst;
 import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.constants.enums.ScoreType;
 import com.westlake.air.propro.constants.enums.TaskTemplate;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.db.*;
+import com.westlake.air.propro.domain.db.simple.PeptideIntensity;
+import com.westlake.air.propro.domain.db.simple.SimpleExperiment;
 import com.westlake.air.propro.domain.params.ExtractParams;
 import com.westlake.air.propro.domain.params.IrtParams;
 import com.westlake.air.propro.domain.params.WorkflowParams;
@@ -30,11 +33,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.FormParam;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -697,87 +700,71 @@ public class ProjectController extends BaseController {
     }
 
     @RequestMapping(value = "/doWriteToFile", method = RequestMethod.POST)
-    String doWriteToFile(Model model,
+    void doWriteToFile(Model model,
                          @RequestParam(value = "projectId", required = true) String projectId,
-                         @RequestParam(value = "pathName", required = true) String pathName,
-                         @RequestParam(value = "outputAllPeptides", required = false, defaultValue = "false") Boolean outputAllPeptides,
                          HttpServletRequest request,
+                         HttpServletResponse response,
                          RedirectAttributes redirectAttributes) {
 
         ProjectDO projectDO = projectService.getById(projectId);
         PermissionUtil.check(projectDO);
 
-        List<ExperimentDO> experimentDOList = experimentService.getAllByProjectId(projectId);
-        HashMap<String, HashMap<String, String>> intensityMap = new HashMap<>();
-        HashMap<String, String> pepToProt = new HashMap<>();
-        if (outputAllPeptides) {
-            //取第一份分析数据
-            List<PeptideDO> peptideDOList = peptideService.getAllByLibraryId(analyseOverviewService.getAllByExpId(experimentDOList.get(0).getId()).get(0).getLibraryId());
-            for (PeptideDO peptideDO : peptideDOList) {
-                intensityMap.put(peptideDO.getPeptideRef(), new HashMap<>());
-                pepToProt.put(peptideDO.getPeptideRef(), peptideDO.getProteinName());
-            }
-            for (ExperimentDO experimentDO : experimentDOList) {
-                String checkState = request.getParameter(experimentDO.getId());
-                if (checkState != null && checkState.equals("on")) {
-                    List<AnalyseDataDO> analyseDataDOList = analyseDataService.getAllByOverviewId(analyseOverviewService.getAllByExpId(experimentDO.getId()).get(0).getId());
-                    for (AnalyseDataDO analyseDataDO : analyseDataDOList) {
-                        if (analyseDataDO.getIsDecoy()) {
-                            continue;
-                        }
-                        if (analyseDataDO.getIdentifiedStatus() == AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS) {
-                            intensityMap.get(analyseDataDO.getPeptideRef()).put(experimentDO.getName(), analyseDataDO.getIntensitySum().toString());
-                        } else {
-                            intensityMap.get(analyseDataDO.getPeptideRef()).put(experimentDO.getName(), "x_" + analyseDataDO.getIntensitySum().intValue());
-                        }
-                    }
+        List<SimpleExperiment> experimentList = experimentService.getAllSimpleExperimentByProjectId(projectId);
+        HashMap<String, HashMap<String, String>> intensityMap = new HashMap<>();//key为PeptideRef, value为另外一个Map,map的key为ExperimentName,value为intensity值
+        HashMap<String, String> pepToProt = new HashMap<>();//key为PeptideRef,value为ProteinName
+
+        for (SimpleExperiment simpleExp : experimentList) {
+            String checkState = request.getParameter(simpleExp.getId());
+            if (checkState != null && checkState.equals("on")) {
+                //取每一个实验的第一个分析结果进行分析
+                AnalyseOverviewDO analyseOverview = analyseOverviewService.getFirstAnalyseOverviewByExpId(simpleExp.getId());
+                if(analyseOverview == null){
+                    continue;
                 }
-            }
-        } else {
-            for (ExperimentDO experimentDO : experimentDOList) {
-                String checkState = request.getParameter(experimentDO.getId());
-                if (checkState != null && checkState.equals("on")) {
-                    List<AnalyseDataDO> analyseDataDOList = analyseDataService.getAllByOverviewId(analyseOverviewService.getAllByExpId(experimentDO.getId()).get(0).getId());
-                    for (AnalyseDataDO analyseDataDO : analyseDataDOList) {
-                        if (analyseDataDO.getIdentifiedStatus() == AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS) {
-                            if (intensityMap.containsKey(analyseDataDO.getPeptideRef())) {
-                                intensityMap.get(analyseDataDO.getPeptideRef()).put(experimentDO.getName(), analyseDataDO.getIntensitySum().toString());
-                            } else {
-                                HashMap<String, String> map = new HashMap<>();
-                                map.put(experimentDO.getName(), analyseDataDO.getIntensitySum().toString());
-                                intensityMap.put(analyseDataDO.getPeptideRef(), map);
-                                pepToProt.put(analyseDataDO.getPeptideRef(), analyseDataDO.getProteinName());
-                            }
-                        }
+                List<PeptideIntensity> peptideIntensityList = analyseDataService.getPeptideIntensityByOverviewId(analyseOverview.getId());
+                for (PeptideIntensity peptideIntensity : peptideIntensityList) {
+                    if (intensityMap.containsKey(peptideIntensity.getPeptideRef())) {
+                        intensityMap.get(peptideIntensity.getPeptideRef()).put(simpleExp.getName(), peptideIntensity.getIntensitySum().toString());
+                    } else {
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put(simpleExp.getName(), peptideIntensity.getIntensitySum().toString());
+                        intensityMap.put(peptideIntensity.getPeptideRef(), map);
+                        pepToProt.put(peptideIntensity.getPeptideRef(), peptideIntensity.getProteinName());
                     }
                 }
             }
         }
 
         try {
-            File file = new File(pathName);
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
-            writer.append("ProteinName").append("\t").append("PeptideRef");
-            for (ExperimentDO experimentDO : experimentDOList) {
-                writer.append("\t").append(experimentDO.getName());
+            OutputStream os = response.getOutputStream();
+            StringBuffer sb = new StringBuffer();
+
+            sb.append("ProteinName").append(SymbolConst.TAB).append("PeptideRef");
+            for (SimpleExperiment simpleExperiment : experimentList) {
+                sb.append(SymbolConst.TAB).append(simpleExperiment.getName());
             }
-            writer.append("\r");
+            sb.append(SymbolConst.RETURN);
             for (String peptideRef : intensityMap.keySet()) {
-                writer.append(pepToProt.get(peptideRef)).append("\t").append(peptideRef);
-                for (ExperimentDO experimentDO : experimentDOList) {
-                    if (intensityMap.get(peptideRef).containsKey(experimentDO.getName())) {
-                        writer.append("\t").append(intensityMap.get(peptideRef).get(experimentDO.getName()));
+                sb.append(pepToProt.get(peptideRef)).append(SymbolConst.TAB).append(peptideRef);
+                for (SimpleExperiment simpleExperiment : experimentList) {
+                    if (intensityMap.get(peptideRef).containsKey(simpleExperiment.getName())) {
+                        sb.append(SymbolConst.TAB).append(intensityMap.get(peptideRef).get(simpleExperiment.getName()));
                     } else {
-                        writer.append("\t");
+                        sb.append(SymbolConst.TAB);
                     }
                 }
-                writer.append("\r");
+                sb.append(SymbolConst.RETURN);
             }
-            writer.close();
+
+            response.setHeader("content-type", "application/octet-stream");
+            response.setContentType("application/octet-stream");
+            response.setCharacterEncoding("gbk");
+            response.setHeader("Cache-Control","max-age=60");
+            response.setHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode(projectDO.getName()+".tsv", "gbk"));
+            os.write(sb.toString().getBytes("gbk"));
+            os.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return "redirect:/project/list";
     }
 }

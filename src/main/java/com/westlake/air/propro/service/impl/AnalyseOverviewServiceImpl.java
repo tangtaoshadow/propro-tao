@@ -39,6 +39,11 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
     }
 
     @Override
+    public AnalyseOverviewDO getFirstAnalyseOverviewByExpId(String expId) {
+        return analyseOverviewDAO.getFirstByExperimentId(expId);
+    }
+
+    @Override
     public Long count(AnalyseOverviewQuery query) {
         return analyseOverviewDAO.count(query);
     }

@@ -27,7 +27,7 @@ import java.util.*;
  */
 @Controller
 @RequestMapping("patch")
-public class PatchController {
+public class PatchController extends BaseController{
 
     @Autowired
     LibraryService libraryService;
@@ -65,7 +65,7 @@ public class PatchController {
         }
 
         libraryService.countAndUpdateForLibrary(toLibraryDO);
-        System.out.println("Still remain: " + JSON.toJSON(remainPep));
+        logger.info("Still remain: " + JSON.toJSON(remainPep));
         return null;
     }
 

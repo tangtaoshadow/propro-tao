@@ -46,9 +46,9 @@ public class ResultCompareServiceImpl implements ResultCompareService {
 //        HashMap<String, HashMap<String,Double>> fileCoverageMap = getProjectCoverageMap(filePPMap, libPPMap);
 //        HashMap<String, HashMap<String,Double>> proproCoverageMap = getProjectCoverageMap(proproPPMap, libPPMap);
         for (String expName: filePPMap.keySet()){
-            System.out.println(expName + " ----------------------");
-            System.out.println("File : " + getCoverage(filePPMap.get(expName), libPPMap));
-            System.out.println("Propro: "  + getCoverage(proproPPMap.get(expName), libPPMap));
+            logger.info(expName + " ----------------------");
+            logger.info("File : " + getCoverage(filePPMap.get(expName), libPPMap));
+            logger.info("Propro: "  + getCoverage(proproPPMap.get(expName), libPPMap));
         }
     }
 
@@ -56,39 +56,39 @@ public class ResultCompareServiceImpl implements ResultCompareService {
     public void compareMatrixReplicate(String projectId, String filePath, String expIdA, String expIdB, int overviewIndex, boolean isUnique) {
         String expNameA = experimentService.getById(expIdA).getModel().getName();
         String expNameB = experimentService.getById(expIdB).getModel().getName();
-        System.out.println(expNameA + " & " + expNameB + " ----------------------------");
+        logger.info(expNameA + " & " + expNameB + " ----------------------------");
         HashMap<String, HashSet<String>> matPepSetMap = getMatrixFilePepMap(projectId, filePath);
         HashSet<String> aFilePepSet = matPepSetMap.get(expNameA);
         HashSet<String> bFilePepSet = matPepSetMap.get(expNameB);
-        System.out.println("FileA Pep: " + aFilePepSet.size());
-        System.out.println("FileB Pep: " + bFilePepSet.size());
-        System.out.println("File Pep Intersection: " + getIntersectionCount(aFilePepSet, bFilePepSet));
+        logger.info("FileA Pep: " + aFilePepSet.size());
+        logger.info("FileB Pep: " + bFilePepSet.size());
+        logger.info("File Pep Intersection: " + getIntersectionCount(aFilePepSet, bFilePepSet));
 
         HashMap<String, HashSet<String>> matProtSetMap = getMatrixFileProtMap(projectId, filePath, isUnique);
         HashSet<String> aFileProtSet = matProtSetMap.get(expNameA);
         HashSet<String> bFileProtSet = matProtSetMap.get(expNameB);
-        System.out.println("FileA Prot: " + aFileProtSet.size());
-        System.out.println("FileB Prot: " + bFileProtSet.size());
-        System.out.println("File Prot Intersection: " + getIntersectionCount(aFileProtSet, bFileProtSet));
+        logger.info("FileA Prot: " + aFileProtSet.size());
+        logger.info("FileB Prot: " + bFileProtSet.size());
+        logger.info("File Prot Intersection: " + getIntersectionCount(aFileProtSet, bFileProtSet));
 
         AnalyseOverviewDO aAnalyseOverviewDO = analyseOverviewService.getAllByExpId(expIdA).get(overviewIndex);
         AnalyseOverviewDO bAnalyseOverviewDO = analyseOverviewService.getAllByExpId(expIdB).get(overviewIndex);
         HashSet<String> aProproPepSet = getProproPeptideRefs(aAnalyseOverviewDO.getId());
         HashSet<String> bProproPepSet = getProproPeptideRefs(bAnalyseOverviewDO.getId());
-        System.out.println("ProproA Pep: " + aProproPepSet.size());
-        System.out.println("ProproB Pep: " + bProproPepSet.size());
-        System.out.println("Propro Pep Intersection: " + getIntersectionCount(aProproPepSet, bProproPepSet));
+        logger.info("ProproA Pep: " + aProproPepSet.size());
+        logger.info("ProproB Pep: " + bProproPepSet.size());
+        logger.info("Propro Pep Intersection: " + getIntersectionCount(aProproPepSet, bProproPepSet));
 
         HashSet<String> aProproProtSet = getProproProteins(aAnalyseOverviewDO.getId(), isUnique);
         HashSet<String> bProproProtSet = getProproProteins(bAnalyseOverviewDO.getId(), isUnique);
-        System.out.println("ProproA Prot: " + aProproProtSet.size());
-        System.out.println("ProproB Prot: " + bProproProtSet.size());
-        System.out.println("Propro Prot Intersection: " + getIntersectionCount(aProproProtSet, bProproProtSet));
+        logger.info("ProproA Prot: " + aProproProtSet.size());
+        logger.info("ProproB Prot: " + bProproProtSet.size());
+        logger.info("Propro Prot Intersection: " + getIntersectionCount(aProproProtSet, bProproProtSet));
 
-        System.out.println("A Pep Intersection: " + getIntersectionCount(aFilePepSet, aProproPepSet));
-        System.out.println("A Prot Intersection: " + getIntersectionCount(aFileProtSet, aProproProtSet));
-        System.out.println("B Pep Intersection: " + getIntersectionCount(bFilePepSet, bProproPepSet));
-        System.out.println("B Prot Intersection: " + getIntersectionCount(bFileProtSet, bProproProtSet));
+        logger.info("A Pep Intersection: " + getIntersectionCount(aFilePepSet, aProproPepSet));
+        logger.info("A Prot Intersection: " + getIntersectionCount(aFileProtSet, aProproProtSet));
+        logger.info("B Pep Intersection: " + getIntersectionCount(bFilePepSet, bProproPepSet));
+        logger.info("B Prot Intersection: " + getIntersectionCount(bFileProtSet, bProproProtSet));
     }
 
     @Override
@@ -104,13 +104,13 @@ public class ResultCompareServiceImpl implements ResultCompareService {
             HashSet<String> proproPepSet = getProproPeptideRefs(analyseOverviewDO.getId());
             HashSet<String> proproProtSet = getProproProteins(analyseOverviewDO.getId(), isUnique);
 
-            System.out.println(experimentDO.getName() + " ------------------------------");
-            System.out.println("Propro Pep: " + proproPepSet.size());
-            System.out.println("File Pep: " + filePepSet.size());
-            System.out.println("Intersection Pep: " + getIntersectionCount(filePepSet, proproPepSet));
-            System.out.println("Propro Prot: " + proproProtSet.size());
-            System.out.println("File Prot: " + fileProtSet.size());
-            System.out.println("Intersection Prot: " + getIntersectionCount(fileProtSet, proproProtSet));
+            logger.info(experimentDO.getName() + " ------------------------------");
+            logger.info("Propro Pep: " + proproPepSet.size());
+            logger.info("File Pep: " + filePepSet.size());
+            logger.info("Intersection Pep: " + getIntersectionCount(filePepSet, proproPepSet));
+            logger.info("Propro Prot: " + proproProtSet.size());
+            logger.info("File Prot: " + fileProtSet.size());
+            logger.info("Intersection Prot: " + getIntersectionCount(fileProtSet, proproProtSet));
         }
 
     }
@@ -132,9 +132,9 @@ public class ResultCompareServiceImpl implements ResultCompareService {
                 fileLightMap.put(pepRef, filePepFdrRtMap.get(pepRef).getRight());
             }
         }
-        System.out.println("File light peptide count: " + fileLight);
-        System.out.println("File heavy peptide count: " + fileHeavy);
-        System.out.println("Intersection File: " + getIntersectionCount(new HashSet<>(fileLightMap.keySet()), new HashSet<>(fileHeavyMap.keySet())));
+        logger.info("File light peptide count: " + fileLight);
+        logger.info("File heavy peptide count: " + fileHeavy);
+        logger.info("Intersection File: " + getIntersectionCount(new HashSet<>(fileLightMap.keySet()), new HashSet<>(fileHeavyMap.keySet())));
 
         HashMap<String, Pair<Double,Double>> proproPepFdrRtMap = getProproPepFdrRtMap(analyseOverviewId);
 
@@ -150,64 +150,64 @@ public class ResultCompareServiceImpl implements ResultCompareService {
                 proproLightMap.put(pepRef, proproPepFdrRtMap.get(pepRef).getRight());
             }
         }
-        System.out.println("Propro light peptide count: " + proproLight);
-        System.out.println("Propro heavy peptide count: " + proproHeavy);
-        System.out.println("Intersection Propro: " + getIntersectionCount(new HashSet<>(proproLightMap.keySet()), new HashSet<>(proproHeavyMap.keySet())));
-        System.out.println("Intersection Light: " + getIntersectionCount(new HashSet<>(proproLightMap.keySet()), new HashSet<>(fileLightMap.keySet())));
-        System.out.println("Intersection Heavy: " + getIntersectionCount(new HashSet<>(proproHeavyMap.keySet()), new HashSet<>(fileHeavyMap.keySet())));
+        logger.info("Propro light peptide count: " + proproLight);
+        logger.info("Propro heavy peptide count: " + proproHeavy);
+        logger.info("Intersection Propro: " + getIntersectionCount(new HashSet<>(proproLightMap.keySet()), new HashSet<>(proproHeavyMap.keySet())));
+        logger.info("Intersection Light: " + getIntersectionCount(new HashSet<>(proproLightMap.keySet()), new HashSet<>(fileLightMap.keySet())));
+        logger.info("Intersection Heavy: " + getIntersectionCount(new HashSet<>(proproHeavyMap.keySet()), new HashSet<>(fileHeavyMap.keySet())));
     }
 
     @Override
     public void printProtResults(String analyseOverviewId, String filePath, boolean isUnique) {
         //Step 1: load pyprophet result
         HashSet<String> fileProtSet = getFileProteins(filePath, isUnique);
-        System.out.println("File prot count: " + fileProtSet.size());
+        logger.info("File prot count: " + fileProtSet.size());
 
         //Step 2: load propro result
         HashSet<String> proproProtSet = getProproProteins(analyseOverviewId, isUnique);
-        System.out.println("Propro prot count: " + proproProtSet.size());
+        logger.info("Propro prot count: " + proproProtSet.size());
 
-        System.out.println("Intersection prot count: " + getIntersectionCount(fileProtSet, proproProtSet));
+        logger.info("Intersection prot count: " + getIntersectionCount(fileProtSet, proproProtSet));
     }
 
     @Override
     public void printPepResults(String analyseOverviewId, String filePath) {
         //Step 1: load pyprophet result
         HashSet<String> filePepSet = getFilePeptideRefs(filePath);
-        System.out.println("File pep count: " + filePepSet.size());
+        logger.info("File pep count: " + filePepSet.size());
 
         //Step 2: load propro result
         HashSet<String> proproPepSet = getProproPeptideRefs(analyseOverviewId);
-        System.out.println("Propro pep count: " + proproPepSet.size());
+        logger.info("Propro pep count: " + proproPepSet.size());
 
-        System.out.println("Intersection pep count: " + getIntersectionCount(filePepSet, proproPepSet));
+        logger.info("Intersection pep count: " + getIntersectionCount(filePepSet, proproPepSet));
     }
 
     @Override
     public void printSeqResults(String analyseOverviewId, String filePath) {
         //Step 1: load pyprophet result
         HashSet<String> fileSeqSet = getFilePeptideSeqs(filePath);
-        System.out.println("File seq count: " + fileSeqSet.size());
+        logger.info("File seq count: " + fileSeqSet.size());
 
         //Step 2: load propro result
         HashSet<String> proproSeqSet = getProproPeptideSeqs(analyseOverviewId);
-        System.out.println("Propro seq count: " + proproSeqSet.size());
+        logger.info("Propro seq count: " + proproSeqSet.size());
 
-        System.out.println("Intersection Prot count: " + getIntersectionCount(fileSeqSet, proproSeqSet));
+        logger.info("Intersection Prot count: " + getIntersectionCount(fileSeqSet, proproSeqSet));
     }
 
     @Override
     public void printProproOnlyPep(String analyseOverviewId, String filePath, int length) {
         HashSet<String> filePepSet = getFilePeptideSeqs(filePath);
         HashSet<String> proproPepSet = getProproPeptideSeqs(analyseOverviewId);
-        System.out.println(getLeftSetOnly(proproPepSet, filePepSet, length));
+        logger.info(getLeftSetOnly(proproPepSet, filePepSet, length));
     }
 
     @Override
     public void printFileOnlyPep(String analyseOverviewId, String filePath, int length) {
         HashSet<String> filePepSet = getFilePeptideRefs(filePath);
         HashSet<String> proproPepSet = getProproPeptideRefs(analyseOverviewId);
-        System.out.println(getLeftSetOnly(filePepSet, proproPepSet, length));
+        logger.info(getLeftSetOnly(filePepSet, proproPepSet, length));
     }
     private String getLeftSetOnly(HashSet<String> leftSet, HashSet<String> rightSet, int length){
         int index = 0;
