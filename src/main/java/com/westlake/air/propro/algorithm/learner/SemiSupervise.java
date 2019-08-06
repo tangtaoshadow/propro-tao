@@ -134,9 +134,14 @@ public class SemiSupervise {
         logger.info("更新数据" + featureScoresList.size() + "条一共用时：" + (System.currentTimeMillis() - start)+"毫秒");
 
         logger.info("最终鉴定肽段数目为:" + count + ",打分反馈更新完毕");
+        int matchedProteinsCount = analyseDataService.countProteins(overviewId);
+        logger.info("最终鉴定蛋白数目为:"+matchedProteinsCount);
         finalResult.setMatchedPeptideCount(count);
+        finalResult.setMatchedProteinCount(matchedProteinsCount);
+
         overviewDO.setWeights(weightsMap);
         overviewDO.setMatchedPeptideCount(count);
+        overviewDO.setMatchedProteinCount(matchedProteinsCount);
         analyseOverviewService.update(overviewDO);
 
         logger.info("合并打分完成,共找到新肽段" + count + "个");

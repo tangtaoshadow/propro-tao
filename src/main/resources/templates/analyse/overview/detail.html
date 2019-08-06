@@ -126,6 +126,26 @@
                                        th:value="|${overview?.fdr}|">
                             </div>
                         </div>
+                        <div class="form-group m-form__group row">
+                            <label for="peakCount" class="col-2 col-form-label"
+                                   th:text="#{label_proteins_count}"></label>
+                            <div class="col-4">
+                                <input type="text" class="form-control m-input" id="peakCount" readonly
+                                       th:value="|${overview?.matchedProteinCount}|">
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group row">
+                            <label for="ppRate" class="col-2 col-form-label">PP Rate</label>
+                            <div class="col-4">
+                                <input th:if="${overview?.matchedProteinCount} != 0" type="text" class="form-control m-input" id="ppRate" readonly
+                                       th:value="${overview?.matchedPeptideCount}/${overview?.matchedProteinCount}">
+                            </div>
+                            <label for="ppRateLibrary" class="col-2 col-form-label">PP Rate of Library</label>
+                            <div class="col-4">
+                                <input th:if="${library?.proteinCount} != 0" type="text" class="form-control m-input" id="ppRateLibrary" readonly
+                                       th:value="${library?.totalCount}/${library?.proteinCount}">
+                            </div>
+                        </div>
                         <div class="m-form__actions">
                             <a th:href="@{/analyse/overview/delete/{id}(id=${overview?.id})}" class="btn btn-danger"
                                th:text="#{btn_delete}"></a>

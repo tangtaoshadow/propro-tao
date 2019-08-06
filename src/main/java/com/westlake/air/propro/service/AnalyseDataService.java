@@ -9,6 +9,7 @@ import com.westlake.air.propro.domain.db.simple.PeptideIntensity;
 import com.westlake.air.propro.domain.db.simple.PeptideScores;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -50,4 +51,6 @@ public interface AnalyseDataService {
     void updateMulti(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList);
 
     void removeUselessData(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList, Double fdr);
+
+    int countProteins(String overviewId);
 }

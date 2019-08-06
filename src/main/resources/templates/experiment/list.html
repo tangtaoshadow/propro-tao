@@ -98,8 +98,13 @@
                     <td th:text="|${experiment.instrument?.manufacturer} ${experiment.instrument?.model}|"></td>
                     <td th:text="${#dates.format(experiment.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td>
-                        <a th:href="@{/analyse/overview/list(expId=${experiment.id})}" data-toggle="m-tooltip"
-                           th:title="#{label_analyse_overview}" th:text="|${analyseOverviewDOMap.get(experiment.id)?.matchedPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.totalPeptideCount}/${analyseOverviewDOMap.get(experiment.id)?.libraryPeptideCount}|"></a>
+                        <a th:href="@{/analyse/overview/list(expId=${experiment.id})}" data-toggle="m-tooltip" th:title="#{label_analyse_overview}">
+                            <div th:text="|Peptides : ${analyseOverviewDOMap.get(experiment.id)?.matchedPeptideCount}|"></div>
+                            <div th:text="|Proteins : ${analyseOverviewDOMap.get(experiment.id)?.matchedProteinCount}|"></div>
+                            <div th:text="|XIC Peptides : ${analyseOverviewDOMap.get(experiment.id)?.totalPeptideCount}|"></div>
+                            <div th:text="|Library Peptides : ${analyseOverviewDOMap.get(experiment.id)?.libraryPeptideCount}|"></div>
+                            <div th:text="|PP Rate : ${analyseOverviewDOMap.get(experiment.id)?.calPPRate()}|"></div>
+                        </a>
                     </td>
                     <td>
                         <a th:href="@{/experiment/edit/{id}(id=${experiment.id})}" data-toggle="m-tooltip"

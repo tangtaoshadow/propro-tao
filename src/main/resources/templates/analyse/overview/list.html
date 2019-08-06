@@ -46,14 +46,8 @@
                     <th width="10%" th:text="#{label_analyse_code}"></th>
                     <th width="5%" th:text="#{label_exp_name}"></th>
                     <th width="5%" th:text="#{label_library_name}"></th>
-                    <th width="5%" th:text="#{label_mz_rt_extract_window}"></th>
-                    <th width="5%" th:text="#{label_sigma_spacing}"></th>
-                    <th width="5%" th:text="#{label_threshold_for_shape_and_shape_weight}"></th>
-
-                    <th width="5%">fdr</th>
-                    <th width="5%" th:text="#{label_classifier}"></th>
-                    <th width="5%" th:text="#{label_slope_intercept}"></th>
-                    <th width="5%" th:text="#{label_reco_conv_total}"></th>
+                    <th width="20%" th:text="#{label_exp_params}"></th>
+                    <th width="15%" th:text="#{label_reco_conv_total}"></th>
                     <th width="5%" th:text="#{label_owner}"></th>
                     <th width="5%" th:text="#{label_note}"></th>
                     <th width="10%" th:text="#{label_create_date}"></th>
@@ -70,14 +64,21 @@
                         </a>
                     </td>
                     <td th:text="${overview.libraryName}"></td>
-                    <td th:text="|${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></td>
-                    <td th:text="|${overview.sigma}/${overview.spacing}|"></td>
-                    <td th:text="|${overview.shapeScoreThreshold}/${overview.shapeScoreWeightThreshold}|"></td>
-
-                    <td th:text="|${overview.fdr}|"></td>
-                    <td th:text="|${overview.classifier}|"></td>
-                    <td th:text="|${overview.slope}/${overview.intercept}|"></td>
-                    <td th:text="|${overview.matchedPeptideCount}/${overview.totalPeptideCount}/${overview.libraryPeptideCount}|"></td>
+                    <td>
+                        <div th:text="|ExtractParams : ${overview.rtExtractWindow}/${overview.mzExtractWindow}|"></div>
+                        <div th:text="|SigmaSpacing : ${overview.sigma}/${overview.spacing}|"></div>
+                        <div th:text="|Threshold : ${overview.shapeScoreThreshold}/${overview.shapeScoreWeightThreshold}|"></div>
+                        <div th:text="|SlopeIntercept : ${overview.slope}/${overview.intercept}|"></div>
+                        <div th:text="|Fdr : ${overview.fdr}|"></div>
+                        <div th:text="|Classifier : ${overview.classifier}|"></div>
+                        <div th:text="|PP Rate : ${overview.calPPRate()}|"></div>
+                    </td>
+                    <td>
+                        <div th:text="|Peptides : ${overview.matchedPeptideCount}|"></div>
+                        <div th:text="|Proteins : ${overview.matchedProteinCount}|"></div>
+                        <div th:text="|XIC Peptides : ${overview.totalPeptideCount}|"></div>
+                        <div th:text="|Library Peptides : ${overview.libraryPeptideCount}|"></div>
+                    </td>
                     <td th:text="${overview.ownerName}"></td>
                     <td th:text="${overview?.note}"></td>
                     <td th:text="${#dates.format(overview.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>

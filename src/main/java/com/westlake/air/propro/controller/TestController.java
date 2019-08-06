@@ -15,6 +15,7 @@ import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.params.WorkflowParams;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
+import com.westlake.air.propro.domain.query.ProjectQuery;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +90,26 @@ public class TestController extends BaseController {
     @RequestMapping("test2")
     @ResponseBody
     int test2(Model model, RedirectAttributes redirectAttributes) {
-        return 1;
+        List<ProjectDO> projects = projectService.getAll(new ProjectQuery());
+        for (ProjectDO project : projects){
+            List<ExperimentDO> exps = experimentService.getAllByProjectId(project.getId());
+            if(exps.size() == 0){
+                continue;
+            }
+            for(ExperimentDO exp : exps){
+                List<AnalyseOverviewDO> overviews = analyseOverviewService.getAllByExpId(exp.getId());
+                if(overviews.size() == 0){
+                    continue;
+                }
+                for (AnalyseOverviewDO overview : overviews){
+                    int count = analyseDataService.countProteins(overview.getId());
+                    overview.setMatchedProteinCount(count);
+                    analyseOverviewService.update(overview);
+                    logger.info(overview.getName()+"更新完毕,鉴定蛋白数目:"+count);
+                }
+            }
+        }
+        return 0;
     }
 
     @RequestMapping("test6")

@@ -117,6 +117,7 @@ public class AnalyseController extends BaseController {
         model.addAttribute("totalPage", resultDO.getTotalPage());
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("scores", ScoreType.getUsedTypes());
+
         return "analyse/overview/list";
     }
 
@@ -124,30 +125,28 @@ public class AnalyseController extends BaseController {
     String overviewDetail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
 
         ResultDO<AnalyseOverviewDO> resultDO = analyseOverviewService.getById(id);
-        if (resultDO.isSuccess()) {
-            AnalyseOverviewDO overview = resultDO.getModel();
-            PermissionUtil.check(resultDO.getModel());
+        AnalyseOverviewDO overview = resultDO.getModel();
+        PermissionUtil.check(resultDO.getModel());
 
-            AnalyseDataQuery query = new AnalyseDataQuery(id);
-            query.setIsDecoy(false);
-            query.setFdrEnd(0.01);
-            query.setPageSize(10000);
-            List<AnalyseDataRT> rts = analyseDataService.getRtList(query);
-            query.setFdrStart(0.01);
-            query.setFdrEnd(1.0);
-            List<AnalyseDataRT> badRts = analyseDataService.getRtList(query);
-            model.addAttribute("rts", rts);
-            model.addAttribute("badRts", badRts);
-            model.addAttribute("overview", resultDO.getModel());
-            model.addAttribute("slope", resultDO.getModel().getSlope());
-            model.addAttribute("intercept", resultDO.getModel().getIntercept());
-            model.addAttribute("targetMap", overview.getTargetDistributions());
-            model.addAttribute("decoyMap", overview.getDecoyDistributions());
-            return "analyse/overview/detail";
-        } else {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, resultDO.getMsgInfo());
-            return "redirect:/analyse/overview/list";
-        }
+        LibraryDO library = libraryService.getById(overview.getLibraryId());
+
+        AnalyseDataQuery query = new AnalyseDataQuery(id);
+        query.setIsDecoy(false);
+        query.setFdrEnd(0.01);
+        query.setPageSize(10000);
+        List<AnalyseDataRT> rts = analyseDataService.getRtList(query);
+        query.setFdrStart(0.01);
+        query.setFdrEnd(1.0);
+        List<AnalyseDataRT> badRts = analyseDataService.getRtList(query);
+        model.addAttribute("library", library);
+        model.addAttribute("rts", rts);
+        model.addAttribute("badRts", badRts);
+        model.addAttribute("overview", resultDO.getModel());
+        model.addAttribute("slope", resultDO.getModel().getSlope());
+        model.addAttribute("intercept", resultDO.getModel().getIntercept());
+        model.addAttribute("targetMap", overview.getTargetDistributions());
+        model.addAttribute("decoyMap", overview.getDecoyDistributions());
+        return "analyse/overview/detail";
     }
 
     @RequestMapping(value = "/overview/export/{id}")

@@ -12,6 +12,7 @@ import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
 import com.westlake.air.propro.domain.db.simple.PeptideIntensity;
 import com.westlake.air.propro.domain.db.simple.PeptideScores;
+import com.westlake.air.propro.domain.db.simple.ProteinPeptide;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 import com.westlake.air.propro.service.AnalyseDataService;
 import com.westlake.air.propro.utils.AnalyseUtil;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -195,6 +197,7 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
 
     /**
      * 将数组中的FDR小于指定值的肽段删除,同时将数据库中对应的肽段也删除
+     *
      * @param overviewId
      * @param simpleFeatureScoresList
      * @param fdr
@@ -204,16 +207,33 @@ public class AnalyseDataServiceImpl implements AnalyseDataService {
         List<SimpleFeatureScores> dataNeedToRemove = new ArrayList<>();
         for (int i = simpleFeatureScoresList.size() - 1; i >= 0; i--) {
             //如果fdr为空或者fdr小于指定的值,那么删除它
-            if(simpleFeatureScoresList.get(i).getFdr() == null || simpleFeatureScoresList.get(i).getFdr() > fdr){
+            if (simpleFeatureScoresList.get(i).getFdr() == null || simpleFeatureScoresList.get(i).getFdr() > fdr) {
                 dataNeedToRemove.add(simpleFeatureScoresList.get(i));
                 simpleFeatureScoresList.remove(i);
             }
         }
 
         long start = System.currentTimeMillis();
-        if(dataNeedToRemove.size() != 0){
+        if (dataNeedToRemove.size() != 0) {
             analyseDataDAO.deleteMulti(overviewId, dataNeedToRemove);
         }
-        logger.info("删除无用数据:"+dataNeedToRemove.size()+"条,总计耗时:"+(System.currentTimeMillis() - start)+"毫秒");
+        logger.info("删除无用数据:" + dataNeedToRemove.size() + "条,总计耗时:" + (System.currentTimeMillis() - start) + "毫秒");
+    }
+
+    @Override
+    public int countProteins(String overviewId) {
+        AnalyseDataQuery query = new AnalyseDataQuery();
+        query.setOverviewId(overviewId);
+        query.setIsDecoy(false);
+        List<ProteinPeptide> ppList = analyseDataDAO.getAll(query, ProteinPeptide.class);
+        HashSet<String> proteins = new HashSet<>();
+        for (ProteinPeptide pp : ppList) {
+            if (pp.getIsUnique() && (!pp.getIsUnique() || !pp.getProteinName().startsWith("1/"))) {
+                continue;
+            } else {
+                proteins.add(pp.getProteinName());
+            }
+        }
+        return proteins.size();
     }
 }

@@ -40,15 +40,15 @@ public class ResultCompareServiceImpl implements ResultCompareService {
 
     @Override
     public void printProteinCoverage(String projectId, String libraryId, String filePath) {
-        HashMap<String,Double> libPPMap = getLibPPMap(libraryId);
-        HashMap<String, HashMap<String,Double>> filePPMap = getFilePPMap(projectId, filePath);
-        HashMap<String, HashMap<String,Double>> proproPPMap = getProproPPMap(projectId);
+        HashMap<String, Double> libPPMap = getLibPPMap(libraryId);
+        HashMap<String, HashMap<String, Double>> filePPMap = getFilePPMap(projectId, filePath);
+        HashMap<String, HashMap<String, Double>> proproPPMap = getProproPPMap(projectId);
 //        HashMap<String, HashMap<String,Double>> fileCoverageMap = getProjectCoverageMap(filePPMap, libPPMap);
 //        HashMap<String, HashMap<String,Double>> proproCoverageMap = getProjectCoverageMap(proproPPMap, libPPMap);
-        for (String expName: filePPMap.keySet()){
+        for (String expName : filePPMap.keySet()) {
             logger.info(expName + " ----------------------");
             logger.info("File : " + getCoverage(filePPMap.get(expName), libPPMap));
-            logger.info("Propro: "  + getCoverage(proproPPMap.get(expName), libPPMap));
+            logger.info("Propro: " + getCoverage(proproPPMap.get(expName), libPPMap));
         }
     }
 
@@ -92,11 +92,11 @@ public class ResultCompareServiceImpl implements ResultCompareService {
     }
 
     @Override
-    public void compareMatrix(String projectId, String filePath, int overviewIndex, boolean isUnique){
+    public void compareMatrix(String projectId, String filePath, int overviewIndex, boolean isUnique) {
         HashMap<String, HashSet<String>> matPepSetMap = getMatrixFilePepMap(projectId, filePath);
         HashMap<String, HashSet<String>> matProtSetMap = getMatrixFileProtMap(projectId, filePath, isUnique);
         List<ExperimentDO> experimentDOList = experimentService.getAllByProjectId(projectId);
-        for (ExperimentDO experimentDO: experimentDOList) {
+        for (ExperimentDO experimentDO : experimentDOList) {
             HashSet<String> filePepSet = matPepSetMap.get(experimentDO.getName());
             HashSet<String> fileProtSet = matProtSetMap.get(experimentDO.getName());
 
@@ -118,10 +118,10 @@ public class ResultCompareServiceImpl implements ResultCompareService {
     @Override
     public void printSilacResults(String analyseOverviewId, String filePath) {
         String SILAC_UNIMOD = "(Unimod:188)";
-        HashMap<String, Pair<Double,Double>> filePepFdrRtMap = getFilePepFdrRtMap(filePath);
+        HashMap<String, Pair<Double, Double>> filePepFdrRtMap = getFilePepFdrRtMap(filePath);
         int fileHeavy = 0, fileLight = 0;
-        HashMap<String,Double> fileLightMap = new HashMap<>();
-        HashMap<String,Double> fileHeavyMap = new HashMap<>();
+        HashMap<String, Double> fileLightMap = new HashMap<>();
+        HashMap<String, Double> fileHeavyMap = new HashMap<>();
         for (String pepRef : filePepFdrRtMap.keySet()) {
             String[] pepInfo = pepRef.split("_");
             if (pepInfo[0].endsWith(SILAC_UNIMOD)) {
@@ -136,10 +136,10 @@ public class ResultCompareServiceImpl implements ResultCompareService {
         logger.info("File heavy peptide count: " + fileHeavy);
         logger.info("Intersection File: " + getIntersectionCount(new HashSet<>(fileLightMap.keySet()), new HashSet<>(fileHeavyMap.keySet())));
 
-        HashMap<String, Pair<Double,Double>> proproPepFdrRtMap = getProproPepFdrRtMap(analyseOverviewId);
+        HashMap<String, Pair<Double, Double>> proproPepFdrRtMap = getProproPepFdrRtMap(analyseOverviewId);
 
-        HashMap<String,Double> proproLightMap = new HashMap<>();
-        HashMap<String,Double> proproHeavyMap = new HashMap<>();
+        HashMap<String, Double> proproLightMap = new HashMap<>();
+        HashMap<String, Double> proproHeavyMap = new HashMap<>();
         int proproHeavy = 0, proproLight = 0;
         for (String pepRef : proproPepFdrRtMap.keySet()) {
             if (pepRef.split("_")[0].endsWith(SILAC_UNIMOD)) {
@@ -209,15 +209,16 @@ public class ResultCompareServiceImpl implements ResultCompareService {
         HashSet<String> proproPepSet = getProproPeptideRefs(analyseOverviewId);
         logger.info(getLeftSetOnly(filePepSet, proproPepSet, length));
     }
-    private String getLeftSetOnly(HashSet<String> leftSet, HashSet<String> rightSet, int length){
+
+    private String getLeftSetOnly(HashSet<String> leftSet, HashSet<String> rightSet, int length) {
         int index = 0;
         StringBuilder leftOnly = new StringBuilder();
         for (String element : leftSet) {
             if (!rightSet.contains(element)) {
-                if (length != -1 && index < length){
+                if (length != -1 && index < length) {
                     leftOnly.append(element).append(";");
-                    index ++;
-                }else {
+                    index++;
+                } else {
                     break;
                 }
             }
@@ -229,16 +230,16 @@ public class ResultCompareServiceImpl implements ResultCompareService {
         HashSet<String> uniqueProt = new HashSet<>();
         try {
             TableFile ppFile = FileUtil.readTableFile(filePath);
-            HashMap<String, Integer> columnMap = ppFile.getColumnMap();
-            List<String[]> fileData = ppFile.getFileData();
-            for (String[] lineSplit : fileData) {
-                if (columnMap.containsKey("decoy") && lineSplit[columnMap.get("decoy")].equals("1")) {
-                    continue;
-                }
-                if (columnMap.containsKey("m_score") && Double.parseDouble(lineSplit[columnMap.get("m_score")]) > 0.01d) {
-                    continue;
-                }
-                String proteinName = lineSplit[columnMap.get("proteinname")];
+                HashMap<String, Integer> columnMap = ppFile.getColumnMap();
+                List<String[]> fileData = ppFile.getFileData();
+                for (String[] lineSplit : fileData) {
+                    if (columnMap.containsKey("decoy") && lineSplit[columnMap.get("decoy")].equals("1")) {
+                        continue;
+                    }
+                    if (columnMap.containsKey("m_score") && Double.parseDouble(lineSplit[columnMap.get("m_score")]) > 0.01d) {
+                        continue;
+                    }
+                    String proteinName = lineSplit[columnMap.get("proteinname")];
                 if (isUnique && !proteinName.startsWith("1/")) {
                     continue;
                 }
@@ -273,8 +274,9 @@ public class ResultCompareServiceImpl implements ResultCompareService {
             return new HashSet<>();
         }
     }
-    private HashMap<String, Pair<Double,Double>> getFilePepFdrRtMap(String filePath) {
-        HashMap<String, Pair<Double,Double>> bestPepRtMap = new HashMap<>();
+
+    private HashMap<String, Pair<Double, Double>> getFilePepFdrRtMap(String filePath) {
+        HashMap<String, Pair<Double, Double>> bestPepRtMap = new HashMap<>();
         try {
             TableFile ppFile = FileUtil.readTableFile(filePath);
             HashMap<String, Integer> columnMap = ppFile.getColumnMap();
@@ -289,12 +291,12 @@ public class ResultCompareServiceImpl implements ResultCompareService {
                 String[] peptideGroupInfo = lineSplit[columnMap.get("transition_group_id")].split("_");
                 String pepRef = peptideGroupInfo[1] + "_" + peptideGroupInfo[2];
                 Double newMScore = Double.parseDouble(lineSplit[columnMap.get("m_score")]);
-                if (bestPepRtMap.containsKey(pepRef)){
+                if (bestPepRtMap.containsKey(pepRef)) {
                     Double mScore = bestPepRtMap.get(pepRef).getLeft();
-                    if (newMScore < mScore){
+                    if (newMScore < mScore) {
                         bestPepRtMap.put(pepRef, Pair.of(newMScore, Double.parseDouble(lineSplit[columnMap.get("rt")])));
                     }
-                }else {
+                } else {
                     bestPepRtMap.put(pepRef, Pair.of(newMScore, Double.parseDouble(lineSplit[columnMap.get("rt")])));
                 }
             }
@@ -305,11 +307,11 @@ public class ResultCompareServiceImpl implements ResultCompareService {
         }
     }
 
-    private HashMap<String, Pair<Double,Double>> getProproPepFdrRtMap(String overviewId){
+    private HashMap<String, Pair<Double, Double>> getProproPepFdrRtMap(String overviewId) {
         List<AnalyseDataDO> analyseDataDOList = getProproDataDO(overviewId);
-        HashMap<String, Pair<Double,Double>> pepFdrRtMap = new HashMap<>();
-        for (AnalyseDataDO dataDO: analyseDataDOList){
-            pepFdrRtMap.put(dataDO.getPeptideRef(), Pair.of(dataDO.getFdr(),dataDO.getBestRt()));
+        HashMap<String, Pair<Double, Double>> pepFdrRtMap = new HashMap<>();
+        for (AnalyseDataDO dataDO : analyseDataDOList) {
+            pepFdrRtMap.put(dataDO.getPeptideRef(), Pair.of(dataDO.getFdr(), dataDO.getBestRt()));
         }
         return pepFdrRtMap;
     }
@@ -431,22 +433,22 @@ public class ResultCompareServiceImpl implements ResultCompareService {
         return count;
     }
 
-    private HashMap<String,Double> getLibPPMap(String libraryId){
-        HashMap<String,Double> libCountMap = new HashMap<>();
+    private HashMap<String, Double> getLibPPMap(String libraryId) {
+        HashMap<String, Double> libCountMap = new HashMap<>();
         List<PeptideDO> peptideDOList = peptideService.getAllByLibraryId(libraryId);
-        for (PeptideDO peptideDO: peptideDOList){
+        for (PeptideDO peptideDO : peptideDOList) {
             Double count = libCountMap.get(peptideDO.getProteinName());
-            if (count == null){
+            if (count == null) {
                 libCountMap.put(peptideDO.getProteinName(), 1d);
-            }else {
+            } else {
                 libCountMap.put(peptideDO.getProteinName(), count + 1d);
             }
         }
         return libCountMap;
     }
 
-    private HashMap<String, HashMap<String,Double>> getFilePPMap(String projectId, String filePath){
-        HashMap<String, HashMap<String,Double>> fileCountMap = new HashMap<>();
+    private HashMap<String, HashMap<String, Double>> getFilePPMap(String projectId, String filePath) {
+        HashMap<String, HashMap<String, Double>> fileCountMap = new HashMap<>();
         List<ExperimentDO> experimentDOList = experimentService.getAllByProjectId(projectId);
         try {
             TableFile ppFile = FileUtil.readTableFile(filePath);
@@ -454,13 +456,13 @@ public class ResultCompareServiceImpl implements ResultCompareService {
             List<String[]> fileData = ppFile.getFileData();
             for (ExperimentDO experimentDO : experimentDOList) {
                 Integer index = columnMap.get(experimentDO.getName().toLowerCase() + "_with_dscore_filtered");
-                HashMap<String,Double> expCountMap = new HashMap<>();
+                HashMap<String, Double> expCountMap = new HashMap<>();
                 for (String[] line : fileData) {
                     if (index != null && index < line.length && !line[index].isEmpty()) {
                         Double count = expCountMap.get(line[1]);
-                        if (count == null){
+                        if (count == null) {
                             expCountMap.put(line[1], 1d);
-                        }else {
+                        } else {
                             expCountMap.put(line[1], count + 1d);
                         }
                     }
@@ -473,56 +475,51 @@ public class ResultCompareServiceImpl implements ResultCompareService {
         return fileCountMap;
     }
 
-    private HashMap<String, HashMap<String,Double>> getProproPPMap(String projectId){
-        HashMap<String, HashMap<String,Double>> proproCountMap = new HashMap<>();
-        List<ExperimentDO> experimentDOList = experimentService.getAllByProjectId(projectId);
-        for (ExperimentDO experimentDO: experimentDOList){
-            HashMap<String,Double> expCountMap = new HashMap<>();
+    private HashMap<String, HashMap<String, Double>> getProproPPMap(String projectId) {
+        HashMap<String, HashMap<String, Double>> proproCountMap = new HashMap<>();
+        List<ExperimentDO> experimentList = experimentService.getAllByProjectId(projectId);
+        for (ExperimentDO experimentDO : experimentList) {
+            HashMap<String, Double> expCountMap = new HashMap<>();
             AnalyseOverviewDO analyseOverviewDO = analyseOverviewService.getAllByExpId(experimentDO.getId()).get(0);
-            List<AnalyseDataDO> analyseDataDOList = getProproDataDO(analyseOverviewDO.getId());
-            for (AnalyseDataDO analyseDataDO: analyseDataDOList){
-                Double count = expCountMap.get(analyseDataDO.getProteinName());
-                if (count == null){
-                    expCountMap.put(analyseDataDO.getProteinName(), 1d);
-                }else {
-                    expCountMap.put(analyseDataDO.getProteinName(), count + 1d);
-                }
+            List<AnalyseDataDO> analyseDataList = getProproDataDO(analyseOverviewDO.getId());
+            for (AnalyseDataDO analyseDataDO : analyseDataList) {
+                expCountMap.merge(analyseDataDO.getProteinName(), 1d, Double::sum);
             }
             proproCountMap.put(experimentDO.getName(), expCountMap);
         }
         return proproCountMap;
     }
 
-    private HashMap<String, HashMap<String,Double>> getProjectCoverageMap(HashMap<String,HashMap<String,Double>> projectPPMap, HashMap<String,Double> libPPMap){
-        HashMap<String, HashMap<String,Double>> coverageMap = new HashMap<>();
-        for (String expName: projectPPMap.keySet()){
+    private HashMap<String, HashMap<String, Double>> getProjectCoverageMap(HashMap<String, HashMap<String, Double>> projectPPMap, HashMap<String, Double> libPPMap) {
+        HashMap<String, HashMap<String, Double>> coverageMap = new HashMap<>();
+        for (String expName : projectPPMap.keySet()) {
             coverageMap.put(expName, getCoverageMap(projectPPMap.get(expName), libPPMap));
         }
         return coverageMap;
     }
 
-    private HashMap<String,Double> getCoverageMap(HashMap<String,Double> expPPMap, HashMap<String,Double> libPPMap){
-        HashMap<String,Double> coverageMap = new HashMap<>();
-        for (Map.Entry<String,Double> entry: expPPMap.entrySet()){
+    private HashMap<String, Double> getCoverageMap(HashMap<String, Double> expPPMap, HashMap<String, Double> libPPMap) {
+        HashMap<String, Double> coverageMap = new HashMap<>();
+        for (Map.Entry<String, Double> entry : expPPMap.entrySet()) {
             Double libCount = libPPMap.get(entry.getKey());
-            if (libCount != null){
-                coverageMap.put(entry.getKey(), entry.getValue()/libCount);
+            if (libCount != null) {
+                coverageMap.put(entry.getKey(), entry.getValue() / libCount);
             }
         }
         return coverageMap;
     }
 
-    private Double getCoverage(HashMap<String,Double> expPPMap, HashMap<String,Double> libPPMap){
+    private Double getCoverage(HashMap<String, Double> expPPMap, HashMap<String, Double> libPPMap) {
         int count = 0;
         double sum = 0d;
-        for (Map.Entry<String,Double> entry: expPPMap.entrySet()){
+        for (Map.Entry<String, Double> entry : expPPMap.entrySet()) {
             Double libCount = libPPMap.get(entry.getKey());
-            if (libCount != null){
-                sum += entry.getValue()/libCount;
-                count ++;
+            if (libCount != null) {
+                sum += entry.getValue() / libCount;
+                count++;
             }
         }
-        return sum/count;
+        return sum / count;
     }
 
     private List<AnalyseDataDO> getProproDataDO(String overviewId) {

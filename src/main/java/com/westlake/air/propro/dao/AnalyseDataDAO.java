@@ -6,9 +6,13 @@ import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
 import com.westlake.air.propro.domain.db.simple.PeptideIntensity;
 import com.westlake.air.propro.domain.db.simple.PeptideScores;
+import com.westlake.air.propro.domain.db.simple.Protein;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
+import com.westlake.air.propro.domain.query.PeptideQuery;
 import com.westlake.air.propro.utils.AnalyseUtil;
 import org.springframework.data.mongodb.core.BulkOperations;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -23,7 +27,7 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
  * Time: 2018-06-07 20:50
  */
 @Service
-public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
+public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery> {
 
     public static String CollectionName = "analyseData";
 
@@ -48,7 +52,7 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
         if (analyseDataQuery.getId() != null) {
             query.addCriteria(where("id").is(analyseDataQuery.getId()));
         }
-        if (analyseDataQuery.getDataRef() != null){
+        if (analyseDataQuery.getDataRef() != null) {
             query.addCriteria(where("dataRef").is(analyseDataQuery.getDataRef()));
         }
         if (analyseDataQuery.getOverviewId() != null) {
@@ -58,7 +62,7 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
             query.addCriteria(where("peptideId").is(analyseDataQuery.getPeptideId()));
         }
         if (analyseDataQuery.getPeptideRef() != null) {
-            query.addCriteria(where("peptideRef").regex(analyseDataQuery.getPeptideRef().replace("(","\\(").replace(")", "\\)"), "i"));
+            query.addCriteria(where("peptideRef").regex(analyseDataQuery.getPeptideRef().replace("(", "\\(").replace(")", "\\)"), "i"));
         }
         if (analyseDataQuery.getProteinName() != null) {
             query.addCriteria(where("proteinName").is(analyseDataQuery.getProteinName()));
@@ -70,10 +74,10 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
             query.addCriteria(where("mz").gte(analyseDataQuery.getMzStart()).lt(analyseDataQuery.getMzEnd()));
         }
         if (analyseDataQuery.getFdrStart() != null || analyseDataQuery.getFdrEnd() != null) {
-            query.addCriteria(where("fdr").gte(analyseDataQuery.getFdrStart()==null?0:analyseDataQuery.getFdrStart()).lte(analyseDataQuery.getFdrEnd()==null?1:analyseDataQuery.getFdrEnd()));
+            query.addCriteria(where("fdr").gte(analyseDataQuery.getFdrStart() == null ? 0 : analyseDataQuery.getFdrStart()).lte(analyseDataQuery.getFdrEnd() == null ? 1 : analyseDataQuery.getFdrEnd()));
         }
         if (analyseDataQuery.getQValueStart() != null || analyseDataQuery.getQValueEnd() != null) {
-            query.addCriteria(where("qValue").gte(analyseDataQuery.getQValueStart()==null?0:analyseDataQuery.getQValueStart()).lte(analyseDataQuery.getQValueEnd()==null?1:analyseDataQuery.getQValueEnd()));
+            query.addCriteria(where("qValue").gte(analyseDataQuery.getQValueStart() == null ? 0 : analyseDataQuery.getQValueStart()).lte(analyseDataQuery.getQValueEnd() == null ? 1 : analyseDataQuery.getQValueEnd()));
         }
         if (analyseDataQuery.getIdentifiedStatus() != null) {
             query.addCriteria(where("identifiedStatus").in(analyseDataQuery.getIdentifiedStatus()));
@@ -91,7 +95,7 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
         return mongoTemplate.find(query, PeptideIntensity.class, CollectionName);
     }
 
-    public List<PeptideScores> getPeptideScoresByOverviewId(String overviewId){
+    public List<PeptideScores> getPeptideScoresByOverviewId(String overviewId) {
         AnalyseDataQuery query = new AnalyseDataQuery(overviewId);
         return mongoTemplate.find(buildQueryWithoutPage(query), PeptideScores.class, CollectionName);
     }
@@ -109,7 +113,7 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
         return mongoTemplate.find(buildQuery(query), AnalyseDataRT.class, CollectionName);
     }
 
-    public void updateMulti(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList){
+    public void updateMulti(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList) {
         BulkOperations ops = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, AnalyseDataDO.class);
         for (SimpleFeatureScores simpleFeatureScores : simpleFeatureScoresList) {
 
@@ -125,9 +129,9 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
             if (!simpleFeatureScores.getIsDecoy()) {
                 //投票策略
                 if (simpleFeatureScores.getFdr() <= 0.01) {
-                    update.set("identifiedStatus",AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS);
+                    update.set("identifiedStatus", AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS);
                 } else {
-                    update.set("identifiedStatus",AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
+                    update.set("identifiedStatus", AnalyseDataDO.IDENTIFIED_STATUS_UNKNOWN);
                 }
             }
             ops.updateOne(query, update);
@@ -135,7 +139,7 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
         ops.execute();
     }
 
-    public void deleteMulti(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList){
+    public void deleteMulti(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList) {
         BulkOperations ops = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, AnalyseDataDO.class);
         for (SimpleFeatureScores simpleFeatureScores : simpleFeatureScoresList) {
             Query query = new Query();
@@ -143,5 +147,9 @@ public class AnalyseDataDAO extends BaseDAO<AnalyseDataDO, AnalyseDataQuery>{
             ops.remove(query);
         }
         ops.execute();
+    }
+
+    public <T> List<T> getAll(AnalyseDataQuery query, Class<T> tClass){
+        return mongoTemplate.find(buildQueryWithoutPage(query), tClass, CollectionName);
     }
 }

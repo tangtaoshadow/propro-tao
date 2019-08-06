@@ -75,7 +75,8 @@
                            th:title="#{menu_peptide_list}" th:text="${library.totalCount}">
                         </a>
                     </td>
-                    <td th:text="${library.totalCount}/${library.proteinCount}"></td>
+                    <td th:if="${library.proteinCount}!=0" th:text="${library.totalCount}/${library.proteinCount}"></td>
+                    <td th:unless="${library.proteinCount}!=0" th:text="|${library.totalCount}/${library.proteinCount}|"></td>
                     <td th:text="${#dates.format(library.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${library.creator}"></td>
                     <td>
