@@ -79,10 +79,10 @@ public class TestController extends BaseController {
     String testLMS(Model model, RedirectAttributes redirectAttributes) {
         TaskDO taskDO = new TaskDO();
         taskDO.addLog("HelloWorld");
-//        String a = resultCompareService.getProproProteins("5d1d57b05bb5e9463e9dcc16", false).size() + "";
-//        String b = resultCompareService.getProproProteins("5d037a57fc6f9e4100b55d81", true).size() + "";
-//        String c = resultCompareService.getProproProteins("5d038111fc6f9e4100b74990", true).size() + "";
-        return "Success";
+        String a = resultCompareService.getProproProteins("5d47a489e925e50457bcef77", true).size() + "";
+        String b = resultCompareService.getProproProteins("5d4795f7e925e50457b74d45", true).size() + "";
+        String c = resultCompareService.getProproProteins("5d47caa818caf922b21cf272", true).size() + "";
+        return "Common:" + a + ";3Da:" + b + ";4Da:" + c;
     }
 
     //计算iRT
@@ -97,7 +97,7 @@ public class TestController extends BaseController {
     List<String> test6(Model model, RedirectAttributes redirectAttributes) throws IOException {
         List<PeptideDO> peptides = peptideService.getAllByLibraryId("5c754e9ddfdfdd68309f0fce");
         List<String> realList = new ArrayList<>();
-        for(PeptideDO peptide : peptides){
+        for (PeptideDO peptide : peptides) {
             realList.add(peptide.getSequence());
         }
         return realList;

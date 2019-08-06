@@ -102,6 +102,12 @@ public class AnalyseOverviewDO extends BaseDO {
     //对应标准库中的肽段数目
     Integer libraryPeptideCount;
 
+    //最终识别的蛋白质数目
+    Integer identifiedProteins;
+
+    //最终识别的肽段-蛋白质覆盖率,公式为:实际鉴定到的同一个蛋白质的肽段数目/标准库中同一个蛋白质对应的肽段数目
+    Float ppRate;
+
     //本次分析最终的选峰数目
     Long peakCount = 0L;
 
