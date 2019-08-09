@@ -91,11 +91,11 @@ public class LibraryTsvParser extends BaseLibraryParser {
                 }
                 PeptideDO peptide = resultDO.getModel();
                 addFragment(peptide, map);
-                //在导入Peptide的同时生成伪肽段
-                shuffleGenerator.generate(peptide);
             }
-
-            peptideService.insertAll(new ArrayList<>(map.values()), false);
+            List<PeptideDO> peptideDOList = new ArrayList<>(map.values());
+            //在导入Peptide的同时生成伪肽段
+            shuffleGenerator.generate(peptideDOList);
+            peptideService.insertAll(peptideDOList, false);
             taskDO.addLog(map.size() + "条肽段数据插入成功");
             taskService.update(taskDO);
             logger.info(map.size() + "条肽段数据插入成功");

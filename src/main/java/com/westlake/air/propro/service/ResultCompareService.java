@@ -1,5 +1,6 @@
 package com.westlake.air.propro.service;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -63,4 +64,7 @@ public interface ResultCompareService {
      * @return
      */
     HashSet<String> getProproProteins(String overviewId, boolean isUnique);
+    HashSet<String> getProproPeptideRefs(String overviewId);
+
+    HashMap<String, HashSet<String>> getMatrixFilePepMap(String projectId, String filePath);
 }

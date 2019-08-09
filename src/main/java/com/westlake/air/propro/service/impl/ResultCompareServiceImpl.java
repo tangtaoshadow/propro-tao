@@ -353,7 +353,8 @@ public class ResultCompareServiceImpl implements ResultCompareService {
         return uniqueProt;
     }
 
-    private HashSet<String> getProproPeptideRefs(String overviewId) {
+    @Override
+    public HashSet<String> getProproPeptideRefs(String overviewId) {
         List<AnalyseDataDO> analyseDataDOList = getProproDataDO(overviewId);
         HashSet<String> uniquePep = new HashSet<>();
         for (AnalyseDataDO dataDO : analyseDataDOList) {
@@ -371,7 +372,8 @@ public class ResultCompareServiceImpl implements ResultCompareService {
         return uniqueSeq;
     }
 
-    private HashMap<String, HashSet<String>> getMatrixFilePepMap(String projectId, String filePath) {
+    @Override
+    public HashMap<String, HashSet<String>> getMatrixFilePepMap(String projectId, String filePath) {
         List<ExperimentDO> experimentDOList = experimentService.getAllByProjectId(projectId);
         HashMap<String, HashSet<String>> matPepSetMap = new HashMap<>();
         for (ExperimentDO experimentDO : experimentDOList) {
@@ -383,8 +385,8 @@ public class ResultCompareServiceImpl implements ResultCompareService {
             List<String[]> fileData = ppFile.getFileData();
             for (String[] line : fileData) {
                 for (String expName : matPepSetMap.keySet()) {
-                    Integer index = columnMap.get(expName.toLowerCase() + "_with_dscore_filtered");
-                    if (index != null && index < line.length && !line[index].isEmpty()) {
+                    Integer index = columnMap.get(expName.toLowerCase() + "");
+                    if (index != null && index < line.length && !line[index].isEmpty() && !line[index].equals("NA")) {
                         String[] pepInfo = line[0].split("_");
                         matPepSetMap.get(expName).add(pepInfo[1] + "_" + pepInfo[2]);
                     }
@@ -411,8 +413,8 @@ public class ResultCompareServiceImpl implements ResultCompareService {
                     continue;
                 }
                 for (String expName : matProtSetMap.keySet()) {
-                    Integer index = columnMap.get(expName.toLowerCase() + "_with_dscore_filtered");
-                    if (index != null && index < line.length && !line[index].isEmpty()) {
+                    Integer index = columnMap.get(expName.toLowerCase() + "");
+                    if (index != null && index < line.length && !line[index].isEmpty() && !line[index].equals("NA")) {
                         matProtSetMap.get(expName).add(line[1]);
                     }
                 }
