@@ -36,9 +36,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.DataOutput;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -260,19 +262,42 @@ public class Irt {
     }
 
     private List<Pair<Double, Double>> chooseReliablePairs(List<Pair<Double, Double>> rtPairs, double delta) throws Exception {
-        SlopeIntercept slopeIntercept = linearFitter.huberFit(rtPairs, delta);
-        TreeMap<Double, Pair<Double, Double>> errorMap = new TreeMap<>();
-        for (Pair<Double, Double> pair : rtPairs) {
-            errorMap.put(Math.abs(pair.getRight() * slopeIntercept.getSlope() + slopeIntercept.getIntercept() - pair.getLeft()), pair);
+        List<Pair<Double, Double>> rtPairsCorrected = new ArrayList<>(rtPairs);
+        preprocessRtPairs(rtPairsCorrected, 50d);
+        SlopeIntercept slopeIntercept = linearFitter.huberFit(rtPairsCorrected, delta);
+        while (MathUtil.getRsq(rtPairsCorrected) < 0.95 && rtPairsCorrected.size() >= 2) {
+            int maxErrorIndex = findMaxErrorIndex(slopeIntercept, rtPairsCorrected);
+            rtPairsCorrected.remove(maxErrorIndex);
+            slopeIntercept = linearFitter.huberFit(rtPairsCorrected, delta);
         }
-        List<Pair<Double, Double>> sortedPairs = new ArrayList<>(errorMap.values());
-        int cutLine = 2;
-        for (int i = sortedPairs.size(); i > 2; i--) {
-            if (MathUtil.getRsq(sortedPairs.subList(0, i)) >= 0.95) {
-                cutLine = i;
-                break;
+        return rtPairsCorrected;
+    }
+
+    private int findMaxErrorIndex(SlopeIntercept slopeIntercept, List<Pair<Double, Double>> rtPairs) {
+        int maxIndex = 0;
+        double maxError = 0d;
+        for (int i = 0; i < rtPairs.size(); i++) {
+            double tempError = Math.abs(rtPairs.get(i).getRight() * slopeIntercept.getSlope() + slopeIntercept.getIntercept() - rtPairs.get(i).getLeft());
+            if (tempError > maxError) {
+                maxError = tempError;
+                maxIndex = i;
             }
         }
-        return sortedPairs.subList(0, cutLine);
+        return maxIndex;
+    }
+
+    private void preprocessRtPairs(List<Pair<Double, Double>> rtPairs, double tolerance) {
+        try {
+            SlopeIntercept initSlopeIntercept = linearFitter.getInitSlopeIntercept(rtPairs);
+            for (int i = rtPairs.size() - 1; i >= 0; i --){
+                double tempError = Math.abs(rtPairs.get(i).getRight() * initSlopeIntercept.getSlope() + initSlopeIntercept.getIntercept() - rtPairs.get(i).getLeft());
+                if (tempError > tolerance) {
+                    rtPairs.remove(i);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -148,7 +148,7 @@ public class LinearFitter {
         return new SlopeIntercept(slope, intercept);
     }
 
-    private SlopeIntercept getInitSlopeIntercept(List<Pair<Double,Double>> rtPairs) throws Exception {
+    public SlopeIntercept getInitSlopeIntercept(List<Pair<Double,Double>> rtPairs) throws Exception {
         double minLibRT = Double.MAX_VALUE;
         for (Pair<Double,Double> pair:rtPairs){
             if (pair.getLeft() < minLibRT){
