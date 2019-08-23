@@ -6,33 +6,33 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.apache.shiro.SecurityUtils;
 
 import java.util.Date;
 
 
-
 /***
- * @Author          TangTao
- * @CreateTime      2019-7-22 00:37:20
+ * @Author TangTao
+ * @CreateTime 2019-7-22 00:37:20
  * @UpdateTime
- * @Achieve         定义 JWT 生成 token 的规则 如:  有效时间 携带的用户信息 加密协议
- * @Copyright       西湖 PROPRO http://www.proteomics.pro/
+ * @Achieve 定义 JWT 生成 token 的规则 如:  有效时间 携带的用户信息 加密协议
+ * @Copyright 西湖 PROPRO http://www.proteomics.pro/
  *
  */
 public class JWTUtil {
 
-    // 过期时间 24 小时
-    private static final long EXPIRE_TIME = 60 * 24 * 60 * 1000;
+    // 过期时间 4 小时
+    private static final long EXPIRE_TIME = 4 * 60 * 60 * 1000;
 
     // 密钥
     private static final String SECRET = "propro-http://www.proteomics.pro/";
 
     /**
      * 登录时通过 loginController
-     * 生成 token, 5min后过期
+     * 生成 token, 5min 后过期
      *
      * @param username 用户名
-     * @return 加密的token
+     * @return 加密的 token
      */
     public static String createToken(String username) {
 
@@ -40,14 +40,16 @@ public class JWTUtil {
 
             Date date = new Date(System.currentTimeMillis() + EXPIRE_TIME);
 
-            Algorithm algorithm = Algorithm.HMAC256(SECRET);
+            Algorithm algorithm = Algorithm.HMAC512(SECRET);
 
-            System.out.println(">algorithm "+algorithm);
+            System.out.println(">algorithm " + algorithm);
 
             // 返回 token
             // 附带username信息
             return JWT.create()
                     .withClaim("username", username)
+                    // 为了让每次 token 不一样 生成一个随机数 目的是产生更大的随机性 这个参数也可以不必要
+                    .withClaim("propro", System.currentTimeMillis())
                     // 到期时间
                     .withExpiresAt(date)
                     // 创建一个新的JWT，并使用给定的算法进行标记
@@ -57,6 +59,7 @@ public class JWTUtil {
 
             return null;
         }
+
     }
 
     /**
@@ -70,9 +73,12 @@ public class JWTUtil {
 
         System.out.println(">执行 verify");
 
+        System.out.println(SecurityUtils.getSubject().getPrincipal());
+
+
         try {
 
-            Algorithm algorithm = Algorithm.HMAC256(SECRET);
+            Algorithm algorithm = Algorithm.HMAC512(SECRET);
 
             // 在token中附带了 username 信息
             JWTVerifier verifier = JWT.require(algorithm)

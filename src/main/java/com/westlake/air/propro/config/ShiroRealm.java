@@ -2,16 +2,16 @@ package com.westlake.air.propro.config;
 
 import com.westlake.air.propro.domain.db.UserDO;
 import com.westlake.air.propro.service.UserService;
-
 import com.westlake.air.propro.utils.JWTUtil;
-import org.apache.shiro.authc.*;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.AuthenticationInfo;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
-
-
 
 
 // @Component
@@ -23,7 +23,6 @@ public class ShiroRealm extends AuthorizingRealm {
     private UserService userService;
 
 
-
     /**
      * 必须重写此方法，不然会报错
      */
@@ -31,7 +30,6 @@ public class ShiroRealm extends AuthorizingRealm {
     public boolean supports(AuthenticationToken token) {
         return token instanceof JWTToken;
     }
-
 
 
     // /**
@@ -43,28 +41,23 @@ public class ShiroRealm extends AuthorizingRealm {
         System.out.println(">执行 doGetAuthenticationInfo 身份认证");
 
         String token = (String) authenticationToken.getCredentials();
-        // System.out.println(">token ---- "+token);
 
         // 解密获得 username 用于和数据库进行对比
         String username = JWTUtil.getUsername(token);
 
-        if (  null==username || !JWTUtil.verify(token, username)) {
-            // System.out.println("token 认证失败");
+        if (null == username || !JWTUtil.verify(token, username)) {
             throw new AuthenticationException("token 认证失败");
         }
 
 
-
         UserDO userInfo = userService.getByUsername(username);
-
-
         if (userInfo == null) {
             // 抛出 AuthenticationException
             throw new AuthenticationException("Username or password error");
         }
 
+        return new SimpleAuthenticationInfo(userInfo, token, getName());
 
-        return new SimpleAuthenticationInfo(token, token, getName());
 
     }
 
@@ -85,7 +78,7 @@ public class ShiroRealm extends AuthorizingRealm {
         UserDO userInfo = userService.getByUsername(username);
 
         // 如果查询为空 应该
-        if(null==userInfo){
+        if (null == userInfo) {
             return info;
         }
 

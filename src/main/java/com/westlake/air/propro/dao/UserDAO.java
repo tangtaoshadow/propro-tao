@@ -8,9 +8,8 @@ import org.springframework.stereotype.Service;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 
-
 @Service
-public class UserDAO extends BaseDAO<UserDO, UserQuery>{
+public class UserDAO extends BaseDAO<UserDO, UserQuery> {
 
     public static String CollectionName = "user";
 
@@ -42,9 +41,7 @@ public class UserDAO extends BaseDAO<UserDO, UserQuery>{
         Query query = new Query();
 
 
-
         if (targetQuery.getId() != null) {
-
 
             query.addCriteria(where("id").is(targetQuery.getId()));
 
@@ -79,7 +76,6 @@ public class UserDAO extends BaseDAO<UserDO, UserQuery>{
 
         return query;
     }
-
 
 
     public UserDO getByUsername(String username) {

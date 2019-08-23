@@ -17,11 +17,11 @@ import java.net.URLEncoder;
 
 
 /***
- * @Author          TangTao
- * @CreateTime      2019-7-22 00:30:50
- * @UpdateTime      2019-7-22 22:01:38
- * @Achieve         配置JWT 过滤规则  鉴权登录拦截器
- * @Copyright       西湖 PROPRO http://www.proteomics.pro/
+ * @Author TangTao
+ * @CreateTime 2019-7-22 00:30:50
+ * @UpdateTime 2019-7-22 22:01:38
+ * @Achieve 配置JWT 过滤规则  鉴权登录拦截器
+ * @Copyright 西湖 PROPRO http://www.proteomics.pro/
  *
  */
 
@@ -50,19 +50,23 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
             } catch (Exception e) {
                 //token 错误
                 responseError(response, e.getMessage());
-                return  false;
+                return false;
             }
+        } else {
         }
 
-        // 如果请求头不存在 Token，则可能是执行登陆操作或者是游客状态访问，
-        // 无需检查 token，直接返回 true
-        return true;
+        /***
+         * Statement:
+         * 当请求头中检测到不存在 token 这种情况不允许存在
+         * 因为允许它不需要携带 token 那就应该在 shiro 里配置好
+         * 而不是留到此处进行处理
+         */
+        return false;
     }
 
     /**
      * 判断用户是否想要登入。
      * 检测 header 里面是否包含 Token 字段
-     *
      */
     @Override
     protected boolean isLoginAttempt(ServletRequest request, ServletResponse response) {
@@ -81,7 +85,6 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 
     /**
      * 执行登陆操作
-     *
      */
     @Override
     protected boolean executeLogin(ServletRequest request, ServletResponse response) throws Exception {
@@ -92,26 +95,33 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
         String token = httpServletRequest.getHeader("Token");
 
         JWTToken jwtToken = new JWTToken(token);
-        System.out.println(" getSubject(request, response).login(jwtToken)");
-        // 提交给realm进行登入，如果错误他会抛出异常并被捕获
-        getSubject(request, response).login(jwtToken);
+        // getSubject(request, response).login(jwtToken);
+
+        try {
+            // 提交给realm进行登入，如果错误他会抛出异常并被捕获
+            getSubject(request, response).login(jwtToken);
+        } catch (Exception e) {
+            return false;
+        }
+
 
         // 如果没有抛出异常则代表登入成功，返回true
         return true;
     }
 
     /**
-     *
      * 对跨域提供支持
-     *
+     * <p>
      * >1 请求最先从这开始执行
-     *
      */
     @Override
     protected boolean preHandle(ServletRequest request, ServletResponse response) throws Exception {
 
-        System.out.println(">执行 preHandle");
+        System.out.println(">jwtfilter 执行 preHandle");
 
+
+        /*****************  下面注释的代码不要删掉  ****************************/
+        // 因为判断过程已经最先在 AuthenticationInterceptor 验证过 没有验证第二次的必要
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
         // 设置 header key-value

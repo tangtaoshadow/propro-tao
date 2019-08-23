@@ -15,17 +15,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.servlet.Filter;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 
 /***
- * @Author          TangTao
- * @CreateTime      2019-7-22 01:23:12
- * @UpdateTime      2019-7-22 21:57:40
- * @Achieve         配置 ShiroConfig 的 缓存 页面权限
- * @Copyright       西湖 PROPRO http://www.proteomics.pro/
+ * @Author TangTao
+ * @CreateTime 2019-7-22 01:23:12
+ * @UpdateTime 2019-7-22 21:57:40
+ * @Achieve 配置 ShiroConfig 的 缓存 页面权限
+ * @Copyright 西湖 PROPRO http://www.proteomics.pro/
  *
  */
 @Configuration
@@ -66,16 +65,16 @@ public class ShiroConfig {
 
 
     /***
-     * @UpdateAuthor    TangTao
-     * @Change          关闭了之前shiro配置的 setCacheManager  setRememberMeManager
-     *                  启用 jwt 所以关闭了shiro的 session
-     * @UpdateTime      2019-7-22 21:59:20
+     * @UpdateAuthor TangTao
+     * @Change 关闭了之前shiro配置的 setCacheManager  setRememberMeManager
+     *                  启用 jwt 所以关闭了 shiro 的 session
+     * @UpdateTime 2019-8-7 01:51:39
      * @param           shiroRealm
-     * @return          DefaultWebSecurityManager
-     * @Achieve         web应用管理配置 注入 DefaultWebSecurityManager
+     * @return DefaultWebSecurityManager
+     * @Achieve web应用管理配置 注入 DefaultWebSecurityManager
      */
     @Bean
-    // , CacheManager cacheManager
+    //  CacheManager cacheManager
     public DefaultWebSecurityManager securityManager(Realm shiroRealm, CacheManager cacheManager) {
 
         System.out.println(">执行 securityManager");
@@ -112,10 +111,11 @@ public class ShiroConfig {
     }
 
 
-
-
-
-    // 配置缓存 如果存在 就不需再次认证
+    /***
+     * 配置它的作用在于 不用每次都去数据库查询
+     * 通过 token 得出 username 然后就直接知道了角色
+     * @return
+     */
     @Bean
     public CacheManager cacheManager() {
 
@@ -193,6 +193,7 @@ public class ShiroConfig {
 
         // 注意 因为这里是 LinkedHashMap 所以要保持先后顺序
         filterChainDefinitionMap.put("/error", "anon");
+        filterChainDefinitionMap.put("/login/**", "anon");
         // filterChainDefinitionMap.put("/login/test1", "admin");
 
 

@@ -2,17 +2,20 @@ package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.westlake.air.propro.algorithm.parser.LibraryTsvParser;
+import com.westlake.air.propro.algorithm.parser.TraMLParser;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResultCode;
 import com.westlake.air.propro.constants.SuccessMsg;
 import com.westlake.air.propro.constants.TaskTemplate;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
-import com.westlake.air.propro.domain.db.*;
+import com.westlake.air.propro.domain.db.ExperimentDO;
+import com.westlake.air.propro.domain.db.LibraryDO;
+import com.westlake.air.propro.domain.db.PeptideDO;
+import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.query.LibraryQuery;
 import com.westlake.air.propro.domain.query.PeptideQuery;
-import com.westlake.air.propro.algorithm.parser.TraMLParser;
-import com.westlake.air.propro.algorithm.parser.LibraryTsvParser;
 import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.PeptideService;
 import com.westlake.air.propro.utils.PermissionUtil;
@@ -25,7 +28,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by James Lu MiaoShan
@@ -99,27 +104,57 @@ public class LibraryController extends BaseController {
         return "library/listIrt";
     }
 
+
+    // 公共标准库
     @RequestMapping(value = "/listPublic")
-    String listPublic(Model model,
-                      @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+    @ResponseBody
+    String listPublic(@RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                       @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
                       @RequestParam(value = "searchName", required = false) String searchName) {
-        model.addAttribute("searchName", searchName);
-        model.addAttribute("pageSize", pageSize);
-        LibraryQuery query = new LibraryQuery();
-        if (searchName != null && !searchName.isEmpty()) {
-            query.setName(searchName);
-        }
-        query.setDoPublic(true);
-        query.setPageSize(pageSize);
-        query.setPageNo(currentPage);
-        query.setType(0);
-        ResultDO<List<LibraryDO>> resultDO = libraryService.getList(query);
 
-        model.addAttribute("libraryList", resultDO.getModel());
-        model.addAttribute("totalPage", resultDO.getTotalPage());
-        model.addAttribute("currentPage", currentPage);
-        return "library/listPublic";
+
+        // 返回状态
+        Map<String, Object> map = new HashMap<String, Object>();
+        // 检查参数 username
+        int status = -1;
+
+        do {
+            // 验证 token
+            String username = getCurrentUsername();
+
+            if (username == null) {
+                // token 不正常
+                status = -2;
+                break;
+            }
+
+            LibraryQuery query = new LibraryQuery();
+            if (searchName != null && !searchName.isEmpty()) {
+                query.setName(searchName);
+            }
+            query.setDoPublic(true);
+            query.setPageSize(pageSize);
+            query.setPageNo(currentPage);
+            query.setType(0);
+            ResultDO<List<LibraryDO>> resultDO = libraryService.getList(query);
+
+            map.put("libraryList", resultDO.getModel());
+            map.put("totalPage", resultDO.getTotalPage());
+            map.put("currentPage", currentPage);
+
+            // 最后标记成功
+            status = 0;
+        } while (false);
+
+
+        // 返回状态结果
+        map.put("status", status);
+
+        // 返回数据
+        JSONObject json = new JSONObject(map);
+
+        return json.toString();
+
     }
 
     @RequestMapping(value = "/listPublicIrt")
@@ -221,7 +256,7 @@ public class LibraryController extends BaseController {
         }
     }
 
-    @RequestMapping(value = "/detail/{id}")
+    @RequestMapping(value = "/detail11/{id}")
     String detail(Model model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         LibraryDO library = libraryService.getById(id);
 
@@ -242,17 +277,177 @@ public class LibraryController extends BaseController {
         }
     }
 
-    @RequestMapping(value = "/update", method = RequestMethod.POST)
-    String update(Model model,
-                  @RequestParam(value = "id", required = true) String id,
-                  @RequestParam(value = "name") String name,
-                  @RequestParam(value = "type") Integer type,
-                  @RequestParam(value = "description") String description,
-                  @RequestParam(value = "libFile") MultipartFile libFile,
-                  @RequestParam(value = "prmFile", required = false) MultipartFile prmFile,
-                  RedirectAttributes redirectAttributes) {
 
+    @RequestMapping(value = "/detail", method = RequestMethod.POST)
+    @ResponseBody
+    String libraryListIdDetail(@RequestParam(value = "id") String id
+    ) {
+        System.out.println("===libraryListIdDetail==========");
+
+        // 返回状态
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        // 状态标记
+        int status = -1;
+
+        System.out.println(id);
+        LibraryDO library = libraryService.getById(id);
+        do {
+
+            // // 验证 token
+            // String username = getCurrentUsername();
+            //
+            // if (username == null) {
+            //     // token 不正常
+            //     status = -2;
+            //     break;
+            // } else {
+            //     // pass
+            // }
+            System.out.println(library);
+            System.out.println(library == null);
+
+            // if (library == null) {
+            //     // 查询库为空  严重错误
+            //     status = -3;
+            //     break;
+            // } else
+
+            {
+
+                // ***  临时注释  ***
+                PermissionUtil.check(library);
+
+                // IRT 库
+                if (library.getType().equals(LibraryDO.TYPE_IRT)) {
+
+                    System.out.println("--==----");
+                    Double[] range = peptideService.getRTRange(id);
+                    System.out.println(range);
+                    if (range != null && range.length == 2) {
+                        map.put("minRt", range[0]);
+                        map.put("maxRt", range[1]);
+                    }
+                }
+                map.put("data", library);
+                status = 0;
+            }
+        } while (false);
+
+
+        // 返回状态结果
+        map.put("status", status);
+
+        // 返回数据
+        JSONObject json = new JSONObject(map);
+
+        System.out.println(json.toString());
+        return json.toString();
+
+    }
+
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @ResponseBody
+    String update(
+            @RequestParam(value = "id", required = true) String id,
+            @RequestParam(value = "name") String name,
+            @RequestParam(value = "libType") String type,
+            @RequestParam(value = "description") String description,
+            @RequestParam(value = "libFile") MultipartFile libFile,
+            @RequestParam(value = "prmFile", required = false) MultipartFile prmFile
+    ) {
+
+        System.out.println("1");
+
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        // 状态标记
+        int status = -1;
+
+        do {
+
+            System.out.println("2");
+
+            LibraryDO library = libraryService.getById(id);
+
+            if (library == null) {
+                status = -2;
+                break;
+            }
+            System.out.println("3");
+
+            PermissionUtil.check(library);
+            library.setDescription(description);
+            if ("library" == type) {
+                library.setType(0);
+            } else {
+                library.setType(1);
+
+            }
+            ResultDO updateResult = libraryService.update(library);
+            if (updateResult.isFailed()) {
+                // 更新失败
+                status = -3;
+                break;
+            }
+
+            System.out.println("4");
+
+            // 没有更新源文件
+            if (libFile == null || libFile.getOriginalFilename() == null || libFile.getOriginalFilename().isEmpty()) {
+                status = -4;
+                break;
+            }
+
+            TaskDO taskDO = new TaskDO(TaskTemplate.UPLOAD_LIBRARY_FILE, library.getName());
+            taskService.insert(taskDO);
+            System.out.println("5");
+
+            try {
+                InputStream libFileStream = libFile.getInputStream();
+                InputStream prmFileStream = null;
+                if (!prmFile.isEmpty()) {
+                    prmFileStream = prmFile.getInputStream();
+                }
+                libraryTask.saveLibraryTask(library, libFileStream, libFile.getOriginalFilename(), prmFileStream, taskDO);
+            } catch (IOException e) {
+                // 更新过程出错
+                e.printStackTrace();
+                status = -5;
+                break;
+            }
+            System.out.println("6");
+
+            // 更新成功
+            status = 0;
+            // 返回 taskId
+            map.put("taskId", taskDO.getId());
+
+
+        } while (false);
+
+        // 返回状态结果
+        map.put("status", status);
+
+        // 返回数据
+        JSONObject json = new JSONObject(map);
+
+        return json.toString();
+
+    }
+
+
+    @RequestMapping(value = "/update11", method = RequestMethod.POST)
+    String update1(Model model,
+                   @RequestParam(value = "id", required = true) String id,
+                   @RequestParam(value = "name") String name,
+                   @RequestParam(value = "type") Integer type,
+                   @RequestParam(value = "description") String description,
+                   @RequestParam(value = "libFile") MultipartFile libFile,
+                   @RequestParam(value = "prmFile", required = false) MultipartFile prmFile,
+                   RedirectAttributes redirectAttributes) {
         String redirectListUrl = null;
+
         if (type == 1) {
             redirectListUrl = "redirect:/library/listIrt";
         } else {
@@ -266,10 +461,13 @@ public class LibraryController extends BaseController {
         }
 
         PermissionUtil.check(library);
+
+
         library.setDescription(description);
         library.setType(type);
         ResultDO updateResult = libraryService.update(library);
         if (updateResult.isFailed()) {
+            // 更新失败
             redirectAttributes.addFlashAttribute(ResultCode.UPDATE_ERROR.getMessage(), updateResult.getMsgInfo());
             return redirectListUrl;
         }
@@ -294,6 +492,7 @@ public class LibraryController extends BaseController {
             e.printStackTrace();
         }
 
+        // 更新成功
         return "redirect:/task/detail/" + taskDO.getId();
     }
 

@@ -32,7 +32,9 @@ public class VMProperties {
 
     public String getDingtalkRobot() {
         if (StringUtils.isEmpty(dingtalkRobot)) {
+            // 把申请信息发送到钉钉上
             dingtalkRobot = "https://oapi.dingtalk.com/robot/send?access_token=f2fb029431f174e678106b30c2db5fb0e40e921999386a61031bf864f18beb77";
+            // dingtalkRobot = "https://oapi.dingtalk.com/robot/send?access_token=27610109eb6b513e986d2cef1e9744fd27da06a04f4b9179114549ea80bd44e9";
         }
         return dingtalkRobot;
     }

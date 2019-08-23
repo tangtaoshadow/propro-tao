@@ -4,26 +4,39 @@ import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.Roles;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.exception.UnauthorizedAccessException;
+import com.westlake.air.propro.service.UserService;
 import org.apache.shiro.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class PermissionUtil {
 
+
+    @Autowired
+    static
+    HttpServletRequest request;
+    @Autowired
+    static
+    UserService userService;
+
     public static void check(LibraryDO library) throws UnauthorizedAccessException {
         UserDO user = getCurrentUser();
-        if(library == null || user == null){
+        if (library == null || user == null) {
+            // 抛了一个重定向 今后要去掉
             throw new UnauthorizedAccessException("redirect:/library/list");
         }
 
-        if(library.isDoPublic()){
+        if (library.isDoPublic()) {
             return;
         }
 
-        if(user.getRoles().contains(Roles.ROLE_ADMIN)){
+        if (user.getRoles().contains(Roles.ROLE_ADMIN)) {
             return;
         }
 
         if (!library.getCreator().equals(user.getUsername())) {
-            if(library.getType().equals(Constants.LIBRARY_TYPE_IRT)){
+            if (library.getType().equals(Constants.LIBRARY_TYPE_IRT)) {
                 throw new UnauthorizedAccessException("redirect:/library/listIrt");
             }
             throw new UnauthorizedAccessException("redirect:/library/list");
@@ -34,15 +47,15 @@ public class PermissionUtil {
 
     public static void check(ProjectDO project) throws UnauthorizedAccessException {
         UserDO user = getCurrentUser();
-        if(project == null || user == null){
+        if (project == null || user == null) {
             throw new UnauthorizedAccessException("redirect:/project/list");
         }
 
-        if(project.isDoPublic()){
+        if (project.isDoPublic()) {
             return;
         }
 
-        if(user.getRoles().contains(Roles.ROLE_ADMIN)){
+        if (user.getRoles().contains(Roles.ROLE_ADMIN)) {
             return;
         }
 
@@ -53,13 +66,13 @@ public class PermissionUtil {
         }
     }
 
-    public static boolean check(TaskDO taskDO) throws UnauthorizedAccessException{
+    public static boolean check(TaskDO taskDO) throws UnauthorizedAccessException {
         UserDO user = getCurrentUser();
-        if(taskDO == null || user == null){
+        if (taskDO == null || user == null) {
             throw new UnauthorizedAccessException("redirect:/task/list");
         }
 
-        if(user.getRoles().contains(Roles.ROLE_ADMIN)){
+        if (user.getRoles().contains(Roles.ROLE_ADMIN)) {
             return true;
         }
 
@@ -70,13 +83,13 @@ public class PermissionUtil {
         }
     }
 
-    public static boolean check(ExperimentDO experiment) throws UnauthorizedAccessException{
+    public static boolean check(ExperimentDO experiment) throws UnauthorizedAccessException {
         UserDO user = getCurrentUser();
-        if(experiment == null || user == null){
+        if (experiment == null || user == null) {
             throw new UnauthorizedAccessException("redirect:/experiment/list");
         }
 
-        if(user.getRoles().contains(Roles.ROLE_ADMIN)){
+        if (user.getRoles().contains(Roles.ROLE_ADMIN)) {
             return true;
         }
 
@@ -87,13 +100,13 @@ public class PermissionUtil {
         }
     }
 
-    public static boolean check(AnalyseOverviewDO overview) throws UnauthorizedAccessException{
+    public static boolean check(AnalyseOverviewDO overview) throws UnauthorizedAccessException {
         UserDO user = getCurrentUser();
-        if(overview == null || user == null){
+        if (overview == null || user == null) {
             throw new UnauthorizedAccessException("redirect:/analyse/overview/list");
         }
 
-        if(user.getRoles().contains(Roles.ROLE_ADMIN)){
+        if (user.getRoles().contains(Roles.ROLE_ADMIN)) {
             return true;
         }
 
@@ -106,10 +119,12 @@ public class PermissionUtil {
 
     public static UserDO getCurrentUser() {
         Object object = SecurityUtils.getSubject().getPrincipal();
+
         if (object != null) {
             return (UserDO) object;
         }
 
         return null;
+
     }
 }

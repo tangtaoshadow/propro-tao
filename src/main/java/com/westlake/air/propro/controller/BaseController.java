@@ -51,12 +51,12 @@ public class BaseController {
     public List<LibraryDO> getLibraryList(Integer type, boolean includePublic) {
         String username = null;
         //如果是管理员的话不要设置指定的用户名
-        if(!isAdmin()){
+        if (!isAdmin()) {
             username = getCurrentUsername();
         }
-        if(!includePublic){
+        if (!includePublic) {
             return libraryService.getSimpleAll(username, type, null);
-        }else{
+        } else {
             List<LibraryDO> libraries = libraryService.getSimpleAll(username, type, false);
             List<LibraryDO> publicLibraries = libraryService.getAllPublic(type);
             libraries.addAll(publicLibraries);
@@ -75,34 +75,36 @@ public class BaseController {
 
     public UserDO getCurrentUser() {
 
-        // Object object = SecurityUtils.getSubject().getPrincipal();
+        // 这里根据 token 来获取用户信息 因为用户名在 token 里
         String token = request.getHeader("token");
-        System.out.println(token);
 
-        if(null==token){
+        if (null == token) {
             return null;
         }
 
         // 获取真实用户名
         String username = JWTUtil.getUsername(token);
-        System.out.println("username="+username);
         // 获取数据库中对应的用户
         UserDO userInfo = userService.getByUsername(username);
-        System.out.println(userInfo);
 
         if (userInfo != null) {
+            // 返回查询到的存在的用户
             return userInfo;
         }
 
         return null;
     }
 
+    // 通过 token 获取用户名 通过用户名向服务器查询出真正存在的一条用户数据 userInfo
     public String getCurrentUsername() {
         UserDO user = getCurrentUser();
+        // 当前仅当用户名存在 且不为空 才会返回用户名
+        // /所以这一步就相当于已经通过 token 验证了用户名的正确性
         if (user != null && user.getUsername() != null && !user.getUsername().isEmpty()) {
             return user.getUsername();
         } else {
-            throw new UserNotLoginException();
+            // 不存在就返回 null
+            return null;
         }
     }
 

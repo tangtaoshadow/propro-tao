@@ -49,7 +49,10 @@ public class TaskDO extends BaseDO {
     }
 
     public TaskDO(TaskTemplate taskTemplate, String taskSuffixName) {
-        this.creator = ((UserDO)SecurityUtils.getSubject().getPrincipal()).getUsername();
+        //
+        this.creator = ((UserDO) SecurityUtils.getSubject().getPrincipal()).getUsername();
+
+
         this.taskTemplate = taskTemplate.getName();
         this.status = TaskStatus.WAITING.getName();
         this.name = taskTemplate.getName() + "-" + taskSuffixName;
