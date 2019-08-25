@@ -359,6 +359,7 @@ public class LibraryController extends BaseController {
 
         System.out.println("1");
 
+        System.out.println(prmFile);
         Map<String, Object> map = new HashMap<String, Object>();
 
         // 状态标记
@@ -406,10 +407,14 @@ public class LibraryController extends BaseController {
             try {
                 InputStream libFileStream = libFile.getInputStream();
                 InputStream prmFileStream = null;
-                if (!prmFile.isEmpty()) {
+
+                if (null != prmFile && !prmFile.isEmpty()) {
                     prmFileStream = prmFile.getInputStream();
                 }
+
+
                 libraryTask.saveLibraryTask(library, libFileStream, libFile.getOriginalFilename(), prmFileStream, taskDO);
+
             } catch (IOException e) {
                 // 更新过程出错
                 e.printStackTrace();

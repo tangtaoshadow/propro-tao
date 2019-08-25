@@ -7,14 +7,11 @@ import com.westlake.air.propro.constants.ResidueType;
 import com.westlake.air.propro.dao.AminoAcidDAO;
 import com.westlake.air.propro.dao.ElementsDAO;
 import com.westlake.air.propro.dao.UnimodDAO;
-import com.westlake.air.propro.domain.ResultDO;
-import com.westlake.air.propro.domain.bean.analyse.MzResult;
 import com.westlake.air.propro.domain.bean.peptide.Annotation;
 import com.westlake.air.propro.domain.bean.peptide.Fragment;
 import com.westlake.air.propro.domain.bean.score.BYSeries;
 import com.westlake.air.propro.domain.db.FragmentInfo;
 import com.westlake.air.propro.domain.db.PeptideDO;
-import com.westlake.air.propro.domain.query.PeptideQuery;
 import com.westlake.air.propro.service.PeptideService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,10 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-
-import static com.westlake.air.propro.constants.Constants.MAX_PAGE_SIZE_FOR_FRAGMENT;
 
 /**
  * Created by James Lu MiaoShan
@@ -120,27 +114,27 @@ public class FragmentFactory {
                 List<String> leftUnimodIds = formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), 0, i);
                 List<String> rightUnimodIds = formulaCalculator.parseUnimodIds(peptideDO.getUnimodMap(), length - i, length);
 
-                if(ionTypes.contains(ResidueType.AIon)){
+                if (ionTypes.contains(ResidueType.AIon)) {
                     String cutInfoA = "a" + i + (charge == 1 ? "" : ("^" + charge));
                     fragmentMap.put(cutInfoA, new FragmentInfo(cutInfoA, formulaCalculator.getMonoMz(leftSubstring, ResidueType.AIon, charge, 0, 0, false, leftUnimodIds), charge));
                 }
-                if(ionTypes.contains(ResidueType.BIon)){
+                if (ionTypes.contains(ResidueType.BIon)) {
                     String cutInfoB = "b" + i + (charge == 1 ? "" : ("^" + charge));
                     fragmentMap.put(cutInfoB, new FragmentInfo(cutInfoB, formulaCalculator.getMonoMz(leftSubstring, ResidueType.BIon, charge, 0, 0, false, leftUnimodIds), charge));
                 }
-                if(ionTypes.contains(ResidueType.CIon)){
+                if (ionTypes.contains(ResidueType.CIon)) {
                     String cutInfoC = "c" + i + (charge == 1 ? "" : ("^" + charge));
                     fragmentMap.put(cutInfoC, new FragmentInfo(cutInfoC, formulaCalculator.getMonoMz(leftSubstring, ResidueType.CIon, charge, 0, 0, false, leftUnimodIds), charge));
                 }
-                if(ionTypes.contains(ResidueType.XIon)){
+                if (ionTypes.contains(ResidueType.XIon)) {
                     String cutInfoX = "x" + i + (charge == 1 ? "" : ("^" + charge));
                     fragmentMap.put(cutInfoX, new FragmentInfo(cutInfoX, formulaCalculator.getMonoMz(rightSubstring, ResidueType.XIon, charge, 0, 0, false, rightUnimodIds), charge));
                 }
-                if(ionTypes.contains(ResidueType.YIon)){
+                if (ionTypes.contains(ResidueType.YIon)) {
                     String cutInfoY = "y" + i + (charge == 1 ? "" : ("^" + charge));
                     fragmentMap.put(cutInfoY, new FragmentInfo(cutInfoY, formulaCalculator.getMonoMz(rightSubstring, ResidueType.YIon, charge, 0, 0, false, rightUnimodIds), charge));
                 }
-                if(ionTypes.contains(ResidueType.ZIon)){
+                if (ionTypes.contains(ResidueType.ZIon)) {
                     String cutInfoZ = "z" + i + (charge == 1 ? "" : ("^" + charge));
                     fragmentMap.put(cutInfoZ, new FragmentInfo(cutInfoZ, formulaCalculator.getMonoMz(rightSubstring, ResidueType.ZIon, charge, 0, 0, false, rightUnimodIds), charge));
                 }
@@ -157,7 +151,7 @@ public class FragmentFactory {
             AminoAcid aa = aminoAcidDAO.getAminoAcidByCode(String.valueOf(acidCode));
             totalMass += aa.getMonoIsotopicMass();
         }
-        if (unimodHashMap == null){
+        if (unimodHashMap == null) {
             return totalMass;
         }
         for (String unimodCode : unimodHashMap.values()) {
@@ -244,7 +238,13 @@ public class FragmentFactory {
         if (type.equals(ResidueType.AIon) || type.equals(ResidueType.BIon) || type.equals(ResidueType.CIon)) {
             return originList.subList(0, location);
         } else if (type.equals(ResidueType.XIon) || type.equals(ResidueType.YIon) || type.equals(ResidueType.ZIon)) {
-            return originList.subList(originList.size() - location, originList.size());
+            List temp = null;
+            try {
+                temp = originList.subList(originList.size() - location, originList.size());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return temp;
         } else if (type.equals(ResidueType.Full)) {
             return originList;
         } else {
