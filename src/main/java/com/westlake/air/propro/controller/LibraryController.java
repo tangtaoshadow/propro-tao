@@ -5,8 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.algorithm.parser.LibraryTsvParser;
 import com.westlake.air.propro.algorithm.parser.TraMLParser;
 import com.westlake.air.propro.constants.Constants;
-import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.constants.SuccessMsg;
+import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.constants.enums.TaskTemplate;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.aird.WindowRange;
@@ -20,7 +20,6 @@ import com.westlake.air.propro.service.LibraryService;
 import com.westlake.air.propro.service.PeptideService;
 import com.westlake.air.propro.utils.PermissionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,7 +35,7 @@ import java.util.Map;
  * Created by James Lu MiaoShan
  * Time: 2018-05-31 09:53
  */
-@Controller
+@RestController
 @RequestMapping("library")
 public class LibraryController extends BaseController {
 
@@ -49,13 +48,20 @@ public class LibraryController extends BaseController {
     @Autowired
     PeptideService peptideService;
 
+    
+    // 标准库
     @RequestMapping(value = "/list")
     String list(Model model,
                 @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
                 @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
                 @RequestParam(value = "searchName", required = false) String searchName) {
-        model.addAttribute("searchName", searchName);
-        model.addAttribute("pageSize", pageSize);
+        int status = -1;
+        Map<String, Object> map = new HashMap<String, Object>();
+
+
+        map.put("searchName", searchName);
+        map.put("pageSize", pageSize);
+
         LibraryQuery query = new LibraryQuery();
         if (searchName != null && !searchName.isEmpty()) {
             query.setName(searchName);
@@ -69,10 +75,15 @@ public class LibraryController extends BaseController {
         query.setType(0);
         ResultDO<List<LibraryDO>> resultDO = libraryService.getList(query);
 
-        model.addAttribute("libraryList", resultDO.getModel());
-        model.addAttribute("totalPage", resultDO.getTotalPage());
-        model.addAttribute("currentPage", currentPage);
-        return "library/list";
+        map.put("libraryList", resultDO.getModel());
+        map.put("totalPage", resultDO.getTotalPage());
+        map.put("currentPage", currentPage);
+        status = 0;
+        map.put("status", status);
+        // 返回数据
+        JSONObject json = new JSONObject(map);
+
+        return json.toString();
     }
 
     @RequestMapping(value = "/listIrt")
