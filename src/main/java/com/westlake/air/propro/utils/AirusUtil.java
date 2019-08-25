@@ -1,7 +1,7 @@
 package com.westlake.air.propro.utils;
 
 import com.westlake.air.propro.constants.FdrConst;
-import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.constants.enums.ScoreType;
 import com.westlake.air.propro.domain.bean.learner.FinalResult;
 import com.westlake.air.propro.domain.bean.learner.ScoreData;
 import com.westlake.air.propro.domain.bean.learner.TrainAndTest;

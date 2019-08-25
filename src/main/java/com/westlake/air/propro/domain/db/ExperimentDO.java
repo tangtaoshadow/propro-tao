@@ -1,5 +1,6 @@
 package com.westlake.air.propro.domain.db;
 
+import com.westlake.air.propro.constants.SuffixConst;
 import com.westlake.air.propro.domain.BaseDO;
 import com.westlake.air.propro.domain.bean.aird.*;
 import com.westlake.air.propro.domain.bean.irt.IrtResult;
@@ -95,11 +96,10 @@ public class ExperimentDO extends BaseDO {
     }
 
     public String getAirdPath() {
-        return FilenameUtils.concat(FilenameUtils.concat(RepositoryUtil.getRepo(), projectName), name) + ".aird";
+        return FilenameUtils.concat(FilenameUtils.concat(RepositoryUtil.getRepo(), projectName), name) + SuffixConst.AIRD;
     }
 
     public String getAirdIndexPath() {
-        return FilenameUtils.concat(FilenameUtils.concat(RepositoryUtil.getRepo(), projectName), name) + ".json";
-
+        return FilenameUtils.concat(FilenameUtils.concat(RepositoryUtil.getRepo(), projectName), name) + SuffixConst.JSON;
     }
 }

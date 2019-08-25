@@ -3,19 +3,18 @@ package com.westlake.air.propro.algorithm.decoy.generator;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.westlake.air.propro.algorithm.decoy.BaseGenerator;
-import com.westlake.air.propro.algorithm.formula.FormulaCalculator;
-import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.constants.ResidueType;
 import com.westlake.air.propro.domain.bean.peptide.Annotation;
 import com.westlake.air.propro.domain.db.FragmentInfo;
 import com.westlake.air.propro.domain.db.PeptideDO;
-import com.westlake.air.propro.utils.TransitionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Nico Wang

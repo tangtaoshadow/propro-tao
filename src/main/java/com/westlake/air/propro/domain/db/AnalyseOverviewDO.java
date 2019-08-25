@@ -1,6 +1,6 @@
 package com.westlake.air.propro.domain.db;
 
-import com.westlake.air.propro.constants.Classifier;
+import com.westlake.air.propro.constants.enums.Classifier;
 import com.westlake.air.propro.domain.BaseDO;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -94,13 +94,19 @@ public class AnalyseOverviewDO extends BaseDO {
     HashMap<String, Integer> decoyDistributions = new HashMap<>();
 
     //最终计算鉴定到的肽段数目
-    Integer matchedPeptideCount;
+    Integer matchedPeptideCount = 0;
 
     //最终提取到的肽段数目
-    Integer totalPeptideCount;
+    Integer totalPeptideCount = 0;
 
     //对应标准库中的肽段数目
     Integer libraryPeptideCount;
+
+    //最终识别的蛋白质数目
+    Integer matchedProteinCount = 0;
+
+    //最终识别的肽段-蛋白质覆盖率,公式为:实际鉴定到的同一个蛋白质的肽段数目/标准库中同一个蛋白质对应的肽段数目
+    Float ppRate;
 
     //本次分析最终的选峰数目
     Long peakCount = 0L;
@@ -110,4 +116,12 @@ public class AnalyseOverviewDO extends BaseDO {
 
     //备忘录
     String note;
+
+    public float calPPRate() {
+        if (matchedProteinCount != 0) {
+            return (float)matchedPeptideCount / matchedProteinCount;
+        } else {
+            return 0;
+        }
+    }
 }

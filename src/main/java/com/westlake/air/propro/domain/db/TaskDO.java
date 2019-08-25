@@ -1,7 +1,7 @@
 package com.westlake.air.propro.domain.db;
 
-import com.westlake.air.propro.constants.TaskStatus;
-import com.westlake.air.propro.constants.TaskTemplate;
+import com.westlake.air.propro.constants.enums.TaskStatus;
+import com.westlake.air.propro.constants.enums.TaskTemplate;
 import com.westlake.air.propro.domain.BaseDO;
 import com.westlake.air.propro.domain.bean.task.MachineInfo;
 import com.westlake.air.propro.domain.bean.task.TaskLog;

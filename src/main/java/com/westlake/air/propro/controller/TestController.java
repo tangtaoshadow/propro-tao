@@ -8,13 +8,14 @@ import com.westlake.air.propro.algorithm.learner.SemiSupervise;
 import com.westlake.air.propro.algorithm.merger.ExpMerger;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.algorithm.parser.MsmsParser;
-import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.constants.enums.ScoreType;
 import com.westlake.air.propro.dao.AnalyseDataDAO;
 import com.westlake.air.propro.domain.bean.file.TableFile;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import com.westlake.air.propro.domain.db.*;
 import com.westlake.air.propro.domain.params.WorkflowParams;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
+import com.westlake.air.propro.domain.query.ProjectQuery;
 import com.westlake.air.propro.service.*;
 import com.westlake.air.propro.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,17 +80,36 @@ public class TestController extends BaseController {
     String testLMS(Model model, RedirectAttributes redirectAttributes) {
         TaskDO taskDO = new TaskDO();
         taskDO.addLog("HelloWorld");
-//        String a = resultCompareService.getProproProteins("5d1d57b05bb5e9463e9dcc16", false).size() + "";
-//        String b = resultCompareService.getProproProteins("5d037a57fc6f9e4100b55d81", true).size() + "";
-//        String c = resultCompareService.getProproProteins("5d038111fc6f9e4100b74990", true).size() + "";
-        return "Success";
+        String a = resultCompareService.getProproProteins("5d47a489e925e50457bcef77", true).size() + "";
+        String b = resultCompareService.getProproProteins("5d4795f7e925e50457b74d45", true).size() + "";
+        String c = resultCompareService.getProproProteins("5d47caa818caf922b21cf272", true).size() + "";
+        return "Common:" + a + ";3Da:" + b + ";4Da:" + c;
     }
 
     //计算iRT
     @RequestMapping("test2")
     @ResponseBody
     int test2(Model model, RedirectAttributes redirectAttributes) {
-        return 1;
+        List<ProjectDO> projects = projectService.getAll(new ProjectQuery());
+        for (ProjectDO project : projects){
+            List<ExperimentDO> exps = experimentService.getAllByProjectId(project.getId());
+            if(exps.size() == 0){
+                continue;
+            }
+            for(ExperimentDO exp : exps){
+                List<AnalyseOverviewDO> overviews = analyseOverviewService.getAllByExpId(exp.getId());
+                if(overviews.size() == 0){
+                    continue;
+                }
+                for (AnalyseOverviewDO overview : overviews){
+                    int count = analyseDataService.countProteins(overview.getId());
+                    overview.setMatchedProteinCount(count);
+                    analyseOverviewService.update(overview);
+                    logger.info(overview.getName()+"更新完毕,鉴定蛋白数目:"+count);
+                }
+            }
+        }
+        return 0;
     }
 
     @RequestMapping("test6")
@@ -97,7 +117,7 @@ public class TestController extends BaseController {
     List<String> test6(Model model, RedirectAttributes redirectAttributes) throws IOException {
         List<PeptideDO> peptides = peptideService.getAllByLibraryId("5c754e9ddfdfdd68309f0fce");
         List<String> realList = new ArrayList<>();
-        for(PeptideDO peptide : peptides){
+        for (PeptideDO peptide : peptides) {
             realList.add(peptide.getSequence());
         }
         return realList;
@@ -268,19 +288,19 @@ public class TestController extends BaseController {
         }
 
         int dimension = 3;
-        System.out.println("file: " + fileTargetMap.size() + " + " + fileDecoyMap.size());
-        System.out.println("propro: " + (proproMatchTarget.size() + proproOnlyTarget.size()) + " + " + (proproMatchDecoy.size() + proproOnlyDecoy.size()));
-        System.out.println("match: " + proproMatchTarget.size() + " + " + proproMatchDecoy.size());
-        System.out.println("propro only: " + proproOnlyTarget.size() + " + " + proproOnlyDecoy.size());
-        System.out.println("file only: " + fileOnlyTarget.size() + " + " + fileOnlyDecoy.size());
-        System.out.println("match file target:   " + JSON.toJSON(getHitMap(fileMatchTarget, dimension)));
-        System.out.println("match propro target: " + JSON.toJSON(getHitMap(proproMatchTarget, dimension)));
-        System.out.println("match file decoy:    " + JSON.toJSON(getHitMap(fileMatchDecoy, dimension)));
-        System.out.println("match propro decoy:  " + JSON.toJSON(getHitMap(proproMatchDecoy, dimension)));
-        System.out.println("only file target:    " + JSON.toJSON(getHitMap(fileOnlyTarget, dimension)));
-        System.out.println("only file decoy:     " + JSON.toJSON(getHitMap(fileOnlyDecoy, dimension)));
-        System.out.println("only propro target:  " + JSON.toJSON(getHitMap(proproOnlyTarget, dimension)));
-        System.out.println("only propro decoy:   " + JSON.toJSON(getHitMap(proproOnlyDecoy, dimension)));
+        logger.info("file: " + fileTargetMap.size() + " + " + fileDecoyMap.size());
+        logger.info("propro: " + (proproMatchTarget.size() + proproOnlyTarget.size()) + " + " + (proproMatchDecoy.size() + proproOnlyDecoy.size()));
+        logger.info("match: " + proproMatchTarget.size() + " + " + proproMatchDecoy.size());
+        logger.info("propro only: " + proproOnlyTarget.size() + " + " + proproOnlyDecoy.size());
+        logger.info("file only: " + fileOnlyTarget.size() + " + " + fileOnlyDecoy.size());
+        logger.info("match file target:   " + JSON.toJSON(getHitMap(fileMatchTarget, dimension)));
+        logger.info("match propro target: " + JSON.toJSON(getHitMap(proproMatchTarget, dimension)));
+        logger.info("match file decoy:    " + JSON.toJSON(getHitMap(fileMatchDecoy, dimension)));
+        logger.info("match propro decoy:  " + JSON.toJSON(getHitMap(proproMatchDecoy, dimension)));
+        logger.info("only file target:    " + JSON.toJSON(getHitMap(fileOnlyTarget, dimension)));
+        logger.info("only file decoy:     " + JSON.toJSON(getHitMap(fileOnlyDecoy, dimension)));
+        logger.info("only propro target:  " + JSON.toJSON(getHitMap(proproOnlyTarget, dimension)));
+        logger.info("only propro decoy:   " + JSON.toJSON(getHitMap(proproOnlyDecoy, dimension)));
 //        printScoreDistribution(analyseOverviewIdList, proproMatchTarget, ScoreType.XcorrShape.getTypeName(), 0);
 //        printScoreDistribution(analyseOverviewIdList, proproMatchTarget, ScoreType.XcorrShape.getTypeName(), 0);
         return null;
@@ -351,22 +371,20 @@ public class TestController extends BaseController {
     @RequestMapping("compare")
     @ResponseBody
     String compareTest() {
-//        String analyseOverviewId = "5d087c33e24d2e62a82055a3";
-//        String filePath = "P:\\data\\HCC_sciex\\pyprophet\\D20181207yix_HCC_SW_T_46A_with_dscore_filtered.tsv";
-//        HashSet<String> result = resultComparator.getFileOnlyPepRef(analyseOverviewId, filePath);
-//        resultComparator.proteinResults(analyseOverviewId, filePath);
-//        resultComparator.peptideRefResults(analyseOverviewId, filePath);
-//        resultComparator.peptideSeqResults(analyseOverviewId, filePath);
-//        resultComparator.silacResults(analyseOverviewId, filePath);
-        String projectIdOld = "5d08705fe0073c9b70faff6a";
-        String projectId = "5d11dd3f33251e8512a2f402";
-        String libraryId = "5d0870dce0073c9b70fb008f";
-        String matrixFilePath = "P:\\data\\HCC_QE3\\HCC_20190106_dia_os_peptides_matrix.tsv";
-        String matrixFilePathNew = "P:\\data\\HCC_QE3\\QEpeptides_2019626.txt";
+        String analyseOverviewId = "5d50c25a2b617d2542652f78";
+        String filePath = "P:\\data\\yixiao\\pyprophet\\D20190802yix_HCCC_b1_pool-HCCC_pool_b1_allFrag_with_dscore_filtered.tsv";
+        resultCompareService.printPepResults(analyseOverviewId, filePath);
+        resultCompareService.printProtResults(analyseOverviewId, filePath, true);
+        resultCompareService.printFileOnlyPep(analyseOverviewId, filePath, 20);
+//        String projectIdOld = "5d08705fe0073c9b70faff6a";
+//        String projectId = "5d11dd3f33251e8512a2f402";
+//        String libraryId = "5d0870dce0073c9b70fb008f";
+//        String matrixFilePath = "P:\\data\\HCC_QE3\\HCC_20190106_dia_os_peptides_matrix.tsv";
+//        String matrixFilePathNew = "P:\\data\\HCC_QE3\\QEpeptides_2019626.txt";
 //        String projectId = "5d087107e0073c9b70fb0091";
 //        String matrixFilePath = "P:\\data\\HCC_sciex\\HCC_20190114_swath_os_peptides_matrix.tsv";
 //        resultCompareService.compareMatrix(projectId, matrixFilePathNew, 0, true);
-        resultCompareService.printProteinCoverage(projectId, libraryId, matrixFilePathNew);
+//        resultCompareService.printProteinCoverage(projectId, libraryId, matrixFilePathNew);
         return null;
     }
 
@@ -380,9 +398,9 @@ public class TestController extends BaseController {
 //        resultComparator.compareReplicate(projectId1, filePath1, "C20181210yix_HCC_DIA_T_24A", "C20181218yix_HCC_DIA_T_24B");
 //        resultComparator.compareReplicate(projectId1, filePath1, "C20181208yix_HCC_DIA_T_46A", "C20181218yix_HCC_DIA_T_46B");
 //        resultComparator.compareReplicate(projectId1, filePath1, "C20181208yix_HCC_DIA_T_48A", "C20181218yix_HCC_DIA_T_48B");
-        String projectId2 = "5d08705fe0073c9b70faff6a";
-        String filePath2 = "P:\\data\\HCC_sciex\\HCC_20190114_swath_os_peptides_matrix.tsv";
-        resultCompareService.compareMatrixReplicate(projectId2, filePath2, "D20181213yix_HCC_SW_T_17A", "D20181217yix_HCC_SW_T_17B", 0, false);
+        String projectId2 = "5d3f9ef467258222a8c6e31b";
+        String filePath2 = "P:\\data\\HeLa_caix_Compare\\peptides_hela20190730_sum.txt";
+        resultCompareService.compareMatrixReplicate(projectId2, filePath2, "5d3fa0aa67258222a8c6e334", "5d3fa0aa67258222a8c6e335", 1, false);
 //        resultComparator.compareReplicate(projectId2, filePath2, "D20181213yix_HCC_SW_T_18A", "D20181217yix_HCC_SW_T_18B");
 //        resultComparator.compareReplicate(projectId2, filePath2, "D20181213yix_HCC_SW_T_24A", "D20181217yix_HCC_SW_T_24B");
 //        resultComparator.compareReplicate(projectId2, filePath2, "D20181207yix_HCC_SW_T_46A", "D20181217yix_HCC_SW_T_46B");
@@ -390,11 +408,81 @@ public class TestController extends BaseController {
         return null;
     }
 
+    @RequestMapping("compareSamples")
+    @ResponseBody
+    String compareSamples(){
+        List<String> experimentIdList = new ArrayList<>();
+//        experimentIdList.add("5d3fa0aa67258222a8c6e333");
+//        experimentIdList.add("5d3fa0aa67258222a8c6e334");
+//        experimentIdList.add("5d3fa0aa67258222a8c6e335");
+        experimentIdList.add("5d3fa0aa67258222a8c6e336");
+        experimentIdList.add("5d3fa0aa67258222a8c6e337");
+//        experimentIdList.add("5d3fa0aa67258222a8c6e338");
+
+        HashMap<String,Integer> proproPepMatchTime = new HashMap<>();
+        for (String experimentId: experimentIdList){
+            HashSet<String> tempPepRefs = resultCompareService.getProproPeptideRefs(analyseOverviewService.getAllByExpId(experimentId).get(1).getId());
+            for (String pep: tempPepRefs){
+                if (proproPepMatchTime.containsKey(pep)){
+                    proproPepMatchTime.put(pep, proproPepMatchTime.get(pep) + 1);
+                }else {
+                    proproPepMatchTime.put(pep, 1);
+                }
+            }
+        }
+        int[] proproCount = new int[experimentIdList.size()];
+        for (int times: proproPepMatchTime.values()){
+            proproCount[times-1] ++;
+        }
+        System.out.println("----------------- Propro -----------------");
+        for (int i = 0; i < proproCount.length; i++){
+            System.out.println("Match " + (i+1) + " times: " + proproCount[i]);
+        }
+        int total = 0;
+        for (int num: proproCount){
+            total += num;
+        }
+        System.out.println("Total: " + total);
+        System.out.println("----------------- File -----------------");
+        HashSet<String> expNameSet = new HashSet<>();
+        for (String expId: experimentIdList){
+            expNameSet.add(experimentService.getById(expId).getModel().getName());
+        }
+        HashMap<String,Integer> filePepMatchTime = new HashMap<>();
+        HashMap<String, HashSet<String>> filePepMap = resultCompareService.getMatrixFilePepMap("5d3f9ef467258222a8c6e31b","P:\\data\\HeLa_caix_Compare\\peptides_hela20190730_sum.txt");
+        for (String experimentName: filePepMap.keySet()){
+            if (!expNameSet.contains(experimentName)){
+                continue;
+            }
+            HashSet<String> pepSet = filePepMap.get(experimentName);
+            for (String pep: pepSet){
+                if (filePepMatchTime.containsKey(pep)){
+                    filePepMatchTime.put(pep, filePepMatchTime.get(pep) + 1);
+                }else {
+                    filePepMatchTime.put(pep, 1);
+                }
+            }
+        }
+        int[] fileCount = new int[experimentIdList.size()];
+        for (int times: filePepMatchTime.values()){
+            fileCount[times-1] ++;
+        }
+        for (int i = 0; i < fileCount.length; i++){
+            System.out.println("Match " + (i+1) + " times: " + fileCount[i]);
+        }
+        int fileTotal = 0;
+        for (int num: fileCount){
+            fileTotal += num;
+        }
+        System.out.println("Total: " + fileTotal);
+        return null;
+    }
+
     @RequestMapping("silac")
     @ResponseBody
     String silacTest() {
-        String overviewId = "5d18e4341fb7212da56b31f1";
-        String filePath = "P:\\data\\SILAC_QE\\F20190530liangx_SILAC_K562_DIA_LHtitra1_1_allFrag_with_dscore_filtered.csv";
+        String overviewId = "5d3fce4de8a83346c944be48";
+        String filePath = "P:\\data\\SILAC_QE\\F20190530liangx_SILAC_K562_DIA_LHtitra1_0_allFrag_with_dscore_filtered.csv";
         resultCompareService.printSilacResults(overviewId, filePath);
         return null;
     }

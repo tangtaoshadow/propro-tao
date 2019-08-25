@@ -1,8 +1,9 @@
 package com.westlake.air.propro.algorithm.aspect;
 
-import com.westlake.air.propro.constants.TaskStatus;
+import com.westlake.air.propro.constants.enums.TaskStatus;
 import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.TaskDO;
+import com.westlake.air.propro.domain.params.IrtParams;
 import com.westlake.air.propro.domain.params.WorkflowParams;
 import com.westlake.air.propro.service.TaskService;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -29,11 +30,11 @@ public class TaskAspect {
         Object result = null;
         Object[] args = joinPoint.getArgs();
         TaskDO taskDO = (TaskDO) args[0];
-        LibraryDO library = (LibraryDO) args[1];
-        ArrayList exps = (ArrayList) args[2];
+        ArrayList exps = (ArrayList) args[1];
+        IrtParams irtParams = (IrtParams) args[2];
         taskDO.start();
-        if (exps != null && library != null) {
-            taskService.update(taskDO, TaskStatus.RUNNING.getName(), "开始分析IRT校准库并且计算iRT值,总计" + exps.size() + "个目标实验,Library ID:" + library.getId() + ";Type:" + library.getType());
+        if (exps != null && irtParams.getLibrary() != null) {
+            taskService.update(taskDO, TaskStatus.RUNNING.getName(), "开始分析IRT校准库并且计算iRT值,总计" + exps.size() + "个目标实验,Library ID:" + irtParams.getLibrary().getId() + ";Type:" + irtParams.getLibrary().getType());
         }
 
         try {

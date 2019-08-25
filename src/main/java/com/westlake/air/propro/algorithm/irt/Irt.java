@@ -6,7 +6,7 @@ import com.westlake.air.propro.algorithm.fitter.LinearFitter;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
 import com.westlake.air.propro.algorithm.peak.FeatureExtractor;
 import com.westlake.air.propro.constants.Constants;
-import com.westlake.air.propro.constants.ResultCode;
+import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.aird.Compressor;
 import com.westlake.air.propro.domain.bean.analyse.MzIntensityPairs;
@@ -21,6 +21,7 @@ import com.westlake.air.propro.domain.db.LibraryDO;
 import com.westlake.air.propro.domain.db.SwathIndexDO;
 import com.westlake.air.propro.domain.db.simple.SimplePeptide;
 import com.westlake.air.propro.domain.params.ExtractParams;
+import com.westlake.air.propro.domain.params.IrtParams;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.service.PeptideService;
 import com.westlake.air.propro.service.ScoreService;
@@ -29,14 +30,17 @@ import com.westlake.air.propro.utils.ConvolutionUtil;
 import com.westlake.air.propro.utils.FileUtil;
 import com.westlake.air.propro.utils.MathUtil;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jblas.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.DataOutput;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -66,20 +70,18 @@ public class Irt {
      * XIC并且求出iRT
      *
      * @param experimentDO
-     * @param library
-     * @param mzExtractWindow
-     * @param sigmaSpacing
+     * @param irtParams
      * @return
      */
-    public ResultDO<IrtResult> extractAndAlign(ExperimentDO experimentDO, LibraryDO library, Float mzExtractWindow, SigmaSpacing sigmaSpacing) {
+    public ResultDO<IrtResult> extractAndAlign(ExperimentDO experimentDO, IrtParams irtParams) {
         try {
-            List<AnalyseDataDO> dataList = extract(experimentDO, library, mzExtractWindow);
+            List<AnalyseDataDO> dataList = extract(experimentDO, irtParams);
             if (dataList == null) {
                 return ResultDO.buildError(ResultCode.IRT_EXCEPTION);
             }
             ResultDO<IrtResult> resultDO = new ResultDO<>(false);
             try {
-                resultDO = align(dataList, library, sigmaSpacing);
+                resultDO = align(dataList, irtParams.getLibrary(), irtParams.getSigmaSpacing());
             } catch (Exception e) {
                 e.printStackTrace();
                 resultDO.setMsgInfo(e.getMessage());
@@ -96,11 +98,10 @@ public class Irt {
      * XIC iRT校准库的数据
      *
      * @param exp
-     * @param library
-     * @param mzExtractWindow
+     * @param irtParams
      * @return
      */
-    private List<AnalyseDataDO> extract(ExperimentDO exp, LibraryDO library, float mzExtractWindow) {
+    private List<AnalyseDataDO> extract(ExperimentDO exp, IrtParams irtParams) {
 
         ResultDO checkResult = ConvolutionUtil.checkExperiment(exp);
         if (checkResult.isFailed()) {
@@ -116,17 +117,32 @@ public class Irt {
         SwathIndexQuery query = new SwathIndexQuery(exp.getId(), 2);
         List<SwathIndexDO> swathList = swathIndexService.getAll(query);
 
+        LibraryDO library = irtParams.getLibrary();
+        float mzExtractWindow = irtParams.getMzExtractWindow();
+        int selectPoints, step;
+        if (irtParams.isUseLibrary()) {
+            int rangeSize = exp.getWindowRanges().size();
+            selectPoints = Math.min(rangeSize, 50);//获取windowRange Size大小,如果超过50的话则采用采样录取的方式
+            step = rangeSize / selectPoints;
+        } else {
+            selectPoints = swathList.size();
+            step = 1;
+        }
+        logger.info("Irt Selected Points Count:" + selectPoints + "; Step:" + step);
         try {
             raf = new RandomAccessFile(file, "r");
-            for (SwathIndexDO swathIndexDO : swathList) {
+            for (int i = 0; i < selectPoints; i++) {
+                //Step1.按照步长获取SwathList的点位库
+                SwathIndexDO swathIndexDO = swathList.get(i * step);
+
                 //Step2.获取标准库的目标肽段片段的坐标
-                //key为rt
-                TreeMap<Float, MzIntensityPairs> rtMap;
+                TreeMap<Float, MzIntensityPairs> rtMap; //key为rt
                 List<SimplePeptide> coordinates = peptideService.buildMS2Coordinates(library, SlopeIntercept.create(), -1, swathIndexDO.getRange(), null, exp.getType(), false, true);
                 if (coordinates.size() == 0) {
                     logger.warn("No iRT Coordinates Found,Rang:" + swathIndexDO.getRange().getStart() + ":" + swathIndexDO.getRange().getEnd());
                     continue;
                 }
+
                 //Step3.提取指定原始谱图
                 try {
                     rtMap = airdFileParser.parseSwathBlockValues(raf, swathIndexDO, exp.fetchCompressor(Compressor.TARGET_MZ), exp.fetchCompressor(Compressor.TARGET_INTENSITY));
@@ -137,8 +153,10 @@ public class Irt {
 
                 //Step4.提取数据并且存储数据,如果传入的库是标准库,那么使用采样的方式进行数据提取
                 if (library.getType().equals(LibraryDO.TYPE_IRT)) {
+                    //如果使用的是irt校准库进行校准,那么会检索校准库中的所有数据集
                     extractor.extractForIrt(finalList, coordinates, rtMap, null, new ExtractParams(mzExtractWindow, -1f));
                 } else {
+                    //如果是使用标准库进行校准的,那么会按照需要选择的总点数进行抽取选择
                     extractor.extractForIrtWithLib(finalList, coordinates, rtMap, null, new ExtractParams(mzExtractWindow, -1f));
                 }
             }
@@ -172,34 +190,34 @@ public class Irt {
                 continue;
             }
             double groupRt = dataDO.getRt();
-            if (groupRt > maxGroupRt){
+            if (groupRt > maxGroupRt) {
                 maxGroupRt = groupRt;
             }
-            if (groupRt < minGroupRt){
+            if (groupRt < minGroupRt) {
                 minGroupRt = groupRt;
             }
             List<ScoreRtPair> scoreRtPairs = rtNormalizerScorer.score(peptideFeature.getPeakGroupList(), peptideFeature.getNormedLibIntMap(), groupRt);
-            if (scoreRtPairs.size() == 0){
+            if (scoreRtPairs.size() == 0) {
                 continue;
             }
             scoreRtList.add(scoreRtPairs);
             compoundRt.add(groupRt);
         }
 
-        List<Pair<Double,Double>> pairs = simpleFindBestFeature(scoreRtList, compoundRt);
-        double delta = (maxGroupRt - minGroupRt)/30d;
-        List<Pair<Double,Double>> pairsCorrected = chooseReliablePairs(pairs, delta);
+        List<Pair<Double, Double>> pairs = simpleFindBestFeature(scoreRtList, compoundRt);
+        double delta = (maxGroupRt - minGroupRt) / 30d;
+        List<Pair<Double, Double>> pairsCorrected = chooseReliablePairs(pairs, delta);
 
-        System.out.println("choose finish ------------------------");
+        logger.info("choose finish ------------------------");
         IrtResult irtResult = new IrtResult();
 
         List<Double[]> selectedList = new ArrayList<>();
         List<Double[]> unselectedList = new ArrayList<>();
         for (int i = 0; i < pairs.size(); i++) {
-            if(pairsCorrected.contains(pairs.get(i))){
-                selectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
-            }else{
-                unselectedList.add(new Double[]{pairs.get(i).getLeft(),pairs.get(i).getRight()});
+            if (pairsCorrected.contains(pairs.get(i))) {
+                selectedList.add(new Double[]{pairs.get(i).getLeft(), pairs.get(i).getRight()});
+            } else {
+                unselectedList.add(new Double[]{pairs.get(i).getLeft(), pairs.get(i).getRight()});
             }
         }
         irtResult.setSelectedPairs(selectedList);
@@ -219,9 +237,9 @@ public class Irt {
      * @param rt         get from groupsResult.getModel()
      * @return rt pairs
      */
-    private List<Pair<Double,Double>> simpleFindBestFeature(List<List<ScoreRtPair>> scoresList, List<Double> rt) {
+    private List<Pair<Double, Double>> simpleFindBestFeature(List<List<ScoreRtPair>> scoresList, List<Double> rt) {
 
-        List<Pair<Double,Double>> pairs = new ArrayList<>();
+        List<Pair<Double, Double>> pairs = new ArrayList<>();
 
         for (int i = 0; i < scoresList.size(); i++) {
             List<ScoreRtPair> scores = scoresList.get(i);
@@ -237,26 +255,49 @@ public class Irt {
             if (Constants.ESTIMATE_BEST_PEPTIDES && max < Constants.OVERALL_QUALITY_CUTOFF) {
                 continue;
             }
-            Pair<Double,Double> rtPair = Pair.of(rt.get(i), expRt);
+            Pair<Double, Double> rtPair = Pair.of(rt.get(i), expRt);
             pairs.add(rtPair);
         }
         return pairs;
     }
 
-    private List<Pair<Double,Double>> chooseReliablePairs(List<Pair<Double,Double>> rtPairs, double delta) throws Exception {
-        SlopeIntercept slopeIntercept = linearFitter.huberFit(rtPairs, delta);
-        TreeMap<Double, Pair<Double,Double>> errorMap = new TreeMap<>();
-        for (Pair<Double, Double> pair: rtPairs){
-            errorMap.put(Math.abs(pair.getRight() * slopeIntercept.getSlope() + slopeIntercept.getIntercept() - pair.getLeft()), pair);
+    private List<Pair<Double, Double>> chooseReliablePairs(List<Pair<Double, Double>> rtPairs, double delta) throws Exception {
+        List<Pair<Double, Double>> rtPairsCorrected = new ArrayList<>(rtPairs);
+        preprocessRtPairs(rtPairsCorrected, 50d);
+        SlopeIntercept slopeIntercept = linearFitter.huberFit(rtPairsCorrected, delta);
+        while (MathUtil.getRsq(rtPairsCorrected) < 0.95 && rtPairsCorrected.size() >= 2) {
+            int maxErrorIndex = findMaxErrorIndex(slopeIntercept, rtPairsCorrected);
+            rtPairsCorrected.remove(maxErrorIndex);
+            slopeIntercept = linearFitter.huberFit(rtPairsCorrected, delta);
         }
-        List<Pair<Double,Double>> sortedPairs = new ArrayList<>(errorMap.values());
-        int cutLine = 2;
-        for (int i = sortedPairs.size(); i > 2; i--){
-            if (MathUtil.getRsq(sortedPairs.subList(0,i)) >= 0.95){
-                cutLine = i;
-                break;
+        return rtPairsCorrected;
+    }
+
+    private int findMaxErrorIndex(SlopeIntercept slopeIntercept, List<Pair<Double, Double>> rtPairs) {
+        int maxIndex = 0;
+        double maxError = 0d;
+        for (int i = 0; i < rtPairs.size(); i++) {
+            double tempError = Math.abs(rtPairs.get(i).getRight() * slopeIntercept.getSlope() + slopeIntercept.getIntercept() - rtPairs.get(i).getLeft());
+            if (tempError > maxError) {
+                maxError = tempError;
+                maxIndex = i;
             }
         }
-        return sortedPairs.subList(0,cutLine);
+        return maxIndex;
+    }
+
+    private void preprocessRtPairs(List<Pair<Double, Double>> rtPairs, double tolerance) {
+        try {
+            SlopeIntercept initSlopeIntercept = linearFitter.getInitSlopeIntercept(rtPairs);
+            for (int i = rtPairs.size() - 1; i >= 0; i --){
+                double tempError = Math.abs(rtPairs.get(i).getRight() * initSlopeIntercept.getSlope() + initSlopeIntercept.getIntercept() - rtPairs.get(i).getLeft());
+                if (tempError > tolerance) {
+                    rtPairs.remove(i);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

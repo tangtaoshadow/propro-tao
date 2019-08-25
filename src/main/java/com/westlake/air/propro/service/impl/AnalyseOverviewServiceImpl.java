@@ -1,6 +1,6 @@
 package com.westlake.air.propro.service.impl;
 
-import com.westlake.air.propro.constants.ResultCode;
+import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.dao.AnalyseOverviewDAO;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.ComparisonResult;
@@ -36,6 +36,11 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
     @Override
     public List<AnalyseOverviewDO> getAllByExpId(String expId) {
         return analyseOverviewDAO.getAllByExperimentId(expId);
+    }
+
+    @Override
+    public AnalyseOverviewDO getFirstAnalyseOverviewByExpId(String expId) {
+        return analyseOverviewDAO.getFirstByExperimentId(expId);
     }
 
     @Override
@@ -90,8 +95,8 @@ public class AnalyseOverviewServiceImpl implements AnalyseOverviewService {
             return ResultDO.buildError(ResultCode.ID_CANNOT_BE_NULL_OR_ZERO);
         }
         try {
-            analyseOverviewDAO.delete(id);
             analyseDataService.deleteAllByOverviewId(id);
+            analyseOverviewDAO.delete(id);
 
             return new ResultDO(true);
         } catch (Exception e) {

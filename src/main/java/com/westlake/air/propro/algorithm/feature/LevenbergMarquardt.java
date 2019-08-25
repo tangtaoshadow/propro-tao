@@ -4,6 +4,8 @@ import lombok.Data;
 import net.finmath.functions.LinearAlgebra;
 import net.finmath.optimizer.OptimizerInterface;
 import net.finmath.optimizer.SolverException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -11,7 +13,6 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 /**
@@ -21,6 +22,9 @@ import java.util.logging.Logger;
 
 @Data
 public abstract class LevenbergMarquardt implements Serializable, Cloneable, OptimizerInterface {
+
+    public static final Logger logger = LoggerFactory.getLogger(LevenbergMarquardt.class);
+
     private static final long serialVersionUID = 4560864869394838155L;
     private final net.finmath.optimizer.LevenbergMarquardt.RegularizationMethod regularizationMethod;
     private double[] initialParameters;
@@ -47,7 +51,6 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
     private int numberOfThreads;
     private ExecutorService executor;
     private boolean executorShutdownWhenDone;
-    private final Logger logger;
 
     public static void main(String[] args) throws SolverException, CloneNotSupportedException {
         LevenbergMarquardt optimizer = new LevenbergMarquardt() {
@@ -65,19 +68,19 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
         optimizer.setTargetValues(new double[]{5.0D, 10.0D});
         optimizer.run();
         double[] bestParameters = optimizer.getBestFitParameters();
-        System.out.println("The solver for problem 1 required " + optimizer.getIterations() + " iterations. The best fit parameters are:");
+        logger.info("The solver for problem 1 required " + optimizer.getIterations() + " iterations. The best fit parameters are:");
 
         for (int i = 0; i < bestParameters.length; ++i) {
-            System.out.println("\tparameter[" + i + "]: " + bestParameters[i]);
+            logger.info("\tparameter[" + i + "]: " + bestParameters[i]);
         }
 
         OptimizerInterface optimizer2 = optimizer.getCloneWithModifiedTargetValues(new double[]{5.1D, 10.2D}, new double[]{1.0D, 1.0D}, true);
         optimizer2.run();
         double[] bestParameters2 = optimizer2.getBestFitParameters();
-        System.out.println("The solver for problem 2 required " + optimizer2.getIterations() + " iterations. The best fit parameters are:");
+        logger.info("The solver for problem 2 required " + optimizer2.getIterations() + " iterations. The best fit parameters are:");
 
         for (int i = 0; i < bestParameters2.length; ++i) {
-            System.out.println("\tparameter[" + i + "]: " + bestParameters2[i]);
+            logger.info("\tparameter[" + i + "]: " + bestParameters2[i]);
         }
 
     }
@@ -107,7 +110,6 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
         this.numberOfThreads = 1;
         this.executor = null;
         this.executorShutdownWhenDone = true;
-        this.logger = Logger.getLogger("net.finmath");
         this.regularizationMethod = regularizationMethod;
         this.initialParameters = initialParameters;
         this.targetValues = targetValues;
@@ -162,7 +164,6 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
         this.numberOfThreads = 1;
         this.executor = null;
         this.executorShutdownWhenDone = true;
-        this.logger = Logger.getLogger("net.finmath");
         this.regularizationMethod = net.finmath.optimizer.LevenbergMarquardt.RegularizationMethod.LEVENBERG_MARQUARDT;
     }
 
@@ -201,7 +202,6 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
         this.numberOfThreads = 1;
         this.executor = null;
         this.executorShutdownWhenDone = true;
-        this.logger = Logger.getLogger("net.finmath");
         this.regularizationMethod = net.finmath.optimizer.LevenbergMarquardt.RegularizationMethod.LEVENBERG_MARQUARDT;
         this.numberOfThreads = numberOfThreads;
     }
@@ -417,15 +417,13 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
                 }
 
                 this.updateParameterTest();
-                if (this.logger.isLoggable(Level.FINE)) {
-                    String logString = "Iteration: " + this.iteration + "\tLambda=" + this.lambda + "\tError Current:" + this.errorMeanSquaredCurrent + "\tError Change:" + this.errorRootMeanSquaredChange + "\t";
 
-                    for (int i = 0; i < this.parameterCurrent.length; ++i) {
-                        logString = logString + "[" + i + "] = " + this.parameterCurrent[i] + "\t";
-                    }
-
-                    this.logger.fine(logString);
+                String logString = "Iteration: " + this.iteration + "\tLambda=" + this.lambda + "\tError Current:" + this.errorMeanSquaredCurrent + "\tError Change:" + this.errorRootMeanSquaredChange + "\t";
+                for (int i = 0; i < this.parameterCurrent.length; ++i) {
+                    logString = logString + "[" + i + "] = " + this.parameterCurrent[i] + "\t";
                 }
+                logger.info(logString);
+
             }
         } finally {
             if (this.executor != null && this.executorShutdownWhenDone) {

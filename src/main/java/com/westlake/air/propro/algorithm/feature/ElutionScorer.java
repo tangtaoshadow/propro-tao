@@ -1,7 +1,7 @@
 package com.westlake.air.propro.algorithm.feature;
 
 import com.westlake.air.propro.constants.Constants;
-import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.constants.enums.ScoreType;
 import com.westlake.air.propro.domain.bean.analyse.RtIntensityPairsDouble;
 import com.westlake.air.propro.domain.bean.score.EmgModelParams;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
@@ -280,7 +280,7 @@ public class ElutionScorer {
             return optimizer.getBestFitParameters();
         } catch (SolverException exception) {
             exception.printStackTrace();
-            System.out.println("LevenbergMarquardt SolverException.");
+            logger.error("LevenbergMarquardt SolverException.");
             return null;
         }
     }

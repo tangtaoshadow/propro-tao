@@ -68,9 +68,6 @@ public class ChromatogramPicker {
             }
 
             double intensity = integratePeaks(intensityArray, leftIndex, rightIndex);
-            if (intensity == 0){
-                continue;
-            }
             ionPeakList.add(new IonPeak(intensity, leftIndex, rightIndex, closestPeakIndex, i));
         }
 

@@ -2,7 +2,7 @@ package com.westlake.air.propro.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.westlake.air.propro.algorithm.fitter.LinearFitter;
-import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.constants.enums.ScoreType;
 import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.domain.bean.analyse.*;
 import com.westlake.air.propro.domain.db.simple.SimplePeptide;
@@ -261,7 +261,7 @@ public class ScoreServiceImpl implements ScoreService {
             }
         }
         if (rsq < minRsq) {
-            System.out.println("RTNormalizer: unable to perform outlier detection.");
+            logger.error("RTNormalizer: unable to perform outlier detection.");
             return null;
         } else {
             return pairs;

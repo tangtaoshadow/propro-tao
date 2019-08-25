@@ -1,6 +1,6 @@
 package com.westlake.air.propro.utils;
 
-import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.constants.enums.ScoreType;
 import com.westlake.air.propro.domain.bean.score.IntegrateWindowMzIntensity;
 import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import org.slf4j.Logger;
@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Nico Wang Ruimin

@@ -1,6 +1,6 @@
 package com.westlake.air.propro.domain;
 
-import com.westlake.air.propro.constants.ResultCode;
+import com.westlake.air.propro.constants.enums.ResultCode;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -143,7 +143,9 @@ public class FeatureFinder {
         }
         for (String cutInfo : ionPeakParams.keySet()) {
             for (IonPeak ionPeak : ionPeakParams.get(cutInfo)) {
-                ionPeakPositionList.get(ionPeak.getApexRtIndex()).put(cutInfo, ionPeak);
+                if (ionPeak.getIntensity() != 0) {
+                    ionPeakPositionList.get(ionPeak.getApexRtIndex()).put(cutInfo, ionPeak);
+                }
             }
         }
         for (int i = 1; i < peakDensity.length - 1; i++) {
@@ -272,10 +274,15 @@ public class FeatureFinder {
                 if (intensity[j] <= 0d) {
                     continue;
                 }
-                int mid = ionPeakParams.get(cutInfo).get(j).getApexRtIndex();
-                if (mid >= bestLeft && mid <= bestRight) {
-                    intensity[j] = 0d;
+                try {
+                    int mid = ionPeakParams.get(cutInfo).get(j).getApexRtIndex();
+                    if (mid >= bestLeft && mid <= bestRight) {
+                        intensity[j] = 0d;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+
                 int left = ionPeakParams.get(cutInfo).get(j).getLeftRtIndex();
                 int right = ionPeakParams.get(cutInfo).get(j).getRightRtIndex();
                 if ((left > bestLeft && left < bestRight) || (right > bestLeft && right < bestRight)) {

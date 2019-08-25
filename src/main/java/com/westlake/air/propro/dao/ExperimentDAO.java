@@ -2,6 +2,7 @@ package com.westlake.air.propro.dao;
 
 import com.westlake.air.propro.domain.bean.experiment.ExpFileSize;
 import com.westlake.air.propro.domain.db.ExperimentDO;
+import com.westlake.air.propro.domain.db.simple.SimpleExperiment;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import org.bson.Document;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -76,6 +77,12 @@ public class ExperimentDAO extends BaseDAO<ExperimentDO, ExperimentQuery>{
         ExperimentQuery query = new ExperimentQuery();
         query.setName(name);
         return mongoTemplate.findOne(buildQuery(query), ExperimentDO.class, CollectionName);
+    }
+
+    public List<SimpleExperiment> getSimpleExperimentByProjectId(String projectId) {
+        ExperimentQuery query = new ExperimentQuery();
+        query.setProjectId(projectId);
+        return mongoTemplate.find(buildQueryWithoutPage(query), SimpleExperiment.class, CollectionName);
     }
 
     public List<ExpFileSize> getAllFileSizeList(String ownerName){

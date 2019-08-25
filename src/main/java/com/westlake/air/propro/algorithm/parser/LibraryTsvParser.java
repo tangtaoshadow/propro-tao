@@ -1,7 +1,7 @@
 package com.westlake.air.propro.algorithm.parser;
 
 import com.westlake.air.propro.algorithm.decoy.generator.ShuffleGenerator;
-import com.westlake.air.propro.constants.ResultCode;
+import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.peptide.Annotation;
 import com.westlake.air.propro.domain.db.FragmentInfo;
@@ -91,11 +91,11 @@ public class LibraryTsvParser extends BaseLibraryParser {
                 }
                 PeptideDO peptide = resultDO.getModel();
                 addFragment(peptide, map);
-                //在导入Peptide的同时生成伪肽段
-                shuffleGenerator.generate(peptide);
             }
-
-            peptideService.insertAll(new ArrayList<>(map.values()), false);
+            List<PeptideDO> peptideDOList = new ArrayList<>(map.values());
+            //在导入Peptide的同时生成伪肽段
+            shuffleGenerator.generate(peptideDOList);
+            peptideService.insertAll(peptideDOList, false);
             taskDO.addLog(map.size() + "条肽段数据插入成功");
             taskService.update(taskDO);
             logger.info(map.size() + "条肽段数据插入成功");

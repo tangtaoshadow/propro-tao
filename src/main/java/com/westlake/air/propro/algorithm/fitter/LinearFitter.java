@@ -4,6 +4,8 @@ import com.westlake.air.propro.domain.bean.score.SlopeIntercept;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.List;
  */
 @Component("linearFitter")
 public class LinearFitter {
+
+    public static final Logger logger = LoggerFactory.getLogger(LinearFitter.class);
 
     /**
      * 最小二乘法线性拟合RTPairs
@@ -41,7 +45,7 @@ public class LinearFitter {
             slopeIntercept = updateHuberSlopeIntercept(rtPairs, slopeIntercept, delta);
             count ++;
         }
-        System.out.println("----------------------- Huber " + count + " epochs -----------------------");
+        logger.info("----------------------- Huber " + count + " epochs -----------------------");
         return slopeIntercept;
     }
     public SlopeIntercept proproFit(List<Pair<Double, Double>> rtPairs, double delta) throws Exception {
@@ -54,7 +58,7 @@ public class LinearFitter {
             slopeIntercept = updateProproSlopeIntercept(rtPairs, slopeIntercept, delta);
             count ++;
         }
-        System.out.println("----------------------- Propro " + count + " epochs -----------------------");
+        logger.info("----------------------- Propro " + count + " epochs -----------------------");
         return slopeIntercept;
     }
     private double getHuberLoss(List<Pair<Double, Double>> rtPairs, double slope, double intercept, double delta){
@@ -123,7 +127,6 @@ public class LinearFitter {
             intercept = slopeIntercept.getIntercept() - sigma * Math.random() * interceptStep * interceptGradient;
             updatedLoss = getHuberLoss(rtPairs, slope, intercept, delta);
         }
-//        System.out.println("Huber: " + updatedLoss + ", " + slope + ", " + intercept);
         return new SlopeIntercept(slope, intercept);
     }
 
@@ -142,11 +145,10 @@ public class LinearFitter {
             intercept = slopeIntercept.getIntercept() - sigma * Math.random() * interceptStep * interceptGradient;
             updatedLoss = getProproLoss(rtPairs, slope, intercept, delta);
         }
-//        System.out.println("Propro: " + updatedLoss + ", " + slope + ", " + intercept);
         return new SlopeIntercept(slope, intercept);
     }
 
-    private SlopeIntercept getInitSlopeIntercept(List<Pair<Double,Double>> rtPairs) throws Exception {
+    public SlopeIntercept getInitSlopeIntercept(List<Pair<Double,Double>> rtPairs) throws Exception {
         double minLibRT = Double.MAX_VALUE;
         for (Pair<Double,Double> pair:rtPairs){
             if (pair.getLeft() < minLibRT){

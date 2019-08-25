@@ -1,6 +1,6 @@
 package com.westlake.air.propro.domain.bean.score;
 
-import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.constants.enums.ScoreType;
 import lombok.Data;
 
 import java.util.List;

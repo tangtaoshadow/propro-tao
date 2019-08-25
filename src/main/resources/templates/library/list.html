@@ -44,6 +44,7 @@
                     <th width="5%">Generator</th>
                     <th width="5%" th:text="#{label_proteins_count}"></th>
                     <th width="5%" th:text="#{label_peptides_count}"></th>
+                    <th width="5%" th:text="#{label_peptide_protein_rate}"></th>
                     <th width="15%" th:text="#{label_create_date}"></th>
                     <th width="15%" th:text="#{label_creator}"></th>
                     <th width="15%" th:text="#{label_operation}"></th>
@@ -74,9 +75,10 @@
                            th:title="#{menu_peptide_list}" th:text="${library.totalCount}">
                         </a>
                     </td>
+                    <td th:if="${library.proteinCount}!=0" th:text="${library.totalCount}/${library.proteinCount}"></td>
+                    <td th:unless="${library.proteinCount}!=0" th:text="|${library.totalCount}/${library.proteinCount}|"></td>
                     <td th:text="${#dates.format(library.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${library.creator}"></td>
-                    <!--                    <td th:text="${#dates.format(library.lastModifiedDate,'yyyy-MM-dd HH:mm:ss')}"></td>-->
                     <td>
                         <a th:href="@{/library/edit/{id}(id=${library.id})}" data-toggle="m-tooltip"
                            th:title="#{btn_modify}"
@@ -89,8 +91,6 @@
                            class="btn btn-danger m-btn m-btn--icon m-btn--icon-only">
                             <i class="fa fa-opencart"></i>
                         </a>
-
-
                     </td>
                 </tr>
                 </tbody>

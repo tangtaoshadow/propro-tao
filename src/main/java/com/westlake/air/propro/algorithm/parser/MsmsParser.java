@@ -3,8 +3,8 @@ package com.westlake.air.propro.algorithm.parser;
 import com.westlake.air.propro.algorithm.decoy.generator.ShuffleGenerator;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.constants.Constants;
-import com.westlake.air.propro.constants.ResultCode;
-import com.westlake.air.propro.constants.Unimod;
+import com.westlake.air.propro.constants.enums.ResultCode;
+import com.westlake.air.propro.constants.enums.Unimod;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.peptide.Annotation;
 import com.westlake.air.propro.domain.bean.score.BYSeries;
@@ -59,7 +59,7 @@ public class MsmsParser extends BaseLibraryParser {
                 logger.error(resultDOTmp.getMsgInfo());
                 return ResultDO.buildError(ResultCode.DELETE_ERROR);
             }
-            taskDO.addLog("删除旧数据完毕,开始文件解析");
+            taskDO.addLog("Delete the old data already, starting parsing file, 删除旧数据完毕,开始文件解析");
             taskService.update(taskDO);
 
             InputStreamReader isr = new InputStreamReader(in, StandardCharsets.UTF_8);

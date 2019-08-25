@@ -1,6 +1,6 @@
 package com.westlake.air.propro.algorithm.feature;
 
-import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.constants.enums.ScoreType;
 import com.westlake.air.propro.domain.bean.score.FeatureScores;
 import org.springframework.stereotype.Component;
 

@@ -1,9 +1,9 @@
 package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.westlake.air.propro.constants.ResultCode;
-import com.westlake.air.propro.constants.TaskStatus;
-import com.westlake.air.propro.constants.TaskTemplate;
+import com.westlake.air.propro.constants.enums.ResultCode;
+import com.westlake.air.propro.constants.enums.TaskStatus;
+import com.westlake.air.propro.constants.enums.TaskTemplate;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.query.TaskQuery;

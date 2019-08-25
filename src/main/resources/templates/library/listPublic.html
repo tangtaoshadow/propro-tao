@@ -42,9 +42,10 @@
                     <th width="5%" th:text="#{label_do_public}"></th>
                     <th width="5%" th:text="#{label_proteins_count}"></th>
                     <th width="5%" th:text="#{label_peptides_count}"></th>
+                    <th width="5%" th:text="#{label_peptide_protein_rate}"></th>
                     <th width="15%" th:text="#{label_create_date}"></th>
                     <th width="15%" th:text="#{label_creator}"></th>
-                    <th width="20%" th:text="#{label_operation}"></th>
+                    <th width="15%" th:text="#{label_operation}"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -59,6 +60,7 @@
                     </td>
                     <td th:text="${library.proteinCount}"></td>
                     <td th:text="${library.totalCount}"></td>
+                    <td th:text="${library.totalCount}/${library.proteinCount}"></td>
                     <td th:text="${#dates.format(library.createDate,'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${library.creator}"></td>
                     <td>

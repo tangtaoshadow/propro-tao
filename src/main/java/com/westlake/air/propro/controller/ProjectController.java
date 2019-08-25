@@ -1,32 +1,43 @@
 package com.westlake.air.propro.controller;
 
+import com.westlake.air.propro.component.ChunkUploader;
 import com.westlake.air.propro.config.VMProperties;
-import com.westlake.air.propro.constants.*;
+import com.westlake.air.propro.constants.Constants;
+import com.westlake.air.propro.constants.SuccessMsg;
+import com.westlake.air.propro.constants.SuffixConst;
+import com.westlake.air.propro.constants.SymbolConst;
+import com.westlake.air.propro.constants.enums.ResultCode;
+import com.westlake.air.propro.constants.enums.ScoreType;
+import com.westlake.air.propro.constants.enums.TaskTemplate;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.analyse.SigmaSpacing;
 import com.westlake.air.propro.domain.db.*;
+import com.westlake.air.propro.domain.db.simple.PeptideIntensity;
+import com.westlake.air.propro.domain.db.simple.SimpleExperiment;
 import com.westlake.air.propro.domain.params.ExtractParams;
+import com.westlake.air.propro.domain.params.IrtParams;
 import com.westlake.air.propro.domain.params.WorkflowParams;
-import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.ProjectQuery;
+import com.westlake.air.propro.domain.vo.FileBlockVO;
+import com.westlake.air.propro.domain.vo.FileVO;
+import com.westlake.air.propro.domain.vo.UploadVO;
 import com.westlake.air.propro.service.*;
-import com.westlake.air.propro.utils.FeatureUtil;
-import com.westlake.air.propro.utils.PermissionUtil;
-import com.westlake.air.propro.utils.RepositoryUtil;
-import com.westlake.air.propro.utils.ScoreUtil;
+import com.westlake.air.propro.utils.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedWriter;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.FormParam;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,6 +63,8 @@ public class ProjectController extends BaseController {
     SwathIndexService swathIndexService;
     @Autowired
     VMProperties vmProperties;
+    @Autowired
+    ChunkUploader chunkUploader;
 
     @RequestMapping(value = "/list")
     String list(Model model,
@@ -192,6 +205,53 @@ public class ProjectController extends BaseController {
         return "redirect:/project/list";
     }
 
+    @RequestMapping(value = "/filemanager")
+    String fileManager(Model model, @RequestParam(value = "name", required = true) String name,
+                       RedirectAttributes redirectAttributes) {
+
+        ProjectDO project = projectService.getByName(name);
+        PermissionUtil.check(project);
+
+        List<File> fileList = FileUtil.scanFiles(name);
+        List<FileVO> fileVOList = new ArrayList<>();
+        for (File file : fileList) {
+            FileVO fileVO = new FileVO();
+            fileVO.setName(file.getName());
+            fileVO.setSize(file.length());
+            if (file.length() / 1024 / 1024 > 0) {
+                fileVO.setSizeStr(file.length() / 1024 / 1024 + " MB");
+            } else {
+                fileVO.setSizeStr(file.length() / 1024 + " KB");
+            }
+            fileVOList.add(fileVO);
+        }
+        model.addAttribute("project", project);
+        model.addAttribute("fileList", fileVOList);
+        return "project/file_manager";
+
+    }
+
+    @RequestMapping(value = "/doupload", method = RequestMethod.POST)
+    @ResponseBody
+    ResultDO doUpload(Model model,
+                      @RequestParam(value = "projectName", required = true) String projectName,
+                      @RequestParam("file") MultipartFile file,
+                      @FormParam("form-data") UploadVO uploadVO) {
+
+        ProjectDO project = projectService.getByName(projectName);
+        PermissionUtil.check(project);
+        model.addAttribute("project", project);
+        chunkUploader.chunkUpload(file, uploadVO, projectName);
+        return new ResultDO(true);
+    }
+
+    @RequestMapping(value = "/check", method = RequestMethod.POST)
+    @ResponseBody
+    public Object check(FileBlockVO block,
+                        @RequestParam(value = "projectName", required = true) String projectName) {
+        return chunkUploader.check(block, projectName);
+    }
+
     @RequestMapping(value = "/scan")
     String scan(Model model,
                 @RequestParam(value = "projectId", required = true) String projectId,
@@ -199,21 +259,8 @@ public class ProjectController extends BaseController {
         ProjectDO project = projectService.getById(projectId);
         PermissionUtil.check(project);
 
-        String directoryPath = RepositoryUtil.getProjectRepo(project.getName());
-        File directory = new File(directoryPath);
-
+        List<File> fileList = FileUtil.scanFiles(project.getName());
         List<File> newFileList = new ArrayList<>();
-        if (!directory.isDirectory()) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.FILE_NOT_SET);
-            return "redirect:/project/list";
-        }
-
-        File[] fileList = directory.listFiles();
-        if (fileList == null) {
-            redirectAttributes.addFlashAttribute(ERROR_MSG, ResultCode.EXPERIMENT_NOT_EXISTED);
-            return "redirect:/project/list";
-        }
-
         List<ExperimentDO> exps = experimentService.getAllByProjectId(projectId);
         List<String> existedExpNames = new ArrayList<>();
         for (ExperimentDO exp : exps) {
@@ -221,7 +268,7 @@ public class ProjectController extends BaseController {
         }
         //过滤文件
         for (File file : fileList) {
-            if (file.isFile() && file.getName().toLowerCase().endsWith(".json") && !existedExpNames.contains(FilenameUtils.getBaseName(file.getName()))) {
+            if (file.isFile() && file.getName().toLowerCase().endsWith(SuffixConst.JSON) && !existedExpNames.contains(FilenameUtils.getBaseName(file.getName()))) {
                 newFileList.add(file);
             }
         }
@@ -277,15 +324,15 @@ public class ProjectController extends BaseController {
     String doIrt(Model model,
                  @RequestParam(value = "id", required = true) String id,
                  @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
-                 @RequestParam(value = "sigma", required = true, defaultValue = "3.75") Float sigma,
-                 @RequestParam(value = "spacing", required = true, defaultValue = "0.01") Float spacing,
-                 @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
+                 @RequestParam(value = "sigma", required = true, defaultValue = Constants.DEFAULT_SIGMA_STR) Float sigma,
+                 @RequestParam(value = "spacing", required = true, defaultValue = Constants.DEFAULT_SPACING_STR) Float spacing,
+                 @RequestParam(value = "mzExtractWindow", required = true, defaultValue = Constants.DEFAULT_MZ_EXTRACTION_WINDOW_STR) Float mzExtractWindow,
                  RedirectAttributes redirectAttributes) {
 
         ProjectDO project = projectService.getById(id);
         PermissionUtil.check(project);
 
-        List<ExperimentDO> expList = getAllExperimentsByProjectId(id);
+        List<ExperimentDO> expList = experimentService.getAllByProjectId(id);
         if (expList == null) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.NO_EXPERIMENT_UNDER_PROJECT);
             return "redirect:/project/list";
@@ -297,7 +344,11 @@ public class ProjectController extends BaseController {
 
         //支持直接使用标准库进行irt预测,在这里进行库的类型的检测,已进入不同的流程渠道
         LibraryDO lib = libraryService.getById(iRtLibraryId);
-        experimentTask.irt(taskDO, lib, expList, mzExtractWindow, sigmaSpacing);
+        IrtParams irtParams = new IrtParams();
+        irtParams.setLibrary(lib);
+        irtParams.setMzExtractWindow(mzExtractWindow);
+        irtParams.setSigmaSpacing(sigmaSpacing);
+        experimentTask.irt(taskDO, expList, irtParams);
 
         return "redirect:/task/list";
     }
@@ -326,7 +377,7 @@ public class ProjectController extends BaseController {
         ProjectDO project = projectService.getById(id);
         PermissionUtil.check(project);
 
-        List<ExperimentDO> expList = getAllExperimentsByProjectId(id);
+        List<ExperimentDO> expList = experimentService.getAllByProjectId(id);
         if (expList == null) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.NO_EXPERIMENT_UNDER_PROJECT);
             return "redirect:/project/list";
@@ -405,15 +456,15 @@ public class ProjectController extends BaseController {
                      @RequestParam(value = "id", required = true) String id,
                      @RequestParam(value = "iRtLibraryId", required = false) String iRtLibraryId,
                      @RequestParam(value = "libraryId", required = true) String libraryId,
-                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = "600") Float rtExtractWindow,
-                     @RequestParam(value = "mzExtractWindow", required = true, defaultValue = "0.05") Float mzExtractWindow,
+                     @RequestParam(value = "rtExtractWindow", required = true, defaultValue = Constants.DEFAULT_RT_EXTRACTION_WINDOW_STR) Float rtExtractWindow,
+                     @RequestParam(value = "mzExtractWindow", required = true, defaultValue = Constants.DEFAULT_MZ_EXTRACTION_WINDOW_STR) Float mzExtractWindow,
                      @RequestParam(value = "note", required = false) String note,
-                     @RequestParam(value = "fdr", required = true, defaultValue = "0.01") Double fdr,
+                     @RequestParam(value = "fdr", required = true, defaultValue = Constants.DEFAULT_FDR_STR) Double fdr,
                      //打分相关的入参
-                     @RequestParam(value = "sigma", required = false, defaultValue = "3.75") Float sigma,
-                     @RequestParam(value = "spacing", required = false, defaultValue = "0.01") Float spacing,
-                     @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = "0.5") Float shapeScoreThreshold,
-                     @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = "0.6") Float shapeWeightScoreThreshold,
+                     @RequestParam(value = "sigma", required = false, defaultValue = Constants.DEFAULT_SIGMA_STR) Float sigma,
+                     @RequestParam(value = "spacing", required = false, defaultValue = Constants.DEFAULT_SPACING_STR) Float spacing,
+                     @RequestParam(value = "shapeScoreThreshold", required = false, defaultValue = Constants.DEFAULT_SHAPE_SCORE_THRESHOLD_STR) Float shapeScoreThreshold,
+                     @RequestParam(value = "shapeWeightScoreThreshold", required = false, defaultValue = Constants.DEFAULT_SHAPE_WEIGHT_SCORE_THRESHOLD_STR) Float shapeWeightScoreThreshold,
                      HttpServletRequest request,
                      RedirectAttributes redirectAttributes) {
 
@@ -443,7 +494,7 @@ public class ProjectController extends BaseController {
 
         List<String> scoreTypes = ScoreUtil.getScoreTypes(request);
 
-        List<ExperimentDO> exps = getAllExperimentsByProjectId(id);
+        List<ExperimentDO> exps = experimentService.getAllByProjectId(id);
         if (exps == null) {
             redirectAttributes.addFlashAttribute(SUCCESS_MSG, ResultCode.NO_EXPERIMENT_UNDER_PROJECT.getMessage());
             return "redirect:/project/list";
@@ -477,7 +528,7 @@ public class ProjectController extends BaseController {
             }
             input.setLibrary(library);
             input.setOwnerName(getCurrentUsername());
-            input.setExtractParams(new ExtractParams(mzExtractWindow,rtExtractWindow));
+            input.setExtractParams(new ExtractParams(mzExtractWindow, rtExtractWindow));
             input.setScoreTypes(scoreTypes);
 
             input.setXcorrShapeThreshold(shapeScoreThreshold);
@@ -639,7 +690,7 @@ public class ProjectController extends BaseController {
 
         ProjectDO projectDO = projectService.getById(id);
         PermissionUtil.check(projectDO);
-        List<ExperimentDO> experimentDOList = getAllExperimentsByProjectId(id);
+        List<ExperimentDO> experimentDOList = experimentService.getAllByProjectId(id);
         String defaultOutputPath = RepositoryUtil.buildOutputPath(projectDO.getName(), projectDO.getName() + ".tsv");
         model.addAttribute("expList", experimentDOList);
         model.addAttribute("project", projectDO);
@@ -649,92 +700,71 @@ public class ProjectController extends BaseController {
     }
 
     @RequestMapping(value = "/doWriteToFile", method = RequestMethod.POST)
-    String doWriteToFile(Model model,
+    void doWriteToFile(Model model,
                          @RequestParam(value = "projectId", required = true) String projectId,
-                         @RequestParam(value = "pathName", required = true) String pathName,
-                         @RequestParam(value = "outputAllPeptides", required = false, defaultValue = "false") Boolean outputAllPeptides,
                          HttpServletRequest request,
+                         HttpServletResponse response,
                          RedirectAttributes redirectAttributes) {
 
         ProjectDO projectDO = projectService.getById(projectId);
         PermissionUtil.check(projectDO);
 
-        List<ExperimentDO> experimentDOList = getAllExperimentsByProjectId(projectId);
-        HashMap<String, HashMap<String, String>> intensityMap = new HashMap<>();
-        HashMap<String, String> pepToProt = new HashMap<>();
-        if (outputAllPeptides) {
-            List<PeptideDO> peptideDOList = peptideService.getAllByLibraryId(analyseOverviewService.getAllByExpId(experimentDOList.get(0).getId()).get(0).getLibraryId());
-            for (PeptideDO peptideDO : peptideDOList) {
-                intensityMap.put(peptideDO.getPeptideRef(), new HashMap<>());
-                pepToProt.put(peptideDO.getPeptideRef(), peptideDO.getProteinName());
-            }
-            for (ExperimentDO experimentDO : experimentDOList) {
-                String checkState = request.getParameter(experimentDO.getId());
-                if (checkState != null && checkState.equals("on")) {
-                    List<AnalyseDataDO> analyseDataDOList = analyseDataService.getAllByOverviewId(analyseOverviewService.getAllByExpId(experimentDO.getId()).get(0).getId());
-                    for (AnalyseDataDO analyseDataDO : analyseDataDOList) {
-                        if (analyseDataDO.getIsDecoy()) {
-                            continue;
-                        }
-                        if (analyseDataDO.getIdentifiedStatus() == AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS) {
-                            intensityMap.get(analyseDataDO.getPeptideRef()).put(experimentDO.getName(), analyseDataDO.getIntensitySum().toString());
-                        } else {
-                            intensityMap.get(analyseDataDO.getPeptideRef()).put(experimentDO.getName(), "x_" + analyseDataDO.getIntensitySum().intValue());
-                        }
-                    }
+        List<SimpleExperiment> experimentList = experimentService.getAllSimpleExperimentByProjectId(projectId);
+        HashMap<String, HashMap<String, String>> intensityMap = new HashMap<>();//key为PeptideRef, value为另外一个Map,map的key为ExperimentName,value为intensity值
+        HashMap<String, String> pepToProt = new HashMap<>();//key为PeptideRef,value为ProteinName
+
+        for (SimpleExperiment simpleExp : experimentList) {
+            String checkState = request.getParameter(simpleExp.getId());
+            if (checkState != null && checkState.equals("on")) {
+                //取每一个实验的第一个分析结果进行分析
+                AnalyseOverviewDO analyseOverview = analyseOverviewService.getFirstAnalyseOverviewByExpId(simpleExp.getId());
+                if(analyseOverview == null){
+                    continue;
                 }
-            }
-        } else {
-            for (ExperimentDO experimentDO : experimentDOList) {
-                String checkState = request.getParameter(experimentDO.getId());
-                if (checkState != null && checkState.equals("on")) {
-                    List<AnalyseDataDO> analyseDataDOList = analyseDataService.getAllByOverviewId(analyseOverviewService.getAllByExpId(experimentDO.getId()).get(0).getId());
-                    for (AnalyseDataDO analyseDataDO : analyseDataDOList) {
-                        if (analyseDataDO.getIdentifiedStatus() == AnalyseDataDO.IDENTIFIED_STATUS_SUCCESS) {
-                            if (intensityMap.containsKey(analyseDataDO.getPeptideRef())) {
-                                intensityMap.get(analyseDataDO.getPeptideRef()).put(experimentDO.getName(), analyseDataDO.getIntensitySum().toString());
-                            } else {
-                                HashMap<String, String> map = new HashMap<>();
-                                map.put(experimentDO.getName(), analyseDataDO.getIntensitySum().toString());
-                                intensityMap.put(analyseDataDO.getPeptideRef(), map);
-                                pepToProt.put(analyseDataDO.getPeptideRef(), analyseDataDO.getProteinName());
-                            }
-                        }
+                List<PeptideIntensity> peptideIntensityList = analyseDataService.getPeptideIntensityByOverviewId(analyseOverview.getId());
+                for (PeptideIntensity peptideIntensity : peptideIntensityList) {
+                    if (intensityMap.containsKey(peptideIntensity.getPeptideRef())) {
+                        intensityMap.get(peptideIntensity.getPeptideRef()).put(simpleExp.getName(), peptideIntensity.getIntensitySum().toString());
+                    } else {
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put(simpleExp.getName(), peptideIntensity.getIntensitySum().toString());
+                        intensityMap.put(peptideIntensity.getPeptideRef(), map);
+                        pepToProt.put(peptideIntensity.getPeptideRef(), peptideIntensity.getProteinName());
                     }
                 }
             }
         }
 
         try {
-            File file = new File(pathName);
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
-            writer.append("ProteinName").append("\t").append("PeptideRef");
-            for (ExperimentDO experimentDO : experimentDOList) {
-                writer.append("\t").append(experimentDO.getName());
+            OutputStream os = response.getOutputStream();
+            StringBuffer sb = new StringBuffer();
+
+            sb.append("ProteinName").append(SymbolConst.TAB).append("PeptideRef");
+            for (SimpleExperiment simpleExperiment : experimentList) {
+                sb.append(SymbolConst.TAB).append(simpleExperiment.getName());
             }
-            writer.append("\r");
+            sb.append(SymbolConst.RETURN);
             for (String peptideRef : intensityMap.keySet()) {
-                writer.append(pepToProt.get(peptideRef)).append("\t").append(peptideRef);
-                for (ExperimentDO experimentDO : experimentDOList) {
-                    if (intensityMap.get(peptideRef).containsKey(experimentDO.getName())) {
-                        writer.append("\t").append(intensityMap.get(peptideRef).get(experimentDO.getName()));
+                sb.append(pepToProt.get(peptideRef)).append(SymbolConst.TAB).append(peptideRef);
+                for (SimpleExperiment simpleExperiment : experimentList) {
+                    if (intensityMap.get(peptideRef).containsKey(simpleExperiment.getName())) {
+                        sb.append(SymbolConst.TAB).append(intensityMap.get(peptideRef).get(simpleExperiment.getName()));
                     } else {
-                        writer.append("\t");
+                        sb.append(SymbolConst.TAB);
                     }
                 }
-                writer.append("\r");
+                sb.append(SymbolConst.RETURN);
             }
-            writer.close();
+
+            response.setHeader("content-type", "application/octet-stream");
+            response.setContentType("application/octet-stream");
+            response.setCharacterEncoding("gbk");
+            response.setHeader("Cache-Control","max-age=60");
+            response.setHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode(projectDO.getName()+".tsv", "gbk"));
+            os.write(sb.toString().getBytes("gbk"));
+            os.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return "redirect:/project/list";
-    }
-
-    private List<ExperimentDO> getAllExperimentsByProjectId(String projectId) {
-        ExperimentQuery query = new ExperimentQuery();
-        query.setProjectId(projectId);
-        return experimentService.getAll(query);
     }
 }

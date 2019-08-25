@@ -6,6 +6,7 @@ import com.westlake.air.propro.domain.bean.score.PeptideFeature;
 import com.westlake.air.propro.domain.bean.score.PeakGroup;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.algorithm.feature.RtNormalizerScorer;
+import com.westlake.air.propro.domain.params.DeveloperParams;
 import com.westlake.air.propro.service.AnalyseDataService;
 import com.westlake.air.propro.service.AnalyseOverviewService;
 import com.westlake.air.propro.service.TaskService;
@@ -119,8 +120,12 @@ public class FeatureExtractor {
             return new PeptideFeature(false);
         }
 
-        List<PeakGroup> peakGroupFeatureList = featureFinder.findFeaturesNew(peptideSpectrum, ionPeaks, ionPeakParams, noise1000Map);
-
+        List<PeakGroup> peakGroupFeatureList;
+        if (DeveloperParams.USE_NEW_PEAKGROUP_SELECTOR) {
+            peakGroupFeatureList = featureFinder.findFeaturesNew(peptideSpectrum, ionPeaks, ionPeakParams, noise1000Map);
+        }else {
+            peakGroupFeatureList = featureFinder.findFeatures(peptideSpectrum, ionPeaks, ionPeakParams, noise1000Map);
+        }
         PeptideFeature featureResult = new PeptideFeature(true);
         featureResult.setPeakGroupList(peakGroupFeatureList);
         featureResult.setNormedLibIntMap(normedLibIntMap);

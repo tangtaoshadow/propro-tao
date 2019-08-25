@@ -38,7 +38,7 @@ public class UserDO extends BaseDO {
 
     String salt;
 
-    //分配空间大小,单位GB
+    //分配的空间大小,单位GB
     Float allocatedSpace = 500f;
 
     //已使用空间大小,单位GB
@@ -51,5 +51,4 @@ public class UserDO extends BaseDO {
     Set<String> roles = new HashSet<>();    //用户所有角色值，用于shiro做角色权限的判断
 
     Set<String> perms = new HashSet<>();    //用户所有权限值，用于shiro做资源权限的判断
-
 }

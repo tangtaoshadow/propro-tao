@@ -1,4 +1,4 @@
-package com.westlake.air.propro.constants;
+package com.westlake.air.propro.constants.enums;
 
 import java.io.Serializable;
 
@@ -62,6 +62,7 @@ public enum ResultCode implements Serializable {
      */
     FILE_LOCATION_CANNOT_BE_EMPTY("FILE_LOCATION_CANNOT_BE_EMPTY", "文件路径不能为空"),
     FILE_NOT_EXISTED("FILE_NOT_EXISTED", "文件不存在"),
+    FILE_ALREADY_EXISTED("FILE_ALREADY_EXISTED", "文件已存在"),
     FILE_NOT_SET("FILE_NOT_SET", "文件未设定"),
     FILE_FORMAT_NOT_SUPPORTED("FILE_FORMAT_NOT_SUPPORTED","文件格式不支持"),
     EXPERIMENT_INSERT_ERROR("EXPERIMENT_INSERT_ERROR", "实验数据插入失败"),
@@ -137,11 +138,14 @@ public enum ResultCode implements Serializable {
 
     /**
      * ******
-     * AirdCompressor
+     * Aird Related
      * *******
      */
     CREATE_FILE_FAILED("CREATE_FILE_FAILED", "创建文件失败"),
-
+    FILE_CHUNK_UPLOAD_FAILED("FILE_CHUNK_UPLOAD_FAILED","文件分片上传失败"),
+    FILE_CHUNKS_MERGE_FAILED("FILE_CHUNKS_MERGE_FAILED","文件分片合并失败"),
+    FILE_CHUNK_ALREADY_EXISTED("FILE_CHUNK_ALREADY_EXISTED","文件分片已存在"),
+    FILE_CHUNK_NOT_EXISTED("FILE_CHUNK_NOT_EXISTED","文件分片不存在"),
     /**
      * ******
      * Project

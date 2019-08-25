@@ -2,8 +2,8 @@ package com.westlake.air.propro.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.westlake.air.propro.algorithm.parser.AirdFileParser;
-import com.westlake.air.propro.constants.ResultCode;
-import com.westlake.air.propro.constants.TaskStatus;
+import com.westlake.air.propro.constants.enums.ResultCode;
+import com.westlake.air.propro.constants.enums.TaskStatus;
 import com.westlake.air.propro.dao.ExperimentDAO;
 import com.westlake.air.propro.dao.ProjectDAO;
 import com.westlake.air.propro.dao.SwathIndexDAO;
@@ -14,6 +14,7 @@ import com.westlake.air.propro.domain.db.ExperimentDO;
 import com.westlake.air.propro.domain.db.ProjectDO;
 import com.westlake.air.propro.domain.db.SwathIndexDO;
 import com.westlake.air.propro.domain.db.TaskDO;
+import com.westlake.air.propro.domain.db.simple.SimpleExperiment;
 import com.westlake.air.propro.domain.query.ExperimentQuery;
 import com.westlake.air.propro.domain.query.SwathIndexQuery;
 import com.westlake.air.propro.service.*;
@@ -25,7 +26,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -87,6 +87,11 @@ public class ExperimentServiceImpl implements ExperimentService {
         ExperimentQuery query = new ExperimentQuery();
         query.setProjectId(projectId);
         return experimentDAO.getAll(query);
+    }
+
+    @Override
+    public List<SimpleExperiment> getAllSimpleExperimentByProjectId(String projectId) {
+        return experimentDAO.getSimpleExperimentByProjectId(projectId);
     }
 
     @Override

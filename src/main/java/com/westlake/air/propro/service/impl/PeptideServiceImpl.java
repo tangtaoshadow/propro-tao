@@ -4,7 +4,7 @@ import com.westlake.air.propro.algorithm.formula.FormulaCalculator;
 import com.westlake.air.propro.algorithm.formula.FragmentFactory;
 import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.constants.ResidueType;
-import com.westlake.air.propro.constants.ResultCode;
+import com.westlake.air.propro.constants.enums.ResultCode;
 import com.westlake.air.propro.dao.LibraryDAO;
 import com.westlake.air.propro.dao.PeptideDAO;
 import com.westlake.air.propro.domain.ResultDO;
@@ -330,7 +330,7 @@ public class PeptideServiceImpl implements PeptideService {
                 targetList.add(bestTarget);
             }
             if (mzDistance >= 0.0002f && bestTarget != null) {
-                System.out.println("Coordinate: " + bestTarget.getPeptideRef() + " " + mzDistance);
+                logger.info("Coordinate: " + bestTarget.getPeptideRef() + " " + mzDistance);
             }
         }
     }

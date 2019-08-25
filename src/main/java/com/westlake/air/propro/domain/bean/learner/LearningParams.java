@@ -1,7 +1,8 @@
 package com.westlake.air.propro.domain.bean.learner;
 
-import com.westlake.air.propro.constants.Classifier;
-import com.westlake.air.propro.constants.ScoreType;
+import com.westlake.air.propro.constants.Constants;
+import com.westlake.air.propro.constants.enums.Classifier;
+import com.westlake.air.propro.constants.enums.ScoreType;
 import lombok.Data;
 
 import java.util.List;
@@ -16,7 +17,7 @@ public class LearningParams {
 
     Classifier classifier = Classifier.lda;
 
-    double fdr = 0.01d;
+    double fdr = Constants.DEFAULT_FDR;
 
     double trainTestRatio = 1;
 
@@ -60,7 +61,7 @@ public class LearningParams {
     //首批训练时默认作为主分数的分数类型
     String mainScore = ScoreType.MainScore.getTypeName();
 
-    double progressiveRate = 1d;
+    double progressiveRate = 0.8d;
 
     String type;
 }

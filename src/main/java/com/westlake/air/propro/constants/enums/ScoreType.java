@@ -1,9 +1,9 @@
-package com.westlake.air.propro.constants;
+package com.westlake.air.propro.constants.enums;
 
 import com.google.common.collect.Lists;
+import com.westlake.air.propro.constants.Constants;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 public enum ScoreType {

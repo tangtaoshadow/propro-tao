@@ -1,17 +1,14 @@
 package com.westlake.air.propro.algorithm.decoy.generator;
 
-import com.westlake.air.propro.algorithm.formula.FormulaCalculator;
-import com.westlake.air.propro.algorithm.formula.FragmentFactory;
-import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.algorithm.decoy.BaseGenerator;
+import com.westlake.air.propro.algorithm.parser.model.chemistry.AminoAcid;
+import com.westlake.air.propro.constants.Constants;
 import com.westlake.air.propro.domain.bean.peptide.Annotation;
 import com.westlake.air.propro.domain.db.FragmentInfo;
 import com.westlake.air.propro.domain.db.PeptideDO;
-import com.westlake.air.propro.algorithm.parser.model.chemistry.AminoAcid;
 import com.westlake.air.propro.utils.TransitionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

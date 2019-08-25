@@ -5,9 +5,11 @@ import com.westlake.air.propro.domain.bean.analyse.AnalyseDataRT;
 import com.westlake.air.propro.domain.bean.score.SimpleFeatureScores;
 import com.westlake.air.propro.domain.db.AnalyseDataDO;
 import com.westlake.air.propro.domain.db.simple.MatchedPeptide;
+import com.westlake.air.propro.domain.db.simple.PeptideIntensity;
 import com.westlake.air.propro.domain.db.simple.PeptideScores;
 import com.westlake.air.propro.domain.query.AnalyseDataQuery;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -17,6 +19,8 @@ import java.util.List;
 public interface AnalyseDataService {
 
     List<AnalyseDataDO> getAllByOverviewId(String overviewId);
+
+    List<PeptideIntensity> getPeptideIntensityByOverviewId(String overviewId);
 
     List<PeptideScores> getSimpleScoresByOverviewId(String overviewId);
 
@@ -46,5 +50,7 @@ public interface AnalyseDataService {
 
     void updateMulti(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList);
 
-    void removeMultiDecoy(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList, Double fdr);
+    void removeUselessData(String overviewId, List<SimpleFeatureScores> simpleFeatureScoresList, Double fdr);
+
+    int countProteins(String overviewId);
 }

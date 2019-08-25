@@ -35,8 +35,6 @@ public class ResiduesDAO {
             InputStream stream = getClass().getClassLoader().getResourceAsStream("dbfile/residues.json");
             File file = new File("dbfile/residues.json");
             FileUtils.copyInputStreamToFile(stream, file);
-
-//            File file = new File(getClass().getClassLoader().getResource("dbfile/residues.json").getPath());
             FileInputStream fis = new FileInputStream(file);
             int fileLength = fis.available();
             byte[] bytes = new byte[fileLength];
@@ -47,9 +45,9 @@ public class ResiduesDAO {
                 parseFeatures(residue);
                 codeResidueMap.put(residue.getOneLetterCode(), residue);
             }
-            System.out.println("Init Residues Database file success!!!");
+            logger.info("Init Residues Database file success!!!");
         } catch (IOException e) {
-            System.out.println("Init Residues Database file failed!!!");
+            logger.info("Init Residues Database file failed!!!");
             e.printStackTrace();
         }
     }

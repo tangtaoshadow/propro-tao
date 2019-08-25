@@ -1,6 +1,6 @@
 package com.westlake.air.propro.service;
 
-import com.westlake.air.propro.constants.TaskTemplate;
+import com.westlake.air.propro.constants.enums.TaskTemplate;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.db.TaskDO;
 import com.westlake.air.propro.domain.query.TaskQuery;

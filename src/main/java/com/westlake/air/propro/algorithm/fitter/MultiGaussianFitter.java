@@ -11,6 +11,8 @@ import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.util.FastMath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -19,6 +21,8 @@ import java.util.*;
  * Time: 2018-12-19 17:07
  */
 public class MultiGaussianFitter extends AbstractCurveFitter {
+
+    public static final Logger logger = LoggerFactory.getLogger(MultiGaussianFitter.class);
 
     private final double[] initialGuess;
     private final int maxIter;
@@ -41,7 +45,7 @@ public class MultiGaussianFitter extends AbstractCurveFitter {
         @Override
         public double[] gradient(double x, double... p) {
             double[] v = new double[p.length];
-            for(int index = 0; index < v.length; index ++){
+            for (int index = 0; index < v.length; index++) {
                 v[index] = 1.0D / 0.0;
             }
             try {
@@ -62,15 +66,17 @@ public class MultiGaussianFitter extends AbstractCurveFitter {
     }
 
     public static MultiGaussianFitter create() {
-        return new MultiGaussianFitter((double[])null, 2147483647, 1);
+        return new MultiGaussianFitter((double[]) null, 2147483647, 1);
     }
+
     public MultiGaussianFitter withStartPoint(double[] newStart) {
-        return new MultiGaussianFitter((double[])newStart.clone(), this.maxIter, this.count);
+        return new MultiGaussianFitter((double[]) newStart.clone(), this.maxIter, this.count);
     }
 
     public MultiGaussianFitter withMaxIterations(int newMaxIter) {
         return new MultiGaussianFitter(this.initialGuess, newMaxIter, this.count);
     }
+
     public MultiGaussianFitter withCount(int count) {
         return new MultiGaussianFitter(this.initialGuess, this.maxIter, count);
     }
@@ -82,8 +88,8 @@ public class MultiGaussianFitter extends AbstractCurveFitter {
         double[] weights = new double[len];
         int i = 0;
 
-        for(Iterator i$ = observations.iterator(); i$.hasNext(); ++i) {
-            WeightedObservedPoint obs = (WeightedObservedPoint)i$.next();
+        for (Iterator i$ = observations.iterator(); i$.hasNext(); ++i) {
+            WeightedObservedPoint obs = (WeightedObservedPoint) i$.next();
             target[i] = obs.getY();
             weights[i] = obs.getWeight();
         }
@@ -104,9 +110,9 @@ public class MultiGaussianFitter extends AbstractCurveFitter {
         @Override
         public double value(double x, double... param) throws NullArgumentException, DimensionMismatchException, NotStrictlyPositiveException {
             double result = 0;
-            int count = param.length/3;
+            int count = param.length / 3;
             double[] tmpParam = new double[3];
-            for(int i=0; i<count; i++){
+            for (int i = 0; i < count; i++) {
                 System.arraycopy(param, i * 3, tmpParam, 0, 3);
                 result += valueSub(x, tmpParam);
             }
@@ -122,11 +128,11 @@ public class MultiGaussianFitter extends AbstractCurveFitter {
 
         @Override
         public double[] gradient(double x, double... param) throws NullArgumentException, DimensionMismatchException, NotStrictlyPositiveException {
-            int count = param.length/3;
+            int count = param.length / 3;
             double[] tmpParam = new double[3];
             double[] tmpGradient;
             double[] result = new double[param.length];
-            for(int i=0; i<count; i++){
+            for (int i = 0; i < count; i++) {
                 System.arraycopy(param, i * 3, tmpParam, 0, 3);
                 tmpGradient = gradientSub(x, tmpParam);
                 System.arraycopy(tmpGradient, 0, result, i * 3, 3);
@@ -157,7 +163,9 @@ public class MultiGaussianFitter extends AbstractCurveFitter {
         }
 
     }
+
     public enum Strategy {Count, Intensity, Gradient}
+
     public class GaussParamGuesser {
         private final List<Double> norm = new ArrayList<>();
         private final List<Double> mean = new ArrayList<>();
@@ -180,7 +188,7 @@ public class MultiGaussianFitter extends AbstractCurveFitter {
                     case Count:
                         sorted = this.sortObservations(observations);
                         params = this.basicGuess(sorted.toArray(new WeightedObservedPoint[0]));
-                        System.out.println(JSON.toJSON(params));
+                        logger.info(JSON.toJSON(params).toString());
                         for (int i = 0; i < count; i++) {
                             this.norm.add(params[0]);
                             this.mean.add((sorted.get(sorted.size() - 1).getX() - sorted.get(0).getX()) / count * (i + 1) + sorted.get(0).getX());
@@ -218,9 +226,6 @@ public class MultiGaussianFitter extends AbstractCurveFitter {
                     case Gradient:
                         List<WeightedObservedPoint> obsList = Lists.newArrayList(observations);
                         List<Double> residualList = new ArrayList<>();
-//                    List<Integer> localMaxIndexs = new ArrayList<>();
-//                    List<Integer> localBoundaryIndex = new ArrayList<>();
-//                    List<Double> localMaxX = new ArrayList<>();
                         List<Double> localBoundaryX = new ArrayList<>();
                         //get residual
                         residualList.add(obsList.get(1).getY() - obsList.get(0).getY());
@@ -273,18 +278,6 @@ public class MultiGaussianFitter extends AbstractCurveFitter {
                                     i++;
                                 }
                             }
-                            //
-//                        if(left > 0 && mid <= 0){
-//                            localMaxIndexs.add(i);
-//                        }else if(left <= 0 && mid > 0){
-//                            localBoundaryIndex.add(i);
-//                        } else if(left > 0 && mid > 0 && right > 0 && mid < left*(1-margin) && mid < right*(1-margin)){
-//                            localMaxIndexs.add(i);
-//                            localBoundaryIndex.add(i+1);
-//                        }else if(left <= 0 && mid <=0 && right < 0 && mid >= left*(1-margin) && mid > right*(1-margin)){
-//                            localMaxIndexs.add(i+1);
-//                            localBoundaryIndex.add(i);
-//                        }
                         }
                         Collections.sort(localBoundaryX);
                         int i = 0;
@@ -294,55 +287,15 @@ public class MultiGaussianFitter extends AbstractCurveFitter {
                                 i++;
                             }
                         }
-//                    if(mid >= 0 && right < 0) {
-//                        localMaxIndexs.add(residualList.size()-1);
-//                    }else if(mid <= 0 && right > 0){
-//                        localBoundaryIndex.add(residualList.size()-1);
-//                    }
-
-//                    //change weight
-//                    for(int i=0; i<localMaxIndexs.size(); i++){
-//                        WeightedObservedPoint point = obsList.get(localMaxIndexs.get(i));
-//                        point = new WeightedObservedPoint(this.weight, point.getX(), point.getY());
-//                        obsList.set(localMaxIndexs.get(i), point);
-//                    }
-
-//                    sorted = this.sortObservations(observations);
-//                    params = this.basicGuess(sorted.toArray(new WeightedObservedPoint[0]));
-//                    System.out.println(JSON.toJSON(params));
-
-//                    for (int i=0; i<localMaxIndexs.size(); i++){
-////                        if(i == 0){
-////                            left = (obsList.get(localMaxIndexs.get(i)).getX() + obsList.get(0).getX())/2;
-////                            right = (obsList.get(localMaxIndexs.get(i+1)).getX() + obsList.get(localMaxIndexs.get(i)).getX())/2;
-////                        }else if(i != localMaxIndexs.size()-1){
-////                            left = right;
-////                            right = (obsList.get(localMaxIndexs.get(i+1)).getX() + obsList.get(localMaxIndexs.get(i)).getX())/2;
-////                        }else{
-////                            left = right;
-////                            right = (obsList.get(localMaxIndexs.get(i)).getX() + obsList.get(obsList.size()-1).getX())/2;
-////                        }
-//                        if(i == 0){
-//                            left = (obsList.get(localMaxIndexs.get(i)).getX() + obsList.get(0).getX())/2;
-//                            right = obsList.get(localBoundaryIndex.get(i)).getX();
-//                        }else if(i != localMaxIndexs.size()-1){
-//                            left = right;
-//                            right = obsList.get(localBoundaryIndex.get(i)).getX();
-//                        }else{
-//                            left = right;
-//                            right = (obsList.get(localMaxIndexs.get(i)).getX() + obsList.get(obsList.size()-1).getX())/2;
-//                        }
-//                        this.norm.add(obsList.get(localMaxIndexs.get(i)).getY());
-//                        this.mean.add((left + right)/2.0D);
-//                        this.sigma.add((right-left)/ (2.0D * FastMath.sqrt(2.0D * FastMath.log(2.0D))));
-//                    }
+                        break;
+                    default:
                         break;
                 }
-                System.out.println("成功获得预估参数。");
-                System.out.println("norm: " + JSON.toJSON(this.norm));
-                System.out.println("mean: " + JSON.toJSON(this.mean));
-                System.out.println("sigma: " + JSON.toJSON(this.sigma));
-                System.out.println(System.currentTimeMillis());
+                logger.info("成功获得预估参数");
+                logger.info("norm: " + JSON.toJSON(this.norm));
+                logger.info("mean: " + JSON.toJSON(this.mean));
+                logger.info("sigma: " + JSON.toJSON(this.sigma));
+                logger.info(System.currentTimeMillis() + "");
             }
         }
 
