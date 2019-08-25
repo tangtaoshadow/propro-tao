@@ -1,7 +1,7 @@
 package com.westlake.air.propro.controller;
 
 import com.westlake.air.propro.constants.Constants;
-import com.westlake.air.propro.constants.TaskStatus;
+import com.westlake.air.propro.constants.enums.TaskStatus;
 import com.westlake.air.propro.dao.ConfigDAO;
 import com.westlake.air.propro.domain.db.UserDO;
 import com.westlake.air.propro.domain.query.*;

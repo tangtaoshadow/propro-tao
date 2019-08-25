@@ -1,13 +1,13 @@
 package com.westlake.air.propro.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.westlake.air.propro.component.HttpClient;
 import com.westlake.air.propro.config.VMProperties;
 import com.westlake.air.propro.domain.ResultDO;
 import com.westlake.air.propro.domain.bean.message.ApplyMessage;
 import com.westlake.air.propro.domain.bean.message.DingtalkMessage;
 import com.westlake.air.propro.domain.db.UserDO;
 import com.westlake.air.propro.service.UserService;
-import com.westlake.air.propro.service.impl.HttpClient;
 import com.westlake.air.propro.utils.JWTUtil;
 import com.westlake.air.propro.utils.PasswordUtil;
 import org.apache.shiro.SecurityUtils;
